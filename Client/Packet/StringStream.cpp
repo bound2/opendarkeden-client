@@ -54,10 +54,12 @@ StringStream & StringStream::operator << ( bool T )
 // so the trailing NUL survived into toString()'s result - which cut every
 // text a consumer read through c_str() off at the first streamed
 // character. Throwable::toString() streams a '\n' between the message and
-// the stack trace, so SendBugReport("%s", t.toString().c_str()) sent the
-// server a bug report without the trace it exists to carry, and
-// __assert__ streams eos first, so assertion_failed.log received a bare
-// newline per failed Assert. Pinned by tests/unit/test_string_stream.cpp.
+// the stack trace, so SendBugReport("%s", t.toString().c_str()) was
+// handed a bug report cut off at its first line (SendBugReport then cuts
+// at 100 bytes of its own, so the server still sees at most that much),
+// and __assert__ streams eos first, so assertion_failed.log received a
+// bare newline per failed Assert. Pinned by
+// tests/unit/test_stringstream_chars.cpp.
 
 StringStream & StringStream::operator << ( char T )
 	throw ()
@@ -273,19 +275,25 @@ StringStream & StringStream::operator << ( const std::string & str )
 std::string StringStream::toString () const
 	throw ()
 {
-	// 일단 스트링을 한번 생성해놓으면, 
-	// 그다음 호출때에는 새로 추가되지 않는 한 그대로 사용한다.
+	// Once the string has been built, later calls reuse it until
+	// something new is inserted.
 	if ( m_bInserted ) {
-		
+
 		m_bInserted = false;
 
-		// 속도를 위해 쓸데없는 복사 방지를 일단 메모리를 다 잡아놓고 시작한다.
+		// The rebuild starts from nothing. It used to append the whole
+		// list to the previous result, so a second toString() after a
+		// further insertion returned the old text followed by all of it
+		// again - latent only because every caller in the tree calls it
+		// once, or twice with nothing inserted between.
+		m_Buffer.clear();
+
+		// Reserve the whole size up front so the appends do not copy.
 		m_Buffer.reserve( m_Size );
 
 		for ( std::list<std::string>::const_iterator itr = m_Strings.begin () ;
 			  itr != m_Strings.end() ;
 			  itr ++ ) {
-			// 버퍼에 하나씩 추가한다.
 			m_Buffer.append( *itr );
 		}
 	}

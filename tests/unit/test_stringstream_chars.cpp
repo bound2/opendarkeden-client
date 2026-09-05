@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------
-// test_string_stream.cpp
+// test_stringstream_chars.cpp
 //----------------------------------------------------------------------
 //
-// The NUL StringStream appended after every streamed character, and the
-// three texts it corrupted.
+// The NUL StringStream appended after every streamed character, the
+// three texts it corrupted, and the buffer toString() failed to clear.
 //
 // This is a second StringStream file beside test_stringstream.cpp, which
 // pins the numeric operators' buffer sizing (docs/RESTRUCTURING.md task
@@ -23,8 +23,10 @@
 //   stack trace, and getStackTrace() streams one after every frame. The
 //   four SendBugReport("%s", t.toString().c_str()) sites
 //   (Client/GameMain.cpp, Client/Packet/ClientCommunicationManager.cpp)
-//   so sent the server a *bug_report cut off before the stack trace the
-//   report exists to carry.
+//   were so handed a *bug_report cut off before the stack trace the
+//   report exists to carry. SendBugReport (Client/Packet/WireHost.cpp)
+//   then cuts at 100 bytes of its own, so what the server sees is
+//   still bounded; the fix makes the whole text reach that cut.
 //
 //   __assert__ (Client/Packet/PacketAssert.cpp) streams eos first, so
 //   assertion_failed.log received a bare newline per failed Assert, and
@@ -211,4 +213,35 @@ TEST(PacketAssert, AssertionMessageCarriesNoNul)
 	CHECK(b_caught);
 
 	RemoveAssertionLog();
+}
+
+
+//----------------------------------------------------------------------
+// toString() after a further insertion
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// toString() caches its result and rebuilds only after something new
+// was inserted. The rebuild used to append the whole list to the
+// previous result rather than replace it, so the second call below
+// answered "aab". Every caller in the tree calls toString() once, or
+// twice with nothing between, which is why nobody saw it; the
+// adversarial review of the NUL fix above read it.
+//----------------------------------------------------------------------
+TEST(StringStream, ToStringIsRebuiltFromScratchAfterAnInsertion)
+{
+	StringStream	ss;
+	ss << 'a';
+
+	CHECK(ss.toString() == std::string("a"));
+
+	ss << 'b';
+
+	CHECK(ss.toString() == std::string("ab"));
+	CHECK(ss.toString() == std::string("ab"));
+
+	ss << "cd" << 3;
+
+	CHECK(ss.toString() == std::string("abcd3"));
+	CHECK_EQ(5, ss.toString().size());
 }
