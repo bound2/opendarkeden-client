@@ -372,10 +372,11 @@ written to `assertion_failed.log` and the message inside the thrown
 separator quirk included. Pinning that text exposed a pre-existing defect,
 now under *Found by reading* in the code-health review:
 `StringStream::operator<<(char)` appends a NUL after every streamed
-character, so every bug report the client sends the server is cut off
+character, so every bug report the client hands `SendBugReport` was cut off
 before its stack trace; the tests spelled the NUL out rather than hiding it,
 and the `fix:` slice that removed it followed (`fix/stringstream-nul`, which
-also took the NUL back out of these tests' expectations).
+also took the NUL back out of these tests' expectations; `SendBugReport`'s
+own 100-byte cut still bounds what the server sees).
 `Client/Packet/Assert1.h`, an unreferenced duplicate
 of `PacketAssert.h` carrying the same include guard, is kept in step rather
 than left to rot. `Client/Packet/ClientPlayer.cpp`'s packet-skip notice
