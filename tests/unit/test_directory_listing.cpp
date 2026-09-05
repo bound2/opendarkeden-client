@@ -279,6 +279,38 @@ TEST(DirectoryListing, SubdirectoriesAreExcludedUnlessAskedFor)
 
 
 //----------------------------------------------------------------------
+// The file dialog (C_VS_UI_FILE_DIALOG::RefreshFileList) is the one
+// caller that hands over a directory with its trailing separator still
+// on - "c:\a\b\" - because it strips only the "*.*" off its search
+// pattern. The listing, its order and the bare names must not change.
+//----------------------------------------------------------------------
+TEST(DirectoryListing, ATrailingSeparatorOnTheDirectoryChangesNothing)
+{
+	const SScratchDirectory Scratch;
+	Populate(Scratch);
+
+	std::vector<Basic::SDirectoryEntry> vBare;
+	std::vector<Basic::SDirectoryEntry> vSlashed;
+
+	const std::string sSlashed = Scratch.Name() + "\\";
+
+	CHECK_EQ(true, Basic::ListDirectory(Scratch.Name().c_str(), "*", vBare,
+			Basic::LIST_FILES_AND_DIRECTORIES));
+	CHECK_EQ(true, Basic::ListDirectory(sSlashed.c_str(), "*", vSlashed,
+			Basic::LIST_FILES_AND_DIRECTORIES));
+
+	CHECK(Render(vBare) == Render(vSlashed));
+	CHECK_EQ(9, vSlashed.size());
+
+	for (size_t i=0; i<vSlashed.size(); i++)
+	{
+		CHECK(vSlashed[i].sName.find('\\') == std::string::npos);
+		CHECK(vSlashed[i].sName.find('/') == std::string::npos);
+	}
+}
+
+
+//----------------------------------------------------------------------
 // An empty but readable directory is a success with nothing in it; a
 // directory that is not there at all is a failure. Neither throws, which
 // is what lets a caller keep the plain if-guard the _findfirst walk had.

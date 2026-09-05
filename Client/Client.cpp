@@ -61,8 +61,11 @@
 #include <string>
 #include <vector>
 #include <sys/stat.h>
+#include <filesystem>
+#include <system_error>
 // std::filesystem directory enumeration, in place of the _findfirst /
-// _findnext walk CheckLogFile() used to run
+// _findnext walk CheckLogFile() used to run, and the FindFirstFile walks
+// WinMain() used to run
 // (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md, priority 6).
 #include "DirectoryListing.h"
 #include "Client.h"
@@ -3222,8 +3225,6 @@ WinMain(HINSTANCE hInstance,
 	CFileFind finder;
 	BOOL bWorking = finder.FindFile("Updater2.exe");
 */
-	WIN32_FIND_DATA FileData1; 
-	HANDLE hSearch1; 
 	DWORD pid;
 	HANDLE hProcess=NULL,hProcessToken=NULL;
 	HWND hwndUpdate = FindWindow("#32770", "FsDarkedenLaunch");
@@ -3236,8 +3237,22 @@ WinMain(HINSTANCE hInstance,
 				int a = SendMessage(hwndUpdate, WM_CLOSE, 0 , 0);
 		}
 		Sleep(1000);
-	hSearch1 = FindFirstFile("Updater2.exe", &FileData1); 
-	if(hSearch1 != INVALID_HANDLE_VALUE)
+	//-------------------------------------------------------------------------
+	// Does Updater2.exe exist?
+	//
+	// This was a FindFirstFile() whose search handle was never closed, used
+	// for nothing but the existence test. std::filesystem::exists() answers
+	// the same question and owns nothing; the error_code overload is the one
+	// used, so an unreadable directory reports false instead of throwing,
+	// which is what INVALID_HANDLE_VALUE did.
+	//
+	// FindFirstFile() on an exact name also matched a DIRECTORY called
+	// "Updater2.exe", and exists() answers true for one as well, so that
+	// corner keeps its old behaviour: the three calls below still run and
+	// CopyFile() still fails on it.
+	//-------------------------------------------------------------------------
+	std::error_code ecUpdater2;
+	if(std::filesystem::exists("Updater2.exe", ecUpdater2))
 	{
 		DeleteFile("Updater.exe");
 		CopyFile("Updater2.exe","Updater.exe",FALSE);
@@ -3246,23 +3261,65 @@ WinMain(HINSTANCE hInstance,
 //yckou end
 //add by sonic Check *.dll have Bug. 2006.4.13
 //yckou begin: check invalid *.dll
-	WIN32_FIND_DATA FileData; 
-	HANDLE hSearch; 
-	bool fFinished = false; 
-
+	//-------------------------------------------------------------------------
+	// The startup DLL whitelist.
+	//
+	// Every *.dll beside the executable has to be a name this list knows, or
+	// WinMain() returns -1 right here - silently, with no message box and no
+	// log line, because logging is not initialised yet. That is deliberate
+	// and is preserved exactly; CLAUDE.md carries the trap note for it.
+	//
+	// Directories are listed as well as files. FindFirstFile("*.dll") also
+	// returned a subdirectory whose name ends in ".dll", and the body below
+	// judges the name alone, so such a directory used to reject the client.
+	// The rule in basic/DirectoryListing.h - ask for
+	// LIST_FILES_AND_DIRECTORIES only when the body could act on a
+	// directory - therefore says list both here.
+	//
+	// Deviations from the FindFirstFile walk that apply:
+	//
+	//   * 8.3 aliases. FindFirstFile matched "*.dll" against the short name
+	//     NTFS keeps for a long one, so a file called "foo.dllx" was reached
+	//     through its "FOO~1.DLL" alias and rejected the client. It is no
+	//     longer listed, so such a file now lets startup continue. This is
+	//     the only deviation that changes which names the check judges,
+	//     and it only loosens it.
+	//   * All or nothing on a mid-walk error. If the iterator fails part
+	//     way through - the share or volume the working directory is on
+	//     goes away mid-listing - the helper returns false and the check
+	//     is skipped entirely, where the legacy loop had already judged
+	//     every entry up to the failure and may already have returned -1.
+	//     A second way the check only gets looser.
+	//   * Case folding outside ASCII. The fold below is byte-wise and so is
+	//     the helper's matching, where Win32 matched on upcased UTF-16.
+	//     Inert for this pattern: the byte before "dll" has to be '.',
+	//     which is not a CP949 lead byte, so no trail byte can sit where
+	//     the fold could misjudge it.
+	//
+	// DOS_DOT does not apply: "*.dll" carries a real extension, so the
+	// helper's literal '.' selects the names Win32's pattern selected.
+	//-------------------------------------------------------------------------
 	std::string InvalidDll;
-	hSearch = FindFirstFile("*.dll", &FileData); 
-	if (hSearch != INVALID_HANDLE_VALUE) 
+	std::vector<Basic::SDirectoryEntry> vDllEntries;
+
+	// A directory that cannot be enumerated at all skipped the check and let
+	// startup continue; that is what INVALID_HANDLE_VALUE did here, and a
+	// false return from Basic::ListDirectory maps onto it - and, as above,
+	// onto the mid-walk failure the legacy loop did not skip on.
+	if (Basic::ListDirectory(".", "*.dll", vDllEntries, Basic::LIST_FILES_AND_DIRECTORIES))
 	{
-		while (!fFinished) 
+		for (size_t iDll=0; iDll<vDllEntries.size(); iDll++)
 		{
-			int iLen = strlen(FileData.cFileName);
-			for (int j=0;j<iLen;j++)
+			InvalidDll = vDllEntries[iDll].sName;
+
+			// The same byte-wise ASCII fold as before, now applied to the
+			// std::string instead of the WIN32_FIND_DATA buffer.
+			size_t iLen = InvalidDll.size();
+			for (size_t j=0;j<iLen;j++)
 			{
-				if(isupper((unsigned char)FileData.cFileName[j]) != 0)
-					FileData.cFileName[j] = (char)tolower((unsigned char)FileData.cFileName[j]);
+				if(isupper((unsigned char)InvalidDll[j]) != 0)
+					InvalidDll[j] = (char)tolower((unsigned char)InvalidDll[j]);
 			}
-			InvalidDll = FileData.cFileName;
 
 			if(InvalidDll != "timer.dll" &&
 				InvalidDll != "msvcrtd.dll" &&
@@ -3335,15 +3392,9 @@ WinMain(HINSTANCE hInstance,
 				//MessageBox(0,(LPCTSTR)InvalidDll.c_str(),"ERROR",MB_OK);
 				//MessageBox(0,
 				return -1;
-				
-		
-			if (!FindNextFile(hSearch, &FileData)) 
-			{
-				fFinished = true; 
-			}
-		} 
-		// Close the search handle. 
-		FindClose(hSearch);
+
+
+		}
 	}
 //yckou end
 //end sonic
