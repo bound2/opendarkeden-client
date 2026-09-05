@@ -125,6 +125,12 @@ set_source_files_properties(
 	# The C++20 container/string helper slice spans both libraries: the
 	# packet and Properties sites and the gamemodel manager sites.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_cpp20_container_helpers.cpp
+	# The second source_location slice. It expands Assert() itself, and
+	# Assert() is conditioned on __WIN32__ - without these definitions the
+	# macro would fall back to <assert.h>, a branch the library never
+	# compiles, and the test would pin nothing. (__END_CATCH, which it
+	# also expands, is conditioned on NDEBUG alone.)
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_source_location.cpp
 	PROPERTIES
 		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS};WIRE_GOLDEN_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/golden\""
 )
