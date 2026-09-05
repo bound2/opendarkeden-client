@@ -353,6 +353,44 @@ is what proves the nested defaulted `current()` reports the call site rather
 than the header. No call site elsewhere in the tree is converted; that is a
 later slice.
 
+**Source-location second slice (2026-09-05):** the explicit `__FILE__` and
+`__LINE__` forwarders in the packet wire layer are converted, so the library
+that carries them is also the one a test binary can link.
+`Client/Packet/Exception.h` gains `DiagnosticSite` - the same shape as
+`ExceptionSite` and `LogSite`, a separate type only because the wire layer's
+exception header may not drag in the `EXCEPTION_CODE` enum and the
+`_Error` macros those carry - and a `Throwable::addStack(site)` overload that
+defaults it; `__END_CATCH`, which
+wraps essentially every method in the tree, now calls `addStack()` and pushes
+the identical `"file:line"` frame. `Client/Packet/PacketAssert.h` gains
+`__assert__(func, expr, site)` and its `Assert(expr)` macro forwards only the
+two things a location cannot carry, the platform's function spelling and the
+stringized expression; the four-argument `__assert__` stays as the
+compatibility entry point and is what the new one delegates to, so the line
+written to `assertion_failed.log` and the message inside the thrown
+`AssertionError` are byte for byte what they were, empty-function-name
+separator quirk included. Pinning that text exposed a pre-existing defect,
+now under *Found by reading* in the code-health review:
+`StringStream::operator<<(char)` appends a NUL after every streamed
+character, so every bug report the client sends the server is cut off
+before its stack trace; the tests spell the NUL out rather than hide it, and
+a `fix:` slice follows. `Client/Packet/Assert1.h`, an unreferenced duplicate
+of `PacketAssert.h` carrying the same include guard, is kept in step rather
+than left to rot. `Client/Packet/ClientPlayer.cpp`'s packet-skip notice
+repeated its file and line inside a message the log header already stamped
+with them; both halves now read one captured `LogSite`, and the site is
+captured on the line the macro occupied, so the text is unchanged. No macro
+name changed, so nothing under `Client/PacketHandler` needed editing.
+`tests/unit/test_packet_source_location.cpp` pins each converted shape against
+the test file's own `__FILE__` and `__LINE__`, and pins the packet-skip line
+by writing the old spelling and the new one into the log file sink and
+comparing both. Left alone: `Client/Packet/SocketOutputStream.cpp`'s
+`printf`, which is not a forwarder - it prints its own location, so a capture
+there would only respell the same two tokens. Everything executable-side
+(`Client/PacketFunction.cpp`, `Client/MEffectGeneratorTable.cpp`, the
+`GCSkillToTileOK` handlers, `Client/LeakMemoryDumper.*`,
+`Client/DebugInfo.h`, `VS_UI/src/Imm/IFCErrors.h`) is a later slice.
+
 **Container-helper status (2026-09-05):** the first priority-2 slice is
 implemented. Twelve membership and line-trimming sites in library code -
 `PacketIDSet`, `GCTimeLimitItemInfo`, `GCNPCAskVariable`, `Properties`,
