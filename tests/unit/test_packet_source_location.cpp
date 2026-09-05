@@ -24,16 +24,13 @@
 //   __END_CATCH (Exception.h) expanded to
 //       } catch ( Throwable & t ) { t.addStack(__FILE__, __LINE__); throw; }
 //   and addStack pushes "<file>:<line>", which getStackTrace() renders
-//   as one leading space per depth followed by that string and '\n' -
-//   plus the NUL StringStream appends to every streamed char, see
-//   NEWLINE_AND_NUL below.
+//   as one leading space per depth followed by that string and '\n'.
 //
 //   Assert(expr) (PacketAssert.h, the __WIN32__ branch) expanded to
 //       __assert__(__FILE__,__LINE__,"",#expr)
 //   and __assert__ builds, with func == "" being non-NULL and therefore
 //   still contributing its separator:
-//       "\n\0Assertion Failed : <file> : <line> : <expr> at <ctime>"
-//   (the leading eos is a char, so it carries a NUL of its own)
+//       "\nAssertion Failed : <file> : <line> : <expr> at <ctime>"
 //   then writes that to assertion_failed.log and throws AssertionError
 //   carrying it. (The tests below therefore append to that file in the
 //   ctest working directory, exactly as a failing Assert always has.)
@@ -96,15 +93,15 @@ ThrowThroughEndCatch()
 }
 
 //----------------------------------------------------------------------
-// A NUL follows every character streamed into a StringStream: its
-// operator<<(char) builds std::string(2, '\0') and writes the character
-// into the first byte, so the second byte survives into the result.
-// Both texts pinned below end up carrying one, and both carried one
-// before this change too - so the expectations spell it out rather than
-// trimming it away, which would make "byte for byte" a weaker claim
-// than it is.
+// A NUL used to follow every character streamed into a StringStream: its
+// operator<<(char) built std::string(2, '\0') and wrote the character
+// into the first byte, so the second byte survived into the result. Both
+// texts pinned below carried one, and the expectations spelled it out
+// rather than trimming it away - which is how it was found. That defect
+// is fixed by this commit, so a streamed newline is now just a newline.
+// tests/unit/test_string_stream.cpp pins the operators themselves.
 //----------------------------------------------------------------------
-const std::string	NEWLINE_AND_NUL("\n\0", 2);
+const std::string	NEWLINE("\n");
 
 //----------------------------------------------------------------------
 // The stack trace Throwable renders for a single frame: one space, the
@@ -113,7 +110,7 @@ const std::string	NEWLINE_AND_NUL("\n\0", 2);
 std::string
 OneFrame(const std::string& file, int line)
 {
-	return " " + file + ":" + std::to_string(line) + NEWLINE_AND_NUL;
+	return " " + file + ":" + std::to_string(line) + NEWLINE;
 }
 
 //----------------------------------------------------------------------
@@ -123,11 +120,10 @@ OneFrame(const std::string& file, int line)
 std::string
 AssertionPrefix(const std::string& file, int line, const std::string& func, const std::string& expr)
 {
-	// The leading eos is a char, so it brings its NUL with it. func is
-	// streamed only when it is non-NULL, and an empty function name is
-	// non-NULL - so its separator is emitted either way, and no
+	// func is streamed only when it is non-NULL, and an empty function
+	// name is non-NULL - so its separator is emitted either way, and no
 	// separator ever appears between func and expr.
-	return NEWLINE_AND_NUL + "Assertion Failed : " + file + " : " + std::to_string(line)
+	return NEWLINE + "Assertion Failed : " + file + " : " + std::to_string(line)
 		+ " : " + func + expr + " at ";
 }
 
@@ -348,7 +344,7 @@ TEST(PacketSourceLocation, AssertCompatibilityOverloadRecordsWhatItIsGiven)
 	{
 		b_caught = true;
 		CHECK(StartsWith(e.getMessage(),
-			NEWLINE_AND_NUL + "Assertion Failed : GameInit.cpp : 4242 : InitGamepZone != NULL at "));
+			NEWLINE + "Assertion Failed : GameInit.cpp : 4242 : InitGamepZone != NULL at "));
 	}
 
 	CHECK(b_caught);
@@ -365,7 +361,7 @@ TEST(PacketSourceLocation, AssertCompatibilityOverloadRecordsWhatItIsGiven)
 	{
 		b_caught = true;
 		CHECK(StartsWith(e.getMessage(),
-			NEWLINE_AND_NUL + "Assertion Failed : GameInit.cpp : 4242pZone != NULL at "));
+			NEWLINE + "Assertion Failed : GameInit.cpp : 4242pZone != NULL at "));
 	}
 
 	RemoveAssertionLog();

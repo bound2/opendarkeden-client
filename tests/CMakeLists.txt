@@ -108,6 +108,10 @@ set_source_files_properties(
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_span_io.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_scalar.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_stringstream.cpp
+	# The character overloads and the diagnostic texts built out of them
+	# (Throwable, __assert__), which is why this one reaches Exception.h
+	# and PacketAssert.h as well.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_string_stream.cpp
 	# gamemodel compiles with the same definitions: its headers reach
 	# Client/Packet/Exception.h, whose inline bodies switch on __WIN32__,
 	# and Client/Packet/Types/CreatureTypes.h, which switches on
