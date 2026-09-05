@@ -49,11 +49,20 @@ StringStream & StringStream::operator << ( bool T )
 	return *this;
 }
 
-StringStream & StringStream::operator << ( char T ) 
+// One streamed character is one byte. Both overloads below used to build
+// a std::string(2,'\0') and write the character into the first byte only,
+// so the trailing NUL survived into toString()'s result - which cut every
+// text a consumer read through c_str() off at the first streamed
+// character. Throwable::toString() streams a '\n' between the message and
+// the stack trace, so SendBugReport("%s", t.toString().c_str()) sent the
+// server a bug report without the trace it exists to carry, and
+// __assert__ streams eos first, so assertion_failed.log received a bare
+// newline per failed Assert. Pinned by tests/unit/test_string_stream.cpp.
+
+StringStream & StringStream::operator << ( char T )
 	throw ()
 {
-	std::string buf(2,'\0');
-	buf[0] = T;
+	std::string buf(1,T);
 
 	m_Strings.push_back( buf );
 
@@ -66,8 +75,7 @@ StringStream & StringStream::operator << ( char T )
 StringStream & StringStream::operator << ( uchar T )
 	throw ()
 {
-	std::string buf(2,0);
-	buf[0] = T;
+	std::string buf(1,(char)T);
 
 	m_Strings.push_back( buf );
 
