@@ -454,8 +454,17 @@ directory that has a parent - `path::has_relative_path()` decides that, and
 that function turned up a pre-existing defect left for its own fix: the inner
 `for(int i = 0; ...)` shadows the outer `i`, so the
 `if(i == m_vs_file_list.size())` after it tests the filter loop's counter
-instead, and drops a file that sorts after every listed entry unless
-`m_filter.size()` happens to equal the list size. No `FindFirstFile` call
+instead, and since the inner loop never breaks for a file, every file is
+dropped unless `m_filter.size()` happens to equal the list size. The `..`
+entry is synthesised outside the success branch, because the helper is all
+or nothing where `FindFirstFile` had delivered `..` before any `FindNextFile`
+could fail; the same all-or-nothing rule is a deviation of the two whitelists
+too, and there it can only skip the check. A dangling junction is the one
+entry the helper classifies differently from `FindFirstFile`: it follows the
+link and reports a file where the legacy walk reported the reparse point's
+own directory bit, so the dialog no longer shows one.
+`tests/unit/test_directory_listing.cpp` now also pins the trailing-separator
+directory string the dialog is the only caller to pass. No `FindFirstFile` call
 remains in live code - only the commented-out loop in
 `VS_UI/src/VS_UI_Tutorial.cpp` - and the `FindFirstFileA`, `FindNextFileA`
 and `FindClose` shims in `basic/Platform.h` now have no caller either, so
