@@ -448,6 +448,44 @@ marks which sites use which. Moving a site off `GetTickCount()` therefore also
 takes it off the 15.6 ms quantisation, which is a small change in when it fires
 and has to be stated each time it is made.
 
+The second priority-5 slice (2026-09-05) is `Client/MTimeItemManager`, the
+register of items that carry a time limit. Its stored deadline was a `DWORD`
+holding `timeGetTime()/1000 + lifetime` and is now an absolute point on
+`MonotonicClock`'s clock, kept at the whole-second resolution the class has
+always counted in. Nothing stayed on the legacy counter: every tick read in
+the file was `timeGetTime()`, the deadline is compared only against another
+read from the same file and never reaches a packet, another class or
+persistent storage, so `MonotonicClock::Now()` is used throughout and
+`LegacyTicks()` is not needed here. The public API is unchanged - `AddTimeItem`
+still takes a `DWORD` of seconds, because that is a lifetime the server sends
+and not a tick, and the four accessors still return `int` fields of a
+countdown. Only the `std::map` base's mapped type changed, and nothing outside
+the class ever read it.
+
+The quantisation statement for this slice is that there is nothing to state:
+these sites read `timeGetTime()`, which `Platform.h` already redefines as
+`platform_get_ticks()`, so they were on a 1 ms counter and were never
+quantised to `GetTickCount()`'s ~15.6 ms step. The resolution is unchanged;
+only the epoch and the width are. The floor to a whole second is preserved
+exactly, so an item added part-way through a second still expires up to a
+second early and the countdown still steps on the clock's second boundary
+rather than on the item's. What the rewrite removes is three defects, which is
+why the commit is a `fix:`. The first two are demonstrated in the test beside
+the new assertion rather than reproduced against a running server: after 49.7
+days of tick the register read every held deadline as up to 49.7 days in the
+future instead of long past, and a lifetime near the top of a `DWORD` wrapped
+the stored sum and expired the item on arrival - a value the server controls.
+The third was the adversarial review's: each old accessor read the clock twice,
+and when the second read fell one second after the first the unsigned
+subtraction went round, so the description panel could paint 49,710 days on
+the very frame an item expired. One read now decides both the sign and the
+value, and the remaining count stays a 64-bit `std::chrono::seconds` all the
+way to the accessors rather than narrowing to a `DWORD`.
+`tests/unit/test_time_item_manager.cpp` drives the wraps through the injected
+clock, works the old `DWORD` arithmetic out on the same numbers beside each
+assertion, and pins the countdown, the boundary one millisecond before expiry,
+the preserved second-floor rounding and the un-narrowed remainder.
+
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through
 `std::filesystem::directory_iterator` against a DOS-style wildcard and returns
