@@ -9,8 +9,16 @@
 #include "SocketEncryptOutputStream.h"
 #include "PacketAssert.h"
 
+#include <cstdint>
 
-CGSkillToObject::CGSkillToObject () 
+// The staged read below narrows ObjectID_t through an exact-width type.
+// Pin the two widths together so a change to ObjectID_t is a compile
+// error here rather than a silent change of how many bytes go on the wire.
+static_assert(sizeof(ObjectID_t) == sizeof(std::uint32_t),
+	"CGSkillToObject stages its target ObjectID as a 32-bit wire scalar");
+
+
+CGSkillToObject::CGSkillToObject ()
      throw ()
 {
 	__BEGIN_TRY
@@ -44,9 +52,18 @@ void CGSkillToObject::read (SocketInputStream & iStream)
 	else 
 #endif
 	{
-		iStream.read((char*)&m_SkillType , szSkillType);
-		iStream.read((char*)&m_CEffectID , szCEffectID);
-		iStream.read((char*)&m_TargetObjectID , szObjectID);
+		// SkillType_t and CEffectID_t are both WORD, so the wire scalar
+		// constraint pins them at their exact 16-bit width.
+		iStream.readWire(m_SkillType);
+		iStream.readWire(m_CEffectID);
+
+		// ObjectID_t is DWORD, which on this toolchain is unsigned long -
+		// four bytes wide, but not one of the exact-width types the
+		// constraint accepts. Stage it in the exact-width equivalent the
+		// static_assert above ties to it, exactly as CGAttack does.
+		std::uint32_t targetObjectID = 0;
+		iStream.readWire(targetObjectID);
+		m_TargetObjectID = static_cast<ObjectID_t>(targetObjectID);
 	}
 
 	__END_CATCH
@@ -71,9 +88,9 @@ void CGSkillToObject::write (SocketOutputStream & oStream) const
 	else
 #endif
 	{
-		oStream.write((char*)&m_SkillType , szSkillType);
-		oStream.write((char*)&m_CEffectID , szCEffectID);
-		oStream.write((char*)&m_TargetObjectID , szObjectID);
+		oStream.writeWire(m_SkillType);
+		oStream.writeWire(m_CEffectID);
+		oStream.writeWire(static_cast<std::uint32_t>(m_TargetObjectID));
 	}
 
 	__END_CATCH

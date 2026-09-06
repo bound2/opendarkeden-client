@@ -42,8 +42,11 @@ void CGSkillToSelf::read (SocketInputStream & iStream)
 	else
 #endif
 	{
-		iStream.read((char*)&m_SkillType , szSkillType);
-		iStream.read((char*)&m_CEffectID , szCEffectID);
+		// SkillType_t and CEffectID_t are both WORD, so the wire scalar
+		// constraint pins them at their exact 16-bit width - the same two
+		// bytes each the szSkillType/szCEffectID lengths asked for.
+		iStream.readWire(m_SkillType);
+		iStream.readWire(m_CEffectID);
 	}
 
 	__END_CATCH
@@ -67,8 +70,8 @@ void CGSkillToSelf::write (SocketOutputStream & oStream) const
 	else
 #endif
 	{
-		oStream.write((char*)&m_SkillType , szSkillType);
-		oStream.write((char*)&m_CEffectID , szCEffectID);
+		oStream.writeWire(m_SkillType);
+		oStream.writeWire(m_CEffectID);
 	}
 
 	__END_CATCH
