@@ -475,6 +475,46 @@ protected by client/server-shared goldens across every encryption code. Later
 slices can migrate remaining raw scalar casts family by family without widening
 the accepted type set.
 
+**Second span/typed-scalar slice (2026-09-06):** the client skill-activation
+family - `CGSkillToSelf`, `CGSkillToObject`, `CGSkillToTile` and
+`CGSkillToNamed` - is migrated. It was chosen because it is the largest
+remaining cluster of `(char*)&field, szField` casts in `Client/Packet` that
+shares one shape (a `SkillType_t`/`CEffectID_t` header, then a target), and
+because the golden evidence was almost complete before the work started: the
+first three already carry client/server-shared goldens for all six encryption
+codes, recorded when task 2.4 pinned the nineteen encrypter users. Only
+`CGSkillToNamed` was unpinned - it never reaches the encrypter, so it fell
+outside that sweep - and its golden was recorded in a commit of its own, ahead
+of the migration, so the bytes it pins are provably the old code's. All four
+goldens still pass unchanged, and `tests/wire-layout.txt` is untouched.
+`CGSkillToInventory` is the family's fifth member and needed no change: it was
+already calling the typed `read`/`write` overloads, which now route through
+`readWire`/`writeWire` themselves. `tests/unit/test_packet_skill_family_wire.cpp`
+adds what a byte golden cannot see - per-field round-trips through the packets'
+own getters under every encryption code, and truncated bodies refused with
+`InsufficientDataException`, the same exception the pointer/length read raised,
+because both spellings now reach one bounded core.
+
+What stays raw in this family is deliberate. The encrypter branch
+(`SHUFFLE_STATEMENT_*` over `readEncrypt`/`writeEncrypt`) is untouched, so the
+migration covers the plain branch only and the round-trips run over both.
+`CGSkillToObject` stages its `ObjectID_t` through a `std::uint32_t`, as
+`CGAttack` does, because `DWORD` is `unsigned long` on this toolchain and so is
+not one of the exact-width types the constraint accepts; a `static_assert` now
+ties the two widths together so a change to `ObjectID_t` is a compile error
+rather than a silent change in how many bytes go on the wire. `CGSkillToNamed`
+reads its target name through the `std::string` overload, which is already
+bounded by construction, and only its write moved to a span. Reading it
+exposed one defect, fixed in its own `fix:` commit on top of the refactor: the
+cap was tested after narrowing the length to a `BYTE`, so a 276-character name
+narrowed to 20, passed the check, and then wrote all 276 characters behind a
+length byte claiming 20. `read()` cannot produce such a name, but
+`setTargetName()` accepts any `std::string`; the cap is now applied to the
+`std::string` size, before the narrowing, the bounded view ties the emitted
+bytes to the length byte just written, and the test file pins it. What the fix
+does not do, and every throwing `write()` in the tree shares, is roll back the
+framing header `SocketOutputStream` has already put in the ring.
+
 **Clock status (2026-09-05):** the first priority-5 slice is implemented.
 `basic/MonotonicClock.{h,cpp}` is the central adapter: `Now()` is
 `std::chrono::steady_clock` truncated to milliseconds, `Duration` is
