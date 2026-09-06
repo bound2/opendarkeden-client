@@ -194,9 +194,20 @@ void SocketOutputStream::write ( const Packet * pPacket )
 		write( (char*)&m_Sequence, szSequenceSize);
 		m_Sequence++;
 
-		printf("%s:%d SocketOutputStream::write packetID: %d, packetSZ: %d sequence %d\n",
-			__FILE__, __LINE__,
-			packetID, packetSize, m_Sequence-1);
+		// A per-packet trace of the framing header, and not upstream's:
+		// 6ded7df added it while bringing the login scene up, in the very
+		// hunk that commented out the __DEBUG_OUTPUT__-gated trace that
+		// used to stand here, and it has been unconditional ever since. It
+		// runs on every packet the client sends - movement, attacks, chat -
+		// formatting the absolute source path and three integers into a
+		// stdout that a WIN32-subsystem executable has no console for.
+		// Gate it the way every other debug trace in these two stream
+		// classes is gated.
+		#ifdef __DEBUG_OUTPUT__
+			printf("%s:%d SocketOutputStream::write packetID: %d, packetSZ: %d sequence %d\n",
+				__FILE__, __LINE__,
+				packetID, packetSize, m_Sequence-1);
+		#endif
 
 		// Now write the packet body to the output buffer.
 		pPacket->write( *this );
