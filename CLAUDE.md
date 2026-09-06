@@ -154,7 +154,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **492 tests, 10,631 checks, 0 failed** in both trees.
+baseline: **498 tests, 10,694 checks, 0 failed** in both trees.
 
 ## Traps
 

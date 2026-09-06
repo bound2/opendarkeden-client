@@ -407,6 +407,54 @@ changed, no packet byte changed, and the candidates that were not equivalent
 linear scan over a map by `operator==`) are listed in the commit and left
 alone.
 
+**Container-helper status, second slice (2026-09-06):** eleven more library
+sites, in three files. `MSkillDomain::IsExistSkillStep` asks the step map with
+`contains`; `MSkillDomain::AddSkillStep` asks its step list with
+`std::ranges::find` instead of an index loop that set a flag;
+`UseEnglishTextFrom` tests the language file's comment character and its
+`LANGUAGE` keyword with `starts_with` over a `std::string_view` of the line, in
+place of an index and an eight-byte `strncmp`;
+`SystemAvailabilitiesManager::LoadFromStream` tests its four line kinds - `;`,
+`*`, `Z`, `S` - the same way, with `empty()` where it called `strlen` on the
+same buffer; `SystemAvailabilitiesManager::ZoneFiltering` and `CheckScript`
+became `std::ranges::any_of` and `std::ranges::none_of` over the predicates
+their hand written scans already used. Every converted site is reached through
+a public entry point by `tests/unit/test_cpp20_container_helpers_2.cpp`, whose
+six tests were built and run twice - once with the three sources reverted to
+their committed state and once with the conversion in place - and reported
+identical counts both times, all six passing in both; the stack this lands on
+ends at 498 tests, 10,694 checks, 0 failed in both trees. One site has only
+one reachable arm: `AddSkillStep`'s duplicate test is `true` on every call the
+public API can make, because `AddSkill` calls it only for a skill not yet in
+the domain, so the test that covers it pins the public contract rather than
+the dead arm.
+
+One candidate was converted, found untestable and reverted, and the reason is
+worth keeping: `C_DIRECTORY::GetMixedDirectory` in `basic/Directory.cpp` tests
+for a trailing path separator with `path[strlen(path) - 1]`, which `ends_with`
+says directly - but a test that calls it does not link. `C_DIRECTORY`'s
+constructor references `platform_get_executable_dir`, which `basic/PlatformSDL.cpp`
+defines only under `#ifndef PLATFORM_WINDOWS`, so pulling `Directory.obj` into
+`unit_tests` fails with `LNK2019`. The whole tree links today only because
+nothing on the Windows build references `C_DIRECTORY` at all. That is a latent
+defect rather than a compatibility one and is not fixed here; until it is,
+`basic/Directory.cpp` has no test path and this slice left it alone.
+
+Candidates read and rejected: every `find` whose iterator is
+dereferenced afterwards, which is not a membership test (`MItemManager`'s
+`GetItem` and `RemoveItem`, `MSkillSet`'s five accessors, `MSkillDomain`'s
+status and learn paths, `MTradeManager::Undo`, `Properties::getProperty`,
+`GCTimeLimitItemInfo::getTimeLimit`, `GCNPCAskVariable::getValue`,
+`TextBackendSDL`'s font and glyph caches); `PacketIDSet::deletePacketID`, whose
+lookup is both a membership test and the iterator it erases - and whose
+condition is inverted, a defect left for its own commit; `MTimeItemManager::RemoveTimeItem`,
+where `erase(key)` would be the tidy spelling but is not a C++20 helper;
+`MSkillDomain::AddSkill`'s linear scan over a map, already rejected by the
+first slice; `strstr` membership in `ClientCommunicationManager`, because
+`std::string::contains` is C++23; and `platform_config_get_string`'s `strncmp`
+prefix in `basic/PlatformSDL.cpp`, which sits behind the same `#ifndef
+PLATFORM_WINDOWS` and is not compiled here.
+
 **Span status (2026-09-04):** the first priority-3 slice is implemented in PR
 #84. `SocketInputStream` and `SocketOutputStream` now expose
 bounded `std::span<char>` and `std::span<std::byte>` overloads while retaining the
