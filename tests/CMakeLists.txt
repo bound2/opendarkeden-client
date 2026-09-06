@@ -141,6 +141,11 @@ set_source_files_properties(
 	# compiles, and the test would pin nothing. (__END_CATCH, which it
 	# also expands, is conditioned on NDEBUG alone.)
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_source_location.cpp
+	# PacketIDSet::deletePacketID. It names CPS_NONE, which PlayerStatus.h
+	# declares only under __GAME_CLIENT__, and Packet.h conditions a member
+	# on the same macro, so the TU must see the definitions packetwire was
+	# built with.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_id_set.cpp
 	PROPERTIES
 		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS};WIRE_GOLDEN_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/golden\""
 )

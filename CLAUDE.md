@@ -134,7 +134,7 @@ the failure count, so the exit code is 0 only when the suite is clean.
   Both trees green, or the fix is not verified.
 - **Executable-only code has no test path.** It gets verified by running the client
   against a live server. The ten defects under *Runtime defects* in the review were
-  all found that way, and none were reachable from a test binary. The seven in the
+  all found that way, and none were reachable from a test binary. The ones in the
   short table below them were found by *reading*, during remediation passes, and are
   filed separately for exactly that reason — the heading is a claim about how a
   defect was found, not a bin for anything executable-side.
@@ -154,7 +154,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **506 tests, 10,731 checks, 0 failed** in both trees.
+baseline: **509 tests, 10,757 checks, 0 failed** in both trees.
 
 ## Traps
 
