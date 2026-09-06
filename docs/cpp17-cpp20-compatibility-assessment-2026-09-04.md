@@ -600,9 +600,16 @@ own directory bit, so the dialog no longer shows one.
 `tests/unit/test_directory_listing.cpp` now also pins the trailing-separator
 directory string the dialog is the only caller to pass. No `FindFirstFile` call
 remains in live code - only the commented-out loop in
-`VS_UI/src/VS_UI_Tutorial.cpp` - and the `FindFirstFileA`, `FindNextFileA`
-and `FindClose` shims in `basic/Platform.h` now have no caller either, so
-they can go with the `_findfirst` ones in a later sweep.
+`VS_UI/src/VS_UI_Tutorial.cpp` - and a fourth slice deleted the shims those
+walks used to reach. `basic/Platform.h` no longer declares `FindFirstFileA`,
+`FindNextFileA`, `FindClose`, `WIN32_FIND_DATA`, `_finddata_t`, `_findfirst`,
+`_findnext` or `_findclose`. All of them sat in the `#ifndef PLATFORM_WINDOWS`
+compatibility layer, which a Windows build never compiles, and nothing outside
+that header named any of them in live code - only comments and the commented-out
+tutorial loop. `FILETIME` stayed, because `Client/CrashReport.cpp` declares one,
+and so did `INVALID_HANDLE_VALUE`, which `Client/Client.cpp`,
+`Client/CGameUpdate.cpp` and `Client/CrashReport.cpp` still compare against.
+Priority 6 now has no `_findfirst` or `FindFirstFile` residue left.
 
 ### Packet modernization guardrails
 
