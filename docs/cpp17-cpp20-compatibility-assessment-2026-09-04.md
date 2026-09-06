@@ -578,11 +578,18 @@ name that was listed stops being listed. The file dialog synthesises the `..`
 entry `directory_iterator` never yields, first in the sequence and only for a
 directory that has a parent - `path::has_relative_path()` decides that, and
 `dir /a` confirms it, listing `..` for `C:\Users` and not for `C:\`. Reading
-that function turned up a pre-existing defect left for its own fix: the inner
-`for(int i = 0; ...)` shadows the outer `i`, so the
-`if(i == m_vs_file_list.size())` after it tests the filter loop's counter
-instead, and since the inner loop never breaks for a file, every file is
-dropped unless `m_filter.size()` happens to equal the list size. The `..`
+that function turned up a pre-existing defect, fixed here: the inner
+`for(int i = 0; ...)` shadowed the outer `i`, so the
+`if(i == m_vs_file_list.size())` after it tested the filter loop's counter
+instead, and since the inner loop almost never breaks for a file, every file was
+dropped unless `m_filter.size()` happened to equal the list size. The suffix
+filter beside it was unbounded twice over: it `strcpy`'d each entry into a
+`char[20]` out of the `char[30]` `Start()` fills, and it indexed the name at
+`size() - j - 1`, which wraps for a name shorter than the suffix. Both halves
+are `basic/FileDialogListing.{h,cpp}` now - moved out of VS_UI so that they
+have a test path at all, then fixed test-first
+(`docs/RESTRUCTURING.md` task 3.1, `tests/unit/test_file_dialog_listing.cpp`).
+The `..`
 entry is synthesised outside the success branch, because the helper is all
 or nothing where `FindFirstFile` had delivered `..` before any `FindNextFile`
 could fail; the same all-or-nothing rule is a deviation of the two whitelists

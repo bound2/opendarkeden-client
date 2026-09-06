@@ -6,11 +6,10 @@
 // lifted out of C_VS_UI_FILE_DIALOG::RefreshFileList, the profile-picture
 // file dialog (docs/RESTRUCTURING.md task 3.1, "moved, then fixed").
 //
-// This file pins the behaviour the dialog has TODAY, defects included,
-// so that the move is provably behaviour-preserving. Two of the tests
-// below therefore assert something wrong on purpose and say so; the fix
-// commit that follows rewrites them into the behaviour the dialog should
-// have had.
+// The move commit before this one pinned the behaviour the dialog had,
+// two defects included. This is that file rewritten: the two tests that
+// asserted a defect now assert what the dialog is supposed to show, and
+// two more cover the inputs the old filter could not survive at all.
 //
 // Nothing here touches the filesystem: the enumeration is
 // basic/DirectoryListing, pinned by test_directory_listing.cpp, and
@@ -46,28 +45,62 @@ struct SDialogList
 {
 	std::vector<std::string>	vNames;
 	std::vector<DWORD>			vAttributes;
-	size_t						uFilterCount;
-
-	SDialogList() : uFilterCount(0) {}
 
 	void	AddDirectory(const char* pName)
 	{
 		Basic::InsertDialogEntry(vNames, vAttributes,
-			std::string("\\") + pName, FILE_ATTRIBUTE_DIRECTORY,
-			uFilterCount);
+			std::string("\\") + pName, FILE_ATTRIBUTE_DIRECTORY);
 	}
 
 	void	AddFile(const char* pName)
 	{
 		Basic::InsertDialogEntry(vNames, vAttributes, pName,
-			ATTRIBUTES_NORMAL, uFilterCount);
+			ATTRIBUTES_NORMAL);
 	}
 };
 
 
 //----------------------------------------------------------------------
+// The whole list as one string. A list that came out wrong then fails on
+// its contents rather than indexing past the end of a short vector,
+// which matters because the behaviour under test is entries going
+// missing.
+//----------------------------------------------------------------------
+std::string	Join(const std::vector<std::string>& vNames)
+{
+	std::string	sJoined;
+
+	for (size_t i = 0; i < vNames.size(); i++)
+	{
+		if (i > 0) sJoined += "|";
+		sJoined += vNames[i];
+	}
+
+	return sJoined;
+}
+
+
+//----------------------------------------------------------------------
+// The attribute vector read the only way the dialog reads it: one 'D'
+// or 'F' per entry.
+//----------------------------------------------------------------------
+std::string	Kinds(const std::vector<DWORD>& vAttributes)
+{
+	std::string	sKinds;
+
+	for (size_t i = 0; i < vAttributes.size(); i++)
+	{
+		sKinds += (vAttributes[i] & FILE_ATTRIBUTE_DIRECTORY) ? 'D' : 'F';
+	}
+
+	return sKinds;
+}
+
+
+//----------------------------------------------------------------------
 // The dialog's own filter list, as C_VS_UI_FILE_DIALOG::Start() builds
-// it: the type string split on ';', so ".bmp;.jpg" is two entries.
+// it: the type string split on ';', so ".bmp;.jpg" - the one live call,
+// in VS_UI/src/VS_UI_GameCommon.cpp - is two entries.
 //----------------------------------------------------------------------
 std::vector<std::string>	ImageFilters()
 {
@@ -83,17 +116,13 @@ std::vector<std::string>	ImageFilters()
 
 
 //----------------------------------------------------------------------
-// The directory branch is the correct one, and the order it produces is
-// what the file branch was meant to extend: every directory first,
-// sorted by byte-wise comparison of the '\'-prefixed name. '\' is 0x5C
-// and every printable name byte the dialog meets is above it, so a
-// directory also sorts ahead of every file.
+// Directories sort among themselves whatever order they arrive in. '\'
+// is 0x5C and the names are compared with it on the front, so ".." leads
+// the list the way the dialog needs it to.
 //----------------------------------------------------------------------
 TEST(FileDialogListing, DirectoriesSortAmongThemselvesWhateverTheOrderIn)
 {
-	SDialogList List;
-
-	List.uFilterCount = 2;
+	SDialogList	List;
 
 	List.AddDirectory("dir_b");
 	List.AddDirectory("dir_a");
@@ -102,111 +131,120 @@ TEST(FileDialogListing, DirectoriesSortAmongThemselvesWhateverTheOrderIn)
 	CHECK_EQ(3, List.vNames.size());
 	CHECK_EQ(3, List.vAttributes.size());
 
-	CHECK(List.vNames[0] == "\\..");
-	CHECK(List.vNames[1] == "\\dir_a");
-	CHECK(List.vNames[2] == "\\dir_b");
-
-	for (size_t i = 0; i < List.vAttributes.size(); i++)
-	{
-		CHECK(0 != (List.vAttributes[i] & FILE_ATTRIBUTE_DIRECTORY));
-	}
+	CHECK(Join(List.vNames) == "\\..|\\dir_a|\\dir_b");
+	CHECK(Kinds(List.vAttributes) == "DDD");
 }
 
 
 //----------------------------------------------------------------------
-// THIS TEST PINS A DEFECT.
+// The whole of what the dialog is for: every matching file is listed,
+// after the directories, and a file the filter rejects is not.
 //
-// The file branch's insertion loop declares its own `int i`, shadowing
-// the `int i` the filter loop above it left at m_filter.size(). The
-// append test after the loop therefore reads the FILTER count instead of
-// the loop counter, and since entries arrive in ascending order the loop
-// never breaks for a file, so a file is appended only when the filter
-// count happens to equal the list size at that moment.
+// This is the material RefreshFileList walks for one directory - the
+// synthesised "..", the subdirectories and files ListDirectory returns,
+// the filter, the insert - with the live ".bmp;.jpg" filter. The real
+// walk interleaves directories and files in name order; this fixture
+// feeds the directories first, and the out-of-order arrivals are
+// covered by AFileIsPlacedAmongTheFilesExactlyOnce below.
 //
-// With the two image filters and the two directories below, that is true
-// exactly once: "a.bmp" lands because the list is two long, and "b.jpg"
-// is dropped because it is three long by then. Every further file would
-// be dropped too.
-//
-// The fix commit rewrites this test.
+// Before the fix the insertion loop's append test read m_filter.size()
+// instead of its own counter, so exactly one file went in here - the one
+// that arrived while the list happened to be two entries long - and
+// every file after it was dropped.
 //----------------------------------------------------------------------
-TEST(FileDialogListing, FilesAreDroppedUnlessTheFilterCountMatchesTheListSize)
+TEST(FileDialogListing, EveryMatchingFileIsListedAfterTheDirectories)
 {
-	SDialogList List;
+	static const char* const	pEntries[] = { "a.bmp", "b.jpg", "c.txt" };
 
-	List.uFilterCount = ImageFilters().size();
+	const std::vector<std::string>	vFilters = ImageFilters();
+
+	SDialogList	List;
 
 	List.AddDirectory("..");
 	List.AddDirectory("dir");
 
-	List.AddFile("a.bmp");
-	List.AddFile("b.jpg");
+	for (size_t i = 0; i < sizeof(pEntries) / sizeof(pEntries[0]); i++)
+	{
+		if (!Basic::MatchesAnySuffixCaseInsensitive(pEntries[i], vFilters))
+			continue;
 
-	CHECK_EQ(3, List.vNames.size());
-	CHECK_EQ(3, List.vAttributes.size());
+		List.AddFile(pEntries[i]);
+	}
 
-	CHECK(List.vNames[0] == "\\..");
-	CHECK(List.vNames[1] == "\\dir");
-	CHECK(List.vNames[2] == "a.bmp");
+	CHECK_EQ(4, List.vNames.size());
+	CHECK_EQ(4, List.vAttributes.size());
 
-	CHECK_EQ(0, (int)(List.vAttributes[2] & FILE_ATTRIBUTE_DIRECTORY));
+	CHECK(Join(List.vNames) == "\\..|\\dir|a.bmp|b.jpg");
+	CHECK(Kinds(List.vAttributes) == "DDFF");
 }
 
 
 //----------------------------------------------------------------------
-// THIS TEST PINS THE SAME DEFECT FROM ITS OTHER SIDE.
-//
-// When the loop DOES find a place for the file it inserts and breaks -
-// and the stale test still runs, against the list size the insert has
-// just grown. When the two agree the entry goes in a second time, so the
-// dialog shows one file twice and the parallel attribute vector grows
-// with it.
-//
-// The fix commit rewrites this test.
+// A file goes in once, at its place among the files. The dialog's
+// version ran its stale append test after the loop had already inserted,
+// so a file whose place was found was inserted a second time whenever
+// the filter count equalled the size the insert had just grown to.
 //----------------------------------------------------------------------
-TEST(FileDialogListing, APlacedFileIsInsertedTwiceWhenTheCountMatchesTheGrownSize)
+TEST(FileDialogListing, AFileIsPlacedAmongTheFilesExactlyOnce)
 {
-	SDialogList List;
+	SDialogList	List;
 
-	List.uFilterCount = 2;
+	List.AddDirectory("..");
 
-	List.AddFile("b.txt");
+	List.AddFile("b.bmp");
+	List.AddFile("a.bmp");
+	List.AddFile("c.bmp");
 
-	CHECK_EQ(0, List.vNames.size());
+	CHECK_EQ(4, List.vNames.size());
+	CHECK_EQ(4, List.vAttributes.size());
 
-	// An empty list is not the filter count, so the append test failed
-	// and nothing went in. Seed the first entry directly instead.
-	List.vNames.push_back("b.txt");
-	List.vAttributes.push_back(ATTRIBUTES_NORMAL);
-
-	List.AddFile("a.txt");
-
-	CHECK_EQ(3, List.vNames.size());
-	CHECK_EQ(3, List.vAttributes.size());
-
-	CHECK(List.vNames[0] == "a.txt");
-	CHECK(List.vNames[1] == "b.txt");
-	CHECK(List.vNames[2] == "a.txt");
+	CHECK(Join(List.vNames) == "\\..|a.bmp|b.bmp|c.bmp");
+	CHECK(Kinds(List.vAttributes) == "DFFF");
 }
 
 
 //----------------------------------------------------------------------
-// The suffix filter, over names at least as long as the suffix - the
-// only inputs it is defined for today, because a shorter name indexes
-// std::string::operator[] past the end. Those are the inputs the fix
-// commit adds.
+// A file whose name sorts below '\' still goes after the directories.
+// That is what the '\' test in the file branch is for; plain string
+// order would put "1.bmp" (0x31) ahead of "\dir".
+//----------------------------------------------------------------------
+TEST(FileDialogListing, AFileSortingBelowTheDirectoryPrefixStillFollowsIt)
+{
+	SDialogList	List;
+
+	List.AddDirectory("dir");
+	List.AddFile("1.bmp");
+
+	CHECK_EQ(2, List.vNames.size());
+
+	CHECK(Join(List.vNames) == "\\dir|1.bmp");
+	CHECK(Kinds(List.vAttributes) == "DF");
+}
+
+
+//----------------------------------------------------------------------
+// The suffix match folds ASCII case on both sides, because the name
+// comes from the filesystem and the filter from the call site.
 //----------------------------------------------------------------------
 TEST(FileDialogListing, ASuffixMatchesCaseInsensitively)
 {
-	const std::vector<std::string> vFilters = ImageFilters();
+	const std::vector<std::string>	vFilters = ImageFilters();
 
 	CHECK_EQ(true, Basic::MatchesAnySuffixCaseInsensitive("a.bmp", vFilters));
 	CHECK_EQ(true, Basic::MatchesAnySuffixCaseInsensitive("a.jpg", vFilters));
 	CHECK_EQ(true, Basic::MatchesAnySuffixCaseInsensitive("A.BMP", vFilters));
 	CHECK_EQ(true, Basic::MatchesAnySuffixCaseInsensitive("MiXeD.JpG", vFilters));
 
-	// The name may be exactly the suffix; nothing indexes out of range.
+	// The name may be exactly the suffix.
 	CHECK_EQ(true, Basic::MatchesAnySuffixCaseInsensitive(".bmp", vFilters));
+
+	// ... and the filter may be the upper-case spelling, since Start()
+	// takes its type string from whatever the call site wrote.
+	std::vector<std::string>	vUpper;
+	vUpper.push_back(".BMP");
+
+	CHECK_EQ(true, Basic::MatchesAnySuffixCaseInsensitive("a.bmp", vUpper));
+	CHECK_EQ(true, Basic::MatchesAnySuffixCaseInsensitive("a.BMP", vUpper));
 
 	CHECK_EQ(false, Basic::MatchesAnySuffixCaseInsensitive("c.txt", vFilters));
 	CHECK_EQ(false, Basic::MatchesAnySuffixCaseInsensitive("noext", vFilters));
@@ -231,4 +269,58 @@ TEST(FileDialogListing, AnEmptyFilterListAdmitsNothingAndAnEmptyFilterAdmitsAll)
 
 	CHECK_EQ(true, Basic::MatchesAnySuffixCaseInsensitive("a.bmp", vEmptyFilter));
 	CHECK_EQ(true, Basic::MatchesAnySuffixCaseInsensitive("noext", vEmptyFilter));
+}
+
+
+//----------------------------------------------------------------------
+// A name shorter than the suffix cannot end with it. Before the fix
+// this indexed the name at a wrapped size() - j - 1, so the answer was
+// not merely wrong - the read was out of range, and in a Debug build
+// std::string::operator[] takes the process down over it.
+//
+// The observable contract is what is asserted, per CLAUDE.md; the ASan
+// tree is where the invalid access would have aborted.
+//----------------------------------------------------------------------
+TEST(FileDialogListing, ANameShorterThanTheSuffixIsNotListed)
+{
+	const std::vector<std::string>	vFilters = ImageFilters();
+
+	CHECK_EQ(false, Basic::MatchesAnySuffixCaseInsensitive("x", vFilters));
+	CHECK_EQ(false, Basic::MatchesAnySuffixCaseInsensitive("mp", vFilters));
+	CHECK_EQ(false, Basic::MatchesAnySuffixCaseInsensitive("", vFilters));
+
+	// The empty name against the empty filter is still a match: nothing
+	// is longer than nothing.
+	std::vector<std::string>	vEmptyFilter;
+	vEmptyFilter.push_back("");
+
+	CHECK_EQ(true, Basic::MatchesAnySuffixCaseInsensitive("", vEmptyFilter));
+}
+
+
+//----------------------------------------------------------------------
+// A long filter is compared where it lies. C_VS_UI_FILE_DIALOG::Start()
+// builds each entry in a char[30], so an entry of up to 29 characters
+// reaches the matcher; the dialog's version strcpy'd it into a char[20]
+// first, which wrote past the buffer for anything from 20 characters up.
+//----------------------------------------------------------------------
+TEST(FileDialogListing, ATwentyFiveCharacterFilterIsMatchedWithoutOverflow)
+{
+	const std::string	sSuffix = "." + std::string(24, 'a');
+
+	CHECK_EQ(25, sSuffix.size());
+
+	std::vector<std::string>	vLong;
+	vLong.push_back(sSuffix);
+
+	CHECK_EQ(true, Basic::MatchesAnySuffixCaseInsensitive(
+		"picture" + sSuffix, vLong));
+	CHECK_EQ(true, Basic::MatchesAnySuffixCaseInsensitive(sSuffix, vLong));
+
+	// Shorter than the filter, and a name of the same length that does
+	// not end with it.
+	CHECK_EQ(false, Basic::MatchesAnySuffixCaseInsensitive("picture.bmp",
+		vLong));
+	CHECK_EQ(false, Basic::MatchesAnySuffixCaseInsensitive(
+		"." + std::string(23, 'a') + "b", vLong));
 }
