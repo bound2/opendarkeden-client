@@ -376,7 +376,9 @@ character, so every bug report the client hands `SendBugReport` was cut off
 before its stack trace; the tests spelled the NUL out rather than hiding it,
 and the `fix:` slice that removed it followed (`fix/stringstream-nul`, which
 also took the NUL back out of these tests' expectations; `SendBugReport`'s
-own 100-byte cut still bounds what the server sees).
+own cut then bounded what the server sees at 100 bytes, and `fix/bug-report-cut`
+raised it to the 116 a `CGSay` message leaves once the `*bug_report ` prefix
+has 12 of its 128).
 `Client/Packet/Assert1.h`, an unreferenced duplicate
 of `PacketAssert.h` carrying the same include guard, is kept in step rather
 than left to rot. `Client/Packet/ClientPlayer.cpp`'s packet-skip notice

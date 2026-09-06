@@ -24,7 +24,7 @@ void CGSay::read (SocketInputStream & iStream)
 	if (szMessage == 0)
 		throw InvalidProtocolException("szMessage == 0");
 
-	if (szMessage > 128)
+	if (szMessage > MAX_MESSAGE_SIZE)
 		throw InvalidProtocolException("too large message length");
 
 	iStream.read(m_Message , szMessage);
@@ -44,7 +44,7 @@ void CGSay::write (SocketOutputStream & oStream) const
 	if (szMessage == 0)
 		throw InvalidProtocolException("szMessage == 0");
 
-	if (szMessage > 128)
+	if (szMessage > MAX_MESSAGE_SIZE)
 		throw InvalidProtocolException("too large message length");
 
 	oStream.write(szMessage);

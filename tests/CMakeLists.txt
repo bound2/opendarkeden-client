@@ -154,6 +154,10 @@ set_source_files_properties(
 	# on the same macro, so the TU must see the definitions packetwire was
 	# built with.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_id_set.cpp
+	# What SendBugReport actually sends. It builds a CGSay and hands it
+	# to a Player subclass, so the Packet vtable and the CGSay class
+	# definition must be the library's.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_bug_report_message.cpp
 	PROPERTIES
 		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS};WIRE_GOLDEN_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/golden\""
 )
