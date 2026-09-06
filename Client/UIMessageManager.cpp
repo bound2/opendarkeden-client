@@ -3214,7 +3214,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 								strTempCommand = "*warp 8000 75 77";
 								pMessage = const_cast<char*>(strTempCommand.c_str());
 							}
-							else if(strncmp(str, "*mc", 3) == 0 && isdigit((unsigned char)str[4]))
+							else if(strlen(str) > 4 && strncmp(str, "*mc", 3) == 0 && isdigit((unsigned char)str[4]))
 							{
 //								if(vMasterCommand.empty())
 								{
@@ -3259,7 +3259,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 									}
 								}
 							}
-							else if(strncmp(str, "*C2G", 4) == 0 )
+							else if(strlen(str) >= 5 && strncmp(str, "*C2G", 4) == 0 )
 							{
 								if( strcmp(str+5, "on") == 0 )
 								{
