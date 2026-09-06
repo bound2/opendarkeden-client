@@ -6,6 +6,8 @@
 #include "Properties.h"
 #include "DebugLog.h"
 
+#include <string_view>	// starts_with, for the language file's line prefixes
+
 
 //----------------------------------------------------------------------
 // Global
@@ -71,12 +73,18 @@ UseEnglishTextFrom(const char* szLanguageInfoFile)
 
 	while (fgets(szLine, sizeof(szLine), pFile) != NULL)
 	{
-		if (szLine[0] == ';')
+		const std::string_view	svLine( szLine );
+
+		if (svLine.starts_with(';'))
 		{
 			continue;
 		}
 
-		if (strncmp(szLine, "LANGUAGE", 8) == 0)
+		// "LANGUAGE" is exactly eight characters, so the strncmp over
+		// eight bytes this replaces and starts_with are the same test:
+		// a shorter line stops the comparison at its own terminator
+		// either way, and neither reads past it.
+		if (svLine.starts_with("LANGUAGE"))
 		{
 			sscanf(szLine + 8, "%d", &language);
 			break;
