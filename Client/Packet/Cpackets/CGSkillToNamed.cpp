@@ -57,9 +57,9 @@ void CGSkillToNamed::write (SocketOutputStream & oStream) const
 	// behind a length byte that claimed 20 - this repo's frame-bounded
 	// reader rejects such a tail, the server's legacy reader parses it as
 	// the next packet. read() cannot produce such a name, but
-	// setTargetName() takes any std::string. (SocketOutputStream has
-	// already written the framing header when this throws, as it has for
-	// every throwing write(); that residue is the same shape as before.)
+	// setTargetName() takes any std::string. SocketOutputStream has
+	// already written the framing header when this throws, and its
+	// write(const Packet*) rolls that header back on the way out.
 	if ( m_TargetName.size() > 20 )
 		throw InvalidProtocolException( "too long target name" );
 

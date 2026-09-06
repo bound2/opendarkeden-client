@@ -106,6 +106,11 @@ set_source_files_properties(
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_factories.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_goldens.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_span_io.cpp
+	# The framing entry point, SocketOutputStream::write(const Packet*):
+	# what the ring and the sequence counter hold after a body write
+	# throws. Defines its own Packet subclass, so it needs the same
+	# definitions - Packet's virtual set changes under them.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_output_stream_rollback.cpp
 	# The second span/typed-scalar slice: the CGSkillTo* family's fields
 	# and its truncated-input contract, over the same stream classes.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_skill_family_wire.cpp

@@ -78,6 +78,17 @@ public:
 			out.push_back((unsigned char)stream.m_Buffer[i]);
 		return out;
 	}
+
+	// Drops the first `count` live bytes, exactly as flush() does after a
+	// successful send of that many - the only way the head ever moves
+	// off zero, and the only way to put the ring into a wrapped state
+	// (head past tail) without a peer to send to. `count` must not exceed
+	// length(); a test that asks for more has misjudged its own fixture.
+	static void Consume(SocketOutputStream& stream, unsigned int count)
+	{
+		CHECK(count <= stream.length());
+		stream.m_Head = (stream.m_Head + count) % stream.m_BufferLen;
+	}
 };
 
 //----------------------------------------------------------------------

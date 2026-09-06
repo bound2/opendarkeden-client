@@ -513,7 +513,16 @@ length byte claiming 20. `read()` cannot produce such a name, but
 `std::string` size, before the narrowing, the bounded view ties the emitted
 bytes to the length byte just written, and the test file pins it. What the fix
 does not do, and every throwing `write()` in the tree shares, is roll back the
-framing header `SocketOutputStream` has already put in the ring.
+framing header `SocketOutputStream` has already put in the ring. That residue
+is closed in a `fix:` commit of its own on top of this slice
+(`fix/output-stream-header-rollback`, found by this slice's adversarial
+review): `SocketOutputStream::write(const Packet*)` now saves the ring's data
+length and the sequence byte before the header goes in and restores both when
+the body write throws, so a refused packet leaves the stream exactly as it
+found it instead of leaving a header the peer would fill from the next packet;
+`tests/unit/test_output_stream_rollback.cpp` pins it over both the plain and
+the encrypt stream, and the frame on the non-throwing path is byte for byte
+what it was.
 
 **Clock status (2026-09-05):** the first priority-5 slice is implemented.
 `basic/MonotonicClock.{h,cpp}` is the central adapter: `Now()` is
