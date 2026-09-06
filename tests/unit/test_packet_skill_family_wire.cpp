@@ -292,6 +292,31 @@ TEST(CGSkillToNamed, NameAtTheCapRoundTrips)
 	CHECK_EQ((size_t)20, dst.getTargetName().size());
 }
 
+// write() refuses anything over the cap instead of emitting a body its
+// own length byte does not describe. 276 is the case the BYTE narrowing
+// used to hide: (BYTE)276 is 20, which passed the old cap check while
+// write() went on to emit all 276 characters.
+TEST(CGSkillToNamed, WriteRefusesNamesLongerThanTheCap)
+{
+	const size_t lengths[] = { 21, 255, 256, 276, 300 };
+
+	for (size_t i = 0; i < sizeof(lengths) / sizeof(lengths[0]); i++)
+	{
+		CGSkillToNamed packet;
+		FillNamed(packet);
+		packet.setTargetName(std::string(lengths[i], 'z'));
+
+		bool bThrew = false;
+		try {
+			SkillOutFixture f;
+			packet.write(f.m_Stream);
+		} catch (InvalidProtocolException&) {
+			bThrew = true;
+		}
+		CHECK(bThrew);
+	}
+}
+
 // An empty name is refused on both sides, as it always was: write()
 // cannot express a zero length byte the reader accepts.
 TEST(CGSkillToNamed, EmptyNameIsRefusedOnBothSides)
