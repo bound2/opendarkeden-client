@@ -41,10 +41,14 @@ void CGModifyNickname::write (SocketOutputStream & oStream) const
 
 	oStream.write( m_NicknameID );
 
-	BYTE szSTR;
-	szSTR = m_Nickname.size();
+	// Cap before narrowing; the length byte must describe every byte written.
+	if ( m_Nickname.size() > MAX_NICKNAME_SIZE )
+		throw InvalidProtocolException("too large nickname length");
+
+	const BYTE szSTR = (BYTE)m_Nickname.size();
+
 	oStream.write( szSTR );
-	oStream.write( m_Nickname );
+	oStream.write( std::span<const char>( m_Nickname.data(), szSTR ) );
 
 	__END_CATCH
 }

@@ -55,7 +55,11 @@ void CGTypeStringList::write (SocketOutputStream & oStream) const
 
 	oStream.write(m_StringType);
 
-	BYTE szList = m_StringList.size();
+	// Cap before narrowing; the count byte must describe every entry written.
+	if ( m_StringList.size() > MAX_STRING_NUM )
+		throw InvalidProtocolException("too large string list size");
+
+	const BYTE szList = (BYTE)m_StringList.size();
 
 	oStream.write( szList );
 
@@ -63,9 +67,14 @@ void CGTypeStringList::write (SocketOutputStream & oStream) const
 
 	for( ; itr != m_StringList.end() ; ++itr )
 	{
-		BYTE szString = (*itr).size();
+		// Cap before narrowing; read() above is the contract.
+		if ( (*itr).size() > MAX_STRING_LENGTH )
+			throw InvalidProtocolException("too large string length");
+
+		const BYTE szString = (BYTE)(*itr).size();
+
 		oStream.write( szString );
-		oStream.write( *itr );
+		oStream.write( std::span<const char>( (*itr).data(), szString ) );
 	}
 
 	oStream.write( m_Param );
