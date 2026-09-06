@@ -129,6 +129,12 @@ set_source_files_properties(
 	# The C++20 container/string helper slice spans both libraries: the
 	# packet and Properties sites and the gamemodel manager sites.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_cpp20_container_helpers.cpp
+	# The second slice of the same backlog item: the skill domain's step
+	# map and step lists, the two line-parsing loaders and the two
+	# availability filter scans. It includes the four Client/ headers it
+	# tests, and gamemodel_world.h besides, so it needs the same
+	# definitions.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_cpp20_container_helpers_2.cpp
 	# The second source_location slice. It expands Assert() itself, and
 	# Assert() is conditioned on __WIN32__ - without these definitions the
 	# macro would fall back to <assert.h>, a branch the library never
