@@ -11563,6 +11563,9 @@ UIMessageManager::Execute_UI_UNDISPLAY_ITEM(intptr_t left, intptr_t right, void*
 	DEBUG_ADD("[UI] Execute_UI_UNDISPLAY_ITEM");
  }
 
+// CGStoreSignFactory::getPacketMaxSize() advertises szBYTE + 80.
+static const size_t STORE_SIGN_MAX_BYTES = 80;
+
  void
 UIMessageManager::Execute_UI_STORE_SIGN(intptr_t left, intptr_t right, void* void_ptr)
  {
@@ -11572,13 +11575,17 @@ UIMessageManager::Execute_UI_STORE_SIGN(intptr_t left, intptr_t right, void* voi
 
 	char * pernalshop_message = (char*)void_ptr;
     CGStoreSign _CGStoreSign;
-	
-	char str[250];
-	memset(str,0,250);
-	strcpy(str, (char*)void_ptr);
-	
-	g_pChatManager->RemoveCurse( str );
-	_CGStoreSign.setSign(str);
+
+	// Not UTF-8: the sign is ASCII bytes mixed with raw UTF-16 units, so the cut is a plain one.
+	std::string strSign( pernalshop_message );
+
+	if (strSign.size() > STORE_SIGN_MAX_BYTES)
+	{
+		strSign.resize( STORE_SIGN_MAX_BYTES );
+	}
+
+	g_pChatManager->RemoveCurse( strSign.data() );
+	_CGStoreSign.setSign(strSign);
 	g_pSocket->sendPacket( &_CGStoreSign );
 
 	gC_vs_ui.ClosePersnalShopMessage();
