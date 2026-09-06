@@ -106,6 +106,9 @@ set_source_files_properties(
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_factories.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_goldens.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_span_io.cpp
+	# The second span/typed-scalar slice: the CGSkillTo* family's fields
+	# and its truncated-input contract, over the same stream classes.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_skill_family_wire.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_scalar.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_stringstream.cpp
 	# The character overloads and the diagnostic texts built out of them
