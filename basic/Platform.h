@@ -1422,7 +1422,7 @@ typedef struct _devicemode {
  * Windows File and Process API Stubs
  * ============================================================================ */
 
-/* File time structure (must be defined before WIN32_FIND_DATA) */
+/* File time structure */
 #ifndef FILETIME_DEFINED
 #define FILETIME_DEFINED
 typedef struct _FILETIME {
@@ -1439,23 +1439,6 @@ typedef struct _SECURITY_ATTRIBUTES {
 	LPVOID lpSecurityDescriptor;
 	BOOL bInheritHandle;
 } SECURITY_ATTRIBUTES, *PSECURITY_ATTRIBUTES, *LPSECURITY_ATTRIBUTES;
-#endif
-
-/* Find file data structure */
-#ifndef WIN32_FIND_DATA_DEFINED
-#define WIN32_FIND_DATA_DEFINED
-typedef struct _WIN32_FIND_DATAA {
-	DWORD dwFileAttributes;
-	FILETIME ftCreationTime;
-	FILETIME ftLastAccessTime;
-	FILETIME ftLastWriteTime;
-	DWORD nFileSizeHigh;
-	DWORD nFileSizeLow;
-	DWORD dwReserved0;
-	DWORD dwReserved1;
-	char cFileName[MAX_PATH];
-	char cAlternateFileName[14];
-} WIN32_FIND_DATA, *PWIN32_FIND_DATA, *LPWIN32_FIND_DATA;
 #endif
 
 /* Process access rights */
@@ -1480,7 +1463,7 @@ typedef struct _WIN32_FIND_DATAA {
 	#define DISP_CHANGE_FAILED -1
 #endif
 
-/* Find file handles */
+/* Opaque handle types */
 typedef void* HANDLE;
 typedef void* HWND;
 typedef void* HINSTANCE;
@@ -1554,29 +1537,6 @@ static inline BOOL TerminateProcess(HANDLE hProcess, UINT uExitCode) {
 	(void)hProcess; (void)uExitCode;
 	return FALSE;
 }
-#endif
-
-#ifndef FindClose
-static inline BOOL FindClose(HANDLE hFindFile) {
-	(void)hFindFile;
-	return FALSE;
-}
-#endif
-
-#ifndef FindFirstFileA
-static inline HANDLE FindFirstFileA(LPCSTR lpFileName, LPWIN32_FIND_DATA lpFindFileData) {
-	(void)lpFileName; (void)lpFindFileData;
-	return (HANDLE)INVALID_HANDLE_VALUE;
-}
-#define FindFirstFile FindFirstFileA
-#endif
-
-#ifndef FindNextFileA
-static inline BOOL FindNextFileA(HANDLE hFindFile, LPWIN32_FIND_DATA lpFindFileData) {
-	(void)hFindFile; (void)lpFindFileData;
-	return FALSE;
-}
-#define FindNextFile FindNextFileA
 #endif
 
 #ifndef INVALID_HANDLE_VALUE
@@ -1724,41 +1684,6 @@ static inline BOOL EnumDisplaySettingsA(LPCSTR lpszDeviceName, DWORD iModeNum, L
 static inline intptr_t _spawnl(int mode, const char* cmdname, const char* arg0, ...) {
 	(void)mode; (void)cmdname; (void)arg0;
 	return -1;
-}
-#endif
-
-/* _finddata_t structure for file finding */
-#ifndef _FINDDATA_T_DEFINED
-#define _FINDDATA_T_DEFINED
-struct _finddata_t {
-	unsigned attrib;
-	time_t time_create;
-	time_t time_access;
-	time_t time_write;
-	long size;
-	char name[512];
-};
-#endif
-
-/* Find functions (Unix-style) */
-#ifndef _findfirst
-static inline long _findfirst(const char* filename, struct _finddata_t* finddata) {
-	(void)filename; (void)finddata;
-	return -1;
-}
-#endif
-
-#ifndef _findnext
-static inline int _findnext(long handle, struct _finddata_t* finddata) {
-	(void)handle; (void)finddata;
-	return -1;
-}
-#endif
-
-#ifndef _findclose
-static inline int _findclose(long handle) {
-	(void)handle;
-	return 0;
 }
 #endif
 
