@@ -33,16 +33,21 @@ void CGModifyGuildMember::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
-	BYTE szName = m_Name.size();
+	// The cap runs on the std::string's own size, BEFORE the narrowing
+	// to the BYTE that goes on the wire: (BYTE)276 is 20, so a
+	// 276-character name used to pass this test and then go out whole
+	// behind a length byte claiming 20.
+	if ( m_Name.size() > 20 )
+		throw InvalidProtocolException( "too long szName length" );
+
+	const BYTE szName = (BYTE)m_Name.size();
 
 	if ( szName == 0 )
 		throw InvalidProtocolException( "szName == 0" );
-	if ( szName > 20 )
-		throw InvalidProtocolException( "too long szName length" );
 
 	oStream.write( m_GuildID );
 	oStream.write( szName );
-	oStream.write( m_Name );
+	oStream.write( std::span<const char>(m_Name.data(), szName) );
 	oStream.write( m_GuildMemberRank );
 
 	__END_CATCH

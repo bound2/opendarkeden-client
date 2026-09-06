@@ -39,17 +39,25 @@ void CGSay::write (SocketOutputStream & oStream) const
 		
 	oStream.write( m_Color );
 
-	BYTE szMessage = m_Message.size();
+	// Bound the message on the std::string's own size, BEFORE narrowing
+	// it to the BYTE that goes on the wire. (BYTE)300 is 44, so a
+	// 300-byte chat line - 100 Korean characters, which is exactly what
+	// the chat box's 100-CHARACTER limit allows - used to narrow below
+	// this cap, pass it, and then go out as 300 bytes behind a length
+	// byte claiming 44. The peer parses the tail as the next packet.
+	if (m_Message.size() > MAX_MESSAGE_SIZE)
+		throw InvalidProtocolException("too large message length");
+
+	const BYTE szMessage = (BYTE)m_Message.size();
 
 	if (szMessage == 0)
 		throw InvalidProtocolException("szMessage == 0");
 
-	if (szMessage > MAX_MESSAGE_SIZE)
-		throw InvalidProtocolException("too large message length");
-
 	oStream.write(szMessage);
 
-	oStream.write(m_Message);
+	// The bounded view ties the emitted bytes to the length just
+	// written, which is what getPacketSize() advertised in the header.
+	oStream.write(std::span<const char>(m_Message.data(), szMessage));
 
 	__END_CATCH
 }

@@ -49,17 +49,21 @@ void CLQueryPlayerID::write ( SocketOutputStream & oStream ) const
 	//--------------------------------------------------
 	// write player id
 	//--------------------------------------------------
-	BYTE szPlayerID = m_PlayerID.size();
+	// The cap runs on the std::string's own size, BEFORE the narrowing
+	// to the BYTE that goes on the wire: (BYTE)276 is 20, so a
+	// 276-character id used to pass this test and then go out whole
+	// behind a length byte claiming 20.
+	if ( m_PlayerID.size() > 20 )
+		throw InvalidProtocolException("too long PlayerID length");
+
+	const BYTE szPlayerID = (BYTE)m_PlayerID.size();
 
 	if ( szPlayerID == 0 )
 		throw InvalidProtocolException("empty PlayerID");
 
-	if ( szPlayerID > 20 )
-		throw InvalidProtocolException("too long PlayerID length");
-
 	oStream.write( szPlayerID );
 
-	oStream.write( m_PlayerID );
+	oStream.write( std::span<const char>(m_PlayerID.data(), szPlayerID) );
 
 	__END_CATCH
 }

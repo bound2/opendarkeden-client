@@ -49,16 +49,20 @@ void CGRequestPowerPoint::write ( SocketOutputStream & oStream )
 {
 	__BEGIN_TRY
 		
-	BYTE szCellNum = m_CellNum.size();
+	// The cap runs on the std::string's own size, BEFORE the narrowing
+	// to the BYTE that goes on the wire: (BYTE)268 is 12, so a
+	// 268-character number used to pass this test and then go out whole
+	// behind a length byte claiming 12.
+	if ( m_CellNum.size() > 12 )
+		throw InvalidProtocolException( "szCellNum > 12" );
+
+	const BYTE szCellNum = (BYTE)m_CellNum.size();
 
 	if ( szCellNum == 0 )
 		throw InvalidProtocolException( "szCellNum == 0" );
 
-	if ( szCellNum > 12 )
-		throw InvalidProtocolException( "szCellNum > 12" );
-
 	oStream.write( szCellNum );
-	oStream.write( m_CellNum );
+	oStream.write( std::span<const char>(m_CellNum.data(), szCellNum) );
 
 	__END_CATCH
 }
