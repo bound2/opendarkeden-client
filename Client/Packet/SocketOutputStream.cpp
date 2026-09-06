@@ -162,26 +162,53 @@ void SocketOutputStream::write ( const Packet * pPacket )
 	 throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
-		
-	// 우선 패킷아이디와 패킷크기를 출력버퍼로 쓴다.
-	PacketID_t packetID = pPacket->getPacketID();
-	write( (char*)&packetID , szPacketID );
-	
-	PacketSize_t packetSize = pPacket->getPacketSize();
-	write( (char*)&packetSize , szPacketSize );
-	
-	// 속흙룐관埼죗
-	write( (char*)&m_Sequence, szSequenceSize);
-	m_Sequence++;
 
-    printf("%s:%d SocketOutputStream::write packetID: %d, packetSZ: %d sequence %d\n",
-        __FILE__, __LINE__,
-        packetID, packetSize, m_Sequence-1);
+	// The framing header goes into the ring before the body, and the body
+	// write can throw - every bounded write() in the tree refuses input it
+	// cannot express, and the span core above throws on its own. Without a
+	// rollback the ring would keep a header announcing a body that never
+	// followed, and the peer would parse the NEXT packet's bytes as that
+	// body; the sequence counter would also have advanced for a packet
+	// that never went out. Remember both, and put them back on the way out.
+	//
+	// The saved LENGTH, not the saved tail: a body big enough to fill the
+	// ring makes write() resize(), which reallocates the buffer and moves
+	// the retained bytes to offset zero (m_Head becomes 0). What survives a
+	// rollback is always the first savedLength bytes from the current head,
+	// wherever the head now is - which is also what makes this correct when
+	// the ring has wrapped, since restoring the tail to head + savedLength
+	// reaches back around the wrap and the bytes past it are dead.
+	const uint savedLength = length();
+	const BYTE savedSequence = m_Sequence;
 
-	// 이제 패킷바디를 출력버퍼로 쓴다.
+	try {
+
+		// First write the packet id and the packet size to the output buffer.
+		PacketID_t packetID = pPacket->getPacketID();
+		write( (char*)&packetID , szPacketID );
+
+		PacketSize_t packetSize = pPacket->getPacketSize();
+		write( (char*)&packetSize , szPacketSize );
+
+		// then the sequence number
+		write( (char*)&m_Sequence, szSequenceSize);
+		m_Sequence++;
+
+		printf("%s:%d SocketOutputStream::write packetID: %d, packetSZ: %d sequence %d\n",
+			__FILE__, __LINE__,
+			packetID, packetSize, m_Sequence-1);
+
+		// Now write the packet body to the output buffer.
 		pPacket->write( *this );
-	
-	
+
+	} catch ( ... ) {
+
+		m_Tail = ( m_Head + savedLength ) % m_BufferLen;
+		m_Sequence = savedSequence;
+		throw;
+
+	}
+
 	__END_CATCH
 }
 
