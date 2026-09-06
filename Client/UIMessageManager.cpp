@@ -10816,9 +10816,17 @@ UIMessageManager::Execute_UI_SEND_SMS_MESSAGE(intptr_t left, intptr_t right, voi
 	if(NULL == TempStr || TempStr->size()>5)
 		return ;
 	
+	// CGSMSSend::read() asserts the message length below MAX_MESSAGE_LENGTH.
+	std::string strMessage( (char *)right );
+
+	if (strMessage.size() >= MAX_MESSAGE_LENGTH)
+	{
+		strMessage.resize( MAX_MESSAGE_LENGTH - 1 );
+	}
+
 	CGSMSSend _CGSMSSend;
 	_CGSMSSend.setCallerNumber(std::string((char *)left));
-	_CGSMSSend.setMessage(std::string((char *)right));
+	_CGSMSSend.setMessage(strMessage);
 	_CGSMSSend.clearString(); 
 	std::list<std::string>::iterator itr = TempStr->begin();
 	while(itr != TempStr->end())
@@ -11050,6 +11058,10 @@ UIMessageManager::Execute_UI_CHANGE_CUSTOM_NAMING(intptr_t left, intptr_t right,
 //			}
 //		}
 		g_pChatManager->RemoveCurse(szTemp );
+
+		// The nickname is the DBCS conversion's output, not UTF-8, so the cut is a plain one.
+		if(strlen(szTemp) > MAX_NICKNAME_SIZE)
+			szTemp[MAX_NICKNAME_SIZE] = '\0';
 
 		// 이쯤에서 effect status를 검색 해서 아이템 사용 패킷을 보내는게 좋을듯..
 		MItem* pItem = NULL;	
