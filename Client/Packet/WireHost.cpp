@@ -228,13 +228,38 @@ WireEncryptSeed ( ZoneID_t zoneID , int serverID , bool bEnglishSeed ) throw ()
 //----------------------------------------------------------------------
 // Moved here verbatim from Client/PacketFunction.cpp, with the
 // executable's own connection replaced by the host's target. The
-// truncation and the reasoning behind it are the ones an earlier
-// hardening pass left in place.
+// bound on the format buffer is the one an earlier hardening pass
+// left in place; the cut below it is not - that was 100 bytes, short
+// of what the packet carries, and is the whole headroom now.
 //
 // (The global that connection lives in is deliberately not named
 // here: R4 greps every line of a library source for g_p* and does not
 // skip comments, so writing it down would read as a seam.)
 //----------------------------------------------------------------------
+
+namespace {
+
+//----------------------------------------------------------------------
+// The chat command the server dispatches a report on, and what a CGSay
+// leaves for the report once the prefix has had its bytes.
+//----------------------------------------------------------------------
+// sizeof counts the NUL, which is not sent, so the prefix is 12 bytes
+// of the 128 a CGSay message may hold - 116 for the text.
+//
+// CGSay::write() THROWS above its cap rather than truncating, so a
+// message built any longer than this would not reach the server cut
+// short: it would not reach the server at all.
+//----------------------------------------------------------------------
+const char	BUG_REPORT_PREFIX[]	= "*bug_report ";
+
+const int	BUG_REPORT_PREFIX_LEN	= (int)sizeof(BUG_REPORT_PREFIX) - 1;
+
+const int	BUG_REPORT_TEXT_MAX	= (int)CGSay::MAX_MESSAGE_SIZE - BUG_REPORT_PREFIX_LEN;
+
+static_assert(BUG_REPORT_TEXT_MAX > 0, "the bug report prefix does not fit in a CGSay message");
+
+} // namespace
+
 void
 SendBugReport ( const char * bug , ... )
 {
@@ -251,11 +276,14 @@ SendBugReport ( const char * bug , ... )
 
 	// vsnprintf NUL terminates within sizeof(Buffer), so a report longer than
 	// the buffer is truncated instead of overrunning the stack. That also makes
-	// the strlen and the Buffer[100] cut below safe, which they were not while
-	// vsprintf could already have run past the end. A negative return is an
-	// encoding error: nothing usable was produced, so send nothing.
+	// the strlen and the cut below safe, which they were not while vsprintf
+	// could already have run past the end. A negative return is an encoding
+	// error: nothing usable was produced, so send nothing.
 	if (written < 0)
 		return;
+
+	// And the cut has to land inside what was formatted.
+	static_assert(BUG_REPORT_TEXT_MAX < (int)sizeof(Buffer), "the cut is outside the format buffer");
 
 #ifdef __DEBUG_OUTPUT__
 	DEBUG_ADD_FORMAT("[BUG_REPORT] %s",Buffer);
@@ -266,12 +294,19 @@ SendBugReport ( const char * bug , ... )
 	if( len <= 1 )
 		return;
 
-	if( len >= 100 )
-		Buffer[100] = '\0';
+	// Cut where the packet ends, not short of it. This was 100, which
+	// spent 16 bytes of every long report on nothing: the four
+	// SendBugReport("%s", t.toString().c_str()) sites hand over a
+	// message and then one "file:line" frame per __END_CATCH the
+	// exception unwound through, and an InvalidProtocolException's
+	// message alone is around 55 bytes - so the 16 were most of the
+	// room the first frame needed.
+	if( len > BUG_REPORT_TEXT_MAX )
+		Buffer[BUG_REPORT_TEXT_MAX] = '\0';
 
 	std::string message;
 
-	message = "*bug_report ";
+	message = BUG_REPORT_PREFIX;
 	message += Buffer;
 
 	CGSay _CGSay;
