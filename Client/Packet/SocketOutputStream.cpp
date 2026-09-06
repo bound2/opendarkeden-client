@@ -282,9 +282,30 @@ uint SocketOutputStream::flush ()
 		//m_Head = m_Tail = 0;
 		
 	} catch ( NonBlockingIOException ) {
+
+		// The socket took what it could and refused the rest. Nothing is
+		// lost by catching this: send() returns the count it accepted,
+		// which may be short, and SocketAPI::send_ex only throws this
+		// when the underlying send() returned SOCKET_ERROR - so the call
+		// that threw transferred nothing, and every byte that did go out
+		// is already in m_Head, which the loops advanced by each returned
+		// count. m_Head therefore names the first byte the peer has not
+		// received, and the ring is left holding exactly the remainder
+		// for the next flush.
+		//
+		// Dropping that remainder is what this used to do, and it cut the
+		// peer's frame mid-packet: the bytes of the next packet were then
+		// read as the rest of this one, and the session stayed a frame
+		// out from there on.
+
 	}
-	
-	m_Head = m_Tail = 0;
+
+	// Only an emptied ring is normalised back to offset zero - which is
+	// worth doing, since it keeps a long session's live run from walking
+	// into a wrap it never needed. A ring that still holds something
+	// keeps its head where the send loops left it.
+	if ( m_Head == m_Tail )
+		m_Head = m_Tail = 0;
 
 	return nFlushed;
 

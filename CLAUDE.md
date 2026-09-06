@@ -154,7 +154,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **530 tests, 11,096 checks, 0 failed** in both trees.
+baseline: **539 tests, 11,171 checks, 0 failed** in both trees.
 
 ## Traps
 
@@ -226,7 +226,7 @@ baseline: **530 tests, 11,096 checks, 0 failed** in both trees.
 
 ## Current focus
 
-`docs/code-health-review-2026-08-29.md` holds 197 findings, 85 fixed — every
+`docs/code-health-review-2026-08-29.md` holds 197 findings, 86 fixed — every
 Critical among them. In priority order:
 
 1. **Unvalidated network input is the top open risk**, and the two halves of it

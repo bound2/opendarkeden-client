@@ -89,6 +89,21 @@ public:
 		CHECK(count <= stream.length());
 		stream.m_Head = (stream.m_Head + count) % stream.m_BufferLen;
 	}
+
+	// The ring indices themselves, for the one thing Bytes() cannot say:
+	// where in the buffer the live run sits. A drained flush() normalises
+	// both back to zero, and a partial one has to leave the head on the
+	// first byte the socket did not take - two states whose byte content
+	// is identical (empty) or indistinguishable from a head at zero.
+	static unsigned int Head(const SocketOutputStream& stream)
+	{
+		return stream.m_Head;
+	}
+
+	static unsigned int Tail(const SocketOutputStream& stream)
+	{
+		return stream.m_Tail;
+	}
 };
 
 //----------------------------------------------------------------------
