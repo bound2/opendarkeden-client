@@ -33,16 +33,20 @@ void CGModifyGuildMemberIntro::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
-	BYTE szGuildMemberIntro = m_GuildMemberIntro.size();
-
-	if ( szGuildMemberIntro > 255 )
+	// The cap runs on the std::string's own size, BEFORE the narrowing
+	// to the BYTE that goes on the wire. This one never fired: no BYTE
+	// exceeds 255, so every intro passed and one over 255 went out whole
+	// behind a length byte holding its low eight bits.
+	if ( m_GuildMemberIntro.size() > 255 )
 		throw InvalidProtocolException( "too long szGuildMemberIntro length" );
+
+	const BYTE szGuildMemberIntro = (BYTE)m_GuildMemberIntro.size();
 
 	oStream.write( m_GuildID );
 	oStream.write( szGuildMemberIntro );
 
 	if ( szGuildMemberIntro > 0 )
-		oStream.write( m_GuildMemberIntro );
+		oStream.write( std::span<const char>(m_GuildMemberIntro.data(), szGuildMemberIntro) );
 
 	__END_CATCH
 }
