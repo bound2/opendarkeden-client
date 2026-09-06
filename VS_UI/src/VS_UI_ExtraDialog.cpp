@@ -3376,20 +3376,19 @@ void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
 
 		//---------------------------------------------------------------------
 		// The suffix filter and the insertion sort are
-		// basic/FileDialogListing.h now (docs/RESTRUCTURING.md task 3.1).
-		// They were moved verbatim, defects and all, so that the move
-		// changes nothing the dialog shows; m_filter.size() is passed
-		// because the file branch's append test read that count rather
-		// than the list size, and the moved code carries the same
-		// behaviour behind that argument.
+		// basic/FileDialogListing.h (docs/RESTRUCTURING.md task 3.1),
+		// where they have a test path: this function is in VS_UI and no
+		// test binary links VS_UI. The commit before their fix moved
+		// them with both defects intact so that both could be pinned
+		// first - the file branch's append test read m_filter.size()
+		// through a shadowed `int i`, and the filter copied each suffix
+		// into a char[20]. Neither the count nor the copy exists now,
+		// so one call places every entry.
 		//---------------------------------------------------------------------
 		if (dw_attributes & FILE_ATTRIBUTE_DIRECTORY)
 		{
 			sz_filename = "\\";
 			sz_filename += sz_entry_name;
-
-			Basic::InsertDialogEntry(m_vs_file_list, m_vs_file_list_attr,
-					sz_filename, dw_attributes, m_filter.size());
 		}
 		else
 		{
@@ -3398,10 +3397,10 @@ void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
 
 			if (!Basic::MatchesAnySuffixCaseInsensitive(sz_filename, m_filter))
 				continue;
-
-			Basic::InsertDialogEntry(m_vs_file_list, m_vs_file_list_attr,
-					sz_filename, dw_attributes, m_filter.size());
 		}
+
+		Basic::InsertDialogEntry(m_vs_file_list, m_vs_file_list_attr,
+				sz_filename, dw_attributes);
 
 //		gC_ui.AddListUnit(dp, str_buf, dw_attributes, true);
 	}

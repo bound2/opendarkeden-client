@@ -2,18 +2,16 @@
 
 	FileDialogListing.cpp
 
-	See FileDialogListing.h. Both functions are moved out of
-	C_VS_UI_FILE_DIALOG::RefreshFileList as they stood, defects included:
-	the move is meant to be invisible to the dialog, and the fix that
-	follows it is the commit that changes what the dialog shows.
+	See FileDialogListing.h. Both functions were moved out of
+	C_VS_UI_FILE_DIALOG::RefreshFileList as they stood by the commit
+	before this one, so that the two defects they carried could be
+	pinned before being fixed here.
 
 	2026.09.05
 
 -----------------------------------------------------------------------------*/
 
 #include "FileDialogListing.h"
-
-#include <string.h>
 
 namespace {
 
@@ -34,96 +32,89 @@ inline char	UpperChar(char str)
 
 /*-----------------------------------------------------------------------------
   Suffix filter
+
+  The suffix is read where it lies. The dialog copied it into a
+  char[20] with strcpy() first, out of the char[30] Start() fills, so a
+  filter of 20 characters or more wrote past the buffer; and it compared
+  all strlen(suffix) bytes whatever the name's length, so a name shorter
+  than the suffix indexed std::string::operator[] at a wrapped
+  size() - j - 1. The length test below is what makes the comparison
+  well defined: a suffix longer than the name is not one of its endings.
 -----------------------------------------------------------------------------*/
 bool
 Basic::MatchesAnySuffixCaseInsensitive(const std::string& sName,
 		const std::vector<std::string>& vSuffixes)
 {
-	char	szfile[20];
-	int		i,j;
-	bool	findflag=false,fAddFile=false;
-
-	for(i=0;i<vSuffixes.size();i++)
+	for(size_t i = 0; i < vSuffixes.size(); i++)
 	{
-		strcpy(szfile,vSuffixes[i].c_str());
+		const std::string&	sSuffix = vSuffixes[i];
 
-		findflag=false;
-		for(j = 0; j < strlen(szfile); j++)
+		if(sSuffix.size() > sName.size()) continue;
+
+		bool	bMatches = true;
+
+		for(size_t j = 0; bMatches && j < sSuffix.size(); j++)
 		{
-			if(UpperChar(sName[sName.size() - j-1])
-				!= UpperChar(szfile[strlen(szfile) - j-1]))
-				findflag=true;
+			if(UpperChar(sName[sName.size() - j - 1])
+				!= UpperChar(sSuffix[sSuffix.size() - j - 1]))
+				bMatches = false;
 		}
-		if(!findflag) fAddFile=true;
+
+		if(bMatches) return true;
 	}
 
-	return fAddFile;
+	return false;
 }
 
 /*-----------------------------------------------------------------------------
   Insertion sort into the dialog's parallel vectors
+
+  One position is found and one entry goes in, whichever branch it takes.
+  The dialog wrote the two branches out separately and, in the file one,
+  declared the loop's counter inside the for statement, where it shadowed
+  an `int i` the filter loop above had left at m_filter.size(); the
+  `if(i == m_vs_file_list.size())` that followed therefore compared the
+  FILTER count against the list size. The listing arrives in the
+  case-folded order basic/DirectoryListing sorts it in, while the loop
+  compares byte-wise, so the loop broke for a file only where the two
+  orders disagree (a lowercase initial followed by an uppercase one, say)
+  and a file was otherwise appended only when the filter count happened
+  to equal the list size. With the live ".bmp;.jpg" filter a directory
+  typically showed one picture, sometimes a handful in the wrong-looking
+  order, and none at all in a directory with no subdirectory. The same
+  stale test also ran after an insert that HAD found a place, and
+  inserted the file a second time when the count equalled the size the
+  insert had just grown to; the dialog's own arrival order can never
+  produce that state (a file only ever enters a list already longer
+  than the count), so that half was reachable in the function and not
+  through the dialog.
+
+  A directory's position is the first entry that sorts after it or is a
+  file; a file's is the first FILE that sorts after it, which is what
+  keeps every directory ahead of every file even when a file name begins
+  below '\' (0x5C).
 -----------------------------------------------------------------------------*/
 void
 Basic::InsertDialogEntry(std::vector<std::string>& vNames,
 		std::vector<DWORD>& vAttributes, const std::string& sName,
-		DWORD dwAttributes, size_t uFilterCount)
+		DWORD dwAttributes)
 {
-	if (dwAttributes & FILE_ATTRIBUTE_DIRECTORY)
+	const bool	bIsDirectory = (dwAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+
+	size_t		uAt;
+
+	for(uAt = 0; uAt < vNames.size(); uAt++)
 	{
-		// A directory goes before the first entry that either sorts
-		// after it or is a file, which is what keeps every directory
-		// ahead of every file. i is declared in the scope that tests
-		// it, so the test below is the loop's own counter and the
-		// branch is correct as it stands.
-		int i;
-		for(i = 0; i < vNames.size(); i++)
+		if(bIsDirectory)
 		{
-			if(vNames[i] > sName || vNames[i][0] != '\\')
-			{
-				vNames.insert(vNames.begin() + i, sName);
-				vAttributes.insert(vAttributes.begin() + i, dwAttributes);
-				break;
-			}
+			if(vNames[uAt] > sName || vNames[uAt][0] != '\\') break;
 		}
-		if(i == vNames.size())
+		else
 		{
-			vNames.insert(vNames.begin() + i, sName);
-			vAttributes.insert(vAttributes.begin() + i, dwAttributes);
+			if(vNames[uAt] > sName && vNames[uAt][0] != '\\') break;
 		}
 	}
-	else
-	{
-		// The file branch, moved with its defect. In the dialog the
-		// loop below declared its own `int i` and so shadowed the
-		// `int i` the filter loop had left at m_filter.size(); the
-		// append test after it therefore read the FILTER count, not
-		// the loop counter. The two are spelled apart here - k is the
-		// loop's, i is the value the shadowed name really held - so
-		// that the defect is legible rather than hidden in a scope.
-		//
-		// Consequences, both reachable: a file whose place the loop
-		// never found is appended only when the filter count happens
-		// to equal the list size, and a file the loop DID place is
-		// inserted a second time when the count equals the list size
-		// it has just grown to.
-		const int	i = (int)uFilterCount;
 
-//		vNames.push_back(sName);
-//		vAttributes.push_back(dwAttributes);
-
-		for(int k = 0; k < vNames.size(); k++)
-		{
-			if(vNames[k] > sName && vNames[k][0] != '\\')
-			{
-				vNames.insert(vNames.begin() + k, sName);
-				vAttributes.insert(vAttributes.begin() + k, dwAttributes);
-				break;
-			}
-		}
-		if(i == vNames.size())
-		{
-			vNames.insert(vNames.begin() + i, sName);
-			vAttributes.insert(vAttributes.begin() + i, dwAttributes);
-		}
-	}
+	vNames.insert(vNames.begin() + uAt, sName);
+	vAttributes.insert(vAttributes.begin() + uAt, dwAttributes);
 }
