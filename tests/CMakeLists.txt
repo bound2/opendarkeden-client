@@ -166,6 +166,10 @@ set_source_files_properties(
 	# over the lengths the length byte cannot express. Constructs the packet
 	# classes and drives their read()/write() over the socket streams.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_string_write_caps.cpp
+	# The seven writers in the same family that had no cap at all, and so
+	# narrowed with nothing to refuse them. Same needs: the packet classes
+	# and the socket streams.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_uncapped_string_writes.cpp
 	PROPERTIES
 		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS};WIRE_GOLDEN_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/golden\""
 )

@@ -23,9 +23,14 @@ void CGStoreSign::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
-	BYTE size = m_Sign.size();
+	// Cap before narrowing; the length byte must describe every byte written.
+	if (m_Sign.size() > 80)
+		throw InvalidProtocolException("too large sign length");
+
+	const BYTE size = (BYTE)m_Sign.size();
+
 	oStream.write(size);
-	oStream.write(m_Sign);
+	oStream.write(std::span<const char>(m_Sign.data(), size));
 
 	__END_CATCH
 }

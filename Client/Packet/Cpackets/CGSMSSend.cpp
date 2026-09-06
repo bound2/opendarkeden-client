@@ -46,9 +46,13 @@ void CGSMSSend::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
+	// Cap before narrowing; the numbers follow the UI, the message read().
+	if ( m_Numbers.size() > MAX_RECEVIER_NUM )
+		throw InvalidProtocolException("too large number list size");
+
 	BYTE size;
-	
-	size = m_Numbers.size();
+
+	size = (BYTE)m_Numbers.size();
 	oStream.write(size);
 
 	std::list<string>::const_iterator itr = m_Numbers.begin();
@@ -56,18 +60,27 @@ void CGSMSSend::write (SocketOutputStream & oStream) const
 
 	for ( ; itr != endItr ; ++itr )
 	{
-		size = itr->size();
+		if ( itr->size() > MAX_NUMBER_LENGTH )
+			throw InvalidProtocolException("too large number length");
+
+		size = (BYTE)itr->size();
 		oStream.write(size);
-		oStream.write(*itr);
+		oStream.write(std::span<const char>(itr->data(), size));
 	}
 
-	size = m_CallerNumber.size();
-	oStream.write(size);
-	oStream.write(m_CallerNumber);
+	if ( m_CallerNumber.size() > MAX_NUMBER_LENGTH )
+		throw InvalidProtocolException("too large caller number length");
 
-	size = m_Message.size();
+	size = (BYTE)m_CallerNumber.size();
 	oStream.write(size);
-	oStream.write(m_Message);
+	oStream.write(std::span<const char>(m_CallerNumber.data(), size));
+
+	if ( m_Message.size() >= MAX_MESSAGE_LENGTH )
+		throw InvalidProtocolException("too large message length");
+
+	size = (BYTE)m_Message.size();
+	oStream.write(size);
+	oStream.write(std::span<const char>(m_Message.data(), size));
 
 	__END_CATCH
 }
