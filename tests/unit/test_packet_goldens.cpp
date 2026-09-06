@@ -70,6 +70,7 @@
 #include "Cpackets/CGNPCAskAnswer.h"
 #include "Cpackets/CGPickupMoney.h"
 #include "Cpackets/CGSkillToInventory.h"
+#include "Cpackets/CGSkillToNamed.h"
 #include "Cpackets/CGSkillToObject.h"
 #include "Cpackets/CGSkillToSelf.h"
 #include "Cpackets/CGSkillToTile.h"
@@ -456,6 +457,22 @@ void	Fill(CGSkillToInventory& p)
 }
 void	Fill(CGAddMouseToZone& p)	{ p.setObjectID(0x14253647); }
 void	Fill(CGDropMoney& p)		{ p.setAmount(0x8899AABB); }
+
+// CGSkillToNamed is the fifth member of the CGSkillTo* family and the
+// only one that never reaches the encrypter: the same SkillType and
+// CEffectID header the other four carry, then a BYTE-length-prefixed
+// target name. Pinned at code 0 only, like every encrypter-free packet
+// in this file. The two scalars are distinct from each other and from
+// the rest of the family's; like every sibling fixture in this family
+// their low bytes sit below 128, so they do not meet the high-bit rule
+// stated at the top of the file, and the golden is recorded from them as
+// they are rather than re-cut to a rule the family never followed.
+void	Fill(CGSkillToNamed& p)
+{
+	p.setSkillType(0x8C4D);
+	p.setCEffectID(0x9F7A);
+	p.setTargetName("Reiot");
+}
 
 //----------------------------------------------------------------------
 // Client-authored fixtures: the chat/guild/system-message family the
@@ -934,6 +951,21 @@ SHARED_ENCRYPTER_PIN(CGSkillToInventory)
 SHARED_ENCRYPTER_PIN(CGAddMouseToZone)
 SHARED_ENCRYPTER_PIN(CGDropMoney)
 #undef SHARED_ENCRYPTER_PIN
+
+//----------------------------------------------------------------------
+// CGSkillToNamed - the CGSkillTo* family's encrypter-free member
+//----------------------------------------------------------------------
+TEST(CGSkillToNamed, RoundTripsAndMatchesGolden)
+{
+	CGSkillToNamed src, dst;
+	Fill(src);
+	CHECK(EncrypterFree(src));
+	RoundTrip(src, dst, 0);
+	CHECK_EQ(src.getSkillType(), dst.getSkillType());
+	CHECK_EQ(src.getCEffectID(), dst.getCEffectID());
+	CHECK(src.getTargetName() == dst.getTargetName());
+	ExpectGolden("CGSkillToNamed", 0, WriteBody(src, 0));
+}
 
 //----------------------------------------------------------------------
 // Client-authored pins: chat, guild chat, system message, login
