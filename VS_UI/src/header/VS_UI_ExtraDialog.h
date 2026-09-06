@@ -173,7 +173,8 @@ public:
 	void	Finish();
 
 	void	Show();
-	char Upperchar(char str){if(!(str>='a'&&str<='z')) return str;else return str-32;}
+	// Upperchar() moved with its only caller, the suffix filter, into
+	// basic/FileDialogListing.cpp (docs/RESTRUCTURING.md task 3.1).
 
 	bool	Timer(bool reset);
 };

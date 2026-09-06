@@ -27,6 +27,9 @@ extern RECT g_GameRect;
 // C_VS_UI_FILE_DIALOG::RefreshFileList() used to run
 // (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md, priority 6).
 #include "DirectoryListing.h"
+// The suffix filter and the insertion sort C_VS_UI_FILE_DIALOG::RefreshFileList
+// runs over that listing (docs/RESTRUCTURING.md task 3.1, "moved, then fixed").
+#include "FileDialogListing.h"
 #include <algorithm>
 #include <filesystem>
 #include <vector>
@@ -3371,67 +3374,33 @@ void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
 			n += 1; // + '\'
 		}
 
+		//---------------------------------------------------------------------
+		// The suffix filter and the insertion sort are
+		// basic/FileDialogListing.h now (docs/RESTRUCTURING.md task 3.1).
+		// They were moved verbatim, defects and all, so that the move
+		// changes nothing the dialog shows; m_filter.size() is passed
+		// because the file branch's append test read that count rather
+		// than the list size, and the moved code carries the same
+		// behaviour behind that argument.
+		//---------------------------------------------------------------------
 		if (dw_attributes & FILE_ATTRIBUTE_DIRECTORY)
 		{
 			sz_filename = "\\";
 			sz_filename += sz_entry_name;
 
-			int i;
-			for(i = 0; i < m_vs_file_list.size(); i++)
-			{
-				if(m_vs_file_list[i] > sz_filename || m_vs_file_list[i][0] != '\\')
-				{
-					m_vs_file_list.insert(m_vs_file_list.begin() + i, sz_filename);
-					m_vs_file_list_attr.insert(m_vs_file_list_attr.begin() + i, dw_attributes);
-					break;
-				}
-			}
-			if(i == m_vs_file_list.size())
-			{
-				m_vs_file_list.insert(m_vs_file_list.begin() + i, sz_filename);
-				m_vs_file_list_attr.insert(m_vs_file_list_attr.begin() + i, dw_attributes);
-			}
+			Basic::InsertDialogEntry(m_vs_file_list, m_vs_file_list_attr,
+					sz_filename, dw_attributes, m_filter.size());
 		}
 		else
 		{
 //			strcpy(str_buf, sz_entry_name);
 			sz_filename = sz_entry_name;
-			char szfile[20];
-			int i,j;
-			BOOL findflag=false,fAddFile=false;
-			
-			for(i=0;i<m_filter.size();i++)
-			{
-				strcpy(szfile,m_filter[i].c_str());
-				
-				findflag=false;
-				for(j = 0; j < strlen(szfile); j++)
-				{					
-					if(Upperchar(sz_filename[sz_filename.size() - j-1]) 
-						!= Upperchar(szfile[strlen(szfile) - j-1]))
-						findflag=true;
-				}
-				if(!findflag) fAddFile=true;
-			}
-			if(!fAddFile) continue;
 
-//			m_vs_file_list.push_back(sz_filename);
-//			m_vs_file_list_attr.push_back(dw_attributes);
+			if (!Basic::MatchesAnySuffixCaseInsensitive(sz_filename, m_filter))
+				continue;
 
-			for(int i = 0; i < m_vs_file_list.size(); i++)
-			{
-				if(m_vs_file_list[i] > sz_filename && m_vs_file_list[i][0] != '\\')
-				{
-					m_vs_file_list.insert(m_vs_file_list.begin() + i, sz_filename);
-					m_vs_file_list_attr.insert(m_vs_file_list_attr.begin() + i, dw_attributes);
-					break;
-				}
-			}
-			if(i == m_vs_file_list.size())
-			{
-				m_vs_file_list.insert(m_vs_file_list.begin() + i, sz_filename);
-				m_vs_file_list_attr.insert(m_vs_file_list_attr.begin() + i, dw_attributes);
-			}
+			Basic::InsertDialogEntry(m_vs_file_list, m_vs_file_list_attr,
+					sz_filename, dw_attributes, m_filter.size());
 		}
 
 //		gC_ui.AddListUnit(dp, str_buf, dw_attributes, true);
