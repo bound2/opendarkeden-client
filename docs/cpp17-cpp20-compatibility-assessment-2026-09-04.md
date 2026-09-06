@@ -189,6 +189,88 @@ preserves today's termination behavior; deciding that those functions should
 propagate instead is a separate behavioral audit and should not be mixed into the
 language port.
 
+**Conformance status (2026-09-06):** the first slice of this finding was scoped
+to `basic/` and **removed nothing, because `basic/` has never carried a dynamic
+exception specification**: 0 before, 0 after. That is not a quirk of the smallest
+library. Measured with the pattern R9 and R10 now use - `throw` followed by
+parentheses holding type names or nothing, files joined so a wrapped type list
+still counts, `//` tails stripped - **every library in this tree is already at
+0**: `basic`, `Client/SpriteLib`, `Client/TextSystem`, `Client/DXLib`,
+`Client/framelib`, `VS_UI` and every `gamemodel` member. The entire workload is
+the packet tree and what hangs off it. The repository holds **11,790**
+specifications in `.h` and `.cpp` files outside comments (a first measurement
+that did not strip `/* */` blocks read 11,841; the 51 it over-counted were dead
+comment text), 8,513 empty and 3,277 type lists, split as: **11,463** in the
+library set (2,211 in `packetwire`'s own `.cpp`, 9,252 in the headers under
+`Client/Packet`, over the set's 1,473 files), **284**
+in `Client/PacketHandler`, **34** in the remaining executable sources - the two
+request-side packet factory managers, `PacketFunction.cpp`, `RequestFileManager`
+and `Updater/UpdateManager.h` - and **9** in `tests/`, in test doubles that
+implement wire interfaces and have to match the specifications on their bases.
+The tree's 45 `.c` files carry none, so unlike `register` in finding 4 there is
+nothing here that can be left alone for being C. This restates finding 3's own
+scan (3,304 non-empty, 8,655 empty, 1,317 files), taken with a different pattern
+over a scope the audit did not record; the two agree to within about 1% and the
+shape of the conclusion is unchanged.
+
+The slice therefore shipped the instrument rather than an edit.
+`tests/ratchet/ratchets.sh` gains two baselines: **R9 = 0** over `basic/`, which
+holds the line there, and **R10 = 11,463** over the library set, which later
+slices ratchet down. R10's set deliberately includes every `.h` under
+`Client/Packet` even though `tests/arch/packetwire_files.txt` lists only `.cpp`,
+because an exception specification is part of the function type and a
+declaration and its definition must change together - a `.cpp`-only metric would
+have counted exactly half of every edit as progress. Both were injection-tested
+in both directions: adding `throw ( Error )` or `throw ()` to a `basic/` header
+fails them, `noexcept` and the `throw Error(...)` / `throw ("...")` statements do
+not, and removing one specification from `SocketAPI.h` fails R10 as unrecorded
+progress. `Client/PacketHandler` and the rest of the executable are outside both,
+and adding a ratchet for them belongs with the slice that clears them.
+
+A ratchet is the only instrument available here, because the build says nothing.
+The Debug log of this tree at `/std:c++20` contains **C4290 zero times** - the
+warning the project notes name for the packet tree - so not one of the 11,499
+sites shows up as a diagnostic. What the build does emit is **539 distinct
+C4297**, "function assumed not to throw an exception but does", across 257
+`Client/Packet` files. That is the pre-existing correctness concern this finding
+raises, now with a number: those are `throw()` functions whose bodies throw,
+already undefined under MSVC's own reading of the specification, and they are the
+set where `throw()` must become a dropped specification rather than `noexcept`.
+
+**The next slice is `packetwire`, because there is no smaller library left.** It
+is the whole 11,463 and cannot land in one commit; the natural subdivision is the
+one `Client/Packet` already has - the root files first (the exception header the
+`__BEGIN_TRY`/`__END_CATCH` pair comes from, the streams, the sockets and the
+framing, which is where the declarations everything else overrides live), then
+the packet directories one at a time. Three things found while measuring should
+travel with those slices.
+
+Dropping `throw(X, Y)` is mechanical: MSVC ignores the list already, so removing
+it changes nothing MSVC does. `throw()` -> `noexcept` is not, and it is a
+judgement per function. MSVC already treats `throw()` as nothrow and omits the
+unwinding, so a `throw()` function whose body can throw is undefined today -
+which means the specification should be **dropped** wherever the body cannot be
+shown nothrow, and promoted to `noexcept` only where it can. The tree already
+carries one worked example of that reasoning, at `Client/Packet/WireHost.h:155`:
+`RequestClientPlayer::readInputStream` and `RequestServerPlayer::send` are
+declared `throw(ProtocolException, Error)` on purpose, because the peer teardown
+depends on that exception unwinding to `RequestServerPlayerManager::Update`, and
+a `throw()` there would make the path undefined under MSVC and `std::terminate`
+under C++17 or on clang and gcc.
+
+`SocketAPI.cpp` writes five of its specifications across two lines and repeats
+each one in the banner comment above the function, so a line-oriented codemod
+will edit the code and leave the comment claiming the old contract. One of those
+comments is already wrong today: `bind_ex`'s names an `MBindException` that both
+the declaration and the definition spell `BindException`.
+
+Finally, the nine specifications in `tests/` are not debt of the same kind. They
+sit on test doubles that override wire interfaces
+(`test_output_stream_flush.cpp`, `test_player_base.cpp`) and mirror what those
+bases declare, so they belong in the same commit as the base they mirror. The
+`throw()` half of that is the part that cannot be deferred: once a base is
+`noexcept`, an override that is not stops compiling.
+
 ### 4. `register` remains in C++ source
 
 There are roughly 650 declaration-like uses of the removed `register` storage
