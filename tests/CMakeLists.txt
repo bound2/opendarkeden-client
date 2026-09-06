@@ -111,6 +111,10 @@ set_source_files_properties(
 	# throws. Defines its own Packet subclass, so it needs the same
 	# definitions - Packet's virtual set changes under them.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_output_stream_rollback.cpp
+	# The other end of the same stream: what flush() leaves in the ring
+	# when the socket takes only part of it. Derives from SocketImpl to
+	# script the partial send, so it needs the same definitions too.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_output_stream_flush.cpp
 	# The second span/typed-scalar slice: the CGSkillTo* family's fields
 	# and its truncated-input contract, over the same stream classes.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_skill_family_wire.cpp

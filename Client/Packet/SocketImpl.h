@@ -72,7 +72,15 @@ public :
 	SocketImpl * accept () throw ( NonBlockingIOException , Error );
 	
 	// send data to peer
-	uint send ( const void * buf , uint len , uint flags = 0 ) throw ( IOException , Error );
+	//
+	// Test seam (tests/unit/test_output_stream_flush.cpp): virtual so a
+	// test can hand Socket an impl whose send() takes only part of what
+	// it is offered, which is the one input SocketOutputStream::flush()
+	// cannot otherwise be given - a real partial send needs a congested
+	// peer. This class already has a vtable (the destructor above is
+	// virtual), so the keyword adds a dispatch and nothing else, and the
+	// only override in the tree is the test's.
+	virtual uint send ( const void * buf , uint len , uint flags = 0 ) throw ( IOException , Error );
 	
 	// receive data from peer
 	uint receive ( void * buf , uint len , uint flags = 0 ) throw ( IOException , Error );
