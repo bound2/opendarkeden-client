@@ -588,7 +588,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				if (p_item->GetPocketNumber() != -1)
 				{
 					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_POCKET_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					sprintf(sz_buf, "%d %s", p_item->GetPocketNumber(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());
+					SafeFormat::Format(sz_buf, "%d %s", p_item->GetPocketNumber(), GetGameString(UI_STRING_MESSAGE_DESC_NUMBER));
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}			
@@ -596,7 +596,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				if (p_item->IsPileItem() == true)
 				{
 					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ITEM_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					sprintf(sz_buf, "%d %s", p_item->GetNumber(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());
+					SafeFormat::Format(sz_buf, "%d %s", p_item->GetNumber(), GetGameString(UI_STRING_MESSAGE_DESC_NUMBER));
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);			
 					py += SMALL_FONT_Y_GAP;
 				}
@@ -765,7 +765,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			if (p_item->GetPocketNumber() != -1)
 			{
 				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_POCKET_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				sprintf(sz_buf, "??? %s", (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());				
+				SafeFormat::Format(sz_buf, "??? %s", GetGameString(UI_STRING_MESSAGE_DESC_NUMBER));
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 				py += SMALL_FONT_Y_GAP;
 			}			
@@ -773,7 +773,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			if (p_item->IsPileItem() == true)
 			{
 				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ITEM_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				sprintf(sz_buf, "??? %s",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());				
+				SafeFormat::Format(sz_buf, "??? %s", GetGameString(UI_STRING_MESSAGE_DESC_NUMBER));
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);			
 				py += SMALL_FONT_Y_GAP;
 			}
@@ -952,9 +952,9 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		{
 			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_POCKET_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
 			if(p_item->IsIdentified())
-				sprintf(sz_buf, "%d %s", p_item->GetPocketNumber(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());
+				SafeFormat::Format(sz_buf, "%d %s", p_item->GetPocketNumber(), GetGameString(UI_STRING_MESSAGE_DESC_NUMBER));
 			else
-				sprintf(sz_buf, "??? %s", (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());
+				SafeFormat::Format(sz_buf, "??? %s", GetGameString(UI_STRING_MESSAGE_DESC_NUMBER));
 
 			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 
@@ -966,9 +966,9 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		{
 			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ITEM_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
 			if(p_item->IsIdentified())
-				sprintf(sz_buf, "%d %s", p_item->GetNumber(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());
+				SafeFormat::Format(sz_buf, "%d %s", p_item->GetNumber(), GetGameString(UI_STRING_MESSAGE_DESC_NUMBER));
 			else				
-				sprintf(sz_buf, "??? %s",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());
+				SafeFormat::Format(sz_buf, "??? %s", GetGameString(UI_STRING_MESSAGE_DESC_NUMBER));
 
 			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);			
 			py += SMALL_FONT_Y_GAP;
@@ -1518,7 +1518,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				
 				if(price.type != -1 && price.number > 0)
 				{
-					wsprintf(sz_buf, "%s %d%s", (*g_pItemTable)[ITEM_CLASS_EVENT_STAR][price.type].HName.GetString(), max( 0, price.number) , (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());
+					SafeFormat::Format(sz_buf, "%s %d%s", (*g_pItemTable)[ITEM_CLASS_EVENT_STAR][price.type].HName.GetString(), max( 0, price.number) , GetGameString(UI_STRING_MESSAGE_DESC_NUMBER));
 				}
 				else
 				{

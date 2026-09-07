@@ -422,3 +422,19 @@ TEST(ItemOptionInfo, ConstructsWithEveryFieldZero)
 	CHECK(info.Name.GetString() == NULL);
 	CHECK(info.EName.GetString() == NULL);
 }
+
+TEST(GameStringTable, EnglishItemCounterIsReadableEmptyText)
+{
+    MStringArray table;
+    MStringArray* saved = g_pGameStringTable;
+    g_pGameStringTable = &table;
+    InitGameStringTable();
+    const char* counter = table[UI_STRING_MESSAGE_DESC_NUMBER].GetString();
+    CHECK(counter != nullptr);
+    if (counter) CHECK_EQ(0, std::strlen(counter));
+    CHECK(std::strcmp(GetGameString(UI_STRING_MESSAGE_DESC_NUMBER), "") == 0);
+    // Older localized tables may omit the counter entirely.
+    table.Release();
+    CHECK(std::strcmp(GetGameString(UI_STRING_MESSAGE_DESC_NUMBER), "") == 0);
+    g_pGameStringTable = saved;
+}

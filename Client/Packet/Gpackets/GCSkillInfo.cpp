@@ -118,7 +118,7 @@ PacketSize_t GCSkillInfo::getPacketSize() const
 	throw()
 {
 
-	PacketSize_t PacketSize = szBYTE;
+	PacketSize_t PacketSize = szBYTE + szBYTE; // PC type and list count.
 
 	for ( std::list< PCSkillInfo * >::const_iterator itr = m_pPCSkillInfoList.begin() ; itr != m_pPCSkillInfoList.end() ; itr ++ ) {
 

@@ -1290,3 +1290,45 @@ TEST(GCGuildChat, EmptyGuildNameWithNonZeroTypeRoundTrips)
 	CHECK(src.getSender() == dst.getSender());
 	CHECK(src.getMessage() == dst.getMessage());
 }
+
+#include "Gpackets/GCSkillInfo.h"
+
+TEST(GCSkillInfo, OustersLoginFrameIncludesSkillLevelsAndPreservesNextPacket)
+{
+    GCSkillInfo packet;
+    packet.setPCType(PC_OUSTERS);
+    auto* skills = new OustersSkillInfo();
+    skills->setListNum(2);
+    for (int i = 0; i < 2; ++i) {
+        auto* skill = new SubOustersSkillInfo();
+        skill->setSkillType(247 - i);
+        skill->setExpLevel(1);
+        skill->setSkillTurn(5);
+        skill->setCastingTime(3);
+        skills->addListElement(skill);
+    }
+    packet.addListElement(skills);
+    const std::vector<unsigned char> expected = {
+        0x69, 0x01, 28, 0, 0, 0, 0, // GCSkillInfo, body size, sequence
+        2, 1, 0, 2,                // Ousters, one list, learn flag, two skills
+        247, 0, 1, 0, 5, 0, 0, 0, 3, 0, 0, 0,
+        246, 0, 1, 0, 5, 0, 0, 0, 3, 0, 0, 0
+    };
+    CHECK_EQ(28u, packet.getPacketSize());
+    CHECK_EQ(12u, SubOustersSkillInfo::getMaxSize());
+    CHECK(WriteFramed(packet, 0) == expected);
+    auto joined = expected;
+    joined.insert(joined.end(), expected.begin(), expected.end());
+    InFixture input;
+    input.m_Stream.setEncryptCode(0);
+    SocketInputStreamTestAccess::Preload(input.m_Stream, joined.data(), joined.size());
+    for (int pass = 0; pass < 2; ++pass) {
+        GCSkillInfo decoded;
+        input.m_Stream.read(&decoded);
+        CHECK_EQ(PC_OUSTERS, decoded.getPCType());
+        CHECK_EQ(1, decoded.getListNum());
+        CHECK_EQ(28u, decoded.getPacketSize());
+        CHECK(WriteBody(decoded, 0) == std::vector<unsigned char>(expected.begin() + 7, expected.end()));
+        CHECK_EQ(pass == 0 ? expected.size() : 0, input.m_Stream.length());
+    }
+}

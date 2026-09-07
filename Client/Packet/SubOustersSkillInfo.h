@@ -30,9 +30,9 @@ public :
 	void write (SocketOutputStream & oStream) const throw (ProtocolException, Error);
 
 	// get size of object
-	uint getSize () const throw () { return szSkillType + szTurn + szTurn; }
+	uint getSize () const throw () { return szSkillType + szExpLevel + szTurn + szTurn; }
 	// get max size of object
-	static uint getMaxSize () throw () { return szSkillType + szTurn + szTurn; }
+	static uint getMaxSize () throw () { return szSkillType + szExpLevel + szTurn + szTurn; }
 
 #ifdef __DEBUG_OUTPUT__
 	// get debug string

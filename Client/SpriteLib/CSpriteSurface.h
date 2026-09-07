@@ -261,8 +261,8 @@ class CSpriteSurface {
 		//------------------------------------------------------------
 		// Clipping a sprite against the surface
 		//
-		// This backend has no clip rectangle of its own (SetClip is
-		// a no-op), so every blit clips to the whole surface.
+		// The static pixel-buffer helpers below clip to the supplied
+		// surface bounds. SDL blits also honor SetClip on their destination.
 		// ClipSpriteToSurface reduces a placement to the sprite-local
 		// rectangle that is visible, the surface pixel its top-left
 		// lands on, and which of the CSpritePal / CAlphaSpritePal

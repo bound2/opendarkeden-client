@@ -457,28 +457,56 @@ void CSpriteSurface::BltSpriteScale(POINT* pPoint, CSprite* pSprite, int scale) 
 }
 
 /* ============================================================================
- * Stub implementations for other BltSprite variants
- * These will be implemented in future iterations
+ * Sprite color and status effects
+ * Preserve the original icon state rendering on SDL destinations
  * ============================================================================ */
 
+// Reuse the original RLE effect blitters, with the SDL viewport translated
+// to sprite coordinates. Their destination starts at the visible top-left.
+template <typename Draw>
+static void BltClippedSpriteEffect(spritectl_surface_t surface, POINT* point,
+                                  CSprite* sprite, Draw draw)
+{
+    if (!surface || !surface->surface || !point || !sprite || !sprite->IsInit()) return;
+    SDL_Surface* target = surface->surface;
+    if (target->format->format != SDL_PIXELFORMAT_RGB565 || target->pitch <= 0 || target->pitch > 0xffff) return;
+    const SDL_Rect& viewport = target->clip_rect;
+    RECT clip = {
+        SDL_max(0, viewport.x - point->x),
+        SDL_max(0, viewport.y - point->y),
+        SDL_min(sprite->GetWidth(), viewport.x + viewport.w - point->x),
+        SDL_min(sprite->GetHeight(), viewport.y + viewport.h - point->y)
+    };
+    if (clip.left >= clip.right || clip.top >= clip.bottom) return;
+    if (SDL_MUSTLOCK(target) && SDL_LockSurface(target) != 0) return;
+    WORD* dest = reinterpret_cast<WORD*>(static_cast<BYTE*>(target->pixels)
+        + (point->y + clip.top) * target->pitch) + point->x + clip.left;
+    draw(dest, static_cast<WORD>(target->pitch), &clip);
+    if (SDL_MUSTLOCK(target)) SDL_UnlockSurface(target);
+}
+
 void CSpriteSurface::BltSpriteColor(POINT* pPoint, CSprite* pSprite, BYTE rgb) {
-	/* TODO: Implement color tinting */
-	BltSprite(pPoint, pSprite);
+    BltClippedSpriteEffect(m_backend_surface, pPoint, pSprite, [=](WORD* dest, WORD pitch, RECT* clip) {
+        pSprite->BltColorClipWidth(dest, pitch, clip, rgb);
+    });
 }
 
 void CSpriteSurface::BltSpriteDarkness(POINT* pPoint, CSprite* pSprite, BYTE DarkBits) {
-	/* TODO: Implement darkness effect */
-	BltSprite(pPoint, pSprite);
+    BltClippedSpriteEffect(m_backend_surface, pPoint, pSprite, [=](WORD* dest, WORD pitch, RECT* clip) {
+        pSprite->BltDarknessClipWidth(dest, pitch, clip, DarkBits);
+    });
 }
 
 void CSpriteSurface::BltSpriteColorSet(POINT* pPoint, CSprite* pSprite, WORD colorSet) {
-	/* TODO: Implement color set */
-	BltSprite(pPoint, pSprite);
+    BltClippedSpriteEffect(m_backend_surface, pPoint, pSprite, [=](WORD* dest, WORD pitch, RECT* clip) {
+        pSprite->BltColorSetClipWidth(dest, pitch, clip, colorSet);
+    });
 }
 
 void CSpriteSurface::BltSpriteEffect(POINT* pPoint, CSprite* pSprite) {
-	/* TODO: Implement effect */
-	BltSprite(pPoint, pSprite);
+    BltClippedSpriteEffect(m_backend_surface, pPoint, pSprite, [=](WORD* dest, WORD pitch, RECT* clip) {
+        pSprite->BltEffectClipWidth(dest, pitch, clip);
+    });
 }
 
 void CSpriteSurface::BltSpriteAlpha4444SmallNotTrans(POINT* pPoint, CSprite* pSprite, BYTE alpha, BYTE shift) {
