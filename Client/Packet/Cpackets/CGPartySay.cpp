@@ -38,10 +38,15 @@ void CGPartySay::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
-	BYTE szMessage = m_Message.size();
+	// Cap before narrowing; the length byte must describe every byte written.
+	if (m_Message.size() > 128)
+		throw InvalidProtocolException("too large message length");
+
+	const BYTE szMessage = (BYTE)m_Message.size();
+
 	oStream.write(m_Color);
 	oStream.write(szMessage);
-	oStream.write(m_Message);
+	oStream.write(std::span<const char>(m_Message.data(), szMessage));
 
 	__END_CATCH
 }

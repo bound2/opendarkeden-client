@@ -71,17 +71,18 @@ void CGConnect::write ( SocketOutputStream & oStream ) const
 	//--------------------------------------------------
 	// write PC name
 	//--------------------------------------------------
-	BYTE szPCName = m_PCName.size();
+	// Cap the std::string's own size, before narrowing to the length byte.
+	if ( m_PCName.size() > 20 )
+		throw InvalidProtocolException("too long pc name length");
+
+	const BYTE szPCName = (BYTE)m_PCName.size();
 
 	if ( szPCName == 0 )
 		throw InvalidProtocolException("szPCName == 0");
 
-	if ( szPCName > 20 )
-		throw InvalidProtocolException("too long pc name length");
-
 	oStream.write( szPCName );
 
-	oStream.write( m_PCName );
+	oStream.write( std::span<const char>(m_PCName.data(), szPCName) );
 
 	oStream.write( (char*)m_MacAddress, 6 );
 

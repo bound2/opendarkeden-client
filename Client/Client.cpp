@@ -61,6 +61,8 @@
 #include <string>
 #include <vector>
 #include <sys/stat.h>
+#include <filesystem>
+#include <system_error>
 // std::filesystem directory enumeration, in place of the _findfirst /
 // _findnext walk CheckLogFile() used to run
 // (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md, priority 6).
@@ -3222,8 +3224,6 @@ WinMain(HINSTANCE hInstance,
 	CFileFind finder;
 	BOOL bWorking = finder.FindFile("Updater2.exe");
 */
-	WIN32_FIND_DATA FileData1; 
-	HANDLE hSearch1; 
 	DWORD pid;
 	HANDLE hProcess=NULL,hProcessToken=NULL;
 	HWND hwndUpdate = FindWindow("#32770", "FsDarkedenLaunch");
@@ -3236,8 +3236,10 @@ WinMain(HINSTANCE hInstance,
 				int a = SendMessage(hwndUpdate, WM_CLOSE, 0 , 0);
 		}
 		Sleep(1000);
-	hSearch1 = FindFirstFile("Updater2.exe", &FileData1); 
-	if(hSearch1 != INVALID_HANDLE_VALUE)
+	// Existence test only; the error_code overload reports false rather
+	// than throwing on an unreadable directory.
+	std::error_code ecUpdater2;
+	if(std::filesystem::exists("Updater2.exe", ecUpdater2))
 	{
 		DeleteFile("Updater.exe");
 		CopyFile("Updater2.exe","Updater.exe",FALSE);
@@ -3246,23 +3248,25 @@ WinMain(HINSTANCE hInstance,
 //yckou end
 //add by sonic Check *.dll have Bug. 2006.4.13
 //yckou begin: check invalid *.dll
-	WIN32_FIND_DATA FileData; 
-	HANDLE hSearch; 
-	bool fFinished = false; 
-
+	// The startup DLL whitelist: a *.dll beside the executable whose name is
+	// not below makes WinMain() return -1 here, silently, before logging is
+	// up. Directories are listed too, because the body judges the name alone.
 	std::string InvalidDll;
-	hSearch = FindFirstFile("*.dll", &FileData); 
-	if (hSearch != INVALID_HANDLE_VALUE) 
+	std::vector<Basic::SDirectoryEntry> vDllEntries;
+
+	// A directory that cannot be enumerated skips the check.
+	if (Basic::ListDirectory(".", "*.dll", vDllEntries, Basic::LIST_FILES_AND_DIRECTORIES))
 	{
-		while (!fFinished) 
+		for (size_t iDll=0; iDll<vDllEntries.size(); iDll++)
 		{
-			int iLen = strlen(FileData.cFileName);
-			for (int j=0;j<iLen;j++)
+			InvalidDll = vDllEntries[iDll].sName;
+
+			size_t iLen = InvalidDll.size();
+			for (size_t j=0;j<iLen;j++)
 			{
-				if(isupper((unsigned char)FileData.cFileName[j]) != 0)
-					FileData.cFileName[j] = (char)tolower((unsigned char)FileData.cFileName[j]);
+				if(isupper((unsigned char)InvalidDll[j]) != 0)
+					InvalidDll[j] = (char)tolower((unsigned char)InvalidDll[j]);
 			}
-			InvalidDll = FileData.cFileName;
 
 			if(InvalidDll != "timer.dll" &&
 				InvalidDll != "msvcrtd.dll" &&
@@ -3335,15 +3339,9 @@ WinMain(HINSTANCE hInstance,
 				//MessageBox(0,(LPCTSTR)InvalidDll.c_str(),"ERROR",MB_OK);
 				//MessageBox(0,
 				return -1;
-				
-		
-			if (!FindNextFile(hSearch, &FileData)) 
-			{
-				fFinished = true; 
-			}
-		} 
-		// Close the search handle. 
-		FindClose(hSearch);
+
+
+		}
 	}
 //yckou end
 //end sonic

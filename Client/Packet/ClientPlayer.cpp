@@ -300,7 +300,8 @@ void ClientPlayer::processCommand ()
 				//---------------------------------------------------------
 				if (++processedPacket > maxProcessPacket)
 				{
-					DEBUG_ADD_FORMAT("[PacketSkip] So many Packets. MaxProcessPacket:%d, CurrentPacket:%d, File:%s, Line:%d",maxProcessPacket,processedPacket, __FILE__,__LINE__);
+					const LogSite site;
+					log_write_at(site, LOG_LEVEL_INFO, "[PacketSkip] So many Packets. MaxProcessPacket:%d, CurrentPacket:%d, File:%s, Line:%d",maxProcessPacket,processedPacket, site.file,site.line);
 					//DEBUG_ADD_FORMAT_WAR(szBuf);
 
 					break;

@@ -34,7 +34,11 @@ class GamePlayer;
 class CGSay : public Packet {
 
 public:
-	
+
+	// The longest message this packet carries; read() and write() both
+	// throw above it rather than truncating.
+	enum { MAX_MESSAGE_SIZE = 128 };
+
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
     void read(SocketInputStream & iStream) throw(ProtocolException, Error);
 		    
@@ -98,8 +102,7 @@ public:
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_SAY; }
 
 	// get packet's max body size
-	// message 의 최대 크기에 대한 설정이 필요하다.
-	PacketSize_t getPacketMaxSize() const throw() { return szuint + szBYTE + 128; }
+	PacketSize_t getPacketMaxSize() const throw() { return szuint + szBYTE + CGSay::MAX_MESSAGE_SIZE; }
 
 };
 

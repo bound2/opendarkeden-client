@@ -18,7 +18,35 @@
 #endif
 
 #include <list>
+#include <source_location>
 
+
+//////////////////////////////////////////////////////////////////////
+//
+// struct DiagnosticSite
+//
+// Where a diagnostic was raised: a file and a line, either captured at
+// the caller by the defaulted std::source_location or supplied
+// explicitly.
+//
+//////////////////////////////////////////////////////////////////////
+
+struct DiagnosticSite {
+
+	const char *	file;
+	int		line;
+	const char *	function;	// NULL when only a file and a line were supplied
+
+	DiagnosticSite ( const std::source_location & location = std::source_location::current() ) noexcept
+		: file(location.file_name()),
+		  line((int)location.line()),
+		  function(location.function_name()) {}
+
+	DiagnosticSite ( const char * site_file , int site_line ) noexcept
+		: file(site_file),
+		  line(site_line),
+		  function(NULL) {}
+};
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -51,6 +79,13 @@ public :
 		StringStream s;
 		s << file << ":" << line;
 		m_Stacks.push_front( s.toString());
+	}
+
+	// The same, with the location captured at the caller rather than
+	// forwarded. This is what __END_CATCH calls.
+	void addStack ( const DiagnosticSite & site = DiagnosticSite() ) noexcept
+	{
+		addStack( site.file, site.line );
 	}
 
 	// return debug std::string - throwable object's function stack trace
@@ -116,7 +151,7 @@ private :
 				try {
 	#define __END_CATCH \
 				} catch ( Throwable & t ) { \
-					t.addStack(__FILE__, __LINE__); \
+					t.addStack(); \
 					throw; \
 				}
 #endif

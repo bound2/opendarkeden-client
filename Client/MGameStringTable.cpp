@@ -6,6 +6,8 @@
 #include "Properties.h"
 #include "DebugLog.h"
 
+#include <string_view>
+
 
 //----------------------------------------------------------------------
 // Global
@@ -71,12 +73,14 @@ UseEnglishTextFrom(const char* szLanguageInfoFile)
 
 	while (fgets(szLine, sizeof(szLine), pFile) != NULL)
 	{
-		if (szLine[0] == ';')
+		const std::string_view	svLine( szLine );
+
+		if (svLine.starts_with(';'))
 		{
 			continue;
 		}
 
-		if (strncmp(szLine, "LANGUAGE", 8) == 0)
+		if (svLine.starts_with("LANGUAGE"))
 		{
 			sscanf(szLine + 8, "%d", &language);
 			break;

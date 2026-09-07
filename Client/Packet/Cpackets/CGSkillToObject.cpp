@@ -9,8 +9,14 @@
 #include "SocketEncryptOutputStream.h"
 #include "PacketAssert.h"
 
+#include <cstdint>
 
-CGSkillToObject::CGSkillToObject () 
+// Pin the wire width so a change to ObjectID_t is a compile error here.
+static_assert(sizeof(ObjectID_t) == sizeof(std::uint32_t),
+	"CGSkillToObject stages its target ObjectID as a 32-bit wire scalar");
+
+
+CGSkillToObject::CGSkillToObject ()
      throw ()
 {
 	__BEGIN_TRY
@@ -44,9 +50,14 @@ void CGSkillToObject::read (SocketInputStream & iStream)
 	else 
 #endif
 	{
-		iStream.read((char*)&m_SkillType , szSkillType);
-		iStream.read((char*)&m_CEffectID , szCEffectID);
-		iStream.read((char*)&m_TargetObjectID , szObjectID);
+		iStream.readWire(m_SkillType);
+		iStream.readWire(m_CEffectID);
+
+		// ObjectID_t is DWORD, not one of the exact-width types readWire
+		// accepts, so it is staged in the equivalent.
+		std::uint32_t targetObjectID = 0;
+		iStream.readWire(targetObjectID);
+		m_TargetObjectID = static_cast<ObjectID_t>(targetObjectID);
 	}
 
 	__END_CATCH
@@ -71,9 +82,9 @@ void CGSkillToObject::write (SocketOutputStream & oStream) const
 	else
 #endif
 	{
-		oStream.write((char*)&m_SkillType , szSkillType);
-		oStream.write((char*)&m_CEffectID , szCEffectID);
-		oStream.write((char*)&m_TargetObjectID , szObjectID);
+		oStream.writeWire(m_SkillType);
+		oStream.writeWire(m_CEffectID);
+		oStream.writeWire(static_cast<std::uint32_t>(m_TargetObjectID));
 	}
 
 	__END_CATCH

@@ -24,7 +24,7 @@ void CGSay::read (SocketInputStream & iStream)
 	if (szMessage == 0)
 		throw InvalidProtocolException("szMessage == 0");
 
-	if (szMessage > 128)
+	if (szMessage > MAX_MESSAGE_SIZE)
 		throw InvalidProtocolException("too large message length");
 
 	iStream.read(m_Message , szMessage);
@@ -39,17 +39,18 @@ void CGSay::write (SocketOutputStream & oStream) const
 		
 	oStream.write( m_Color );
 
-	BYTE szMessage = m_Message.size();
+	// Cap the std::string's own size, before narrowing to the length byte.
+	if (m_Message.size() > MAX_MESSAGE_SIZE)
+		throw InvalidProtocolException("too large message length");
+
+	const BYTE szMessage = (BYTE)m_Message.size();
 
 	if (szMessage == 0)
 		throw InvalidProtocolException("szMessage == 0");
 
-	if (szMessage > 128)
-		throw InvalidProtocolException("too large message length");
-
 	oStream.write(szMessage);
 
-	oStream.write(m_Message);
+	oStream.write(std::span<const char>(m_Message.data(), szMessage));
 
 	__END_CATCH
 }

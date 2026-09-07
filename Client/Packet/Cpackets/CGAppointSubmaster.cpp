@@ -32,16 +32,18 @@ void CGAppointSubmaster::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
-	BYTE szName = m_Name.size();
+	// Cap the std::string's own size, before narrowing to the length byte.
+	if ( m_Name.size() > 20 )
+		throw InvalidProtocolException( "too long szName length" );
+
+	const BYTE szName = (BYTE)m_Name.size();
 
 	if ( szName == 0 )
 		throw InvalidProtocolException( "szName == 0" );
-	if ( szName > 20 )
-		throw InvalidProtocolException( "too long szName length" );
 
 	oStream.write( m_GuildID );
 	oStream.write( szName );
-	oStream.write( m_Name );
+	oStream.write( std::span<const char>(m_Name.data(), szName) );
 
 	__END_CATCH
 }

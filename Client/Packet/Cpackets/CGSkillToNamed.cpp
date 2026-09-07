@@ -6,7 +6,9 @@
 #include "Client_PCH.h"
 #include "CGSkillToNamed.h"
 
-CGSkillToNamed::CGSkillToNamed () 
+#include <span>
+
+CGSkillToNamed::CGSkillToNamed ()
      throw ()
 {
 	__BEGIN_TRY
@@ -26,9 +28,9 @@ void CGSkillToNamed::read (SocketInputStream & iStream)
 	__BEGIN_TRY
 
 	BYTE szTargetName;
-		
-	iStream.read((char*)&m_SkillType , szSkillType);
-	iStream.read((char*)&m_CEffectID , szCEffectID);
+
+	iStream.readWire(m_SkillType);
+	iStream.readWire(m_CEffectID);
 	iStream.read( szTargetName );
 
 	if ( szTargetName == 0 )
@@ -46,17 +48,19 @@ void CGSkillToNamed::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
-	BYTE szTargetName = m_TargetName.size();
+	// Cap the std::string's own size, before narrowing to the length byte.
+	if ( m_TargetName.size() > 20 )
+		throw InvalidProtocolException( "too long target name" );
+
+	const BYTE szTargetName = (BYTE)m_TargetName.size();
 
 	if ( szTargetName == 0 )
 		throw InvalidProtocolException( "szTargetName == 0" );
-	if ( szTargetName > 20 )
-		throw InvalidProtocolException( "too long target name" );
 
-	oStream.write((char*)&m_SkillType , szSkillType);
-	oStream.write((char*)&m_CEffectID , szCEffectID);
+	oStream.writeWire(m_SkillType);
+	oStream.writeWire(m_CEffectID);
 	oStream.write( szTargetName );
-	oStream.write( m_TargetName );
+	oStream.write( std::span<const char>(m_TargetName.data(), szTargetName) );
 
 	__END_CATCH
 }

@@ -28,16 +28,17 @@ void CGGlobalChat::write (SocketOutputStream & oStream) const
 	__BEGIN_TRY
 
 	oStream.write( m_Color );
-	
-	BYTE szMessage = m_Message.size();
+
+	// Cap the std::string's own size, before narrowing to the length byte.
+	if (m_Message.size() > 128) throw InvalidProtocolException("too large message length");
+
+	const BYTE szMessage = (BYTE)m_Message.size();
 
 	if (szMessage == 0) throw InvalidProtocolException("szMessage == 0");
 
-	if (szMessage > 128) throw InvalidProtocolException("too large message length");
-
 	oStream.write(szMessage);
 
-	oStream.write(m_Message);
+	oStream.write(std::span<const char>(m_Message.data(), szMessage));
 
 	__END_CATCH
 }

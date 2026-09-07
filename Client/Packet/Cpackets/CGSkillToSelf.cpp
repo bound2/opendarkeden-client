@@ -42,8 +42,8 @@ void CGSkillToSelf::read (SocketInputStream & iStream)
 	else
 #endif
 	{
-		iStream.read((char*)&m_SkillType , szSkillType);
-		iStream.read((char*)&m_CEffectID , szCEffectID);
+		iStream.readWire(m_SkillType);
+		iStream.readWire(m_CEffectID);
 	}
 
 	__END_CATCH
@@ -67,8 +67,8 @@ void CGSkillToSelf::write (SocketOutputStream & oStream) const
 	else
 #endif
 	{
-		oStream.write((char*)&m_SkillType , szSkillType);
-		oStream.write((char*)&m_CEffectID , szCEffectID);
+		oStream.writeWire(m_SkillType);
+		oStream.writeWire(m_CEffectID);
 	}
 
 	__END_CATCH

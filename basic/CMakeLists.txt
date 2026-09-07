@@ -42,6 +42,12 @@ set(BASIC_SOURCES
 	# basic is the one library every target already links.
 	DirectoryListing.cpp
 	DisplaySettings.cpp
+	# The file dialog's list building (docs/RESTRUCTURING.md task 3.1,
+	# "moved, then fixed"). Its caller is
+	# C_VS_UI_FILE_DIALOG::RefreshFileList in VS_UI, which no test binary
+	# links, so the two functions live here for the reason DebugLog and
+	# SafeFormat do: basic is the one library every target already links.
+	FileDialogListing.cpp
 	BasicData.cpp
 	Timer2.cpp
 	BasicException.cpp
@@ -126,6 +132,7 @@ install(FILES
 	PlatformUtil.h
 	Directory.h
 	DirectoryListing.h
+	FileDialogListing.h
 	BasicMemory.h
 	BasicException.h
 	DLL.h

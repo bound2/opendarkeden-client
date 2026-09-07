@@ -142,9 +142,9 @@ Basic::ListDirectory(const char* pDirectory, const char* pPattern,
 		while (iEntry != iEnd)
 		{
 			// The error_code overload, so a hostile entry - a dangling
-			// symlink, say - throws nothing. An entry that cannot be
-			// classified is left as an ordinary file, which is how
-			// _findfirst reported it, rather than losing the listing.
+			// symlink, say - throws nothing. is_directory() follows the
+			// link, so an entry whose target cannot be classified is
+			// left as an ordinary file rather than losing the listing.
 			std::error_code	TypeError;
 
 			const bool	bIsDirectory = iEntry->is_directory(TypeError);

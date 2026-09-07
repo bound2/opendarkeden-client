@@ -718,6 +718,183 @@ R8=$(find Client VS_UI basic \( -name '*.cpp' -o -name '*.h' \) -print0 2>/dev/n
 check "R8 (printf-family calls whose format is not a literal)" "$R8" "$R8_BASELINE"
 
 #----------------------------------------------------------------------
+# R9 / R10 - dynamic exception specifications.
+#
+# `throw()` and `throw(X, Y)` written on a declaration or a definition.
+# The non-empty form was REMOVED in C++17 and the empty form deprecated;
+# MSVC accepts both and IGNORES the type list, which is why a permissive
+# MSVC C++20 build succeeds here where clang stops at the first one
+# (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md, finding 3).
+# A ratchet is the only instrument there is, because the BUILD says
+# nothing: the Debug log of this tree at /std:c++20 contains C4290 - the
+# warning CLAUDE.md names for the packet tree - exactly zero times, so
+# none of the 11,463 sites below is visible as a diagnostic. What the
+# build does emit is 539 distinct C4297, "function assumed not to throw
+# an exception but does", across 257 Client/Packet files: those are
+# `throw()` functions whose bodies throw, undefined under MSVC's own
+# reading of the specification, and they are why `throw()` -> `noexcept`
+# is a judgement per function rather than a substitution.
+#
+# R9 holds the libraries that carry none; R10 counts what is left, so a
+# conformance slice has to record its progress here.
+#
+# THE PATTERN, and what separates a specification from a statement.
+# Both start with the keyword, so the discriminator is what the
+# parentheses hold: a specification holds a comma-separated list of TYPE
+# NAMES or nothing at all, a `throw` statement holds an expression. The
+# class between the parens is therefore identifiers, `::` and commas and
+# nothing else - no quote, no digit-leading token, no operator, no call.
+#
+#   throw ()             matches - the empty specification
+#   throw ( X )          matches
+#   throw ( X , Y )      matches
+#   throw ("...")        does NOT match, and is a statement: six live
+#                        ones in GCShopList.cpp, GCShopListMysterious.cpp
+#                        and GCShopVersion.h, plus two commented out in
+#                        the two SXml.cpp
+#   throw Error ( ... )  does NOT match - the keyword is not followed by
+#                        a paren, which is how every other throw
+#                        statement in this tree is written
+#
+# The false positive it would accept is `throw (e);`, a statement
+# rethrowing a named object. There is none: every single-identifier match
+# in the set was enumerated, 97 of them, and all 97 name an exception
+# class on a declarator - Error 58, NoSuchElementException 15,
+# InvalidProtocolException 13, DuplicatedException 5, IOException 3,
+# AssertionError 3.
+#
+# The false negatives, written down here rather than discovered later:
+#
+#   - a type list this class cannot spell - a template argument
+#     (`throw(A<B>)`), a pointer or reference, or a comment between the
+#     parens. None exists today, and a new one would be invisible.
+#   - a specification whose /* */ block or // tail is unbalanced or
+#     nested in a way the two strips misread. Block comments ARE
+#     stripped (36 of the first measurement were dead comment text in
+#     CGBloodDrain.h, GCAddBat.h, GCAddWolf.h and the skill OK files),
+#     so deleting commented-out code does not read as progress.
+#   - a specification reached through a macro.
+#
+# The files are JOINED before matching, as R7 and R8 are, because five
+# specifications put the keyword and the rest of the list on different
+# lines - SocketAPI.cpp's bind_ex, connect_ex, accept_ex, send_ex and
+# recv_ex. Line-based this set measures 11,458 rather than 11,463, so
+# removing those five would have looked like a partial no-op, which is
+# the failure mode task 5.3 found in R4. The type-name-only class is what
+# makes joining safe: a match cannot run across a statement boundary,
+# because a `;`, a quote or an operator ends it.
+#
+# THE LIBRARY SET (R10) is every library a test binary can link, spelled
+# the way R4 spells its own membership, plus the headers: basic,
+# Client/SpriteLib, Client/TextSystem, Client/DXLib, Client/framelib and
+# VS_UI as whole trees; the gamemodel membership file's .cpp and .h
+# lines; the packetwire membership file's .cpp lines AND every .h under
+# Client/Packet.
+#
+# Those headers are in the set for a reason worth stating. 9,252 of the
+# 11,463 are in them, and an exception specification is part of the
+# function type, so a declaration and its definition have to change
+# together. A .cpp-only metric - which is all
+# tests/arch/packetwire_files.txt can give, since it lists .cpp by design
+# - would have counted exactly half of every edit and called it progress.
+#
+# One .cpp under Client/Packet is deliberately outside the set:
+# RequestClientPlayerManager.cpp, the packetwire holdout
+# (tests/arch/packetwire_holdouts.txt), which compiles into the
+# executable. It carries 0, so the choice does not move the number.
+#
+# NOT counted, and they are the rest of the workload: Client/PacketHandler
+# (284), the remaining executable sources (49 - the two request-side
+# packet factory managers, PacketFunction.cpp, RequestFileManager and
+# Updater/UpdateManager.h) and tests/ (9, in test doubles that implement
+# wire interfaces and must match the specifications on their bases).
+# 11,463 + 284 + 34 + 9 = 11,790, which is every .h and .cpp in the
+# repository outside comments - 8,513 empty and 3,277 non-empty.
+#----------------------------------------------------------------------
+# R9 = 0, and it is not a removal. The first conformance slice
+# (2026-09-06) went looking for basic/'s specifications and found none:
+# basic/ has never carried one, and neither has Client/SpriteLib,
+# Client/TextSystem, Client/DXLib, Client/framelib, VS_UI or any
+# gamemodel member. The whole conformance workload is the packet tree, so
+# the slice shipped the instrument instead of an edit. Read this zero the
+# way R3's comment says to read its own: it is a statement about the
+# pattern above, not about the language mode.
+R9_BASELINE=0
+
+# R10 = 11,463, all of it under Client/Packet: 2,211 in the membership
+# file's .cpp and 9,252 in the headers, over the set's 1,473 files.
+# 8,492 are the empty `throw()` and 2,971 are type lists. Later
+# slices ratchet this down a subsystem at a time; the mapping each of
+# them applies is in the assessment's finding 3, and the one place where
+# the choice is NOT mechanical is already written down at
+# Client/Packet/WireHost.h:155 - the request-file path throws through
+# functions declared throw(ProtocolException, Error) by design, and
+# giving them noexcept would turn a designed peer teardown into
+# std::terminate.
+R10_BASELINE=11463
+
+# Identifiers, `::` and commas between the parens, and nothing else. The
+# leading alternation rather than \b for the reason R8's comment gives:
+# it has to be able to match at the very start of the joined stream.
+EXCSPEC='(^|[^A-Za-z0-9_])throw[[:space:]]*\([[:space:]]*([A-Za-z_][A-Za-z0-9_:]*[[:space:]]*(,[[:space:]]*[A-Za-z_][A-Za-z0-9_:]*[[:space:]]*)*)?\)'
+
+# Reads repository-relative paths on stdin and counts the specifications
+# in them. -a and one joined stream for the reason R7 and R8 give: grep
+# calls this tree's CP949 and UTF-8 sources binary and stops inside them
+# when it classifies per file.
+count_exception_specs () {
+	sort -u | while read -r f; do [ -f "$f" ] && echo "$f"; done \
+		| tr '\n' '\0' | xargs -0 cat 2>/dev/null \
+		| perl -0pe 's{/\*.*?\*/}{ }gs' \
+		| sed -e 's://.*::' | tr '\n' ' ' \
+		| grep -aoE "$EXCSPEC" | wc -l
+}
+
+basic_members () {
+	find basic \( -name '*.h' -o -name '*.cpp' \) 2>/dev/null
+}
+
+libset_members () {
+	basic_members
+	find Client/SpriteLib Client/TextSystem Client/DXLib Client/framelib VS_UI \
+		\( -name '*.h' -o -name '*.cpp' \) 2>/dev/null
+	sed -e 's/#.*//' tests/arch/gamemodel_files.txt \
+		| grep -oE 'Client/[A-Za-z0-9_/]+\.(cpp|h)'
+	sed -e 's/#.*//' tests/arch/packetwire_files.txt \
+		| grep -oE 'Client/Packet/[A-Za-z0-9_/]+\.cpp'
+	find Client/Packet -name '*.h' 2>/dev/null
+}
+
+# Both baselines are fail-open if their inputs silently are not there: a
+# renamed directory makes find print nothing, and R9 would then count 0
+# of nothing and PASS. So the inputs are asserted, and R9's file list is
+# asserted non-empty on top of that.
+for d in basic Client/SpriteLib Client/TextSystem Client/DXLib Client/framelib \
+	VS_UI Client/Packet; do
+	if [ ! -d "$d" ]; then
+		echo "FAIL R9/R10: directory $d is missing - fix the path list in this script"
+		FAIL=1
+	fi
+done
+for f in tests/arch/gamemodel_files.txt tests/arch/packetwire_files.txt; do
+	if [ ! -f "$f" ]; then
+		echo "FAIL R9/R10: membership file $f is missing - fix the path list in this script"
+		FAIL=1
+	fi
+done
+
+if [ "$(basic_members | wc -l)" -eq 0 ]; then
+	echo "FAIL R9: basic/ enumerates no .h or .cpp - a zero here would measure nothing"
+	FAIL=1
+else
+	R9=$(basic_members | count_exception_specs)
+	check "R9 (dynamic exception specifications in basic/)" "$R9" "$R9_BASELINE"
+fi
+
+R10=$(libset_members | count_exception_specs)
+check "R10 (dynamic exception specifications in the library set)" "$R10" "$R10_BASELINE"
+
+#----------------------------------------------------------------------
 # R6 was here for exactly one slice, and retired by doing its job.
 #
 # Task 5.1 stubbed SendBugReport in tests/stubs/client_globals.cpp so

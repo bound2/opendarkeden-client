@@ -49,17 +49,18 @@ void CGPortCheck::write ( Datagram & oDatagram ) const
 	//--------------------------------------------------
 	// write PC name
 	//--------------------------------------------------
-	BYTE szPCName = m_PCName.size();
+	// Cap the std::string's own size, before narrowing to the length byte.
+	if ( m_PCName.size() > 20 )
+		throw InvalidProtocolException("too long name length");
+
+	const BYTE szPCName = (BYTE)m_PCName.size();
 
 	if ( szPCName == 0 )
 		throw InvalidProtocolException("szPCName == 0");
 
-	if ( szPCName > 20 )
-		throw InvalidProtocolException("too long name length");
-
 	oDatagram.write( szPCName );
 
-	oDatagram.write( m_PCName );
+	oDatagram.write( m_PCName.data(), szPCName );
 
 	__END_CATCH
 }

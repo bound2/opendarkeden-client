@@ -162,26 +162,45 @@ void SocketOutputStream::write ( const Packet * pPacket )
 	 throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
-		
-	// 우선 패킷아이디와 패킷크기를 출력버퍼로 쓴다.
-	PacketID_t packetID = pPacket->getPacketID();
-	write( (char*)&packetID , szPacketID );
-	
-	PacketSize_t packetSize = pPacket->getPacketSize();
-	write( (char*)&packetSize , szPacketSize );
-	
-	// 속흙룐관埼죗
-	write( (char*)&m_Sequence, szSequenceSize);
-	m_Sequence++;
 
-    printf("%s:%d SocketOutputStream::write packetID: %d, packetSZ: %d sequence %d\n",
-        __FILE__, __LINE__,
-        packetID, packetSize, m_Sequence-1);
+	// The framing header goes into the ring before the body, and the body
+	// write can throw; roll both back so the ring never keeps a header
+	// announcing a body that never followed. The saved LENGTH, not the
+	// saved tail: a resize() during the body write moves the retained
+	// bytes, and the length is what survives that.
+	const uint savedLength = length();
+	const BYTE savedSequence = m_Sequence;
 
-	// 이제 패킷바디를 출력버퍼로 쓴다.
+	try {
+
+		// First write the packet id and the packet size to the output buffer.
+		PacketID_t packetID = pPacket->getPacketID();
+		write( (char*)&packetID , szPacketID );
+
+		PacketSize_t packetSize = pPacket->getPacketSize();
+		write( (char*)&packetSize , szPacketSize );
+
+		// then the sequence number
+		write( (char*)&m_Sequence, szSequenceSize);
+		m_Sequence++;
+
+		#ifdef __DEBUG_OUTPUT__
+			printf("%s:%d SocketOutputStream::write packetID: %d, packetSZ: %d sequence %d\n",
+				__FILE__, __LINE__,
+				packetID, packetSize, m_Sequence-1);
+		#endif
+
+		// Now write the packet body to the output buffer.
 		pPacket->write( *this );
-	
-	
+
+	} catch ( ... ) {
+
+		m_Tail = ( m_Head + savedLength ) % m_BufferLen;
+		m_Sequence = savedSequence;
+		throw;
+
+	}
+
 	__END_CATCH
 }
 
@@ -255,9 +274,17 @@ uint SocketOutputStream::flush ()
 		//m_Head = m_Tail = 0;
 		
 	} catch ( NonBlockingIOException ) {
+
+		// The socket took what it could and refused the rest. m_Head names
+		// the first byte the peer has not received, so the ring is left
+		// holding exactly the remainder for the next flush; dropping it
+		// would cut the peer's frame mid-packet.
+
 	}
-	
-	m_Head = m_Tail = 0;
+
+	// Only an emptied ring is normalised back to offset zero.
+	if ( m_Head == m_Tail )
+		m_Head = m_Tail = 0;
 
 	return nFlushed;
 

@@ -41,23 +41,26 @@ void CGRegistGuild::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
-	BYTE szGuildName = m_GuildName.size();
-	BYTE szGuildIntro = m_GuildIntro.size();
+	// Cap both std::strings' own sizes, before narrowing to the length
+	// bytes. 255 is the most a length byte can express.
+	if ( m_GuildName.size() > 30 )
+		throw InvalidProtocolException( "szGuildName > 30" );
+
+	if ( m_GuildIntro.size() > 255 )
+		throw InvalidProtocolException( "szGuildIntro > 256" );
+
+	const BYTE szGuildName = (BYTE)m_GuildName.size();
+	const BYTE szGuildIntro = (BYTE)m_GuildIntro.size();
 
 	if ( szGuildName == 0 )
 		throw InvalidProtocolException( "szGuildName == 0 " );
-	if ( szGuildName > 30 ) 
-		throw InvalidProtocolException( "szGuildName > 30" );
-
-	if ( szGuildIntro > 256 )
-		throw InvalidProtocolException( "szGuildIntro > 256" );
 
 	oStream.write( szGuildName );
-	oStream.write( m_GuildName );
+	oStream.write( std::span<const char>(m_GuildName.data(), szGuildName) );
 	oStream.write( szGuildIntro );
 
 	if ( szGuildIntro != 0 )
-		oStream.write( m_GuildIntro );
+		oStream.write( std::span<const char>(m_GuildIntro.data(), szGuildIntro) );
 
 	__END_CATCH
 }

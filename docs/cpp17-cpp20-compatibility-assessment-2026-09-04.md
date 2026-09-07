@@ -189,6 +189,88 @@ preserves today's termination behavior; deciding that those functions should
 propagate instead is a separate behavioral audit and should not be mixed into the
 language port.
 
+**Conformance status (2026-09-06):** the first slice of this finding was scoped
+to `basic/` and **removed nothing, because `basic/` has never carried a dynamic
+exception specification**: 0 before, 0 after. That is not a quirk of the smallest
+library. Measured with the pattern R9 and R10 now use - `throw` followed by
+parentheses holding type names or nothing, files joined so a wrapped type list
+still counts, `//` tails stripped - **every library in this tree is already at
+0**: `basic`, `Client/SpriteLib`, `Client/TextSystem`, `Client/DXLib`,
+`Client/framelib`, `VS_UI` and every `gamemodel` member. The entire workload is
+the packet tree and what hangs off it. The repository holds **11,790**
+specifications in `.h` and `.cpp` files outside comments (a first measurement
+that did not strip `/* */` blocks read 11,841; the 51 it over-counted were dead
+comment text), 8,513 empty and 3,277 type lists, split as: **11,463** in the
+library set (2,211 in `packetwire`'s own `.cpp`, 9,252 in the headers under
+`Client/Packet`, over the set's 1,473 files), **284**
+in `Client/PacketHandler`, **34** in the remaining executable sources - the two
+request-side packet factory managers, `PacketFunction.cpp`, `RequestFileManager`
+and `Updater/UpdateManager.h` - and **9** in `tests/`, in test doubles that
+implement wire interfaces and have to match the specifications on their bases.
+The tree's 45 `.c` files carry none, so unlike `register` in finding 4 there is
+nothing here that can be left alone for being C. This restates finding 3's own
+scan (3,304 non-empty, 8,655 empty, 1,317 files), taken with a different pattern
+over a scope the audit did not record; the two agree to within about 1% and the
+shape of the conclusion is unchanged.
+
+The slice therefore shipped the instrument rather than an edit.
+`tests/ratchet/ratchets.sh` gains two baselines: **R9 = 0** over `basic/`, which
+holds the line there, and **R10 = 11,463** over the library set, which later
+slices ratchet down. R10's set deliberately includes every `.h` under
+`Client/Packet` even though `tests/arch/packetwire_files.txt` lists only `.cpp`,
+because an exception specification is part of the function type and a
+declaration and its definition must change together - a `.cpp`-only metric would
+have counted exactly half of every edit as progress. Both were injection-tested
+in both directions: adding `throw ( Error )` or `throw ()` to a `basic/` header
+fails them, `noexcept` and the `throw Error(...)` / `throw ("...")` statements do
+not, and removing one specification from `SocketAPI.h` fails R10 as unrecorded
+progress. `Client/PacketHandler` and the rest of the executable are outside both,
+and adding a ratchet for them belongs with the slice that clears them.
+
+A ratchet is the only instrument available here, because the build says nothing.
+The Debug log of this tree at `/std:c++20` contains **C4290 zero times** - the
+warning the project notes name for the packet tree - so not one of the 11,499
+sites shows up as a diagnostic. What the build does emit is **539 distinct
+C4297**, "function assumed not to throw an exception but does", across 257
+`Client/Packet` files. That is the pre-existing correctness concern this finding
+raises, now with a number: those are `throw()` functions whose bodies throw,
+already undefined under MSVC's own reading of the specification, and they are the
+set where `throw()` must become a dropped specification rather than `noexcept`.
+
+**The next slice is `packetwire`, because there is no smaller library left.** It
+is the whole 11,463 and cannot land in one commit; the natural subdivision is the
+one `Client/Packet` already has - the root files first (the exception header the
+`__BEGIN_TRY`/`__END_CATCH` pair comes from, the streams, the sockets and the
+framing, which is where the declarations everything else overrides live), then
+the packet directories one at a time. Three things found while measuring should
+travel with those slices.
+
+Dropping `throw(X, Y)` is mechanical: MSVC ignores the list already, so removing
+it changes nothing MSVC does. `throw()` -> `noexcept` is not, and it is a
+judgement per function. MSVC already treats `throw()` as nothrow and omits the
+unwinding, so a `throw()` function whose body can throw is undefined today -
+which means the specification should be **dropped** wherever the body cannot be
+shown nothrow, and promoted to `noexcept` only where it can. The tree already
+carries one worked example of that reasoning, at `Client/Packet/WireHost.h:155`:
+`RequestClientPlayer::readInputStream` and `RequestServerPlayer::send` are
+declared `throw(ProtocolException, Error)` on purpose, because the peer teardown
+depends on that exception unwinding to `RequestServerPlayerManager::Update`, and
+a `throw()` there would make the path undefined under MSVC and `std::terminate`
+under C++17 or on clang and gcc.
+
+`SocketAPI.cpp` writes five of its specifications across two lines and repeats
+each one in the banner comment above the function, so a line-oriented codemod
+will edit the code and leave the comment claiming the old contract. One of those
+comments is already wrong today: `bind_ex`'s names an `MBindException` that both
+the declaration and the definition spell `BindException`.
+
+Finally, the nine specifications in `tests/` are not debt of the same kind. They
+sit on test doubles that override wire interfaces
+(`test_output_stream_flush.cpp`, `test_player_base.cpp`) and mirror what those
+bases declare, so they belong in the same commit as the base they mirror. The
+`throw()` half of that is the part that cannot be deferred: once a base is
+`noexcept`, an override that is not stops compiling.
+
 ### 4. `register` remains in C++ source
 
 There are roughly 650 declaration-like uses of the removed `register` storage
@@ -353,6 +435,49 @@ is what proves the nested defaulted `current()` reports the call site rather
 than the header. No call site elsewhere in the tree is converted; that is a
 later slice.
 
+**Source-location second slice (2026-09-05):** the explicit `__FILE__` and
+`__LINE__` forwarders in the packet wire layer are converted, so the library
+that carries them is also the one a test binary can link.
+`Client/Packet/Exception.h` gains `DiagnosticSite` - the same shape as
+`ExceptionSite` and `LogSite`, a separate type only because the wire layer's
+exception header may not drag in the `EXCEPTION_CODE` enum and the
+`_Error` macros those carry - and a `Throwable::addStack(site)` overload that
+defaults it; `__END_CATCH`, which
+wraps essentially every method in the tree, now calls `addStack()` and pushes
+the identical `"file:line"` frame. `Client/Packet/PacketAssert.h` gains
+`__assert__(func, expr, site)` and its `Assert(expr)` macro forwards only the
+two things a location cannot carry, the platform's function spelling and the
+stringized expression; the four-argument `__assert__` stays as the
+compatibility entry point and is what the new one delegates to, so the line
+written to `assertion_failed.log` and the message inside the thrown
+`AssertionError` are byte for byte what they were, empty-function-name
+separator quirk included. Pinning that text exposed a pre-existing defect,
+now under *Found by reading* in the code-health review:
+`StringStream::operator<<(char)` appends a NUL after every streamed
+character, so every bug report the client hands `SendBugReport` was cut off
+before its stack trace; the tests spelled the NUL out rather than hiding it,
+and the `fix:` slice that removed it followed (`fix/stringstream-nul`, which
+also took the NUL back out of these tests' expectations; `SendBugReport`'s
+own cut then bounded what the server sees at 100 bytes, and `fix/bug-report-cut`
+raised it to the 116 a `CGSay` message leaves once the `*bug_report ` prefix
+has 12 of its 128).
+`Client/Packet/Assert1.h`, an unreferenced duplicate
+of `PacketAssert.h` carrying the same include guard, is kept in step rather
+than left to rot. `Client/Packet/ClientPlayer.cpp`'s packet-skip notice
+repeated its file and line inside a message the log header already stamped
+with them; both halves now read one captured `LogSite`, and the site is
+captured on the line the macro occupied, so the text is unchanged. No macro
+name changed, so nothing under `Client/PacketHandler` needed editing.
+`tests/unit/test_packet_source_location.cpp` pins each converted shape against
+the test file's own `__FILE__` and `__LINE__`, and pins the packet-skip line
+by writing the old spelling and the new one into the log file sink and
+comparing both. Left alone: `Client/Packet/SocketOutputStream.cpp`'s
+`printf`, which is not a forwarder - it prints its own location, so a capture
+there would only respell the same two tokens. Everything executable-side
+(`Client/PacketFunction.cpp`, `Client/MEffectGeneratorTable.cpp`, the
+`GCSkillToTileOK` handlers, `Client/LeakMemoryDumper.*`,
+`Client/DebugInfo.h`, `VS_UI/src/Imm/IFCErrors.h`) is a later slice.
+
 **Container-helper status (2026-09-05):** the first priority-2 slice is
 implemented. Twelve membership and line-trimming sites in library code -
 `PacketIDSet`, `GCTimeLimitItemInfo`, `GCNPCAskVariable`, `Properties`,
@@ -365,6 +490,54 @@ changed, no packet byte changed, and the candidates that were not equivalent
 (an erase of one element where `std::erase` would remove all matches, and a
 linear scan over a map by `operator==`) are listed in the commit and left
 alone.
+
+**Container-helper status, second slice (2026-09-06):** eleven more library
+sites, in three files. `MSkillDomain::IsExistSkillStep` asks the step map with
+`contains`; `MSkillDomain::AddSkillStep` asks its step list with
+`std::ranges::find` instead of an index loop that set a flag;
+`UseEnglishTextFrom` tests the language file's comment character and its
+`LANGUAGE` keyword with `starts_with` over a `std::string_view` of the line, in
+place of an index and an eight-byte `strncmp`;
+`SystemAvailabilitiesManager::LoadFromStream` tests its four line kinds - `;`,
+`*`, `Z`, `S` - the same way, with `empty()` where it called `strlen` on the
+same buffer; `SystemAvailabilitiesManager::ZoneFiltering` and `CheckScript`
+became `std::ranges::any_of` and `std::ranges::none_of` over the predicates
+their hand written scans already used. Every converted site is reached through
+a public entry point by `tests/unit/test_cpp20_container_helpers_2.cpp`, whose
+six tests were built and run twice - once with the three sources reverted to
+their committed state and once with the conversion in place - and reported
+identical counts both times, all six passing in both; the stack this lands on
+ends at 498 tests, 10,694 checks, 0 failed in both trees. One site has only
+one reachable arm: `AddSkillStep`'s duplicate test is `true` on every call the
+public API can make, because `AddSkill` calls it only for a skill not yet in
+the domain, so the test that covers it pins the public contract rather than
+the dead arm.
+
+One candidate was converted, found untestable and reverted, and the reason is
+worth keeping: `C_DIRECTORY::GetMixedDirectory` in `basic/Directory.cpp` tests
+for a trailing path separator with `path[strlen(path) - 1]`, which `ends_with`
+says directly - but a test that calls it does not link. `C_DIRECTORY`'s
+constructor references `platform_get_executable_dir`, which `basic/PlatformSDL.cpp`
+defines only under `#ifndef PLATFORM_WINDOWS`, so pulling `Directory.obj` into
+`unit_tests` fails with `LNK2019`. The whole tree links today only because
+nothing on the Windows build references `C_DIRECTORY` at all. That is a latent
+defect rather than a compatibility one and is not fixed here; until it is,
+`basic/Directory.cpp` has no test path and this slice left it alone.
+
+Candidates read and rejected: every `find` whose iterator is
+dereferenced afterwards, which is not a membership test (`MItemManager`'s
+`GetItem` and `RemoveItem`, `MSkillSet`'s five accessors, `MSkillDomain`'s
+status and learn paths, `MTradeManager::Undo`, `Properties::getProperty`,
+`GCTimeLimitItemInfo::getTimeLimit`, `GCNPCAskVariable::getValue`,
+`TextBackendSDL`'s font and glyph caches); `PacketIDSet::deletePacketID`, whose
+lookup is both a membership test and the iterator it erases - and whose
+condition is inverted, a defect left for its own commit; `MTimeItemManager::RemoveTimeItem`,
+where `erase(key)` would be the tidy spelling but is not a C++20 helper;
+`MSkillDomain::AddSkill`'s linear scan over a map, already rejected by the
+first slice; `strstr` membership in `ClientCommunicationManager`, because
+`std::string::contains` is C++23; and `platform_config_get_string`'s `strncmp`
+prefix in `basic/PlatformSDL.cpp`, which sits behind the same `#ifndef
+PLATFORM_WINDOWS` and is not compiled here.
 
 **Span status (2026-09-04):** the first priority-3 slice is implemented in PR
 #84. `SocketInputStream` and `SocketOutputStream` now expose
@@ -385,6 +558,55 @@ and the ordinary `CGAttack` combat path are the representative migrations,
 protected by client/server-shared goldens across every encryption code. Later
 slices can migrate remaining raw scalar casts family by family without widening
 the accepted type set.
+
+**Second span/typed-scalar slice (2026-09-06):** the client skill-activation
+family - `CGSkillToSelf`, `CGSkillToObject`, `CGSkillToTile` and
+`CGSkillToNamed` - is migrated. It was chosen because it is the largest
+remaining cluster of `(char*)&field, szField` casts in `Client/Packet` that
+shares one shape (a `SkillType_t`/`CEffectID_t` header, then a target), and
+because the golden evidence was almost complete before the work started: the
+first three already carry client/server-shared goldens for all six encryption
+codes, recorded when task 2.4 pinned the nineteen encrypter users. Only
+`CGSkillToNamed` was unpinned - it never reaches the encrypter, so it fell
+outside that sweep - and its golden was recorded in a commit of its own, ahead
+of the migration, so the bytes it pins are provably the old code's. All four
+goldens still pass unchanged, and `tests/wire-layout.txt` is untouched.
+`CGSkillToInventory` is the family's fifth member and needed no change: it was
+already calling the typed `read`/`write` overloads, which now route through
+`readWire`/`writeWire` themselves. `tests/unit/test_packet_skill_family_wire.cpp`
+adds what a byte golden cannot see - per-field round-trips through the packets'
+own getters under every encryption code, and truncated bodies refused with
+`InsufficientDataException`, the same exception the pointer/length read raised,
+because both spellings now reach one bounded core.
+
+What stays raw in this family is deliberate. The encrypter branch
+(`SHUFFLE_STATEMENT_*` over `readEncrypt`/`writeEncrypt`) is untouched, so the
+migration covers the plain branch only and the round-trips run over both.
+`CGSkillToObject` stages its `ObjectID_t` through a `std::uint32_t`, as
+`CGAttack` does, because `DWORD` is `unsigned long` on this toolchain and so is
+not one of the exact-width types the constraint accepts; a `static_assert` now
+ties the two widths together so a change to `ObjectID_t` is a compile error
+rather than a silent change in how many bytes go on the wire. `CGSkillToNamed`
+reads its target name through the `std::string` overload, which is already
+bounded by construction, and only its write moved to a span. Reading it
+exposed one defect, fixed in its own `fix:` commit on top of the refactor: the
+cap was tested after narrowing the length to a `BYTE`, so a 276-character name
+narrowed to 20, passed the check, and then wrote all 276 characters behind a
+length byte claiming 20. `read()` cannot produce such a name, but
+`setTargetName()` accepts any `std::string`; the cap is now applied to the
+`std::string` size, before the narrowing, the bounded view ties the emitted
+bytes to the length byte just written, and the test file pins it. What the fix
+does not do, and every throwing `write()` in the tree shares, is roll back the
+framing header `SocketOutputStream` has already put in the ring. That residue
+is closed in a `fix:` commit of its own on top of this slice
+(`fix/output-stream-header-rollback`, found by this slice's adversarial
+review): `SocketOutputStream::write(const Packet*)` now saves the ring's data
+length and the sequence byte before the header goes in and restores both when
+the body write throws, so a refused packet leaves the stream exactly as it
+found it instead of leaving a header the peer would fill from the next packet;
+`tests/unit/test_output_stream_rollback.cpp` pins it over both the plain and
+the encrypt stream, and the frame on the non-throwing path is byte for byte
+what it was.
 
 **Clock status (2026-09-05):** the first priority-5 slice is implemented.
 `basic/MonotonicClock.{h,cpp}` is the central adapter: `Now()` is
@@ -410,6 +632,44 @@ marks which sites use which. Moving a site off `GetTickCount()` therefore also
 takes it off the 15.6 ms quantisation, which is a small change in when it fires
 and has to be stated each time it is made.
 
+The second priority-5 slice (2026-09-05) is `Client/MTimeItemManager`, the
+register of items that carry a time limit. Its stored deadline was a `DWORD`
+holding `timeGetTime()/1000 + lifetime` and is now an absolute point on
+`MonotonicClock`'s clock, kept at the whole-second resolution the class has
+always counted in. Nothing stayed on the legacy counter: every tick read in
+the file was `timeGetTime()`, the deadline is compared only against another
+read from the same file and never reaches a packet, another class or
+persistent storage, so `MonotonicClock::Now()` is used throughout and
+`LegacyTicks()` is not needed here. The public API is unchanged - `AddTimeItem`
+still takes a `DWORD` of seconds, because that is a lifetime the server sends
+and not a tick, and the four accessors still return `int` fields of a
+countdown. Only the `std::map` base's mapped type changed, and nothing outside
+the class ever read it.
+
+The quantisation statement for this slice is that there is nothing to state:
+these sites read `timeGetTime()`, which `Platform.h` already redefines as
+`platform_get_ticks()`, so they were on a 1 ms counter and were never
+quantised to `GetTickCount()`'s ~15.6 ms step. The resolution is unchanged;
+only the epoch and the width are. The floor to a whole second is preserved
+exactly, so an item added part-way through a second still expires up to a
+second early and the countdown still steps on the clock's second boundary
+rather than on the item's. What the rewrite removes is three defects, which is
+why the commit is a `fix:`. The first two are demonstrated in the test beside
+the new assertion rather than reproduced against a running server: after 49.7
+days of tick the register read every held deadline as up to 49.7 days in the
+future instead of long past, and a lifetime near the top of a `DWORD` wrapped
+the stored sum and expired the item on arrival - a value the server controls.
+The third was the adversarial review's: each old accessor read the clock twice,
+and when the second read fell one second after the first the unsigned
+subtraction went round, so the description panel could paint 49,710 days on
+the very frame an item expired. One read now decides both the sign and the
+value, and the remaining count stays a 64-bit `std::chrono::seconds` all the
+way to the accessors rather than narrowing to a `DWORD`.
+`tests/unit/test_time_item_manager.cpp` drives the wraps through the injected
+clock, works the old `DWORD` arithmetic out on the same numbers beside each
+assertion, and pins the countdown, the boundary one millisecond before expiry,
+the preserved second-floor rounding and the un-narrowed remainder.
+
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through
 `std::filesystem::directory_iterator` against a DOS-style wildcard and returns
@@ -432,8 +692,57 @@ its `_chdir` dance and its dotfile skip, asks for `*` where it asked for `*.*`,
 and lists files only. `UpdateUtility.cpp` is compiled into no target and does
 not build on its own for four pre-existing reasons in untouched functions; the
 migrated code was proven to compile with those patched temporarily. No
-`_findfirst` call remains in live code. The three `FindFirstFile` walks,
-including the startup DLL whitelist, are left for a later slice.
+`_findfirst` call remains in live code. A third slice took the four
+`FindFirstFile` call sites that were left: the `Updater2.exe` existence test
+in `Client/Client.cpp`, which never closed its search handle and is now a
+`std::filesystem::exists` through the `std::error_code` overload; the startup
+DLL whitelist in the same file; the older copy of that whitelist in
+`Client/GameInit.cpp`, whose `g_wAuthKeyMap` assignment fires only when the
+listing is non-empty and every name on it is whitelisted; and
+`C_VS_UI_FILE_DIALOG::RefreshFileList` in `VS_UI/src/VS_UI_ExtraDialog.cpp`,
+the profile-picture file dialog. The whitelist keeps its silent `return -1`
+out of `WinMain` - no message box and no log line, because logging is not up
+yet - and both whitelists list directories as well as files, because they
+judge the name alone and a subdirectory whose name ends in `.dll` used to
+reject the client too. The 8.3-alias deviation applies to them: a file such
+as `foo.dllx` was matched through its `FOO~1.DLL` short name and stopped
+startup, and is no longer listed, so the check only ever gets looser and no
+name that was listed stops being listed. The file dialog synthesises the `..`
+entry `directory_iterator` never yields, first in the sequence and only for a
+directory that has a parent - `path::has_relative_path()` decides that, and
+`dir /a` confirms it, listing `..` for `C:\Users` and not for `C:\`. Reading
+that function turned up a pre-existing defect, fixed here: the inner
+`for(int i = 0; ...)` shadowed the outer `i`, so the
+`if(i == m_vs_file_list.size())` after it tested the filter loop's counter
+instead, and since the inner loop almost never breaks for a file, every file was
+dropped unless `m_filter.size()` happened to equal the list size. The suffix
+filter beside it was unbounded twice over: it `strcpy`'d each entry into a
+`char[20]` out of the `char[30]` `Start()` fills, and it indexed the name at
+`size() - j - 1`, which wraps for a name shorter than the suffix. Both halves
+are `basic/FileDialogListing.{h,cpp}` now - moved out of VS_UI so that they
+have a test path at all, then fixed test-first
+(`docs/RESTRUCTURING.md` task 3.1, `tests/unit/test_file_dialog_listing.cpp`).
+The `..`
+entry is synthesised outside the success branch, because the helper is all
+or nothing where `FindFirstFile` had delivered `..` before any `FindNextFile`
+could fail; the same all-or-nothing rule is a deviation of the two whitelists
+too, and there it can only skip the check. A dangling junction is the one
+entry the helper classifies differently from `FindFirstFile`: it follows the
+link and reports a file where the legacy walk reported the reparse point's
+own directory bit, so the dialog no longer shows one.
+`tests/unit/test_directory_listing.cpp` now also pins the trailing-separator
+directory string the dialog is the only caller to pass. No `FindFirstFile` call
+remains in live code - only the commented-out loop in
+`VS_UI/src/VS_UI_Tutorial.cpp` - and a fourth slice deleted the shims those
+walks used to reach. `basic/Platform.h` no longer declares `FindFirstFileA`,
+`FindNextFileA`, `FindClose`, `WIN32_FIND_DATA`, `_finddata_t`, `_findfirst`,
+`_findnext` or `_findclose`. All of them sat in the `#ifndef PLATFORM_WINDOWS`
+compatibility layer, which a Windows build never compiles, and nothing outside
+that header named any of them in live code - only comments and the commented-out
+tutorial loop. `FILETIME` stayed, because `Client/CrashReport.cpp` declares one,
+and so did `INVALID_HANDLE_VALUE`, which `Client/Client.cpp`,
+`Client/CGameUpdate.cpp` and `Client/CrashReport.cpp` still compare against.
+Priority 6 now has no `_findfirst` or `FindFirstFile` residue left.
 
 ### Packet modernization guardrails
 

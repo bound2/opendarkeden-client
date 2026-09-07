@@ -1,7 +1,9 @@
 #include "Client_PCH.h"
 #include "SystemAvailabilities.h"
+#include <algorithm>
 #include <istream>
 #include <string>
+#include <string_view>
 #include <string.h>
 #include <stdio.h>
 
@@ -62,40 +64,27 @@ bool	SystemAvailabilitiesManager::ZoneFiltering( int zoneID ) const
 
 	for(int i = m_OpenDegree; i >= 0; i-- )
 	{
-		std::list<int>::const_iterator itr = m_ZoneFilter[i].begin();
-		std::list<int>::const_iterator endItr = m_ZoneFilter[i].end();
-		
-		while( itr != endItr )
-		{			
-			int AllowZoneID = *itr;
-			itr++;
+		// 90909 is the row that allows every zone.
+		const bool bAllowed = std::ranges::any_of( m_ZoneFilter[i],
+				[zoneID]( int AllowZoneID )
+				{
+					return AllowZoneID == 90909 || zoneID == AllowZoneID;
+				} );
 
-			if( AllowZoneID == 90909 )
-				return true;
-
-			if( zoneID == AllowZoneID )
-				return true;
-		}
+		if( bAllowed )
+			return true;
 	}
 	return false;
 }
 
 bool	SystemAvailabilitiesManager::CheckScript( const std::list<FilterScript>& List, int &scriptID, int& answerID ) const
 {
-	std::list<FilterScript>::const_iterator itr = List.begin();	
-	std::list<FilterScript>::const_iterator endItr = List.end();
-
-	while( itr != endItr )
-	{
-		const FilterScript *Script = &(*itr);
-
-		if( Script->scriptID == scriptID &&
-			Script->answerID == answerID )
-			return false;
-
-		itr++;
-	}
-	return true;			// 리스트에 없으면 사용 가능
+	return std::ranges::none_of( List,
+			[&]( const FilterScript& Script )
+			{
+				return Script.scriptID == scriptID &&
+					   Script.answerID == answerID;
+			} );		// not in the list means it may be used
 }
 
 bool	SystemAvailabilitiesManager::LoadFromStream(std::istream& in)
@@ -132,14 +121,17 @@ bool	SystemAvailabilitiesManager::LoadFromStream(std::istream& in)
 		strncpy( szLine, line.c_str(), sizeof(szLine)-1 );
 		szLine[sizeof(szLine)-1] = '\0';
 
-		// * 는 key, ; 는 주석
-		if( strlen( szLine ) <= 0 )
-			continue;
-		
-		if( szLine[0] == ';' )
+		// One view over the truncated copy the rest of the loop reads.
+		const std::string_view	svLine( szLine );
+
+		// '*' starts a key, ';' starts a comment.
+		if( svLine.empty() )
 			continue;
 
-		if( szLine[0] == '*' )
+		if( svLine.starts_with( ';' ) )
+			continue;
+
+		if( svLine.starts_with( '*' ) )
 		{
 			sscanf(szLine+1,"%d %d",&key,&count);		// key 는 enum(SystemKind) 값.
 			ScriptList.clear();
@@ -148,7 +140,7 @@ bool	SystemAvailabilitiesManager::LoadFromStream(std::istream& in)
 			continue;
 		}
 
-		if( szLine[0] == 'Z' )
+		if( svLine.starts_with( 'Z' ) )
 		{
 			sscanf(szLine+1,"%d",&key);					// key 는 회차
 			ZoneList.clear();
@@ -156,7 +148,7 @@ bool	SystemAvailabilitiesManager::LoadFromStream(std::istream& in)
 			continue;
 		}
 		
-		if( szLine[0] == 'S' )
+		if( svLine.starts_with( 'S' ) )
 		{
 			sscanf(szLine+1,"%d %d",&key,&count);		// key 는 무효-_-
 			ScriptListByDegree.clear();

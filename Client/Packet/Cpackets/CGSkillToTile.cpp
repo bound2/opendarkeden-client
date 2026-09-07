@@ -44,10 +44,10 @@ void CGSkillToTile::read (SocketInputStream & iStream)
 	else
 #endif
 	{
-		iStream.read((char*)&m_SkillType , szSkillType);
-		iStream.read((char*)&m_CEffectID , szCEffectID);
-		iStream.read((char*)&m_X , szCoord);
-		iStream.read((char*)&m_Y , szCoord);
+		iStream.readWire(m_SkillType);
+		iStream.readWire(m_CEffectID);
+		iStream.readWire(m_X);
+		iStream.readWire(m_Y);
 	}
 
 
@@ -74,10 +74,10 @@ void CGSkillToTile::write (SocketOutputStream & oStream) const
 	else
 #endif
 	{
-		oStream.write((char*)&m_SkillType , szSkillType);
-		oStream.write((char*)&m_CEffectID , szCEffectID);
-		oStream.write((char*)&m_X , szCoord);
-		oStream.write((char*)&m_Y , szCoord);
+		oStream.writeWire(m_SkillType);
+		oStream.writeWire(m_CEffectID);
+		oStream.writeWire(m_X);
+		oStream.writeWire(m_Y);
 	}
 
 	__END_CATCH

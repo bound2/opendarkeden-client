@@ -33,17 +33,18 @@ void CLQueryCharacterName::write (SocketOutputStream & oStream) const
 	__BEGIN_TRY
 
 	// write player id
-	BYTE szCharacterName = m_CharacterName.size();
+	// Cap the std::string's own size, before narrowing to the length byte.
+	if (m_CharacterName.size() > 20)
+		throw InvalidProtocolException("too long CharacterName length");
+
+	const BYTE szCharacterName = (BYTE)m_CharacterName.size();
 
 	if (szCharacterName == 0)
 		throw InvalidProtocolException("empty CharacterName");
 
-	if (szCharacterName > 20)
-		throw InvalidProtocolException("too long CharacterName length");
-
 	oStream.write(szCharacterName);
 
-	oStream.write(m_CharacterName);
+	oStream.write(std::span<const char>(m_CharacterName.data(), szCharacterName));
 
 	__END_CATCH
 }

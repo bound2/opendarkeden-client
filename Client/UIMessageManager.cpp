@@ -2420,6 +2420,37 @@ UIMessageManager::Execute_UI_CONNECT(intptr_t left, intptr_t right, void* void_p
 }
 
 
+static const size_t CHAT_MESSAGE_MAX_BYTES = CGSay::MAX_MESSAGE_SIZE;
+
+//-----------------------------------------------------------------------------
+//
+// Truncate UTF-8 text to a byte budget, on a character boundary
+//
+//-----------------------------------------------------------------------------
+static void
+TruncateUtf8ToBytes(std::string& strText, size_t nMaxBytes)
+{
+	if (strText.size() <= nMaxBytes)
+	{
+		return;
+	}
+
+	// Back off over continuation bytes so the cut lands on a character.
+	size_t nCut = nMaxBytes;
+
+	while (nCut > 0 && ((unsigned char)strText[nCut] & 0xC0) == 0x80)
+	{
+		nCut--;
+	}
+
+	if (nCut == 0)
+	{
+		nCut = nMaxBytes;
+	}
+
+	strText.resize(nCut);
+}
+
 //-----------------------------------------------------------------------------
 //
 // Chat에서 Enter눌렀을 때
@@ -2462,10 +2493,12 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 	{
 		if (g_pParty!=NULL )
 		{
+				std::string strPartySay( chatString );
+				TruncateUtf8ToBytes( strPartySay, CHAT_MESSAGE_MAX_BYTES );
 
 				CGPartySay _CGPartySay;
 				_CGPartySay.setColor(right);
-				_CGPartySay.setMessage(chatString);
+				_CGPartySay.setMessage(strPartySay);
 				g_pSocket->sendPacket( &_CGPartySay );
 
 		}
@@ -2485,7 +2518,10 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 			else
 				_CGGuildChat.SetType(1);
 			// 2004, 11, 11, sobeit add end
-			_CGGuildChat.setMessage( std::string(chatString) );
+			std::string strGuildChat( chatString );
+			TruncateUtf8ToBytes( strGuildChat, CHAT_MESSAGE_MAX_BYTES );
+
+			_CGGuildChat.setMessage( strGuildChat );
 			_CGGuildChat.setColor( right );
 			
 			g_pSocket->sendPacket( &_CGGuildChat );
@@ -2553,10 +2589,15 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 			// server로 message 보내기
 			//g_Socket.Send(g_String);
 			char* strUI = chatString;
-			char* strOrg = new char[128];
+
+			std::string strChat( strUI );
+			TruncateUtf8ToBytes( strChat, CHAT_MESSAGE_MAX_BYTES );
+
+			char strOrg[CHAT_MESSAGE_MAX_BYTES + 1];
 			char* str = strOrg;
 
-			strcpy( strOrg, strUI );
+			memset( strOrg, 0, sizeof(strOrg) );
+			memcpy( strOrg, strChat.c_str(), strChat.size() );
 
 			if (str!=NULL && str[0]!=NULL)
 			{
@@ -2571,7 +2612,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 					{
 						if(0 == strncmp(str, (*g_pGameStringTable)[UI_STRING_MESSAGE_RANGER_SAY].GetString(),(*g_pGameStringTable)[UI_STRING_MESSAGE_RANGER_SAY].GetLength()))
 						{
-							char TempBuffer[128]; 
+							char TempBuffer[CHAT_MESSAGE_MAX_BYTES + 1];
 							strcpy(TempBuffer, str+(*g_pGameStringTable)[UI_STRING_MESSAGE_RANGER_SAY].GetLength());
 							CGRangerSay _CGRangerSay;
 							_CGRangerSay.setMessage(TempBuffer);
@@ -2582,10 +2623,10 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 							g_pPlayer->SetChatString( str );//+1 );
 
 							// history에 추가
-							char temp[128];
+							char temp[CHAT_MESSAGE_MAX_BYTES + 1];
 							strcpy(temp, str );//+1);
 							//sprintf(temp, "[%s] %s", g_pUserInformation->CharacterID.GetString(), str+1);
-							//UI_AddChatToHistory( temp );								
+							//UI_AddChatToHistory( temp );
 							UI_AddChatToHistory( temp, g_pUserInformation->CharacterID.GetString(), CLD_ZONECHAT, right );
 							return;
 						}
@@ -2609,13 +2650,17 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 						}
 						if (pItem!=NULL)
 						{
-							char TempBuffer[128]; 
-							if (strlen(str)>60)
+							char TempBuffer[128];
+
+							// The terminator goes at prefix+60, so the guard is on that index.
+							const size_t nSayPrefix = (*g_pGameStringTable)[UI_STRING_MESSAGE_PLAYER_SAY].GetLength();
+
+							if (strlen(str)>nSayPrefix+60)
 							{
-								str[(*g_pGameStringTable)[UI_STRING_MESSAGE_PLAYER_SAY].GetLength()+60]=NULL;
+								str[nSayPrefix+60]=NULL;
 							}
-							
-							strcpy(TempBuffer, str+(*g_pGameStringTable)[UI_STRING_MESSAGE_PLAYER_SAY].GetLength());	
+
+							strcpy(TempBuffer, str+nSayPrefix);
 							string msg="";
 							msg = g_pUserInformation->CharacterID.GetString();
 							msg +=">";
@@ -2687,10 +2732,10 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 										g_pPlayer->SetChatString( str, right );//+1 );
 
 										// history에 추가
-										char temp[128];
+										char temp[CHAT_MESSAGE_MAX_BYTES + 1];
 										strcpy(temp, str );//+1);
 										//sprintf(temp, "[%s] %s", g_pUserInformation->CharacterID.GetString(), str+1);
-										//UI_AddChatToHistory( temp );								
+										//UI_AddChatToHistory( temp );
 										UI_AddChatToHistory( temp, g_pUserInformation->CharacterID.GetString(), CLD_ZONECHAT, right );
 
 										// 현재 시간을 설정해둔다.
@@ -2786,7 +2831,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 											g_pWhisperManager->SendWhisperMessage( pName, pMessage, right );
 
 											
-											char strMessage[128];
+											char strMessage[CHAT_MESSAGE_MAX_BYTES + 1];
 											char strName[128];
 											//sprintf(temp, "[%s] <%s> %s", g_pUserInformation->CharacterID.GetString(), pName, pMessage);
 											//UI_AddChatToHistory( temp );
@@ -2824,7 +2869,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 								const char* pCommand = strToken.GetToken();
 								const char* pData = strToken.GetEnd();
 
-								char pLwrCommand[128];
+								char pLwrCommand[CHAT_MESSAGE_MAX_BYTES + 1];
 								strcpy(pLwrCommand, pCommand);
 #ifdef PLATFORM_WINDOWS
 								strcpy(pLwrCommand, _strlwr(pLwrCommand));
@@ -3170,7 +3215,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 								strTempCommand = "*warp 8000 75 77";
 								pMessage = const_cast<char*>(strTempCommand.c_str());
 							}
-							else if(strncmp(str, "*mc", 3) == 0 && isdigit((unsigned char)str[4]))
+							else if(strlen(str) > 4 && strncmp(str, "*mc", 3) == 0 && isdigit((unsigned char)str[4]))
 							{
 //								if(vMasterCommand.empty())
 								{
@@ -3215,7 +3260,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 									}
 								}
 							}
-							else if(strncmp(str, "*C2G", 4) == 0 )
+							else if(strlen(str) >= 5 && strncmp(str, "*C2G", 4) == 0 )
 							{
 								if( strcmp(str+5, "on") == 0 )
 								{
@@ -3329,9 +3374,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 					}
 				}
 			}
-
-			delete [] strOrg;
-		}					
+		}
 	}
 
 	DeleteNewArray(void_ptr);
@@ -10773,9 +10816,17 @@ UIMessageManager::Execute_UI_SEND_SMS_MESSAGE(intptr_t left, intptr_t right, voi
 	if(NULL == TempStr || TempStr->size()>5)
 		return ;
 	
+	// CGSMSSend::read() asserts the message length below MAX_MESSAGE_LENGTH.
+	std::string strMessage( (char *)right );
+
+	if (strMessage.size() >= MAX_MESSAGE_LENGTH)
+	{
+		strMessage.resize( MAX_MESSAGE_LENGTH - 1 );
+	}
+
 	CGSMSSend _CGSMSSend;
 	_CGSMSSend.setCallerNumber(std::string((char *)left));
-	_CGSMSSend.setMessage(std::string((char *)right));
+	_CGSMSSend.setMessage(strMessage);
 	_CGSMSSend.clearString(); 
 	std::list<std::string>::iterator itr = TempStr->begin();
 	while(itr != TempStr->end())
@@ -11007,6 +11058,10 @@ UIMessageManager::Execute_UI_CHANGE_CUSTOM_NAMING(intptr_t left, intptr_t right,
 //			}
 //		}
 		g_pChatManager->RemoveCurse(szTemp );
+
+		// The nickname is the DBCS conversion's output, not UTF-8, so the cut is a plain one.
+		if(strlen(szTemp) > MAX_NICKNAME_SIZE)
+			szTemp[MAX_NICKNAME_SIZE] = '\0';
 
 		// 이쯤에서 effect status를 검색 해서 아이템 사용 패킷을 보내는게 좋을듯..
 		MItem* pItem = NULL;	
@@ -11520,6 +11575,9 @@ UIMessageManager::Execute_UI_UNDISPLAY_ITEM(intptr_t left, intptr_t right, void*
 	DEBUG_ADD("[UI] Execute_UI_UNDISPLAY_ITEM");
  }
 
+// CGStoreSignFactory::getPacketMaxSize() advertises szBYTE + 80.
+static const size_t STORE_SIGN_MAX_BYTES = 80;
+
  void
 UIMessageManager::Execute_UI_STORE_SIGN(intptr_t left, intptr_t right, void* void_ptr)
  {
@@ -11529,13 +11587,17 @@ UIMessageManager::Execute_UI_STORE_SIGN(intptr_t left, intptr_t right, void* voi
 
 	char * pernalshop_message = (char*)void_ptr;
     CGStoreSign _CGStoreSign;
-	
-	char str[250];
-	memset(str,0,250);
-	strcpy(str, (char*)void_ptr);
-	
-	g_pChatManager->RemoveCurse( str );
-	_CGStoreSign.setSign(str);
+
+	// Not UTF-8: the sign is ASCII bytes mixed with raw UTF-16 units, so the cut is a plain one.
+	std::string strSign( pernalshop_message );
+
+	if (strSign.size() > STORE_SIGN_MAX_BYTES)
+	{
+		strSign.resize( STORE_SIGN_MAX_BYTES );
+	}
+
+	g_pChatManager->RemoveCurse( strSign.data() );
+	_CGStoreSign.setSign(strSign);
 	g_pSocket->sendPacket( &_CGStoreSign );
 
 	gC_vs_ui.ClosePersnalShopMessage();

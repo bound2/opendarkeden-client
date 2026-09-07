@@ -70,6 +70,7 @@
 #include "Cpackets/CGNPCAskAnswer.h"
 #include "Cpackets/CGPickupMoney.h"
 #include "Cpackets/CGSkillToInventory.h"
+#include "Cpackets/CGSkillToNamed.h"
 #include "Cpackets/CGSkillToObject.h"
 #include "Cpackets/CGSkillToSelf.h"
 #include "Cpackets/CGSkillToTile.h"
@@ -456,6 +457,15 @@ void	Fill(CGSkillToInventory& p)
 }
 void	Fill(CGAddMouseToZone& p)	{ p.setObjectID(0x14253647); }
 void	Fill(CGDropMoney& p)		{ p.setAmount(0x8899AABB); }
+
+// CGSkillToNamed: the CGSkillTo* family's encrypter-free member, pinned
+// at code 0 only.
+void	Fill(CGSkillToNamed& p)
+{
+	p.setSkillType(0x8C4D);
+	p.setCEffectID(0x9F7A);
+	p.setTargetName("Reiot");
+}
 
 //----------------------------------------------------------------------
 // Client-authored fixtures: the chat/guild/system-message family the
@@ -934,6 +944,21 @@ SHARED_ENCRYPTER_PIN(CGSkillToInventory)
 SHARED_ENCRYPTER_PIN(CGAddMouseToZone)
 SHARED_ENCRYPTER_PIN(CGDropMoney)
 #undef SHARED_ENCRYPTER_PIN
+
+//----------------------------------------------------------------------
+// CGSkillToNamed - the CGSkillTo* family's encrypter-free member
+//----------------------------------------------------------------------
+TEST(CGSkillToNamed, RoundTripsAndMatchesGolden)
+{
+	CGSkillToNamed src, dst;
+	Fill(src);
+	CHECK(EncrypterFree(src));
+	RoundTrip(src, dst, 0);
+	CHECK_EQ(src.getSkillType(), dst.getSkillType());
+	CHECK_EQ(src.getCEffectID(), dst.getCEffectID());
+	CHECK(src.getTargetName() == dst.getTargetName());
+	ExpectGolden("CGSkillToNamed", 0, WriteBody(src, 0));
+}
 
 //----------------------------------------------------------------------
 // Client-authored pins: chat, guild chat, system message, login

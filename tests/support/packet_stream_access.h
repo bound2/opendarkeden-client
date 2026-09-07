@@ -78,6 +78,26 @@ public:
 			out.push_back((unsigned char)stream.m_Buffer[i]);
 		return out;
 	}
+
+	// Drops the first `count` live bytes, as flush() does after a
+	// successful send of that many.
+	static void Consume(SocketOutputStream& stream, unsigned int count)
+	{
+		CHECK(count <= stream.length());
+		stream.m_Head = (stream.m_Head + count) % stream.m_BufferLen;
+	}
+
+	// The ring indices, for the one thing Bytes() cannot say: where in
+	// the buffer the live run sits.
+	static unsigned int Head(const SocketOutputStream& stream)
+	{
+		return stream.m_Head;
+	}
+
+	static unsigned int Tail(const SocketOutputStream& stream)
+	{
+		return stream.m_Tail;
+	}
 };
 
 //----------------------------------------------------------------------

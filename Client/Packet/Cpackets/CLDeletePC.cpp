@@ -57,29 +57,31 @@ void CLDeletePC::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 		
-	BYTE szName = m_Name.size();
+	// Cap both std::strings' own sizes, before narrowing to the length
+	// bytes.
+	if ( m_Name.size() > 20 )
+		throw InvalidProtocolException("too long name length");
+
+	const BYTE szName = (BYTE)m_Name.size();
 
 	if ( szName == 0 )
 		throw InvalidProtocolException("szName == 0");
 
-	if ( szName > 20 )
-		throw InvalidProtocolException("too long name length");
-
 	oStream.write( szName );
-	oStream.write( m_Name );
+	oStream.write( std::span<const char>(m_Name.data(), szName) );
 
 	oStream.write( (BYTE)m_Slot );
 
-	BYTE szSSN = m_SSN.size();
+	if ( m_SSN.size() > 18 )
+		throw InvalidProtocolException("too long name length");
+
+	const BYTE szSSN = (BYTE)m_SSN.size();
 
 	if ( szSSN== 0 )
 		throw InvalidProtocolException("szSSN == 0");
 
-	if ( szSSN > 18 )
-		throw InvalidProtocolException("too long name length");
-
 	oStream.write( szSSN );
-	oStream.write( m_SSN );
+	oStream.write( std::span<const char>(m_SSN.data(), szSSN) );
 
 	__END_CATCH
 }

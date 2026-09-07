@@ -42,10 +42,17 @@ regenerate locally, never commit it. `/MP` is set once for all targets in
 
 ### Reading build output
 
-A clean build is **~27,000 warnings and 0 errors**. The noise is pre-existing: C4290
-across `Client/Packet/**` (LNK4217/LNK4286 used to join it while 36 `Client/*.cpp`
-files compiled into both `DarkEden` and `VS_UI.lib`; `docs/RESTRUCTURING.md` task 4.0
-ended that). Judge a build by `error C####`, `error LNK`, `error MSB`
+A clean Debug build is **about 4,600 warning lines and 0 errors** (measured
+2026-09-06 under `/std:c++20`; an older note here said ~27,000 dominated by C4290,
+which the C++20 mode no longer emits at all - MSVC accepts a `throw(X, Y)` list
+silently and reads `throw()` as `noexcept`). The noise is pre-existing: C4005,
+C4312, C5033 and **C4297**, the last being `throw()` functions whose bodies
+throw, 539 of them across 257 `Client/Packet` files - the ones that must lose
+the specification rather than gain `noexcept` when finding 3 of the C++20
+assessment is worked (ratchets R9/R10 count the specifications, since the
+build cannot). LNK4217/LNK4286 used to join the noise while 36 `Client/*.cpp`
+files compiled into both `DarkEden` and `VS_UI.lib`; `docs/RESTRUCTURING.md`
+task 4.0 ended that. Judge a build by `error C####`, `error LNK`, `error MSB`
 or `fatal error` — never by grepping `"error"`, which matches ~2,700 identifiers such
 as `GCMoveErrorHandler`. Redirect builds to a log file; piping through `tail` buffers
 the output and hides all progress.
@@ -134,7 +141,7 @@ the failure count, so the exit code is 0 only when the suite is clean.
   Both trees green, or the fix is not verified.
 - **Executable-only code has no test path.** It gets verified by running the client
   against a live server. The ten defects under *Runtime defects* in the review were
-  all found that way, and none were reachable from a test binary. The seven in the
+  all found that way, and none were reachable from a test binary. The ones in the
   short table below them were found by *reading*, during remediation passes, and are
   filed separately for exactly that reason — the heading is a claim about how a
   defect was found, not a bin for anything executable-side.
@@ -154,7 +161,7 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **465 tests, 10,462 checks, 0 failed** in both trees.
+baseline: **590 tests, 277,189 checks, 0 failed** in both trees.
 
 ## Traps
 
@@ -226,7 +233,7 @@ baseline: **465 tests, 10,462 checks, 0 failed** in both trees.
 
 ## Current focus
 
-`docs/code-health-review-2026-08-29.md` holds 197 findings, 85 fixed — every
+`docs/code-health-review-2026-08-29.md` holds 197 findings, 86 fixed — every
 Critical among them. In priority order:
 
 1. **Unvalidated network input is the top open risk**, and the two halves of it

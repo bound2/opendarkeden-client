@@ -32,11 +32,16 @@ void CGPartyLeave::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
-	BYTE name_length = m_TargetName.size();
+	// Cap before narrowing; the length byte must describe every byte written.
+	if (m_TargetName.size() > 10)
+		throw InvalidProtocolException("too large name length");
+
+	const BYTE name_length = (BYTE)m_TargetName.size();
+
 	oStream.write(name_length);
 	if (name_length > 0)
 	{
-		oStream.write(m_TargetName);
+		oStream.write(std::span<const char>(m_TargetName.data(), name_length));
 	}
 
 	__END_CATCH

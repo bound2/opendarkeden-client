@@ -44,19 +44,29 @@ void CGAddSMSAddress::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
+	// Cap before narrowing; the length byte must describe every byte written.
 	BYTE szSTR;
 
-	szSTR = m_CharacterName.size();
-	oStream.write( szSTR );
-	oStream.write( m_CharacterName );
+	if ( m_CharacterName.size() > 20 )
+		throw InvalidProtocolException("too large character name length");
 
-	szSTR = m_CustomName.size();
+	szSTR = (BYTE)m_CharacterName.size();
 	oStream.write( szSTR );
-	oStream.write( m_CustomName );
+	oStream.write( std::span<const char>( m_CharacterName.data(), szSTR ) );
 
-	szSTR = m_Number.size();
+	if ( m_CustomName.size() > 40 )
+		throw InvalidProtocolException("too large custom name length");
+
+	szSTR = (BYTE)m_CustomName.size();
 	oStream.write( szSTR );
-	oStream.write( m_Number );
+	oStream.write( std::span<const char>( m_CustomName.data(), szSTR ) );
+
+	if ( m_Number.size() > 11 )
+		throw InvalidProtocolException("too large number length");
+
+	szSTR = (BYTE)m_Number.size();
+	oStream.write( szSTR );
+	oStream.write( std::span<const char>( m_Number.data(), szSTR ) );
 
 	__END_CATCH
 }

@@ -20,6 +20,7 @@
 #include <arpa/inet.h>
 #endif
 #include "DebugLog.h"
+#include "DirectoryListing.h"
 #include "Client.h"
 #include "GameObject.h"
 #include "AddonDef.h"
@@ -1564,24 +1565,25 @@ InitGame()
 		g_pNickNameStringTable = new MStringArray;
 	}
 	//yckou begin: check invalid *.dll
-	WIN32_FIND_DATA FileData; 
-	HANDLE hSearch; 
-	bool fFinished = false; 
-	
+	// An older, shorter copy of the DLL whitelist in Client.cpp; here an
+	// unlisted name only breaks out of the walk, and g_wAuthKeyMap is set
+	// only when every entry of a non-empty listing is whitelisted.
 	std::string InvalidDll;
-	hSearch = FindFirstFile("*.dll", &FileData); 
-	if (hSearch != INVALID_HANDLE_VALUE) 
+	std::vector<Basic::SDirectoryEntry> vDllEntries;
+
+	if (Basic::ListDirectory(".", "*.dll", vDllEntries, Basic::LIST_FILES_AND_DIRECTORIES))
 	{
-		while (!fFinished) 
+		for (size_t iDll=0; iDll<vDllEntries.size(); iDll++)
 		{
-			int iLen = strlen(FileData.cFileName);
-			for (int j=0;j<iLen;j++)
+			InvalidDll = vDllEntries[iDll].sName;
+
+			size_t iLen = InvalidDll.size();
+			for (size_t j=0;j<iLen;j++)
 			{
-				if(isupper((unsigned char)FileData.cFileName[j]) != 0)
-					FileData.cFileName[j] = (char)tolower((unsigned char)FileData.cFileName[j]);
+				if(isupper((unsigned char)InvalidDll[j]) != 0)
+					InvalidDll[j] = (char)tolower((unsigned char)InvalidDll[j]);
 			}
-			InvalidDll = FileData.cFileName;
-			
+
 			if(InvalidDll != "timer.dll" &&
 				InvalidDll != "msvcrtd.dll" &&
 				InvalidDll != "msvcrt.dll" &&
@@ -1606,15 +1608,12 @@ InitGame()
 				InvalidDll != "npchk.dll" &&
 				InvalidDll != "xerces-c_2_4_0.dll")
 				break;
-			
-			if (!FindNextFile(hSearch, &FileData)) 
+
+			if (iDll + 1 == vDllEntries.size())
 			{
-				fFinished = true; 
 				g_wAuthKeyMap = 0x5154;
 			}
-		} 
-		// Close the search handle. 
-		FindClose(hSearch);
+		}
 	}
 	//yckou end
 	//---------------------------------------------------------------------

@@ -72,7 +72,10 @@ public :
 	SocketImpl * accept () throw ( NonBlockingIOException , Error );
 	
 	// send data to peer
-	uint send ( const void * buf , uint len , uint flags = 0 ) throw ( IOException , Error );
+	//
+	// Test seam: virtual so a test can supply an impl whose send() takes
+	// only part of what it is offered (tests/unit/test_output_stream_flush.cpp).
+	virtual uint send ( const void * buf , uint len , uint flags = 0 ) throw ( IOException , Error );
 	
 	// receive data from peer
 	uint receive ( void * buf , uint len , uint flags = 0 ) throw ( IOException , Error );

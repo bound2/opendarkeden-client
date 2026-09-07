@@ -65,13 +65,16 @@ void CGRequestIP::write ( SocketOutputStream & oStream )
 {
 	__BEGIN_TRY
 	
-	// 최적화 작업시 실제 크기를 명시하도록 한다.
-	BYTE num = m_Name.size();
+	// Cap before narrowing; the length byte must describe every byte written.
+	if (m_Name.size() > 10)
+		throw InvalidProtocolException("too large name length");
+
+	const BYTE num = (BYTE)m_Name.size();
 	oStream.write( num );
 
 	if (num > 0)
 	{
-		oStream.write( m_Name );
+		oStream.write( std::span<const char>(m_Name.data(), num) );
 	}
 
 	__END_CATCH

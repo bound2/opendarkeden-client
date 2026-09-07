@@ -19,7 +19,7 @@
 //
 // __assert__
 //
-// 이 함수에서는 __BEGIN_TRY , __END_CATCH로 wrapping할 필요가 없다.
+// There is no need to wrap this function in __BEGIN_TRY / __END_CATCH.
 //
 //--------------------------------------------------------------------------------
 void __assert__ ( const char * file , uint line , const char * func , const char * expr )
@@ -42,4 +42,17 @@ void __assert__ ( const char * file , uint line , const char * func , const char
 	ofile.close();
 
 	throw AssertionError( msg.toString() );
+}
+
+//--------------------------------------------------------------------------------
+//
+// __assert__ - C++20 entry point
+//
+// The captured function name is deliberately not used: which spelling this
+// platform wants is decided by the Assert macro and passed in func.
+//
+//--------------------------------------------------------------------------------
+void __assert__ ( const char * func , const char * expr , const DiagnosticSite & site )
+{
+	__assert__( site.file , (uint)site.line , func , expr );
 }

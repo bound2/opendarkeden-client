@@ -3,6 +3,13 @@
 
 MTimeItemManager		*g_pTimeItemManager = NULL;
 
+// The current time, floored to the whole second this class counts in.
+static TIMEITEM_DEADLINE
+NowInSeconds()
+{
+	return std::chrono::floor<std::chrono::seconds>( MonotonicClock::Now() );
+}
+
 MTimeItemManager::MTimeItemManager()
 {
 	clear();
@@ -21,9 +28,12 @@ bool	MTimeItemManager::IsExist(TYPE_OBJECTID objectID)
 bool	MTimeItemManager::AddTimeItem(TYPE_OBJECTID objectID, DWORD time)
 {
 	RemoveTimeItem( objectID );
-	
-	insert( TIMEITEM_MAP::value_type( objectID, time + timeGetTime()/1000 ) );
-	
+
+	// time is a lifetime, not a point in time.
+	const std::chrono::seconds d_lifetime( (std::chrono::seconds::rep)time );
+
+	insert( TIMEITEM_MAP::value_type( objectID, NowInSeconds() + d_lifetime ) );
+
 	return true;
 }
 
@@ -39,19 +49,29 @@ bool	MTimeItemManager::RemoveTimeItem(TYPE_OBJECTID objectID)
 	return false;
 }
 
+// Seconds left on an item, or zero once its deadline has been reached.
+std::chrono::seconds	MTimeItemManager::GetRemainingSeconds( TYPE_OBJECTID objectID )
+{
+	TIMEITEM_MAP::const_iterator c_itr = find( objectID );
+
+	if( c_itr == end() )
+		return std::chrono::seconds( 0 );
+
+	// One clock read decides both the sign and the value.
+	const std::chrono::seconds d_left = (*c_itr).second - NowInSeconds();
+
+	if( d_left.count() <= 0 )
+		return std::chrono::seconds( 0 );
+
+	return d_left;
+}
+
 int		MTimeItemManager::GetDay( TYPE_OBJECTID objectID )
 {
 	if(! IsExist( objectID ) )
 		return -1;
 
-	TIMEITEM_MAP::const_iterator c_itr = find( objectID );
-	
-	if(timeGetTime()/1000 > (*c_itr).second )
-		return 0;
-
-	DWORD time = (*c_itr).second - timeGetTime()/1000;
-	
-	return (time/60/60/24);
+	return (int)( GetRemainingSeconds( objectID ).count() / 60 / 60 / 24 );
 }
 
 int		MTimeItemManager::GetHour( TYPE_OBJECTID objectID )
@@ -59,17 +79,7 @@ int		MTimeItemManager::GetHour( TYPE_OBJECTID objectID )
 	if(! IsExist( objectID ) )
 		return -1;
 
-	TIMEITEM_MAP::const_iterator c_itr = find( objectID );
-
-	if(timeGetTime()/1000 > (*c_itr).second )
-		return 0;
-
-	DWORD time = (*c_itr).second - timeGetTime()/1000;
-	
-	//time = time - ( GetDay() * 60 * 60 * 24 );
-	
-	// % 는 내가 가장 싫어하는 연산잔데..ㅡ.ㅜ 계산하기 귀찮아서..
-	return ( (time/60/60) % 24 );
+	return (int)( ( GetRemainingSeconds( objectID ).count() / 60 / 60 ) % 24 );
 }
 
 int		MTimeItemManager::GetMinute(TYPE_OBJECTID objectID )
@@ -77,15 +87,7 @@ int		MTimeItemManager::GetMinute(TYPE_OBJECTID objectID )
 	if(! IsExist( objectID ) )
 		return -1;
 
-	TIMEITEM_MAP::const_iterator c_itr = find( objectID );
-
-	if(timeGetTime()/1000 > (*c_itr).second )
-		return 0;
-
-	DWORD time = (*c_itr).second - timeGetTime()/1000;
-	
-	// % 는 내가 가장 싫어하는 연산잔데..ㅡ.ㅜ 계산하기 귀찮아서..
-	return ( (time/60 ) % 60 );
+	return (int)( ( GetRemainingSeconds( objectID ).count() / 60 ) % 60 );
 }
 
 int		MTimeItemManager::GetSecond(TYPE_OBJECTID objectID )
@@ -93,15 +95,7 @@ int		MTimeItemManager::GetSecond(TYPE_OBJECTID objectID )
 	if(! IsExist ( objectID ) )
 		return -1;
 
-	TIMEITEM_MAP::const_iterator c_itr = find( objectID );
-	
-	if(timeGetTime()/1000 > (*c_itr).second )
-		return 0;
-
-	DWORD time = (*c_itr).second - timeGetTime()/1000;
-
-	// % 는 내가 가장 싫어하는 연산잔데..ㅡ.ㅜ 계산하기 귀찮아서..
-	return ( time % 60 );
+	return (int)( GetRemainingSeconds( objectID ).count() % 60 );
 }
 
 bool	MTimeItemManager::IsExpired( TYPE_OBJECTID objectID )
@@ -109,9 +103,5 @@ bool	MTimeItemManager::IsExpired( TYPE_OBJECTID objectID )
 	if( !IsExist( objectID ) )
 		return true;
 
-	if(GetDay( objectID ) == 0 && GetHour( objectID ) == 0 && GetMinute( objectID) == 0 && GetSecond( objectID ) == 0)
-	{
-		return true;
-	}
-	return false;
+	return ( GetRemainingSeconds( objectID ).count() == 0 );
 }

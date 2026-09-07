@@ -23,7 +23,11 @@
 #include "TextSystem/TextService.h"
 #include "TextSystem/RenderTargetSpriteSurface.h"
 extern RECT g_GameRect;
+#include "DirectoryListing.h"
+#include "FileDialogListing.h"
 #include <algorithm>
+#include <filesystem>
+#include <vector>
 
 //-----------------------------------------------------------------------------
 // AskString
@@ -3253,16 +3257,14 @@ void	C_VS_UI_FILE_DIALOG::Finish()
 - RefreshFileList
 -
 
-  `file 이 굉장히 많을 경우 계속 이 Method를 실행하면 엄청난 속도저하가 일어난다.
-   따라서 갱신이 필요할 경우에만 이 Method를 실행한다.
+  Running this method over and over is a severe slowdown when the directory
+  holds a great many files, so it is run only when the list has to be
+  refreshed.
 
-  `GetCurrentDirectory()로 얻은 dir을 refresh한다.
+  Refreshes the directory obtained from GetCurrentDirectory().
 -----------------------------------------------------------------------------*/
 void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
 {
-	HANDLE				hFind;
-	WIN32_FIND_DATA	fd;
-	BOOL					next_ok = true; // FindNextFile(hFind, &fd)이 BOOL을 반환하므로...
 	std::string			sz_filename;
 	int					n;
 
@@ -3277,90 +3279,78 @@ void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
 	m_vs_file_list.clear();
 	m_vs_file_list_attr.clear();
 	
-	hFind = FindFirstFile(sz_dirname, &fd);
-	while (hFind != INVALID_HANDLE_VALUE && next_ok)
-	{
-		// '\.'은 생략한다.
-		//if ((fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && fd.cFileName == ".")
-		if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-			if (fd.cFileName[0] == '.' && 
-				 fd.cFileName[1] == '\0') goto _next_find_;
+	// The buffer above is a search pattern, "<dir>\*.*"; ListDirectory wants
+	// the directory and the pattern apart. Three characters come off, not
+	// four, so the '\' is kept and a drive root stays the absolute "C:\".
+	// The pattern is "*", not "*.*": the '.' is a literal to the helper.
+	std::string							sz_directory(sz_dirname);
+	std::vector<Basic::SDirectoryEntry>	v_entries;
+	std::vector<Basic::SDirectoryEntry>	v_listed;
 
-		n = strlen(fd.cFileName);
-		if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+	sz_directory.erase(sz_directory.size() - 3);
+
+	// directory_iterator does not return "..", and ".." is the entry the
+	// user clicks to go up, so it is synthesised - first, where
+	// FindFirstFile delivered it, and whether or not the listing succeeds.
+	// A volume root has no parent, which has_relative_path() tests for.
+	if (std::filesystem::path(sz_directory).has_relative_path())
+	{
+		Basic::SDirectoryEntry	parent_entry;
+
+		parent_entry.sName = "..";
+		parent_entry.bIsDirectory = true;
+
+		v_entries.push_back(parent_entry);
+	}
+
+	if (Basic::ListDirectory(sz_directory.c_str(), "*", v_listed,
+			Basic::LIST_FILES_AND_DIRECTORIES))
+	{
+		v_entries.insert(v_entries.end(), v_listed.begin(), v_listed.end());
+	}
+
+	for (size_t i_entry = 0; i_entry < v_entries.size(); i_entry++)
+	{
+		const char	*sz_entry_name = v_entries[i_entry].sName.c_str();
+
+		// m_vs_file_list_attr is only ever tested for FILE_ATTRIBUTE_DIRECTORY
+		// (see MouseControl() and Show()), so the directory bit is all that
+		// has to be reproduced here.
+		DWORD		dw_attributes = v_entries[i_entry].bIsDirectory ?
+							FILE_ATTRIBUTE_DIRECTORY : FILE_ATTRIBUTE_NORMAL;
+
+		// The '\.' entry is skipped.
+		//if ((dw_attributes & FILE_ATTRIBUTE_DIRECTORY) && sz_entry_name == ".")
+		if (dw_attributes & FILE_ATTRIBUTE_DIRECTORY)
+			if (sz_entry_name[0] == '.' &&
+				 sz_entry_name[1] == '\0') continue;
+
+		n = strlen(sz_entry_name);
+		if (dw_attributes & FILE_ATTRIBUTE_DIRECTORY)
 		{
-			n += 1; // + '\' 
+			n += 1; // + '\'
 		}
 
-		if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+		if (dw_attributes & FILE_ATTRIBUTE_DIRECTORY)
 		{
 			sz_filename = "\\";
-			sz_filename += fd.cFileName;
-
-			int i;
-			for(i = 0; i < m_vs_file_list.size(); i++)
-			{
-				if(m_vs_file_list[i] > sz_filename || m_vs_file_list[i][0] != '\\')
-				{
-					m_vs_file_list.insert(m_vs_file_list.begin() + i, sz_filename);
-					m_vs_file_list_attr.insert(m_vs_file_list_attr.begin() + i, fd.dwFileAttributes);
-					break;
-				}
-			}
-			if(i == m_vs_file_list.size())
-			{
-				m_vs_file_list.insert(m_vs_file_list.begin() + i, sz_filename);
-				m_vs_file_list_attr.insert(m_vs_file_list_attr.begin() + i, fd.dwFileAttributes);
-			}
+			sz_filename += sz_entry_name;
 		}
 		else
 		{
-//			strcpy(str_buf, fd.cFileName);
-			sz_filename = fd.cFileName;
-			char szfile[20];
-			int i,j;
-			BOOL findflag=false,fAddFile=false;
-			
-			for(i=0;i<m_filter.size();i++)
-			{
-				strcpy(szfile,m_filter[i].c_str());
-				
-				findflag=false;
-				for(j = 0; j < strlen(szfile); j++)
-				{					
-					if(Upperchar(sz_filename[sz_filename.size() - j-1]) 
-						!= Upperchar(szfile[strlen(szfile) - j-1]))
-						findflag=true;
-				}
-				if(!findflag) fAddFile=true;
-			}
-			if(!fAddFile) goto _next_find_;
+//			strcpy(str_buf, sz_entry_name);
+			sz_filename = sz_entry_name;
 
-//			m_vs_file_list.push_back(sz_filename);
-//			m_vs_file_list_attr.push_back(fd.dwFileAttributes);
-
-			for(int i = 0; i < m_vs_file_list.size(); i++)
-			{
-				if(m_vs_file_list[i] > sz_filename && m_vs_file_list[i][0] != '\\')
-				{
-					m_vs_file_list.insert(m_vs_file_list.begin() + i, sz_filename);
-					m_vs_file_list_attr.insert(m_vs_file_list_attr.begin() + i, fd.dwFileAttributes);
-					break;
-				}
-			}
-			if(i == m_vs_file_list.size())
-			{
-				m_vs_file_list.insert(m_vs_file_list.begin() + i, sz_filename);
-				m_vs_file_list_attr.insert(m_vs_file_list_attr.begin() + i, fd.dwFileAttributes);
-			}
+			if (!Basic::MatchesAnySuffixCaseInsensitive(sz_filename, m_filter))
+				continue;
 		}
 
-//		gC_ui.AddListUnit(dp, str_buf, fd.dwFileAttributes, true);
-_next_find_:
-		next_ok = FindNextFile(hFind, &fd);
+		Basic::InsertDialogEntry(m_vs_file_list, m_vs_file_list_attr,
+				sz_filename, dw_attributes);
+
+//		gC_ui.AddListUnit(dp, str_buf, dw_attributes, true);
 	}
 
-	FindClose(hFind);
 	m_pC_scroll_bar->SetScrollPos(0);
 	m_select = -1;
 

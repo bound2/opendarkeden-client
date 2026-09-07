@@ -59,28 +59,31 @@ void CLLogin::write ( SocketOutputStream & oStream ) const
 
 	if( !m_bNetmarble )
 	{
-		BYTE szID = m_ID.size();
+		// Cap both std::strings' own sizes, before narrowing to the
+		// length bytes.
+		if ( m_ID.size() > 30 )
+			throw InvalidProtocolException("too large ID length");
+
+		const BYTE szID = (BYTE)m_ID.size();
 
 		if ( szID == 0 )
 			throw InvalidProtocolException("empty ID");
 
-		if ( szID > 30 )
-			throw InvalidProtocolException("too large ID length");
-
 		oStream.write( szID );
 
-		oStream.write( m_ID );
+		oStream.write( std::span<const char>(m_ID.data(), szID) );
 
-		BYTE szPassword = m_Password.size();
+		if ( m_Password.size() > 20 )
+			throw InvalidProtocolException("too large password length");
+
+		const BYTE szPassword = (BYTE)m_Password.size();
 
 		if ( szPassword == 0 )
 			throw InvalidProtocolException("szPassword == 0");
-		if ( szPassword > 20 )
-			throw InvalidProtocolException("too large password length");
 
 		oStream.write( szPassword );
 
-		oStream.write( m_Password );
+		oStream.write( std::span<const char>(m_Password.data(), szPassword) );
 
 		oStream.write( (char*)m_MacAddress, 6*sizeof(BYTE) );
 		

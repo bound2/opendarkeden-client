@@ -106,8 +106,24 @@ set_source_files_properties(
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_factories.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_goldens.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_span_io.cpp
+	# The framing entry point, SocketOutputStream::write(const Packet*):
+	# what the ring and the sequence counter hold after a body write
+	# throws. Defines its own Packet subclass, so it needs the same
+	# definitions - Packet's virtual set changes under them.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_output_stream_rollback.cpp
+	# The other end of the same stream: what flush() leaves in the ring
+	# when the socket takes only part of it. Derives from SocketImpl to
+	# script the partial send, so it needs the same definitions too.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_output_stream_flush.cpp
+	# The second span/typed-scalar slice: the CGSkillTo* family's fields
+	# and its truncated-input contract, over the same stream classes.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_skill_family_wire.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_scalar.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_stringstream.cpp
+	# The character overloads and the diagnostic texts built out of them
+	# (Throwable, __assert__), which is why this one reaches Exception.h
+	# and PacketAssert.h as well.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_stringstream_chars.cpp
 	# gamemodel compiles with the same definitions: its headers reach
 	# Client/Packet/Exception.h, whose inline bodies switch on __WIN32__,
 	# and Client/Packet/Types/CreatureTypes.h, which switches on
@@ -125,6 +141,35 @@ set_source_files_properties(
 	# The C++20 container/string helper slice spans both libraries: the
 	# packet and Properties sites and the gamemodel manager sites.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_cpp20_container_helpers.cpp
+	# The second slice of the same backlog item: the skill domain's step
+	# map and step lists, the two line-parsing loaders and the two
+	# availability filter scans. It includes the four Client/ headers it
+	# tests, and gamemodel_world.h besides, so it needs the same
+	# definitions.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_cpp20_container_helpers_2.cpp
+	# The second source_location slice. It expands Assert() itself, and
+	# Assert() is conditioned on __WIN32__ - without these definitions the
+	# macro would fall back to <assert.h>, a branch the library never
+	# compiles, and the test would pin nothing. (__END_CATCH, which it
+	# also expands, is conditioned on NDEBUG alone.)
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_source_location.cpp
+	# PacketIDSet::deletePacketID. It names CPS_NONE, which PlayerStatus.h
+	# declares only under __GAME_CLIENT__, and Packet.h conditions a member
+	# on the same macro, so the TU must see the definitions packetwire was
+	# built with.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_id_set.cpp
+	# What SendBugReport actually sends. It builds a CGSay and hands it
+	# to a Player subclass, so the Packet vtable and the CGSay class
+	# definition must be the library's.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_bug_report_message.cpp
+	# Every BYTE-length-prefixed string write() under Client/Packet/Cpackets,
+	# over the lengths the length byte cannot express. Constructs the packet
+	# classes and drives their read()/write() over the socket streams.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_string_write_caps.cpp
+	# The seven writers in the same family that had no cap at all, and so
+	# narrowed with nothing to refuse them. Same needs: the packet classes
+	# and the socket streams.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_uncapped_string_writes.cpp
 	PROPERTIES
 		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS};WIRE_GOLDEN_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/golden\""
 )

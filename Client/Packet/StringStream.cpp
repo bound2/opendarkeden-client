@@ -49,11 +49,12 @@ StringStream & StringStream::operator << ( bool T )
 	return *this;
 }
 
-StringStream & StringStream::operator << ( char T ) 
+// One streamed character is one byte: no trailing NUL into toString().
+
+StringStream & StringStream::operator << ( char T )
 	throw ()
 {
-	std::string buf(2,'\0');
-	buf[0] = T;
+	std::string buf(1,T);
 
 	m_Strings.push_back( buf );
 
@@ -66,8 +67,7 @@ StringStream & StringStream::operator << ( char T )
 StringStream & StringStream::operator << ( uchar T )
 	throw ()
 {
-	std::string buf(2,0);
-	buf[0] = T;
+	std::string buf(1,(char)T);
 
 	m_Strings.push_back( buf );
 
@@ -265,19 +265,21 @@ StringStream & StringStream::operator << ( const std::string & str )
 std::string StringStream::toString () const
 	throw ()
 {
-	// 일단 스트링을 한번 생성해놓으면, 
-	// 그다음 호출때에는 새로 추가되지 않는 한 그대로 사용한다.
+	// Once the string has been built, later calls reuse it until
+	// something new is inserted.
 	if ( m_bInserted ) {
-		
+
 		m_bInserted = false;
 
-		// 속도를 위해 쓸데없는 복사 방지를 일단 메모리를 다 잡아놓고 시작한다.
+		// The rebuild starts from nothing.
+		m_Buffer.clear();
+
+		// Reserve the whole size up front so the appends do not copy.
 		m_Buffer.reserve( m_Size );
 
 		for ( std::list<std::string>::const_iterator itr = m_Strings.begin () ;
 			  itr != m_Strings.end() ;
 			  itr ++ ) {
-			// 버퍼에 하나씩 추가한다.
 			m_Buffer.append( *itr );
 		}
 	}
