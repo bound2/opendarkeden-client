@@ -216,7 +216,7 @@ class RequestFileManager {
 		bool			AddMyRequest(RequestReceiveInfo* pInfo);
 		bool			RemoveMyRequest(const std::string& name);
 		bool			HasMyRequest(const std::string& name) const;
-		bool			ReceiveMyRequest(const std::string& name, RequestClientPlayer* pRequestClientPlayer) throw (ConnectException);
+		bool			ReceiveMyRequest(const std::string& name, RequestClientPlayer* pRequestClientPlayer);
 
 		//--------------------------------------------------------------
 		// OtherRequest - 다른 사람이 요청한 file처리

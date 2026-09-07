@@ -42,8 +42,7 @@ extern int		g_LeftPremiumDays;
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
 void GCNoticeEventHandler::execute ( GCNoticeEvent * pPacket , Player * pPlayer )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY 
 	__BEGIN_DEBUG

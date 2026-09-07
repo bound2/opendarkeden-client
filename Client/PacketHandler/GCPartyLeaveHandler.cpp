@@ -19,7 +19,6 @@ extern CMessageArray*		g_pGameMessage;
 void GCPartyLeaveHandler::execute (GCPartyLeave * pPacket , Player * pPlayer)
 	 
 
-throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 	

@@ -31,8 +31,7 @@
 // 
 //----------------------------------------------------------------------
 void LGIncomingConnectionHandler::execute ( LGIncomingConnection * pPacket )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 

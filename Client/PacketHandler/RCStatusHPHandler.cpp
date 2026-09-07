@@ -23,8 +23,7 @@
 // 
 //----------------------------------------------------------------------
 void RCStatusHPHandler::execute ( RCStatusHP * pPacket )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 

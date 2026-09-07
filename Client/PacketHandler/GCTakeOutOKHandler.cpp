@@ -17,8 +17,7 @@ extern void UI_RemoveItemFromItemShop( DWORD id );
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 void GCTakeOutOKHandler::execute ( GCTakeOutOK * pGCTakeOutOK , Player * pPlayer )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 

@@ -18,8 +18,7 @@
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
 void GCPartySayHandler::execute ( GCPartySay * pPacket , Player * pPlayer )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY 
 		

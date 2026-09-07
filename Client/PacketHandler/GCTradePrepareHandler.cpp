@@ -28,7 +28,6 @@ void GCTradePrepareHandler::execute ( GCTradePrepare * pPacket , Player * pPlaye
 	 
 
 
-throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 	

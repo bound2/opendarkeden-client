@@ -30,8 +30,7 @@
 // 
 //--------------------------------------------------------------------------------
 void GLIncomingConnectionOKHandler::execute ( GLIncomingConnectionOK * pPacket )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 

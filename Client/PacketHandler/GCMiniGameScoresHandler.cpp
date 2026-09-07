@@ -15,8 +15,7 @@
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 void GCMiniGameScoresHandler::execute ( GCMiniGameScores * pGCMiniGameScores , Player * pPlayer )
-	 
-throw ( ProtocolException , Error )
+
 {	
 	UI_MiniGameScores( pGCMiniGameScores );
 }

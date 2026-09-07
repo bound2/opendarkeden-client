@@ -405,6 +405,28 @@ sources (34), which the slice that clears them should put under a ratchet of
 their own, since a `throw()` there whose body throws is the same undefined
 behaviour it was in the libraries.
 
+**Executable side (2026-09-07): finding 3 is closed on the source side.**
+The 319 specifications outside the library set are gone: 284 in
+`Client/PacketHandler`, one on each handler's `execute` definition, all type
+lists; 32 in the two request-side packet factory managers under
+`Client/OtherClass`, whose constructors, destructors and `toString` had
+`throw()` (deleted: `__BEGIN_TRY` bodies and a `std::string`) and whose
+`getPacket`/`getPacketMaxSize` and validation entry points had lists; and
+three lists in `RequestFileManager` and `Updater/UpdateManager.h`. Nothing
+was promoted. The same script and the same token-by-token verification as
+the packet directories; the only test path is the executable build, since
+none of these files links into a test binary. Ratchet **R12 = 0** holds every
+`.h`, `.cpp` and `.inl` under `Client`, `VS_UI`, `basic`, `tools`,
+`third_party` and `tests` at zero, so R9 and R10 are now subsumed and kept
+only as the record of how the libraries got there. What this finding still
+does not settle is the pre-existing concern it raised at the top: the
+`throw()` functions whose bodies throw were undefined under MSVC's reading and
+now simply propagate, which is the behaviour ISO C++ gives an unspecified
+function and the one the callers were written against; the C4297 count in
+the build is what remains of it, on destructors wrapped in
+`__BEGIN_TRY`/`__END_CATCH`, which are `noexcept` by default whatever is
+written on them.
+
 ### 4. `register` remains in C++ source
 
 There are roughly 650 declaration-like uses of the removed `register` storage

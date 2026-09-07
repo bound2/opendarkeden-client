@@ -21,8 +21,7 @@
 // 
 //----------------------------------------------------------------------
 void RCSayHandler::execute ( RCSay * pPacket )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 

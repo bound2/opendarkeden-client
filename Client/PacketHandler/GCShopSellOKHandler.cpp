@@ -22,7 +22,6 @@ void	CheckItemForSkillIcon(const MItem* pItem);
 void GCShopSellOKHandler::execute ( GCShopSellOK * pPacket , Player * pPlayer )
 	 
 
-throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 	

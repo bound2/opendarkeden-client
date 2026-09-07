@@ -925,6 +925,34 @@ R10=$(libset_members | count_exception_specs)
 check "R10 (dynamic exception specifications in the library set)" "$R10" "$R10_BASELINE"
 
 #----------------------------------------------------------------------
+# R12 - dynamic exception specifications anywhere in the tree.
+#
+# R9 and R10 cover the libraries; this one covers every .h, .cpp and
+# .inl under Client, VS_UI, basic, tools, third_party and tests, so the
+# executable side is held too. Same pattern, same strips, same blind
+# spots as R10's comment lists. The last 319 outside the library set -
+# 284 in Client/PacketHandler, one per handler's execute definition,
+# 32 in the two request-side packet factory managers, and three in
+# RequestFileManager and Updater/UpdateManager.h - went on 2026-09-07,
+# all of them type lists deleted or throw() deleted, none promoted.
+# R12 = 0 as of that day: finding 3 of the assessment is closed on the
+# source side, and a new specification anywhere fails here.
+#----------------------------------------------------------------------
+R12_BASELINE=0
+
+tree_members () {
+	find Client VS_UI basic tools third_party tests \( -name '*.h' -o -name '*.cpp' -o -name '*.inl' \) 2>/dev/null
+}
+
+if [ "$(tree_members | wc -l)" -eq 0 ]; then
+	echo "FAIL R12: no C++ sources enumerated - a zero here would measure nothing"
+	FAIL=1
+else
+	R12=$(tree_members | count_exception_specs)
+	check "R12 (dynamic exception specifications in the whole tree)" "$R12" "$R12_BASELINE"
+fi
+
+#----------------------------------------------------------------------
 # R6 was here for exactly one slice, and retired by doing its job.
 #
 # Task 5.1 stubbed SendBugReport in tests/stubs/client_globals.cpp so

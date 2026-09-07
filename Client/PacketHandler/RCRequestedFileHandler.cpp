@@ -95,8 +95,7 @@ static bool isSafeProfileBaseName(const std::string& base)
 //
 //////////////////////////////////////////////////////////////////////
 void RCRequestedFileHandler::execute ( RCRequestedFile * pPacket , Player * pPlayer )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 	

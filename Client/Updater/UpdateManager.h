@@ -74,7 +74,7 @@ public :
 	int	getNum() const	{ return m_Updates.size(); }
 
 	// get debug std::string
-	std::string toString () const throw ();
+	std::string toString () const;
 
 	void		operator = (const UpdateManager& um);
 	void		operator += (const UpdateManager& um);

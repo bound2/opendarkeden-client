@@ -12,7 +12,6 @@
 #include "Player.h"
 
 void GCExchangeBuyHandler::execute(GCExchangeBuy* pPacket, Player* pPlayer)
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 

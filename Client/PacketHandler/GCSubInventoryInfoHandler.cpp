@@ -20,8 +20,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 void GCSubInventoryInfoHandler::execute ( GCSubInventoryInfo * pPacket , Player * pPlayer )
-	 
-throw ( ProtocolException , Error )
+
 {
 
 	

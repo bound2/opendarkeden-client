@@ -15,7 +15,6 @@
 void GCRankBonusInfoHandler::execute ( GCRankBonusInfo * pPacket , Player * pPlayer )
 	 
 
-throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 	for(int i = 0; i < g_pRankBonusTable->GetSize(); i++)

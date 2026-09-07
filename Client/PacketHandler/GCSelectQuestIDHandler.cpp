@@ -20,8 +20,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 void GCSelectQuestIDHandler::execute ( GCSelectQuestID * pPacket , Player * pPlayer )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 	

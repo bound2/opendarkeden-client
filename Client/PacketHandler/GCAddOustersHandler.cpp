@@ -17,8 +17,7 @@ extern void SetPetInfo(PetInfo* pPetInfo, TYPE_OBJECTID objectID);
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
 void GCAddOustersHandler::execute ( GCAddOusters * pPacket , Player * pPlayer )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 		
