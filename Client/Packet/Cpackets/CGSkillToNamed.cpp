@@ -29,9 +29,6 @@ void CGSkillToNamed::read (SocketInputStream & iStream)
 
 	BYTE szTargetName;
 
-	// SkillType_t and CEffectID_t are both WORD, so the wire scalar
-	// constraint pins them at the exact 16-bit width szSkillType and
-	// szCEffectID asked for.
 	iStream.readWire(m_SkillType);
 	iStream.readWire(m_CEffectID);
 	iStream.read( szTargetName );
@@ -51,15 +48,7 @@ void CGSkillToNamed::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
-	// Bound the name on the std::string's own size, BEFORE narrowing it to
-	// the BYTE that goes on the wire. A 276-character name narrows to 20
-	// and used to pass the cap, after which write() emitted all 276 bytes
-	// behind a length byte that claimed 20 - this repo's frame-bounded
-	// reader rejects such a tail, the server's legacy reader parses it as
-	// the next packet. read() cannot produce such a name, but
-	// setTargetName() takes any std::string. SocketOutputStream has
-	// already written the framing header when this throws, and its
-	// write(const Packet*) rolls that header back on the way out.
+	// Cap the std::string's own size, before narrowing to the length byte.
 	if ( m_TargetName.size() > 20 )
 		throw InvalidProtocolException( "too long target name" );
 
@@ -71,8 +60,6 @@ void CGSkillToNamed::write (SocketOutputStream & oStream) const
 	oStream.writeWire(m_SkillType);
 	oStream.writeWire(m_CEffectID);
 	oStream.write( szTargetName );
-	// The bounded view ties the emitted bytes to the length just written,
-	// which is what getPacketSize() advertised in the framing header.
 	oStream.write( std::span<const char>(m_TargetName.data(), szTargetName) );
 
 	__END_CATCH

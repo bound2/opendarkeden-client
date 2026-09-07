@@ -42,9 +42,6 @@ void CGSkillToSelf::read (SocketInputStream & iStream)
 	else
 #endif
 	{
-		// SkillType_t and CEffectID_t are both WORD, so the wire scalar
-		// constraint pins them at their exact 16-bit width - the same two
-		// bytes each the szSkillType/szCEffectID lengths asked for.
 		iStream.readWire(m_SkillType);
 		iStream.readWire(m_CEffectID);
 	}

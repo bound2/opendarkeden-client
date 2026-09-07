@@ -229,8 +229,7 @@ WireEncryptSeed ( ZoneID_t zoneID , int serverID , bool bEnglishSeed ) throw ()
 // Moved here verbatim from Client/PacketFunction.cpp, with the
 // executable's own connection replaced by the host's target. The
 // bound on the format buffer is the one an earlier hardening pass
-// left in place; the cut below it is not - that was 100 bytes, short
-// of what the packet carries, and is the whole headroom now.
+// left in place.
 //
 // (The global that connection lives in is deliberately not named
 // here: R4 greps every line of a library source for g_p* and does not
@@ -239,17 +238,8 @@ WireEncryptSeed ( ZoneID_t zoneID , int serverID , bool bEnglishSeed ) throw ()
 
 namespace {
 
-//----------------------------------------------------------------------
 // The chat command the server dispatches a report on, and what a CGSay
 // leaves for the report once the prefix has had its bytes.
-//----------------------------------------------------------------------
-// sizeof counts the NUL, which is not sent, so the prefix is 12 bytes
-// of the 128 a CGSay message may hold - 116 for the text.
-//
-// CGSay::write() THROWS above its cap rather than truncating, so a
-// message built any longer than this would not reach the server cut
-// short: it would not reach the server at all.
-//----------------------------------------------------------------------
 const char	BUG_REPORT_PREFIX[]	= "*bug_report ";
 
 const int	BUG_REPORT_PREFIX_LEN	= (int)sizeof(BUG_REPORT_PREFIX) - 1;
@@ -294,13 +284,7 @@ SendBugReport ( const char * bug , ... )
 	if( len <= 1 )
 		return;
 
-	// Cut where the packet ends, not short of it. This was 100, which
-	// spent 16 bytes of every long report on nothing: the four
-	// SendBugReport("%s", t.toString().c_str()) sites hand over a
-	// message and then one "file:line" frame per __END_CATCH the
-	// exception unwound through, and an InvalidProtocolException's
-	// message alone is around 55 bytes - so the 16 were most of the
-	// room the first frame needed.
+	// Cut where the packet ends, not short of it.
 	if( len > BUG_REPORT_TEXT_MAX )
 		Buffer[BUG_REPORT_TEXT_MAX] = '\0';
 

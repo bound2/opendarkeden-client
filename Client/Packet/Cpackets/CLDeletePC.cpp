@@ -57,10 +57,8 @@ void CLDeletePC::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 		
-	// Both caps run on the std::string's own size, BEFORE the narrowing
-	// to the BYTE that goes on the wire: (BYTE)276 is 20, so a
-	// 276-character name used to pass its cap and then go out whole
-	// behind a length byte claiming 20.
+	// Cap both std::strings' own sizes, before narrowing to the length
+	// bytes.
 	if ( m_Name.size() > 20 )
 		throw InvalidProtocolException("too long name length");
 

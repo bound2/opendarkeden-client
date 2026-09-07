@@ -2,33 +2,12 @@
 // test_bug_report_message.cpp
 //----------------------------------------------------------------------
 //
-// What a bug report actually reaches the server as.
+// What a bug report reaches the server as. SendBugReport
+// (Client/Packet/WireHost.cpp) formats into a 256-byte buffer, cuts the
+// text, prefixes "*bug_report " and sends a CGSay; a CGSay message is
+// 128 bytes, the prefix spends 12, so 116 is left for the report.
 //
-// SendBugReport (Client/Packet/WireHost.cpp) formats its arguments into
-// a 256-byte stack buffer, cuts the text, prefixes the chat command the
-// server dispatches on, and sends the result as a CGSay. Every one of
-// those steps bounds what the server is told, and the cut is the
-// tightest of them: CGSay::write() refuses a message over 128 bytes,
-// the prefix "*bug_report " spends 12 of those, so 116 is what is left
-// for the report itself.
-//
-// The point of pinning it here rather than reading the constant is that
-// the four SendBugReport("%s", t.toString().c_str()) sites hand over a
-// Throwable::toString() - a message and then one "file:line" frame per
-// __END_CATCH the exception unwound through. A report cut shorter than
-// the packet allows loses frames for no reason, which is exactly the
-// state fix/stringstream-nul left this in: it made the whole text reach
-// the cut, and the cut was 100.
-//
-// Player's default constructor builds no socket and no streams, and
-// sendPacket is virtual, so a subclass that keeps what it was handed
-// makes the whole path observable from a test binary - the format, the
-// cut, the prefix and the packet. That is the only reason any of this
-// is testable: SendBugReport moved into packetwire in task 5.1, and
-// WireHost.cpp is a member of tests/arch/packetwire_files.txt.
-//
-// Compiled with the packetwire defines (tests/CMakeLists.txt), so the
-// Packet and stream definitions are identical to the library's.
+// A Player subclass keeps the packet instead of writing a socket.
 //
 //----------------------------------------------------------------------
 
@@ -48,11 +27,8 @@
 
 namespace {
 
-//----------------------------------------------------------------------
-// The three numbers, spelled out rather than taken from the code under
-// test - a test that read CGSay's cap through the same constant
-// SendBugReport reads it through could not see either of them move.
-//----------------------------------------------------------------------
+// Spelled out rather than read through the constant the code under test
+// reads, which would not see either number move.
 const std::string	PREFIX		= "*bug_report ";
 
 // CGSay::read() and CGSay::write() both throw above this.
@@ -61,9 +37,7 @@ const int		SAY_MESSAGE_MAX	= 128;
 // What the prefix leaves of it: 128 - 12.
 const int		TEXT_MAX	= 116;
 
-//----------------------------------------------------------------------
 // A target that keeps the packet instead of writing a socket.
-//----------------------------------------------------------------------
 class CapturingTarget : public Player
 {
 public:
@@ -102,18 +76,13 @@ const WireHost	s_Host = { NULL, NULL, NULL, HostBugReportTarget,
 			NULL, NULL,
 			NULL, NULL, NULL, NULL, NULL, NULL };
 
-//----------------------------------------------------------------------
-// Puts the library back the way every other test expects it, whichever
-// way the test leaves.
-//----------------------------------------------------------------------
+// Puts the library back however the test leaves.
 struct NoHost
 {
 	~NoHost()	{ Wire::SetHost(NULL); s_pTarget = NULL; }
 };
 
-//----------------------------------------------------------------------
 // A stream over a never-used socket (see packet_stream_access.h).
-//----------------------------------------------------------------------
 struct OutFixture
 {
 	Socket			m_Socket;
@@ -126,14 +95,11 @@ struct OutFixture
 	}
 };
 
-//----------------------------------------------------------------------
 // The report SendBugReport builds for one text, as the target sees it.
-//----------------------------------------------------------------------
 std::string	ReportFor ( const std::string & text )
 {
-	// The target outlives the host that names it: declared first, so
-	// NoHost's destructor takes the pointer back before the object it
-	// points at goes away.
+	// Declared first, so NoHost's destructor takes the pointer back
+	// before the object it points at goes away.
 	CapturingTarget	target;
 	NoHost		restore;
 
@@ -148,12 +114,8 @@ std::string	ReportFor ( const std::string & text )
 	return target.m_Message;
 }
 
-//----------------------------------------------------------------------
-// Whether a CGSay will actually carry that message. This is the half
-// the arithmetic above cannot assert for itself: a report one byte over
-// the cap is not truncated by the packet, it is thrown out of
-// Player::sendPacket and never reaches the server at all.
-//----------------------------------------------------------------------
+// Whether a CGSay will actually carry that message: one byte over the
+// cap is thrown, not truncated.
 bool	ACGSayCarries ( const std::string & message )
 {
 	OutFixture	out;
@@ -174,10 +136,7 @@ bool	ACGSayCarries ( const std::string & message )
 	return true;
 }
 
-//----------------------------------------------------------------------
-// A text of n bytes, distinguishable by position so a cut in the wrong
-// place reads as the wrong characters rather than as the right ones.
-//----------------------------------------------------------------------
+// A text of n bytes, distinguishable by position.
 std::string	TextOf ( int n )
 {
 	std::string	text;
@@ -209,8 +168,7 @@ TEST(BugReport, AReportOfNoCharactersOrOneIsNotSent)
 	SendBugReport(NULL);
 	CHECK_EQ(0, target.m_nSent);
 
-	// A report that says nothing, and one that says one character: the
-	// length test is `<= 1`, so neither survives it.
+	// The length test is `<= 1`, so neither of these survives it.
 	SendBugReport("");
 	SendBugReport("x");
 	CHECK_EQ(0, target.m_nSent);
@@ -263,9 +221,7 @@ TEST(BugReport, TheTextIsCutOnlyWhereACGSayMessageEnds)
 	CHECK_EQ(SAY_MESSAGE_MAX, (int)ReportFor(exact).size());
 	CHECK_EQ(SAY_MESSAGE_MAX, (int)ReportFor(over).size());
 
-	// A long report - the shape of a Throwable::toString() carrying a
-	// message and several stack frames - keeps the first TEXT_MAX bytes
-	// of its text and nothing after them.
+	// A long report keeps the first TEXT_MAX bytes and nothing after.
 	const std::string	report = ReportFor(TextOf(200));
 
 	CHECK_EQ(SAY_MESSAGE_MAX, (int)report.size());
@@ -278,9 +234,7 @@ TEST(BugReport, TheTextIsCutOnlyWhereACGSayMessageEnds)
 //----------------------------------------------------------------------
 TEST(BugReport, NoReportOutgrowsThePacketThatCarriesIt)
 {
-	// Across the lengths either side of every boundary in the path:
-	// the two-character floor, the headroom, the cap itself and the
-	// 256-byte buffer SendBugReport formats into.
+	// Either side of every boundary in the path.
 	const int	lengths[] = { 2, 3, 50, 114, 115, 116, 117, 118,
 					127, 128, 129, 200, 254, 255 };
 

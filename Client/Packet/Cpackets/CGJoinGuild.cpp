@@ -34,12 +34,8 @@ void CGJoinGuild::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
-	// The cap runs on the std::string's own size, BEFORE the narrowing
-	// to the BYTE that goes on the wire. This one never fired: 256 is
-	// not a value a BYTE can hold, so every intro passed and one over
-	// 255 went out whole behind a length byte holding its low eight
-	// bits. A length byte cannot express 256 either, so 255 is what the
-	// wire has always allowed.
+	// Cap the std::string's own size, before narrowing to the length byte.
+	// 255 is the most a length byte can express.
 	if ( m_GuildMemberIntro.size() > 255 )
 		throw InvalidProtocolException( "szGuildMemberIntro > 256" );
 

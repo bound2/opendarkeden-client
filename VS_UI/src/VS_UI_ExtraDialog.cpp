@@ -23,12 +23,7 @@
 #include "TextSystem/TextService.h"
 #include "TextSystem/RenderTargetSpriteSurface.h"
 extern RECT g_GameRect;
-// std::filesystem directory enumeration, in place of the FindFirstFile walk
-// C_VS_UI_FILE_DIALOG::RefreshFileList() used to run
-// (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md, priority 6).
 #include "DirectoryListing.h"
-// The suffix filter and the insertion sort C_VS_UI_FILE_DIALOG::RefreshFileList
-// runs over that listing (docs/RESTRUCTURING.md task 3.1, "moved, then fixed").
 #include "FileDialogListing.h"
 #include <algorithm>
 #include <filesystem>
@@ -3284,52 +3279,20 @@ void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
 	m_vs_file_list.clear();
 	m_vs_file_list_attr.clear();
 	
-	//-------------------------------------------------------------------------
-	// The buffer above is a search pattern, "<dir>\*.*"; Basic::ListDirectory
-	// wants the directory and the pattern apart. The directory is the buffer
-	// without its trailing "*.*" - three characters, not four, so the '\' is
-	// kept and a drive root stays the absolute "C:\" rather than becoming the
-	// drive-relative "C:". The strcat above guarantees at least those four
-	// characters are there.
-	//
-	// The pattern asked for is "*" and not "*.*": Win32 read "*.*" as
-	// everything, while the '.' is a literal to the helper, so "*.*" would
-	// silently lose every dotless name (basic/DirectoryListing.h, DOS_DOT).
-	// Files and directories are both listed, because this loop sorts the two
-	// into one list and the dialog navigates the directories.
-	//-------------------------------------------------------------------------
+	// The buffer above is a search pattern, "<dir>\*.*"; ListDirectory wants
+	// the directory and the pattern apart. Three characters come off, not
+	// four, so the '\' is kept and a drive root stays the absolute "C:\".
+	// The pattern is "*", not "*.*": the '.' is a literal to the helper.
 	std::string							sz_directory(sz_dirname);
 	std::vector<Basic::SDirectoryEntry>	v_entries;
 	std::vector<Basic::SDirectoryEntry>	v_listed;
 
 	sz_directory.erase(sz_directory.size() - 3);
 
-	//-------------------------------------------------------------------------
-	// FindFirstFile returned "." and ".." ahead of everything else, and
-	// std::filesystem::directory_iterator returns neither. "." was thrown
-	// away by the loop body below, but ".." is the list entry the user
-	// clicks to go up - ChangeDir()/GetParentDir() recognise it as "\.." -
-	// so it has to be put back. It is put back FIRST, where FindFirstFile
-	// delivered it, so the insertion sort below sees the same sequence of
-	// entries it always saw and produces the same list.
-	//
-	// FindFirstFile produced ".." for every directory that has a parent
-	// and never for a volume root, so has_relative_path() is the test:
-	// path("C:\\") has an empty relative path, path("C:\\Users\\") does
-	// not. Verified against `dir /a`, which enumerates through
-	// FindFirstFile: it lists "." and ".." for C:\Users and neither for
-	// C:\.
-	//
-	// It is synthesised whether or not the listing succeeds. The helper is
-	// all or nothing - a listing that fails part way returns nothing -
-	// where FindFirstFile had already delivered ".." before any
-	// FindNextFile could fail, so keeping ".." outside the success branch
-	// is what leaves the user a way up out of a directory that went away
-	// under the dialog. The one case that gains an entry the legacy walk
-	// did not give is a subdirectory FindFirstFile could not open at all;
-	// ".." is a valid target there too. A drive with no media is a root and
-	// still gives an empty list, as INVALID_HANDLE_VALUE did.
-	//-------------------------------------------------------------------------
+	// directory_iterator does not return "..", and ".." is the entry the
+	// user clicks to go up, so it is synthesised - first, where
+	// FindFirstFile delivered it, and whether or not the listing succeeds.
+	// A volume root has no parent, which has_relative_path() tests for.
 	if (std::filesystem::path(sz_directory).has_relative_path())
 	{
 		Basic::SDirectoryEntry	parent_entry;
@@ -3351,18 +3314,12 @@ void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
 		const char	*sz_entry_name = v_entries[i_entry].sName.c_str();
 
 		// m_vs_file_list_attr is only ever tested for FILE_ATTRIBUTE_DIRECTORY
-		// (see MouseControl() and Show()), so the directory bit is the whole
-		// of what has to be reproduced here. A dangling junction or symlink
-		// is the one entry this misjudges: the helper follows the link and
-		// reports it as a file, where FindFirstFile reported the reparse
-		// point's own directory bit, so it now fails the filter below and is
-		// not shown at all.
+		// (see MouseControl() and Show()), so the directory bit is all that
+		// has to be reproduced here.
 		DWORD		dw_attributes = v_entries[i_entry].bIsDirectory ?
 							FILE_ATTRIBUTE_DIRECTORY : FILE_ATTRIBUTE_NORMAL;
 
-		// The '\.' entry is skipped. It can no longer be listed - "." is
-		// never enumerated and is not synthesised above - but the guard is
-		// kept so the body still states what it drops.
+		// The '\.' entry is skipped.
 		//if ((dw_attributes & FILE_ATTRIBUTE_DIRECTORY) && sz_entry_name == ".")
 		if (dw_attributes & FILE_ATTRIBUTE_DIRECTORY)
 			if (sz_entry_name[0] == '.' &&
@@ -3374,17 +3331,6 @@ void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
 			n += 1; // + '\'
 		}
 
-		//---------------------------------------------------------------------
-		// The suffix filter and the insertion sort are
-		// basic/FileDialogListing.h (docs/RESTRUCTURING.md task 3.1),
-		// where they have a test path: this function is in VS_UI and no
-		// test binary links VS_UI. The commit before their fix moved
-		// them with both defects intact so that both could be pinned
-		// first - the file branch's append test read m_filter.size()
-		// through a shadowed `int i`, and the filter copied each suffix
-		// into a char[20]. Neither the count nor the copy exists now,
-		// so one call places every entry.
-		//---------------------------------------------------------------------
 		if (dw_attributes & FILE_ATTRIBUTE_DIRECTORY)
 		{
 			sz_filename = "\\";

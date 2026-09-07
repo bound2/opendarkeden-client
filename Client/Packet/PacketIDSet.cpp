@@ -59,8 +59,7 @@ void PacketIDSet::deletePacketID ( PacketID_t packetID )
 
 	PACKET_ID_SET::iterator itr = m_PacketIDSet.find( packetID );
 
-	// Not in the set: there is nothing to erase, and erasing end() would
-	// be undefined.
+	// Nothing to erase; erasing end() would be undefined.
 	if ( itr == m_PacketIDSet.end() )
 		throw NoSuchElementException();
 

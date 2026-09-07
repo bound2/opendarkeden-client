@@ -2,26 +2,9 @@
 // test_packet_id_set.cpp
 //----------------------------------------------------------------------
 //
-// PacketIDSet - the per-status set of packet ids the packet validator
-// keeps, one instance per PlayerStatus.
-//
-// tests/unit/test_cpp20_container_helpers.cpp already covers the read
-// half (hasPacketID under each of the four set types) and the duplicate
-// refusal in addPacketID. This file covers deletePacketID, which had
-// nothing on it at all: its membership test was inverted, so it threw
-// NoSuchElementException for an id the set really held and fell through
-// to std::set::erase(end()) for one it did not.
-//
-// The contract asserted here is the observable one - what the set holds
-// afterwards, read back through hasPacketID and toString - rather than
-// the spelling of the test inside the function.
-//
-// Note on the guard in DeleteOfAnAbsentIDThrowsAndLeavesTheSetAlone:
-// the absent-id path was undefined behaviour before the fix, and MSVC's
-// debug iterators abort the process on erase(end()), which would take
-// the whole suite down instead of reporting one failed test. That test
-// therefore establishes that a delete of a present id works before it
-// enters the path, and reports rather than crashes when it does not.
+// PacketIDSet::deletePacketID - what the set holds afterwards, read back
+// through hasPacketID and toString. The read half and addPacketID's
+// duplicate refusal are in test_cpp20_container_helpers.cpp.
 //
 //----------------------------------------------------------------------
 
@@ -36,12 +19,8 @@
 
 namespace {
 
-//----------------------------------------------------------------------
-// The set exposes no size of its own, so the count comes out of the one
-// public view of its contents: toString() renders every id it holds,
-// space separated, after the "PacketID:" label and before the closing
-// parenthesis.
-//----------------------------------------------------------------------
+// The set exposes no size, so the count comes out of toString(): every
+// id, space separated, after "PacketID:" and before the ')'.
 int		IDCount(const PacketIDSet& idSet)
 {
 	const std::string				rendered	= idSet.toString();
@@ -72,10 +51,7 @@ int		IDCount(const PacketIDSet& idSet)
 	return count;
 }
 
-//----------------------------------------------------------------------
-// Whether deleting an id the set really holds is accepted. Used as a
-// guard by the absent-id test, on its own throwaway set.
-//----------------------------------------------------------------------
+// Whether deleting an id the set really holds is accepted.
 bool	DeleteOfAPresentIDIsAccepted()
 {
 	PacketIDSet	probe(CPS_NONE, PacketIDSet::PIST_NORMAL);
@@ -143,9 +119,8 @@ TEST(PacketIDSet, DeleteRemovesThePresentID)
 //----------------------------------------------------------------------
 TEST(PacketIDSet, DeleteOfAnAbsentIDThrowsAndLeavesTheSetAlone)
 {
-	// Guard, not the subject of this test: see the file header. Without
-	// a working delete of a present id, the call below is the undefined
-	// erase(end()) and would abort the suite rather than fail a test.
+	// Guard: without a working delete of a present id, the call below is
+	// an undefined erase(end()) that would abort the whole suite.
 	const bool	bDeleteIsAccepted = DeleteOfAPresentIDIsAccepted();
 	CHECK(bDeleteIsAccepted);
 	if (!bDeleteIsAccepted)

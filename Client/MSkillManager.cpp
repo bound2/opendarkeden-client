@@ -6,7 +6,7 @@
 #include "MTypeDef.h"
 #include "MItem.h"		// the item host carries the millisecond clock the delays run on
 
-#include <algorithm>	// std::ranges::find, for the step list's membership test
+#include <algorithm>
 
 //----------------------------------------------------------------------
 //
@@ -1347,8 +1347,6 @@ MSkillDomain::UnLearnSkill(ACTIONINFO id)
 BOOL
 MSkillDomain::IsExistSkillStep(SKILL_STEP ss) const
 {
-	// Membership only: the list behind the step is never read here, so
-	// the lookup existed to be compared with the end iterator.
 	return m_mapSkillStep.contains( ss ) ? TRUE : FALSE;
 }
 
@@ -1388,9 +1386,7 @@ MSkillDomain::AddSkillStep(SKILL_STEP ss, ACTIONINFO ai)
 	}
 
 	// Is ai in the list already? The list itself is searched; it used
-	// to be copied whole for this, once per skill added. The hand
-	// written scan compared elements with operator==, which is what
-	// std::ranges::find over the same vector does.
+	// to be copied whole for this, once per skill added.
 	if( std::ranges::find( *pList, ai ) == pList->end() )
 //		pList->push_back( ai );
 	{

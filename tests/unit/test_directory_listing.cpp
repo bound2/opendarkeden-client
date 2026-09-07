@@ -2,19 +2,9 @@
 // test_directory_listing.cpp
 //----------------------------------------------------------------------
 //
-// basic/DirectoryListing - the std::filesystem replacement for the
-// _findfirst / _findnext walks in ProfileManager and Client.cpp
-// (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md, priority 6).
-//
-// The migrated callers are executable-side and have no test path, so the
-// contract they were migrated against is pinned here instead: the match
-// set, the case-insensitive ordinal order an NTFS _findnext walk produced,
-// the treatment of subdirectories, and the promise that an absent
-// directory is a false return rather than an exception.
-//
-// The expectations below were checked against FindFirstFileW on this
-// machine before they were written down - see the semantics table in
-// basic/DirectoryListing.h.
+// basic/DirectoryListing: the match set, the NTFS ordinal order, the
+// subdirectory filter and the failure contract, as measured against
+// FindFirstFileW (see the table in basic/DirectoryListing.h).
 //
 //----------------------------------------------------------------------
 
@@ -278,12 +268,7 @@ TEST(DirectoryListing, SubdirectoriesAreExcludedUnlessAskedFor)
 }
 
 
-//----------------------------------------------------------------------
-// The file dialog (C_VS_UI_FILE_DIALOG::RefreshFileList) is the one
-// caller that hands over a directory with its trailing separator still
-// on - "c:\a\b\" - because it strips only the "*.*" off its search
-// pattern. The listing, its order and the bare names must not change.
-//----------------------------------------------------------------------
+// The file dialog hands over a directory with its trailing separator on.
 TEST(DirectoryListing, ATrailingSeparatorOnTheDirectoryChangesNothing)
 {
 	const SScratchDirectory Scratch;

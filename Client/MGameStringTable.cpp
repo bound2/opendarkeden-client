@@ -6,7 +6,7 @@
 #include "Properties.h"
 #include "DebugLog.h"
 
-#include <string_view>	// starts_with, for the language file's line prefixes
+#include <string_view>
 
 
 //----------------------------------------------------------------------
@@ -80,10 +80,6 @@ UseEnglishTextFrom(const char* szLanguageInfoFile)
 			continue;
 		}
 
-		// "LANGUAGE" is exactly eight characters, so the strncmp over
-		// eight bytes this replaces and starts_with are the same test:
-		// a shorter line stops the comparison at its own terminator
-		// either way, and neither reads past it.
 		if (svLine.starts_with("LANGUAGE"))
 		{
 			sscanf(szLine + 8, "%d", &language);

@@ -49,11 +49,7 @@ void CGPortCheck::write ( Datagram & oDatagram ) const
 	//--------------------------------------------------
 	// write PC name
 	//--------------------------------------------------
-	// The cap runs on the std::string's own size, BEFORE the narrowing
-	// to the BYTE that goes on the wire: (BYTE)276 is 20, so a
-	// 276-character name used to pass this test and then go out whole
-	// behind a length byte claiming 20. (Datagram has no span overload,
-	// so the bounded write is the pointer/length one.)
+	// Cap the std::string's own size, before narrowing to the length byte.
 	if ( m_PCName.size() > 20 )
 		throw InvalidProtocolException("too long name length");
 

@@ -20,9 +20,6 @@
 #include <arpa/inet.h>
 #endif
 #include "DebugLog.h"
-// std::filesystem directory enumeration, in place of the FindFirstFile walk
-// InitGame() used to run over the DLLs beside the executable
-// (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md, priority 6).
 #include "DirectoryListing.h"
 #include "Client.h"
 #include "GameObject.h"
@@ -1568,46 +1565,18 @@ InitGame()
 		g_pNickNameStringTable = new MStringArray;
 	}
 	//yckou begin: check invalid *.dll
-	//---------------------------------------------------------------------
-	// An older copy of the startup DLL whitelist in Client.cpp, kept
-	// separate on purpose: its control flow is not the same one. Here an
-	// unlisted name only breaks out of the walk, and g_wAuthKeyMap is
-	// assigned exactly when the walk runs off the end of a non-empty
-	// listing - that is, when the directory holds at least one *.dll and
-	// every one of them is whitelisted. The migrated loop reproduces that
-	// condition by assigning on the last entry, which is only reached when
-	// no earlier entry has broken out.
-	//
-	// g_wAuthKeyMap is defined as 0x5154 at Client/Client.cpp:182, and
-	// the only other assignment (Client/Client.cpp:3221, in the dead
-	// #ifdef DEBUG_INFO branch) writes the same value, so this walk
-	// changes nothing in effect today. It is migrated faithfully rather
-	// than deleted, and its list is left exactly as it is - shorter than
-	// Client.cpp's - because merging the two would be a behavioural
-	// change, not a refactor.
-	//
-	// Directories are listed as well as files, for the same reason as in
-	// Client.cpp: FindFirstFile("*.dll") returned a subdirectory whose name
-	// ends in ".dll" and the body judges the name alone. The deviations
-	// spelled out at the Client.cpp whitelist apply here too: 8.3 aliases,
-	// the all-or-nothing mid-walk error (which here leaves g_wAuthKeyMap
-	// alone where the legacy loop might have reached the assignment), and
-	// the non-ASCII fold, inert for this pattern. DOS_DOT does not apply,
-	// because "*.dll" has a real extension.
-	//---------------------------------------------------------------------
+	// An older, shorter copy of the DLL whitelist in Client.cpp; here an
+	// unlisted name only breaks out of the walk, and g_wAuthKeyMap is set
+	// only when every entry of a non-empty listing is whitelisted.
 	std::string InvalidDll;
 	std::vector<Basic::SDirectoryEntry> vDllEntries;
 
-	// A directory that cannot be enumerated at all left g_wAuthKeyMap
-	// alone, which is what INVALID_HANDLE_VALUE did here.
 	if (Basic::ListDirectory(".", "*.dll", vDllEntries, Basic::LIST_FILES_AND_DIRECTORIES))
 	{
 		for (size_t iDll=0; iDll<vDllEntries.size(); iDll++)
 		{
 			InvalidDll = vDllEntries[iDll].sName;
 
-			// The same byte-wise ASCII fold as before, now applied to the
-			// std::string instead of the WIN32_FIND_DATA buffer.
 			size_t iLen = InvalidDll.size();
 			for (size_t j=0;j<iLen;j++)
 			{
@@ -1640,9 +1609,6 @@ InitGame()
 				InvalidDll != "xerces-c_2_4_0.dll")
 				break;
 
-			// The legacy walk assigned this when FindNextFile() failed
-			// after the last entry; the last entry of the listing is the
-			// same moment.
 			if (iDll + 1 == vDllEntries.size())
 			{
 				g_wAuthKeyMap = 0x5154;

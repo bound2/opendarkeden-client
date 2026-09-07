@@ -164,20 +164,10 @@ void SocketOutputStream::write ( const Packet * pPacket )
 	__BEGIN_TRY
 
 	// The framing header goes into the ring before the body, and the body
-	// write can throw - every bounded write() in the tree refuses input it
-	// cannot express, and the span core above throws on its own. Without a
-	// rollback the ring would keep a header announcing a body that never
-	// followed, and the peer would parse the NEXT packet's bytes as that
-	// body; the sequence counter would also have advanced for a packet
-	// that never went out. Remember both, and put them back on the way out.
-	//
-	// The saved LENGTH, not the saved tail: a body big enough to fill the
-	// ring makes write() resize(), which reallocates the buffer and moves
-	// the retained bytes to offset zero (m_Head becomes 0). What survives a
-	// rollback is always the first savedLength bytes from the current head,
-	// wherever the head now is - which is also what makes this correct when
-	// the ring has wrapped, since restoring the tail to head + savedLength
-	// reaches back around the wrap and the bytes past it are dead.
+	// write can throw; roll both back so the ring never keeps a header
+	// announcing a body that never followed. The saved LENGTH, not the
+	// saved tail: a resize() during the body write moves the retained
+	// bytes, and the length is what survives that.
 	const uint savedLength = length();
 	const BYTE savedSequence = m_Sequence;
 
@@ -194,15 +184,6 @@ void SocketOutputStream::write ( const Packet * pPacket )
 		write( (char*)&m_Sequence, szSequenceSize);
 		m_Sequence++;
 
-		// A per-packet trace of the framing header, and not upstream's:
-		// 6ded7df added it while bringing the login scene up, in the very
-		// hunk that commented out the __DEBUG_OUTPUT__-gated trace that
-		// used to stand here, and it has been unconditional ever since. It
-		// runs on every packet the client sends - movement, attacks, chat -
-		// formatting the absolute source path and three integers into a
-		// stdout that a WIN32-subsystem executable has no console for.
-		// Gate it the way every other debug trace in these two stream
-		// classes is gated.
 		#ifdef __DEBUG_OUTPUT__
 			printf("%s:%d SocketOutputStream::write packetID: %d, packetSZ: %d sequence %d\n",
 				__FILE__, __LINE__,
@@ -294,27 +275,14 @@ uint SocketOutputStream::flush ()
 		
 	} catch ( NonBlockingIOException ) {
 
-		// The socket took what it could and refused the rest. Nothing is
-		// lost by catching this: send() returns the count it accepted,
-		// which may be short, and SocketAPI::send_ex only throws this
-		// when the underlying send() returned SOCKET_ERROR - so the call
-		// that threw transferred nothing, and every byte that did go out
-		// is already in m_Head, which the loops advanced by each returned
-		// count. m_Head therefore names the first byte the peer has not
-		// received, and the ring is left holding exactly the remainder
-		// for the next flush.
-		//
-		// Dropping that remainder is what this used to do, and it cut the
-		// peer's frame mid-packet: the bytes of the next packet were then
-		// read as the rest of this one, and the session stayed a frame
-		// out from there on.
+		// The socket took what it could and refused the rest. m_Head names
+		// the first byte the peer has not received, so the ring is left
+		// holding exactly the remainder for the next flush; dropping it
+		// would cut the peer's frame mid-packet.
 
 	}
 
-	// Only an emptied ring is normalised back to offset zero - which is
-	// worth doing, since it keeps a long session's live run from walking
-	// into a wrap it never needed. A ring that still holds something
-	// keeps its head where the send loops left it.
+	// Only an emptied ring is normalised back to offset zero.
 	if ( m_Head == m_Tail )
 		m_Head = m_Tail = 0;
 

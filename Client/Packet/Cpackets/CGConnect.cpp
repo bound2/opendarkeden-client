@@ -71,10 +71,7 @@ void CGConnect::write ( SocketOutputStream & oStream ) const
 	//--------------------------------------------------
 	// write PC name
 	//--------------------------------------------------
-	// The cap runs on the std::string's own size, BEFORE the narrowing
-	// to the BYTE that goes on the wire: (BYTE)276 is 20, so a
-	// 276-character name used to pass this test and then go out whole
-	// behind a length byte claiming 20.
+	// Cap the std::string's own size, before narrowing to the length byte.
 	if ( m_PCName.size() > 20 )
 		throw InvalidProtocolException("too long pc name length");
 

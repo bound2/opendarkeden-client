@@ -48,14 +48,8 @@ void __assert__ ( const char * file , uint line , const char * func , const char
 //
 // __assert__ - C++20 entry point
 //
-// What Assert() reaches now. The site was captured at the failing line by
-// the defaulted DiagnosticSite rather than forwarded from it, and is handed
-// to the function above unchanged, so the logged line and the thrown
-// AssertionError's message are byte for byte what they were.
-//
-// The captured function name is deliberately NOT used: the Windows macro
-// passed "" and the others passed __PRETTY_FUNCTION__, and which of the two
-// this platform wants is still decided by the macro and passed in func.
+// The captured function name is deliberately not used: which spelling this
+// platform wants is decided by the Assert macro and passed in func.
 //
 //--------------------------------------------------------------------------------
 void __assert__ ( const char * func , const char * expr , const DiagnosticSite & site )

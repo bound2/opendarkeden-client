@@ -2,45 +2,13 @@
 // test_packet_source_location.cpp
 //----------------------------------------------------------------------
 //
-// The second std::source_location slice
-// (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md, modernization
-// backlog priority 1): the explicit __FILE__/__LINE__ forwarders in the
-// packet wire layer, converted to capture their site instead.
+// DiagnosticSite, __END_CATCH, Assert() and ClientPlayer.cpp's
+// packet-skip notice: each captures its site through a defaulted
+// std::source_location instead of forwarding __FILE__ and __LINE__.
 //
-// Three call shapes changed, and the whole claim about all three is that
-// nothing observable moved - the same string is logged, the same string
-// is pushed onto a stack trace, the same type is thrown. So the pins
-// below are exact strings, built from this translation unit's own
-// __FILE__ and __LINE__, not "the line is non-zero" checks. A defaulted
-// std::source_location::current() is evaluated at the CALL site, and
-// here it is nested one level - it is the default argument of the
-// DiagnosticSite constructor, which is itself the default argument of
-// the entry point. A compiler that resolved it to the header would
-// report Exception.h's own line for every __END_CATCH in the tree, and
-// that is exactly what these comparisons would catch.
-//
-// What each site produced BEFORE the conversion, read off the old code:
-//
-//   __END_CATCH (Exception.h) expanded to
-//       } catch ( Throwable & t ) { t.addStack(__FILE__, __LINE__); throw; }
-//   and addStack pushes "<file>:<line>", which getStackTrace() renders
-//   as one leading space per depth followed by that string and '\n'.
-//
-//   Assert(expr) (PacketAssert.h, the __WIN32__ branch) expanded to
-//       __assert__(__FILE__,__LINE__,"",#expr)
-//   and __assert__ builds, with func == "" being non-NULL and therefore
-//   still contributing its separator:
-//       "\nAssertion Failed : <file> : <line> : <expr> at <ctime>"
-//   then writes that to assertion_failed.log and throws AssertionError
-//   carrying it. (The tests below therefore append to that file in the
-//   ctest working directory, exactly as a failing Assert always has.)
-//
-//   ClientPlayer.cpp's packet-skip notice was
-//       DEBUG_ADD_FORMAT("[PacketSkip] So many Packets. MaxProcessPacket:%d,"
-//                        " CurrentPacket:%d, File:%s, Line:%d",
-//                        maxProcessPacket, processedPacket, __FILE__, __LINE__)
-//   i.e. log_write(LOG_LEVEL_INFO, __FILE__, __LINE__, ...) with the same
-//   file and line repeated inside the message body.
+// The pins are exact strings built from this translation unit's own
+// __FILE__ and __LINE__, because the failure mode worth catching is a
+// capture that resolves to the header's line rather than the caller's.
 //
 //----------------------------------------------------------------------
 
@@ -59,25 +27,15 @@
 
 namespace {
 
-//----------------------------------------------------------------------
-// A failing Assert appends its message to assertion_failed.log in the
-// working directory, exactly as it always has. The tests that provoke
-// one remove the file afterwards, so the ctest directory does not grow
-// a line per run.
-//----------------------------------------------------------------------
+// A failing Assert appends to assertion_failed.log; clean it up.
 void	RemoveAssertionLog()
 {
 	std::error_code Error;
 	std::filesystem::remove("assertion_failed.log", Error);
 }
 
-//----------------------------------------------------------------------
-// The __END_CATCH probe.
-//
-// The macro has to be expanded in a real function for its capture to
-// mean anything, so the line it occupies is recorded from inside, one
-// statement above it, rather than counted from outside the function.
-//----------------------------------------------------------------------
+// The __END_CATCH probe: the line the macro occupies is recorded from
+// inside the function rather than counted from outside it.
 int	g_n_end_catch_line = 0;
 
 void
@@ -85,44 +43,28 @@ ThrowThroughEndCatch()
 {
 	__BEGIN_TRY
 
-	// __END_CATCH is three lines below this comment, two below the
-	// assignment.
+	// __END_CATCH is two lines below the assignment.
 	g_n_end_catch_line = __LINE__ + 2;
 	throw Exception("a message from the unit tests");
 	__END_CATCH
 }
 
-//----------------------------------------------------------------------
-// A NUL used to follow every character streamed into a StringStream: its
-// operator<<(char) built std::string(2, '\0') and wrote the character
-// into the first byte, so the second byte survived into the result. Both
-// texts pinned below carried one, and the expectations spelled it out
-// rather than trimming it away - which is how it was found. That defect
-// is fixed by this commit, so a streamed newline is now just a newline.
-// tests/unit/test_string_stream.cpp pins the operators themselves.
-//----------------------------------------------------------------------
 const std::string	NEWLINE("\n");
 
-//----------------------------------------------------------------------
 // The stack trace Throwable renders for a single frame: one space, the
 // "file:line" string addStack pushed, and a streamed newline.
-//----------------------------------------------------------------------
 std::string
 OneFrame(const std::string& file, int line)
 {
 	return " " + file + ":" + std::to_string(line) + NEWLINE;
 }
 
-//----------------------------------------------------------------------
-// Everything a failed assertion writes before the timestamp ctime()
-// appends, which is the only part that legitimately differs run to run.
-//----------------------------------------------------------------------
+// Everything a failed assertion writes before ctime()'s timestamp.
 std::string
 AssertionPrefix(const std::string& file, int line, const std::string& func, const std::string& expr)
 {
-	// func is streamed only when it is non-NULL, and an empty function
-	// name is non-NULL - so its separator is emitted either way, and no
-	// separator ever appears between func and expr.
+	// func is streamed only when non-NULL, and "" is non-NULL, so its
+	// separator is emitted either way and none appears before expr.
 	return NEWLINE + "Assertion Failed : " + file + " : " + std::to_string(line)
 		+ " : " + func + expr + " at ";
 }
@@ -140,11 +82,6 @@ StartsWith(const std::string& text, const std::string& prefix)
 // DiagnosticSite
 //----------------------------------------------------------------------
 
-//----------------------------------------------------------------------
-// The type the two converted macros go through. Its default constructor
-// must report the caller, and its (file, line) constructor must report
-// exactly what it is handed and claim no function name it does not have.
-//----------------------------------------------------------------------
 TEST(PacketSourceLocation, DiagnosticSiteCapturesTheCallersLine)
 {
 	const int		n_expected_line = __LINE__ + 1;
@@ -167,11 +104,6 @@ TEST(PacketSourceLocation, DiagnosticSiteCapturesTheCallersLine)
 // Throwable::addStack and __END_CATCH
 //----------------------------------------------------------------------
 
-//----------------------------------------------------------------------
-// The no-argument overload is what __END_CATCH calls now. It must push
-// the same "file:line" string the two-argument overload pushed when the
-// macro forwarded __FILE__ and __LINE__ into it.
-//----------------------------------------------------------------------
 TEST(PacketSourceLocation, AddStackEntryPointRecordsTheCallersSite)
 {
 	Throwable	t("a message from the unit tests");
@@ -183,19 +115,12 @@ TEST(PacketSourceLocation, AddStackEntryPointRecordsTheCallersSite)
 	CHECK(t.getMessage() == "a message from the unit tests");
 }
 
-//----------------------------------------------------------------------
-// The (file, line) overload is untouched and still records exactly what
-// it is given - it is what the captured overload delegates to, so the
-// two must agree about the same site.
-//----------------------------------------------------------------------
 TEST(PacketSourceLocation, AddStackCompatibilityOverloadRecordsWhatItIsGiven)
 {
 	Throwable	t_explicit;
 	t_explicit.addStack("GameInit.cpp", 4242);
 	CHECK(t_explicit.getStackTrace() == OneFrame("GameInit.cpp", 4242));
 
-	// Handed this translation unit's own __FILE__ and __LINE__, the old
-	// spelling renders what the captured one renders for itself.
 	Throwable		t_forwarded;
 	const int		n_forwarded_line = __LINE__ + 1;
 	t_forwarded.addStack(__FILE__, __LINE__);
@@ -207,18 +132,10 @@ TEST(PacketSourceLocation, AddStackCompatibilityOverloadRecordsWhatItIsGiven)
 	CHECK(t_forwarded.getStackTrace() == OneFrame(__FILE__, n_forwarded_line));
 	CHECK(t_captured.getStackTrace() == OneFrame(__FILE__, n_captured_line));
 
-	// Same shape, different line: neither overload is quietly reporting
-	// the header's own location.
+	// Same shape, different line: neither reports the header's location.
 	CHECK(t_forwarded.getStackTrace() != t_captured.getStackTrace());
 }
 
-//----------------------------------------------------------------------
-// The population that mattered: every method in the wire layer is
-// wrapped in __BEGIN_TRY/__END_CATCH, and the macro no longer spells
-// __FILE__ and __LINE__. The frame it pushes must name the line the
-// macro was written on - the header's own line would be the failure
-// mode worth catching.
-//----------------------------------------------------------------------
 TEST(PacketSourceLocation, EndCatchRecordsTheLineOfTheMacroUse)
 {
 	bool	b_caught = false;
@@ -232,9 +149,7 @@ TEST(PacketSourceLocation, EndCatchRecordsTheLineOfTheMacroUse)
 		b_caught = true;
 
 #ifdef NDEBUG
-		// __BEGIN_TRY/__END_CATCH compile away entirely under NDEBUG,
-		// so there is no frame to name. Debug is where this slice is
-		// verified; this branch only keeps the test honest elsewhere.
+		// __BEGIN_TRY/__END_CATCH compile away under NDEBUG.
 		CHECK(t.getStackTrace().empty());
 #else
 		CHECK(g_n_end_catch_line != 0);
@@ -251,11 +166,6 @@ TEST(PacketSourceLocation, EndCatchRecordsTheLineOfTheMacroUse)
 // __assert__ and Assert()
 //----------------------------------------------------------------------
 
-//----------------------------------------------------------------------
-// The C++20 entry point: the site arrives captured rather than
-// forwarded, and the message is the one the old four-argument call
-// produced, character for character up to ctime()'s timestamp.
-//----------------------------------------------------------------------
 TEST(PacketSourceLocation, AssertEntryPointRecordsTheCallersSite)
 {
 	bool	b_caught = false;
@@ -275,24 +185,14 @@ TEST(PacketSourceLocation, AssertEntryPointRecordsTheCallersSite)
 	CHECK(b_caught);
 }
 
-//----------------------------------------------------------------------
-// Assert(expr) itself, which is the shape every live assertion in the
-// wire layer uses. On this platform the macro passes an empty function
-// name, and
-// that empty name is still non-NULL inside __assert__ - so its " : "
-// separator is still emitted and no separator appears before the
-// expression. Both quirks are pinned here because keeping them is the
-// point: the conversion may not move a single character.
-//----------------------------------------------------------------------
+// On this platform the macro passes an empty function name.
 TEST(PacketSourceLocation, AssertMacroRecordsTheLineOfTheMacroUse)
 {
 	const bool	b_false = false;
 	bool		b_caught = false;
 
 #ifdef NDEBUG
-	// Assert() compiles away entirely under NDEBUG (PacketAssert.h), so
-	// nothing throws. Debug is where this slice is verified; this branch
-	// only keeps the test honest elsewhere.
+	// Assert() compiles away under NDEBUG (PacketAssert.h).
 	Assert(b_false);
 	CHECK_EQ(false, b_caught);
 #else
@@ -326,13 +226,6 @@ TEST(PacketSourceLocation, AssertMacroRecordsTheLineOfTheMacroUse)
 	RemoveAssertionLog();
 }
 
-//----------------------------------------------------------------------
-// The four-argument entry point is unchanged and still writes exactly
-// what it is handed, including the missing separator between a non-empty
-// function name and the expression. Nothing in the tree calls it
-// directly today; the captured overload delegates to it, so this is the
-// pin on the text both spellings share.
-//----------------------------------------------------------------------
 TEST(PacketSourceLocation, AssertCompatibilityOverloadRecordsWhatItIsGiven)
 {
 	bool	b_caught = false;
@@ -349,9 +242,7 @@ TEST(PacketSourceLocation, AssertCompatibilityOverloadRecordsWhatItIsGiven)
 
 	CHECK(b_caught);
 
-	// A NULL function name drops its separator with it, which leaves the
-	// line number and the expression run together. Nothing passes NULL
-	// today; the case is pinned so the delegation above cannot start.
+	// A NULL function name drops its separator with it.
 	b_caught = false;
 
 	try {
@@ -374,21 +265,9 @@ TEST(PacketSourceLocation, AssertCompatibilityOverloadRecordsWhatItIsGiven)
 // ClientPlayer.cpp's packet-skip notice
 //----------------------------------------------------------------------
 
-//----------------------------------------------------------------------
-// That site is inside ClientPlayer::processCommand, behind a socket and
-// a full packet queue, so the line it emits cannot be provoked from a
-// test binary. What can be pinned is the shape it was converted to: the
-// message repeats the file and line the log header already carries, and
-// after the conversion both come from one captured site. So the old
-// spelling and the new one are written here side by side, into the file
-// sink, and the two lines must be the same line but for the number each
-// one names for itself.
-//
-// The logging system is initialised for the duration of this test only
-// and put back afterwards, and the timestamp - the one part of a line
-// that legitimately differs between two calls - is cut off before the
-// comparison.
-//----------------------------------------------------------------------
+// The live site is unreachable from a test binary, so the old spelling
+// and the new one are written side by side into the file sink; the two
+// lines must match but for the number each names for itself.
 TEST(PacketSourceLocation, PacketSkipLineIsWhatTheMacroProduced)
 {
 	static const char* const	sz_format =
@@ -435,7 +314,7 @@ TEST(PacketSourceLocation, PacketSkipLineIsWhatTheMacroProduced)
 	if (lines.size() == 2)
 	{
 		// DebugLog prints the basename in the header and whatever it was
-		// handed in the body, which is the full __FILE__ either way.
+		// handed in the body.
 		const std::string	expected_macro =
 			"[INFO ] [test_packet_source_location.cpp:" + std::to_string(n_macro_line)
 			+ "] [PacketSkip] So many Packets. MaxProcessPacket:30, CurrentPacket:31, File:"
@@ -449,9 +328,7 @@ TEST(PacketSourceLocation, PacketSkipLineIsWhatTheMacroProduced)
 		CHECK(lines[0] == expected_macro);
 		CHECK(lines[1] == expected_site);
 
-		// The header and the body of the converted line name the same
-		// site, which is the property the conversion actually buys: the
-		// two halves are now one value.
+		// The header and the body of the converted line name one site.
 		CHECK(lines[1].find(":" + std::to_string(n_site_line) + "]") != std::string::npos);
 		CHECK(lines[1].find("Line:" + std::to_string(n_site_line)) != std::string::npos);
 	}

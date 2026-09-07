@@ -44,9 +44,6 @@ void CGSkillToTile::read (SocketInputStream & iStream)
 	else
 #endif
 	{
-		// SkillType_t and CEffectID_t are WORD, Coord_t is BYTE. All three
-		// are exact-width types, so the wire scalar constraint pins each
-		// field at the width szSkillType/szCEffectID/szCoord asked for.
 		iStream.readWire(m_SkillType);
 		iStream.readWire(m_CEffectID);
 		iStream.readWire(m_X);
