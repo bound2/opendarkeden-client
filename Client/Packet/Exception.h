@@ -83,7 +83,7 @@ public :
 
 	// The same, with the location captured at the caller rather than
 	// forwarded. This is what __END_CATCH calls.
-	void addStack ( const DiagnosticSite & site = DiagnosticSite() ) noexcept
+	void addStack ( const DiagnosticSite & site = DiagnosticSite() )
 	{
 		addStack( site.file, site.line );
 	}

@@ -271,8 +271,9 @@ bases declare, so they belong in the same commit as the base they mirror. The
 `throw()` half of that is the part that cannot be deferred: once a base is
 `noexcept`, an override that is not stops compiling.
 
-**Packet-root status (2026-09-07):** the 155 files directly under
-`Client/Packet` are at 0, from 1,799, and **R10 = 9,664**. The work went as
+**Packet-root status (2026-09-07):** the 162 files directly under
+`Client/Packet` are at 0 - 143 of them carried a specification, 1,799 in
+all - and so is `tests/`; **R10 = 9,664**. The work went as
 four slices - the wire core (the exception header, the asserts, the string
 stream, the sockets, the datagram classes, the streams and the file API, 524
 sites), the packet framework and the player classes (224), the
@@ -319,8 +320,9 @@ each slice applied, and the numbers it produced:
   `getPacketMaxSize` (448 factory subclasses in the packet directories, still
   `throw()` and rewritten by later slices; `GCPetStashListFactory` and
   `GCGoodsListFactory` already call an unspecified `getPacketMaxSize`),
-  `DatagramPacket`'s pure virtuals, `ModifyInfo::getPacketSize` (about
-  thirty overrides in `Gpackets`) and `WarInfo::getSize`, whose overrides add
+  `DatagramPacket`'s pure virtuals, `ModifyInfo::getPacketSize` (not
+  virtual, but about thirty `Gpackets` classes declare a member of the same
+  name that hides it) and `WarInfo::getSize`, whose overrides add
   `ValueList::getPacketSize`. A base with no specification compiles under any
   override, which is the property the packet-directory slices need.
 - **The two things this finding said should travel with the slice did**:

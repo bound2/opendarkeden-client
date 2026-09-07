@@ -810,6 +810,7 @@ check "R8 (printf-family calls whose format is not a literal)" "$R8" "$R8_BASELI
 # wire interfaces and must match the specifications on their bases).
 # 11,463 + 284 + 34 + 9 = 11,790, which is every .h and .cpp in the
 # repository outside comments - 8,513 empty and 3,277 non-empty.
+# The nine in tests/ went with the packet-root slice, 2026-09-07.
 #----------------------------------------------------------------------
 # R9 = 0, and it is not a removal. The first conformance slice
 # (2026-09-06) went looking for basic/'s specifications and found none:
@@ -832,9 +833,10 @@ R9_BASELINE=0
 # giving them noexcept would turn a designed peer teardown into
 # std::terminate.
 #
-# R10 = 9,664 (2026-09-07): the 155 files directly under Client/Packet
-# are at 0 - the wire core, the packet framework and players, and the
-# info classes, 1,799 sites. What is left is the packet directories:
+# R10 = 9,664 (2026-09-07): the 162 files directly under Client/Packet
+# are at 0 - 143 of them carried a specification: the wire core, the
+# packet framework and players, and the info classes, 1,799 sites - and
+# so is tests/. What is left is the packet directories:
 # Cpackets, Gpackets, Lpackets, Rpackets, Upackets and Types. Ten
 # destructors that carried a type list are spelled noexcept(false),
 # which this pattern does not count; everything else is deleted or
