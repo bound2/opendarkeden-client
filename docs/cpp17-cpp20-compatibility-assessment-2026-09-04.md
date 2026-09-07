@@ -96,6 +96,25 @@ For a real upgrade, the build contract should:
 Passing `/std:c++20` in an ad hoc flags variable is useful for an audit but should
 not be the committed implementation.
 
+**Build-contract status (2026-09-07):** `CMAKE_CXX_STANDARD 20` with
+`CMAKE_CXX_STANDARD_REQUIRED ON` was already the contract (PR #83), and the
+root `CMakeLists.txt` now adds `CMAKE_CXX_EXTENSIONS OFF` and, for MSVC,
+`/permissive-` and `/Zc:__cplusplus` on every C++ target through
+`add_compile_options`, next to `/MP`. With findings 3 and 4 closed the whole
+tree - 1,241 translation units, the tests included - builds under
+`/permissive-` with **0 errors**, and every test passes in the plain and the
+ASan tree, so there was no strict-mode workload left to schedule: the
+string-literal fixes of finding 5 and the exception and `register` sweeps
+were the whole of it. One trap, recorded because the first probe fell into
+it: passing `/permissive-` in `-DCMAKE_CXX_FLAGS=` on the configure line
+replaces CMake's MSVC defaults, `/EHsc` among them, and without `/EHsc` a
+C++ exception cannot be caught by type - six tests failed with "uncaught
+exception of unknown type" and the receive-loop test saw packets leak on the
+throw path, none of which had anything to do with conformance. The committed
+change adds the option and keeps the defaults. The second-compiler job is
+still open: clang 19 is on this machine but the ClangCL toolset is not, and
+a Linux or macOS build is a port, not a language-mode question.
+
 ## Build experiments
 
 The audit used CMake 4.4.3, MSVC 19.44.35228, Windows SDK 10.0.22621, the existing
