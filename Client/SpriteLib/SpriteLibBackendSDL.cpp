@@ -409,11 +409,13 @@ int spritectl_blt_sprite_rle(spritectl_surface_t dest, int x, int y,
 	int dest_bytes_per_pixel = sdl_surface->format->BytesPerPixel;
 	int dest_stride = dest_pitch / dest_bytes_per_pixel;  /* Number of pixels per row */
 
-	/* Calculate clipping rect */
-	int clip_left = (x < 0) ? -x : 0;
-	int clip_top = (y < 0) ? -y : 0;
-	int clip_right = (x + sprite->width > dest_width) ? dest_width - x : sprite->width;
-	int clip_bottom = (y + sprite->height > dest_height) ? dest_height - y : sprite->height;
+    // Direct RLE writes bypass SDL_BlitSurface, so apply the same destination
+    // clip explicitly. SDL_SetClipRect already intersects it with the surface.
+    const SDL_Rect& viewport = sdl_surface->clip_rect;
+    int clip_left = SDL_max(0, viewport.x - x);
+    int clip_top = SDL_max(0, viewport.y - y);
+    int clip_right = SDL_min(sprite->width, viewport.x + viewport.w - x);
+    int clip_bottom = SDL_min(sprite->height, viewport.y + viewport.h - y);
 
 	if (clip_left >= clip_right || clip_top >= clip_bottom) {
 		if (SDL_MUSTLOCK(sdl_surface)) {

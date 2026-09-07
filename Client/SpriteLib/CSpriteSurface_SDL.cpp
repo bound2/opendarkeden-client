@@ -31,14 +31,13 @@ int CSpriteSurface::s_Value1 = 1;
 int CSpriteSurface::s_Value2 = 31;
 int CSpriteSurface::s_Value3 = 1;
 
-/*
- * The 16-bit (non-palette) effect routines were never ported: the
- * header declares memcpyEffectDarker and its siblings, but no SDL
- * translation unit defines them, so this table has to stay empty and
- * memcpyEffect falls back to a plain copy.
- */
+// Register the non-palette effects restored for skill and rank icons.
+// Other legacy effects keep the existing plain-copy fallback until ported.
 FUNCTION_MEMCPYEFFECT CSpriteSurface::s_pMemcpyEffectFunction = NULL;
-FUNCTION_MEMCPYEFFECT CSpriteSurface::s_pMemcpyEffectFunctionTable[MAX_EFFECT] = {0};
+FUNCTION_MEMCPYEFFECT CSpriteSurface::s_pMemcpyEffectFunctionTable[MAX_EFFECT] = {
+    NULL, CSpriteSurface::memcpyEffectGrayScale, NULL, NULL, NULL, NULL, NULL, NULL,
+    CSpriteSurface::memcpyEffectGradation
+};
 
 /*
  * The palette effect routines are compiled (CSpriteSurface_Effects.cpp),
@@ -447,7 +446,10 @@ void CSpriteSurface::memcpyAlpha(WORD* pDest, WORD* pSource, WORD pixels)
 
 void CSpriteSurface::memcpyColor(WORD* pDest, WORD* pSource, WORD pixels)
 {
-	/* TODO: Implement */
+    // rgb_RED / rgb_GREEN / rgb_BLUE select one original color channel.
+    const WORD masks[] = {0xf800, 0x07e0, 0x001f};
+    const WORD mask = s_Value1 >= 0 && s_Value1 < 3 ? masks[s_Value1] : 0xffff;
+    for (int i = 0; i < pixels; ++i) pDest[i] = pSource[i] & mask;
 }
 
 void CSpriteSurface::memcpyScale(WORD* pDest, WORD destPitch, WORD* pSource, WORD pixels)
@@ -457,7 +459,12 @@ void CSpriteSurface::memcpyScale(WORD* pDest, WORD destPitch, WORD* pSource, WOR
 
 void CSpriteSurface::memcpyDarkness(WORD* pDest, WORD* pSource, WORD pixels)
 {
-	/* TODO: Implement */
+    const int shift = SDL_max(0, SDL_min(s_Value1, 6));
+    for (int i = 0; i < pixels; ++i) {
+        const WORD c = pSource[i];
+        pDest[i] = (((c >> 11) >> shift) << 11)
+            | ((((c >> 5) & 63) >> shift) << 5) | ((c & 31) >> shift);
+    }
 }
 
 void CSpriteSurface::memcpyBrightness(WORD* pDest, WORD* pSource, WORD pixels)
@@ -582,13 +589,21 @@ S_SURFACEINFO* CSpriteSurface::GetDDSD()
 
 void CSpriteSurface::SetClip(RECT* rect)
 {
-	/* Stub: SDL backend doesn't use clipping rectangles in the same way */
-	/* SDL uses SDL_Rect for clipping with SDL_RenderSetClipRect */
+    if (!m_backend_surface || !m_backend_surface->surface) return;
+    if (!rect) {
+        SetClipNULL();
+        return;
+    }
+    SDL_Rect clip = {rect->left, rect->top,
+                     SDL_max(0, rect->right - rect->left),
+                     SDL_max(0, rect->bottom - rect->top)};
+    SDL_SetClipRect(m_backend_surface->surface, &clip);
 }
 
 void CSpriteSurface::SetClipNULL()
 {
-	/* Stub: Reset clipping - not applicable for SDL backend */
+    if (m_backend_surface && m_backend_surface->surface)
+        SDL_SetClipRect(m_backend_surface->surface, nullptr);
 }
 
 /* ============================================================================
@@ -884,10 +899,29 @@ void CSpriteSurface::memcpyEffect(unsigned short* dest, unsigned short* src, uns
 	}
 }
 
-void CSpriteSurface::memcpyEffectGradation(unsigned short* dest, unsigned short* src, unsigned short pixels)
+void CSpriteSurface::memcpyEffectGrayScale(WORD* dest, WORD* src, WORD pixels)
 {
-	// Gradation effect - simple copy for now
-	memcpyEffect(dest, src, pixels);
+    for (int i = 0; i < pixels; ++i) {
+        const WORD c = src[i];
+        // The legacy average uses three 5-bit channels; normalize RGB565 green.
+        const int gray = ((c >> 11) + ((c >> 6) & 31) + (c & 31)) / 3;
+        dest[i] = (gray << 11) | (((gray << 1) | (gray >> 4)) << 5) | gray;
+    }
+}
+
+void CSpriteSurface::memcpyEffectGradation(WORD* dest, WORD* src, WORD pixels)
+{
+    if (s_Value1 < 0 || s_Value1 >= MAX_COLORSET) {
+        memcpy(dest, src, pixels * sizeof(WORD));
+        return;
+    }
+    for (int i = 0; i < pixels; ++i) {
+        const WORD c = src[i];
+        const int brightness = (c >> 11) + ((c >> 6) & 31) + (c & 31);
+        // Pure white sums to 93; the legacy lookup has entries 0 through 92.
+        const int gradation = CIndexSprite::ColorToGradation[SDL_min(brightness, MAX_COLOR_TO_GRADATION - 1)];
+        dest[i] = CIndexSprite::ColorSet[s_Value1][SDL_min(gradation, MAX_COLORGRADATION - 1)];
+    }
 }
 
 #endif /* SPRITELIB_BACKEND_SDL */

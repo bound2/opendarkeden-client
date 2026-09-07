@@ -832,3 +832,169 @@ TEST(BltAlphaSpritePalTo, DrawsNothingOutsideUnloadedOrRejected)
 	AlphaBlit(surface, 1, 1, rejected, pal);
 	CHECK(surface.IsBlack());
 }
+
+#include "CSprite565.h"
+
+namespace {
+class ScrollClipSprite : public CSprite565 {
+public:
+    ScrollClipSprite() {
+        m_Width = 5;
+        m_Height = 4;
+        m_Pixels = new WORD*[m_Height];
+        for (int y = 0; y < m_Height; ++y)
+            m_Pixels[y] = new WORD[7]{1, 1, 4, 0xf800, 0xf800, 0xf800, 0xf800};
+        m_bInit = true;
+    }
+};
+}
+
+TEST(SpriteSurfaceClip, ScrolledSpritesRespectViewportAndReset)
+{
+    CHECK_EQ(0, spritectl_init());
+    CSpriteSurface surface;
+    CHECK(surface.Init(10, 8));
+    if (!surface.GetBackendSurface()) return;
+    ScrollClipSprite rle;
+    WORD pixels[20];
+    for (int i = 0; i < 20; ++i) pixels[i] = i % 5 == 0 ? 0 : 0xf800;
+    auto decoded = spritectl_create_sprite(5, 4, SPRITECTL_FORMAT_RGB565, pixels, sizeof(pixels));
+    CHECK(decoded != nullptr);
+    if (!decoded) return;
+    const POINT positions[] = {{0, 0}, {5, 4}, {9, 7}, {-2, 2}, {3, -2}, {3, 2}};
+    const RECT clips[] = {{3, 2, 7, 6}, {-2, -2, 4, 4}, {30, 30, 35, 35}, {4, 4, 4, 4}};
+    for (int mode = 0; mode < 3; ++mode) {
+        for (RECT clip : clips) {
+            for (POINT pos : positions) {
+                surface.SetClipNULL();
+                surface.FillSurface(0x1234);
+                surface.SetClip(&clip);
+                if (mode == 0)
+                    surface.BltSprite(&pos, &rle);
+                else if (mode == 1)
+                    spritectl_blt_sprite(surface.GetBackendSurface(), pos.x, pos.y, decoded, 0, 255);
+                else {
+                    RECT fill = {pos.x + 1, pos.y, pos.x + 5, pos.y + 4};
+                    surface.FillRect(&fill, 0xf800);
+                }
+                DWORD pitch = 0;
+                const BYTE* data = static_cast<const BYTE*>(surface.Lock(nullptr, &pitch));
+                CHECK(data != nullptr);
+                if (data) {
+                    for (int y = 0; y < 8; ++y) {
+                        const WORD* row = reinterpret_cast<const WORD*>(data + y * pitch);
+                        for (int x = 0; x < 10; ++x) {
+                            const bool visible = x >= clip.left && x < clip.right && y >= clip.top && y < clip.bottom
+                                && x >= pos.x + 1 && x < pos.x + 5 && y >= pos.y && y < pos.y + 4;
+                            CHECK_EQ(visible ? 0xf800 : 0x1234, row[x]);
+                        }
+                    }
+                    surface.Unlock();
+                }
+            }
+        }
+    }
+    // Closing the skill viewport must restore drawing in the surrounding UI.
+    surface.SetClipNULL();
+    surface.FillSurface(0x1234);
+    POINT origin = {0, 0};
+    surface.BltSprite(&origin, &rle);
+    const WORD* row = static_cast<const WORD*>(surface.Lock());
+    CHECK(row != nullptr);
+    if (row) {
+        CHECK_EQ(0x1234, row[0]);
+        CHECK_EQ(0xf800, row[1]);
+        surface.Unlock();
+    }
+    spritectl_destroy_sprite(decoded);
+}
+
+#include "CIndexSprite.h"
+
+namespace {
+class SkillStateSprite : public CSprite565 {
+public:
+    SkillStateSprite() {
+        m_Width = 8;
+        m_Height = 2;
+        m_Pixels = new WORD*[m_Height];
+        for (int y = 0; y < m_Height; ++y)
+            m_Pixels[y] = new WORD[11]{2, 1, 3, 0xffff, 0xf800, 0x07e0, 1, 3, 0x001f, 0x8410, 0};
+        m_bInit = true;
+    }
+};
+}
+
+TEST(SpriteSurfaceEffects, SkillAndRankStatesRespectTransparencyAndViewport)
+{
+    CHECK_EQ(0, spritectl_init());
+    CIndexSprite::SetColorSet();
+    CSpriteSurface surface;
+    CHECK(surface.Init(11, 7)); // Odd width exercises padded SDL rows.
+    if (!surface.GetBackendSurface()) return;
+    RECT fullSurface = {0, 0, 11, 7};
+    SkillStateSprite sprite;
+    const auto savedEffect = CSpriteSurface::s_pMemcpyEffectFunction;
+    const int savedValue = CSpriteSurface::s_Value1;
+    CSpriteSurface::SetEffect(CSpriteSurface::EFFECT_GRAY_SCALE);
+    const WORD expected[6][8] = {
+        {0, 0xf800, 0xf800, 0, 0, 0, 0x8000, 0}, // red channel
+        {0, 0x07e0, 0, 0x07e0, 0, 0, 0x0400, 0}, // green / learnable
+        {0, 0x001f, 0, 0, 0, 0x001f, 0x0010, 0}, // blue channel
+        {0, 0x7bef, 0x7800, 0x03e0, 0, 0x000f, 0x4208, 0}, // unavailable rank choice
+        {0, 0xffff, 0x528a, 0x528a, 0, 0x528a, 0x8430, 0}, // locked skill
+        {0, CIndexSprite::ColorSet[59][CIndexSprite::ColorToGradation[92]],
+            CIndexSprite::ColorSet[59][CIndexSprite::ColorToGradation[31]],
+            CIndexSprite::ColorSet[59][CIndexSprite::ColorToGradation[31]], 0,
+            CIndexSprite::ColorSet[59][CIndexSprite::ColorToGradation[31]],
+            CIndexSprite::ColorSet[59][CIndexSprite::ColorToGradation[48]],
+            CIndexSprite::ColorSet[59][MAX_COLORGRADATION - 1]} // learned passive / rank
+    };
+    const POINT positions[] = {{1, 2}, {-2, 2}, {7, 2}, {1, -1}, {1, 6}, {30, 30}};
+    const RECT clips[] = {{0, 0, 11, 7}, {3, 2, 7, 4}, {4, 3, 4, 3}, {-5, -5, 5, 5}};
+    for (int mode = 0; mode < 6; ++mode) {
+        for (RECT clip : clips) {
+            for (POINT pos : positions) {
+                surface.SetClipNULL();
+                surface.FillRect(&fullSurface, 0x1234);
+                surface.SetClip(&clip);
+                if (mode < 3) surface.BltSpriteColor(&pos, &sprite, static_cast<BYTE>(mode));
+                else if (mode == 3) surface.BltSpriteDarkness(&pos, &sprite, 1);
+                else if (mode == 4) surface.BltSpriteEffect(&pos, &sprite);
+                else surface.BltSpriteColorSet(&pos, &sprite, 59);
+                DWORD pitch = 0;
+                const BYTE* data = static_cast<const BYTE*>(surface.Lock(nullptr, &pitch));
+                CHECK(data != nullptr);
+                if (data) {
+                    for (int y = 0; y < 7; ++y) {
+                        const WORD* row = reinterpret_cast<const WORD*>(data + y * pitch);
+                        for (int x = 0; x < 11; ++x) {
+                            const int sx = x - pos.x;
+                            const bool visible = x >= clip.left && x < clip.right && y >= clip.top && y < clip.bottom
+                                && y >= pos.y && y < pos.y + 2 && sx >= 0 && sx < 8 && sx != 0 && sx != 4;
+                            CHECK_EQ(visible ? expected[mode][sx] : 0x1234, row[x]);
+                        }
+                    }
+                    surface.Unlock();
+                }
+            }
+        }
+    }
+    // Drawing an effect must not recolor the cached sprite or later learned icons.
+    surface.SetClipNULL();
+    surface.FillRect(&fullSurface, 0x1234);
+    POINT origin = {0, 0};
+    surface.BltSprite(&origin, &sprite);
+    const WORD* row = static_cast<const WORD*>(surface.Lock());
+    CHECK(row != nullptr);
+    if (row) {
+        CHECK_EQ(0xffff, row[1]);
+        CHECK_EQ(0xf800, row[2]);
+        CHECK_EQ(0x07e0, row[3]);
+        CHECK_EQ(0x1234, row[4]);
+        CHECK_EQ(0x001f, row[5]);
+        surface.Unlock();
+    }
+    CSpriteSurface::s_pMemcpyEffectFunction = savedEffect;
+    CSpriteSurface::s_Value1 = savedValue;
+}
