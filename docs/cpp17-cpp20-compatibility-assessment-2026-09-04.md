@@ -111,9 +111,11 @@ replaces CMake's MSVC defaults, `/EHsc` among them, and without `/EHsc` a
 C++ exception cannot be caught by type - six tests failed with "uncaught
 exception of unknown type" and the receive-loop test saw packets leak on the
 throw path, none of which had anything to do with conformance. The committed
-change adds the option and keeps the defaults. The second-compiler job is
-still open: clang 19 is on this machine but the ClangCL toolset is not, and
-a Linux or macOS build is a port, not a language-mode question.
+change adds the option and keeps the defaults. The second-compiler job
+followed the same day: the `windows-clang` preset builds the whole tree with
+clang-cl 19 through NMake from a VS developer prompt (the ClangCL toolset is
+not installed, but the compiler is), and the experiments table below has the
+result. A Linux or macOS build is a port, not a language-mode question.
 
 ## Build experiments
 
@@ -132,6 +134,7 @@ mode.
 | C++20 plus `_HAS_STD_BYTE=0`, `_HAS_AUTO_PTR_ETC=1`, and `/Zc:strictStrings-` probes | The complete target graph built; all six CTest entries passed. The unit binary reported **375 tests, 5,066 checks, 0 failures**. |
 | Clang 19.1.5 C++17 compile probe | Rejected non-empty dynamic exception specifications immediately; one representative packet translation unit hit Clang's 20-error limit in `SocketAPI.h`. |
 | Clang 19.1.5 SpriteLib probe | Rejected `register` declarations as invalid ISO C++17. |
+| clang-cl 19.1.5, whole tree, 2026-09-07 (NMake, the `windows-clang` preset) | With findings 3 and 4 closed: every library, every tool, `unit_tests` and `DarkEden` compile and link; the clang-built unit binary reports **596 tests, 294,382 checks, 0 failures** and every ctest passes. Two ISO defects MSVC had accepted as extensions were found and fixed: a `POINT` brace-initialised from `0xFFFFFFFF` (narrowing to `LONG`), and an `enum` whose first value `0xffff0000` gave it `int` as its underlying type, so that its members were negative `case` labels against an unsigned `id_t`; it now has `unsigned int` as its underlying type. |
 
 The `_HAS_*` macros and `/Zc:strictStrings-` were used only to expose the next
 layer of errors. They are **not proposed fixes**: they disable new library features
