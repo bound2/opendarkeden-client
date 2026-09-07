@@ -29,37 +29,37 @@ class SubServerInfo {
 public :
 
 	// read data from socket input stream
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+	void read ( SocketInputStream & iStream );
 
 	// write data to socket output stream
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+	void write ( SocketOutputStream & oStream ) const;
 
 	// get size of object
-	uint getSize () throw ()
+	uint getSize () noexcept
 	{ return szServerID + szBYTE + m_ServerName.size() + szBYTE; }
 
 	// get max size of object
-	static uint getMaxSize () throw ()
+	static uint getMaxSize () noexcept
 	{ return szServerID + szBYTE + 20 + szBYTE; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 public :
 
 	// get/set ServerID
-	void setServerID( ServerID_t ServerID) throw() { m_ServerID = ServerID; }
-	ServerID_t getServerID() const throw() { return m_ServerID; }
+	void setServerID( ServerID_t ServerID) noexcept { m_ServerID = ServerID; }
+	ServerID_t getServerID() const noexcept { return m_ServerID; }
 
 	// get/set ServerName
-	void setServerName( std::string ServerName ) throw() { m_ServerName = ServerName; }
-	std::string getServerName() const throw() { return m_ServerName; }
+	void setServerName( std::string ServerName ) { m_ServerName = ServerName; }
+	std::string getServerName() const { return m_ServerName; }
 
 	// get/set ServerStat
-	void setServerStat( BYTE ServerStat ) throw() { m_ServerStat = ServerStat; }
-	BYTE getServerStat() const throw() { return m_ServerStat; }
+	void setServerStat( BYTE ServerStat ) noexcept { m_ServerStat = ServerStat; }
+	BYTE getServerStat() const noexcept { return m_ServerStat; }
 
 private :
 

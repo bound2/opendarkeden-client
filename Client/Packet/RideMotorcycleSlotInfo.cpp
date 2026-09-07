@@ -11,7 +11,6 @@
 // read data from socket input stream
 //////////////////////////////////////////////////////////////////////////////
 void RideMotorcycleSlotInfo::read ( SocketInputStream & iStream ) 
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -34,7 +33,6 @@ void RideMotorcycleSlotInfo::read ( SocketInputStream & iStream )
 // write data to socket output stream
 //////////////////////////////////////////////////////////////////////////////
 void RideMotorcycleSlotInfo::write ( SocketOutputStream & oStream ) const 
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -58,7 +56,6 @@ void RideMotorcycleSlotInfo::write ( SocketOutputStream & oStream ) const
 //////////////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 std::string RideMotorcycleSlotInfo::toString () const 
-	throw ()
 {
 	StringStream msg;
 

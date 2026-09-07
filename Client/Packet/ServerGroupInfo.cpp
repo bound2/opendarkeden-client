@@ -19,7 +19,6 @@
 // constructor
 //////////////////////////////////////////////////////////////////////
 ServerGroupInfo::ServerGroupInfo () 
-     throw ()
 {
 	__BEGIN_TRY
 	m_Stat = 0;
@@ -31,7 +30,6 @@ ServerGroupInfo::ServerGroupInfo ()
 // destructor
 //////////////////////////////////////////////////////////////////////
 ServerGroupInfo::~ServerGroupInfo () 
-    throw ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -42,7 +40,6 @@ ServerGroupInfo::~ServerGroupInfo ()
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
 void ServerGroupInfo::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 		
@@ -60,7 +57,7 @@ void ServerGroupInfo::read ( SocketInputStream & iStream )
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
 void ServerGroupInfo::write ( SocketOutputStream & oStream ) 
-     const throw ( ProtocolException , Error )
+     const
 {
 	__BEGIN_TRY
 		
@@ -78,7 +75,6 @@ void ServerGroupInfo::write ( SocketOutputStream & oStream )
 // getSize
 //--------------------------------------------------------------------
 PacketSize_t ServerGroupInfo::getSize()
-	throw()
 {
 	__BEGIN_TRY
 
@@ -98,7 +94,7 @@ PacketSize_t ServerGroupInfo::getSize()
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string ServerGroupInfo::toString () 
-		const throw ()
+		const
 	{
 		__BEGIN_TRY
 

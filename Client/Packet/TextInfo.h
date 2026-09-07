@@ -31,13 +31,13 @@ public :
 	//----------------------------------------------------------------------
 
 	// read data from socket input stream
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+	void read ( SocketInputStream & iStream );
 
 	// write data to socket output stream
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+	void write ( SocketOutputStream & oStream ) const;
 
 	// get size of object
-	uint getSize () const throw () 
+	uint getSize () const noexcept 
 	{ 
 		return szDWORD 					// text id
 			+ szBYTE + m_Writer.size() 	// writer
@@ -46,10 +46,10 @@ public :
 	}
 
 	// get debug std::string
-	std::string toString () const throw ();
+	std::string toString () const;
 
 	// get max size()
-	static uint getMaxSize () throw () 
+	static uint getMaxSize () noexcept 
 	{ 
 		return szDWORD		// text id
 			+ szBYTE + 20 	// writer
@@ -59,17 +59,17 @@ public :
 	
 public :
 
-	uint getID () const throw () { return m_ID; }
-	void setID ( uint id ) throw () { m_ID = id; }
+	uint getID () const noexcept { return m_ID; }
+	void setID ( uint id ) noexcept { m_ID = id; }
 	
-	std::string getWriter () const throw () { return m_Writer ; }
-	void setWriter( std::string writer ) throw () { m_Writer = writer ; }
+	std::string getWriter () const { return m_Writer ; }
+	void setWriter( std::string writer ) { m_Writer = writer ; }
 	
-	std::string getTopic () const throw () { return m_Topic ; }
-	void setTopic ( std::string topic ) throw () { m_Topic = topic ; }
+	std::string getTopic () const { return m_Topic ; }
+	void setTopic ( std::string topic ) { m_Topic = topic ; }
 	
-	uint getHit () const throw () { return m_Hit ; }
-	void setHit ( uint hit) throw () { m_Hit = hit ; }
+	uint getHit () const noexcept { return m_Hit ; }
+	void setHit ( uint hit) noexcept { m_Hit = hit ; }
 	
 private :
 

@@ -46,7 +46,7 @@ struct MissionInfo
 	string	m_StrArg;		// 찍어줄 문자열
 	DWORD	m_NumArg;		// 찍어줄 숫자
 
-	void read(SocketInputStream& iStream) throw(ProtocolException, Error)
+	void read(SocketInputStream& iStream)
 	{
 		iStream.read(m_Condition);
 		iStream.read(m_Index);
@@ -59,7 +59,7 @@ struct MissionInfo
 		iStream.read(m_NumArg);
 	}
 
-	void write(SocketOutputStream& oStream) const throw(ProtocolException, Error)
+	void write(SocketOutputStream& oStream) const
 	{
 		oStream.write(m_Condition);
 		oStream.write(m_Index);
@@ -90,8 +90,8 @@ public:
 		CAN_REPLAY,		// 재수행 가능
 	};
 
-	void read(SocketInputStream& iStream) throw(ProtocolException, Error);
-	void write(SocketOutputStream& oStream) const throw(ProtocolException, Error);
+	void read(SocketInputStream& iStream);
+	void write(SocketOutputStream& oStream) const;
 	PacketSize_t getSize() const;
 	static PacketSize_t getMaxSize();
 	DWORD GetQuestID() {return m_QuestID;}

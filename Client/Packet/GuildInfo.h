@@ -27,51 +27,51 @@ class GuildInfo {
 public :
 	
 	// constructor
-	GuildInfo () throw ();
+	GuildInfo ();
 	
 	// destructor
-	~GuildInfo () throw ();
+	~GuildInfo ();
 
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read (SocketInputStream & iStream) throw (ProtocolException, Error);
+    void read (SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write (SocketOutputStream & oStream) const throw (ProtocolException, Error);
+    void write (SocketOutputStream & oStream) const;
 
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getSize () throw ();
+	PacketSize_t getSize ();
 
-	static uint getMaxSize() throw() {
+	static uint getMaxSize() noexcept {
 		//return ( szGuildID + szBYTE + 30 + szBYTE + 20 + szBYTE + szBYTE + 11 ) * 256 + szBYTE;
 		return szGuildID + szBYTE + 30 + szBYTE + 20 + szBYTE + szBYTE + 11;
 	}
 
 	// get packet's debug string
-	std::string toString () const throw ();
+	std::string toString () const;
 
 	// get/set GuildID
-	GuildID_t getGuildID() const throw() { return m_GuildID; }
-	void setGuildID( GuildID_t GuildID ) throw() { m_GuildID = GuildID; }
+	GuildID_t getGuildID() const noexcept { return m_GuildID; }
+	void setGuildID( GuildID_t GuildID ) noexcept { m_GuildID = GuildID; }
 
 	// get/set Guild Name
-	std::string getGuildName() const throw() { return m_GuildName; }
-	void setGuildName( const std::string& GuildName ) throw() { m_GuildName = GuildName; }
+	std::string getGuildName() const { return m_GuildName; }
+	void setGuildName( const std::string& GuildName ) { m_GuildName = GuildName; }
 
 	// get/set Guild Master
-	std::string getGuildMaster() const throw() { return m_GuildMaster; }
-	void setGuildMaster( const std::string& GuildMaster ) throw() { m_GuildMaster = GuildMaster; }
+	std::string getGuildMaster() const { return m_GuildMaster; }
+	void setGuildMaster( const std::string& GuildMaster ) { m_GuildMaster = GuildMaster; }
 
 	// get/set Guild Member Count
-	BYTE getGuildMemberCount() const throw() { return m_GuildMemberCount; }
-	void setGuildMemberCount( BYTE GuildMemberCount ) throw() { m_GuildMemberCount = GuildMemberCount; }
+	BYTE getGuildMemberCount() const noexcept { return m_GuildMemberCount; }
+	void setGuildMemberCount( BYTE GuildMemberCount ) noexcept { m_GuildMemberCount = GuildMemberCount; }
 
 	// get/set Guild Expire Date
-	std::string getGuildExpireDate() const throw() { return m_GuildExpireDate; }
-	void setGuildExpireDate( const std::string& GuildExpireDate ) throw() { m_GuildExpireDate = GuildExpireDate; }
+	std::string getGuildExpireDate() const { return m_GuildExpireDate; }
+	void setGuildExpireDate( const std::string& GuildExpireDate ) { m_GuildExpireDate = GuildExpireDate; }
 
 
 private :

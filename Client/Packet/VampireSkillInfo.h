@@ -29,48 +29,48 @@ class VampireSkillInfo : public PCSkillInfo {
 public :
 	
 	// constructor
-	VampireSkillInfo () throw ();
+	VampireSkillInfo ();
 	
 	// destructor
-	~VampireSkillInfo () throw ();
+	~VampireSkillInfo ();
 
 public :
 
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getSize () throw ();
+	PacketSize_t getSize () noexcept;
 
-	static uint getMaxSize () throw () { 
+	static uint getMaxSize () noexcept { 
 		return szBYTE + szBYTE + ( SubVampireSkillInfo::getMaxSize() * 120 );
 	}
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 	// get / set New Skill
-	bool isLearnNewSkill() const throw() { return m_bLearnNewSkill; }
-	void setLearnNewSkill( bool NewSkill ) throw() { m_bLearnNewSkill = NewSkill; }
+	bool isLearnNewSkill() const noexcept { return m_bLearnNewSkill; }
+	void setLearnNewSkill( bool NewSkill ) noexcept { m_bLearnNewSkill = NewSkill; }
 
 	// get / set ListNumber
-	BYTE getListNum() const throw() { return m_ListNum; }
-	void setListNum( BYTE ListNum ) throw() { m_ListNum = ListNum; }
+	BYTE getListNum() const noexcept { return m_ListNum; }
+	void setListNum( BYTE ListNum ) noexcept { m_ListNum = ListNum; }
 
 	// add / delete / clear S List
-	void addListElement( SubVampireSkillInfo * pSubVampireSkillInfo ) throw() { m_SubVampireSkillInfoList.push_back( pSubVampireSkillInfo ); }
+	void addListElement( SubVampireSkillInfo * pSubVampireSkillInfo ) { m_SubVampireSkillInfoList.push_back( pSubVampireSkillInfo ); }
 
 	// ClearList
-	void clearList() throw() { m_SubVampireSkillInfoList.clear(); m_ListNum = 0; }
+	void clearList() noexcept { m_SubVampireSkillInfoList.clear(); m_ListNum = 0; }
 
 	// pop front Element in Status List
-	SubVampireSkillInfo * popFrontListElement() throw() 
+	SubVampireSkillInfo * popFrontListElement() 
 	{ 
 		SubVampireSkillInfo * TempSubVampireSkillInfo = m_SubVampireSkillInfoList.front(); m_SubVampireSkillInfoList.pop_front(); return TempSubVampireSkillInfo; 
 	}

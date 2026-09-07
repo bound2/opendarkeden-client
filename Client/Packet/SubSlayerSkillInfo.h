@@ -29,47 +29,47 @@ class SubSlayerSkillInfo {
 public :
 
 	// read data from socket input stream
-	void read (SocketInputStream & iStream) throw (ProtocolException, Error);
+	void read (SocketInputStream & iStream);
 
 	// write data to socket output stream
-	void write (SocketOutputStream & oStream) const throw (ProtocolException, Error);
+	void write (SocketOutputStream & oStream) const;
 
 	// get size of object
-	uint getSize () const throw () { return szSkillType + szExp + szExpLevel + szTurn + szTurn + szBYTE; }
+	uint getSize () const noexcept { return szSkillType + szExp + szExpLevel + szTurn + szTurn + szBYTE; }
 	// get max size of object
-	static uint getMaxSize () throw () { return szSkillType + szExp + szExpLevel + szTurn + szTurn + szBYTE; }
+	static uint getMaxSize () noexcept { return szSkillType + szExp + szExpLevel + szTurn + szTurn + szBYTE; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 public :
 
 	// get / set SkillType
-	SkillType_t getSkillType() const throw() { return m_SkillType; }
-	void setSkillType(SkillType_t SkillType) throw() { m_SkillType = SkillType; }
+	SkillType_t getSkillType() const noexcept { return m_SkillType; }
+	void setSkillType(SkillType_t SkillType) noexcept { m_SkillType = SkillType; }
 
 	// get / set Exp
-	Exp_t getSkillExp() const throw() { return m_Exp; }
-	void setSkillExp(Exp_t Exp) throw() { m_Exp = Exp; }
+	Exp_t getSkillExp() const noexcept { return m_Exp; }
+	void setSkillExp(Exp_t Exp) noexcept { m_Exp = Exp; }
 
 	// get / set ExpLevel
-	ExpLevel_t getSkillExpLevel() const throw() { return m_ExpLevel; }
-	void setSkillExpLevel(ExpLevel_t ExpLevel) throw() { m_ExpLevel = ExpLevel; }
+	ExpLevel_t getSkillExpLevel() const noexcept { return m_ExpLevel; }
+	void setSkillExpLevel(ExpLevel_t ExpLevel) noexcept { m_ExpLevel = ExpLevel; }
 
 	// get / set Turn
-	Turn_t getSkillTurn() const throw() { return m_Interval ; }
-	void setSkillTurn(Turn_t SkillTurn) throw() { m_Interval = SkillTurn; }
+	Turn_t getSkillTurn() const noexcept { return m_Interval ; }
+	void setSkillTurn(Turn_t SkillTurn) noexcept { m_Interval = SkillTurn; }
 
 	// get / set CastingTime
-	Turn_t getCastingTime() const throw() { return m_CastingTime; }
-	void setCastingTime(Turn_t CastingTime) throw() { m_CastingTime = CastingTime; }
+	Turn_t getCastingTime() const noexcept { return m_CastingTime; }
+	void setCastingTime(Turn_t CastingTime) noexcept { m_CastingTime = CastingTime; }
 
 	// get / set Enable
 	// true 일 경우 사용 가능, false일 경우 사용 불가능.
-	bool getEnable() const throw() { return m_Enable; }
-	void setEnable(bool Enable ) throw() { m_Enable = Enable; }
+	bool getEnable() const noexcept { return m_Enable; }
+	void setEnable(bool Enable ) noexcept { m_Enable = Enable; }
 
 private :
 

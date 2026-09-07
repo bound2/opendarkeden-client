@@ -14,7 +14,6 @@
 // read data from socket input stream
 //----------------------------------------------------------------------
 void SubVampireSkillInfo::read ( SocketInputStream & iStream ) 
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 	try {
@@ -34,7 +33,6 @@ void SubVampireSkillInfo::read ( SocketInputStream & iStream )
 // write data to socket output stream
 //----------------------------------------------------------------------
 void SubVampireSkillInfo::write ( SocketOutputStream & oStream ) const 
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -56,7 +54,6 @@ void SubVampireSkillInfo::write ( SocketOutputStream & oStream ) const
 //----------------------------------------------------------------------
 #ifdef __DEBUG_OUTPUT__
 	std::string SubVampireSkillInfo::toString () const 
-		throw ()
 	{
 		StringStream msg;
 

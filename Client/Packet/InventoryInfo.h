@@ -28,32 +28,32 @@ class InventoryInfo {
 public :
 	
 	// constructor
-	InventoryInfo () throw ();
+	InventoryInfo ();
 	
 	// destructor
-	~InventoryInfo () throw ();
+	~InventoryInfo ();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getSize () throw ();
+	PacketSize_t getSize ();
 
-	static uint getMaxSize() throw() {
+	static uint getMaxSize() {
 		// Width/Height are commented out of read()/write() — not on the wire
 		return szBYTE + ( InventorySlotInfo::getMaxSize() * 60 );
 	}
 
 	// get packet's debug std::string
-	std::string toString () const throw ();
+	std::string toString () const;
 
 	CoordInven_t getWidth() const { return m_Width; }
 	void setWidth( CoordInven_t Width ) { m_Width = Width; }
@@ -62,17 +62,17 @@ public :
 	void setHeight( CoordInven_t Height ) { m_Height = Height; }
 	
 	// get / set ListNumber
-	BYTE getListNum() const throw() { return m_ListNum; }
-	void setListNum( BYTE ListNum ) throw() { m_ListNum = ListNum; }
+	BYTE getListNum() const noexcept { return m_ListNum; }
+	void setListNum( BYTE ListNum ) noexcept { m_ListNum = ListNum; }
 
 	// add / delete / clear S List
-	void addListElement( InventorySlotInfo * pInventorySlotInfo ) throw() { m_InventorySlotInfoList.push_back( pInventorySlotInfo ); }
+	void addListElement( InventorySlotInfo * pInventorySlotInfo ) { m_InventorySlotInfoList.push_back( pInventorySlotInfo ); }
 
 	// ClearList
-	void clearList() throw() { m_InventorySlotInfoList.clear(); m_ListNum = 0; }
+	void clearList() noexcept { m_InventorySlotInfoList.clear(); m_ListNum = 0; }
 
 	// pop front Element in Status List
-	InventorySlotInfo * popFrontListElement() throw() 
+	InventorySlotInfo * popFrontListElement() 
 	{ 
 		InventorySlotInfo * TempInventorySlotInfo = m_InventorySlotInfoList.front(); m_InventorySlotInfoList.pop_front(); return TempInventorySlotInfo; 
 	}

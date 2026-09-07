@@ -24,38 +24,38 @@ class SubOustersSkillInfo {
 public :
 
 	// read data from socket input stream
-	void read (SocketInputStream & iStream) throw (ProtocolException, Error);
+	void read (SocketInputStream & iStream);
 
 	// write data to socket output stream
-	void write (SocketOutputStream & oStream) const throw (ProtocolException, Error);
+	void write (SocketOutputStream & oStream) const;
 
 	// get size of object
-	uint getSize () const throw () { return szSkillType + szExpLevel + szTurn + szTurn; }
+	uint getSize () const noexcept { return szSkillType + szExpLevel + szTurn + szTurn; }
 	// get max size of object
-	static uint getMaxSize () throw () { return szSkillType + szExpLevel + szTurn + szTurn; }
+	static uint getMaxSize () noexcept { return szSkillType + szExpLevel + szTurn + szTurn; }
 
 #ifdef __DEBUG_OUTPUT__
 	// get debug string
-	std::string toString () const throw ();
+	std::string toString () const;
 #endif
 
 public :
 
 	// get / set SkillType
-	SkillType_t getSkillType() const throw() { return m_SkillType; }
-	void setSkillType(SkillType_t SkillType) throw() { m_SkillType = SkillType; }
+	SkillType_t getSkillType() const noexcept { return m_SkillType; }
+	void setSkillType(SkillType_t SkillType) noexcept { m_SkillType = SkillType; }
 
 	// get /set Skill ExpLevel
-	ExpLevel_t getExpLevel() const throw() { return m_ExpLevel; }
-	void setExpLevel( ExpLevel_t ExpLevel ) throw() { m_ExpLevel = ExpLevel; }
+	ExpLevel_t getExpLevel() const noexcept { return m_ExpLevel; }
+	void setExpLevel( ExpLevel_t ExpLevel ) noexcept { m_ExpLevel = ExpLevel; }
 
 	// get / set Turn
-	Turn_t getSkillTurn() const throw() { return m_Interval ; }
-	void setSkillTurn(Turn_t SkillTurn) throw() { m_Interval = SkillTurn; }
+	Turn_t getSkillTurn() const noexcept { return m_Interval ; }
+	void setSkillTurn(Turn_t SkillTurn) noexcept { m_Interval = SkillTurn; }
 
 	// get / set CastingTime
-	Turn_t getCastingTime() const throw() { return m_CastingTime; }
-	void setCastingTime(Turn_t CastingTime) throw() { m_CastingTime = CastingTime; }
+	Turn_t getCastingTime() const noexcept { return m_CastingTime; }
+	void setCastingTime(Turn_t CastingTime) noexcept { m_CastingTime = CastingTime; }
 
 private :
 
