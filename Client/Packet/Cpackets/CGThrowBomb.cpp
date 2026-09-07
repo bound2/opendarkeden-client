@@ -6,8 +6,7 @@
 #include "Client_PCH.h"
 #include "CGThrowBomb.h"
 
-void CGThrowBomb::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGThrowBomb::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -20,8 +19,7 @@ void CGThrowBomb::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGThrowBomb::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGThrowBomb::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -36,7 +34,6 @@ void CGThrowBomb::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 	std::string CGThrowBomb::toString () const
-		   throw ()
 	{
 		__BEGIN_TRY
 			

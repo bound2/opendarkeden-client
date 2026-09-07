@@ -12,22 +12,19 @@
 #include "PacketAssert.h"
 
 
-CGPickupMoney::CGPickupMoney () 
-     throw ()
+CGPickupMoney::CGPickupMoney ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGPickupMoney::~CGPickupMoney () 
-    throw ()
+CGPickupMoney::~CGPickupMoney ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGPickupMoney::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGPickupMoney::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -53,8 +50,7 @@ void CGPickupMoney::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGPickupMoney::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGPickupMoney::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -82,7 +78,7 @@ void CGPickupMoney::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGPickupMoney::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 		

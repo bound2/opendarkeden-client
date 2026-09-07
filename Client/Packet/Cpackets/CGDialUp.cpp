@@ -15,8 +15,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-CGDialUp::CGDialUp () 
-     throw ()
+CGDialUp::CGDialUp ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -26,8 +25,7 @@ CGDialUp::CGDialUp ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-CGDialUp::~CGDialUp () 
-    throw ()
+CGDialUp::~CGDialUp ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -37,8 +35,7 @@ CGDialUp::~CGDialUp ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void CGDialUp::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void CGDialUp::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -51,8 +48,7 @@ void CGDialUp::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void CGDialUp::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void CGDialUp::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -65,7 +61,7 @@ void CGDialUp::write ( SocketOutputStream & oStream ) const
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string CGDialUp::toString () 
-		const throw ()
+		const
 	{
 		__BEGIN_TRY
 			

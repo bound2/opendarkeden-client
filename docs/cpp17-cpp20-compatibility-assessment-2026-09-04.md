@@ -375,6 +375,19 @@ its output is a review of the 162 promoted lines, which reduce to about sixty
 distinct shapes. `Cpackets` (3,172) and `Gpackets` (5,883) are what remains,
 and the same script applies to them.
 
+**Cpackets (2026-09-07):** at 0, 3,172 sites in 326 files, **R10 = 5,883**.
+The script's decisions were 873 type lists deleted, 1,049 `throw()` promoted
+and 1,250 deleted, verified the same way (residual 0, every file compared
+token by token with its committed version, the promoted lines reduced to
+their shapes and read). The one thing the script cannot see is a packet
+deriving from another packet: `CGUseMessageItemFromInventory` derives from
+`CGUseItemFromInventory` and overrides its `getPacketSize` and its factory's
+`getPacketMaxSize` with multi-line bodies the script deletes, while the base's
+one-liners it promotes - and MSVC refused the pair, C2694, an override with a
+less restrictive specification than its base. The base's two functions are
+unspecified, by hand, and the build is the check that finds the next such
+pair; `Gpackets` should expect the same for its `OK1`/`OK2`-style families.
+
 ### 4. `register` remains in C++ source
 
 There are roughly 650 declaration-like uses of the removed `register` storage

@@ -6,22 +6,19 @@
 #include "Client_PCH.h"
 #include "CGPartySay.h"
 
-CGPartySay::CGPartySay () 
-     throw ()
+CGPartySay::CGPartySay ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGPartySay::~CGPartySay () 
-    throw ()
+CGPartySay::~CGPartySay ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGPartySay::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGPartySay::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 
@@ -33,8 +30,7 @@ void CGPartySay::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 		    
-void CGPartySay::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGPartySay::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -56,7 +52,6 @@ void CGPartySay::write (SocketOutputStream & oStream) const
 //////////////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 string CGPartySay::toString () const
-    throw ()
 {
 	__BEGIN_TRY
 		

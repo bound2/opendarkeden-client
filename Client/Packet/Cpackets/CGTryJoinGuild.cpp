@@ -7,8 +7,7 @@
 #include "CGTryJoinGuild.h"
 
 
-void CGTryJoinGuild::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGTryJoinGuild::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -18,8 +17,7 @@ void CGTryJoinGuild::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGTryJoinGuild::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGTryJoinGuild::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -31,7 +29,6 @@ void CGTryJoinGuild::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGTryJoinGuild::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

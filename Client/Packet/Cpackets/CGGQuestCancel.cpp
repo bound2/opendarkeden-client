@@ -6,8 +6,7 @@
 #include "Client_PCH.h"
 #include "CGGQuestCancel.h"
 
-void CGGQuestCancel::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGGQuestCancel::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -16,8 +15,7 @@ void CGGQuestCancel::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 		    
-void CGGQuestCancel::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGGQuestCancel::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -28,7 +26,6 @@ void CGGQuestCancel::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 string CGGQuestCancel::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

@@ -19,18 +19,18 @@
 class CGThrowBomb : public Packet 
 {
 public:
-	CGThrowBomb() throw()		{ }
-	~CGThrowBomb() throw()		{ }
+	CGThrowBomb()		{ }
+	~CGThrowBomb()		{ }
 	
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_THROW_BOMB; }
-	PacketSize_t getPacketSize() const throw() { return szCoord * 4 + szBYTE; }
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_THROW_BOMB; }
+	PacketSize_t getPacketSize() const noexcept { return szCoord * 4 + szBYTE; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "CGThrowBomb"; }
-		std::string toString() const throw();
+		std::string getPacketName() const { return "CGThrowBomb"; }
+		std::string toString() const;
 	#endif
 
 public:
@@ -64,12 +64,12 @@ private:
 class CGThrowBombFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new CGThrowBomb(); }
+	Packet* createPacket() { return new CGThrowBomb(); }
 
-	std::string getPacketName() const throw() { return "CGThrowBomb"; }
+	std::string getPacketName() const { return "CGThrowBomb"; }
 
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_THROW_BOMB; }
-	PacketSize_t getPacketMaxSize() const throw() { return szCoord * 4 + szBYTE; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_THROW_BOMB; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szCoord * 4 + szBYTE; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -80,7 +80,7 @@ public:
 	class CGThrowBombHandler 
 	{
 	public:
-		static void execute(CGThrowBomb* pCGThrowBomb, Player* pPlayer) throw ( ProtocolException , Error );
+		static void execute(CGThrowBomb* pCGThrowBomb, Player* pPlayer);
 	};
 #endif
 

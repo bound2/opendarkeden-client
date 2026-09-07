@@ -6,16 +6,14 @@
 #include "Client_PCH.h"
 #include "CGStoreOpen.h"
 
-void CGStoreOpen::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGStoreOpen::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 
 	__END_CATCH
 }
 
-void CGStoreOpen::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGStoreOpen::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -23,7 +21,6 @@ void CGStoreOpen::write (SocketOutputStream & oStream) const
 }
 
 string CGStoreOpen::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

@@ -7,16 +7,14 @@
 #include "CGRequestUnionInfo.h"
 
 
-void CGRequestUnionInfo::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGRequestUnionInfo::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
 	__END_CATCH
 }
 
-void CGRequestUnionInfo::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGRequestUnionInfo::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -25,7 +23,6 @@ void CGRequestUnionInfo::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 string CGRequestUnionInfo::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

@@ -18,25 +18,25 @@
 class CGAddItemToCodeSheet : public Packet 
 {
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_ADD_ITEM_TO_CODE_SHEET; }
-	PacketSize_t getPacketSize() const throw() { return szObjectID + szCoordInven + szCoordInven; }
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_ADD_ITEM_TO_CODE_SHEET; }
+	PacketSize_t getPacketSize() const noexcept { return szObjectID + szCoordInven + szCoordInven; }
 
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "CGAddItemToCodeSheet"; }
-	std::string toString() const throw();
+	std::string getPacketName() const { return "CGAddItemToCodeSheet"; }
+	std::string toString() const;
 #endif
 
 public:
-	ObjectID_t getObjectID() const throw() { return m_ObjectID; }
-	void setObjectID(ObjectID_t ObjectID) throw() { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() const noexcept { return m_ObjectID; }
+	void setObjectID(ObjectID_t ObjectID) noexcept { m_ObjectID = ObjectID; }
 
-	CoordInven_t getX() const throw() { return m_X; }
-	void setX(Coord_t X) throw() { m_X = X; }
+	CoordInven_t getX() const noexcept { return m_X; }
+	void setX(Coord_t X) noexcept { m_X = X; }
 
-	CoordInven_t getY() const throw() { return m_Y; }
-	void setY(Coord_t Y) throw() { m_Y = Y; }
+	CoordInven_t getY() const noexcept { return m_Y; }
+	void setY(Coord_t Y) noexcept { m_Y = Y; }
 
 private :
 	ObjectID_t   m_ObjectID;	// ObjectID
@@ -52,10 +52,10 @@ private :
 class CGAddItemToCodeSheetFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new CGAddItemToCodeSheet(); }
-	string getPacketName() const throw() { return "CGAddItemToCodeSheet"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_ADD_ITEM_TO_CODE_SHEET; }
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szCoordInven + szCoordInven; }
+	Packet* createPacket() { return new CGAddItemToCodeSheet(); }
+	string getPacketName() const { return "CGAddItemToCodeSheet"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_ADD_ITEM_TO_CODE_SHEET; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szCoordInven + szCoordInven; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -65,7 +65,7 @@ public:
 class CGAddItemToCodeSheetHandler 
 {
 public:
-	static void execute(CGAddItemToCodeSheet* pCGAddItemToCodeSheet, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(CGAddItemToCodeSheet* pCGAddItemToCodeSheet, Player* pPlayer);
 
 };
 

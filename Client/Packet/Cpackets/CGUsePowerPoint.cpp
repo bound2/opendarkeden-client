@@ -10,29 +10,26 @@
 // class CGUsePowerPoint member methods
 //////////////////////////////////////////////////////////////////////////////
 
-CGUsePowerPoint::CGUsePowerPoint () 
-     throw ()
+CGUsePowerPoint::CGUsePowerPoint ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 	
-CGUsePowerPoint::~CGUsePowerPoint () 
-    throw ()
+CGUsePowerPoint::~CGUsePowerPoint ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGUsePowerPoint::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void CGUsePowerPoint::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 		    
 void CGUsePowerPoint::write ( SocketOutputStream & oStream ) 
-     const throw ( ProtocolException , Error )
+     const
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -40,7 +37,7 @@ void CGUsePowerPoint::write ( SocketOutputStream & oStream )
 
 #ifdef __DEBUG_OUTPUT__
 string CGUsePowerPoint::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 

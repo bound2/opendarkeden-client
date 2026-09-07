@@ -26,46 +26,46 @@ class CGSkillToObject : public Packet {
 public :
 	
 	// constructor
-	CGSkillToObject () throw ();
+	CGSkillToObject ();
 	
 	// destructor
-	~CGSkillToObject () throw ();
+	~CGSkillToObject ();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_CG_SKILL_TO_OBJECT; }
+	PacketID_t getPacketID () const noexcept { return PACKET_CG_SKILL_TO_OBJECT; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () { return szSkillType + szCEffectID + szObjectID; }
+	PacketSize_t getPacketSize () const noexcept { return szSkillType + szCEffectID + szObjectID; }
 
 	// get/set SkillType
-	SkillType_t getSkillType() const throw()  { return m_SkillType; }
-	void setSkillType( SkillType_t SkillType ) throw() { m_SkillType = SkillType; }
+	SkillType_t getSkillType() const noexcept  { return m_SkillType; }
+	void setSkillType( SkillType_t SkillType ) noexcept { m_SkillType = SkillType; }
 
 	// get/set CEffectID
-	CEffectID_t getCEffectID() const throw() { return m_CEffectID; }
-	void setCEffectID( CEffectID_t CEffectID ) throw() { m_CEffectID = CEffectID; }
+	CEffectID_t getCEffectID() const noexcept { return m_CEffectID; }
+	void setCEffectID( CEffectID_t CEffectID ) noexcept { m_CEffectID = CEffectID; }
 
 	// get/set TargetObjectID
-	ObjectID_t getTargetObjectID() const throw() { return m_TargetObjectID; }
-	void setTargetObjectID( ObjectID_t TargetObjectID ) throw() { m_TargetObjectID = TargetObjectID; }
+	ObjectID_t getTargetObjectID() const noexcept { return m_TargetObjectID; }
+	void setTargetObjectID( ObjectID_t TargetObjectID ) noexcept { m_TargetObjectID = TargetObjectID; }
 	
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CGSkillToObject"; }
+		std::string getPacketName () const { return "CGSkillToObject"; }
 
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 private :
@@ -94,27 +94,27 @@ class CGSkillToObjectFactory : public PacketFactory {
 public :
 	
 	// constructor
-	CGSkillToObjectFactory () throw () {}
+	CGSkillToObjectFactory () {}
 	
 	// destructor
-	virtual ~CGSkillToObjectFactory () throw () {}
+	virtual ~CGSkillToObjectFactory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new CGSkillToObject(); }
+	Packet * createPacket () { return new CGSkillToObject(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CGSkillToObject"; }
+		std::string getPacketName () const { return "CGSkillToObject"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_SKILL_TO_OBJECT; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_SKILL_TO_OBJECT; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize () const throw () { return szSkillType + szCEffectID + szObjectID; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szSkillType + szCEffectID + szObjectID; }
 };
 
 
@@ -129,7 +129,7 @@ public :
 	public :
 
 		// execute packet's handler
-		static void execute ( CGSkillToObject * pCGSkillToObject , Player * pPlayer ) throw ( ProtocolException , Error );
+		static void execute ( CGSkillToObject * pCGSkillToObject , Player * pPlayer );
 
 	};
 #endif

@@ -6,22 +6,19 @@
 #include "Client_PCH.h"
 #include "CGRelicToObject.h"
 
-CGRelicToObject::CGRelicToObject () 
-     throw ()
+CGRelicToObject::CGRelicToObject ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGRelicToObject::~CGRelicToObject () 
-    throw ()
+CGRelicToObject::~CGRelicToObject ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGRelicToObject::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGRelicToObject::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -33,8 +30,7 @@ void CGRelicToObject::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGRelicToObject::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGRelicToObject::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -48,7 +44,6 @@ void CGRelicToObject::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGRelicToObject::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

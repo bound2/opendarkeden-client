@@ -6,8 +6,7 @@
 #include "Client_PCH.h"
 #include "CGRequestStoreInfo.h"
 
-void CGRequestStoreInfo::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGRequestStoreInfo::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 
@@ -16,8 +15,7 @@ void CGRequestStoreInfo::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGRequestStoreInfo::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGRequestStoreInfo::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -27,7 +25,6 @@ void CGRequestStoreInfo::write (SocketOutputStream & oStream) const
 }
 
 string CGRequestStoreInfo::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

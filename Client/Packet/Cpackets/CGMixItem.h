@@ -20,28 +20,28 @@
 class CGMixItem : public Packet 
 {
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_MIX_ITEM; }
-	PacketSize_t getPacketSize() const throw() { return szObjectID + szCoordInven + szCoordInven + ( szObjectID * 2 ); }
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_MIX_ITEM; }
+	PacketSize_t getPacketSize() const { return szObjectID + szCoordInven + szCoordInven + ( szObjectID * 2 ); }
 
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "CGMixItem"; }
-	std::string toString() const throw();
+	std::string getPacketName() const { return "CGMixItem"; }
+	std::string toString() const;
 #endif
 	
 public:
-	ObjectID_t getObjectID() const throw() { return m_ObjectID; }
-	void setObjectID(ObjectID_t ObjectID) throw() { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() const noexcept { return m_ObjectID; }
+	void setObjectID(ObjectID_t ObjectID) noexcept { m_ObjectID = ObjectID; }
 
-	CoordInven_t getX() const throw() { return m_InvenX; }
-	void setX(CoordInven_t InvenX) throw() { m_InvenX = InvenX; }
+	CoordInven_t getX() const noexcept { return m_InvenX; }
+	void setX(CoordInven_t InvenX) noexcept { m_InvenX = InvenX; }
 
-	CoordInven_t getY() const throw() { return m_InvenY; }
-	void setY(CoordInven_t InvenY) throw() { m_InvenY = InvenY; }
+	CoordInven_t getY() const noexcept { return m_InvenY; }
+	void setY(CoordInven_t InvenY) noexcept { m_InvenY = InvenY; }
 
-	ObjectID_t getTargetObjectID( uint index ) const throw() { assert(index<2); return m_TargetObjectID[index]; }
-	void setTargetObjectID( uint index, ObjectID_t oid ) throw() { assert(index<2); m_TargetObjectID[index] = oid; }
+	ObjectID_t getTargetObjectID( uint index ) const { assert(index<2); return m_TargetObjectID[index]; }
+	void setTargetObjectID( uint index, ObjectID_t oid ) { assert(index<2); m_TargetObjectID[index] = oid; }
 
 private:
 	ObjectID_t   m_ObjectID; // 아이템의 object id 
@@ -58,10 +58,10 @@ private:
 class CGMixItemFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new CGMixItem(); }
-	std::string getPacketName() const throw() { return "CGMixItem"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_MIX_ITEM; }
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szCoordInven + szCoordInven + ( szObjectID * 2 ); }
+	Packet* createPacket() { return new CGMixItem(); }
+	std::string getPacketName() const { return "CGMixItem"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_MIX_ITEM; }
+	PacketSize_t getPacketMaxSize() const { return szObjectID + szCoordInven + szCoordInven + ( szObjectID * 2 ); }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -74,7 +74,7 @@ class Item;
 class CGMixItemHandler 
 {
 public:
-	static void execute(CGMixItem* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(CGMixItem* pPacket, Player* pPlayer);
 };
 
 #endif

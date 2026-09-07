@@ -27,34 +27,34 @@ class CLQueryCharacterName : public Packet {
 public:
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CL_QUERY_CHARACTER_NAME; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CL_QUERY_CHARACTER_NAME; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw() 
+	PacketSize_t getPacketSize() const 
 	{ 
 		return szBYTE + m_CharacterName.size(); 
 	}
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName() const throw() { return "CLQueryCharacterName"; }
+		std::string getPacketName() const { return "CLQueryCharacterName"; }
 		
 		// get packet's debug std::string
-		std::string toString() const throw();
+		std::string toString() const;
 	#endif
 
 public:
 
 	// get/set player's id
-	std::string getCharacterName() const throw() { return m_CharacterName; }
-	void setCharacterName(const std::string & playerID) throw() { m_CharacterName = playerID; }
+	std::string getCharacterName() const { return m_CharacterName; }
+	void setCharacterName(const std::string & playerID) { m_CharacterName = playerID; }
 
 private :
 
@@ -77,18 +77,18 @@ class CLQueryCharacterNameFactory : public PacketFactory {
 public:
 	
 	// create packet
-	Packet* createPacket() throw() { return new CLQueryCharacterName(); }
+	Packet* createPacket() { return new CLQueryCharacterName(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName() const throw() { return "CLQueryCharacterName"; }
+		std::string getPacketName() const { return "CLQueryCharacterName"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CL_QUERY_CHARACTER_NAME; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CL_QUERY_CHARACTER_NAME; }
 
 	// get packet's max body size
-	PacketSize_t getPacketMaxSize() const throw() 
+	PacketSize_t getPacketMaxSize() const 
 	{ 
 		return szBYTE + 20; 
 	}
@@ -107,7 +107,7 @@ public:
 	public:
 
 		// execute packet's handler
-		static void execute(CLQueryCharacterName* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+		static void execute(CLQueryCharacterName* pPacket, Player* pPlayer);
 
 	};
 #endif

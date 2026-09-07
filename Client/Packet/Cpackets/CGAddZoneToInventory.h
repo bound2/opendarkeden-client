@@ -24,56 +24,56 @@ class CGAddZoneToInventory : public Packet {
 public :
 
 	// constructor
-	CGAddZoneToInventory() throw();
+	CGAddZoneToInventory();
 
 	// destructor
-	~CGAddZoneToInventory() throw();
+	~CGAddZoneToInventory();
 
 public :
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_CG_ADD_ZONE_TO_INVENTORY; }
+	PacketID_t getPacketID () const noexcept { return PACKET_CG_ADD_ZONE_TO_INVENTORY; }
 	
 	// get packet's body size
 	// *OPTIMIZATION HINT*
 	// const static CGAddZoneToInventoryPacketSize 를 정의해서 리턴하라.
-	PacketSize_t getPacketSize () const throw () { return szObjectID + szCoord + szCoord + szCoordInven + szCoordInven; }
+	PacketSize_t getPacketSize () const noexcept { return szObjectID + szCoord + szCoord + szCoordInven + szCoordInven; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CGAddZoneToInventory"; }
+		std::string getPacketName () const { return "CGAddZoneToInventory"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 	
 public :
 
 	// get / set ObjectID
-	ObjectID_t getObjectID() throw () { return m_ObjectID; }
-	void setObjectID( ObjectID_t ObjectID ) throw() { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() noexcept { return m_ObjectID; }
+	void setObjectID( ObjectID_t ObjectID ) noexcept { m_ObjectID = ObjectID; }
 
 	// get/set X Coordicate
-	Coord_t getZoneX () const throw () { return m_ZoneX; }
-	void setZoneX ( Coord_t ZoneX ) throw () { m_ZoneX = ZoneX; }
+	Coord_t getZoneX () const noexcept { return m_ZoneX; }
+	void setZoneX ( Coord_t ZoneX ) noexcept { m_ZoneX = ZoneX; }
 
 	// get/set Y Coordicate
-	Coord_t getZoneY () const throw () { return m_ZoneY; }
-	void setZoneY ( Coord_t ZoneY ) throw () { m_ZoneY = ZoneY; }
+	Coord_t getZoneY () const noexcept { return m_ZoneY; }
+	void setZoneY ( Coord_t ZoneY ) noexcept { m_ZoneY = ZoneY; }
 
 	// get / set Ivnentory X, Y Coordicate
-	CoordInven_t getInvenX() const throw () { return m_InvenX; }
-	void setInvenX( CoordInven_t InvenX ) throw () { m_InvenX = InvenX; }
+	CoordInven_t getInvenX() const noexcept { return m_InvenX; }
+	void setInvenX( CoordInven_t InvenX ) noexcept { m_InvenX = InvenX; }
 
 	// get / set Inventory Y
-	CoordInven_t getInvenY() const throw () { return m_InvenY; }
+	CoordInven_t getInvenY() const noexcept { return m_InvenY; }
 	void setInvenY( CoordInven_t InvenY ) { m_InvenY = InvenY; }
 
 private :
@@ -104,20 +104,20 @@ class CGAddZoneToInventoryFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new CGAddZoneToInventory(); }
+	Packet * createPacket () { return new CGAddZoneToInventory(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CGAddZoneToInventory"; }
+		std::string getPacketName () const { return "CGAddZoneToInventory"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_ADD_ZONE_TO_INVENTORY; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_ADD_ZONE_TO_INVENTORY; }
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static CGAddZoneToInventoryPacketSize 를 정의해서 리턴하라.
-	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szCoord + szCoord + szCoordInven + szCoordInven; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID + szCoord + szCoord + szCoordInven + szCoordInven; }
 
 };
 
@@ -133,7 +133,7 @@ public :
 	public :
 
 		// execute packet's handler
-		static void execute ( CGAddZoneToInventory * pPacket , Player * player ) throw ( ProtocolException , Error );
+		static void execute ( CGAddZoneToInventory * pPacket , Player * player );
 	};
 
 #endif

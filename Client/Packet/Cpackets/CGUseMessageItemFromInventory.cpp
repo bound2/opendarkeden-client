@@ -10,8 +10,7 @@
 #include "PacketAssert.h"
 
 #ifdef __DEBUG_OUTPUT__
-void CGUseMessageItemFromInventory::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGUseMessageItemFromInventory::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 
@@ -35,8 +34,7 @@ void CGUseMessageItemFromInventory::read (SocketInputStream & iStream)
 }
 #endif
 		    
-void CGUseMessageItemFromInventory::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGUseMessageItemFromInventory::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -62,7 +60,7 @@ void CGUseMessageItemFromInventory::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGUseMessageItemFromInventory::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 		

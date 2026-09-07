@@ -26,52 +26,52 @@ class CGSkillToTile : public Packet {
 public :
 	
 	// constructor
-	CGSkillToTile () throw ();
+	CGSkillToTile ();
 	
 	// destructor
-	~CGSkillToTile () throw ();
+	~CGSkillToTile ();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_CG_SKILL_TO_TILE; }
+	PacketID_t getPacketID () const noexcept { return PACKET_CG_SKILL_TO_TILE; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () { return szSkillType + szCEffectID + szCoord + szCoord ; }
+	PacketSize_t getPacketSize () const noexcept { return szSkillType + szCEffectID + szCoord + szCoord ; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CGSkillToTile"; }
+		std::string getPacketName () const { return "CGSkillToTile"; }
 	#endif
 
 	// get/set SkillType
-	SkillType_t getSkillType() const throw()  { return m_SkillType; }
-	void setSkillType( SkillType_t SkillType ) throw() { m_SkillType = SkillType; }
+	SkillType_t getSkillType() const noexcept  { return m_SkillType; }
+	void setSkillType( SkillType_t SkillType ) noexcept { m_SkillType = SkillType; }
 
 	// get/set CEffectID
-	CEffectID_t getCEffectID() const throw() { return m_CEffectID; }
-	void setCEffectID( CEffectID_t CEffectID ) throw() { m_CEffectID = CEffectID; }
+	CEffectID_t getCEffectID() const noexcept { return m_CEffectID; }
+	void setCEffectID( CEffectID_t CEffectID ) noexcept { m_CEffectID = CEffectID; }
 
 	// get/set X
-	Coord_t getX() const throw() { return m_X; }
-	void setX( Coord_t X ) throw() { m_X = X; }
+	Coord_t getX() const noexcept { return m_X; }
+	void setX( Coord_t X ) noexcept { m_X = X; }
 
 	// get/set Y
-	Coord_t getY() const throw() { return m_Y; }
-	void setY( Coord_t Y ) throw() { m_Y = Y; }
+	Coord_t getY() const noexcept { return m_Y; }
+	void setY( Coord_t Y ) noexcept { m_Y = Y; }
 	
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 private :
@@ -103,27 +103,27 @@ class CGSkillToTileFactory : public PacketFactory {
 public :
 	
 	// constructor
-	CGSkillToTileFactory () throw () {}
+	CGSkillToTileFactory () {}
 	
 	// destructor
-	virtual ~CGSkillToTileFactory () throw () {}
+	virtual ~CGSkillToTileFactory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new CGSkillToTile(); }
+	Packet * createPacket () { return new CGSkillToTile(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CGSkillToTile"; }
+		std::string getPacketName () const { return "CGSkillToTile"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_SKILL_TO_TILE; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_SKILL_TO_TILE; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szSkillType + szCEffectID + szCoord + szCoord; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szSkillType + szCEffectID + szCoord + szCoord; }
 
 };
 
@@ -140,7 +140,7 @@ class CGSkillToTileHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( CGSkillToTile * pCGSkillToTile , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( CGSkillToTile * pCGSkillToTile , Player * pPlayer );
 
 };
 #endif

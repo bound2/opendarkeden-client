@@ -7,8 +7,7 @@
 #include "CGDenyUnion.h"
 
 
-void CGDenyUnion::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGDenyUnion::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -17,8 +16,7 @@ void CGDenyUnion::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGDenyUnion::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGDenyUnion::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -29,7 +27,6 @@ void CGDenyUnion::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 string CGDenyUnion::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

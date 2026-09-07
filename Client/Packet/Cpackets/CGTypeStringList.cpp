@@ -6,22 +6,19 @@
 #include "Client_PCH.h"
 #include "CGTypeStringList.h"
 
-CGTypeStringList::CGTypeStringList () 
-     throw ()
+CGTypeStringList::CGTypeStringList ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGTypeStringList::~CGTypeStringList () 
-    throw ()
+CGTypeStringList::~CGTypeStringList ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGTypeStringList::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGTypeStringList::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 
@@ -48,8 +45,7 @@ void CGTypeStringList::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGTypeStringList::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGTypeStringList::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -84,7 +80,7 @@ void CGTypeStringList::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGTypeStringList::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 		

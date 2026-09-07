@@ -6,8 +6,7 @@
 #include "Client_PCH.h"
 #include "CGRequestInfo.h"
 
-void CGRequestInfo::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGRequestInfo::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -17,8 +16,7 @@ void CGRequestInfo::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGRequestInfo::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGRequestInfo::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -29,8 +27,7 @@ void CGRequestInfo::write (SocketOutputStream & oStream) const
 }
 
 #ifdef __DEBUG_OUTPUT__
-std::string CGRequestInfo::toString () const 
-	throw ()
+std::string CGRequestInfo::toString () const
 {
 	StringStream msg;
 	msg << "CGRequestInfo(" 

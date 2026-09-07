@@ -6,22 +6,19 @@
 #include "Client_PCH.h"
 #include "CGAbsorbSoul.h"
 
-CGAbsorbSoul::CGAbsorbSoul () 
-     throw ()
+CGAbsorbSoul::CGAbsorbSoul ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGAbsorbSoul::~CGAbsorbSoul () 
-    throw ()
+CGAbsorbSoul::~CGAbsorbSoul ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGAbsorbSoul::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGAbsorbSoul::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -37,8 +34,7 @@ void CGAbsorbSoul::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 		    
-void CGAbsorbSoul::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGAbsorbSoul::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -56,7 +52,6 @@ void CGAbsorbSoul::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGAbsorbSoul::toString () const
-    throw ()
 {
 	__BEGIN_TRY
 		

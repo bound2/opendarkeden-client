@@ -8,30 +8,26 @@
 #include "PacketAssert.h"
 
 
-CGPetGamble::CGPetGamble () 
-     throw ()
+CGPetGamble::CGPetGamble ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGPetGamble::~CGPetGamble () 
-    throw ()
+CGPetGamble::~CGPetGamble ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGPetGamble::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGPetGamble::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
 	__END_CATCH
 }
 
-void CGPetGamble::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGPetGamble::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -40,7 +36,7 @@ void CGPetGamble::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGPetGamble::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 		

@@ -6,16 +6,14 @@
 #include "Client_PCH.h"
 #include "CGSMSAddressList.h"
 
-void CGSMSAddressList::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGSMSAddressList::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
 	__END_CATCH
 }
 		    
-void CGSMSAddressList::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGSMSAddressList::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -23,7 +21,6 @@ void CGSMSAddressList::write (SocketOutputStream & oStream) const
 }
 
 string CGSMSAddressList::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

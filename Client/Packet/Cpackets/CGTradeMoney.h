@@ -32,25 +32,25 @@ enum
 class CGTradeMoney : public Packet 
 {
 public:
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
-	PacketID_t getPacketID () const throw () { return PACKET_CG_TRADE_MONEY; }
-	PacketSize_t getPacketSize () const throw () { return szObjectID + szGold + szBYTE; }
+	void read ( SocketInputStream & iStream );
+	void write ( SocketOutputStream & oStream ) const;
+	PacketID_t getPacketID () const noexcept { return PACKET_CG_TRADE_MONEY; }
+	PacketSize_t getPacketSize () const noexcept { return szObjectID + szGold + szBYTE; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "CGTradeMoney"; }
-		std::string toString () const throw ();
+		std::string getPacketName () const { return "CGTradeMoney"; }
+		std::string toString () const;
 	#endif
 	
 public:
-	ObjectID_t getTargetObjectID() const throw() { return m_TargetObjectID; }
-	void setTargetObjectID(ObjectID_t id) throw() { m_TargetObjectID = id; }
+	ObjectID_t getTargetObjectID() const noexcept { return m_TargetObjectID; }
+	void setTargetObjectID(ObjectID_t id) noexcept { m_TargetObjectID = id; }
 
-	Gold_t getAmount() const throw() { return m_Gold; }
-	void setAmount(Gold_t gold) throw() { m_Gold = gold; }
+	Gold_t getAmount() const noexcept { return m_Gold; }
+	void setAmount(Gold_t gold) noexcept { m_Gold = gold; }
 
-	BYTE getCode() const throw() { return m_Code; }
-	void setCode(BYTE code) throw() { m_Code = code; }
+	BYTE getCode() const noexcept { return m_Code; }
+	void setCode(BYTE code) noexcept { m_Code = code; }
 
 private:
 	ObjectID_t m_TargetObjectID; // 교환을 원하는 상대방의 ObjectID
@@ -67,14 +67,14 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 class CGTradeMoneyFactory : public PacketFactory {
 public:
-	Packet * createPacket () throw () { return new CGTradeMoney(); }
+	Packet * createPacket () { return new CGTradeMoney(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "CGTradeMoney"; }
+		std::string getPacketName () const { return "CGTradeMoney"; }
 	#endif
 
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_TRADE_MONEY; }
-	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szGold + szBYTE; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_TRADE_MONEY; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID + szGold + szBYTE; }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -87,10 +87,10 @@ public:
 	class CGTradeMoneyHandler 
 	{
 	public:
-		static void execute ( CGTradeMoney * pPacket , Player * player ) throw ( ProtocolException , Error );
-		static void executeSlayer ( CGTradeMoney * pPacket , Player * player ) throw ( ProtocolException , Error );
-		static void executeVampire ( CGTradeMoney * pPacket , Player * player ) throw ( ProtocolException , Error );
-		static void executeError ( CGTradeMoney * pPacket , Player * player, BYTE ErrorCode ) throw ( ProtocolException , Error );
+		static void execute ( CGTradeMoney * pPacket , Player * player );
+		static void executeSlayer ( CGTradeMoney * pPacket , Player * player );
+		static void executeVampire ( CGTradeMoney * pPacket , Player * player );
+		static void executeError ( CGTradeMoney * pPacket , Player * player, BYTE ErrorCode );
 	};
 #endif
 

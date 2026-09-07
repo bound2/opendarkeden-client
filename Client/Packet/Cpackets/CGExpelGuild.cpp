@@ -7,8 +7,7 @@
 #include "CGExpelGuild.h"
 
 
-void CGExpelGuild::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGExpelGuild::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -17,8 +16,7 @@ void CGExpelGuild::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGExpelGuild::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGExpelGuild::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -29,7 +27,6 @@ void CGExpelGuild::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 string CGExpelGuild::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

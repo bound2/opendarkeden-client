@@ -6,8 +6,7 @@
 #include "Client_PCH.h"
 #include "CGAddItemToCodeSheet.h"
 
-void CGAddItemToCodeSheet::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGAddItemToCodeSheet::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -18,8 +17,7 @@ void CGAddItemToCodeSheet::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGAddItemToCodeSheet::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGAddItemToCodeSheet::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -33,7 +31,6 @@ void CGAddItemToCodeSheet::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGAddItemToCodeSheet::toString () const
-	throw ()
 {
 	__BEGIN_TRY
 		

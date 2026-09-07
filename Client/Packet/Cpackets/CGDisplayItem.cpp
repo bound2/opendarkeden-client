@@ -6,8 +6,7 @@
 #include "Client_PCH.h"
 #include "CGDisplayItem.h"
 
-void CGDisplayItem::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGDisplayItem::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -20,8 +19,7 @@ void CGDisplayItem::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGDisplayItem::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGDisplayItem::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -35,7 +33,6 @@ void CGDisplayItem::write (SocketOutputStream & oStream) const
 }
 
 string CGDisplayItem::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

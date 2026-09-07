@@ -6,8 +6,7 @@
 #include "Client_PCH.h"
 #include "CGGlobalChat.h"
 
-void CGGlobalChat::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGGlobalChat::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 	
@@ -22,8 +21,7 @@ void CGGlobalChat::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGGlobalChat::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGGlobalChat::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -45,7 +43,6 @@ void CGGlobalChat::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGGlobalChat::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

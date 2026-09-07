@@ -11,8 +11,7 @@
 #include "SocketEncryptOutputStream.h"
 #include "PacketAssert.h"
 
-CGUseItemFromInventory::CGUseItemFromInventory () 
-     throw ()
+CGUseItemFromInventory::CGUseItemFromInventory ()
 {
 	__BEGIN_TRY
 
@@ -21,15 +20,13 @@ CGUseItemFromInventory::CGUseItemFromInventory ()
 	__END_CATCH
 }
 	
-CGUseItemFromInventory::~CGUseItemFromInventory () 
-    throw ()
+CGUseItemFromInventory::~CGUseItemFromInventory ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGUseItemFromInventory::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGUseItemFromInventory::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -57,8 +54,7 @@ void CGUseItemFromInventory::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 		    
-void CGUseItemFromInventory::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGUseItemFromInventory::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -88,7 +84,7 @@ void CGUseItemFromInventory::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGUseItemFromInventory::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 		

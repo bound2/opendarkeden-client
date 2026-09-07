@@ -6,22 +6,19 @@
 #include "Client_PCH.h"
 #include "CGAddSMSAddress.h"
 
-CGAddSMSAddress::CGAddSMSAddress () 
-     throw ()
+CGAddSMSAddress::CGAddSMSAddress ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGAddSMSAddress::~CGAddSMSAddress () 
-    throw ()
+CGAddSMSAddress::~CGAddSMSAddress ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGAddSMSAddress::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGAddSMSAddress::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 
@@ -39,8 +36,7 @@ void CGAddSMSAddress::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGAddSMSAddress::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGAddSMSAddress::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -72,7 +68,7 @@ void CGAddSMSAddress::write (SocketOutputStream & oStream) const
 }
 
 string CGAddSMSAddress::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 		

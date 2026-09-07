@@ -26,39 +26,39 @@ class CGSelectPortal : public Packet {
 public :
 	
 	// constructor
-	CGSelectPortal () throw ();
+	CGSelectPortal ();
 	
 	// destructor
-	~CGSelectPortal () throw ();
+	~CGSelectPortal ();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_CG_SELECT_PORTAL; }
+	PacketID_t getPacketID () const noexcept { return PACKET_CG_SELECT_PORTAL; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () { return szZoneID; }
+	PacketSize_t getPacketSize () const noexcept { return szZoneID; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CGSelectPortal"; }
+		std::string getPacketName () const { return "CGSelectPortal"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 	// get / set ZoneID
-	ObjectID_t getZoneID() const throw()  { return m_ZoneID; }
-	void setZoneID( ZoneID_t ZoneID ) throw() { m_ZoneID = ZoneID; }
+	ObjectID_t getZoneID() const noexcept  { return m_ZoneID; }
+	void setZoneID( ZoneID_t ZoneID ) noexcept { m_ZoneID = ZoneID; }
 
 	
 private :
@@ -80,25 +80,25 @@ class CGSelectPortalFactory : public PacketFactory {
 public :
 	
 	// constructor
-	CGSelectPortalFactory () throw () {}
+	CGSelectPortalFactory () {}
 	
 	// destructor
-	virtual ~CGSelectPortalFactory () throw () {}
+	virtual ~CGSelectPortalFactory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new CGSelectPortal(); }
+	Packet * createPacket () { return new CGSelectPortal(); }
 
 	// get packet name
-	std::string getPacketName () const throw () { return "CGSelectPortal"; }
+	std::string getPacketName () const { return "CGSelectPortal"; }
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_SELECT_PORTAL; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_SELECT_PORTAL; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize () const throw () { return szZoneID; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szZoneID; }
 };
 
 
@@ -113,7 +113,7 @@ class CGSelectPortalHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( CGSelectPortal * pCGSelectPortal , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( CGSelectPortal * pCGSelectPortal , Player * pPlayer );
 
 };
 #endif

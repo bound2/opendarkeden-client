@@ -10,23 +10,20 @@
 #include "PacketAssert.h"
 
 
-CGDissectionCorpse::CGDissectionCorpse () 
-     throw ()
+CGDissectionCorpse::CGDissectionCorpse ()
 {
 	__BEGIN_TRY
 	m_IsPet = 0;
 	__END_CATCH
 }
 
-CGDissectionCorpse::~CGDissectionCorpse () 
-    throw ()
+CGDissectionCorpse::~CGDissectionCorpse ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGDissectionCorpse::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGDissectionCorpse::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -54,8 +51,7 @@ void CGDissectionCorpse::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGDissectionCorpse::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGDissectionCorpse::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -85,7 +81,6 @@ void CGDissectionCorpse::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGDissectionCorpse::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

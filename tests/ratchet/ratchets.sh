@@ -847,7 +847,14 @@ R9_BASELINE=0
 # enough for one, and it promotes only an inline one-liner returning a
 # constant or a scalar member. Cpackets (3,172) and Gpackets (5,883) are
 # what is left; Types carries none.
-R10_BASELINE=9055
+#
+# R10 = 5,883 (2026-09-07): Cpackets is at 0, 3,172 sites by the same
+# script. One packet derives from another there
+# (CGUseMessageItemFromInventory from CGUseItemFromInventory), and the
+# build refused the base's promoted size functions under the derived
+# class's unpromoted overrides, so the base is unspecified too. Gpackets
+# is all that is left.
+R10_BASELINE=5883
 
 # Identifiers, `::` and commas between the parens, and nothing else. The
 # leading alternation rather than \b for the reason R8's comment gives:

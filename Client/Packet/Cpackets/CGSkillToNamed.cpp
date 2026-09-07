@@ -9,21 +9,18 @@
 #include <span>
 
 CGSkillToNamed::CGSkillToNamed ()
-     throw ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGSkillToNamed::~CGSkillToNamed () 
-    throw ()
+CGSkillToNamed::~CGSkillToNamed ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGSkillToNamed::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGSkillToNamed::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 
@@ -43,8 +40,7 @@ void CGSkillToNamed::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGSkillToNamed::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGSkillToNamed::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -68,7 +64,6 @@ void CGSkillToNamed::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGSkillToNamed::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

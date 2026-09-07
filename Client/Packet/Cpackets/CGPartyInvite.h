@@ -31,22 +31,22 @@ enum
 class CGPartyInvite : public Packet 
 {
 public:
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_PARTY_INVITE; }
-	PacketSize_t getPacketSize() const throw() { return szObjectID + szBYTE; }
+	void read(SocketInputStream & iStream);
+	void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_PARTY_INVITE; }
+	PacketSize_t getPacketSize() const noexcept { return szObjectID + szBYTE; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "CGPartyInvite"; }
-		std::string toString() const throw();
+		std::string getPacketName() const { return "CGPartyInvite"; }
+		std::string toString() const;
 	#endif
 	
 public:
-	ObjectID_t getTargetObjectID() const throw() { return m_TargetObjectID; }
-	void setTargetObjectID(ObjectID_t id) throw() { m_TargetObjectID = id; }
+	ObjectID_t getTargetObjectID() const noexcept { return m_TargetObjectID; }
+	void setTargetObjectID(ObjectID_t id) noexcept { m_TargetObjectID = id; }
 
-	BYTE getCode(void) const throw() { return m_Code; }
-	void setCode(BYTE code) throw() { m_Code = code; }
+	BYTE getCode(void) const noexcept { return m_Code; }
+	void setCode(BYTE code) noexcept { m_Code = code; }
 
 private:
 	ObjectID_t m_TargetObjectID; // 상대방의 OID
@@ -61,14 +61,14 @@ private:
 class CGPartyInviteFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new CGPartyInvite(); }
+	Packet* createPacket() { return new CGPartyInvite(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "CGPartyInvite"; }
+		std::string getPacketName() const { return "CGPartyInvite"; }
 	#endif
 
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_PARTY_INVITE; }
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szBYTE; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_PARTY_INVITE; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szBYTE; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -78,8 +78,8 @@ public:
 	class CGPartyInviteHandler 
 	{
 	public:
-		static void execute(CGPartyInvite* pPacket, Player* player) throw(ProtocolException, Error);
-		static void executeError(CGPartyInvite* pPacket, Player* player, BYTE ErrorCode) throw(ProtocolException, Error);
+		static void execute(CGPartyInvite* pPacket, Player* player);
+		static void executeError(CGPartyInvite* pPacket, Player* player, BYTE ErrorCode);
 	};
 #endif
 

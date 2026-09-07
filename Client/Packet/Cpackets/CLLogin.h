@@ -27,38 +27,38 @@ class CLLogin : public Packet {
 public :
 	
     // Reads data from the input stream (buffer) and initialises the packet.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // Sends the packet's binary image to the output stream (buffer).
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_CL_LOGIN; }
+	PacketID_t getPacketID () const noexcept { return PACKET_CL_LOGIN; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw ();// { return szBYTE + m_ID.size() + szBYTE + m_Password.size(); }
+	PacketSize_t getPacketSize () const;// { return szBYTE + m_ID.size() + szBYTE + m_Password.size(); }
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet name
-	std::string getPacketName () const throw () { return "CLLogin"; }
+	std::string getPacketName () const { return "CLLogin"; }
 	
 	// get packet's debug string
-	std::string toString () const throw ();
+	std::string toString () const;
 #endif
 
 public :
 
 	// get/set player's id
-	std::string getID () const throw () { return m_ID; }
-	void setID ( std::string id ) throw () { m_ID = id; }
+	std::string getID () const { return m_ID; }
+	void setID ( std::string id ) { m_ID = id; }
 
 	// get/set player's password
-	std::string getPassword () const throw () { return m_Password; }
-	void setPassword ( std::string password ) throw () { m_Password = password; }
+	std::string getPassword () const { return m_Password; }
+	void setPassword ( std::string password ) { m_Password = password; }
 
-	const BYTE* getMacAddress() const throw () { return m_MacAddress; }
-	void setMacAddress( const BYTE* macAddress ) throw () { memcpy( m_MacAddress, macAddress, 6 * sizeof(BYTE) ); }
+	const BYTE* getMacAddress() const noexcept { return m_MacAddress; }
+	void setMacAddress( const BYTE* macAddress ) { memcpy( m_MacAddress, macAddress, 6 * sizeof(BYTE) ); }
 
 	void SetLoginMode(BYTE n) { m_LoginMode = n;}
 
@@ -67,12 +67,12 @@ public :
 	// user information; the packet itself no longer reads the game
 	// global, so it compiles into the packetwire library and can be
 	// pinned by a test in either mode.
-	bool isNetmarble () const throw () { return m_bNetmarble; }
-	void setNetmarble ( bool bNetmarble ) throw () { m_bNetmarble = bNetmarble; }
+	bool isNetmarble () const noexcept { return m_bNetmarble; }
+	void setNetmarble ( bool bNetmarble ) noexcept { m_bNetmarble = bNetmarble; }
 
 	// A user-provided constructor forgoes value-initialisation's zero
 	// fill, so the MAC is cleared here explicitly.
-	CLLogin () throw () : m_LoginMode(0) , m_bNetmarble(false) { memset( m_MacAddress, 0, sizeof(m_MacAddress) ); }
+	CLLogin () : m_LoginMode(0) , m_bNetmarble(false) { memset( m_MacAddress, 0, sizeof(m_MacAddress) ); }
 
 private :
 
@@ -106,18 +106,18 @@ class CLLoginFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new CLLogin(); }
+	Packet * createPacket () { return new CLLogin(); }
 
 	// get packet name
-	std::string getPacketName () const throw () { return "CLLogin"; }
+	std::string getPacketName () const { return "CLLogin"; }
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CL_LOGIN; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CL_LOGIN; }
 
 	// get packet's max body size
 	// szID + ID(<=30) + szPassword + password(<=30, the server's cap; our
 	// write() clamps at 20) + mac(6) + loginMode
-	PacketSize_t getPacketMaxSize () const throw () { return szBYTE + 30 + szBYTE + 30 + 6 + szBYTE; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szBYTE + 30 + szBYTE + 30 + 6 + szBYTE; }
 
 };
 
@@ -133,7 +133,7 @@ public :
 	public :
 
 		// execute packet's handler
-		static void execute ( CLLogin * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+		static void execute ( CLLogin * pPacket , Player * pPlayer );
 
 	};
 #endif

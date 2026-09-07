@@ -8,8 +8,7 @@
 #include "SocketEncryptInputStream.h"
 #include "SocketEncryptOutputStream.h"
 #include "PacketAssert.h"
-CGSkillToInventory::CGSkillToInventory () 
-     throw ()
+CGSkillToInventory::CGSkillToInventory ()
 {
 	__BEGIN_TRY
 
@@ -18,15 +17,13 @@ CGSkillToInventory::CGSkillToInventory ()
 	__END_CATCH
 }
 	
-CGSkillToInventory::~CGSkillToInventory () 
-    throw ()
+CGSkillToInventory::~CGSkillToInventory ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGSkillToInventory::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGSkillToInventory::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -60,8 +57,7 @@ void CGSkillToInventory::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGSkillToInventory::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGSkillToInventory::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -97,7 +93,6 @@ void CGSkillToInventory::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGSkillToInventory::toString () const
-	throw ()
 {
 	__BEGIN_TRY
 		

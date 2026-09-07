@@ -26,33 +26,33 @@ class CGTryJoinGuild : public Packet
 public:
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_CG_TRY_JOIN_GUILD; }
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_TRY_JOIN_GUILD; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw() { return szGuildID + szGuildMemberRank; }
+	PacketSize_t getPacketSize() const noexcept { return szGuildID + szGuildMemberRank; }
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet name
-	std::string getPacketName() const throw() { return "CGTryJoinGuild"; }
+	std::string getPacketName() const { return "CGTryJoinGuild"; }
 
 	// get packet's debug std::string
-	std::string toString() const throw();
+	std::string toString() const;
 #endif
 
 	// get/set Guild ID
-	GuildID_t getGuildID() const throw() { return m_GuildID; }
-	void setGuildID( GuildID_t GuildID ) throw() { m_GuildID = GuildID; }
+	GuildID_t getGuildID() const noexcept { return m_GuildID; }
+	void setGuildID( GuildID_t GuildID ) noexcept { m_GuildID = GuildID; }
 
 	// get/set Guild Member Rank
-	GuildMemberRank_t getGuildMemberRank() const throw() { return m_GuildMemberRank; }
-	void setGuildMemberRank( GuildMemberRank_t GuildMemberRank ) throw() { m_GuildMemberRank = GuildMemberRank; }
+	GuildMemberRank_t getGuildMemberRank() const noexcept { return m_GuildMemberRank; }
+	void setGuildMemberRank( GuildMemberRank_t GuildMemberRank ) noexcept { m_GuildMemberRank = GuildMemberRank; }
 
 
 private :
@@ -79,25 +79,25 @@ class CGTryJoinGuildFactory : public PacketFactory {
 public:
 	
 	// constructor
-	CGTryJoinGuildFactory() throw() {}
+	CGTryJoinGuildFactory() {}
 	
 	// destructor
-	virtual ~CGTryJoinGuildFactory() throw() {}
+	virtual ~CGTryJoinGuildFactory() {}
 
 	
 public:
 	
 	// create packet
-	Packet* createPacket() throw() { return new CGTryJoinGuild(); }
+	Packet* createPacket() { return new CGTryJoinGuild(); }
 
 	// get packet name
-	std::string getPacketName() const throw() { return "CGTryJoinGuild"; }
+	std::string getPacketName() const { return "CGTryJoinGuild"; }
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_TRY_JOIN_GUILD; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_TRY_JOIN_GUILD; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szGuildID + szGuildMemberRank; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szGuildID + szGuildMemberRank; }
 };
 
 #ifndef __GAME_CLIENT__
@@ -112,7 +112,7 @@ class CGTryJoinGuildHandler {
 public:
 
 	// execute packet's handler
-	static void execute(CGTryJoinGuild* pCGTryJoinGuild, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(CGTryJoinGuild* pCGTryJoinGuild, Player* pPlayer);
 
 };
 #endif

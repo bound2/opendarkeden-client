@@ -26,46 +26,46 @@ class CGRideMotorCycle : public Packet {
 public :
 	
 	// constructor
-	CGRideMotorCycle () throw ();
+	CGRideMotorCycle ();
 	
 	// destructor
-	~CGRideMotorCycle () throw ();
+	~CGRideMotorCycle ();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_CG_RIDE_MOTORCYCLE; }
+	PacketID_t getPacketID () const noexcept { return PACKET_CG_RIDE_MOTORCYCLE; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () { return szObjectID + szCoord + szCoord ; }
+	PacketSize_t getPacketSize () const noexcept { return szObjectID + szCoord + szCoord ; }
 
 	// get/set ObjectID
-	ObjectID_t getObjectID() const throw()  { return m_ObjectID; }
-	void setObjectID( ObjectID_t ObjectID ) throw() { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() const noexcept  { return m_ObjectID; }
+	void setObjectID( ObjectID_t ObjectID ) noexcept { m_ObjectID = ObjectID; }
 
 	// get/set X
-	Coord_t getX() const throw() { return m_X; }
-	void setX( Coord_t X ) throw() { m_X = X; }
+	Coord_t getX() const noexcept { return m_X; }
+	void setX( Coord_t X ) noexcept { m_X = X; }
 
 	// get/set Y
-	Coord_t getY() const throw() { return m_Y; }
-	void setY( Coord_t Y ) throw() { m_Y = Y; }
+	Coord_t getY() const noexcept { return m_Y; }
+	void setY( Coord_t Y ) noexcept { m_Y = Y; }
 	
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CGRideMotorCycle"; }
+		std::string getPacketName () const { return "CGRideMotorCycle"; }
 
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 private :
@@ -94,27 +94,27 @@ class CGRideMotorCycleFactory : public PacketFactory {
 public :
 	
 	// constructor
-	CGRideMotorCycleFactory () throw () {}
+	CGRideMotorCycleFactory () {}
 	
 	// destructor
-	virtual ~CGRideMotorCycleFactory () throw () {}
+	virtual ~CGRideMotorCycleFactory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new CGRideMotorCycle(); }
+	Packet * createPacket () { return new CGRideMotorCycle(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CGRideMotorCycle"; }
+		std::string getPacketName () const { return "CGRideMotorCycle"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_RIDE_MOTORCYCLE; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_RIDE_MOTORCYCLE; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szCoord + szCoord; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szCoord + szCoord; }
 
 };
 
@@ -130,7 +130,7 @@ public :
 	public :
 
 		// execute packet's handler
-		static void execute ( CGRideMotorCycle * pCGRideMotorCycle , Player * pPlayer ) throw ( ProtocolException , Error );
+		static void execute ( CGRideMotorCycle * pCGRideMotorCycle , Player * pPlayer );
 
 	};
 #endif

@@ -8,8 +8,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGSelectTileEffect::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void CGSelectTileEffect::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -20,8 +19,7 @@ void CGSelectTileEffect::read ( SocketInputStream & iStream )
 		    
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGSelectTileEffect::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void CGSelectTileEffect::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 		
@@ -36,7 +34,6 @@ void CGSelectTileEffect::write ( SocketOutputStream & oStream ) const
 //////////////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string CGSelectTileEffect::toString () const
-		   throw ()
 	{
 		__BEGIN_TRY
 			

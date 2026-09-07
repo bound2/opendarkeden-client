@@ -24,8 +24,7 @@
 //	__END_CATCH
 //}
 
-void CGUsePotionFromInventory::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGUsePotionFromInventory::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -51,8 +50,7 @@ void CGUsePotionFromInventory::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGUsePotionFromInventory::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGUsePotionFromInventory::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -80,7 +78,7 @@ void CGUsePotionFromInventory::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGUsePotionFromInventory::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 		

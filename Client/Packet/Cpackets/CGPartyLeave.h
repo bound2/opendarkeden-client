@@ -17,18 +17,18 @@
 class CGPartyLeave : public Packet 
 {
 public:
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_PARTY_LEAVE; }
-	PacketSize_t getPacketSize() const throw() { return szBYTE + m_TargetName.size(); }
+	void read(SocketInputStream & iStream);
+	void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_PARTY_LEAVE; }
+	PacketSize_t getPacketSize() const { return szBYTE + m_TargetName.size(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "CGPartyLeave"; }
-		std::string toString() const throw();
+		std::string getPacketName() const { return "CGPartyLeave"; }
+		std::string toString() const;
 	#endif
 	
 public:
-	std::string getTargetName(void) const throw() { return m_TargetName; }
+	std::string getTargetName(void) const { return m_TargetName; }
 	void setTargetName(const std::string& name) { m_TargetName = name; }
 
 private:
@@ -42,14 +42,14 @@ private:
 class CGPartyLeaveFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new CGPartyLeave(); }
+	Packet* createPacket() { return new CGPartyLeave(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "CGPartyLeave"; }
+		std::string getPacketName() const { return "CGPartyLeave"; }
 	#endif
 
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_PARTY_LEAVE; }
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE + 10; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_PARTY_LEAVE; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE + 10; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -59,7 +59,7 @@ public:
 	class CGPartyLeaveHandler 
 	{
 	public:
-		static void execute(CGPartyLeave* pPacket, Player* player) throw(ProtocolException, Error);
+		static void execute(CGPartyLeave* pPacket, Player* player);
 	};
 #endif
 

@@ -29,14 +29,14 @@ public:
 		STRING_TYPE_FORCE_APART_COUPLE,
 	};
 public:
-	CGTypeStringList() throw();
-	~CGTypeStringList() throw();
+	CGTypeStringList();
+	~CGTypeStringList();
 
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_TYPE_STRING_LIST; }
-	PacketSize_t getPacketSize() const throw()
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_TYPE_STRING_LIST; }
+	PacketSize_t getPacketSize() const
 	{
 		PacketSize_t ret = szBYTE;
 		ret+=szBYTE;
@@ -51,8 +51,8 @@ public:
 		return ret; 
 	}
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "CGTypeStringList"; }
-	std::string toString() const throw();
+	std::string getPacketName() const { return "CGTypeStringList"; }
+	std::string toString() const;
 #endif
 	
 public:
@@ -79,10 +79,10 @@ private:
 class CGTypeStringListFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new CGTypeStringList(); }
-	std::string getPacketName() const throw() { return "CGTypeStringList"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_TYPE_STRING_LIST; }
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE+szBYTE + ( szBYTE + MAX_STRING_LENGTH ) * MAX_STRING_NUM + szDWORD; }
+	Packet* createPacket() { return new CGTypeStringList(); }
+	std::string getPacketName() const { return "CGTypeStringList"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_TYPE_STRING_LIST; }
+	PacketSize_t getPacketMaxSize() const { return szBYTE+szBYTE + ( szBYTE + MAX_STRING_LENGTH ) * MAX_STRING_NUM + szDWORD; }
 };
 
 #ifndef __GAME_CLIENT__
@@ -93,11 +93,11 @@ public:
 class CGTypeStringListHandler 
 {
 public:
-	static void execute(CGTypeStringList* pPacket, Player* player) throw(ProtocolException, Error);
+	static void execute(CGTypeStringList* pPacket, Player* player);
 
 private:
-	static void executeWaitForMeet(CGTypeStringList* pPacket, Player* player) throw(ProtocolException, Error);
-	static void executeWaitForApart(CGTypeStringList* pPacket, Player* player) throw(ProtocolException, Error);
+	static void executeWaitForMeet(CGTypeStringList* pPacket, Player* player);
+	static void executeWaitForApart(CGTypeStringList* pPacket, Player* player);
 };
 #endif
 

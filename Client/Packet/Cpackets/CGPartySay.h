@@ -26,41 +26,41 @@ class CGPartySay : public Packet {
 public:
 	
 	// constructor
-	CGPartySay() throw();
+	CGPartySay();
 	
 	// destructor
-	~CGPartySay() throw();
+	~CGPartySay();
 
 	
 public:
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_CG_PARTY_SAY; }
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_PARTY_SAY; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw() { return szBYTE + m_Message.size() + szuint; }
+	PacketSize_t getPacketSize() const { return szBYTE + m_Message.size() + szuint; }
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet name
-	string getPacketName() const throw() { return "CGPartySay"; }
+	string getPacketName() const { return "CGPartySay"; }
 	
 	// get packet's debug string
-	string toString() const throw();
+	string toString() const;
 #endif
 public:
 	void	setMessage( const string& msg ) { m_Message = msg; }
 	string	getMessage() const { return m_Message; }
 
-	uint getColor() const throw() { return m_Color; }
-	void setColor( uint color ) throw() { m_Color = color; }
+	uint getColor() const noexcept { return m_Color; }
+	void setColor( uint color ) noexcept { m_Color = color; }
 	
 private :
 	uint	m_Color;
@@ -82,25 +82,25 @@ class CGPartySayFactory : public PacketFactory {
 public:
 	
 	// constructor
-	CGPartySayFactory() throw() {}
+	CGPartySayFactory() {}
 	
 	// destructor
-	virtual ~CGPartySayFactory() throw() {}
+	virtual ~CGPartySayFactory() {}
 
 	
 public:
 	
 	// create packet
-	Packet* createPacket() throw() { return new CGPartySay(); }
+	Packet* createPacket() { return new CGPartySay(); }
 
 	// get packet name
-	string getPacketName() const throw() { return "CGPartySay"; }
+	string getPacketName() const { return "CGPartySay"; }
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_PARTY_SAY; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_PARTY_SAY; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE + 128 + szuint; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE + 128 + szuint; }
 
 };
 
@@ -115,7 +115,7 @@ class CGPartySayHandler {
 public:
 
 	// execute packet's handler
-	static void execute(CGPartySay* pCGPartySay, Player* player) throw ( ProtocolException , Error );
+	static void execute(CGPartySay* pCGPartySay, Player* player);
 };
 
 #endif

@@ -24,24 +24,24 @@ class CLGetServerList : public Packet {
 public :
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_CL_GET_SERVER_LIST; }
+	PacketID_t getPacketID () const noexcept { return PACKET_CL_GET_SERVER_LIST; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () { return 0; }
+	PacketSize_t getPacketSize () const noexcept { return 0; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CLGetServerList"; }
+		std::string getPacketName () const { return "CLGetServerList"; }
 
 		// get packet's debug std::string
-		std::string toString () const throw () { return "CLGetServerList"; }
+		std::string toString () const { return "CLGetServerList"; }
 	#endif
 
 private :
@@ -61,16 +61,16 @@ class CLGetServerListFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new CLGetServerList(); }
+	Packet * createPacket () { return new CLGetServerList(); }
 
 	// get packet name
-	std::string getPacketName () const throw () { return "CLGetServerList"; }
+	std::string getPacketName () const { return "CLGetServerList"; }
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CL_GET_SERVER_LIST; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CL_GET_SERVER_LIST; }
 
 	// get packet's max body size
-	PacketSize_t getPacketMaxSize () const throw () { return 0; }
+	PacketSize_t getPacketMaxSize () const noexcept { return 0; }
 
 };
 
@@ -87,7 +87,7 @@ public :
 	public :
 
 		// execute packet's handler
-		static void execute ( CLGetServerList * pPacket , Player * player ) throw ( ProtocolException , Error );
+		static void execute ( CLGetServerList * pPacket , Player * player );
 
 	};
 #endif

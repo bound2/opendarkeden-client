@@ -26,34 +26,34 @@ class CGSubmitScore : public Packet {
 public:
 	
 	// constructor
-	CGSubmitScore() throw();
+	CGSubmitScore();
 	
 	// destructor
-	~CGSubmitScore() throw();
+	~CGSubmitScore();
 
 	
 public:
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_CG_SUBMIT_SCORE; }
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_SUBMIT_SCORE; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw() { return szBYTE + szBYTE + szWORD; }
+	PacketSize_t getPacketSize() const noexcept { return szBYTE + szBYTE + szWORD; }
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet name
-	std::string getPacketName() const throw() { return "CGSubmitScore"; }
+	std::string getPacketName() const { return "CGSubmitScore"; }
 	
 	// get packet's debug string
-	std::string toString() const throw();
+	std::string toString() const;
 #endif
 
 public:
@@ -85,27 +85,27 @@ class CGSubmitScoreFactory : public PacketFactory {
 public:
 	
 	// constructor
-	CGSubmitScoreFactory() throw() {}
+	CGSubmitScoreFactory() {}
 	
 	// destructor
-	virtual ~CGSubmitScoreFactory() throw() {}
+	virtual ~CGSubmitScoreFactory() {}
 
 	
 public:
 	
 	// create packet
-	Packet* createPacket() throw() { return new CGSubmitScore(); }
+	Packet* createPacket() { return new CGSubmitScore(); }
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet name
-	std::string getPacketName() const throw() { return "CGSubmitScore"; }
+	std::string getPacketName() const { return "CGSubmitScore"; }
 #endif
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_SUBMIT_SCORE; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_SUBMIT_SCORE; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE + szBYTE + szWORD; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE + szBYTE + szWORD; }
 
 };
 
@@ -121,7 +121,7 @@ class CGSubmitScoreHandler {
 public:
 
 	// execute packet's handler
-	static void execute(CGSubmitScore* pCGSubmitScore, Player* player) throw ( ProtocolException , Error );
+	static void execute(CGSubmitScore* pCGSubmitScore, Player* player);
 };
 #endif
 

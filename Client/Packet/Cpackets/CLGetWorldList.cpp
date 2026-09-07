@@ -6,15 +6,13 @@
 #include "Client_PCH.h"
 #include "CLGetWorldList.h"
 
-void CLGetWorldList::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CLGetWorldList::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CLGetWorldList::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CLGetWorldList::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 	__END_CATCH

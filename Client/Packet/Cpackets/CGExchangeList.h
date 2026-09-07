@@ -78,15 +78,15 @@ private:
 class CGExchangeListFactory : public PacketFactory
 {
 public:
-	Packet* createPacket() throw() { return new CGExchangeList(); }
-	string getPacketName() const throw() { return "CGExchangeList"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_EXCHANGE_LIST; }
+	Packet* createPacket() { return new CGExchangeList(); }
+	string getPacketName() const { return "CGExchangeList"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_EXCHANGE_LIST; }
 	// page(4) + pageSize(4) + itemClass(1) + itemType(2) + minPrice(4)
 	// + maxPrice(4) + sellerFilter length byte(1) + sellerFilter body(255)
 	// = 275. write() clamps the body to kMaxSellerFilter, so getPacketSize()
 	// can never exceed this.
 	// Must stay identical to the server repo's CGExchangeListFactory::getPacketMaxSize()
-	PacketSize_t getPacketMaxSize() const throw() { return 4 + 4 + 1 + 2 + 4 + 4 + 1 + CGExchangeList::kMaxSellerFilter; }
+	PacketSize_t getPacketMaxSize() const noexcept { return 4 + 4 + 1 + 2 + 4 + 4 + 1 + CGExchangeList::kMaxSellerFilter; }
 };
 
 #endif

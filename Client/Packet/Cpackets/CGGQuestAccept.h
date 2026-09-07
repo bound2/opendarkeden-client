@@ -19,17 +19,17 @@
 class CGGQuestAccept : public Packet 
 {
 public:
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_GQUEST_ACCEPT; }
-	PacketSize_t getPacketSize() const throw() { return szDWORD; }
+	void read(SocketInputStream & iStream);
+	void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_GQUEST_ACCEPT; }
+	PacketSize_t getPacketSize() const noexcept { return szDWORD; }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "CGGQuestAccept"; }
-	string toString() const throw();
+	string getPacketName() const { return "CGGQuestAccept"; }
+	string toString() const;
 #endif
 public:
-	DWORD getQuestID() const throw()  { return m_QuestID; }
-	void setQuestID(DWORD QuestID) throw() { m_QuestID = QuestID; }
+	DWORD getQuestID() const noexcept  { return m_QuestID; }
+	void setQuestID(DWORD QuestID) noexcept { m_QuestID = QuestID; }
 
 private:
 	DWORD       m_QuestID;  // 기술의 종류
@@ -42,12 +42,12 @@ private:
 class CGGQuestAcceptFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new CGGQuestAccept(); }
+	Packet* createPacket() { return new CGGQuestAccept(); }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "CGGQuestAccept"; }
+	string getPacketName() const { return "CGGQuestAccept"; }
 #endif
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_GQUEST_ACCEPT; }
-	PacketSize_t getPacketMaxSize() const throw() { return szDWORD; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_GQUEST_ACCEPT; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szDWORD; }
 };
 
 
@@ -58,7 +58,7 @@ public:
 class CGGQuestAcceptHandler 
 {
 public:
-	static void execute(CGGQuestAccept* pCGGQuestAccept, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(CGGQuestAccept* pCGGQuestAccept, Player* pPlayer);
 };
 
 #endif

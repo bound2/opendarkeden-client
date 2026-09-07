@@ -52,18 +52,18 @@ class CGGetEventItem : public Packet
 
 public:
 
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+	void read(SocketInputStream & iStream);
 
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+	void write(SocketOutputStream & oStream) const;
 
 
-	PacketID_t getPacketID() const throw() { return PACKET_CG_GET_EVENT_ITEM; }
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_GET_EVENT_ITEM; }
 
-	PacketSize_t getPacketSize() const throw() { return szBYTE; }
+	PacketSize_t getPacketSize() const noexcept { return szBYTE; }
 
-	string getPacketName() const throw() { return "CGGetEventItem"; }
+	string getPacketName() const { return "CGGetEventItem"; }
 
-	string toString() const throw();
+	string toString() const;
 
 public:
 
@@ -95,13 +95,13 @@ class CGGetEventItemFactory : public PacketFactory
 
 public:
 
-	Packet* createPacket() throw() { return new CGGetEventItem(); }
+	Packet* createPacket() { return new CGGetEventItem(); }
 
-	string getPacketName() const throw() { return "CGGetEventItem"; }
+	string getPacketName() const { return "CGGetEventItem"; }
 
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_GET_EVENT_ITEM; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_GET_EVENT_ITEM; }
 
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE; }
 
 };
 

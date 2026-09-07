@@ -6,22 +6,19 @@
 #include "Client_PCH.h"
 #include "CGPartyPosition.h"
 
-CGPartyPosition::CGPartyPosition () 
-     throw ()
+CGPartyPosition::CGPartyPosition ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGPartyPosition::~CGPartyPosition () 
-    throw ()
+CGPartyPosition::~CGPartyPosition ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGPartyPosition::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGPartyPosition::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 
@@ -34,8 +31,7 @@ void CGPartyPosition::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 		    
-void CGPartyPosition::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGPartyPosition::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -53,7 +49,6 @@ void CGPartyPosition::write (SocketOutputStream & oStream) const
 //////////////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 string CGPartyPosition::toString () const
-    throw ()
 {
 	__BEGIN_TRY
 		

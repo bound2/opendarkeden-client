@@ -23,44 +23,44 @@ class CGAddMouseToGear : public Packet {
 public :
 
 	// constructor
-	CGAddMouseToGear() throw();
+	CGAddMouseToGear();
 
 	// destructor
-	~CGAddMouseToGear() throw();
+	~CGAddMouseToGear();
 
 public :
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_CG_ADD_MOUSE_TO_GEAR; }
+	PacketID_t getPacketID () const noexcept { return PACKET_CG_ADD_MOUSE_TO_GEAR; }
 	
 	// get packet's body size
 	// *OPTIMIZATION HINT*
 	// const static CGAddMouseToGearPacketSize 를 정의해서 리턴하라.
-	PacketSize_t getPacketSize () const throw () { return szObjectID + szSlotID; }
+	PacketSize_t getPacketSize () const noexcept { return szObjectID + szSlotID; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CGAddMouseToGear"; }
+		std::string getPacketName () const { return "CGAddMouseToGear"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 	
 public :
 
 	// get / set ObjectID
-	ObjectID_t getObjectID() throw () { return m_ObjectID; }
-	void setObjectID( ObjectID_t ObjectID ) throw() { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() noexcept { return m_ObjectID; }
+	void setObjectID( ObjectID_t ObjectID ) noexcept { m_ObjectID = ObjectID; }
 
-	SlotID_t getSlotID() const throw() { return m_SlotID; }
-	void setSlotID( SlotID_t SlotID ) throw() { m_SlotID = SlotID; }
+	SlotID_t getSlotID() const noexcept { return m_SlotID; }
+	void setSlotID( SlotID_t SlotID ) noexcept { m_SlotID = SlotID; }
 
 private :
 	
@@ -85,21 +85,21 @@ class CGAddMouseToGearFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new CGAddMouseToGear(); }
+	Packet * createPacket () { return new CGAddMouseToGear(); }
 
 	
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CGAddMouseToGear"; }
+		std::string getPacketName () const { return "CGAddMouseToGear"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_ADD_MOUSE_TO_GEAR; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_ADD_MOUSE_TO_GEAR; }
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static CGAddMouseToGearPacketSize 를 정의해서 리턴하라.
-	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szSlotID; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID + szSlotID; }
 
 };
 
@@ -114,7 +114,7 @@ public :
 	public :
 
 		// execute packet's handler
-		static void execute ( CGAddMouseToGear * pPacket , Player * player ) throw ( ProtocolException , Error );
+		static void execute ( CGAddMouseToGear * pPacket , Player * player );
 	};
 
 #endif

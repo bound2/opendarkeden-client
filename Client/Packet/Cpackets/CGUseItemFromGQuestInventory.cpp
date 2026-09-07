@@ -8,8 +8,7 @@
 #include "Client_PCH.h"
 #include "CGUseItemFromGQuestInventory.h"
 
-void CGUseItemFromGQuestInventory::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGUseItemFromGQuestInventory::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -18,8 +17,7 @@ void CGUseItemFromGQuestInventory::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 		    
-void CGUseItemFromGQuestInventory::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGUseItemFromGQuestInventory::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -29,7 +27,7 @@ void CGUseItemFromGQuestInventory::write (SocketOutputStream & oStream) const
 }
 #ifdef __DEBUG_OUTPUT__
 string CGUseItemFromGQuestInventory::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 		

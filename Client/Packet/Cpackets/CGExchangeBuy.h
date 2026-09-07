@@ -68,14 +68,14 @@ private:
 class CGExchangeBuyFactory : public PacketFactory
 {
 public:
-	Packet* createPacket() throw() { return new CGExchangeBuy(); }
-	string getPacketName() const throw() { return "CGExchangeBuy"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_EXCHANGE_BUY; }
+	Packet* createPacket() { return new CGExchangeBuy(); }
+	string getPacketName() const { return "CGExchangeBuy"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_EXCHANGE_BUY; }
 	// listingID(8) + idempotency key length byte(1) + key body(64) = 73.
 	// write() clamps the body to kMaxIdempotencyKey, so getPacketSize() can
 	// never exceed this.
 	// Must stay identical to the server repo's CGExchangeBuyFactory::getPacketMaxSize()
-	PacketSize_t getPacketMaxSize() const throw() { return 8 + 1 + CGExchangeBuy::kMaxIdempotencyKey; }
+	PacketSize_t getPacketMaxSize() const noexcept { return 8 + 1 + CGExchangeBuy::kMaxIdempotencyKey; }
 };
 
 #endif

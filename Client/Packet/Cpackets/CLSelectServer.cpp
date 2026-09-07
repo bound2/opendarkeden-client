@@ -6,8 +6,7 @@
 #include "Client_PCH.h"
 #include "CLSelectServer.h"
 
-void CLSelectServer::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CLSelectServer::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 
@@ -16,8 +15,7 @@ void CLSelectServer::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CLSelectServer::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CLSelectServer::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 

@@ -10,8 +10,7 @@
 #include "PacketAssert.h"
 
 
-void CGUseItemFromGear::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGUseItemFromGear::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -35,8 +34,7 @@ void CGUseItemFromGear::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 		    
-void CGUseItemFromGear::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGUseItemFromGear::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -62,7 +60,7 @@ void CGUseItemFromGear::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGUseItemFromGear::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 		

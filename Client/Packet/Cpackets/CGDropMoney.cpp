@@ -10,22 +10,19 @@
 #include "PacketAssert.h"
 
 
-CGDropMoney::CGDropMoney () 
-     throw ()
+CGDropMoney::CGDropMoney ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGDropMoney::~CGDropMoney () 
-    throw ()
+CGDropMoney::~CGDropMoney ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGDropMoney::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGDropMoney::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -46,8 +43,7 @@ void CGDropMoney::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGDropMoney::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGDropMoney::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -70,7 +66,7 @@ void CGDropMoney::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGDropMoney::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 		

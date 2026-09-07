@@ -14,7 +14,6 @@
 
 void CGGetEventItem::read (SocketInputStream & iStream) 
 
-	 throw (ProtocolException , Error)
 
 {
 
@@ -28,7 +27,6 @@ void CGGetEventItem::read (SocketInputStream & iStream)
 
 void CGGetEventItem::write (SocketOutputStream & oStream) const 
 
-     throw (ProtocolException , Error)
 
 {
 
@@ -42,7 +40,7 @@ void CGGetEventItem::write (SocketOutputStream & oStream) const
 
 string CGGetEventItem::toString () 
 
-	const throw ()
+	const
 
 {
 

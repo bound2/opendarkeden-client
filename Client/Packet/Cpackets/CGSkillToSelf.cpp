@@ -10,22 +10,19 @@
 #include "PacketAssert.h"
 
 
-CGSkillToSelf::CGSkillToSelf () 
-     throw ()
+CGSkillToSelf::CGSkillToSelf ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGSkillToSelf::~CGSkillToSelf () 
-    throw ()
+CGSkillToSelf::~CGSkillToSelf ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGSkillToSelf::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGSkillToSelf::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -49,8 +46,7 @@ void CGSkillToSelf::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGSkillToSelf::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGSkillToSelf::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -76,7 +72,6 @@ void CGSkillToSelf::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGSkillToSelf::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

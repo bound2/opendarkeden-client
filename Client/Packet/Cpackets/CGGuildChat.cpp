@@ -6,8 +6,7 @@
 #include "Client_PCH.h"
 #include "CGGuildChat.h"
 
-void CGGuildChat::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGGuildChat::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 	
@@ -30,8 +29,7 @@ void CGGuildChat::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 		    
-void CGGuildChat::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGGuildChat::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 	
@@ -56,7 +54,6 @@ void CGGuildChat::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGGuildChat::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

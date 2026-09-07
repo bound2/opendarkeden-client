@@ -10,22 +10,19 @@
 #include "PacketAssert.h"
 
 
-CGTameMonster::CGTameMonster () 
-     throw ()
+CGTameMonster::CGTameMonster ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGTameMonster::~CGTameMonster () 
-    throw ()
+CGTameMonster::~CGTameMonster ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGTameMonster::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGTameMonster::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -34,8 +31,7 @@ void CGTameMonster::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGTameMonster::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGTameMonster::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -46,7 +42,6 @@ void CGTameMonster::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGTameMonster::toString () const
-    throw ()
 {
 	__BEGIN_TRY
 		

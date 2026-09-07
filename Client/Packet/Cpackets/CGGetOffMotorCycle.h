@@ -26,46 +26,46 @@ class CGGetOffMotorCycle : public Packet {
 public :
 	
 	// constructor
-	CGGetOffMotorCycle () throw ();
+	CGGetOffMotorCycle ();
 	
 	// destructor
-	~CGGetOffMotorCycle () throw ();
+	~CGGetOffMotorCycle ();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_CG_GET_OFF_MOTORCYCLE; }
+	PacketID_t getPacketID () const noexcept { return PACKET_CG_GET_OFF_MOTORCYCLE; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () { return szObjectID; }
+	PacketSize_t getPacketSize () const noexcept { return szObjectID; }
 
 	// get/set ObjectID
-	ObjectID_t getObjectID() const throw()  { return m_ObjectID; }
-	void setObjectID( ObjectID_t ObjectID ) throw() { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() const noexcept  { return m_ObjectID; }
+	void setObjectID( ObjectID_t ObjectID ) noexcept { m_ObjectID = ObjectID; }
 
 	#ifndef __GAME_CLIENT__
 		// get packet name (required when not GAME_CLIENT)
-		std::string getPacketName () const throw () { return "CGGetOffMotorCycle"; }
+		std::string getPacketName () const { return "CGGetOffMotorCycle"; }
 
 		// get packet's debug string (required when not GAME_CLIENT)
-		std::string toString () const throw () { return "CGGetOffMotorCycle"; }
+		std::string toString () const { return "CGGetOffMotorCycle"; }
 	#endif
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CGGetOffMotorCycle"; }
+		std::string getPacketName () const { return "CGGetOffMotorCycle"; }
 
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 private :
@@ -87,27 +87,27 @@ class CGGetOffMotorCycleFactory : public PacketFactory {
 public :
 	
 	// constructor
-	CGGetOffMotorCycleFactory () throw () {}
+	CGGetOffMotorCycleFactory () {}
 	
 	// destructor
-	virtual ~CGGetOffMotorCycleFactory () throw () {}
+	virtual ~CGGetOffMotorCycleFactory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new CGGetOffMotorCycle(); }
+	Packet * createPacket () { return new CGGetOffMotorCycle(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CGGetOffMotorCycle"; }
+		std::string getPacketName () const { return "CGGetOffMotorCycle"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_GET_OFF_MOTORCYCLE; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_GET_OFF_MOTORCYCLE; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID; }
 
 };
 
@@ -123,7 +123,7 @@ public :
 	public :
 
 		// execute packet's handler
-		static void execute ( CGGetOffMotorCycle * pCGGetOffMotorCycle , Player * pPlayer ) throw ( ProtocolException , Error );
+		static void execute ( CGGetOffMotorCycle * pCGGetOffMotorCycle , Player * pPlayer );
 
 	};
 #endif
