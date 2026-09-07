@@ -62,19 +62,19 @@ class Throwable {
 public :
 
 	// constructor
-	Throwable () throw () {}
+	Throwable () noexcept {}
 	
 	// constructor
-	Throwable ( std::string message ) throw () : m_Message(message) {}
+	Throwable ( std::string message ) : m_Message(message) {}
 
 	// destructor
-	virtual ~Throwable () throw () {}
+	virtual ~Throwable () {}
 
 	// return class's name
-	virtual std::string getName () const throw () { return "Throwable"; }
+	virtual std::string getName () const { return "Throwable"; }
 
 	// add function name to throwable object's function stack
-	void addStack ( const std::string & file, const int line ) throw ()
+	void addStack ( const std::string & file, const int line )
 	{
 		StringStream s;
 		s << file << ":" << line;
@@ -89,7 +89,7 @@ public :
 	}
 
 	// return debug std::string - throwable object's function stack trace
-	std::string getStackTrace () const throw ()
+	std::string getStackTrace () const
 	{
 		StringStream buf;
 		int i = 1;
@@ -106,13 +106,13 @@ public :
 	}
 
 	// get throwable object's message
-	std::string getMessage () const throw () { return m_Message; }
+	std::string getMessage () const { return m_Message; }
 	
 	// set throwable object's message
-	void setMessage ( const std::string & message ) throw () { m_Message = message; }
+	void setMessage ( const std::string & message ) { m_Message = message; }
 	
 	// return debug string - throwable object's detailed information
-	virtual std::string toString () const throw ()
+	virtual std::string toString () const
 	{
 		StringStream buf;
 		buf << getName() << " : " << m_Message << '\n'
@@ -209,9 +209,9 @@ private :
 //////////////////////////////////////////////////////////////////////
 class Exception : public Throwable {
 public :
-	Exception () throw () : Throwable() {}
-	Exception ( std::string msg ) throw () : Throwable(msg) {}
-	std::string getName () const throw () { return "Exception"; }
+	Exception () noexcept : Throwable() {}
+	Exception ( std::string msg ) : Throwable(msg) {}
+	std::string getName () const { return "Exception"; }
 };
 
 	//////////////////////////////////////////////////////////////////////
@@ -224,9 +224,9 @@ public :
 	// 파일, 소켓, IPC 입출력시 발생할 수 있는 예외
 	class IOException : public Exception {
 	public :
-		IOException () throw () : Exception () {}
-		IOException ( std::string msg ) throw () : Exception (msg) {}
-		std::string getName () const throw () { return "IOException"; }
+		IOException () noexcept : Exception () {}
+		IOException ( std::string msg ) : Exception (msg) {}
+		std::string getName () const { return "IOException"; }
 	};
 
 		//////////////////////////////////////////////////////////////////////
@@ -238,9 +238,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class NonBlockingIOException : public IOException {
 		public :
-			NonBlockingIOException () throw () : IOException () {}
-			NonBlockingIOException ( std::string msg ) throw () : IOException (msg) {}
-			std::string getName () const throw () { return "NonBlockingIOException"; }
+			NonBlockingIOException () noexcept : IOException () {}
+			NonBlockingIOException ( std::string msg ) : IOException (msg) {}
+			std::string getName () const { return "NonBlockingIOException"; }
 		};
 	
 		//////////////////////////////////////////////////////////////////////
@@ -252,9 +252,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class InterruptedIOException : public IOException {
 		public :
-			InterruptedIOException () throw () : IOException () {}
-			InterruptedIOException ( std::string msg ) throw () : IOException (msg) {}
-			std::string getName () const throw () { return "InterruptedIOException"; }
+			InterruptedIOException () noexcept : IOException () {}
+			InterruptedIOException ( std::string msg ) : IOException (msg) {}
+			std::string getName () const { return "InterruptedIOException"; }
 		};
 	
 		//////////////////////////////////////////////////////////////////////
@@ -266,9 +266,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class EOFException : public IOException {
 		public :
-			EOFException () throw () : IOException () {}
-			EOFException ( std::string msg ) throw () : IOException (msg) {}
-			std::string getName () const throw () { return "EOFException"; }
+			EOFException () noexcept : IOException () {}
+			EOFException ( std::string msg ) : IOException (msg) {}
+			std::string getName () const { return "EOFException"; }
 		};
 	
 		//////////////////////////////////////////////////////////////////////
@@ -278,9 +278,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class FileNotOpenedException : public IOException {
 		public :
-			FileNotOpenedException () throw () : IOException() {}
-			FileNotOpenedException ( std::string msg ) throw () : IOException(msg) {}
-			std::string getName () const throw () { return "FileNotOpenedException"; }
+			FileNotOpenedException () noexcept : IOException() {}
+			FileNotOpenedException ( std::string msg ) : IOException(msg) {}
+			std::string getName () const { return "FileNotOpenedException"; }
 		};
 
 		//////////////////////////////////////////////////////////////////////
@@ -290,9 +290,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class FileAlreadyExistException : public IOException {
 		public :
-			FileAlreadyExistException () throw () : IOException() {}
-			FileAlreadyExistException ( std::string msg ) throw () : IOException(msg) {}
-			std::string getName () const throw () { return "FileAlreadyExistException"; }
+			FileAlreadyExistException () noexcept : IOException() {}
+			FileAlreadyExistException ( std::string msg ) : IOException(msg) {}
+			std::string getName () const { return "FileAlreadyExistException"; }
 		};
 
 		//////////////////////////////////////////////////////////////////////
@@ -302,9 +302,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class FileNotExistException : public IOException {
 		public :
-			FileNotExistException () throw () : IOException() {}
-			FileNotExistException ( std::string msg ) throw () : IOException(msg) {}
-			std::string getName () const throw () { return "FileNotExistException"; }
+			FileNotExistException () noexcept : IOException() {}
+			FileNotExistException ( std::string msg ) : IOException(msg) {}
+			std::string getName () const { return "FileNotExistException"; }
 		};
 
 		//////////////////////////////////////////////////////////////////////
@@ -316,9 +316,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class TimeoutException : public IOException {
 		public :
-			TimeoutException () throw () : IOException () {}
-			TimeoutException ( std::string msg ) throw () : IOException (msg) {}
-			std::string getName () const throw () { return "TimeoutException"; }
+			TimeoutException () noexcept : IOException () {}
+			TimeoutException ( std::string msg ) : IOException (msg) {}
+			std::string getName () const { return "TimeoutException"; }
 		};
 
 		//////////////////////////////////////////////////////////////////////
@@ -330,9 +330,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class SocketException : public IOException {
 		public :
-			SocketException () throw () : IOException () {}
-			SocketException ( std::string msg ) throw () : IOException (msg) {}
-			std::string getName () const throw () { return "SocketException"; }
+			SocketException () noexcept : IOException () {}
+			SocketException ( std::string msg ) : IOException (msg) {}
+			std::string getName () const { return "SocketException"; }
 		};
 	
 			//////////////////////////////////////////////////////////////////////
@@ -344,9 +344,9 @@ public :
 			//////////////////////////////////////////////////////////////////////
 			class BindException : public SocketException {
 			public :
-				BindException () throw () : SocketException () {}
-				BindException ( std::string msg ) throw () : SocketException (msg) {}
-				std::string getName () const throw () { return "BindException"; }
+				BindException () noexcept : SocketException () {}
+				BindException ( std::string msg ) : SocketException (msg) {}
+				std::string getName () const { return "BindException"; }
 			};
 	
 			//////////////////////////////////////////////////////////////////////
@@ -358,9 +358,9 @@ public :
 			//////////////////////////////////////////////////////////////////////
 			class ConnectException : public SocketException {
 			public :
-				ConnectException () throw () : SocketException () {}
-				ConnectException ( std::string msg ) throw () : SocketException (msg) {}
-				std::string getName () const throw () { return "ConnectException"; }
+				ConnectException () noexcept : SocketException () {}
+				ConnectException ( std::string msg ) : SocketException (msg) {}
+				std::string getName () const { return "ConnectException"; }
 			};
 			
 		//////////////////////////////////////////////////////////////////////
@@ -372,9 +372,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class ProtocolException : public IOException {
 		public :
-			ProtocolException () throw () : IOException () {}
-			ProtocolException ( std::string msg ) throw () : IOException (msg) {}
-			std::string getName () const throw () { return "ProtocolException"; }
+			ProtocolException () noexcept : IOException () {}
+			ProtocolException ( std::string msg ) : IOException (msg) {}
+			std::string getName () const { return "ProtocolException"; }
 		};
 	
 			//////////////////////////////////////////////////////////////////////
@@ -386,9 +386,9 @@ public :
 			//////////////////////////////////////////////////////////////////////
 			class IdleException : public ProtocolException {
 			public :
-				IdleException () throw () : ProtocolException () {}
-				IdleException ( std::string msg ) throw () : ProtocolException (msg) {}
-				std::string getName () const throw () { return "IdleException"; }
+				IdleException () noexcept : ProtocolException () {}
+				IdleException ( std::string msg ) : ProtocolException (msg) {}
+				std::string getName () const { return "IdleException"; }
 			};
 	
 
@@ -401,9 +401,9 @@ public :
 			//////////////////////////////////////////////////////////////////////
 			class InvalidProtocolException : public ProtocolException {
 			public :
-				InvalidProtocolException () throw () : ProtocolException () {}
-				InvalidProtocolException ( std::string msg ) throw () : ProtocolException (msg) {}
-				std::string getName () const throw () { return "InvalidProtocolException"; }
+				InvalidProtocolException () noexcept : ProtocolException () {}
+				InvalidProtocolException ( std::string msg ) : ProtocolException (msg) {}
+				std::string getName () const { return "InvalidProtocolException"; }
 			};
 	
 			//////////////////////////////////////////////////////////////////////
@@ -415,11 +415,11 @@ public :
 			//////////////////////////////////////////////////////////////////////
 			class InsufficientDataException : public ProtocolException {
 			public :
-				InsufficientDataException ( uint size = 0 ) throw () : ProtocolException () , m_Size(size) {}
-				InsufficientDataException ( std::string msg , uint size = 0 ) throw () : ProtocolException (msg) , m_Size(size) {}
-				std::string getName () const throw () { return "InsufficientDataException"; }
-				uint getSize () const throw () { return m_Size; }
-				std::string toString () const throw ()
+				InsufficientDataException ( uint size = 0 ) noexcept : ProtocolException () , m_Size(size) {}
+				InsufficientDataException ( std::string msg , uint size = 0 ) : ProtocolException (msg) , m_Size(size) {}
+				std::string getName () const { return "InsufficientDataException"; }
+				uint getSize () const noexcept { return m_Size; }
+				std::string toString () const
 				{
 					StringStream buf;
 					buf << getName() << " : " << getMessage();
@@ -443,9 +443,9 @@ public :
 			//////////////////////////////////////////////////////////////////////
 			class DisconnectException : public ProtocolException {
 			public :
-				DisconnectException () throw () : ProtocolException () {}
-				DisconnectException ( std::string msg ) throw () : ProtocolException (msg) {}
-				std::string getName () const throw () { return "DisconnectException"; }
+				DisconnectException () noexcept : ProtocolException () {}
+				DisconnectException ( std::string msg ) : ProtocolException (msg) {}
+				std::string getName () const { return "DisconnectException"; }
 			};
 
 			//////////////////////////////////////////////////////////////////////
@@ -455,9 +455,9 @@ public :
 			//////////////////////////////////////////////////////////////////////
 			class IgnorePacketException : public ProtocolException {
 			public :
-				IgnorePacketException () throw () : ProtocolException () {}
-				IgnorePacketException ( std::string msg ) throw () : ProtocolException (msg) {}
-				std::string getName () const throw () { return "IgnorePacketException"; }
+				IgnorePacketException () noexcept : ProtocolException () {}
+				IgnorePacketException ( std::string msg ) : ProtocolException (msg) {}
+				std::string getName () const { return "IgnorePacketException"; }
 			};
 
 
@@ -470,9 +470,9 @@ public :
 	//////////////////////////////////////////////////////////////////////
 	class ThreadException : public Exception {
 	public :
-		ThreadException () throw () : Exception () {}
-		ThreadException ( std::string msg ) throw () : Exception (msg) {}
-		std::string getName () const throw () { return "ThreadException"; }
+		ThreadException () noexcept : Exception () {}
+		ThreadException ( std::string msg ) : Exception (msg) {}
+		std::string getName () const { return "ThreadException"; }
 	};
 
 		//////////////////////////////////////////////////////////////////////
@@ -484,9 +484,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class MutexException : public ThreadException {
 		public :
-			MutexException () throw () : ThreadException () {}
-			MutexException ( std::string msg ) throw () : ThreadException (msg) {}
-			std::string getName () const throw () { return "MutexException"; }
+			MutexException () noexcept : ThreadException () {}
+			MutexException ( std::string msg ) : ThreadException (msg) {}
+			std::string getName () const { return "MutexException"; }
 		};
 
 			//////////////////////////////////////////////////////////////////////
@@ -498,9 +498,9 @@ public :
 			//////////////////////////////////////////////////////////////////////
 			class MutexAttrException : public MutexException {
 			public :
-				MutexAttrException () throw () : MutexException () {}
-				MutexAttrException ( std::string msg ) throw () : MutexException (msg) {}
-				std::string getName () const throw () { return "MutexAttrException"; }
+				MutexAttrException () noexcept : MutexException () {}
+				MutexAttrException ( std::string msg ) : MutexException (msg) {}
+				std::string getName () const { return "MutexAttrException"; }
 			};
 
 
@@ -513,9 +513,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class CondVarException : public ThreadException {
 		public :
-			CondVarException () throw () : ThreadException () {}
-			CondVarException ( std::string msg ) throw () : ThreadException (msg) {}
-			std::string getName () const throw () { return "CondVarException"; }
+			CondVarException () noexcept : ThreadException () {}
+			CondVarException ( std::string msg ) : ThreadException (msg) {}
+			std::string getName () const { return "CondVarException"; }
 		};
 
 		//////////////////////////////////////////////////////////////////////
@@ -527,9 +527,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class SemaphoreException : public ThreadException {
 		public :
-			SemaphoreException () throw () : ThreadException () {}
-			SemaphoreException ( std::string msg ) throw () : ThreadException (msg) {}
-			std::string getName () const throw () { return "SemaphoreException"; }
+			SemaphoreException () noexcept : ThreadException () {}
+			SemaphoreException ( std::string msg ) : ThreadException (msg) {}
+			std::string getName () const { return "SemaphoreException"; }
 		};
 
 
@@ -542,9 +542,9 @@ public :
 	//////////////////////////////////////////////////////////////////////
 	class SQLException : public Exception {
 	public :
-		SQLException () throw () : Exception() {}
-		SQLException ( std::string msg ) throw () : Exception(msg) {}
-		std::string getName () const throw () { return "SQLException"; }
+		SQLException () noexcept : Exception() {}
+		SQLException ( std::string msg ) : Exception(msg) {}
+		std::string getName () const { return "SQLException"; }
 	};
 
 		//////////////////////////////////////////////////////////////////////
@@ -556,9 +556,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class SQLWarning : public SQLException {
 		public :
-			SQLWarning () throw () : SQLException() {}
-			SQLWarning ( std::string msg ) throw () : SQLException(msg) {}
-			std::string getName () const throw () { return "SQLWarning"; }
+			SQLWarning () noexcept : SQLException() {}
+			SQLWarning ( std::string msg ) : SQLException(msg) {}
+			std::string getName () const { return "SQLWarning"; }
 		};
 
 
@@ -571,9 +571,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class SQLConnectException : public SQLException {
 		public :
-			SQLConnectException () throw () : SQLException() {}
-			SQLConnectException ( std::string msg ) throw () : SQLException(msg) {}
-			std::string getName () const throw () { return "SQLConnectException"; }
+			SQLConnectException () noexcept : SQLException() {}
+			SQLConnectException ( std::string msg ) : SQLException(msg) {}
+			std::string getName () const { return "SQLConnectException"; }
 		};
 
 		//////////////////////////////////////////////////////////////////////
@@ -583,9 +583,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class SQLQueryException : public SQLException {
 		public :
-			SQLQueryException () throw () : SQLException() {}
-			SQLQueryException ( std::string msg ) throw () : SQLException(msg) {}
-			std::string getName () const throw () { return "SQLQueryException"; }
+			SQLQueryException () noexcept : SQLException() {}
+			SQLQueryException ( std::string msg ) : SQLException(msg) {}
+			std::string getName () const { return "SQLQueryException"; }
 		};
 
 
@@ -598,9 +598,9 @@ public :
 	//////////////////////////////////////////////////////////////////////
 	class RuntimeException : public Exception {
 	public :
-		RuntimeException () throw () : Exception () {}
-		RuntimeException ( std::string msg ) throw () : Exception (msg) {}
-		std::string getName () const throw () { return "RuntimeException"; }
+		RuntimeException () noexcept : Exception () {}
+		RuntimeException ( std::string msg ) : Exception (msg) {}
+		std::string getName () const { return "RuntimeException"; }
 	};
 	
 		//////////////////////////////////////////////////////////////////////
@@ -612,9 +612,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class InvalidArgumentException : public RuntimeException {
 		public :
-			InvalidArgumentException () throw () : RuntimeException () {}
-			InvalidArgumentException ( std::string msg ) throw () : RuntimeException (msg) {}
-			std::string getName () const throw () { return "InvalidArgumentException"; }
+			InvalidArgumentException () noexcept : RuntimeException () {}
+			InvalidArgumentException ( std::string msg ) : RuntimeException (msg) {}
+			std::string getName () const { return "InvalidArgumentException"; }
 		};
 
 		//////////////////////////////////////////////////////////////////////
@@ -626,9 +626,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class OutOfBoundException : public RuntimeException {
 		public :
-			OutOfBoundException () throw () : RuntimeException () {}
-			OutOfBoundException ( std::string msg ) throw () : RuntimeException (msg) {}
-			std::string getName () const throw () { return "OutOfBoundException"; }
+			OutOfBoundException () noexcept : RuntimeException () {}
+			OutOfBoundException ( std::string msg ) : RuntimeException (msg) {}
+			std::string getName () const { return "OutOfBoundException"; }
 		};
 
 		//////////////////////////////////////////////////////////////////////
@@ -640,9 +640,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class InterruptedException : public RuntimeException {
 		public :
-			InterruptedException () throw () : RuntimeException () {}
-			InterruptedException ( std::string msg ) throw () : RuntimeException (msg) {}
-			std::string getName () const throw () { return "InterruptedException"; }
+			InterruptedException () noexcept : RuntimeException () {}
+			InterruptedException ( std::string msg ) : RuntimeException (msg) {}
+			std::string getName () const { return "InterruptedException"; }
 		};
 
 		//////////////////////////////////////////////////////////////////////
@@ -654,9 +654,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class NoSuchElementException : public RuntimeException {
 		public :
-			NoSuchElementException () throw () : RuntimeException () {}
-			NoSuchElementException ( std::string msg ) throw () : RuntimeException (msg) {}
-			std::string getName () const throw () { return "NoSuchElementException"; }
+			NoSuchElementException () noexcept : RuntimeException () {}
+			NoSuchElementException ( std::string msg ) : RuntimeException (msg) {}
+			std::string getName () const { return "NoSuchElementException"; }
 		};
 
 		//////////////////////////////////////////////////////////////////////
@@ -668,9 +668,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class DuplicatedException : public RuntimeException {
 		public :
-			DuplicatedException () throw () : RuntimeException () {}
-			DuplicatedException ( std::string msg ) throw () : RuntimeException (msg) {}
-			std::string getName () const throw () { return "DuplicatedException"; }
+			DuplicatedException () noexcept : RuntimeException () {}
+			DuplicatedException ( std::string msg ) : RuntimeException (msg) {}
+			std::string getName () const { return "DuplicatedException"; }
 		};
 
 	//////////////////////////////////////////////////////////////////////
@@ -682,9 +682,9 @@ public :
 	//////////////////////////////////////////////////////////////////////
 	class GameException : public Exception {
 	public :
-		GameException () throw () : Exception () {}
-		GameException ( std::string msg ) throw () : Exception (msg) {}
-		std::string getName () const throw () { return "GameException"; }
+		GameException () noexcept : Exception () {}
+		GameException ( std::string msg ) : Exception (msg) {}
+		std::string getName () const { return "GameException"; }
 	};
 	
 		//////////////////////////////////////////////////////////////////////
@@ -697,9 +697,9 @@ public :
 		//////////////////////////////////////////////////////////////////////
 		class PortalException : public GameException {
 		public :
-			PortalException () throw () : GameException () {}
-			PortalException ( std::string msg ) throw () : GameException (msg) {}
-			std::string getName () const throw () { return "PortalException"; }
+			PortalException () noexcept : GameException () {}
+			PortalException ( std::string msg ) : GameException (msg) {}
+			std::string getName () const { return "PortalException"; }
 		};
 
 
@@ -710,9 +710,9 @@ public :
 //////////////////////////////////////////////////////////////////////
 class Error : public Throwable {
 public :
-	Error () throw () : Throwable() {}
-	Error ( const std::string & msg ) throw () : Throwable(msg) {}
-	std::string getName () const throw () { return "Error"; }
+	Error () noexcept : Throwable() {}
+	Error ( const std::string & msg ) : Throwable(msg) {}
+	std::string getName () const { return "Error"; }
 };	
 	//////////////////////////////////////////////////////////////////////
 	//
@@ -721,9 +721,9 @@ public :
 	//////////////////////////////////////////////////////////////////////
 	class GameError : public Error {
 	public :
-		GameError () throw () : Error () {}
-		GameError ( std::string msg ) throw () : Error(msg) {}
-		std::string getName () const throw () { return "GameError"; }
+		GameError () noexcept : Error () {}
+		GameError ( std::string msg ) : Error(msg) {}
+		std::string getName () const { return "GameError"; }
 	};
 
 
@@ -734,9 +734,9 @@ public :
 	//////////////////////////////////////////////////////////////////////
 	class AssertionError : public Error {
 	public :
-		AssertionError () throw () : Error () {}
-		AssertionError ( std::string msg ) throw () : Error(msg) {}
-		std::string getName () const throw () { return "AssertionError"; }
+		AssertionError () noexcept : Error () {}
+		AssertionError ( std::string msg ) : Error(msg) {}
+		std::string getName () const { return "AssertionError"; }
 	};
 
 	//////////////////////////////////////////////////////////////////////
@@ -746,9 +746,9 @@ public :
 	//////////////////////////////////////////////////////////////////////
 	class UnsupportedError : public Error {
 	public :
-		UnsupportedError () throw () : Error () {}
-		UnsupportedError ( std::string msg ) throw () : Error(msg) {}
-		std::string getName () const throw () { return "UnsupportedError"; }
+		UnsupportedError () noexcept : Error () {}
+		UnsupportedError ( std::string msg ) : Error(msg) {}
+		std::string getName () const { return "UnsupportedError"; }
 	};
 
 	//////////////////////////////////////////////////////////////////////
@@ -761,9 +761,9 @@ public :
 	//////////////////////////////////////////////////////////////////////
 	class LogError : public Error {
 	public :
-		LogError () throw () : Error () {}
-		LogError ( std::string msg ) throw () : Error(msg) {}
-		std::string getName () const throw () { return "LogError"; }
+		LogError () noexcept : Error () {}
+		LogError ( std::string msg ) : Error(msg) {}
+		std::string getName () const { return "LogError"; }
 	};
 
 	//////////////////////////////////////////////////////////////////////
@@ -773,12 +773,12 @@ public :
 	//////////////////////////////////////////////////////////////////////
 	class UnknownError : public Error {
 	public :
-		UnknownError () throw () : Error() {}
-		UnknownError ( const std::string & msg ) throw () : Error(msg) {}
-		UnknownError ( const std::string & msg , uint ErrorCode ) throw () : Error(msg), m_ErrorCode(ErrorCode) {}
-		std::string getName () const throw () { return "UnknownError"; }
-		uint getErrorCode () const throw () { return m_ErrorCode; }
-		std::string toString () const throw ()
+		UnknownError () noexcept : Error() {}
+		UnknownError ( const std::string & msg ) : Error(msg) {}
+		UnknownError ( const std::string & msg , uint ErrorCode ) : Error(msg), m_ErrorCode(ErrorCode) {}
+		std::string getName () const { return "UnknownError"; }
+		uint getErrorCode () const noexcept { return m_ErrorCode; }
+		std::string toString () const
 		{
 			StringStream buf;
 			buf << getName() << " : " << getMessage() << " ( " << getErrorCode() << " ) \n"

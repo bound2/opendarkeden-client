@@ -27,7 +27,7 @@
 //--------------------------------------------------------------------------------
 
 // Compatibility entry point, for call sites that name a file and a line.
-void __assert__ ( const char * file , uint line , const char * func , const char * expr ) throw ( AssertionError );
+void __assert__ ( const char * file , uint line , const char * func , const char * expr );
 
 // C++20 entry point: the failing site arrives through the defaulted
 // DiagnosticSite (Exception.h). func is still passed by hand, because the

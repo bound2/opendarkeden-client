@@ -42,18 +42,17 @@ class ScriptedSendSocketImpl : public SocketImpl {
 
 public :
 
-	ScriptedSendSocketImpl () throw () : m_nNextCall(0) {}
+	ScriptedSendSocketImpl () : m_nNextCall(0) {}
 
 	// One cap per send() call, in order. A call past the end of the
 	// script takes everything it is offered; a cap of 0 is a would-block.
-	void	setScript ( const std::vector<uint> & Script ) throw ()
+	void	setScript ( const std::vector<uint> & Script )
 	{
 		m_Script = Script;
 		m_nNextCall = 0;
 	}
 
-	uint	send ( const void * buf , uint len , uint /*flags*/ )
-		throw ( IOException , Error ) override
+	uint	send ( const void * buf , uint len , uint /*flags*/ ) override
 	{
 		const uint nCap = ( m_nNextCall < m_Script.size() )
 				? m_Script[m_nNextCall] : len;
@@ -69,10 +68,10 @@ public :
 	}
 
 	// what the peer has received across every flush so far
-	const ByteVec &	getPeer () const throw () { return m_Peer; }
+	const ByteVec &	getPeer () const noexcept { return m_Peer; }
 
 	// how many times flush() reached the socket
-	size_t		getCallCount () const throw () { return m_nNextCall; }
+	size_t		getCallCount () const noexcept { return m_nNextCall; }
 
 private :
 

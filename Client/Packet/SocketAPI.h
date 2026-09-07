@@ -74,76 +74,65 @@ namespace SocketAPI {
 //
 // exception version of socket ()
 //
-SOCKET socket_ex ( int domain , int type , int protocol ) 
-	throw ( ProtocolException , Error );
+SOCKET socket_ex ( int domain , int type , int protocol );
 
 
 //
 // exception version of bind ()
 //
-void bind_ex ( SOCKET s , const struct sockaddr * name , uint namelen ) 
-	throw ( BindException , Error );
+void bind_ex ( SOCKET s , const struct sockaddr * name , uint namelen );
 
 
 //
 // exception version of connect ()
 //
-void connect_ex ( SOCKET s , const struct sockaddr * name , uint namelen )
-	throw ( ConnectException , NonBlockingIOException , Error );
+void connect_ex ( SOCKET s , const struct sockaddr * name , uint namelen );
 
 //
 // exception version of listen ()
 //
-void listen_ex ( SOCKET s , uint backlog ) 
-	throw ( ProtocolException , Error );
+void listen_ex ( SOCKET s , uint backlog );
 
 
 //
 // exception version of accept ()
 //
-SOCKET accept_ex ( SOCKET s , struct sockaddr * addr , uint * addrlen )
-	throw ( NonBlockingIOException , Error );
+SOCKET accept_ex ( SOCKET s , struct sockaddr * addr , uint * addrlen );
 
 
 //
 // exception version of getsockopt ()
 //
-void getsockopt_ex ( SOCKET s , int level , int optname , void * optval , uint * optlen )
-	throw ( ProtocolException , Error );
+void getsockopt_ex ( SOCKET s , int level , int optname , void * optval , uint * optlen );
 
 //
 // exception version of setsockopt ()
 //
-void setsockopt_ex ( SOCKET s , int level , int optname , const void * optval , uint optlen )
-	throw ( ProtocolException , Error );
+void setsockopt_ex ( SOCKET s , int level , int optname , const void * optval , uint optlen );
 
 
 //
 // exception version of send()
 //
-uint send_ex ( SOCKET s , const void * buf , uint len , uint flags )
-	throw ( NonBlockingIOException , ConnectException , Error );
+uint send_ex ( SOCKET s , const void * buf , uint len , uint flags );
 
 
 //
 // exception version of sendto()
 //
-uint sendto_ex ( SOCKET s , const void * buf , int len , unsigned int flags , const struct sockaddr * to , int tolen )
-	throw ( NonBlockingIOException , ConnectException , Error );
+uint sendto_ex ( SOCKET s , const void * buf , int len , unsigned int flags , const struct sockaddr * to , int tolen );
 
 
 //
 // exception version of recv()
 //
-uint recv_ex ( SOCKET s , void * buf , uint len , uint flags )
-	throw ( NonBlockingIOException , ConnectException , Error );
+uint recv_ex ( SOCKET s , void * buf , uint len , uint flags );
 
 
 //
 // exception version of recvfrom()
 //
-uint recvfrom_ex ( SOCKET s , void * buf , int len , uint flags , struct sockaddr * from , uint * fromlen )
-	throw ( NonBlockingIOException , ConnectException , Error );
+uint recvfrom_ex ( SOCKET s , void * buf , int len , uint flags , struct sockaddr * from , uint * fromlen );
  
 
 //
@@ -153,8 +142,7 @@ uint recvfrom_ex ( SOCKET s , void * buf , int len , uint flags , struct sockadd
 //
 // in UNIX , close() used instead
 //
-void closesocket_ex ( SOCKET s )
-	throw ( FileNotOpenedException, Error );
+void closesocket_ex ( SOCKET s );
 
 
 //
@@ -164,43 +152,37 @@ void closesocket_ex ( SOCKET s )
 //
 // in UNIX , ioctl() used instead
 //
-void ioctlsocket_ex ( SOCKET s , long cmd , ulong * argp )
-	throw ( ProtocolException , Error );
+void ioctlsocket_ex ( SOCKET s , long cmd , ulong * argp );
 
 
 //
 // check if socket is nonblocking mode
 //
-bool getsocketnonblocking_ex ( SOCKET s )
-	throw ( ProtocolException , Error );
+bool getsocketnonblocking_ex ( SOCKET s );
 
 
 //
 // make socket nonblocking mode
 //
-void setsocketnonblocking_ex ( SOCKET s , bool on )
-	throw ( ProtocolException , Error );
+void setsocketnonblocking_ex ( SOCKET s , bool on );
 
 
 //
 // get amount of data in socket input buffer
 //
-uint availablesocket_ex ( SOCKET s )
-	throw ( ProtocolException , Error );
+uint availablesocket_ex ( SOCKET s );
 
 
 //
 // exception version of shutdown()
 //
-void shutdown_ex ( SOCKET s , uint how )
-	throw ( ProtocolException , Error );
+void shutdown_ex ( SOCKET s , uint how );
 
 
 //
 // exception version of select()
 //
-int select_ex ( int maxfdp1 , fd_set * readset , fd_set * writeset , fd_set * exceptset , struct timeval * timeout )
-	throw ( TimeoutException , InterruptedException , Error );
+int select_ex ( int maxfdp1 , fd_set * readset , fd_set * writeset , fd_set * exceptset , struct timeval * timeout );
 
 
 };//end of namespace 

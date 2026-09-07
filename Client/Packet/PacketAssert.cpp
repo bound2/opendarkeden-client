@@ -23,7 +23,6 @@
 //
 //--------------------------------------------------------------------------------
 void __assert__ ( const char * file , uint line , const char * func , const char * expr )
-	throw ( AssertionError )
 {
 	StringStream msg;
 	

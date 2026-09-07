@@ -20,7 +20,6 @@
 // constructor
 //////////////////////////////////////////////////////////////////////
 SocketOutputStream::SocketOutputStream ( Socket * sock , uint BufferLen )
-	throw ( ProtocolException , Error )
 : m_Socket(sock), m_Buffer(NULL), m_BufferLen(BufferLen), m_Head(0), m_Tail(0) ,m_Sequence(0)
 {
 	__BEGIN_TRY
@@ -38,7 +37,6 @@ SocketOutputStream::SocketOutputStream ( Socket * sock , uint BufferLen )
 // destructor
 //////////////////////////////////////////////////////////////////////
 SocketOutputStream::~SocketOutputStream ()
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -68,7 +66,6 @@ SocketOutputStream::~SocketOutputStream ()
 //
 //////////////////////////////////////////////////////////////////////
 uint SocketOutputStream::write ( const char * buf , uint len )
-     throw ( ProtocolException , Error )
 {
 	if ( len == 0 )
 		return 0;
@@ -80,7 +77,6 @@ uint SocketOutputStream::write ( const char * buf , uint len )
 // write data from a bounded source
 //////////////////////////////////////////////////////////////////////
 uint SocketOutputStream::write ( std::span<const char> buf )
-     throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -148,7 +144,6 @@ uint SocketOutputStream::write ( std::span<const char> buf )
 // write raw bytes from a bounded source
 //////////////////////////////////////////////////////////////////////
 uint SocketOutputStream::write ( std::span<const std::byte> buf )
-	throw ( ProtocolException , Error )
 {
 	return write(std::span<const char>(
 		reinterpret_cast<const char*>(buf.data()), buf.size()));
@@ -159,7 +154,6 @@ uint SocketOutputStream::write ( std::span<const std::byte> buf )
 // write packet to stream (output buffer)
 //////////////////////////////////////////////////////////////////////
 void SocketOutputStream::write ( const Packet * pPacket )
-	 throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -209,7 +203,6 @@ void SocketOutputStream::write ( const Packet * pPacket )
 // flush stream (output buffer) to socket
 //////////////////////////////////////////////////////////////////////
 uint SocketOutputStream::flush () 
-     throw ( IOException , Error )
 {
 	__BEGIN_TRY
 
@@ -296,7 +289,6 @@ uint SocketOutputStream::flush ()
 // resize buffer
 //////////////////////////////////////////////////////////////////////
 void SocketOutputStream::resize ( int size )
-	 throw ( IOException , Error )
 {
 	__BEGIN_TRY
 		
@@ -364,7 +356,7 @@ void SocketOutputStream::resize ( int size )
 // get data's size in buffer
 //////////////////////////////////////////////////////////////////////
 uint SocketOutputStream::length () const
-     throw ()
+     noexcept
 {
     if ( m_Head < m_Tail )
         return m_Tail - m_Head;

@@ -37,12 +37,12 @@ class Socket {
 public :
 	
 	// constructor
-	Socket () throw ();
-	Socket ( const std::string & host , uint port ) throw ();
-	Socket ( SocketImpl * impl ) throw ();
+	Socket ();
+	Socket ( const std::string & host , uint port );
+	Socket ( SocketImpl * impl );
 	
 	// destructor
-	virtual ~Socket () throw ( ProtocolException , Error );
+	virtual ~Socket ();
 
 	
 //////////////////////////////////////////////////
@@ -51,23 +51,23 @@ public :
 public :
 	
 	// close connection
-	void close () throw ( ProtocolException , Error ) { m_pSocketImpl->close(); }
+	void close () { m_pSocketImpl->close(); }
 	
 	// try connect to remote host
-	void connect () throw ( ConnectException , Error ) { m_pSocketImpl->connect(); }
-	void connect ( const std::string & host , uint port ) throw ( ConnectException , Error ) { m_pSocketImpl->connect(host,port); }
+	void connect () { m_pSocketImpl->connect(); }
+	void connect ( const std::string & host , uint port ) { m_pSocketImpl->connect(host,port); }
 
 	// close previous connection and connect to another socket
-	void reconnect ( const std::string & host , uint port ) throw ( ConnectException , Error );
+	void reconnect ( const std::string & host , uint port );
 	
 	// send data to peer
-	uint send ( const void * buf , uint len , uint flags = 0 ) throw ( IOException , Error ) { return m_pSocketImpl->send(buf,len,flags); }
+	uint send ( const void * buf , uint len , uint flags = 0 ) { return m_pSocketImpl->send(buf,len,flags); }
 	
 	// receive data from peer
-	uint receive ( void * buf , uint len , uint flags = 0 ) throw ( IOException , Error ) { return m_pSocketImpl->receive(buf,len,flags); }
+	uint receive ( void * buf , uint len , uint flags = 0 ) { return m_pSocketImpl->receive(buf,len,flags); }
 	
 	//
-	uint available () const throw ( ProtocolException , Error ) { return m_pSocketImpl->available(); }
+	uint available () const { return m_pSocketImpl->available(); }
 
 
 //////////////////////////////////////////////////
@@ -76,33 +76,33 @@ public :
 public :
  
     // get/set socket's linger status
-    uint getLinger () const throw ( ProtocolException , Error ) { return m_pSocketImpl->getLinger(); }
-    void setLinger ( uint lingertime ) throw ( ProtocolException , Error ) { m_pSocketImpl->setLinger(lingertime); }
+    uint getLinger () const { return m_pSocketImpl->getLinger(); }
+    void setLinger ( uint lingertime ) { m_pSocketImpl->setLinger(lingertime); }
  
     // get/set socket's nonblocking status
-    bool isNonBlocking () const throw ( ProtocolException , Error ) { return m_pSocketImpl->isNonBlocking(); }
-    void setNonBlocking ( bool on = true ) throw ( ProtocolException , Error ) { m_pSocketImpl->setNonBlocking(on); }
+    bool isNonBlocking () const { return m_pSocketImpl->isNonBlocking(); }
+    void setNonBlocking ( bool on = true ) { m_pSocketImpl->setNonBlocking(on); }
  
     // get/set receive buffer size
-    uint getReceiveBufferSize () const throw ( ProtocolException , Error ) { return m_pSocketImpl->getReceiveBufferSize(); }
-    void setReceiveBufferSize ( uint size ) throw ( ProtocolException , Error ) { m_pSocketImpl->setReceiveBufferSize(size); }
+    uint getReceiveBufferSize () const { return m_pSocketImpl->getReceiveBufferSize(); }
+    void setReceiveBufferSize ( uint size ) { m_pSocketImpl->setReceiveBufferSize(size); }
  
     // get/set send buffer size
-    uint getSendBufferSize () const throw ( ProtocolException , Error ) { return m_pSocketImpl->getSendBufferSize(); }
-    void setSendBufferSize ( uint size ) throw ( ProtocolException , Error ) { m_pSocketImpl->setSendBufferSize(size); }
+    uint getSendBufferSize () const { return m_pSocketImpl->getSendBufferSize(); }
+    void setSendBufferSize ( uint size ) { m_pSocketImpl->setSendBufferSize(size); }
  
 	// get host & port
-	std::string getHost () const throw () { return m_pSocketImpl->getHost(); }
-	uint getPort () const throw () { return m_pSocketImpl->getPort(); }
+	std::string getHost () const { return m_pSocketImpl->getHost(); }
+	uint getPort () const noexcept { return m_pSocketImpl->getPort(); }
 
 	// check if socket is valid
-	bool isValid () const throw () { return m_pSocketImpl->isValid(); }
+	bool isValid () const noexcept { return m_pSocketImpl->isValid(); }
 
 	// get socket descriptor
-	SOCKET getSOCKET () const throw () { return m_pSocketImpl->getSOCKET(); }
+	SOCKET getSOCKET () const noexcept { return m_pSocketImpl->getSOCKET(); }
 
 	// return debug string ( FD , HOST , PORT )
-	std::string toString () const throw ();
+	std::string toString () const;
 	
 
 //////////////////////////////////////////////////

@@ -16,7 +16,6 @@
 // constructor
 //////////////////////////////////////////////////////////////////////
 ServerSocket::ServerSocket ( uint port , uint backlog ) 
-	throw ( BindException , Error )
 : m_Impl(NULL)
 {
 	__BEGIN_TRY
@@ -45,7 +44,6 @@ ServerSocket::ServerSocket ( uint port , uint backlog )
 // destructor
 //////////////////////////////////////////////////////////////////////
 ServerSocket::~ServerSocket ()
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 		
@@ -63,7 +61,6 @@ ServerSocket::~ServerSocket ()
 // close socket
 //////////////////////////////////////////////////////////////////////
 void ServerSocket::close ()
-	 throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 		
@@ -76,7 +73,6 @@ void ServerSocket::close ()
 // accept new connection
 //////////////////////////////////////////////////////////////////////
 Socket * ServerSocket::accept ()
-	throw ( ProtocolException , Error )
 {
 	Socket * Client = NULL;
 
