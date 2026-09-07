@@ -6,22 +6,19 @@
 #include "Client_PCH.h"
 #include "CGModifyNickname.h"
 
-CGModifyNickname::CGModifyNickname () 
-     throw ()
+CGModifyNickname::CGModifyNickname ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGModifyNickname::~CGModifyNickname () 
-    throw ()
+CGModifyNickname::~CGModifyNickname ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGModifyNickname::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGModifyNickname::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 
@@ -34,8 +31,7 @@ void CGModifyNickname::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGModifyNickname::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGModifyNickname::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -55,7 +51,7 @@ void CGModifyNickname::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 string CGModifyNickname::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 		

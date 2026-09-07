@@ -16,8 +16,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-GCWhisperFailed::GCWhisperFailed () 
-     throw ()
+GCWhisperFailed::GCWhisperFailed ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -27,8 +26,7 @@ GCWhisperFailed::GCWhisperFailed ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-GCWhisperFailed::~GCWhisperFailed () 
-    throw ()
+GCWhisperFailed::~GCWhisperFailed ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -38,8 +36,7 @@ GCWhisperFailed::~GCWhisperFailed ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCWhisperFailed::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCWhisperFailed::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -49,8 +46,7 @@ void GCWhisperFailed::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void GCWhisperFailed::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCWhisperFailed::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -61,7 +57,6 @@ void GCWhisperFailed::write ( SocketOutputStream & oStream ) const
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string GCWhisperFailed::toString () const
-		throw ()
 	{
 		__BEGIN_TRY
 			

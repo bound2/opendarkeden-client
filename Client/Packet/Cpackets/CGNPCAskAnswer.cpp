@@ -10,8 +10,7 @@
 #include "PacketAssert.h"
 
 
-void CGNPCAskAnswer::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGNPCAskAnswer::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -37,8 +36,7 @@ void CGNPCAskAnswer::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGNPCAskAnswer::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGNPCAskAnswer::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -65,8 +63,7 @@ void CGNPCAskAnswer::write (SocketOutputStream & oStream) const
 }
 
 #ifdef __DEBUG_OUTPUT__
-std::string CGNPCAskAnswer::toString () const 
-	throw ()
+std::string CGNPCAskAnswer::toString () const
 {
 	StringStream msg;
 	msg << "CGNPCAskAnswer(" 

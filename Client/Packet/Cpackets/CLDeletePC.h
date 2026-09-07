@@ -26,37 +26,37 @@ class CLDeletePC : public Packet {
 public :
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_CL_DELETE_PC; }
+	PacketID_t getPacketID () const noexcept { return PACKET_CL_DELETE_PC; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () { return szBYTE + m_Name.size() + szSlot + szBYTE + m_SSN.size(); }
+	PacketSize_t getPacketSize () const { return szBYTE + m_Name.size() + szSlot + szBYTE + m_SSN.size(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "CLDeletePC"; }
+		std::string getPacketName () const { return "CLDeletePC"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 	// get/set name
-	std::string getName () const throw () { return m_Name; }
-	void setName ( std::string name ) throw () { m_Name = name; }
+	std::string getName () const { return m_Name; }
+	void setName ( std::string name ) { m_Name = name; }
 
 	// get/set Slot
-	Slot getSlot () const throw () { return m_Slot; }
-	void setSlot ( Slot slot ) throw () { m_Slot = slot; }
+	Slot getSlot () const noexcept { return m_Slot; }
+	void setSlot ( Slot slot ) noexcept { m_Slot = slot; }
 
 	// get/set SSN
-	std::string getSSN() const throw() { return m_SSN; }
-	void setSSN( const std::string & SSN ) throw() { m_SSN = SSN; }
+	std::string getSSN() const { return m_SSN; }
+	void setSSN( const std::string & SSN ) { m_SSN = SSN; }
 
 private :
 	
@@ -84,16 +84,16 @@ class CLDeletePCFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new CLDeletePC(); }
+	Packet * createPacket () { return new CLDeletePC(); }
 
 	// get packet name
-	std::string getPacketName () const throw () { return "CLDeletePC"; }
+	std::string getPacketName () const { return "CLDeletePC"; }
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CL_DELETE_PC; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CL_DELETE_PC; }
 
 	// get packet's max body size
-	PacketSize_t getPacketMaxSize () const throw () { return szBYTE + 20 + szSlot + szBYTE + 20; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szBYTE + 20 + szSlot + szBYTE + 20; }
 
 };
 
@@ -109,7 +109,7 @@ public :
 	public :
 
 		// execute packet's handler
-		static void execute ( CLDeletePC * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+		static void execute ( CLDeletePC * pPacket , Player * pPlayer );
 
 	};
 #endif

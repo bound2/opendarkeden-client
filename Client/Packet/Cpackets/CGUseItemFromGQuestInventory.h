@@ -19,17 +19,17 @@
 class CGUseItemFromGQuestInventory : public Packet 
 {
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_USE_ITEM_FROM_GQUEST_INVENTORY; }
-	PacketSize_t getPacketSize() const throw() { return szBYTE; }
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_USE_ITEM_FROM_GQUEST_INVENTORY; }
+	PacketSize_t getPacketSize() const noexcept { return szBYTE; }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "CGUseItemFromGQuestInventory"; }
-	string toString() const throw();
+	string getPacketName() const { return "CGUseItemFromGQuestInventory"; }
+	string toString() const;
 #endif	
 public:
-	BYTE getIndex() const throw() { return m_Index; }
-	void setIndex(BYTE Index) throw() { m_Index = Index; }
+	BYTE getIndex() const noexcept { return m_Index; }
+	void setIndex(BYTE Index) noexcept { m_Index = Index; }
 
 private:
 	BYTE   m_Index; // 아이템의 index
@@ -43,12 +43,12 @@ private:
 class CGUseItemFromGQuestInventoryFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new CGUseItemFromGQuestInventory(); }
+	Packet* createPacket() { return new CGUseItemFromGQuestInventory(); }
 //#ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "CGUseItemFromGQuestInventory"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_USE_ITEM_FROM_GQUEST_INVENTORY; }
+	string getPacketName() const { return "CGUseItemFromGQuestInventory"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_USE_ITEM_FROM_GQUEST_INVENTORY; }
 //#endif
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE; }
 };
 
 
@@ -62,7 +62,7 @@ class Item;
 class CGUseItemFromGQuestInventoryHandler 
 {
 public:
-	static void execute(CGUseItemFromGQuestInventory* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(CGUseItemFromGQuestInventory* pPacket, Player* pPlayer);
 };
 #endif
 #endif

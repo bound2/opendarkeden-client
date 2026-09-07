@@ -17,20 +17,20 @@
 class CGSilverCoating : public Packet 
 {
 public:
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+	void read ( SocketInputStream & iStream );
+	void write ( SocketOutputStream & oStream ) const;
 
-	PacketID_t   getPacketID () const throw ()   { return PACKET_CG_SILVER_COATING; }
-	PacketSize_t getPacketSize () const throw () { return szObjectID; }
+	PacketID_t   getPacketID () const noexcept   { return PACKET_CG_SILVER_COATING; }
+	PacketSize_t getPacketSize () const noexcept { return szObjectID; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string       getPacketName () const throw () { return "CGSilverCoating"; }
-		std::string       toString () const throw ();
+		std::string       getPacketName () const { return "CGSilverCoating"; }
+		std::string       toString () const;
 	#endif
 	
 public:
-	ObjectID_t getObjectID() throw () { return m_ObjectID; }
-	void setObjectID( ObjectID_t ObjectID ) throw() { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() noexcept { return m_ObjectID; }
+	void setObjectID( ObjectID_t ObjectID ) noexcept { m_ObjectID = ObjectID; }
 
 private:
 	ObjectID_t m_ObjectID; // Item Object ID
@@ -44,14 +44,14 @@ private:
 class CGSilverCoatingFactory : public PacketFactory 
 {
 public:
-	Packet * createPacket () throw () { return new CGSilverCoating(); }
+	Packet * createPacket () { return new CGSilverCoating(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "CGSilverCoating"; }
+		std::string getPacketName () const { return "CGSilverCoating"; }
 	#endif
 
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_SILVER_COATING; }
-	PacketSize_t getPacketMaxSize () const throw () { return szObjectID; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_SILVER_COATING; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -61,7 +61,7 @@ public:
 	class CGSilverCoatingHandler 
 	{
 	public:
-		static void execute ( CGSilverCoating * pPacket , Player * player ) throw ( ProtocolException , Error );
+		static void execute ( CGSilverCoating * pPacket , Player * player );
 	};
 #endif
 

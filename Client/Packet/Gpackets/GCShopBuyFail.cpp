@@ -10,8 +10,7 @@
 #include "GCShopBuyFail.h"
 #include "PacketAssert.h"
 
-void GCShopBuyFail::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void GCShopBuyFail::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -22,8 +21,7 @@ void GCShopBuyFail::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 		    
-void GCShopBuyFail::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void GCShopBuyFail::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -36,7 +34,6 @@ void GCShopBuyFail::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 	std::string GCShopBuyFail::toString () const
-		   throw ()
 	{
 		__BEGIN_TRY
 			

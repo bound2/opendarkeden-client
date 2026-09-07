@@ -21,17 +21,17 @@
 class GCExecuteElement : public Packet 
 {
 public:
-	GCExecuteElement() throw();
-	~GCExecuteElement() throw();
+	GCExecuteElement();
+	~GCExecuteElement();
 	
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error) { iStream.read(m_dwQuestID); iStream.read(m_Condition); iStream.read(m_Index); }
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error) { oStream.write(m_dwQuestID); oStream.write(m_Condition); oStream.write(m_Index); }
-	PacketID_t getPacketID() const throw() { return PACKET_GC_EXECUTE_ELEMENT; }
-	PacketSize_t getPacketSize() const throw() { return szDWORD + szBYTE + szWORD; }
+    void read(SocketInputStream & iStream) { iStream.read(m_dwQuestID); iStream.read(m_Condition); iStream.read(m_Index); }
+    void write(SocketOutputStream & oStream) const { oStream.write(m_dwQuestID); oStream.write(m_Condition); oStream.write(m_Index); }
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_EXECUTE_ELEMENT; }
+	PacketSize_t getPacketSize() const noexcept { return szDWORD + szBYTE + szWORD; }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "GCExecuteElement"; }
-	string toString() const throw();
+	string getPacketName() const { return "GCExecuteElement"; }
+	string toString() const;
 #endif
 public:
 	BYTE	getCondition() const { return m_Condition; }
@@ -56,16 +56,16 @@ private:
 class GCExecuteElementFactory : public PacketFactory 
 {
 public :
-	GCExecuteElementFactory() throw() {}
-	virtual ~GCExecuteElementFactory() throw() {}
+	GCExecuteElementFactory() {}
+	virtual ~GCExecuteElementFactory() {}
 	
 public:
-	Packet* createPacket() throw() { return new GCExecuteElement(); }
+	Packet* createPacket() { return new GCExecuteElement(); }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "GCExecuteElement"; }
+	string getPacketName() const { return "GCExecuteElement"; }
 #endif
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_EXECUTE_ELEMENT; }
-	PacketSize_t getPacketMaxSize() const throw() { return szDWORD + szBYTE + szWORD; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_EXECUTE_ELEMENT; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szDWORD + szBYTE + szWORD; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -75,7 +75,7 @@ public:
 class GCExecuteElementHandler 
 {
 public:
-	static void execute(GCExecuteElement* pGCExecuteElement, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(GCExecuteElement* pGCExecuteElement, Player* pPlayer);
 
 };
 

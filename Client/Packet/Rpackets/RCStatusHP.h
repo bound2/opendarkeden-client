@@ -28,42 +28,42 @@ public :
 	RCStatusHP();
 	
     // Datagram 객체에서부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( Datagram & iDatagram ) throw ( ProtocolException , Error );
+    void read ( Datagram & iDatagram );
 		    
     // Datagram 객체로 패킷의 바이너리 이미지를 보낸다.
-    void write ( Datagram & oDatagram ) const throw ( ProtocolException , Error );
+    void write ( Datagram & oDatagram ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_RC_STATUS_HP; }
+	PacketID_t getPacketID () const noexcept { return PACKET_RC_STATUS_HP; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () 
+	PacketSize_t getPacketSize () const 
 	{ 
 		return szBYTE + m_Name.size() + szHP + szHP;
 	}
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "RCStatusHP"; }
+		std::string getPacketName () const { return "RCStatusHP"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 public :
 	// get /set CurrentHP
-	HP_t getCurrentHP() const throw() { return m_CurrentHP; }
-	void setCurrentHP( HP_t CurrentHP ) throw() { m_CurrentHP = CurrentHP; }
+	HP_t getCurrentHP() const noexcept { return m_CurrentHP; }
+	void setCurrentHP( HP_t CurrentHP ) noexcept { m_CurrentHP = CurrentHP; }
 
 	// get /set MaxHP
-	HP_t getMaxHP() const throw() { return m_MaxHP; }
-	void setMaxHP( HP_t MaxHP ) throw() { m_MaxHP = MaxHP; }
+	HP_t getMaxHP() const noexcept { return m_MaxHP; }
+	void setMaxHP( HP_t MaxHP ) noexcept { m_MaxHP = MaxHP; }
 
 
 	// get/set chatting Name
-	std::string getName () const throw () { return m_Name; }
-	void setName ( const std::string & name ) throw () { m_Name = name; }
+	std::string getName () const { return m_Name; }
+	void setName ( const std::string & name ) { m_Name = name; }
 
 protected :
 	std::string		m_Name;
@@ -87,17 +87,17 @@ class RCStatusHPFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new RCStatusHP(); }
+	Packet * createPacket () { return new RCStatusHP(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "RCStatusHP"; }
+		std::string getPacketName () const { return "RCStatusHP"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_RC_STATUS_HP; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_RC_STATUS_HP; }
 
-	PacketSize_t getPacketMaxSize () const throw () 
+	PacketSize_t getPacketMaxSize () const 
 	{ 
 		return szBYTE + 20 + szHP + szHP;
 	}
@@ -116,7 +116,7 @@ class RCStatusHPHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( RCStatusHP * pPacket ) throw ( ProtocolException , Error );
+	static void execute ( RCStatusHP * pPacket );
 
 };
 

@@ -27,34 +27,34 @@ class CLQueryPlayerID : public Packet {
 public :
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CL_QUERY_PLAYER_ID; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CL_QUERY_PLAYER_ID; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () 
+	PacketSize_t getPacketSize () const 
 	{ 
 		return szBYTE + m_PlayerID.size(); 
 	}
 
 #ifdef __DEBUG_OUTPUT__	
 	// get packet name
-	std::string getPacketName () const throw () { return "CLQueryPlayerID"; }
+	std::string getPacketName () const { return "CLQueryPlayerID"; }
 	
 	// get packet's debug std::string
-	std::string toString () const throw ();
+	std::string toString () const;
 #endif
 
 public :
 
 	// get/set player's id
-	std::string getPlayerID () const throw () { return m_PlayerID; }
-	void setPlayerID ( const std::string & playerID ) throw () { m_PlayerID = playerID; }
+	std::string getPlayerID () const { return m_PlayerID; }
+	void setPlayerID ( const std::string & playerID ) { m_PlayerID = playerID; }
 
 private :
 
@@ -76,16 +76,16 @@ class CLQueryPlayerIDFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new CLQueryPlayerID(); }
+	Packet * createPacket () { return new CLQueryPlayerID(); }
 
 	// get packet name
-	std::string getPacketName () const throw () { return "CLQueryPlayerID"; }
+	std::string getPacketName () const { return "CLQueryPlayerID"; }
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CL_QUERY_PLAYER_ID; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CL_QUERY_PLAYER_ID; }
 
 	// get packet's max body size
-	PacketSize_t getPacketMaxSize () const throw () 
+	PacketSize_t getPacketMaxSize () const 
 	{ 
 		return szBYTE + 20; 
 	}
@@ -104,7 +104,7 @@ public :
 	public :
 
 		// execute packet's handler
-		static void execute ( CLQueryPlayerID * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+		static void execute ( CLQueryPlayerID * pPacket , Player * pPlayer );
 
 	};
 #endif

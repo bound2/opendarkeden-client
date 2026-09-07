@@ -47,30 +47,30 @@ class GCAddItemToItemVerify : public Packet
 {
 
 public:
-	GCAddItemToItemVerify() throw() { m_Code = ADD_ITEM_TO_ITEM_VERIFY_MAX; m_Parameter = 0; m_Parameter2 = 0; }
-	virtual ~GCAddItemToItemVerify() throw() {}
+	GCAddItemToItemVerify() { m_Code = ADD_ITEM_TO_ITEM_VERIFY_MAX; m_Parameter = 0; m_Parameter2 = 0; }
+	virtual ~GCAddItemToItemVerify() {}
 
 public:
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+	void read(SocketInputStream & iStream);
+	void write(SocketOutputStream & oStream) const;
 
-	PacketID_t getPacketID() const throw() { return PACKET_GC_ADD_ITEM_TO_ITEM_VERIFY; }
-	PacketSize_t getPacketSize() const throw();
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_ADD_ITEM_TO_ITEM_VERIFY; }
+	PacketSize_t getPacketSize() const;
 
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "GCAddItemToItemVerify"; }
-	std::string toString() const throw();
+	std::string getPacketName() const { return "GCAddItemToItemVerify"; }
+	std::string toString() const;
 #endif
 	
 public:
-	BYTE getCode(void) const throw() { return m_Code;}
-	void setCode(BYTE code) throw() { m_Code = code;}
+	BYTE getCode(void) const noexcept { return m_Code;}
+	void setCode(BYTE code) noexcept { m_Code = code;}
 
-	uint getParameter(void) const throw() { return m_Parameter; }
-	void setParameter(uint parameter) throw() { m_Parameter = parameter; }
+	uint getParameter(void) const noexcept { return m_Parameter; }
+	void setParameter(uint parameter) noexcept { m_Parameter = parameter; }
 
-	uint getParameter2(void) const throw() { return m_Parameter2; }
-	void setParameter2(uint parameter) throw() { m_Parameter2 = parameter; }
+	uint getParameter2(void) const noexcept { return m_Parameter2; }
+	void setParameter2(uint parameter) noexcept { m_Parameter2 = parameter; }
 
 private: 
 	BYTE m_Code;
@@ -88,10 +88,10 @@ private:
 class GCAddItemToItemVerifyFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new GCAddItemToItemVerify(); }
-	std::string getPacketName() const throw() { return "GCAddItemToItemVerify"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_ADD_ITEM_TO_ITEM_VERIFY; }
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE + szuint +szuint; }
+	Packet* createPacket() { return new GCAddItemToItemVerify(); }
+	std::string getPacketName() const { return "GCAddItemToItemVerify"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_ADD_ITEM_TO_ITEM_VERIFY; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE + szuint +szuint; }
 };
 
 
@@ -102,7 +102,7 @@ public:
 class GCAddItemToItemVerifyHandler 
 {
 public:
-	static void execute( GCAddItemToItemVerify* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute( GCAddItemToItemVerify* pPacket, Player* pPlayer);
 };
 
 #endif

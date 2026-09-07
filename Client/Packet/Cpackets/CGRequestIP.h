@@ -31,36 +31,36 @@ class CGRequestIP : public Packet
 public :
 	
 	// constructor
-	CGRequestIP () throw ();
+	CGRequestIP ();
 	
 	// destructor
-	~CGRequestIP () throw ();
+	~CGRequestIP ();
 	
 public :
-    PacketID_t getPacketID () const throw () { return PACKET_CG_REQUEST_IP; }
+    PacketID_t getPacketID () const noexcept { return PACKET_CG_REQUEST_IP; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "CGRequestIP"; }
+		std::string getPacketName () const { return "CGRequestIP"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getPacketSize () const throw () { return szBYTE + m_Name.size(); }
-	static PacketSize_t getPacketMaxSize() throw() { return szBYTE + 10;}
+	PacketSize_t getPacketSize () const { return szBYTE + m_Name.size(); }
+	static PacketSize_t getPacketMaxSize() noexcept { return szBYTE + 10;}
 
 	// get&set ObjectID
-	std::string getName() const throw() { return m_Name; }
-	void setName( const char* pName) throw() { m_Name = pName;}
+	std::string getName() const { return m_Name; }
+	void setName( const char* pName) { m_Name = pName;}
 
 
 protected :
@@ -82,27 +82,27 @@ class CGRequestIPFactory : public PacketFactory {
 public :
 	
 	// constructor
-	CGRequestIPFactory () throw () {}
+	CGRequestIPFactory () {}
 	
 	// destructor
-	virtual ~CGRequestIPFactory () throw () {}
+	virtual ~CGRequestIPFactory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new CGRequestIP(); }
+	Packet * createPacket () { return new CGRequestIP(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CGRequestIP"; }
+		std::string getPacketName () const { return "CGRequestIP"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_REQUEST_IP; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_REQUEST_IP; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize () const throw () { return szBYTE + 10;}
+	PacketSize_t getPacketMaxSize () const noexcept { return szBYTE + 10;}
 
 };
 
@@ -118,7 +118,7 @@ class CGRequestIPHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( CGRequestIP * pCGRequestIP , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( CGRequestIP * pCGRequestIP , Player * pPlayer );
 
 };
 

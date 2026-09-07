@@ -28,55 +28,55 @@ class GCAttackArmsOK3 : public Packet {
 public :
 	
 	// constructor
-	GCAttackArmsOK3 () throw ();
+	GCAttackArmsOK3 ();
 	
 	// destructor
-	~GCAttackArmsOK3 () throw ();
+	~GCAttackArmsOK3 ();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_ATTACK_ARMS_OK_3; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_ATTACK_ARMS_OK_3; }
 	
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
 //	PacketSize_t getPacketSize () const throw () { return szObjectID + szObjectID + szbool; }
-	PacketSize_t getPacketSize () const throw () { return szSkillType + szObjectID + szCoord*2; }
+	PacketSize_t getPacketSize () const noexcept { return szSkillType + szObjectID + szCoord*2; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCAttackArmsOK3"; }
+		std::string getPacketName () const { return "GCAttackArmsOK3"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 	// get / set ObjectID
-	ObjectID_t getObjectID() const throw() { return m_ObjectID; }
-	void setObjectID( ObjectID_t ObjectID ) throw() { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() const noexcept { return m_ObjectID; }
+	void setObjectID( ObjectID_t ObjectID ) noexcept { m_ObjectID = ObjectID; }
 
 	// get / set ObjectID
 //	ObjectID_t getTargetObjectID() const throw() { return m_TargetObjectID; }
 //	void setTargetObjectID( ObjectID_t TargetObjectID ) throw() { m_TargetObjectID = TargetObjectID; }
-	Coord_t getTargetX() const throw() { return m_X;}
-	Coord_t getTargetY() const throw() { return m_Y;}
-	void setTargetXY( Coord_t X, Coord_t Y) throw() { m_X = X; m_Y = Y;}
+	Coord_t getTargetX() const noexcept { return m_X;}
+	Coord_t getTargetY() const noexcept { return m_Y;}
+	void setTargetXY( Coord_t X, Coord_t Y) { m_X = X; m_Y = Y;}
 
 	// get / set success
 //	bool getSkillSuccess() const throw() { return m_bSuccess;}
 //	void setSkillSuccess( bool bSuccess) throw() { m_bSuccess = bSuccess;}
 	
 	void setSkillType( SkillType_t		SkillType ) { m_SkillType = SkillType; }
-	SkillType_t getSkillType() const throw() { return m_SkillType; }		
+	SkillType_t getSkillType() const noexcept { return m_SkillType; }		
 
 private :
 	
@@ -107,27 +107,27 @@ class GCAttackArmsOK3Factory : public PacketFactory {
 public :
 	
 	// constructor
-	GCAttackArmsOK3Factory () throw () {}
+	GCAttackArmsOK3Factory () {}
 	
 	// destructor
-	virtual ~GCAttackArmsOK3Factory () throw () {}
+	virtual ~GCAttackArmsOK3Factory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCAttackArmsOK3(); }
+	Packet * createPacket () { return new GCAttackArmsOK3(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCAttackArmsOK3"; }
+		std::string getPacketName () const { return "GCAttackArmsOK3"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_ATTACK_ARMS_OK_3; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_ATTACK_ARMS_OK_3; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize () const throw () { return szSkillType + szObjectID + szCoord*2; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szSkillType + szObjectID + szCoord*2; }
 
 };
 
@@ -143,7 +143,7 @@ class GCAttackArmsOK3Handler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCAttackArmsOK3 * pGCAttackArmsOK3 , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCAttackArmsOK3 * pGCAttackArmsOK3 , Player * pPlayer );
 
 };
 

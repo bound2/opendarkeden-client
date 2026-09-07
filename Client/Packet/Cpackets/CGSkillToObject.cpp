@@ -17,22 +17,19 @@ static_assert(sizeof(ObjectID_t) == sizeof(std::uint32_t),
 
 
 CGSkillToObject::CGSkillToObject ()
-     throw ()
 {
 	__BEGIN_TRY
 	m_CEffectID = 0;
 	__END_CATCH
 }
 
-CGSkillToObject::~CGSkillToObject () 
-    throw ()
+CGSkillToObject::~CGSkillToObject ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGSkillToObject::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGSkillToObject::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -63,8 +60,7 @@ void CGSkillToObject::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGSkillToObject::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGSkillToObject::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -92,7 +88,6 @@ void CGSkillToObject::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGSkillToObject::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

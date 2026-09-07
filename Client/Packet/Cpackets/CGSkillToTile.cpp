@@ -10,22 +10,19 @@
 #include "PacketAssert.h"
 
 
-CGSkillToTile::CGSkillToTile () 
-     throw ()
+CGSkillToTile::CGSkillToTile ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGSkillToTile::~CGSkillToTile () 
-    throw ()
+CGSkillToTile::~CGSkillToTile ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGSkillToTile::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGSkillToTile::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -54,8 +51,7 @@ void CGSkillToTile::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGSkillToTile::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGSkillToTile::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -85,7 +81,6 @@ void CGSkillToTile::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGSkillToTile::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

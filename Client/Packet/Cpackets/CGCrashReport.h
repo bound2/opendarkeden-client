@@ -22,14 +22,14 @@
 
 class CGCrashReport : public Packet {
 public:
-	CGCrashReport() throw();
-	~CGCrashReport() throw();
+	CGCrashReport();
+	~CGCrashReport();
 
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_CRASH_REPORT; }
-	PacketSize_t getPacketSize() const throw() {
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_CRASH_REPORT; }
+	PacketSize_t getPacketSize() const {
 		return
 			m_ExecutableTime.size()
 			+ szWORD
@@ -39,8 +39,8 @@ public:
 			+ szWORD + m_Message.size();
 	}
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "CGCrashReport"; }
-	std::string toString() const throw();
+	std::string getPacketName() const { return "CGCrashReport"; }
+	std::string toString() const;
 #endif
 	
 public:
@@ -84,18 +84,18 @@ class CGCrashReportFactory : public PacketFactory {
 public:
 	
 	// create packet
-	Packet* createPacket() throw() { return new CGCrashReport(); }
+	Packet* createPacket() { return new CGCrashReport(); }
 
 	// get packet name
-	std::string getPacketName() const throw() { return "CGCrashReport"; }
+	std::string getPacketName() const { return "CGCrashReport"; }
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_CRASH_REPORT; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_CRASH_REPORT; }
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static CGCrashReportPacketSize 를 정의해서 리턴하라.
-	PacketSize_t getPacketMaxSize() const throw() {
+	PacketSize_t getPacketMaxSize() const {
 		return
 			19 + szWORD + 10 + szWORD + 100 + szWORD + 1024 + szWORD + 1024;
 	}
@@ -114,7 +114,7 @@ class CGCrashReportHandler {
 public:
 
 	// execute packet's handler
-	static void execute(CGCrashReport* pPacket, Player* player) throw(ProtocolException, Error);
+	static void execute(CGCrashReport* pPacket, Player* player);
 };
 #endif
 

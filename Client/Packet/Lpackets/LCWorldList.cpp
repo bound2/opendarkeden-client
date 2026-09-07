@@ -17,7 +17,6 @@
 // constructor
 //----------------------------------------------------------------------
 LCWorldList::LCWorldList ()
-	throw ()
 {
 	m_CurrentWorldID = 1;
 }
@@ -27,7 +26,6 @@ LCWorldList::LCWorldList ()
 // destructor
 //----------------------------------------------------------------------
 LCWorldList::~LCWorldList ()
-	throw ()
 {
 	__BEGIN_TRY
 
@@ -50,8 +48,7 @@ LCWorldList::~LCWorldList ()
 //----------------------------------------------------------------------
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //----------------------------------------------------------------------
-void LCWorldList::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void LCWorldList::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -74,8 +71,7 @@ void LCWorldList::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void LCWorldList::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void LCWorldList::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -95,8 +91,7 @@ void LCWorldList::write ( SocketOutputStream & oStream ) const
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
-PacketSize_t LCWorldList::getPacketSize () const 
-	throw ()
+PacketSize_t LCWorldList::getPacketSize () const
 {
 	__BEGIN_TRY
 
@@ -120,7 +115,6 @@ PacketSize_t LCWorldList::getPacketSize () const
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string LCWorldList::toString () const
-		   throw ()
 	{
 		__BEGIN_TRY
 

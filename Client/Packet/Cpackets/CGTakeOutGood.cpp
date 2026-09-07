@@ -8,22 +8,19 @@
 #include "PacketAssert.h"
 
 
-CGTakeOutGood::CGTakeOutGood () 
-     throw ()
+CGTakeOutGood::CGTakeOutGood ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGTakeOutGood::~CGTakeOutGood () 
-    throw ()
+CGTakeOutGood::~CGTakeOutGood ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGTakeOutGood::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGTakeOutGood::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -32,8 +29,7 @@ void CGTakeOutGood::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGTakeOutGood::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGTakeOutGood::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -44,7 +40,7 @@ void CGTakeOutGood::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGTakeOutGood::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 		

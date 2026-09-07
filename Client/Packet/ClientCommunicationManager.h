@@ -32,8 +32,8 @@ class ClientCommunicationManager {
 		//------------------------------------------------------------------
 		// send
 		//------------------------------------------------------------------
-		void	sendDatagram ( Datagram * pDatagram ) throw ( ConnectException , Error );
-		void	sendPacket ( const std::string& host , uint port , DatagramPacket * pPacket ) throw ( ConnectException , Error );
+		void	sendDatagram ( Datagram * pDatagram );
+		void	sendPacket ( const std::string& host , uint port , DatagramPacket * pPacket );
 
 	private :
 		// UDP 서버 소켓

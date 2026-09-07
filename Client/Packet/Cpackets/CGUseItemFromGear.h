@@ -17,22 +17,22 @@
 class CGUseItemFromGear : public Packet 
 {
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_USE_ITEM_FROM_GEAR; }
-	PacketSize_t getPacketSize() const throw() { return szObjectID + szBYTE; }
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_USE_ITEM_FROM_GEAR; }
+	PacketSize_t getPacketSize() const noexcept { return szObjectID + szBYTE; }
 
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "CGUseItemFromGear"; }
-	std::string toString() const throw();
+	std::string getPacketName() const { return "CGUseItemFromGear"; }
+	std::string toString() const;
 #endif
 	
 public:
-	ObjectID_t getObjectID() const throw() { return m_ObjectID; }
-	void setObjectID(ObjectID_t ObjectID) throw() { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() const noexcept { return m_ObjectID; }
+	void setObjectID(ObjectID_t ObjectID) noexcept { m_ObjectID = ObjectID; }
 
-	BYTE getPart() const throw() { return m_Part; }
-	void setPart( BYTE part ) throw() { m_Part = part; }
+	BYTE getPart() const noexcept { return m_Part; }
+	void setPart( BYTE part ) noexcept { m_Part = part; }
 
 private:
 	ObjectID_t   m_ObjectID; // 아이템의 object id 
@@ -46,10 +46,10 @@ private:
 class CGUseItemFromGearFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new CGUseItemFromGear(); }
-	std::string getPacketName() const throw() { return "CGUseItemFromGear"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_USE_ITEM_FROM_GEAR; }
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szBYTE; }
+	Packet* createPacket() { return new CGUseItemFromGear(); }
+	std::string getPacketName() const { return "CGUseItemFromGear"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_USE_ITEM_FROM_GEAR; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szBYTE; }
 };
 
 #ifndef __GAME_CLIENT__
@@ -62,10 +62,10 @@ class Item;
 class CGUseItemFromGearHandler 
 {
 public:
-	static void execute(CGUseItemFromGear* pPacket, Player* player) throw(ProtocolException, Error);
+	static void execute(CGUseItemFromGear* pPacket, Player* player);
 
 protected:
-	static void executeCoupleRing(CGUseItemFromGear* pPacket, Player* player) throw(ProtocolException, Error);
+	static void executeCoupleRing(CGUseItemFromGear* pPacket, Player* player);
 };
 #endif
 

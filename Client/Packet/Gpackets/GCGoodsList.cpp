@@ -22,8 +22,7 @@
 // constructor
 //////////////////////////////////////////////////////////////////////////////
 
-GCGoodsList::GCGoodsList() 
-	throw ()
+GCGoodsList::GCGoodsList()
 {
 	__BEGIN_TRY
 
@@ -35,8 +34,7 @@ GCGoodsList::GCGoodsList()
 //////////////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////////////
-GCGoodsList::~GCGoodsList() 
-	throw ()
+GCGoodsList::~GCGoodsList()
 {
 	__BEGIN_TRY
 
@@ -62,8 +60,7 @@ GCGoodsList::~GCGoodsList()
 //////////////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////////////
-void GCGoodsList::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCGoodsList::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -105,8 +102,7 @@ void GCGoodsList::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////////////
-void GCGoodsList::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCGoodsList::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 	__BEGIN_DEBUG
@@ -150,8 +146,7 @@ void GCGoodsList::write ( SocketOutputStream & oStream ) const
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-PacketSize_t GCGoodsList::getPacketSize () const 
-	throw ()
+PacketSize_t GCGoodsList::getPacketSize () const
 { 
 	__BEGIN_TRY
 	__BEGIN_DEBUG
@@ -179,7 +174,6 @@ PacketSize_t GCGoodsList::getPacketSize () const
 // get packet's debug std::string
 //////////////////////////////////////////////////////////////////////////////
 std::string GCGoodsList::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

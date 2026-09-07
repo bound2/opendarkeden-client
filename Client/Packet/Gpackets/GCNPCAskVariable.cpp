@@ -11,7 +11,6 @@
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 GCNPCAskVariable::GCNPCAskVariable()
-	throw ()
 {
 	__BEGIN_TRY 
 
@@ -20,8 +19,7 @@ GCNPCAskVariable::GCNPCAskVariable()
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-GCNPCAskVariable::~GCNPCAskVariable() 
-	throw ()
+GCNPCAskVariable::~GCNPCAskVariable()
 {
 	__BEGIN_TRY 
 
@@ -33,8 +31,7 @@ GCNPCAskVariable::~GCNPCAskVariable()
 //////////////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////////////
-void GCNPCAskVariable::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCNPCAskVariable::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -56,8 +53,7 @@ void GCNPCAskVariable::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////////////
-void GCNPCAskVariable::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCNPCAskVariable::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -77,7 +73,6 @@ void GCNPCAskVariable::write ( SocketOutputStream & oStream ) const
 }
 
 void GCNPCAskVariable::addScriptParameter( ScriptParameter* pParam )
-	throw(DuplicatedException)
 {
 	__BEGIN_TRY
 
@@ -93,7 +88,6 @@ void GCNPCAskVariable::addScriptParameter( ScriptParameter* pParam )
 }
 
 void GCNPCAskVariable::clearScriptParameters()
-	throw()
 {
 	__BEGIN_TRY
 
@@ -113,7 +107,6 @@ void GCNPCAskVariable::clearScriptParameters()
 }
 
 std::string GCNPCAskVariable::getValue( const std::string& name ) const
-	throw( NoSuchElementException )
 {
 	__BEGIN_TRY
 
@@ -133,7 +126,6 @@ std::string GCNPCAskVariable::getValue( const std::string& name ) const
 
 
 PacketSize_t GCNPCAskVariable::getPacketSize() const
-	throw()
 {
 	__BEGIN_TRY
 
@@ -158,7 +150,6 @@ PacketSize_t GCNPCAskVariable::getPacketSize() const
 //////////////////////////////////////////////////////////////////////////////
 #ifdef	__DEBUG_OUTPUT__
 std::string GCNPCAskVariable::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

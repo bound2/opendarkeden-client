@@ -50,10 +50,10 @@ class SocketInputStream {
 public :
 	
 	// constructor
-	SocketInputStream ( Socket * sock , uint BufferSize = DefaultSocketInputBufferSize ) throw ( ProtocolException , Error );
+	SocketInputStream ( Socket * sock , uint BufferSize = DefaultSocketInputBufferSize );
 	
 	// destructor
-	virtual ~SocketInputStream () throw ( ProtocolException , Error );
+	virtual ~SocketInputStream () noexcept(false);
 
 	
 //////////////////////////////////////////////////
@@ -62,12 +62,12 @@ public :
 public :
 	
 	// read data from stream (input buffer)
-	uint read ( char * buf , uint len ) throw ( ProtocolException , Error );
-	uint read ( std::span<char> buf ) throw ( ProtocolException , Error );
-	uint read ( std::span<char> buf , std::size_t len ) throw ( ProtocolException , Error );
-	uint read ( std::span<std::byte> buf ) throw ( ProtocolException , Error );
-	uint read ( std::string & str , uint len ) throw ( ProtocolException , Error );
-	void read ( Packet * p ) throw ( ProtocolException , Error );
+	uint read ( char * buf , uint len );
+	uint read ( std::span<char> buf );
+	uint read ( std::span<char> buf , std::size_t len );
+	uint read ( std::span<std::byte> buf );
+	uint read ( std::string & str , uint len );
+	void read ( Packet * p );
 
 	template <packetwire::WritableWireScalar T>
 	uint readWire ( T & value )
@@ -82,20 +82,20 @@ public :
 		return count;
 	}
 
-	uint read ( bool   & buf ) throw ( ProtocolException , Error ) { return read( (char*)&buf, szbool   ); }
-	uint read ( char   & buf ) throw ( ProtocolException , Error ) { return read( (char*)&buf, szchar   ); }
-	uint read ( uchar  & buf ) throw ( ProtocolException , Error ) { return readWire(buf); }
-	uint read ( short  & buf ) throw ( ProtocolException , Error ) { return readWire(buf); }
-	uint read ( ushort & buf ) throw ( ProtocolException , Error ) { return readWire(buf); }
-	uint read ( int    & buf ) throw ( ProtocolException , Error ) { return readWire(buf); }
-	uint read ( uint   & buf ) throw ( ProtocolException , Error ) { return readWire(buf); }
-	uint read ( long   & buf ) throw ( ProtocolException , Error ) {
+	uint read ( bool   & buf ) { return read( (char*)&buf, szbool   ); }
+	uint read ( char   & buf ) { return read( (char*)&buf, szchar   ); }
+	uint read ( uchar  & buf ) { return readWire(buf); }
+	uint read ( short  & buf ) { return readWire(buf); }
+	uint read ( ushort & buf ) { return readWire(buf); }
+	uint read ( int    & buf ) { return readWire(buf); }
+	uint read ( uint   & buf ) { return readWire(buf); }
+	uint read ( long   & buf ) {
 		int32_t tmp = 0;
 		uint ret = readWire(tmp);
 		buf = static_cast<long>(tmp);
 		return ret;
 	}
-	uint read ( ulong  & buf ) throw ( ProtocolException , Error ) {
+	uint read ( ulong  & buf ) {
 		uint32_t tmp = 0;
 		uint ret = readWire(tmp);
 		buf = static_cast<ulong>(tmp);
@@ -103,30 +103,30 @@ public :
 	}
 
 	// peek data from stream (input buffer)
-	bool peek ( char * buf , uint len ) throw ( ProtocolException , Error );
+	bool peek ( char * buf , uint len );
 	
 	// skip data from stream (input buffer)
-	void skip ( uint len ) throw ( ProtocolException , Error );
+	void skip ( uint len );
 	
 	// fill stream (input buffer) from socket
-	uint fill () throw ( IOException , Error );
-	uint fill_RAW () throw ( IOException , Error );
+	uint fill ();
+	uint fill_RAW ();
 
 	// resize buffer
-	void resize ( int size ) throw ( IOException , Error );
+	void resize ( int size );
 	
 	// get buffer length
-	uint capacity () const throw () { return m_BufferLen; }
+	uint capacity () const noexcept { return m_BufferLen; }
 	
 	// get data length in buffer
-	uint length () const throw ();
-	uint size () const throw () { return length(); }
+	uint length () const;
+	uint size () const { return length(); }
 
 	// check if buffer is empty
-	bool isEmpty () const throw () { return length() == 0; }
+	bool isEmpty () const { return length() == 0; }
 
 	// get debug string
-	std::string toString () const throw ();
+	std::string toString () const;
 
 
 //////////////////////////////////////////////////
@@ -176,7 +176,7 @@ public :
 	// visible rather than implied. setKey survives only because Player::setKey
 	// still calls it after CGConnectSetKey; adding real encryption is a
 	// protocol change that has to be agreed with the server repository first.
-	void setKey(WORD /*EncryptKey*/, BYTE* /*HashTable*/) throw() {}
+	void setKey(WORD /*EncryptKey*/, BYTE* /*HashTable*/) noexcept {}
 };
 
 #endif

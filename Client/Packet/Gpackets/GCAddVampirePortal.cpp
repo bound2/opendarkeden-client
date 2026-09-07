@@ -11,8 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // class GCAddVampirePortal member methods
 //////////////////////////////////////////////////////////////////////////////
-void GCAddVampirePortal::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCAddVampirePortal::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -38,7 +37,7 @@ void GCAddVampirePortal::read ( SocketInputStream & iStream )
 }
 		    
 void GCAddVampirePortal::write ( SocketOutputStream & oStream ) 
-     const throw ( ProtocolException , Error )
+     const
 {
 	__BEGIN_TRY
 
@@ -65,7 +64,7 @@ void GCAddVampirePortal::write ( SocketOutputStream & oStream )
 
 #ifdef __DEBUG_OUTPUT__
 	std::string GCAddVampirePortal::toString () 
-		const throw ()
+		const
 	{
 		__BEGIN_TRY
 

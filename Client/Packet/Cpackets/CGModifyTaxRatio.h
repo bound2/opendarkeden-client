@@ -26,23 +26,23 @@ class CGModifyTaxRatio : public Packet
 public:
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_CG_MODIFY_TAX_RATIO; }
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_MODIFY_TAX_RATIO; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw() { return szuint; }
+	PacketSize_t getPacketSize() const noexcept { return szuint; }
 #ifdef __DEBUG_OUTPUT__
 	// get packet name
-	std::string getPacketName() const throw() { return "CGModifyTaxRatio"; }
+	std::string getPacketName() const { return "CGModifyTaxRatio"; }
 
 	// get packet's debug string
-	std::string toString() const throw();
+	std::string toString() const;
 #endif
 	// get/set Ratio
 	uint getRatio() const { return m_Ratio; }
@@ -68,25 +68,25 @@ class CGModifyTaxRatioFactory : public PacketFactory {
 public:
 	
 	// constructor
-	CGModifyTaxRatioFactory() throw() {}
+	CGModifyTaxRatioFactory() {}
 	
 	// destructor
-	virtual ~CGModifyTaxRatioFactory() throw() {}
+	virtual ~CGModifyTaxRatioFactory() {}
 
 	
 public:
 	
 	// create packet
-	Packet* createPacket() throw() { return new CGModifyTaxRatio(); }
+	Packet* createPacket() { return new CGModifyTaxRatio(); }
 
 	// get packet name
-	string getPacketName() const throw() { return "CGModifyTaxRatio"; }
+	string getPacketName() const { return "CGModifyTaxRatio"; }
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_MODIFY_TAX_RATIO; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_MODIFY_TAX_RATIO; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szuint; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szuint; }
 };
 
 
@@ -101,7 +101,7 @@ class CGModifyTaxRatioHandler {
 public:
 
 	// execute packet's handler
-	static void execute(CGModifyTaxRatio* pCGModifyTaxRatio, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(CGModifyTaxRatio* pCGModifyTaxRatio, Player* pPlayer);
 
 };
 #endif

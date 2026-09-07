@@ -7,8 +7,7 @@
 #include "CGSelectBloodBible.h"
 
 
-void CGSelectBloodBible::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGSelectBloodBible::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -17,8 +16,7 @@ void CGSelectBloodBible::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGSelectBloodBible::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGSelectBloodBible::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -29,7 +27,6 @@ void CGSelectBloodBible::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGSelectBloodBible::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

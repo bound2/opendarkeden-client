@@ -70,22 +70,22 @@ enum
 class GCTradeError : public Packet 
 {
 public:
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
-	PacketID_t getPacketID () const throw () { return PACKET_GC_TRADE_ERROR; }
-	PacketSize_t getPacketSize () const throw () { return szObjectID + szBYTE ; }
+	void read ( SocketInputStream & iStream );
+	void write ( SocketOutputStream & oStream ) const;
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_TRADE_ERROR; }
+	PacketSize_t getPacketSize () const noexcept { return szObjectID + szBYTE ; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "GCTradeError"; }
-		std::string toString () const throw ();
+		std::string getPacketName () const { return "GCTradeError"; }
+		std::string toString () const;
 	#endif
 
 public:
-	ObjectID_t getTargetObjectID() const throw() { return m_TargetObjectID; }
-	void setTargetObjectID(ObjectID_t id) throw() { m_TargetObjectID = id; }
+	ObjectID_t getTargetObjectID() const noexcept { return m_TargetObjectID; }
+	void setTargetObjectID(ObjectID_t id) noexcept { m_TargetObjectID = id; }
 
-	BYTE getCode() const throw() { return m_Code; }
-	void setCode(BYTE code) throw() { m_Code = code; }
+	BYTE getCode() const noexcept { return m_Code; }
+	void setCode(BYTE code) noexcept { m_Code = code; }
 
 private:
 	ObjectID_t m_TargetObjectID; // 교환의 대상 아이디
@@ -103,14 +103,14 @@ private:
 class GCTradeErrorFactory : public PacketFactory 
 {
 public:
-	Packet * createPacket () throw () { return new GCTradeError(); }
+	Packet * createPacket () { return new GCTradeError(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "GCTradeError"; }
+		std::string getPacketName () const { return "GCTradeError"; }
 	#endif
 
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_TRADE_ERROR; }
-	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szBYTE; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_TRADE_ERROR; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID + szBYTE; }
 
 };
 
@@ -124,7 +124,7 @@ public:
 class GCTradeErrorHandler 
 {
 public:
-	static void execute ( GCTradeError * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCTradeError * pPacket , Player * pPlayer );
 
 };
 

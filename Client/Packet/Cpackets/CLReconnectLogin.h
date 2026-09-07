@@ -28,34 +28,34 @@ class CLReconnectLogin : public Packet {
 public :
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_CL_RECONNECT_LOGIN; }
+	PacketID_t getPacketID () const noexcept { return PACKET_CL_RECONNECT_LOGIN; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () 
+	PacketSize_t getPacketSize () const 
 	{ 
 		return szDWORD+szBYTE; 						// authentication key
 	}
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CLReconnectLogin"; }
+		std::string getPacketName () const { return "CLReconnectLogin"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 public :
 
 	// get/set key
-	DWORD getKey () const throw () { return m_Key; }
-	void setKey ( DWORD key ) throw () { m_Key = key; }
+	DWORD getKey () const noexcept { return m_Key; }
+	void setKey ( DWORD key ) noexcept { m_Key = key; }
 
 	void SetLoginMode(BYTE n) { m_LoginMode = n;}
 	BYTE GetLoginMode() { return m_LoginMode;}
@@ -81,18 +81,18 @@ class CLReconnectLoginFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new CLReconnectLogin(); }
+	Packet * createPacket () { return new CLReconnectLogin(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CLReconnectLogin"; }
+		std::string getPacketName () const { return "CLReconnectLogin"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CL_RECONNECT_LOGIN; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CL_RECONNECT_LOGIN; }
 
 	// get packet's max body size
-	PacketSize_t getPacketMaxSize () const throw ()
+	PacketSize_t getPacketMaxSize () const
 	{ 
 		return szDWORD+szBYTE; 			// authentication key
 	}
@@ -110,7 +110,7 @@ public :
 	public :
 
 		// execute packet's handler
-		static void execute ( CLReconnectLogin * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+		static void execute ( CLReconnectLogin * pPacket , Player * pPlayer );
 
 	};
 #endif

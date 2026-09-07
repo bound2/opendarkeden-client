@@ -17,7 +17,6 @@
 // constructor
 //----------------------------------------------------------------------
 LCServerList::LCServerList ()
-	throw ()
 {
 	m_CurrentServerGroupID = 0;
 }
@@ -27,7 +26,6 @@ LCServerList::LCServerList ()
 // destructor
 //----------------------------------------------------------------------
 LCServerList::~LCServerList ()
-	throw ()
 {
 	__BEGIN_TRY
 
@@ -50,8 +48,7 @@ LCServerList::~LCServerList ()
 //----------------------------------------------------------------------
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //----------------------------------------------------------------------
-void LCServerList::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void LCServerList::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -74,8 +71,7 @@ void LCServerList::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void LCServerList::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void LCServerList::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -95,8 +91,7 @@ void LCServerList::write ( SocketOutputStream & oStream ) const
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
-PacketSize_t LCServerList::getPacketSize () const 
-	throw ()
+PacketSize_t LCServerList::getPacketSize () const
 {
 	__BEGIN_TRY
 
@@ -120,7 +115,6 @@ PacketSize_t LCServerList::getPacketSize () const
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string LCServerList::toString () const
-		   throw ()
 	{
 		__BEGIN_TRY
 

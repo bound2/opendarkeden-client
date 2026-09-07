@@ -16,8 +16,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-CGThrowItem::CGThrowItem () 
-     throw ()
+CGThrowItem::CGThrowItem ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -27,8 +26,7 @@ CGThrowItem::CGThrowItem ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-CGThrowItem::~CGThrowItem () 
-    throw ()
+CGThrowItem::~CGThrowItem ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -38,8 +36,7 @@ CGThrowItem::~CGThrowItem ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void CGThrowItem::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void CGThrowItem::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -55,8 +52,7 @@ void CGThrowItem::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void CGThrowItem::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void CGThrowItem::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 	
@@ -73,7 +69,6 @@ void CGThrowItem::write ( SocketOutputStream & oStream ) const
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string CGThrowItem::toString () const
-		   throw ()
 	{
 		__BEGIN_TRY
 			

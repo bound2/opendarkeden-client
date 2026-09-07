@@ -20,13 +20,13 @@
 class CGSelectRegenZone : public Packet 
 {
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_SELECT_REGEN_ZONE; }
-	PacketSize_t getPacketSize() const throw() { return szBYTE; }
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_SELECT_REGEN_ZONE; }
+	PacketSize_t getPacketSize() const noexcept { return szBYTE; }
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "CGSelectRegenZone"; }
-	std::string toString() const throw();
+	std::string getPacketName() const { return "CGSelectRegenZone"; }
+	std::string toString() const;
 #endif
 
 public:
@@ -42,10 +42,10 @@ private:
 
 class CGSelectRegenZoneFactory : public PacketFactory 
 {
-	Packet* createPacket() throw() { return new CGSelectRegenZone(); }
-	std::string getPacketName() const throw() { return "CGSelectRegenZone"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_SELECT_REGEN_ZONE; }
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE; }
+	Packet* createPacket() { return new CGSelectRegenZone(); }
+	std::string getPacketName() const { return "CGSelectRegenZone"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_SELECT_REGEN_ZONE; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -55,7 +55,7 @@ class CGSelectRegenZoneFactory : public PacketFactory
 class CGSelectRegenZoneHandler 
 {
 public:
-	static void execute(CGSelectRegenZone* pCGSelectRegenZone, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(CGSelectRegenZone* pCGSelectRegenZone, Player* pPlayer);
 };
 
 #endif

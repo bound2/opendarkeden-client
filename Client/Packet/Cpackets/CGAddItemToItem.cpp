@@ -7,8 +7,7 @@
 #include "Client_PCH.h"
 #include "CGAddItemToItem.h"
 
-void CGAddItemToItem::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGAddItemToItem::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -19,8 +18,7 @@ void CGAddItemToItem::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGAddItemToItem::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGAddItemToItem::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -33,7 +31,6 @@ void CGAddItemToItem::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGAddItemToItem::toString () const
-	throw ()
 {
 	__BEGIN_TRY
 		

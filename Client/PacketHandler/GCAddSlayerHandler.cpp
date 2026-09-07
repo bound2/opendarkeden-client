@@ -20,8 +20,7 @@ extern void SetPetInfo(PetInfo* pPetInfo, TYPE_OBJECTID objectID);
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 void GCAddSlayerHandler::execute ( GCAddSlayer * pPacket , Player * pPlayer )
-	 
-	throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 		

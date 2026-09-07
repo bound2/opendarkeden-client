@@ -14,8 +14,7 @@
 //----------------------------------------------------------------------
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //----------------------------------------------------------------------
-void CLRegisterPlayer::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void CLRegisterPlayer::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -143,7 +142,6 @@ void CLRegisterPlayer::read ( SocketInputStream & iStream )
 // write data to socket output stream
 //////////////////////////////////////////////////////////////////////
 void CLRegisterPlayer::write ( SocketOutputStream & oStream ) const
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -267,8 +265,7 @@ void CLRegisterPlayer::write ( SocketOutputStream & oStream ) const
 // get debug std::string
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
-	std::string CLRegisterPlayer::toString () const 
-		throw ()
+	std::string CLRegisterPlayer::toString () const
 	{
 		__BEGIN_TRY
 

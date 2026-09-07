@@ -11,8 +11,7 @@
 // class GCPartyLeave member methods
 //////////////////////////////////////////////////////////////////////////////
 
-void GCPartyLeave::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void GCPartyLeave::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 
@@ -45,8 +44,7 @@ void GCPartyLeave::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 		    
-void GCPartyLeave::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void GCPartyLeave::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 	
@@ -67,7 +65,6 @@ void GCPartyLeave::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string GCPartyLeave::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

@@ -11,8 +11,7 @@
 // class GCAddHelicopter member methods
 //////////////////////////////////////////////////////////////////////////////
 
-void GCAddHelicopter::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCAddHelicopter::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -23,7 +22,7 @@ void GCAddHelicopter::read ( SocketInputStream & iStream )
 }
 		    
 void GCAddHelicopter::write ( SocketOutputStream & oStream ) 
-     const throw ( ProtocolException , Error )
+     const
 {
 	__BEGIN_TRY
 
@@ -35,7 +34,7 @@ void GCAddHelicopter::write ( SocketOutputStream & oStream )
 
 #ifdef __DEBUG_OUTPUT__
 	std::string GCAddHelicopter::toString () 
-		const throw ()
+		const
 	{
 		__BEGIN_TRY
 

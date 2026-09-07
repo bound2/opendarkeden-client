@@ -17,19 +17,19 @@
 class CGRequestNewbieItem : public Packet 
 {
 public:
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
-	PacketID_t getPacketID () const throw () { return PACKET_CG_REQUEST_NEWBIE_ITEM; }
-	PacketSize_t getPacketSize () const throw () { return szBYTE; }
+	void read ( SocketInputStream & iStream );
+	void write ( SocketOutputStream & oStream ) const;
+	PacketID_t getPacketID () const noexcept { return PACKET_CG_REQUEST_NEWBIE_ITEM; }
+	PacketSize_t getPacketSize () const noexcept { return szBYTE; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "CGRequestNewbieItem"; }
-		std::string toString () const throw ();
+		std::string getPacketName () const { return "CGRequestNewbieItem"; }
+		std::string toString () const;
 	#endif
 	
 public:
-	BYTE getItemClass(void) const throw() { return m_ItemClass; }
-	void setItemClass(BYTE itemClass) throw() { m_ItemClass = itemClass; }
+	BYTE getItemClass(void) const noexcept { return m_ItemClass; }
+	void setItemClass(BYTE itemClass) noexcept { m_ItemClass = itemClass; }
 
 private:
 	BYTE m_ItemClass;
@@ -42,14 +42,14 @@ private:
 class CGRequestNewbieItemFactory : public PacketFactory 
 {
 public:
-	Packet * createPacket () throw () { return new CGRequestNewbieItem(); }
+	Packet * createPacket () { return new CGRequestNewbieItem(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "CGRequestNewbieItem"; }
+		std::string getPacketName () const { return "CGRequestNewbieItem"; }
 	#endif
 
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_REQUEST_NEWBIE_ITEM; }
-	PacketSize_t getPacketMaxSize () const throw () { return szBYTE; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_REQUEST_NEWBIE_ITEM; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szBYTE; }
 };
 
 
@@ -60,7 +60,7 @@ public:
 	class CGRequestNewbieItemHandler 
 	{
 	public:
-		static void execute ( CGRequestNewbieItem * pPacket , Player * player ) throw ( ProtocolException , Error );
+		static void execute ( CGRequestNewbieItem * pPacket , Player * player );
 	};
 #endif
 

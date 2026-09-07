@@ -26,51 +26,51 @@ class CGDissectionCorpse : public Packet {
 public :
 	
 	// constructor
-	CGDissectionCorpse () throw ();
+	CGDissectionCorpse ();
 	
 	// destructor
-	~CGDissectionCorpse () throw ();
+	~CGDissectionCorpse ();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_CG_DISSECTION_CORPSE; }
+	PacketID_t getPacketID () const noexcept { return PACKET_CG_DISSECTION_CORPSE; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () { return szObjectID + szCoord + szCoord + szBYTE; }
+	PacketSize_t getPacketSize () const noexcept { return szObjectID + szCoord + szCoord + szBYTE; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CGDissectionCorpse"; }
+		std::string getPacketName () const { return "CGDissectionCorpse"; }
 	#endif
 
 	// get/set Corpse's X
-	Coord_t getX() const throw() { return m_X; }
-	void setX( Coord_t X ) throw() { m_X = X; }
+	Coord_t getX() const noexcept { return m_X; }
+	void setX( Coord_t X ) noexcept { m_X = X; }
 
 	// get/set Corpse's Y
-	Coord_t getY() const throw() { return m_Y; }
-	void setY( Coord_t Y ) throw() { m_Y = Y; }
+	Coord_t getY() const noexcept { return m_Y; }
+	void setY( Coord_t Y ) noexcept { m_Y = Y; }
 
 	// get/set ObjectID
-	ObjectID_t getObjectID() const throw() { return m_ObjectID; }
-	void setObjectID( ObjectID_t ObjectID ) throw() { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() const noexcept { return m_ObjectID; }
+	void setObjectID( ObjectID_t ObjectID ) noexcept { m_ObjectID = ObjectID; }
 
 	BYTE isPet() const { return m_IsPet; }
 	void setPet(BYTE pet) { m_IsPet = pet; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 private :
@@ -97,27 +97,27 @@ class CGDissectionCorpseFactory : public PacketFactory {
 public :
 	
 	// constructor
-	CGDissectionCorpseFactory () throw () {}
+	CGDissectionCorpseFactory () {}
 	
 	// destructor
-	virtual ~CGDissectionCorpseFactory () throw () {}
+	virtual ~CGDissectionCorpseFactory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new CGDissectionCorpse(); }
+	Packet * createPacket () { return new CGDissectionCorpse(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CGDissectionCorpse"; }
+		std::string getPacketName () const { return "CGDissectionCorpse"; }
 	#endif	
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_DISSECTION_CORPSE; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_DISSECTION_CORPSE; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szCoord + szCoord + szBYTE; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID + szCoord + szCoord + szBYTE; }
 };
 
 
@@ -132,7 +132,7 @@ class CGDissectionCorpseHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( CGDissectionCorpse * pCGDissectionCorpse , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( CGDissectionCorpse * pCGDissectionCorpse , Player * pPlayer );
 
 };
 #endif

@@ -810,6 +810,7 @@ check "R8 (printf-family calls whose format is not a literal)" "$R8" "$R8_BASELI
 # wire interfaces and must match the specifications on their bases).
 # 11,463 + 284 + 34 + 9 = 11,790, which is every .h and .cpp in the
 # repository outside comments - 8,513 empty and 3,277 non-empty.
+# The nine in tests/ went with the packet-root slice, 2026-09-07.
 #----------------------------------------------------------------------
 # R9 = 0, and it is not a removal. The first conformance slice
 # (2026-09-06) went looking for basic/'s specifications and found none:
@@ -831,7 +832,36 @@ R9_BASELINE=0
 # functions declared throw(ProtocolException, Error) by design, and
 # giving them noexcept would turn a designed peer teardown into
 # std::terminate.
-R10_BASELINE=11463
+#
+# R10 = 9,664 (2026-09-07): the 162 files directly under Client/Packet
+# are at 0 - 143 of them carried a specification: the wire core, the
+# packet framework and players, and the info classes, 1,799 sites - and
+# so is tests/. What is left is the packet directories:
+# Cpackets, Gpackets, Lpackets, Rpackets, Upackets and Types. Ten
+# destructors that carried a type list are spelled noexcept(false),
+# which this pattern does not count; everything else is deleted or
+# noexcept.
+#
+# R10 = 9,055 (2026-09-07): Lpackets, Upackets and Rpackets are at 0 as
+# well, 609 sites, by script this time - the packet classes are regular
+# enough for one, and it promotes only an inline one-liner returning a
+# constant or a scalar member. Cpackets (3,172) and Gpackets (5,883) are
+# what is left; Types carries none.
+#
+# R10 = 5,883 (2026-09-07): Cpackets is at 0, 3,172 sites by the same
+# script. One packet derives from another there
+# (CGUseMessageItemFromInventory from CGUseItemFromInventory), and the
+# build refused the base's promoted size functions under the derived
+# class's unpromoted overrides, so the base is unspecified too. Gpackets
+# is all that is left.
+#
+# R10 = 0 (2026-09-07): Gpackets is at 0, 5,883 sites by the same
+# script, with GCChangeInventoryItemNum::getPacketSize left unspecified
+# under the two packets that derive from it. The whole library set is
+# clean, and this ratchet now holds it there the way R9 holds basic/.
+# What it never covered - Client/PacketHandler (284) and the remaining
+# executable sources (34) - is the next slice, with a ratchet of its own.
+R10_BASELINE=0
 
 # Identifiers, `::` and commas between the parens, and nothing else. The
 # leading alternation rather than \b for the reason R8's comment gives:
@@ -893,6 +923,34 @@ fi
 
 R10=$(libset_members | count_exception_specs)
 check "R10 (dynamic exception specifications in the library set)" "$R10" "$R10_BASELINE"
+
+#----------------------------------------------------------------------
+# R12 - dynamic exception specifications anywhere in the tree.
+#
+# R9 and R10 cover the libraries; this one covers every .h, .cpp and
+# .inl under Client, VS_UI, basic, tools, third_party and tests, so the
+# executable side is held too. Same pattern, same strips, same blind
+# spots as R10's comment lists. The last 319 outside the library set -
+# 284 in Client/PacketHandler, one per handler's execute definition,
+# 32 in the two request-side packet factory managers, and three in
+# RequestFileManager and Updater/UpdateManager.h - went on 2026-09-07,
+# all of them type lists deleted or throw() deleted, none promoted.
+# R12 = 0 as of that day: finding 3 of the assessment is closed on the
+# source side, and a new specification anywhere fails here.
+#----------------------------------------------------------------------
+R12_BASELINE=0
+
+tree_members () {
+	find Client VS_UI basic tools third_party tests \( -name '*.h' -o -name '*.cpp' -o -name '*.inl' \) 2>/dev/null
+}
+
+if [ "$(tree_members | wc -l)" -eq 0 ]; then
+	echo "FAIL R12: no C++ sources enumerated - a zero here would measure nothing"
+	FAIL=1
+else
+	R12=$(tree_members | count_exception_specs)
+	check "R12 (dynamic exception specifications in the whole tree)" "$R12" "$R12_BASELINE"
+fi
 
 #----------------------------------------------------------------------
 # R6 was here for exactly one slice, and retired by doing its job.

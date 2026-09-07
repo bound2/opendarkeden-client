@@ -23,8 +23,7 @@ extern bool g_bZoneSafe;
 //
 //////////////////////////////////////////////////////////////////////
 void GCWarListHandler::execute ( GCWarList * pPacket , Player * pPlayer )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY 
 	

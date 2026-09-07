@@ -10,22 +10,19 @@
 #include "PacketAssert.h"
 
 
-CGAddMouseToZone::CGAddMouseToZone () 
-     throw ()
+CGAddMouseToZone::CGAddMouseToZone ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGAddMouseToZone::~CGAddMouseToZone () 
-    throw ()
+CGAddMouseToZone::~CGAddMouseToZone ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGAddMouseToZone::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGAddMouseToZone::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -46,8 +43,7 @@ void CGAddMouseToZone::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGAddMouseToZone::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGAddMouseToZone::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -70,7 +66,7 @@ void CGAddMouseToZone::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGAddMouseToZone::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 		

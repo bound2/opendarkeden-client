@@ -18,16 +18,16 @@
 class GCAuthKey : public Packet 
 {
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_GC_AUTH_KEY; }
-	PacketSize_t getPacketSize() const throw() { return szDWORD; }
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_AUTH_KEY; }
+	PacketSize_t getPacketSize() const noexcept { return szDWORD; }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "GCAuthKey"; }
-	string toString() const throw();
+	string getPacketName() const { return "GCAuthKey"; }
+	string toString() const;
 #endif
-	DWORD getKey() const throw() { return m_Key; }
-	void setKey(DWORD key) throw() { m_Key = key; }
+	DWORD getKey() const noexcept { return m_Key; }
+	void setKey(DWORD key) noexcept { m_Key = key; }
 
 private:
 	DWORD		m_Key;
@@ -43,12 +43,12 @@ private:
 class GCAuthKeyFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new GCAuthKey(); }
+	Packet* createPacket() { return new GCAuthKey(); }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "GCAuthKey"; }
+	string getPacketName() const { return "GCAuthKey"; }
 #endif
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_AUTH_KEY; }
-	PacketSize_t getPacketMaxSize() const throw() { return szDWORD; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_AUTH_KEY; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szDWORD; }
 };
 
 
@@ -59,7 +59,7 @@ public:
 class GCAuthKeyHandler 
 {
 public:
-	static void execute(GCAuthKey* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(GCAuthKey* pPacket, Player* pPlayer);
 
 };
 

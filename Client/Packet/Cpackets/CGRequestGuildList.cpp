@@ -7,8 +7,7 @@
 #include "CGRequestGuildList.h"
 
 
-void CGRequestGuildList::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGRequestGuildList::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 	
@@ -17,8 +16,7 @@ void CGRequestGuildList::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGRequestGuildList::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGRequestGuildList::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 	
@@ -29,7 +27,6 @@ void CGRequestGuildList::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 string CGRequestGuildList::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

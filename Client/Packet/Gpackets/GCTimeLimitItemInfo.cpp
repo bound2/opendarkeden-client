@@ -4,18 +4,15 @@
 #include "PacketAssert.h"
 
 GCTimeLimitItemInfo::GCTimeLimitItemInfo()
-	throw()
 {
 	m_TimeLimitItemInfos.clear();
 }
 
 GCTimeLimitItemInfo::~GCTimeLimitItemInfo()
-	throw()
 {
 }
 
 void GCTimeLimitItemInfo::read(SocketInputStream& iStream)
-	throw(ProtocolException, Error)
 {
 	__BEGIN_TRY
 
@@ -43,7 +40,6 @@ void GCTimeLimitItemInfo::read(SocketInputStream& iStream)
 }
 
 void GCTimeLimitItemInfo::write(SocketOutputStream& oStream ) const
-	throw(ProtocolException, Error)
 {
 	__BEGIN_TRY
 
@@ -66,7 +62,6 @@ void GCTimeLimitItemInfo::write(SocketOutputStream& oStream ) const
 }
 
 PacketSize_t GCTimeLimitItemInfo::getPacketSize() const
-	throw()
 {
 	__BEGIN_TRY
 
@@ -76,7 +71,6 @@ PacketSize_t GCTimeLimitItemInfo::getPacketSize() const
 }
 
 DWORD GCTimeLimitItemInfo::getTimeLimit(ObjectID_t objectID) const
-	throw(ProtocolException, Error)
 {
 	__BEGIN_TRY
 
@@ -90,7 +84,6 @@ DWORD GCTimeLimitItemInfo::getTimeLimit(ObjectID_t objectID) const
 }
 
 void GCTimeLimitItemInfo::addTimeLimit(ObjectID_t objectID, DWORD time)
-	throw(ProtocolException, Error)
 {
 	__BEGIN_TRY
 
@@ -105,7 +98,6 @@ void GCTimeLimitItemInfo::addTimeLimit(ObjectID_t objectID, DWORD time)
 
 #ifdef __DEBUG_OUTPUT__
 std::string GCTimeLimitItemInfo::toString() const
-	throw()
 {
 	__BEGIN_TRY
 

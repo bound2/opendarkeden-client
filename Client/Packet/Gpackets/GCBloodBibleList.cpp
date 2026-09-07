@@ -9,8 +9,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-GCBloodBibleList::~GCBloodBibleList() 
-	throw ()
+GCBloodBibleList::~GCBloodBibleList()
 {
 	__BEGIN_TRY 
 
@@ -20,8 +19,7 @@ GCBloodBibleList::~GCBloodBibleList()
 //////////////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////////////
-void GCBloodBibleList::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCBloodBibleList::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -43,8 +41,7 @@ void GCBloodBibleList::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////////////
-void GCBloodBibleList::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCBloodBibleList::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -66,7 +63,6 @@ void GCBloodBibleList::write ( SocketOutputStream & oStream ) const
 
 
 PacketSize_t GCBloodBibleList::getPacketSize() const
-	throw()
 {
 	__BEGIN_TRY
 
@@ -83,7 +79,6 @@ PacketSize_t GCBloodBibleList::getPacketSize() const
 // get packet's debug string
 //////////////////////////////////////////////////////////////////////////////
 string GCBloodBibleList::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

@@ -29,39 +29,39 @@ public :
 	RCCharacterInfo();
 	
     // Datagram 객체에서부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( Datagram & iDatagram ) throw ( ProtocolException , Error );
+    void read ( Datagram & iDatagram );
 		    
     // Datagram 객체로 패킷의 바이너리 이미지를 보낸다.
-    void write ( Datagram & oDatagram ) const throw ( ProtocolException , Error );
+    void write ( Datagram & oDatagram ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_RC_CHARACTER_INFO; }
+	PacketID_t getPacketID () const noexcept { return PACKET_RC_CHARACTER_INFO; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () 
+	PacketSize_t getPacketSize () const 
 	{ 
 		return szBYTE + m_Name.size() + szGuildID;
 	}
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "RCCharacterInfo"; }
+		std::string getPacketName () const { return "RCCharacterInfo"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 public :
 
 	// get /set GuildID
-	GuildID_t getGuildID() const throw() { return m_GuildID; }
-	void setGuildID( GuildID_t guildID ) throw() { m_GuildID = guildID; }
+	GuildID_t getGuildID() const noexcept { return m_GuildID; }
+	void setGuildID( GuildID_t guildID ) noexcept { m_GuildID = guildID; }
 
 
 	// get/set chatting Name
-	std::string getName () const throw () { return m_Name; }
-	void setName ( const std::string & name ) throw () { m_Name = name; }
+	std::string getName () const { return m_Name; }
+	void setName ( const std::string & name ) { m_Name = name; }
 
 protected :
 	std::string		m_Name;
@@ -83,17 +83,17 @@ class RCCharacterInfoFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new RCCharacterInfo(); }
+	Packet * createPacket () { return new RCCharacterInfo(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "RCCharacterInfo"; }
+		std::string getPacketName () const { return "RCCharacterInfo"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_RC_CHARACTER_INFO; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_RC_CHARACTER_INFO; }
 
-	PacketSize_t getPacketMaxSize () const throw () 
+	PacketSize_t getPacketMaxSize () const 
 	{ 
 		return szBYTE + 20 + szGuildID;
 	}
@@ -112,7 +112,7 @@ class RCCharacterInfoHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( RCCharacterInfo * pPacket ) throw ( ProtocolException , Error );
+	static void execute ( RCCharacterInfo * pPacket );
 
 };
 

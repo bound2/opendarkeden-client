@@ -28,17 +28,17 @@ class CGConnect : public Packet {
 public :
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_CG_CONNECT; }
+	PacketID_t getPacketID () const noexcept { return PACKET_CG_CONNECT; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () 
+	PacketSize_t getPacketSize () const 
 	{ 
 		return szDWORD 						// authentication key
 			+ szPCType 						// Slayer or Vampire?
@@ -48,29 +48,29 @@ public :
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CGConnect"; }
+		std::string getPacketName () const { return "CGConnect"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 public :
 
 	// get/set key
-	DWORD getKey () const throw () { return m_Key; }
-	void setKey ( DWORD key ) throw () { m_Key = key; }
+	DWORD getKey () const noexcept { return m_Key; }
+	void setKey ( DWORD key ) noexcept { m_Key = key; }
 
 	// get/set PCType
-	PCType getPCType () const throw () { return m_PCType; }
-	void setPCType ( PCType pcType ) throw () { m_PCType = pcType; }
+	PCType getPCType () const noexcept { return m_PCType; }
+	void setPCType ( PCType pcType ) noexcept { m_PCType = pcType; }
 	
 	// get/set pc name
-	std::string getPCName () const throw () { return m_PCName; }
-	void setPCName ( std::string pcName ) throw () { m_PCName = pcName; }
+	std::string getPCName () const { return m_PCName; }
+	void setPCName ( std::string pcName ) { m_PCName = pcName; }
 
 	// get/set mac address
-	const BYTE* getMacAddress() const throw () { return m_MacAddress; }
-	void setMacAddress( const BYTE* macAddress ) throw () { memcpy( m_MacAddress, macAddress, 6 * sizeof(BYTE) ); }
+	const BYTE* getMacAddress() const noexcept { return m_MacAddress; }
+	void setMacAddress( const BYTE* macAddress ) { memcpy( m_MacAddress, macAddress, 6 * sizeof(BYTE) ); }
 
 private :
 	
@@ -101,18 +101,18 @@ class CGConnectFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new CGConnect(); }
+	Packet * createPacket () { return new CGConnect(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CGConnect"; }
+		std::string getPacketName () const { return "CGConnect"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_CONNECT; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_CONNECT; }
 
 	// get packet's max body size
-	PacketSize_t getPacketMaxSize () const throw ()
+	PacketSize_t getPacketMaxSize () const
 	{ 
 		return szDWORD 			// authentication key
 			+ szPCType 			// Slayer or Vampire
@@ -133,7 +133,7 @@ public :
 	public :
 
 		// execute packet's handler
-		static void execute ( CGConnect * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+		static void execute ( CGConnect * pPacket , Player * pPlayer );
 
 	};
 #endif

@@ -26,19 +26,19 @@ class GCAddWolf : public Packet
 public :
 
 	// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+	void read(SocketInputStream & iStream);
 			
 	// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+	void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_GC_ADD_WOLF; }
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_ADD_WOLF; }
 	
 	// get packet's body size
 	// *OPTIMIZATION HINT*
 	// const static GCAddWolfPacketSize 를 정의, 리턴하라.
-	PacketSize_t getPacketSize() const throw() 
+	PacketSize_t getPacketSize() const 
 	{ 
 		return szObjectID 
 			+ szBYTE + m_Name.size() 
@@ -54,22 +54,22 @@ public :
 
 	#ifdef __DEBUG_OUTPUT__	
 		// get packet's name
-		std::string getPacketName() const throw() { return "GCAddWolf"; }
+		std::string getPacketName() const { return "GCAddWolf"; }
 	
 		// get packet's debug std::string
-		std::string toString() const throw();
+		std::string toString() const;
 	#endif
 
 
 public :
 
 	// get/set object id
-	ObjectID_t getObjectID() const throw() { return m_ObjectID; }
-	void setObjectID(ObjectID_t creatureID) throw() { m_ObjectID = creatureID; }
+	ObjectID_t getObjectID() const noexcept { return m_ObjectID; }
+	void setObjectID(ObjectID_t creatureID) noexcept { m_ObjectID = creatureID; }
 
 	// get/set name
-	std::string getName() const throw() { return m_Name; }
-	void setName(std::string name) throw() { m_Name = name; }
+	std::string getName() const { return m_Name; }
+	void setName(std::string name) { m_Name = name; }
 
 /*
 	// get/set sprite type
@@ -85,32 +85,32 @@ public :
 	void setSubColor(Color_t color) throw() { m_SubColor = color; }
 */
 	// get/set X
-	Coord_t getX() const throw() { return m_X; }
-	void setXYDir(Coord_t x, Coord_t y, Dir_t Dir) throw() { m_X = x; m_Y = y; m_Dir = Dir; }
+	Coord_t getX() const noexcept { return m_X; }
+	void setXYDir(Coord_t x, Coord_t y, Dir_t Dir) { m_X = x; m_Y = y; m_Dir = Dir; }
 	
 	// get/set Y
-	Coord_t getY() const throw() { return m_Y; }
+	Coord_t getY() const noexcept { return m_Y; }
 
 	// get/set Dir
-	Dir_t getDir() const throw() { return m_Dir; }
+	Dir_t getDir() const noexcept { return m_Dir; }
 
 	// get /set MaxHP
-	HP_t getMaxHP() const throw() { return m_MaxHP; }
-	void setMaxHP(HP_t MaxHP) throw() { m_MaxHP = MaxHP; }
+	HP_t getMaxHP() const noexcept { return m_MaxHP; }
+	void setMaxHP(HP_t MaxHP) noexcept { m_MaxHP = MaxHP; }
 
 	// get /set CurrentHP
-	HP_t getCurrentHP() const throw() { return m_CurrentHP; }
-	void setCurrentHP(HP_t CurrentHP) throw() { m_CurrentHP = CurrentHP; }
+	HP_t getCurrentHP() const noexcept { return m_CurrentHP; }
+	void setCurrentHP(HP_t CurrentHP) noexcept { m_CurrentHP = CurrentHP; }
 
 	// get/set ItemType
-	ItemType_t getItemType() const throw() { return m_ItemType; }
-	void setItemType(ItemType_t ItemType) throw() { m_ItemType = ItemType; }
+	ItemType_t getItemType() const noexcept { return m_ItemType; }
+	void setItemType(ItemType_t ItemType) noexcept { m_ItemType = ItemType; }
 
 	// get/set GuildID
-	GuildID_t getGuildID() const throw() { return m_GuildID; }
-	void setGuildID(GuildID_t GuildID) throw() { m_GuildID = GuildID; }
+	GuildID_t getGuildID() const noexcept { return m_GuildID; }
+	void setGuildID(GuildID_t GuildID) noexcept { m_GuildID = GuildID; }
 
-	Color_t getColor() const throw() { return m_MainColor; }
+	Color_t getColor() const noexcept { return m_MainColor; }
 	void setColor( Color_t color ) { m_MainColor = color; }
 
 private :
@@ -158,20 +158,20 @@ class GCAddWolfFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet* createPacket() throw() { return new GCAddWolf(); }
+	Packet* createPacket() { return new GCAddWolf(); }
 
 	#ifdef __DEBUG_OUTPUT__	
 		// get packet name
-		std::string getPacketName() const throw() { return "GCAddWolf"; }
+		std::string getPacketName() const { return "GCAddWolf"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_ADD_WOLF; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_ADD_WOLF; }
 
 	// get packet's body size
 	// *OPTIMIZATION HINT*
 	// const static GCAddWolfPacketSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize() const throw() 
+	PacketSize_t getPacketMaxSize() const 
 	{
 		return szObjectID 
 			+ szBYTE + 20 
@@ -199,7 +199,7 @@ class GCAddWolfHandler {
 public :
 
 	// execute packet's handler
-	static void execute(GCAddWolf* pPacket, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(GCAddWolf* pPacket, Player* pPlayer);
 
 };
 

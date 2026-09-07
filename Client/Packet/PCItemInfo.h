@@ -24,32 +24,32 @@
 class PCItemInfo 
 {
 public:
-	PCItemInfo() throw();
-	virtual ~PCItemInfo() throw();
+	PCItemInfo();
+	virtual ~PCItemInfo();
 
 public:
-	void read (SocketInputStream & iStream) throw (ProtocolException, Error);
-	void write (SocketOutputStream & oStream) const throw (ProtocolException, Error);
+	void read (SocketInputStream & iStream);
+	void write (SocketOutputStream & oStream) const;
 
 #ifdef __DEBUG_OUTPUT__
-	std::string toString() const throw();
+	std::string toString() const;
 #endif
 
 public:
-	void setObjectID(ObjectID_t ObjectID) throw() { m_ObjectID = ObjectID; }
-	ObjectID_t getObjectID() const throw() { return m_ObjectID; }
+	void setObjectID(ObjectID_t ObjectID) noexcept { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() const noexcept { return m_ObjectID; }
 
-	void setItemClass (BYTE IClass) throw() { m_IClass = IClass; }
-	BYTE getItemClass () const throw() { return m_IClass; }
+	void setItemClass (BYTE IClass) noexcept { m_IClass = IClass; }
+	BYTE getItemClass () const noexcept { return m_IClass; }
 
-	void setItemType (ItemType_t ItemType) throw() { m_ItemType = ItemType; }
-	ItemType_t getItemType() const throw() { return m_ItemType; }
+	void setItemType (ItemType_t ItemType) noexcept { m_ItemType = ItemType; }
+	ItemType_t getItemType() const noexcept { return m_ItemType; }
 
-	void addOptionType(OptionType_t OptionType) throw() { m_OptionType.push_back( OptionType ); }
-	void setOptionType(const std::list<OptionType_t>& OptionType) throw() { m_OptionType = OptionType; }
-	int getOptionTypeSize() const throw() { return m_OptionType.size(); }
-	const std::list<OptionType_t>& getOptionType() const throw() { return m_OptionType; }
-	OptionType_t popOptionType() throw() 
+	void addOptionType(OptionType_t OptionType) { m_OptionType.push_back( OptionType ); }
+	void setOptionType(const std::list<OptionType_t>& OptionType) { m_OptionType = OptionType; }
+	int getOptionTypeSize() const noexcept { return m_OptionType.size(); }
+	const std::list<OptionType_t>& getOptionType() const noexcept { return m_OptionType; }
+	OptionType_t popOptionType() 
 	{ 
 		if (m_OptionType.empty()) return 0;
 		OptionType_t optionType = m_OptionType.front(); 
@@ -57,38 +57,38 @@ public:
 		return optionType; 
 	}
 
-	void setSilver(Silver_t amount) throw() { m_Silver = amount; }
-	Silver_t getSilver() const throw() { return m_Silver; }
+	void setSilver(Silver_t amount) noexcept { m_Silver = amount; }
+	Silver_t getSilver() const noexcept { return m_Silver; }
 
-	void setDurability(Durability_t Durability) throw() { m_Durability = Durability; }
-	Durability_t getDurability() const throw() { return m_Durability; }
+	void setDurability(Durability_t Durability) noexcept { m_Durability = Durability; }
+	Durability_t getDurability() const noexcept { return m_Durability; }
 
-	void setGrade(Grade_t grade) throw() { m_Grade = grade; }
-	Grade_t getGrade() const throw() { return m_Grade; }
+	void setGrade(Grade_t grade) noexcept { m_Grade = grade; }
+	Grade_t getGrade() const noexcept { return m_Grade; }
 
-	void setEnchantLevel(EnchantLevel_t level) throw() { m_EnchantLevel = level; }
-	EnchantLevel_t getEnchantLevel() const throw() { return m_EnchantLevel; }
+	void setEnchantLevel(EnchantLevel_t level) noexcept { m_EnchantLevel = level; }
+	EnchantLevel_t getEnchantLevel() const noexcept { return m_EnchantLevel; }
 
-	void setItemNum(ItemNum_t ItemNum) throw() { m_ItemNum = ItemNum; }
-	ItemNum_t getItemNum() const throw() { return m_ItemNum; }
+	void setItemNum(ItemNum_t ItemNum) noexcept { m_ItemNum = ItemNum; }
+	ItemNum_t getItemNum() const noexcept { return m_ItemNum; }
 
-	void setMainColor(WORD MainColor) throw() { m_MainColor = MainColor; }
-	WORD getMainColor() const throw() { return m_MainColor; }
+	void setMainColor(WORD MainColor) noexcept { m_MainColor = MainColor; }
+	WORD getMainColor() const noexcept { return m_MainColor; }
 
-	BYTE getListNum() const throw() { return m_ListNum; }
-	void setListNum(BYTE ListNum) throw() { m_ListNum = ListNum; }
+	BYTE getListNum() const noexcept { return m_ListNum; }
+	void setListNum(BYTE ListNum) noexcept { m_ListNum = ListNum; }
 
-	std::list<SubItemInfo*>&getSubItems()  throw() {return m_SubItemInfoList; }
+	std::list<SubItemInfo*>&getSubItems()  noexcept {return m_SubItemInfoList; }
 	
-	void addListElement(SubItemInfo* pSubItemInfo) throw() 
+	void addListElement(SubItemInfo* pSubItemInfo) 
 	{ 
 		m_SubItemInfoList.push_back(pSubItemInfo); 
 		m_ListNum++;
 	}
 
-	void clearList() throw() { m_SubItemInfoList.clear(); m_ListNum = 0; }
+	void clearList() noexcept { m_SubItemInfoList.clear(); m_ListNum = 0; }
 
-	SubItemInfo* popFrontListElement() throw() 
+	SubItemInfo* popFrontListElement() 
 	{ 
 		SubItemInfo* TempSubItemInfo = m_SubItemInfoList.front(); 
 		m_SubItemInfoList.pop_front(); 
@@ -96,7 +96,7 @@ public:
 	}
 
 public:
-	uint getSize() const throw()
+	uint getSize() const noexcept
 	{
 		return szObjectID +
 			szBYTE +
@@ -112,7 +112,7 @@ public:
 			SubItemInfo::getMaxSize()*m_ListNum;
 	}
 
-	static uint getMaxSize() throw()
+	static uint getMaxSize() noexcept
 	{
 		return szObjectID +
 			szBYTE +

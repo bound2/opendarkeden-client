@@ -19,22 +19,22 @@
 class GCTradeRemoveItem : public Packet 
 {
 public:
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
-	PacketID_t getPacketID () const throw () { return PACKET_GC_TRADE_REMOVE_ITEM; }
-	PacketSize_t getPacketSize () const throw () { return szObjectID*2; }
+	void read ( SocketInputStream & iStream );
+	void write ( SocketOutputStream & oStream ) const;
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_TRADE_REMOVE_ITEM; }
+	PacketSize_t getPacketSize () const noexcept { return szObjectID*2; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "GCTradeRemoveItem"; }
-		std::string toString () const throw ();
+		std::string getPacketName () const { return "GCTradeRemoveItem"; }
+		std::string toString () const;
 	#endif
 
 public:
-	ObjectID_t getTargetObjectID() const throw() { return m_TargetObjectID; }
-	void setTargetObjectID(ObjectID_t id) throw() { m_TargetObjectID = id; }
+	ObjectID_t getTargetObjectID() const noexcept { return m_TargetObjectID; }
+	void setTargetObjectID(ObjectID_t id) noexcept { m_TargetObjectID = id; }
 
-	ObjectID_t getItemObjectID() const throw() { return m_ItemObjectID; }
-	void setItemObjectID(ObjectID_t id) throw() { m_ItemObjectID = id; }
+	ObjectID_t getItemObjectID() const noexcept { return m_ItemObjectID; }
+	void setItemObjectID(ObjectID_t id) noexcept { m_ItemObjectID = id; }
 
 private:
 	ObjectID_t m_TargetObjectID; // 교환을 원하는 상대방의 ObjectID
@@ -52,14 +52,14 @@ private:
 class GCTradeRemoveItemFactory : public PacketFactory 
 {
 public:
-	Packet * createPacket () throw () { return new GCTradeRemoveItem(); }
+	Packet * createPacket () { return new GCTradeRemoveItem(); }
 	
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "GCTradeRemoveItem"; }
+		std::string getPacketName () const { return "GCTradeRemoveItem"; }
 	#endif
 
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_TRADE_REMOVE_ITEM; }
-	PacketSize_t getPacketMaxSize () const throw () { return szObjectID*2; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_TRADE_REMOVE_ITEM; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID*2; }
 
 };
 
@@ -73,7 +73,7 @@ public:
 class GCTradeRemoveItemHandler 
 {
 public:
-	static void execute ( GCTradeRemoveItem * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCTradeRemoveItem * pPacket , Player * pPlayer );
 
 };
 

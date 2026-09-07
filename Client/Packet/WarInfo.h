@@ -30,24 +30,24 @@ public :
 	virtual ~WarInfo() {}
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    virtual void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    virtual void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    virtual void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    virtual void write(SocketOutputStream & oStream) const;
 
-	virtual PacketSize_t getSize() const throw() 
+	virtual PacketSize_t getSize() const 
 	{ 
 		return szDWORD*2;
 	}
 
-	static PacketSize_t getMaxSize() throw() 
+	static PacketSize_t getMaxSize() noexcept 
 	{ 
 		return szDWORD*2;
 	}
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet's debug string
-	virtual std::string toString() const throw() = 0;
+	virtual std::string toString() const = 0;
 #endif
 
 public :

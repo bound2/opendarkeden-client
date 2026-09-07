@@ -26,23 +26,23 @@ class CGWithdrawTax : public Packet
 public:
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_CG_WITHDRAW_TAX; }
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_WITHDRAW_TAX; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw() { return szGold; }
+	PacketSize_t getPacketSize() const noexcept { return szGold; }
 #ifdef __DEBUG_OUTPUT__
 	// get packet name
-	std::string getPacketName() const throw() { return "CGWithdrawTax"; }
+	std::string getPacketName() const { return "CGWithdrawTax"; }
 
 	// get packet's debug std::string
-	std::string toString() const throw();
+	std::string toString() const;
 #endif
 
 	// get/set Gold
@@ -69,26 +69,26 @@ class CGWithdrawTaxFactory : public PacketFactory {
 public:
 	
 	// constructor
-	CGWithdrawTaxFactory() throw() {}
+	CGWithdrawTaxFactory() {}
 	
 	// destructor
-	virtual ~CGWithdrawTaxFactory() throw() {}
+	virtual ~CGWithdrawTaxFactory() {}
 
 	
 public:
 	
 	// create packet
-	Packet* createPacket() throw() { return new CGWithdrawTax(); }
+	Packet* createPacket() { return new CGWithdrawTax(); }
 #ifdef __DEBUG_OUTPUT__
 	// get packet name
-	std::string getPacketName() const throw() { return "CGWithdrawTax"; }
+	std::string getPacketName() const { return "CGWithdrawTax"; }
 #endif
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_WITHDRAW_TAX; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_WITHDRAW_TAX; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szGold; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szGold; }
 };
 
 
@@ -104,7 +104,7 @@ public:
 #ifndef __GAME_CLIENT__
 
 	// execute packet's handler
-	static void execute(CGWithdrawTax* pCGWithdrawTax, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(CGWithdrawTax* pCGWithdrawTax, Player* pPlayer);
 #endif
 
 };

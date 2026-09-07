@@ -27,12 +27,34 @@
       "inherits": "windows",
       "binaryDir": "${sourceDir}/build/presets/windows-asan",
       "cacheVariables": { "USE_ASAN": "ON" }
+    },
+    {
+      "name": "windows-clang",
+      "displayName": "clang-cl (VS developer prompt), NMake, all tests",
+      "generator": "NMake Makefiles",
+      "binaryDir": "${sourceDir}/build/presets/windows-clang",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "clang-cl",
+        "CMAKE_CXX_COMPILER": "clang-cl",
+        "BUILD_TESTS": "ON",
+        "REQUIRE_TEST_TOOLS": "ON",
+        "USE_ASAN": "OFF",
+        "USE_TSAN": "OFF",
+        "USE_UBSAN": "OFF",
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
+        "VCPKG_HOST_TRIPLET": "x64-windows",
+        "VCPKG_INSTALLED_DIR": "${sourceDir}/build/presets/vcpkg_installed",
+        "VCPKG_MANIFEST_MODE": "ON"
+      }
     }
   ],
   "buildPresets": [
     { "name": "windows-debug", "configurePreset": "windows", "configuration": "Debug", "jobs": 2 },
     { "name": "windows-release", "configurePreset": "windows", "configuration": "Release", "jobs": 2 },
-    { "name": "windows-asan", "configurePreset": "windows-asan", "configuration": "Debug", "jobs": 2 }
+    { "name": "windows-asan", "configurePreset": "windows-asan", "configuration": "Debug", "jobs": 2 },
+    { "name": "windows-clang", "configurePreset": "windows-clang" }
   ],
   "testPresets": [
     {

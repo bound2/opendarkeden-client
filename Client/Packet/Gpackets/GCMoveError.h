@@ -24,43 +24,43 @@ class GCMoveError : public Packet {
 public :
 
 	// constructor
-	GCMoveError () throw () {}
-	GCMoveError ( Coord_t x , Coord_t y ) throw () : m_X(x), m_Y(y) {}
+	GCMoveError () {}
+	GCMoveError ( Coord_t x , Coord_t y ) : m_X(x), m_Y(y) {}
 	
 
 public :
 
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_MOVE_ERROR; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_MOVE_ERROR; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () { return szCoord + szCoord; }
+	PacketSize_t getPacketSize () const noexcept { return szCoord + szCoord; }
 	
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCMoveError"; }
+		std::string getPacketName () const { return "GCMoveError"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 	
 
 public :
 
 	// get/set X
-	Coord_t getX() const throw () { return m_X; }
-	void setX( Coord_t x) throw () { m_X = x; }
+	Coord_t getX() const noexcept { return m_X; }
+	void setX( Coord_t x) noexcept { m_X = x; }
 	
 	// get/set Y
-	Coord_t getY() const throw () { return m_Y; }
-	void setY( Coord_t y) throw () { m_Y = y ; }
+	Coord_t getY() const noexcept { return m_Y; }
+	void setY( Coord_t y) noexcept { m_Y = y ; }
 
 
 private : 
@@ -84,18 +84,18 @@ class  GCMoveErrorFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCMoveError(); }
+	Packet * createPacket () { return new GCMoveError(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCMoveError"; }
+		std::string getPacketName () const { return "GCMoveError"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_MOVE_ERROR; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_MOVE_ERROR; }
 
 	// get packet's max body size
-	PacketSize_t getPacketMaxSize () const throw () { return szCoord + szCoord; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szCoord + szCoord; }
 	
 };
 
@@ -111,7 +111,7 @@ class  GCMoveErrorHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCMoveError * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCMoveError * pPacket , Player * pPlayer );
 
 };
 

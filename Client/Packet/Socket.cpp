@@ -18,7 +18,6 @@
 // constructor
 //////////////////////////////////////////////////////////////////////
 Socket::Socket () 
-	throw () 
 : m_pSocketImpl(NULL) 
 { 
 	__BEGIN_TRY
@@ -34,7 +33,6 @@ Socket::Socket ()
 //
 //////////////////////////////////////////////////////////////////////
 Socket::Socket ( const std::string & host , uint port ) 
-	throw () 
 : m_pSocketImpl(NULL) 
 { 
 	__BEGIN_TRY
@@ -50,7 +48,6 @@ Socket::Socket ( const std::string & host , uint port )
 //
 //////////////////////////////////////////////////////////////////////
 Socket::Socket ( SocketImpl * impl ) 
-	throw () 
 : m_pSocketImpl(NULL) 
 { 
 	__BEGIN_TRY
@@ -66,8 +63,7 @@ Socket::Socket ( SocketImpl * impl )
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-Socket::~Socket ()
-	throw ( ProtocolException , Error ) 
+Socket::~Socket () noexcept(false)
 { 
 	__BEGIN_TRY
 
@@ -84,7 +80,6 @@ Socket::~Socket ()
 // close previous connection and connect to another server socket
 //////////////////////////////////////////////////////////////////////
 void Socket::reconnect ( const std::string & host , uint port )
-	throw ( ConnectException , Error )
 {
 	__BEGIN_TRY
 
@@ -106,7 +101,6 @@ void Socket::reconnect ( const std::string & host , uint port )
 // return debug string
 //////////////////////////////////////////////////////////////////////
 std::string Socket::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

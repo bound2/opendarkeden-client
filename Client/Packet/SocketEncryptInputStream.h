@@ -31,7 +31,7 @@ class SocketEncryptInputStream : public SocketInputStream {
 public :
 	
 	// constructor
-	SocketEncryptInputStream (Socket* sock, uint BufferSize = DefaultSocketEncryptInputBufferSize) throw (Error);
+	SocketEncryptInputStream (Socket* sock, uint BufferSize = DefaultSocketEncryptInputBufferSize);
 	~SocketEncryptInputStream() {}
 	
 //////////////////////////////////////////////////
@@ -45,21 +45,21 @@ public :
 	// 그러나, std::string 의 크기를 BYTE/WORD 중 어느 것으로 할 건지는 의문이다.
 	// 패킷의 크기는 작을 수록 좋다는 정책하에서 필요에 따라서 std::string size 값을
 	// BYTE 또는 WORD 를 수동으로 사용하도록 한다.
-    uint readEncrypt (bool   &buf) throw (ProtocolException, Error) { uint re = read((char*)&buf, szbool  ); buf = m_Encrypter.convert(buf); return re; }
-    uint readEncrypt (char   &buf) throw (ProtocolException, Error) { uint re = read((char*)&buf, szchar  ); buf = m_Encrypter.convert(buf); return re; }
-    uint readEncrypt (uchar  &buf) throw (ProtocolException, Error) { uint re = readWire(buf); buf = m_Encrypter.convert(buf); return re; }
-    uint readEncrypt (short  &buf) throw (ProtocolException, Error) { uint re = readWire(buf); buf = m_Encrypter.convert(buf); return re; }
-    uint readEncrypt (ushort &buf) throw (ProtocolException, Error) { uint re = readWire(buf); buf = m_Encrypter.convert(buf); return re; }
-    uint readEncrypt (int    &buf) throw (ProtocolException, Error) { uint re = readWire(buf); buf = m_Encrypter.convert(buf); return re; }
-    uint readEncrypt (uint   &buf) throw (ProtocolException, Error) { uint re = readWire(buf); buf = m_Encrypter.convert(buf); return re; }
-    uint readEncrypt (long   &buf) throw (ProtocolException, Error) {
+    uint readEncrypt (bool   &buf) { uint re = read((char*)&buf, szbool  ); buf = m_Encrypter.convert(buf); return re; }
+    uint readEncrypt (char   &buf) { uint re = read((char*)&buf, szchar  ); buf = m_Encrypter.convert(buf); return re; }
+    uint readEncrypt (uchar  &buf) { uint re = readWire(buf); buf = m_Encrypter.convert(buf); return re; }
+    uint readEncrypt (short  &buf) { uint re = readWire(buf); buf = m_Encrypter.convert(buf); return re; }
+    uint readEncrypt (ushort &buf) { uint re = readWire(buf); buf = m_Encrypter.convert(buf); return re; }
+    uint readEncrypt (int    &buf) { uint re = readWire(buf); buf = m_Encrypter.convert(buf); return re; }
+    uint readEncrypt (uint   &buf) { uint re = readWire(buf); buf = m_Encrypter.convert(buf); return re; }
+    uint readEncrypt (long   &buf) {
         int32_t tmp = 0;
         uint re = readWire(tmp);
         tmp = static_cast<int32_t>(m_Encrypter.convert(static_cast<long>(tmp)));
         buf = static_cast<long>(tmp);
         return re;
     }
-    uint readEncrypt (ulong  &buf) throw (ProtocolException, Error) {
+    uint readEncrypt (ulong  &buf) {
         uint32_t tmp = 0;
         uint re = readWire(tmp);
         tmp = static_cast<uint32_t>(m_Encrypter.convert(static_cast<ulong>(tmp)));

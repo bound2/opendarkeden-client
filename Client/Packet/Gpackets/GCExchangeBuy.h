@@ -31,14 +31,14 @@ public:
 
 	// uint8 success + bstr message (length byte always written, body clamped
 	// to kMaxMessage exactly as write() clamps it) + uint64 orderID
-	PacketSize_t getPacketSize() const throw()
+	PacketSize_t getPacketSize() const
 	{
 		return sizeof(BYTE) + sizeof(BYTE)
 			+ (PacketSize_t)(m_Message.length() > kMaxMessage ? kMaxMessage : m_Message.length())
 			+ sizeof(ulonglong);
 	}
-	PacketID_t getPacketID() const throw() { return PACKET_GC_EXCHANGE_BUY; }
-	string getPacketName() const throw() { return "GCExchangeBuy"; }
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_EXCHANGE_BUY; }
+	string getPacketName() const { return "GCExchangeBuy"; }
 	string toString() const;
 
 	// Getters
@@ -64,14 +64,14 @@ private:
 class GCExchangeBuyFactory : public PacketFactory
 {
 public:
-	Packet* createPacket() throw() { return new GCExchangeBuy(); }
-	string getPacketName() const throw() { return "GCExchangeBuy"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_EXCHANGE_BUY; }
+	Packet* createPacket() { return new GCExchangeBuy(); }
+	string getPacketName() const { return "GCExchangeBuy"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_EXCHANGE_BUY; }
 	// success(1) + message length byte(1) + message body(255) + orderID(8)
 	// = 265. write() clamps the body to kMaxMessage, so getPacketSize() can
 	// never exceed this.
 	// Must stay identical to the server repo's GCExchangeBuyFactory::getPacketMaxSize()
-	PacketSize_t getPacketMaxSize() const throw() { return 1 + 1 + GCExchangeBuy::kMaxMessage + 8; }
+	PacketSize_t getPacketMaxSize() const noexcept { return 1 + 1 + GCExchangeBuy::kMaxMessage + 8; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -81,7 +81,7 @@ public:
 class GCExchangeBuyHandler
 {
 public:
-	static void execute(GCExchangeBuy* pPacket, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(GCExchangeBuy* pPacket, Player* pPlayer);
 };
 
 #endif // __GC_EXCHANGE_BUY_H__

@@ -6,22 +6,19 @@
 #include "Client_PCH.h"
 #include "CGDeleteSMSAddress.h"
 
-CGDeleteSMSAddress::CGDeleteSMSAddress () 
-     throw ()
+CGDeleteSMSAddress::CGDeleteSMSAddress ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGDeleteSMSAddress::~CGDeleteSMSAddress () 
-    throw ()
+CGDeleteSMSAddress::~CGDeleteSMSAddress ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGDeleteSMSAddress::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGDeleteSMSAddress::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 
@@ -30,8 +27,7 @@ void CGDeleteSMSAddress::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGDeleteSMSAddress::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGDeleteSMSAddress::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -41,7 +37,7 @@ void CGDeleteSMSAddress::write (SocketOutputStream & oStream) const
 }
 
 string CGDeleteSMSAddress::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 		

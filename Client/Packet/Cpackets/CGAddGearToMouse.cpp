@@ -15,8 +15,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-CGAddGearToMouse::CGAddGearToMouse () 
-     throw ()
+CGAddGearToMouse::CGAddGearToMouse ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -26,8 +25,7 @@ CGAddGearToMouse::CGAddGearToMouse ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-CGAddGearToMouse::~CGAddGearToMouse () 
-    throw ()
+CGAddGearToMouse::~CGAddGearToMouse ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -37,8 +35,7 @@ CGAddGearToMouse::~CGAddGearToMouse ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void CGAddGearToMouse::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void CGAddGearToMouse::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -52,8 +49,7 @@ void CGAddGearToMouse::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void CGAddGearToMouse::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void CGAddGearToMouse::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -67,7 +63,7 @@ void CGAddGearToMouse::write ( SocketOutputStream & oStream ) const
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string CGAddGearToMouse::toString () 
-		const throw ()
+		const
 	{
 		__BEGIN_TRY
 			

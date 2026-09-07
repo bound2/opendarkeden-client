@@ -30,35 +30,35 @@ class GCMakeItemFail : public GCChangeInventoryItemNum, public ModifyInfo {
 public :
 	
 	// constructor
-	GCMakeItemFail () throw ();
+	GCMakeItemFail ();
 	
 	// destructor
-	~GCMakeItemFail () throw ();
+	~GCMakeItemFail ();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_MAKE_ITEM_FAIL; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_MAKE_ITEM_FAIL; }
 	
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getPacketSize () const throw () { return GCChangeInventoryItemNum::getPacketSize() + ModifyInfo::getPacketSize(); }
+	PacketSize_t getPacketSize () const { return GCChangeInventoryItemNum::getPacketSize() + ModifyInfo::getPacketSize(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCMakeItemFail"; }
+		std::string getPacketName () const { return "GCMakeItemFail"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 private :
 	
@@ -79,28 +79,28 @@ class GCMakeItemFailFactory : public PacketFactory {
 public :
 	
 	// constructor
-	GCMakeItemFailFactory () throw () {}
+	GCMakeItemFailFactory () {}
 	
 	// destructor
-	virtual ~GCMakeItemFailFactory () throw () {}
+	virtual ~GCMakeItemFailFactory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCMakeItemFail(); }
+	Packet * createPacket () { return new GCMakeItemFail(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCMakeItemFail"; }
+		std::string getPacketName () const { return "GCMakeItemFail"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_MAKE_ITEM_FAIL; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_MAKE_ITEM_FAIL; }
 
 	// get Packet Max Size
 	// PacketSize_t getPacketMaxSize() const throw() { return szSkillType + szCEffectID + szDuration + szBYTE + szBYTE * m_ListNum * 2 ; }
-	PacketSize_t getPacketMaxSize() const throw() { return 255 + ModifyInfo::getPacketMaxSize(); }
+	PacketSize_t getPacketMaxSize() const { return 255 + ModifyInfo::getPacketMaxSize(); }
 };
 
 
@@ -115,7 +115,7 @@ class GCMakeItemFailHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCMakeItemFail * pGCMakeItemFail , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCMakeItemFail * pGCMakeItemFail , Player * pPlayer );
 
 };
 

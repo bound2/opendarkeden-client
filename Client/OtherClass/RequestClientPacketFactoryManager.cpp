@@ -335,8 +335,7 @@
 // constructor
 //
 //////////////////////////////////////////////////////////////////////
-RequestClientPacketFactoryManager::RequestClientPacketFactoryManager () 
-	throw ()
+RequestClientPacketFactoryManager::RequestClientPacketFactoryManager ()
 : m_Factories(NULL) , m_Size(Packet::PACKET_MAX)
 {
 	__BEGIN_TRY
@@ -359,8 +358,7 @@ RequestClientPacketFactoryManager::RequestClientPacketFactoryManager ()
 // destructor
 //
 //////////////////////////////////////////////////////////////////////
-RequestClientPacketFactoryManager::~RequestClientPacketFactoryManager () 
-	throw ()
+RequestClientPacketFactoryManager::~RequestClientPacketFactoryManager ()
 {
 	__BEGIN_TRY
 		
@@ -401,7 +399,6 @@ RequestClientPacketFactoryManager::~RequestClientPacketFactoryManager ()
 //
 //////////////////////////////////////////////////////////////////////
 void RequestClientPacketFactoryManager::init ()
-	 throw (Error)
 {
 	__BEGIN_TRY
 		
@@ -734,8 +731,7 @@ void RequestClientPacketFactoryManager::init ()
 // 팩토리 객체를 특정 인덱스에 추가한다.
 //
 //////////////////////////////////////////////////////////////////////
-void RequestClientPacketFactoryManager::addFactory (PacketFactory * pFactory) 
-	 throw (Error)
+void RequestClientPacketFactoryManager::addFactory (PacketFactory * pFactory)
 {
 	__BEGIN_TRY
 		
@@ -765,8 +761,7 @@ void RequestClientPacketFactoryManager::addFactory (PacketFactory * pFactory)
 // 패킷아이디로 패킷객체를 생성한다.
 //
 //////////////////////////////////////////////////////////////////////
-Packet * RequestClientPacketFactoryManager::createPacket (PacketID_t packetID) 
-	   throw (InvalidProtocolException , Error)
+Packet * RequestClientPacketFactoryManager::createPacket (PacketID_t packetID)
 {
 	__BEGIN_TRY
 
@@ -789,8 +784,7 @@ Packet * RequestClientPacketFactoryManager::createPacket (PacketID_t packetID)
 // 패킷아이디로 특정 패킷의 최대 크기를 리턴한다.
 //
 //////////////////////////////////////////////////////////////////////
-PacketSize_t RequestClientPacketFactoryManager::getPacketMaxSize (PacketID_t packetID) 
-	   throw (InvalidProtocolException , Error)
+PacketSize_t RequestClientPacketFactoryManager::getPacketMaxSize (PacketID_t packetID)
 {
 	__BEGIN_TRY
 
@@ -814,8 +808,7 @@ PacketSize_t RequestClientPacketFactoryManager::getPacketMaxSize (PacketID_t pac
 //
 //////////////////////////////////////////////////////////////////////
 #if !defined(__GAME_CLIENT__) || defined(__GAME_CLIENT__) && defined(__DEBUG_OUTPUT__)
-std::string RequestClientPacketFactoryManager::getPacketName (PacketID_t packetID) 
-	   throw (InvalidProtocolException , Error)
+std::string RequestClientPacketFactoryManager::getPacketName (PacketID_t packetID)
 {
 	__BEGIN_TRY
 
@@ -837,7 +830,6 @@ std::string RequestClientPacketFactoryManager::getPacketName (PacketID_t packetI
 // get debug string
 //////////////////////////////////////////////////////////////////////
 std::string RequestClientPacketFactoryManager::toString () const
-	throw ()
 {
 	__BEGIN_TRY
 

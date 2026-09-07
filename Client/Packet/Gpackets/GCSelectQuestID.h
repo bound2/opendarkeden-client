@@ -23,14 +23,14 @@ class GCSelectQuestID : public Packet
 {
 public:
 public:
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_GC_SELECT_QUEST_ID; }
-	PacketSize_t getPacketSize() const throw();
+	void read(SocketInputStream & iStream);
+	void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_SELECT_QUEST_ID; }
+	PacketSize_t getPacketSize() const;
 	
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "GCSelectQuestID"; }
-	std::string toString() const throw();
+	std::string getPacketName() const { return "GCSelectQuestID"; }
+	std::string toString() const;
 #endif
 
 public:
@@ -48,12 +48,12 @@ private:
 class GCSelectQuestIDFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new GCSelectQuestID(); }
+	Packet* createPacket() { return new GCSelectQuestID(); }
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "GCSelectQuestID"; }
+	std::string getPacketName() const { return "GCSelectQuestID"; }
 #endif
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_SELECT_QUEST_ID; }
-	PacketSize_t getPacketMaxSize() const throw()
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_SELECT_QUEST_ID; }
+	PacketSize_t getPacketMaxSize() const
 	{
 		return szBYTE
 			 + szQuestID * maxQuestNum;
@@ -67,7 +67,7 @@ public:
 class GCSelectQuestIDHandler 
 {
 public:
-	static void execute(GCSelectQuestID* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(GCSelectQuestID* pPacket, Player* pPlayer);
 };
 
 #endif

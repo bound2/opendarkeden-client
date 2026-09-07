@@ -14,8 +14,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 void GCShowGuildInfoHandler::execute ( GCShowGuildInfo * pPacket , Player * pPlayer )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 	

@@ -24,24 +24,24 @@
 class CGTameMonster : public Packet {
 
 public:
-	CGTameMonster() throw();
-	~CGTameMonster() throw();
+	CGTameMonster();
+	~CGTameMonster();
 	
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_TAME_MONSTER; }
-	PacketSize_t getPacketSize() const throw() { return szObjectID; }
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_TAME_MONSTER; }
+	PacketSize_t getPacketSize() const noexcept { return szObjectID; }
 
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "CGTameMonster"; }
-	std::string toString() const throw();
+	std::string getPacketName() const { return "CGTameMonster"; }
+	std::string toString() const;
 #endif
 	
 public:
 	// get/set ObjectID
-	ObjectID_t getObjectID() const throw() { return m_ObjectID; }
-	void setObjectID(ObjectID_t ObjectID) throw() { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() const noexcept { return m_ObjectID; }
+	void setObjectID(ObjectID_t ObjectID) noexcept { m_ObjectID = ObjectID; }
 	
 private :
 	
@@ -59,14 +59,14 @@ private :
 class CGTameMonsterFactory : public PacketFactory {
 
 public:
-	CGTameMonsterFactory() throw() {}
-	virtual ~CGTameMonsterFactory() throw() {}
+	CGTameMonsterFactory() {}
+	virtual ~CGTameMonsterFactory() {}
 
 public:
-	Packet* createPacket() throw() { return new CGTameMonster(); }
-	std::string getPacketName() const throw() { return "CGTameMonster"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_TAME_MONSTER; }
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID; }
+	Packet* createPacket() { return new CGTameMonster(); }
+	std::string getPacketName() const { return "CGTameMonster"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_TAME_MONSTER; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID; }
 };
 
 #ifndef __GAME_CLIENT__
@@ -79,7 +79,7 @@ public:
 class CGTameMonsterHandler {
 	
 public:
-	static void execute(CGTameMonster* pCGTameMonster, Player* player) throw ( ProtocolException , Error );
+	static void execute(CGTameMonster* pCGTameMonster, Player* player);
 };
 
 #endif

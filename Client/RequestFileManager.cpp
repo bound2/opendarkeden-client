@@ -416,7 +416,6 @@ RequestFileManager::HasMyRequest(const std::string& name) const
 //---------------------------------------------------------------------------
 bool
 RequestFileManager::ReceiveMyRequest(const std::string& name, RequestClientPlayer* pRequestClientPlayer)
-	throw (ConnectException)
 {
 	REQUEST_RECEIVE_MAP::iterator iMy = m_MyRequests.find( name );
 

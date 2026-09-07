@@ -26,36 +26,36 @@ class GCShopSellFail : public Packet
 
 public :
 
-	GCShopSellFail() throw ();
-	virtual ~GCShopSellFail() throw ();
+	GCShopSellFail();
+	virtual ~GCShopSellFail();
 	
 	// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+	void read ( SocketInputStream & iStream );
 		    
 	// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+	void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_SHOP_SELL_FAIL; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_SHOP_SELL_FAIL; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () { return szObjectID;}
+	PacketSize_t getPacketSize () const noexcept { return szObjectID;}
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCShopSellFail"; }
+		std::string getPacketName () const { return "GCShopSellFail"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 
 public :
 
 	// get/set NPC's object id
-	ObjectID_t getObjectID () const throw () { return m_ObjectID; }
-	void setObjectID ( ObjectID_t creatureID ) throw () { m_ObjectID = creatureID; }
+	ObjectID_t getObjectID () const noexcept { return m_ObjectID; }
+	void setObjectID ( ObjectID_t creatureID ) noexcept { m_ObjectID = creatureID; }
 
 
 private :
@@ -80,20 +80,20 @@ class GCShopSellFailFactory : public PacketFactory
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCShopSellFail(); }
+	Packet * createPacket () { return new GCShopSellFail(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCShopSellFail"; }
+		std::string getPacketName () const { return "GCShopSellFail"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_SHOP_SELL_FAIL; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_SHOP_SELL_FAIL; }
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static GCShopSellFailPacketMaxSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize () const throw () { return szObjectID; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID; }
 
 };
 
@@ -110,7 +110,7 @@ class GCShopSellFailHandler
 public :
 	
 	// execute packet's handler
-	static void execute ( GCShopSellFail * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCShopSellFail * pPacket , Player * pPlayer );
 
 };
 

@@ -34,24 +34,24 @@ public :
 	virtual ~PCInfo () {}	
 
 	// 현재 인스턴스가 슬레이어인지 뱀파이어인지..
-	virtual PCType getPCType () const throw () = 0;	
+	virtual PCType getPCType () const noexcept = 0;	
 
 	//----------------------------------------------------------------------
 	// 패킷에 embedding 되려는 객체는 아래와 같은 데이타를 명시해야 한다.
 	//----------------------------------------------------------------------
 
 	// read data from socket input stream
-	virtual void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error ) = 0;
+	virtual void read ( SocketInputStream & iStream ) = 0;
 
 	// write data to socket output stream
-	virtual void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error ) = 0;
+	virtual void write ( SocketOutputStream & oStream ) const = 0;
 
 	// get size of object
-	virtual uint getSize () const throw () = 0;
+	virtual uint getSize () const noexcept = 0;
 
 	#ifdef __DEBUG_OUTPUT__
 		// get debug std::string
-		virtual std::string toString () const throw () = 0;
+		virtual std::string toString () const = 0;
 	#endif
 
 };

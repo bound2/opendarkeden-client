@@ -19,35 +19,35 @@
 class CGUseItemFromInventory : public Packet 
 {
 public:
-	CGUseItemFromInventory () throw ();
-	~CGUseItemFromInventory () throw ();
+	CGUseItemFromInventory ();
+	~CGUseItemFromInventory ();
 
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_USE_ITEM_FROM_INVENTORY; }
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_USE_ITEM_FROM_INVENTORY; }
 
 	//modify by viva for notice
 	//PacketSize_t getPacketSize() const throw() { return szObjectID + szObjectID + szCoordInven + szCoordInven; }
-	PacketSize_t getPacketSize() const throw() { return szObjectID + szCoordInven + szCoordInven; }
+	PacketSize_t getPacketSize() const { return szObjectID + szCoordInven + szCoordInven; }
 	//end
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "CGUseItemFromInventory"; }
-		std::string toString() const throw();
+		std::string getPacketName() const { return "CGUseItemFromInventory"; }
+		std::string toString() const;
 	#endif	
 	
 public:
-	ObjectID_t getObjectID() const throw() { return m_ObjectID; }
-	void setObjectID(ObjectID_t ObjectID) throw() { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() const noexcept { return m_ObjectID; }
+	void setObjectID(ObjectID_t ObjectID) noexcept { m_ObjectID = ObjectID; }
 
-	ObjectID_t getInventoryItemObjectID() throw() { return m_InventoryItemObjectID; }
-	void setInventoryItemObjectID(ObjectID_t InventoryItemObjectID) throw() { m_InventoryItemObjectID = InventoryItemObjectID; }
+	ObjectID_t getInventoryItemObjectID() noexcept { return m_InventoryItemObjectID; }
+	void setInventoryItemObjectID(ObjectID_t InventoryItemObjectID) noexcept { m_InventoryItemObjectID = InventoryItemObjectID; }
 	
-	CoordInven_t getX() const throw() { return m_InvenX; }
-	void setX(CoordInven_t InvenX) throw() { m_InvenX = InvenX; }
+	CoordInven_t getX() const noexcept { return m_InvenX; }
+	void setX(CoordInven_t InvenX) noexcept { m_InvenX = InvenX; }
 
-	CoordInven_t getY() const throw() { return m_InvenY; }
-	void setY(CoordInven_t InvenY) throw() { m_InvenY = InvenY; }
+	CoordInven_t getY() const noexcept { return m_InvenY; }
+	void setY(CoordInven_t InvenY) noexcept { m_InvenY = InvenY; }
 
 private:
 	ObjectID_t   m_ObjectID; // 아이템의 object id 
@@ -64,15 +64,15 @@ private:
 class CGUseItemFromInventoryFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new CGUseItemFromInventory(); }
+	Packet* createPacket() { return new CGUseItemFromInventory(); }
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "CGUseItemFromInventory"; }
+		std::string getPacketName() const { return "CGUseItemFromInventory"; }
 	#endif
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_USE_ITEM_FROM_INVENTORY; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_USE_ITEM_FROM_INVENTORY; }
 	
 	//modify by viva
 	//PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szObjectID + szCoordInven + szCoordInven; }
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szCoordInven + szCoordInven; }
+	PacketSize_t getPacketMaxSize() const { return szObjectID + szCoordInven + szCoordInven; }
 	//end
 };
 
@@ -87,14 +87,14 @@ class Item;
 	class CGUseItemFromInventoryHandler 
 	{
 	public:
-		static void execute(CGUseItemFromInventory* pPacket, Player* player) throw(ProtocolException, Error);
+		static void execute(CGUseItemFromInventory* pPacket, Player* player);
 
 	protected:
-		static void executePotion(CGUseItemFromInventory* pPacket, Player* player) throw(ProtocolException, Error);
-		static void executeMagazine(CGUseItemFromInventory* pPacket, Player* player) throw(ProtocolException, Error);
-		static void executeETC(CGUseItemFromInventory* pPacket, Player* player) throw(ProtocolException, Error);
-		static void executeSerum(CGUseItemFromInventory* pPacket, Player* player) throw(ProtocolException, Error);
-		static void executeVampireETC(CGUseItemFromInventory* pPacket, Player* player) throw(ProtocolException, Error);
+		static void executePotion(CGUseItemFromInventory* pPacket, Player* player);
+		static void executeMagazine(CGUseItemFromInventory* pPacket, Player* player);
+		static void executeETC(CGUseItemFromInventory* pPacket, Player* player);
+		static void executeSerum(CGUseItemFromInventory* pPacket, Player* player);
+		static void executeVampireETC(CGUseItemFromInventory* pPacket, Player* player);
 	};
 #endif
 

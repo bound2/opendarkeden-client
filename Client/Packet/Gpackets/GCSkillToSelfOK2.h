@@ -28,52 +28,52 @@ class GCSkillToSelfOK2 : public Packet {
 public :
 	
 	// constructor
-	GCSkillToSelfOK2() throw();
+	GCSkillToSelfOK2();
 	
 	// destructor
-	~GCSkillToSelfOK2() throw();
+	~GCSkillToSelfOK2();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_GC_SKILL_TO_SELF_OK_2; }
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_SKILL_TO_SELF_OK_2; }
 	
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getPacketSize() const throw() { return szObjectID + szSkillType + szDuration + szBYTE; }
+	PacketSize_t getPacketSize() const noexcept { return szObjectID + szSkillType + szDuration + szBYTE; }
 
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet's name
-	std::string getPacketName() const throw() { return "GCSkillToSelfOK2"; }
+	std::string getPacketName() const { return "GCSkillToSelfOK2"; }
 	
 	// get packet's debug string
-	std::string toString() const throw();
+	std::string toString() const;
 #endif
 
 	// get / set ObjectID
-	ObjectID_t getObjectID() const throw() { return m_ObjectID; }
-	void setObjectID(ObjectID_t ObjectID) throw() { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() const noexcept { return m_ObjectID; }
+	void setObjectID(ObjectID_t ObjectID) noexcept { m_ObjectID = ObjectID; }
 
 	// get / set SkillType
-	SkillType_t getSkillType() const throw() { return m_SkillType; }
-	void setSkillType(SkillType_t SkillType) throw() { m_SkillType = SkillType; }
+	SkillType_t getSkillType() const noexcept { return m_SkillType; }
+	void setSkillType(SkillType_t SkillType) noexcept { m_SkillType = SkillType; }
 
 	// get / set Duration
-	Duration_t getDuration() const throw() { return m_Duration; }
-	void setDuration(Duration_t Duration) throw() { m_Duration = Duration; }
+	Duration_t getDuration() const noexcept { return m_Duration; }
+	void setDuration(Duration_t Duration) noexcept { m_Duration = Duration; }
 
-	BYTE getGrade() const throw() { return m_Grade; }
-	void setGrade( BYTE grade ) throw() { m_Grade = grade; }
+	BYTE getGrade() const noexcept { return m_Grade; }
+	void setGrade( BYTE grade ) noexcept { m_Grade = grade; }
 
 private :
 	
@@ -104,28 +104,28 @@ class GCSkillToSelfOK2Factory : public PacketFactory {
 public :
 	
 	// constructor
-	GCSkillToSelfOK2Factory() throw() {}
+	GCSkillToSelfOK2Factory() {}
 	
 	// destructor
-	virtual ~GCSkillToSelfOK2Factory() throw() {}
+	virtual ~GCSkillToSelfOK2Factory() {}
 
 	
 public :
 	
 	// create packet
-	Packet* createPacket() throw() { return new GCSkillToSelfOK2(); }
+	Packet* createPacket() { return new GCSkillToSelfOK2(); }
 
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet name
-	std::string getPacketName() const throw() { return "GCSkillToSelfOK2"; }
+	std::string getPacketName() const { return "GCSkillToSelfOK2"; }
 #endif
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_SKILL_TO_SELF_OK_2; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_SKILL_TO_SELF_OK_2; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szSkillType + szDuration + szBYTE; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szSkillType + szDuration + szBYTE; }
 
 };
 
@@ -141,7 +141,7 @@ class GCSkillToSelfOK2Handler {
 public :
 
 	// execute packet's handler
-	static void execute(GCSkillToSelfOK2* pGCSkillToSelfOK2, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(GCSkillToSelfOK2* pGCSkillToSelfOK2, Player* pPlayer);
 
 };
 

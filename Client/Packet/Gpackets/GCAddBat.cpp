@@ -10,8 +10,7 @@
 // class GCAddBat member methods
 //////////////////////////////////////////////////////////////////////////////
 
-void GCAddBat::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCAddBat::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -45,8 +44,7 @@ void GCAddBat::read ( SocketInputStream & iStream )
 	__END_CATCH
 }
 
-void GCAddBat::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCAddBat::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 		
@@ -82,7 +80,6 @@ void GCAddBat::write ( SocketOutputStream & oStream ) const
 #ifdef __DEBUG_OUTPUT__
 	
 	std::string GCAddBat::toString () const
-		   throw ()
 	{
 		__BEGIN_TRY
 

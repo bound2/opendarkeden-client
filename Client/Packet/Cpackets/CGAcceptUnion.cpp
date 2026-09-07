@@ -7,8 +7,7 @@
 #include "CGAcceptUnion.h"
 
 
-void CGAcceptUnion::read (SocketInputStream & iStream)  
-	 throw (ProtocolException , Error)
+void CGAcceptUnion::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY  
 		
@@ -18,7 +17,6 @@ void CGAcceptUnion::read (SocketInputStream & iStream)
 } 
  
 void CGAcceptUnion::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error) 
 {
 	__BEGIN_TRY 
 		   
@@ -29,7 +27,6 @@ void CGAcceptUnion::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 string CGAcceptUnion::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

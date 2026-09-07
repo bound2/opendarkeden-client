@@ -82,16 +82,16 @@ class Item;
 class GCGoodsList : public Packet 
 {
 public:
-	GCGoodsList() throw();
-	virtual ~GCGoodsList() throw();
+	GCGoodsList();
+	virtual ~GCGoodsList();
 
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_GC_GOODS_LIST; }
-	PacketSize_t getPacketSize() const throw();
+	void read(SocketInputStream & iStream);
+	void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_GOODS_LIST; }
+	PacketSize_t getPacketSize() const;
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "GCGoodsList"; }
-	std::string toString() const throw();
+	std::string getPacketName() const { return "GCGoodsList"; }
+	std::string toString() const;
 #endif
 
 public:
@@ -111,12 +111,12 @@ private:
 class GCGoodsListFactory : public PacketFactory 
 {
 public :
-	Packet* createPacket() throw() { return new GCGoodsList(); }
+	Packet* createPacket() { return new GCGoodsList(); }
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "GCGoodsList"; }
+	std::string getPacketName() const { return "GCGoodsList"; }
 #endif
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_GOODS_LIST; }
-	PacketSize_t getPacketMaxSize() const throw() 
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_GOODS_LIST; }
+	PacketSize_t getPacketMaxSize() const 
 	{ 
 		PacketSize_t size = szBYTE;
 		size += GoodsInfo::getPacketMaxSize() * MAX_GOODS_LIST;
@@ -133,7 +133,7 @@ public :
 class GCGoodsListHandler 
 {
 public :
-	static void execute(GCGoodsList* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(GCGoodsList* pPacket, Player* pPlayer);
 
 };
 

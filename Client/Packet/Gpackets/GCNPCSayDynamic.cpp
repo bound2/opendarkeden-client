@@ -7,8 +7,7 @@
 #include "Client_PCH.h"
 #include "GCNPCSayDynamic.h"
 
-void GCNPCSayDynamic::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCNPCSayDynamic::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -29,8 +28,7 @@ void GCNPCSayDynamic::read ( SocketInputStream & iStream )
 	__END_CATCH
 }
 		    
-void GCNPCSayDynamic::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCNPCSayDynamic::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 		
@@ -53,7 +51,6 @@ void GCNPCSayDynamic::write ( SocketOutputStream & oStream ) const
 
 #ifdef __DEBUG_OUTPUT__
 	std::string GCNPCSayDynamic::toString () const
-		   throw ()
 	{
 		__BEGIN_TRY
 			

@@ -26,27 +26,27 @@ class CGQuitUnionDeny : public Packet
 public:
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_CG_QUIT_UNION_DENY; }
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_QUIT_UNION_DENY; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw() { return szGuildID; }
+	PacketSize_t getPacketSize() const noexcept { return szGuildID; }
 #ifdef __DEBUG_OUTPUT__
 	// get packet name
-	string getPacketName() const throw() { return "CGQuitUnionDeny"; }
+	string getPacketName() const { return "CGQuitUnionDeny"; }
 
 	// get packet's debug string
-	string toString() const throw();
+	string toString() const;
 #endif
 	// get/set GuildID
-	GuildID_t getGuildID() const throw() { return m_GuildID; }
-	void setGuildID( GuildID_t GuildID ) throw() { m_GuildID = GuildID; }
+	GuildID_t getGuildID() const noexcept { return m_GuildID; }
+	void setGuildID( GuildID_t GuildID ) noexcept { m_GuildID = GuildID; }
 
 
 private :
@@ -70,25 +70,25 @@ class CGQuitUnionDenyFactory : public PacketFactory {
 public:
 	
 	// constructor
-	CGQuitUnionDenyFactory() throw() {}
+	CGQuitUnionDenyFactory() {}
 	
 	// destructor
-	virtual ~CGQuitUnionDenyFactory() throw() {}
+	virtual ~CGQuitUnionDenyFactory() {}
 
 	
 public:
 	
 	// create packet
-	Packet* createPacket() throw() { return new CGQuitUnionDeny(); }
+	Packet* createPacket() { return new CGQuitUnionDeny(); }
 
 	// get packet name
-	string getPacketName() const throw() { return "CGQuitUnionDeny"; }
+	string getPacketName() const { return "CGQuitUnionDeny"; }
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_QUIT_UNION_DENY; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_QUIT_UNION_DENY; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szGuildID; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szGuildID; }
 };
 
 
@@ -103,7 +103,7 @@ class CGQuitUnionDenyHandler {
 public:
 
 	// execute packet's handler
-	static void execute(CGQuitUnionDeny* pCGQuitUnionDeny, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(CGQuitUnionDeny* pCGQuitUnionDeny, Player* pPlayer);
 
 };
 #endif

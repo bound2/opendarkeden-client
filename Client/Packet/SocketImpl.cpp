@@ -26,7 +26,7 @@
 
 ////////////////////////////////////////////////////////////////////////
 // 
-// SocketImpl::SocketImpl () throw ( Error );
+// SocketImpl::SocketImpl ();
 // 
 // Parameters 
 //     none
@@ -36,7 +36,6 @@
 // 
 ////////////////////////////////////////////////////////////////////////
 SocketImpl::SocketImpl () 
-	 throw ()
 : m_SocketID(INVALID_SOCKET), m_Host("Unknown"), m_Port(0)
 {
 }
@@ -46,7 +45,6 @@ SocketImpl::SocketImpl ()
 //
 //////////////////////////////////////////////////////////////////////
 SocketImpl::SocketImpl ( uint port ) 
-	 throw ()
 : m_SocketID(INVALID_SOCKET), m_Host("Unknown"), m_Port(port)
 {
 	m_key = 1;
@@ -57,7 +55,6 @@ SocketImpl::SocketImpl ( uint port )
 //
 //////////////////////////////////////////////////////////////////////
 SocketImpl::SocketImpl ( const std::string & host , uint port ) 
-	throw ()
 : m_SocketID(INVALID_SOCKET), m_Host(host), m_Port(port)
 {
 	m_key = 1;
@@ -66,7 +63,7 @@ SocketImpl::SocketImpl ( const std::string & host , uint port )
 
 ////////////////////////////////////////////////////////////////////////
 //
-// SocketImpl::SocketImpl ( const SocketImpl & impl ) throw ();
+// SocketImpl::SocketImpl ( const SocketImpl & impl );
 //
 // copy constructor 
 //
@@ -78,7 +75,6 @@ SocketImpl::SocketImpl ( const std::string & host , uint port )
 //
 ////////////////////////////////////////////////////////////////////////
 SocketImpl::SocketImpl ( const SocketImpl & impl ) 
-	throw ()
 : m_SocketID(impl.m_SocketID), m_Host(impl.m_Host), m_Port(impl.m_Port)
 {
 	m_key = 1;
@@ -86,7 +82,7 @@ SocketImpl::SocketImpl ( const SocketImpl & impl )
 
 ////////////////////////////////////////////////////////////////////////
 //
-// SocketImpl::~SocketImpl () throw ( Error );
+// SocketImpl::~SocketImpl ();
 //
 // virtual destructor
 //
@@ -97,8 +93,7 @@ SocketImpl::SocketImpl ( const SocketImpl & impl )
 //     Error
 //
 ////////////////////////////////////////////////////////////////////////
-SocketImpl::~SocketImpl ()
-	throw ( ProtocolException , Error )
+SocketImpl::~SocketImpl () noexcept(false)
 {
 	__BEGIN_TRY 
 
@@ -110,7 +105,7 @@ SocketImpl::~SocketImpl ()
 //////////////////////////////////////////////////////////////////////
 // create connection
 //////////////////////////////////////////////////////////////////////
-void SocketImpl::create () throw ( ProtocolException , Error )
+void SocketImpl::create ()
 {
 	__BEGIN_TRY
 		
@@ -129,7 +124,7 @@ void SocketImpl::create () throw ( ProtocolException , Error )
 //////////////////////////////////////////////////////////////////////
 // close connection
 //////////////////////////////////////////////////////////////////////
-void SocketImpl::close () throw ( ProtocolException , Error )
+void SocketImpl::close ()
 {
 	__BEGIN_TRY 
 		
@@ -147,7 +142,6 @@ void SocketImpl::close () throw ( ProtocolException , Error )
 // bind address to socket
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::bind ()
-	 throw ( BindException , Error )
 {
 	__BEGIN_TRY
 
@@ -164,7 +158,6 @@ void SocketImpl::bind ()
 // bind address to socket
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::bind ( uint port )
-	 throw ( BindException , Error )
 {
 	__BEGIN_TRY
 
@@ -183,7 +176,6 @@ void SocketImpl::bind ( uint port )
 // bind address to socket
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::listen ( uint backlog )
-	 throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 		
@@ -197,7 +189,6 @@ void SocketImpl::listen ( uint backlog )
 // connect to remote host
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::connect ( const std::string & host , uint port )
-     throw ( ConnectException , Error )
 {
 	__BEGIN_TRY 
 		
@@ -221,7 +212,6 @@ void SocketImpl::connect ( const std::string & host , uint port )
 //
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::connect ()
-     throw ( ConnectException , Error )
 {
 	__BEGIN_TRY 
 
@@ -242,7 +232,6 @@ void SocketImpl::connect ()
 //
 //////////////////////////////////////////////////////////////////////
 SocketImpl * SocketImpl::accept ()
-	throw ( NonBlockingIOException , Error )
 {
 	__BEGIN_TRY
 
@@ -274,7 +263,6 @@ SocketImpl * SocketImpl::accept ()
 // send data to peer
 //////////////////////////////////////////////////////////////////////
 uint SocketImpl::send ( const void * buf , uint len , uint flags ) 
-     throw ( IOException , Error )
 {
 	__BEGIN_TRY 
 #ifdef __USE_ENCRY__  //使用加密协议
@@ -305,7 +293,6 @@ uint SocketImpl::send ( const void * buf , uint len , uint flags )
 // receive data from peer
 //////////////////////////////////////////////////////////////////////
 uint SocketImpl::receive ( void * buf , uint len , uint flags ) 
-     throw ( IOException , Error )
 {
 	__BEGIN_TRY 
 
@@ -318,7 +305,6 @@ uint SocketImpl::receive ( void * buf , uint len , uint flags )
 // how much available?
 //////////////////////////////////////////////////////////////////////
 uint SocketImpl::available () const
-     throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY 
 		
@@ -331,7 +317,6 @@ uint SocketImpl::available () const
 // get socket's linger status
 //////////////////////////////////////////////////////////////////////
 uint SocketImpl::getLinger () const
-     throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY 
 
@@ -350,7 +335,6 @@ uint SocketImpl::getLinger () const
 // set socket's linger status
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::setLinger ( uint lingertime )
-     throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY 
 
@@ -369,7 +353,6 @@ void SocketImpl::setLinger ( uint lingertime )
 // get socket's reuse address status
 //////////////////////////////////////////////////////////////////////
 bool SocketImpl::isReuseAddr () const
-     throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY 
 		
@@ -388,7 +371,6 @@ bool SocketImpl::isReuseAddr () const
 // set socket's reuse address status
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::setReuseAddr ( bool on )
-     throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY 
 
@@ -404,7 +386,6 @@ void SocketImpl::setReuseAddr ( bool on )
 // get socket's nonblocking status
 //////////////////////////////////////////////////////////////////////
 bool SocketImpl::isNonBlocking () const
-     throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY 
 
@@ -418,7 +399,6 @@ bool SocketImpl::isNonBlocking () const
 // set socket's nonblocking status
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::setNonBlocking ( bool on )
-     throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY 
 
@@ -432,7 +412,6 @@ void SocketImpl::setNonBlocking ( bool on )
 // get receive buffer size
 //////////////////////////////////////////////////////////////////////
 uint SocketImpl::getReceiveBufferSize () const
-     throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY 
 
@@ -451,7 +430,6 @@ uint SocketImpl::getReceiveBufferSize () const
 // set receive buffer size
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::setReceiveBufferSize ( uint ReceiveBufferSize )
-	 throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY 
 
@@ -464,7 +442,6 @@ void SocketImpl::setReceiveBufferSize ( uint ReceiveBufferSize )
 // get send buffer size
 //////////////////////////////////////////////////////////////////////
 uint SocketImpl::getSendBufferSize () const
-     throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY 
 		
@@ -480,7 +457,7 @@ uint SocketImpl::getSendBufferSize () const
 
 //////////////////////////////////////////////////////////////////////
 //
-// void SocketImpl::setSendBufferSize ( uint SendBufferSize ) throw ( Error )
+// void SocketImpl::setSendBufferSize ( uint SendBufferSize )
 //
 // set send buffer size
 //
@@ -493,7 +470,6 @@ uint SocketImpl::getSendBufferSize () const
 //
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::setSendBufferSize ( uint SendBufferSize )
-     throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY 
 		
@@ -505,7 +481,7 @@ void SocketImpl::setSendBufferSize ( uint SendBufferSize )
 
 //////////////////////////////////////////////////////////////////////
 //
-// string SocketImpl::_getHost () const throw ();
+// string SocketImpl::_getHost () const;
 //
 // get host address of this socket
 //
@@ -520,7 +496,6 @@ void SocketImpl::setSendBufferSize ( uint SendBufferSize )
 //
 //////////////////////////////////////////////////////////////////////
 std::string SocketImpl::_getHost () const 
-       throw ()
 {
 	return std::string( inet_ntoa( m_SockAddr.sin_addr ) );
 }
@@ -528,7 +503,7 @@ std::string SocketImpl::_getHost () const
 
 //////////////////////////////////////////////////////////////////////
 //
-// void SocketImpl::_setHost ( const std::string & host ) throw ()
+// void SocketImpl::_setHost ( const std::string & host )
 //
 // set host address of this socket
 //
@@ -543,7 +518,7 @@ std::string SocketImpl::_getHost () const
 //
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::_setHost ( const std::string & host ) 
-     throw ()
+     noexcept
 {
 	m_SockAddr.sin_addr.s_addr = inet_addr( host.c_str() );
 }
@@ -551,7 +526,7 @@ void SocketImpl::_setHost ( const std::string & host )
 
 //////////////////////////////////////////////////////////////////////
 //
-// uint SocketImpl::_getPort () const throw ()
+// uint SocketImpl::_getPort () const
 //
 // get port of this socket
 //
@@ -566,7 +541,7 @@ void SocketImpl::_setHost ( const std::string & host )
 //
 //////////////////////////////////////////////////////////////////////
 uint SocketImpl::_getPort () const 
-     throw ()
+     noexcept
 {
 	return ntohs( m_SockAddr.sin_port );
 }
@@ -574,7 +549,7 @@ uint SocketImpl::_getPort () const
 
 //////////////////////////////////////////////////////////////////////
 //
-// void SocketImpl::_setPort ( uint port ) throw ()
+// void SocketImpl::_setPort ( uint port )
 //
 // set host address of this socket
 //
@@ -589,12 +564,12 @@ uint SocketImpl::_getPort () const
 //
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::_setPort ( uint port ) 
-	 throw ()
+	 noexcept
 {
 	m_SockAddr.sin_port = htons(port);
 }
 void SocketImpl::EnData(char* pData,uint len) 
-	throw()
+	noexcept
 {
 	for (uint i=0;i<len;i++)
 	{

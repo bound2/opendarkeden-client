@@ -27,40 +27,40 @@ class GCLearnSkillFailed : public Packet
 
 public: 
 
-	GCLearnSkillFailed() throw();
-	virtual ~GCLearnSkillFailed() throw();
+	GCLearnSkillFailed();
+	virtual ~GCLearnSkillFailed();
 
 	
 public:
 	
 	// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+	void read ( SocketInputStream & iStream );
 			
 	// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+	void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_LEARN_SKILL_FAILED; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_LEARN_SKILL_FAILED; }
 	
 	// get packet size
-	PacketSize_t getPacketSize () const throw () { return szSkillType+szBYTE; }
+	PacketSize_t getPacketSize () const noexcept { return szSkillType+szBYTE; }
 	
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCLearnSkillFailed"; }
+		std::string getPacketName () const { return "GCLearnSkillFailed"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 	
 	// get/set skill type
-	SkillType_t getSkillType(void) const throw () { return m_SkillType; }
-	void setSkillType( SkillType_t SkillType ) throw () { m_SkillType = SkillType; }
+	SkillType_t getSkillType(void) const noexcept { return m_SkillType; }
+	void setSkillType( SkillType_t SkillType ) noexcept { m_SkillType = SkillType; }
 
 	// get/set description
-	BYTE getDesc(void) const throw() { return m_Desc;}
-	void setDesc(BYTE desc) throw() { m_Desc = desc;}
+	BYTE getDesc(void) const noexcept { return m_Desc;}
+	void setDesc(BYTE desc) noexcept { m_Desc = desc;}
 
 private:
 
@@ -83,27 +83,27 @@ class  GCLearnSkillFailedFactory : public PacketFactory {
 public :
 	
 	// constructor
-	 GCLearnSkillFailedFactory () throw () {}
+	 GCLearnSkillFailedFactory () {}
 	
 	// destructor
-	virtual ~GCLearnSkillFailedFactory () throw () {}
+	virtual ~GCLearnSkillFailedFactory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCLearnSkillFailed(); }
+	Packet * createPacket () { return new GCLearnSkillFailed(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCLearnSkillFailed"; }
+		std::string getPacketName () const { return "GCLearnSkillFailed"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_LEARN_SKILL_FAILED; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_LEARN_SKILL_FAILED; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szSkillType+szBYTE; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szSkillType+szBYTE; }
 
 };
 
@@ -119,7 +119,7 @@ class  GCLearnSkillFailedHandler {
 public :
 
 	// execute packet's handler
-	static void execute (  GCLearnSkillFailed * pGCLearnSkillFailed , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute (  GCLearnSkillFailed * pGCLearnSkillFailed , Player * pPlayer );
 
 };
 

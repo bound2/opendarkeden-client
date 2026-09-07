@@ -24,16 +24,16 @@
 class RideMotorcycleInfo 
 {
 public:
-	RideMotorcycleInfo () throw ();
-	~RideMotorcycleInfo () throw ();
+	RideMotorcycleInfo ();
+	~RideMotorcycleInfo ();
 	
 public:
-    void read (SocketInputStream & iStream) throw (ProtocolException, Error);
-    void write (SocketOutputStream & oStream) const throw (ProtocolException, Error);
+    void read (SocketInputStream & iStream);
+    void write (SocketOutputStream & oStream) const;
 
-	PacketSize_t getSize() throw ();
+	PacketSize_t getSize();
 
-	static uint getMaxSize() throw() 
+	static uint getMaxSize() 
 	{
 		return szObjectID +  // motorcycle object id
 			szItemType +  // motorcycle type
@@ -43,21 +43,21 @@ public:
 	}
 
 #ifdef __DEBUG_OUTPUT__
-	std::string toString () const throw ();
+	std::string toString () const;
 #endif
 
 public:
-	void setObjectID(ObjectID_t ObjectID) throw() { m_ObjectID = ObjectID; }
-	ObjectID_t getObjectID() const throw() { return m_ObjectID; }
+	void setObjectID(ObjectID_t ObjectID) noexcept { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() const noexcept { return m_ObjectID; }
 
-	void setItemType(ItemType_t ItemType) throw() { m_ItemType = ItemType; }
-	ItemType_t getItemType() const throw() { return m_ItemType; }
+	void setItemType(ItemType_t ItemType) noexcept { m_ItemType = ItemType; }
+	ItemType_t getItemType() const noexcept { return m_ItemType; }
 
-	void addOptionType(OptionType_t OptionType) throw() { m_OptionType.push_back( OptionType ); }
-	void setOptionType(const std::list<OptionType_t>& OptionType) throw() { m_OptionType = OptionType; }
-	int getOptionTypeSize() const throw()	{ return m_OptionType.size(); }
-	const std::list<OptionType_t>& getOptionType() const throw() { return m_OptionType; }
-	OptionType_t popOptionType() throw()
+	void addOptionType(OptionType_t OptionType) { m_OptionType.push_back( OptionType ); }
+	void setOptionType(const std::list<OptionType_t>& OptionType) { m_OptionType = OptionType; }
+	int getOptionTypeSize() const noexcept	{ return m_OptionType.size(); }
+	const std::list<OptionType_t>& getOptionType() const noexcept { return m_OptionType; }
+	OptionType_t popOptionType()
 	{
 		if (m_OptionType.empty()) return 0;
         OptionType_t optionType = m_OptionType.front();
@@ -66,14 +66,14 @@ public:
 	}
 
 public:
-	BYTE getListNum() const throw() { return m_ListNum; }
-	void setListNum(BYTE ListNum) throw() { m_ListNum = ListNum; }
+	BYTE getListNum() const noexcept { return m_ListNum; }
+	void setListNum(BYTE ListNum) noexcept { m_ListNum = ListNum; }
 
-	void addListElement(RideMotorcycleSlotInfo* pRideMotorcycleSlotInfo) throw() { m_RideMotorcycleSlotInfoList.push_back(pRideMotorcycleSlotInfo); }
+	void addListElement(RideMotorcycleSlotInfo* pRideMotorcycleSlotInfo) { m_RideMotorcycleSlotInfoList.push_back(pRideMotorcycleSlotInfo); }
 
-	void clearList() throw() { m_RideMotorcycleSlotInfoList.clear(); m_ListNum = 0; }
+	void clearList() noexcept { m_RideMotorcycleSlotInfoList.clear(); m_ListNum = 0; }
 
-	RideMotorcycleSlotInfo* popFrontListElement() throw() 
+	RideMotorcycleSlotInfo* popFrontListElement() 
 	{ 
 		RideMotorcycleSlotInfo* TempRideMotorcycleSlotInfo = m_RideMotorcycleSlotInfoList.front(); m_RideMotorcycleSlotInfoList.pop_front(); return TempRideMotorcycleSlotInfo; 
 	}

@@ -18,8 +18,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-GCMineExplosionOK2::GCMineExplosionOK2 () 
-     throw ()
+GCMineExplosionOK2::GCMineExplosionOK2 ()
 {
 	__BEGIN_TRY
 
@@ -32,8 +31,7 @@ GCMineExplosionOK2::GCMineExplosionOK2 ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-GCMineExplosionOK2::~GCMineExplosionOK2 () 
-    throw ()
+GCMineExplosionOK2::~GCMineExplosionOK2 ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -43,8 +41,7 @@ GCMineExplosionOK2::~GCMineExplosionOK2 ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCMineExplosionOK2::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCMineExplosionOK2::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -72,7 +69,7 @@ void GCMineExplosionOK2::read ( SocketInputStream & iStream )
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
 void GCMineExplosionOK2::write ( SocketOutputStream & oStream ) 
-     const throw ( ProtocolException , Error )
+     const
 {
 	__BEGIN_TRY
 		
@@ -99,7 +96,6 @@ void GCMineExplosionOK2::write ( SocketOutputStream & oStream )
 //
 //////////////////////////////////////////////////////////////////////
 void GCMineExplosionOK2::addCListElement( ObjectID_t ObjectID )
-    throw()
 {
     __BEGIN_TRY
 
@@ -143,7 +139,6 @@ void GCMineExplosionOK2::deleteCListElement()
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string GCMineExplosionOK2::toString () const
-		   throw ()
 	{
 		__BEGIN_TRY
 

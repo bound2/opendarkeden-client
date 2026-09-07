@@ -26,19 +26,19 @@ class GCAddNPC : public Packet
 public :
 	
 	// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+	void read ( SocketInputStream & iStream );
 			
 	// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+	void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_ADD_NPC; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_ADD_NPC; }
 	
 	// get packet's body size
 	// *OPTIMIZATION HINT*
 	// const static GCAddNPCPacketSize 를 정의, 리턴하라.
-	PacketSize_t getPacketSize () const throw () 
+	PacketSize_t getPacketSize () const 
 	{ 
 		return szObjectID 
 			+ szBYTE + m_Name.size() + szNPCID
@@ -49,50 +49,50 @@ public :
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCAddNPC"; }
+		std::string getPacketName () const { return "GCAddNPC"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 
 public :
 
 	// get/set object id
-	ObjectID_t getObjectID () const throw () { return m_ObjectID; }
-	void setObjectID ( ObjectID_t creatureID ) throw () { m_ObjectID = creatureID; }
+	ObjectID_t getObjectID () const noexcept { return m_ObjectID; }
+	void setObjectID ( ObjectID_t creatureID ) noexcept { m_ObjectID = creatureID; }
 
 	// get/set name
-	std::string getName () const throw () { return m_Name; }
-	void setName ( std::string name ) throw () { m_Name = name; }
+	std::string getName () const { return m_Name; }
+	void setName ( std::string name ) { m_Name = name; }
 
 	// get/set NPC id
-	NPCID_t getNPCID(void) const throw() { return m_NPCID;}
-	void setNPCID(NPCID_t NPCID) throw() { m_NPCID = NPCID;}
+	NPCID_t getNPCID(void) const noexcept { return m_NPCID;}
+	void setNPCID(NPCID_t NPCID) noexcept { m_NPCID = NPCID;}
 
 	// get/set sprite type
-	SpriteType_t getSpriteType () const throw () { return m_SpriteType; }
-	void setSpriteType ( SpriteType_t spriteType ) throw () { m_SpriteType = spriteType; }
+	SpriteType_t getSpriteType () const noexcept { return m_SpriteType; }
+	void setSpriteType ( SpriteType_t spriteType ) noexcept { m_SpriteType = spriteType; }
 
 	// get/set main color
-	Color_t getMainColor () const throw () { return m_MainColor; }
-	void setMainColor ( Color_t color ) throw () { m_MainColor = color; }
+	Color_t getMainColor () const noexcept { return m_MainColor; }
+	void setMainColor ( Color_t color ) noexcept { m_MainColor = color; }
 
 	// get/set sub color
-	Color_t getSubColor () const throw () { return m_SubColor; }
-	void setSubColor ( Color_t color ) throw () { m_SubColor = color; }
+	Color_t getSubColor () const noexcept { return m_SubColor; }
+	void setSubColor ( Color_t color ) noexcept { m_SubColor = color; }
 
 	// get/set X
-	Coord_t getX () const throw () { return m_X; }
-	void setX ( Coord_t x ) throw () { m_X = x; }
+	Coord_t getX () const noexcept { return m_X; }
+	void setX ( Coord_t x ) noexcept { m_X = x; }
 	
 	// get/set Y
-	Coord_t getY () const throw () { return m_Y; }
-	void setY ( Coord_t y ) throw () { m_Y = y; }
+	Coord_t getY () const noexcept { return m_Y; }
+	void setY ( Coord_t y ) noexcept { m_Y = y; }
 
 	// get/set Dir
-	Dir_t getDir () const throw () { return m_Dir; }
-	void setDir ( Dir_t dir ) throw () { m_Dir = dir; }
+	Dir_t getDir () const noexcept { return m_Dir; }
+	void setDir ( Dir_t dir ) noexcept { m_Dir = dir; }
 
 private :
 	
@@ -133,20 +133,20 @@ class GCAddNPCFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCAddNPC(); }
+	Packet * createPacket () { return new GCAddNPC(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCAddNPC"; }
+		std::string getPacketName () const { return "GCAddNPC"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_ADD_NPC; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_ADD_NPC; }
 
 	// get packet's body size
 	// *OPTIMIZATION HINT*
 	// const static GCAddNPCPacketSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize () const throw () 
+	PacketSize_t getPacketMaxSize () const 
 	{
 		return szObjectID 
 			+ szBYTE + 40 + szNPCID
@@ -169,7 +169,7 @@ class GCAddNPCHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCAddNPC * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCAddNPC * pPacket , Player * pPlayer );
 
 };
 

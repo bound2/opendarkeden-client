@@ -62,7 +62,6 @@ static int startWinsock ()
 //
 //////////////////////////////////////////////////////////////////////
 static void ensureWinsockStarted ()
-	throw ( Error )
 {
 	static const int startupResult = startWinsock();
 
@@ -76,7 +75,6 @@ static void ensureWinsockStarted ()
 //////////////////////////////////////////////////////////////////////
 //
 // SOCKET SocketAPI::socket_ex ( int domain , int type , int protocol )
-//		throw ( Error )
 //
 // exception version of socket()
 //
@@ -93,7 +91,6 @@ static void ensureWinsockStarted ()
 //
 //////////////////////////////////////////////////////////////////////
 SOCKET SocketAPI::socket_ex ( int domain , int type , int protocol ) 
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -153,9 +150,7 @@ SOCKET SocketAPI::socket_ex ( int domain , int type , int protocol )
 
 //////////////////////////////////////////////////////////////////////
 //
-// void SocketAPI::bind_ex ( SOCKET s , const struct sockaddr * addr , uint addrlen ) 
-//      throw ( MBindException , 
-//              Error );
+// void SocketAPI::bind_ex ( SOCKET s , const struct sockaddr * addr , uint addrlen );
 //
 // exception version of bind()
 //
@@ -173,8 +168,6 @@ SOCKET SocketAPI::socket_ex ( int domain , int type , int protocol )
 //
 //////////////////////////////////////////////////////////////////////
 void SocketAPI::bind_ex ( SOCKET s , const struct sockaddr * addr , uint addrlen ) 
-     throw ( BindException , 
-             Error )
 {
 	__BEGIN_TRY
 
@@ -240,10 +233,7 @@ void SocketAPI::bind_ex ( SOCKET s , const struct sockaddr * addr , uint addrlen
 
 //////////////////////////////////////////////////////////////////////
 //
-// void SocketAPI::connect_ex ( SOCKET s , const struct sockaddr * addr , uint addrlen )
-//      throw ( ConnectException , 
-//              NonBlockingIOException , 
-//              Error );
+// void SocketAPI::connect_ex ( SOCKET s , const struct sockaddr * addr , uint addrlen );
 //
 // exception version of connect() system call
 //
@@ -262,9 +252,6 @@ void SocketAPI::bind_ex ( SOCKET s , const struct sockaddr * addr , uint addrlen
 //
 //////////////////////////////////////////////////////////////////////
 void SocketAPI::connect_ex ( SOCKET s , const struct sockaddr * addr , uint addrlen )
-     throw ( ConnectException , 
-             NonBlockingIOException , 
-             Error )
 {
 	__BEGIN_TRY
 
@@ -345,8 +332,7 @@ void SocketAPI::connect_ex ( SOCKET s , const struct sockaddr * addr , uint addr
 
 //////////////////////////////////////////////////////////////////////
 //
-// void SocketAPI::listen_ex ( SOCKET s , uint backlog )
-//      throw ( Error );
+// void SocketAPI::listen_ex ( SOCKET s , uint backlog );
 //
 // exception version of listen()
 //
@@ -362,7 +348,6 @@ void SocketAPI::connect_ex ( SOCKET s , const struct sockaddr * addr , uint addr
 //
 //////////////////////////////////////////////////////////////////////
 void SocketAPI::listen_ex ( SOCKET s , uint backlog ) 
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -412,9 +397,7 @@ void SocketAPI::listen_ex ( SOCKET s , uint backlog )
 
 //////////////////////////////////////////////////////////////////////
 //
-//SOCKET SocketAPI::accept_ex ( SOCKET s , struct sockaddr * addr , uint * addrlen ) 
-//       throw ( NonBlockingIOException , 
-//               Error );
+//SOCKET SocketAPI::accept_ex ( SOCKET s , struct sockaddr * addr , uint * addrlen );
 //
 // exception version of accept()
 //
@@ -432,8 +415,6 @@ void SocketAPI::listen_ex ( SOCKET s , uint backlog )
 //
 //////////////////////////////////////////////////////////////////////
 SOCKET SocketAPI::accept_ex ( SOCKET s , struct sockaddr * addr , uint * addrlen )
-       throw ( NonBlockingIOException , 
-               Error )
 {
 	__BEGIN_TRY
 
@@ -496,8 +477,7 @@ SOCKET SocketAPI::accept_ex ( SOCKET s , struct sockaddr * addr , uint * addrlen
 
 //////////////////////////////////////////////////////////////////////
 //
-// void SocketAPI::getsockopt_ex ( SOCKET s , int level , int optname , void * optval , uint * optlen )
-//      throw ( Error );
+// void SocketAPI::getsockopt_ex ( SOCKET s , int level , int optname , void * optval , uint * optlen );
 //
 // exception version of getsockopt()
 //
@@ -516,7 +496,6 @@ SOCKET SocketAPI::accept_ex ( SOCKET s , struct sockaddr * addr , uint * addrlen
 //
 //////////////////////////////////////////////////////////////////////
 void SocketAPI::getsockopt_ex ( SOCKET s , int level , int optname , void * optval , uint * optlen )
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -564,8 +543,7 @@ void SocketAPI::getsockopt_ex ( SOCKET s , int level , int optname , void * optv
 
 //////////////////////////////////////////////////////////////////////
 //
-// void SocketAPI::setsockopt_ex ( SOCKET s , int level , int optname , const void * optval , uint optlen )
-//      throw ( Error );
+// void SocketAPI::setsockopt_ex ( SOCKET s , int level , int optname , const void * optval , uint optlen );
 //
 // exception version of setsockopt()
 //
@@ -584,7 +562,6 @@ void SocketAPI::getsockopt_ex ( SOCKET s , int level , int optname , void * optv
 //
 //////////////////////////////////////////////////////////////////////
 void SocketAPI::setsockopt_ex ( SOCKET s , int level , int optname , const void * optval , uint optlen )
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -637,7 +614,6 @@ void SocketAPI::setsockopt_ex ( SOCKET s , int level , int optname , const void 
 //////////////////////////////////////////////////////////////////////
 //
 // uint SocketAPI::send_ex ( SOCKET s , const void * buf , uint len , uint flags )
-//      throw ( NonBlockingIOException , ConnectException , Error )
 // 
 // exception version of send()
 // 
@@ -657,9 +633,6 @@ void SocketAPI::setsockopt_ex ( SOCKET s , int level , int optname , const void 
 // 
 //////////////////////////////////////////////////////////////////////
 uint SocketAPI::send_ex ( SOCKET s , const void * buf , uint len , uint flags )
-     throw ( NonBlockingIOException ,
-             ConnectException ,
-             Error )
 {
 	__BEGIN_TRY
 
@@ -748,7 +721,6 @@ uint SocketAPI::send_ex ( SOCKET s , const void * buf , uint len , uint flags )
 // exception version of sendto()
 //////////////////////////////////////////////////////////////////////
 uint SocketAPI::sendto_ex ( SOCKET s , const void * buf , int len , unsigned int flags , const struct sockaddr * to , int tolen )
-    throw ( NonBlockingIOException , ConnectException , Error )
 {
 	__BEGIN_TRY
 
@@ -793,7 +765,6 @@ uint SocketAPI::sendto_ex ( SOCKET s , const void * buf , int len , unsigned int
 //////////////////////////////////////////////////////////////////////
 //
 // uint SocketAPI::recv_ex ( SOCKET s , void * buf , uint len , uint flags )
-//      throw ( NonBlockingIOException , ConnectException , Error )
 //
 // exception version of recv()
 //
@@ -813,9 +784,6 @@ uint SocketAPI::sendto_ex ( SOCKET s , const void * buf , int len , unsigned int
 //
 //////////////////////////////////////////////////////////////////////
 uint SocketAPI::recv_ex ( SOCKET s , void * buf , uint len , uint flags )
-     throw ( NonBlockingIOException ,
-             ConnectException ,
-             Error )
 {
 	__BEGIN_TRY
 
@@ -898,7 +866,6 @@ uint SocketAPI::recv_ex ( SOCKET s , void * buf , uint len , uint flags )
 // exception version of recvfrom()
 /////////////////////////////////////////////////////////////////////
 uint SocketAPI::recvfrom_ex ( SOCKET s , void * buf , int len , uint flags , struct sockaddr * from , uint * fromlen )
-    throw ( NonBlockingIOException , ConnectException , Error )
 {
 	__BEGIN_TRY
 
@@ -997,7 +964,6 @@ uint SocketAPI::recvfrom_ex ( SOCKET s , void * buf , int len , uint flags , str
 /////////////////////////////////////////////////////////////////////
 //
 // void SocketAPI::closesocket_ex ( SOCKET s )
-//      throw ( Error )
 //
 // exception version of closesocket()
 //
@@ -1012,7 +978,6 @@ uint SocketAPI::recvfrom_ex ( SOCKET s , void * buf , int len , uint flags , str
 //
 /////////////////////////////////////////////////////////////////////
 void SocketAPI::closesocket_ex ( SOCKET s )
-     throw ( FileNotOpenedException, Error )
 {
 	__BEGIN_TRY
 
@@ -1047,13 +1012,11 @@ void SocketAPI::closesocket_ex ( SOCKET s )
 /////////////////////////////////////////////////////////////////////
 //
 // void SocketAPI::ioctlsocket_ex ( SOCKET s , long cmd , ulong * argp )
-//      throw ( Error )
 //
 // exception version of ioctlsocket()
 //
 /////////////////////////////////////////////////////////////////////
 void SocketAPI::ioctlsocket_ex ( SOCKET s , long cmd , ulong * argp )
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -1084,8 +1047,7 @@ void SocketAPI::ioctlsocket_ex ( SOCKET s , long cmd , ulong * argp )
 
 //////////////////////////////////////////////////////////////////////
 //
-// bool SocketAPI::getsocketnonblocking_ex ( SOCKET s ) 
-//      throw ( Error );
+// bool SocketAPI::getsocketnonblocking_ex ( SOCKET s );
 //
 // check if this socket is nonblocking mode
 //
@@ -1100,7 +1062,6 @@ void SocketAPI::ioctlsocket_ex ( SOCKET s , long cmd , ulong * argp )
 //
 //////////////////////////////////////////////////////////////////////
 bool SocketAPI::getsocketnonblocking_ex ( SOCKET s )
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -1116,8 +1077,7 @@ bool SocketAPI::getsocketnonblocking_ex ( SOCKET s )
 
 //////////////////////////////////////////////////////////////////////
 //
-// void SocketAPI::setsocketnonblocking_ex ( SOCKET s , bool on ) 
-//      throw ( Error );
+// void SocketAPI::setsocketnonblocking_ex ( SOCKET s , bool on );
 //
 // make this socket blocking/nonblocking
 //
@@ -1133,7 +1093,6 @@ bool SocketAPI::getsocketnonblocking_ex ( SOCKET s )
 //
 //////////////////////////////////////////////////////////////////////
 void SocketAPI::setsocketnonblocking_ex ( SOCKET s , bool on )
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -1150,7 +1109,6 @@ void SocketAPI::setsocketnonblocking_ex ( SOCKET s , bool on )
 //////////////////////////////////////////////////////////////////////
 //
 // uint SocketAPI::availablesocket_ex ( SOCKET s )
-//      throw ( Error )
 //
 // get amount of data in socket input buffer
 //
@@ -1165,7 +1123,6 @@ void SocketAPI::setsocketnonblocking_ex ( SOCKET s , bool on )
 //
 //////////////////////////////////////////////////////////////////////
 uint SocketAPI::availablesocket_ex ( SOCKET s )
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -1184,7 +1141,6 @@ uint SocketAPI::availablesocket_ex ( SOCKET s )
 //////////////////////////////////////////////////////////////////////
 //
 // void SocketAPI::shutdown_ex ( SOCKET s , uint how )
-// 	    throw ( Error )
 //
 // shutdown all or part of connection of socket
 //
@@ -1200,7 +1156,6 @@ uint SocketAPI::availablesocket_ex ( SOCKET s )
 //
 //////////////////////////////////////////////////////////////////////
 void SocketAPI::shutdown_ex ( SOCKET s , uint how )
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -1242,7 +1197,6 @@ void SocketAPI::shutdown_ex ( SOCKET s , uint how )
 //////////////////////////////////////////////////////////////////////
 //
 // int SocketAPI::select_ex ( int maxfdp1 , fd_set * readset , fd_set * writeset , fd_set * exceptset , struct timeval * timeout )
-//		throw ( Error )
 //
 // system call for I/O multiplexing
 //
@@ -1263,7 +1217,6 @@ void SocketAPI::shutdown_ex ( SOCKET s , uint how )
 //
 //////////////////////////////////////////////////////////////////////
 int SocketAPI::select_ex ( int maxfdp1 , fd_set * readset , fd_set * writeset , fd_set * exceptset , struct timeval * timeout )
-	throw ( TimeoutException , InterruptedException , Error )
 {
 	__BEGIN_TRY
 

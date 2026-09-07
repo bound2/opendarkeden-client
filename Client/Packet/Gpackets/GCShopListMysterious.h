@@ -34,40 +34,40 @@ class Item;
 class GCShopListMysterious : public Packet 
 {
 public:
-	GCShopListMysterious() throw ();
-	virtual ~GCShopListMysterious() throw ();
+	GCShopListMysterious();
+	virtual ~GCShopListMysterious();
 
 public:
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
-	PacketID_t getPacketID () const throw () { return PACKET_GC_SHOP_LIST_MYSTERIOUS; }
-	PacketSize_t getPacketSize () const throw ();
+	void read ( SocketInputStream & iStream );
+	void write ( SocketOutputStream & oStream ) const;
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_SHOP_LIST_MYSTERIOUS; }
+	PacketSize_t getPacketSize () const;
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "GCShopListMysterious"; }
-		std::string toString () const throw ();
+		std::string getPacketName () const { return "GCShopListMysterious"; }
+		std::string toString () const;
 	#endif
 
 public:
-	ObjectID_t getObjectID () const throw () { return m_ObjectID; }
-	void setObjectID ( ObjectID_t creatureID ) throw () { m_ObjectID = creatureID; }
+	ObjectID_t getObjectID () const noexcept { return m_ObjectID; }
+	void setObjectID ( ObjectID_t creatureID ) noexcept { m_ObjectID = creatureID; }
 
-	ShopVersion_t getShopVersion(void) const throw() { return m_Version;}
-	void setShopVersion(ShopVersion_t ver) throw() { m_Version = ver;}
+	ShopVersion_t getShopVersion(void) const noexcept { return m_Version;}
+	void setShopVersion(ShopVersion_t ver) noexcept { m_Version = ver;}
 	
-	ShopRackType_t getShopType(void) const throw() { return m_RackType;}
+	ShopRackType_t getShopType(void) const noexcept { return m_RackType;}
 	void setShopType(const ShopRackType_t type) { m_RackType = type;}
 	
-	SHOPLISTITEM_MYSTERIOUS getShopItem(BYTE index) const throw();
+	SHOPLISTITEM_MYSTERIOUS getShopItem(BYTE index) const;
 
 #ifndef __GAME_CLIENT__
-	void setShopItem(BYTE index, const Item* pItem) throw();
+	void setShopItem(BYTE index, const Item* pItem);
 #endif
 
-	MarketCond_t getMarketCondBuy(void) const throw() { return m_MarketCondBuy;}
-	MarketCond_t getMarketCondSell(void) const throw() { return m_MarketCondSell;}
-	void setMarketCondBuy(MarketCond_t cond) throw() { m_MarketCondBuy = cond;}
-	void setMarketCondSell(MarketCond_t cond) throw() { m_MarketCondSell = cond;}
+	MarketCond_t getMarketCondBuy(void) const noexcept { return m_MarketCondBuy;}
+	MarketCond_t getMarketCondSell(void) const noexcept { return m_MarketCondSell;}
+	void setMarketCondBuy(MarketCond_t cond) noexcept { m_MarketCondBuy = cond;}
+	void setMarketCondSell(MarketCond_t cond) noexcept { m_MarketCondSell = cond;}
 	
 private:
 	ObjectID_t              m_ObjectID;                     // NPC's object id
@@ -86,14 +86,14 @@ private:
 class GCShopListMysteriousFactory : public PacketFactory 
 {
 public:
-	Packet * createPacket () throw () { return new GCShopListMysterious(); }
+	Packet * createPacket () { return new GCShopListMysterious(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "GCShopListMysterious"; }
+		std::string getPacketName () const { return "GCShopListMysterious"; }
 	#endif
 
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_SHOP_LIST_MYSTERIOUS; }
-	PacketSize_t getPacketMaxSize () const throw () 
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_SHOP_LIST_MYSTERIOUS; }
+	PacketSize_t getPacketMaxSize () const 
 	{ 
 		PacketSize_t unit_size = szBYTE + szItemType;
 		PacketSize_t rValue    = 0; 
@@ -119,7 +119,7 @@ public:
 class GCShopListMysteriousHandler 
 {
 public:
-	static void execute ( GCShopListMysterious * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCShopListMysterious * pPacket , Player * pPlayer );
 };
 
 #endif

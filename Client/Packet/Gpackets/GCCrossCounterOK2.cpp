@@ -19,7 +19,6 @@
 // constructor
 //////////////////////////////////////////////////////////////////////
 GCCrossCounterOK2::GCCrossCounterOK2 ()
-     throw ()
 {
 	__BEGIN_TRY
 
@@ -32,7 +31,6 @@ GCCrossCounterOK2::GCCrossCounterOK2 ()
 // destructor
 //////////////////////////////////////////////////////////////////////
 GCCrossCounterOK2::~GCCrossCounterOK2 ()
-    throw ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -43,7 +41,6 @@ GCCrossCounterOK2::~GCCrossCounterOK2 ()
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
 void GCCrossCounterOK2::read ( SocketInputStream & iStream )
-	 throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 		
@@ -60,7 +57,7 @@ void GCCrossCounterOK2::read ( SocketInputStream & iStream )
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
 void GCCrossCounterOK2::write ( SocketOutputStream & oStream )
-     const throw ( ProtocolException , Error )
+     const
 {
 	__BEGIN_TRY
 
@@ -79,7 +76,7 @@ void GCCrossCounterOK2::write ( SocketOutputStream & oStream )
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 std::string GCCrossCounterOK2::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 

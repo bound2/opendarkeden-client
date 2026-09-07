@@ -29,51 +29,51 @@ class GCAttackArmsOK1 : public ModifyInfo {
 public :
 	
 	// constructor
-	GCAttackArmsOK1 () throw ();
+	GCAttackArmsOK1 ();
 	
 	// destructor
-	~GCAttackArmsOK1 () throw ();
+	~GCAttackArmsOK1 ();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_ATTACK_ARMS_OK_1; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_ATTACK_ARMS_OK_1; }
 	
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getPacketSize () const throw () { return szObjectID + szBullet + szbool + ModifyInfo::getPacketSize() +szSkillType ;}
+	PacketSize_t getPacketSize () const { return szObjectID + szBullet + szbool + ModifyInfo::getPacketSize() +szSkillType ;}
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCAttackArmsOK1"; }
+		std::string getPacketName () const { return "GCAttackArmsOK1"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 	// get / set Success
-	bool getSkillSuccess() const throw() { return m_bSuccess; }
-	void setSkillSuccess( bool Success ) throw() { m_bSuccess = Success; }
+	bool getSkillSuccess() const noexcept { return m_bSuccess; }
+	void setSkillSuccess( bool Success ) noexcept { m_bSuccess = Success; }
 	
 	// get / set ObjectID
-	ObjectID_t getObjectID() const throw() { return m_ObjectID; }
-	void setObjectID( ObjectID_t ObjectID ) throw() { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() const noexcept { return m_ObjectID; }
+	void setObjectID( ObjectID_t ObjectID ) noexcept { m_ObjectID = ObjectID; }
 
 	// get / set Bullet Num
-	Bullet_t getBullet() const throw() { return m_BulletNum; }
+	Bullet_t getBullet() const noexcept { return m_BulletNum; }
 	void setBulletNum( Bullet_t BulletNum ) { m_BulletNum = BulletNum; }
 
 	void setSkillType( SkillType_t		SkillType ) { m_SkillType = SkillType; }
-	SkillType_t getSkillType() const throw() { return m_SkillType; }		
+	SkillType_t getSkillType() const noexcept { return m_SkillType; }		
 
 private :
 
@@ -103,27 +103,27 @@ class GCAttackArmsOK1Factory : public PacketFactory {
 public :
 	
 	// constructor
-	GCAttackArmsOK1Factory () throw () {}
+	GCAttackArmsOK1Factory () {}
 	
 	// destructor
-	virtual ~GCAttackArmsOK1Factory () throw () {}
+	virtual ~GCAttackArmsOK1Factory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCAttackArmsOK1(); }
+	Packet * createPacket () { return new GCAttackArmsOK1(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCAttackArmsOK1"; }
+		std::string getPacketName () const { return "GCAttackArmsOK1"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_ATTACK_ARMS_OK_1; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_ATTACK_ARMS_OK_1; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize () const throw () { return szSkillType + szObjectID + szBullet + szbool + ModifyInfo::getPacketMaxSize(); }
+	PacketSize_t getPacketMaxSize () const { return szSkillType + szObjectID + szBullet + szbool + ModifyInfo::getPacketMaxSize(); }
 
 };
 
@@ -139,7 +139,7 @@ class GCAttackArmsOK1Handler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCAttackArmsOK1 * pGCAttackArmsOK1 , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCAttackArmsOK1 * pGCAttackArmsOK1 , Player * pPlayer );
 
 };
 

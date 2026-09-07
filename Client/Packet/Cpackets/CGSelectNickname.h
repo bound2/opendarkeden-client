@@ -24,16 +24,16 @@
 class CGSelectNickname : public Packet
 {
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_SELECT_NICKNAME; }
-	PacketSize_t getPacketSize() const throw() { return szWORD; }
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_SELECT_NICKNAME; }
+	PacketSize_t getPacketSize() const noexcept { return szWORD; }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "CGSelectNickname"; }
-	string toString() const throw();
+	string getPacketName() const { return "CGSelectNickname"; }
+	string toString() const;
 #endif
-	WORD getNicknameID() const throw() { return m_NicknameID; }
-	void setNicknameID( WORD NicknameID ) throw() { m_NicknameID = NicknameID; }
+	WORD getNicknameID() const noexcept { return m_NicknameID; }
+	void setNicknameID( WORD NicknameID ) noexcept { m_NicknameID = NicknameID; }
 
 private :
 	WORD m_NicknameID;
@@ -51,15 +51,15 @@ private :
 class CGSelectNicknameFactory : public PacketFactory {
 
 public:
-	CGSelectNicknameFactory() throw() {}
-	virtual ~CGSelectNicknameFactory() throw() {}
+	CGSelectNicknameFactory() {}
+	virtual ~CGSelectNicknameFactory() {}
 
 	
 public:
-	Packet* createPacket() throw() { return new CGSelectNickname(); }
-	string getPacketName() const throw() { return "CGSelectNickname"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_SELECT_NICKNAME; }
-	PacketSize_t getPacketMaxSize() const throw() { return szWORD; }
+	Packet* createPacket() { return new CGSelectNickname(); }
+	string getPacketName() const { return "CGSelectNickname"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_SELECT_NICKNAME; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szWORD; }
 };
 
 //#endif
@@ -74,7 +74,7 @@ class CGSelectNicknameHandler {
 public:
 
 	// execute packet's handler
-	static void execute(CGSelectNickname* pCGSelectNickname, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(CGSelectNickname* pCGSelectNickname, Player* pPlayer);
 
 };
 #endif

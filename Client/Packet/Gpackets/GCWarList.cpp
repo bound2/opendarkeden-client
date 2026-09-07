@@ -14,8 +14,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////////////
-GCWarList::GCWarList() 
-	throw ()
+GCWarList::GCWarList()
 {
 	__BEGIN_TRY 
 
@@ -25,8 +24,7 @@ GCWarList::GCWarList()
 //////////////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////////////
-GCWarList::~GCWarList() 
-	throw ()
+GCWarList::~GCWarList()
 {
 	__BEGIN_TRY 
 
@@ -40,7 +38,6 @@ GCWarList::~GCWarList()
 //////////////////////////////////////////////////////////////////////////////
 void
 GCWarList::clear()
-	throw ()
 {
 	__BEGIN_TRY 
 
@@ -65,8 +62,7 @@ GCWarList::clear()
 //////////////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////////////
-void GCWarList::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void GCWarList::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 
@@ -109,8 +105,7 @@ void GCWarList::read (SocketInputStream & iStream)
 //////////////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////////////
-void GCWarList::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void GCWarList::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -134,8 +129,7 @@ void GCWarList::write (SocketOutputStream & oStream) const
 }
 
 
-PacketSize_t GCWarList::getPacketSize () const 
-	throw ()
+PacketSize_t GCWarList::getPacketSize () const
 { 
 	__BEGIN_TRY
 
@@ -161,7 +155,6 @@ PacketSize_t GCWarList::getPacketSize () const
 // get packet's debug string
 //////////////////////////////////////////////////////////////////////////////
 std::string GCWarList::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		
@@ -186,8 +179,7 @@ std::string GCWarList::toString () const
 }
 #endif
 
-WarInfo* GCWarList::popWarInfo() 
-	throw()
+WarInfo* GCWarList::popWarInfo()
 {
 	__BEGIN_TRY
 

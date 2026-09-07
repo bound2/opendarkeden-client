@@ -47,19 +47,19 @@ public:
 public:
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_CL_CREATE_PC; }
+	PacketID_t getPacketID() const noexcept { return PACKET_CL_CREATE_PC; }
 	
 	// get packet's body size
 	// *OPTIMIZATION HINT*
 	// const static CLCreatePCPacketSize 를 정의, 리턴하라.
-	PacketSize_t getPacketSize() const throw() 
+	PacketSize_t getPacketSize() const 
 	{ 
 		return szBYTE + m_Name.size() 	// 이름
 			+ szSlot					// 슬랏
@@ -71,63 +71,63 @@ public:
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet's name
-	std::string getPacketName() const throw() { return "CLCreatePC"; }
+	std::string getPacketName() const { return "CLCreatePC"; }
 	
 	// get packet's debug std::string
-	std::string toString() const throw();
+	std::string toString() const;
 #endif
 	
 public:
 
 	// get/set name
-	std::string getName() const throw() { return m_Name; }
-	void setName(std::string name) throw() { m_Name = name; }
+	std::string getName() const { return m_Name; }
+	void setName(std::string name) { m_Name = name; }
 
 	// get/set slot
-	Slot getSlot() const throw() { return m_Slot; }
-	void setSlot(Slot slot) throw() { m_Slot = slot; }
+	Slot getSlot() const noexcept { return m_Slot; }
+	void setSlot(Slot slot) noexcept { m_Slot = slot; }
 
 	// get/set sex
-    Sex getSex() const throw() { return m_BitSet.test(SLAYER_BIT_SEX)?MALE:FEMALE; }
-    void setSex(Sex sex) throw() { m_BitSet.set(SLAYER_BIT_SEX,(sex==MALE?true:false)); }
+    Sex getSex() const { return m_BitSet.test(SLAYER_BIT_SEX)?MALE:FEMALE; }
+    void setSex(Sex sex) { m_BitSet.set(SLAYER_BIT_SEX,(sex==MALE?true:false)); }
 
 	// get/set hair style
-	HairStyle getHairStyle() const throw() { return HairStyle((m_BitSet.to_ulong() >> 1) & 3); }
-	void setHairStyle(HairStyle hairStyle) throw() { m_BitSet |= std::bitset<SLAYER_BIT_MAX>(hairStyle << 1); }
+	HairStyle getHairStyle() const { return HairStyle((m_BitSet.to_ulong() >> 1) & 3); }
+	void setHairStyle(HairStyle hairStyle) { m_BitSet |= std::bitset<SLAYER_BIT_MAX>(hairStyle << 1); }
 
 	// get/set race. by sigi. 2002.10.31
 	//bool isSlayer() const throw() { return ((m_BitSet.to_ulong() >> 3) & 1)==0; }
 	//void setSlayer(bool bSlayer=true) throw() { m_BitSet |= bitset<SLAYER_BIT_MAX>((int)(bSlayer==false) << 3); }
 
 	// get/set hair color
-	Color_t getHairColor() const throw() { return m_Colors[ SLAYER_COLOR_HAIR ]; }
-	void setHairColor(Color_t hairColor) throw() { m_Colors[ SLAYER_COLOR_HAIR ] = hairColor; }
+	Color_t getHairColor() const noexcept { return m_Colors[ SLAYER_COLOR_HAIR ]; }
+	void setHairColor(Color_t hairColor) noexcept { m_Colors[ SLAYER_COLOR_HAIR ] = hairColor; }
 
 	// get/set skin color
-	Color_t getSkinColor() const throw() { return m_Colors[ SLAYER_COLOR_SKIN ]; }
-	void setSkinColor(Color_t skinColor) throw() { m_Colors[ SLAYER_COLOR_SKIN ] = skinColor; }
+	Color_t getSkinColor() const noexcept { return m_Colors[ SLAYER_COLOR_SKIN ]; }
+	void setSkinColor(Color_t skinColor) noexcept { m_Colors[ SLAYER_COLOR_SKIN ] = skinColor; }
 
 	// get/set shirt color
-	Color_t getShirtColor(ColorType colorType = MAIN_COLOR) const throw() { return m_Colors[ SLAYER_COLOR_SHIRT +(uint)colorType ]; }
-	void setShirtColor(Color_t shirtColor, ColorType colorType = MAIN_COLOR) throw() { m_Colors[ SLAYER_COLOR_SHIRT +(uint)colorType ] = shirtColor; }
+	Color_t getShirtColor(ColorType colorType = MAIN_COLOR) const { return m_Colors[ SLAYER_COLOR_SHIRT +(uint)colorType ]; }
+	void setShirtColor(Color_t shirtColor, ColorType colorType = MAIN_COLOR) { m_Colors[ SLAYER_COLOR_SHIRT +(uint)colorType ] = shirtColor; }
 
 	// get/set jeans color
-	Color_t getJeansColor(ColorType colorType = MAIN_COLOR) const throw() { return m_Colors[ SLAYER_COLOR_JEANS +(uint)colorType ]; }
-	void setJeansColor(Color_t jeansColor, ColorType colorType = MAIN_COLOR) throw() { m_Colors[ SLAYER_COLOR_JEANS +(uint)colorType ] = jeansColor; }
+	Color_t getJeansColor(ColorType colorType = MAIN_COLOR) const { return m_Colors[ SLAYER_COLOR_JEANS +(uint)colorType ]; }
+	void setJeansColor(Color_t jeansColor, ColorType colorType = MAIN_COLOR) { m_Colors[ SLAYER_COLOR_JEANS +(uint)colorType ] = jeansColor; }
 
 	// get/set STR
-	Attr_t getSTR() const throw() { return m_STR; }
-	void setSTR(Attr_t str) throw() { m_STR = str; }
+	Attr_t getSTR() const noexcept { return m_STR; }
+	void setSTR(Attr_t str) noexcept { m_STR = str; }
 	// get/set DEX
-	Attr_t getDEX() const throw() { return m_DEX; }
-	void setDEX(Attr_t dex) throw() { m_DEX = dex; }
+	Attr_t getDEX() const noexcept { return m_DEX; }
+	void setDEX(Attr_t dex) noexcept { m_DEX = dex; }
 	// get/set INT
-	Attr_t getINT() const throw() { return m_INT; }
-	void setINT(Attr_t inte) throw() { m_INT = inte; }
+	Attr_t getINT() const noexcept { return m_INT; }
+	void setINT(Attr_t inte) noexcept { m_INT = inte; }
 
 	// get/set Race
-	Race_t getRace() const throw() { return m_Race; }
-	void setRace( Race_t race ) throw() { m_Race = race; }
+	Race_t getRace() const noexcept { return m_Race; }
+	void setRace( Race_t race ) noexcept { m_Race = race; }
 
 
 private :
@@ -167,18 +167,18 @@ class CLCreatePCFactory : public PacketFactory {
 public:
 	
 	// create packet
-	Packet* createPacket() throw() { return new CLCreatePC(); }
+	Packet* createPacket() { return new CLCreatePC(); }
 
 	// get packet name
-	std::string getPacketName() const throw() { return "CLCreatePC"; }
+	std::string getPacketName() const { return "CLCreatePC"; }
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CL_CREATE_PC; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CL_CREATE_PC; }
 
 	// get packet's body size
 	// *OPTIMIZATION HINT*
 	// const static CLCreatePCPacketSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize() const throw()
+	PacketSize_t getPacketMaxSize() const
 	{ 
 		return szBYTE + 20 								// 이름
 			+ szSlot									// 슬랏
@@ -201,7 +201,7 @@ class CLCreatePCHandler {
 public:
 
 	// execute packet's handler
-	static void execute(CLCreatePC* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(CLCreatePC* pPacket, Player* pPlayer);
 
 };
 #endif

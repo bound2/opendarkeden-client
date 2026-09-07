@@ -10,22 +10,19 @@
 #include "PacketAssert.h"
 
 
-CGAttack::CGAttack () 
-     throw ()
+CGAttack::CGAttack ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGAttack::~CGAttack () 
-    throw ()
+CGAttack::~CGAttack ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGAttack::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGAttack::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -55,8 +52,7 @@ void CGAttack::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGAttack::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGAttack::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -86,7 +82,6 @@ void CGAttack::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGAttack::toString () const
-    throw ()
 {
 	__BEGIN_TRY
 		

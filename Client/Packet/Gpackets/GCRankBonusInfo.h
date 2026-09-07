@@ -22,30 +22,30 @@ class GCRankBonusInfo : public Packet {
 public :
 
 	// constructor
-	GCRankBonusInfo() throw();
+	GCRankBonusInfo();
 
 	// destructor
-	~GCRankBonusInfo() throw();
+	~GCRankBonusInfo();
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_GC_RANK_BONUS_INFO; }
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_RANK_BONUS_INFO; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw() { return szBYTE + ( szDWORD * m_RankBonusInfoList.size() ); }
+	PacketSize_t getPacketSize() const { return szBYTE + ( szDWORD * m_RankBonusInfoList.size() ); }
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet name
-	std::string getPacketName() const throw() { return "GCRankBonusInfo"; }
+	std::string getPacketName() const { return "GCRankBonusInfo"; }
 	
 	// get packet's debug std::string
-	std::string toString() const throw();
+	std::string toString() const;
 #endif
 
 //--------------------------------------------------
@@ -53,13 +53,13 @@ public :
 //--------------------------------------------------
 public :
 
-	BYTE getListNum() const throw() { return m_RankBonusInfoList.size(); }
+	BYTE getListNum() const { return m_RankBonusInfoList.size(); }
 
     // add
-	void addListElement( DWORD rankBonusType ) throw() { m_RankBonusInfoList.push_back( rankBonusType ); }
+	void addListElement( DWORD rankBonusType ) { m_RankBonusInfoList.push_back( rankBonusType ); }
 	
 	// pop front Element in Status List
-	DWORD popFrontListElement() throw()
+	DWORD popFrontListElement()
 	{
 		if ( !m_RankBonusInfoList.empty() )
 		{
@@ -92,18 +92,18 @@ class GCRankBonusInfoFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet* createPacket() throw() { return new GCRankBonusInfo(); }
+	Packet* createPacket() { return new GCRankBonusInfo(); }
 
 	// get packet name
-	std::string getPacketName() const throw() { return "GCRankBonusInfo"; }
+	std::string getPacketName() const { return "GCRankBonusInfo"; }
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_RANK_BONUS_INFO; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_RANK_BONUS_INFO; }
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static GCRankBonusInfoPacketMaxSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize() const throw() 
+	PacketSize_t getPacketMaxSize() const 
 	{ 
 		return szBYTE + ( szDWORD * 100 );
 	}
@@ -122,7 +122,7 @@ class GCRankBonusInfoHandler {
 public :
 
 	// execute packet's handler
-	static void execute(GCRankBonusInfo* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(GCRankBonusInfo* pPacket, Player* pPlayer);
 
 };
 

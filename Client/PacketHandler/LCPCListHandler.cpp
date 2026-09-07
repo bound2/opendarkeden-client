@@ -27,8 +27,7 @@
 // 출력하자.
 //----------------------------------------------------------------------
 void LCPCListHandler::execute ( LCPCList * pPacket , Player * pPlayer )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 

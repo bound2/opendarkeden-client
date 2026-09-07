@@ -19,18 +19,18 @@
 class GCKnockBack : public Packet 
 {
 public:
-	GCKnockBack() throw() {}
-	~GCKnockBack() throw() {}
+	GCKnockBack() {}
+	~GCKnockBack() {}
 
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_GC_KNOCK_BACK; }
-	PacketSize_t getPacketSize() const throw() { return szObjectID + szZoneCoord*4; }
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_KNOCK_BACK; }
+	PacketSize_t getPacketSize() const noexcept { return szObjectID + szZoneCoord*4; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "GCKnockBack"; }
-		std::string toString() const throw();
+		std::string getPacketName() const { return "GCKnockBack"; }
+		std::string toString() const;
 	#endif
 
 public:
@@ -49,8 +49,8 @@ public:
 	void setTargetY(ZoneCoord_t y) { m_TargetY = y; }
 	ZoneCoord_t getTargetY(void) const { return m_TargetY; }
 
-	void setOrigin(ZoneCoord_t x, ZoneCoord_t y) throw() { setOriginX(x); setOriginY(y); }
-	void setTarget(ZoneCoord_t x, ZoneCoord_t y) throw() { setTargetX(x); setTargetY(y); }
+	void setOrigin(ZoneCoord_t x, ZoneCoord_t y) { setOriginX(x); setOriginY(y); }
+	void setTarget(ZoneCoord_t x, ZoneCoord_t y) { setTargetX(x); setTargetY(y); }
 
 private:
 	ObjectID_t  m_ObjectID;
@@ -67,14 +67,14 @@ private:
 class GCKnockBackFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new GCKnockBack(); }
+	Packet* createPacket() { return new GCKnockBack(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "GCKnockBack"; }
+		std::string getPacketName() const { return "GCKnockBack"; }
 	#endif
 
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_KNOCK_BACK; }
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szZoneCoord*4; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_KNOCK_BACK; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szZoneCoord*4; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ public:
 class GCKnockBackHandler 
 {
 public:
-	static void execute(GCKnockBack* pGCKnockBack, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(GCKnockBack* pGCKnockBack, Player* pPlayer);
 
 };
 

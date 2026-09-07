@@ -18,8 +18,7 @@ extern bool gbl_global_empty_move;
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 void GCSelectRankBonusFailedHandler::execute ( GCSelectRankBonusFailed * pGCSelectRankBonusFailed , Player * pPlayer )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 

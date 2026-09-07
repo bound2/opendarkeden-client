@@ -18,7 +18,6 @@
 // constructor
 //////////////////////////////////////////////////////////////////////
 StringStream::StringStream () 
-	throw ()
 : m_Size(0), m_bInserted(false), m_Buffer("")
 {
 }
@@ -28,7 +27,6 @@ StringStream::StringStream ()
 // destructor
 //////////////////////////////////////////////////////////////////////
 StringStream::~StringStream () 
-    throw ()
 {
 }
 
@@ -37,7 +35,6 @@ StringStream::~StringStream ()
 // add string to stream
 //////////////////////////////////////////////////////////////////////
 StringStream & StringStream::operator << ( bool T ) 
-	throw ()
 {
 	std::string buf( T == true ? "true" : "false" );
 
@@ -52,7 +49,6 @@ StringStream & StringStream::operator << ( bool T )
 // One streamed character is one byte: no trailing NUL into toString().
 
 StringStream & StringStream::operator << ( char T )
-	throw ()
 {
 	std::string buf(1,T);
 
@@ -65,7 +61,6 @@ StringStream & StringStream::operator << ( char T )
 }
 
 StringStream & StringStream::operator << ( uchar T )
-	throw ()
 {
 	std::string buf(1,(char)T);
 
@@ -85,7 +80,6 @@ StringStream & StringStream::operator << ( uchar T )
 // is 316 characters) - pinned by tests/unit/test_stringstream.cpp.
 
 StringStream & StringStream::operator << ( short T )
-	throw ()
 {
 	char buf[8];
 	snprintf( buf , sizeof(buf) , "%d" , T );
@@ -101,7 +95,6 @@ StringStream & StringStream::operator << ( short T )
 }
 
 StringStream & StringStream::operator << ( ushort T )
-	throw ()
 {
 	char buf[8];
 	snprintf( buf , sizeof(buf) , "%d" , T );
@@ -117,7 +110,6 @@ StringStream & StringStream::operator << ( ushort T )
 }
 
 StringStream & StringStream::operator << ( int T )
-	throw ()
 {
 	char buf[24];
 	snprintf( buf , sizeof(buf) , "%d" , T );
@@ -133,7 +125,6 @@ StringStream & StringStream::operator << ( int T )
 }
 
 StringStream & StringStream::operator << ( uint T )
-	throw ()
 {
 	char buf[24];
 	snprintf( buf , sizeof(buf) , "%u" , T );
@@ -149,7 +140,6 @@ StringStream & StringStream::operator << ( uint T )
 }
 
 StringStream & StringStream::operator << ( long T )
-	throw ()
 {
 	// long is 32-bit under MSVC but 64-bit on LP64 platforms - size for
 	// the wider case rather than the current compiler.
@@ -167,7 +157,6 @@ StringStream & StringStream::operator << ( long T )
 }
 
 StringStream & StringStream::operator << ( ulong T )
-	throw ()
 {
 	char buf[24];
 	snprintf( buf , sizeof(buf) , "%lu" , T );
@@ -183,7 +172,6 @@ StringStream & StringStream::operator << ( ulong T )
 }
 
 StringStream & StringStream::operator << ( ulonglong T )
-	throw ()
 {
 	char buf[24];
 	snprintf( buf , sizeof(buf) , "%llu" , T );
@@ -199,7 +187,6 @@ StringStream & StringStream::operator << ( ulonglong T )
 }
 
 StringStream & StringStream::operator << ( float T )
-	throw ()
 {
 	// %f of FLT_MAX is 46 characters (39 integer digits, '.', 6 decimals).
 	char buf[64];
@@ -216,7 +203,6 @@ StringStream & StringStream::operator << ( float T )
 }
 
 StringStream & StringStream::operator << ( double T )
-	throw ()
 {
 	// %f of -DBL_MAX is 317 characters (sign, 309 integer digits, '.',
 	// 6 decimals); sized with headroom so no representable double
@@ -235,7 +221,6 @@ StringStream & StringStream::operator << ( double T )
 }
 
 StringStream & StringStream::operator << ( const char * buf )
-	throw ()
 {
 	std::string str(buf);
 
@@ -248,7 +233,6 @@ StringStream & StringStream::operator << ( const char * buf )
 }
 
 StringStream & StringStream::operator << ( const std::string & str )
-	throw ()
 {
 	m_Strings.push_back( str );
 
@@ -263,7 +247,6 @@ StringStream & StringStream::operator << ( const std::string & str )
 // make string
 //////////////////////////////////////////////////////////////////////
 std::string StringStream::toString () const
-	throw ()
 {
 	// Once the string has been built, later calls reuse it until
 	// something new is inserted.

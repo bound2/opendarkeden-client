@@ -1101,7 +1101,7 @@ class C_VS_UI_OPTION : public Window, public Exec, public ButtonVisual, public C
 {
 public :
 
-	enum EXEC_ID
+	enum EXEC_ID : unsigned int
 	{
 		DEFAULT_ID = 0xffff0000,
 		SAVE_ID,

@@ -189,30 +189,30 @@ typedef struct _LONGDATA
 class ModifyInfo : public Packet
 {
 public:
-	ModifyInfo () throw ();
-	virtual ~ModifyInfo () throw ();
+	ModifyInfo ();
+	virtual ~ModifyInfo ();
 	
 public:
-    void read (SocketInputStream & iStream) throw (ProtocolException, Error);
-    void write (SocketOutputStream & oStream) const throw (ProtocolException, Error);
-	PacketSize_t getPacketSize () const throw () { return szBYTE*2 + m_ShortCount*(szBYTE+szshort) + m_LongCount*(szBYTE+szlong); }
-	static PacketSize_t getPacketMaxSize() throw() { return szBYTE*2 + 255*(szBYTE+szshort+szBYTE+szlong); }
+    void read (SocketInputStream & iStream);
+    void write (SocketOutputStream & oStream) const;
+	PacketSize_t getPacketSize () const { return szBYTE*2 + m_ShortCount*(szBYTE+szshort) + m_LongCount*(szBYTE+szlong); }
+	static PacketSize_t getPacketMaxSize() noexcept { return szBYTE*2 + 255*(szBYTE+szshort+szBYTE+szlong); }
 
 #ifdef __DEBUG_OUTPUT__
-	std::string toString () const throw ();
+	std::string toString () const;
 #endif
 
 public:
-	BYTE getShortCount(void) const throw() { return m_ShortCount; }
-	BYTE getLongCount(void) const throw() { return m_LongCount; }
+	BYTE getShortCount(void) const noexcept { return m_ShortCount; }
+	BYTE getLongCount(void) const noexcept { return m_LongCount; }
 
-	void addShortData(ModifyType type, ushort value) throw();
-	void addLongData(ModifyType type, ulong value) throw();
+	void addShortData(ModifyType type, ushort value);
+	void addLongData(ModifyType type, ulong value);
 
-	void popShortData(SHORTDATA& rData) throw();
-	void popLongData(LONGDATA& rData) throw();
+	void popShortData(SHORTDATA& rData);
+	void popLongData(LONGDATA& rData);
 
-	void clearList(void) throw() { m_ShortCount = 0; m_LongCount = 0; m_ShortList.clear(); m_LongList.clear(); }
+	void clearList(void) noexcept { m_ShortCount = 0; m_LongCount = 0; m_ShortList.clear(); m_LongList.clear(); }
 
 protected:
 	BYTE            m_ShortCount;

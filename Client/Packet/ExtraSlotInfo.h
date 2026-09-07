@@ -26,11 +26,11 @@ public:
 	virtual ~ExtraSlotInfo();
 
 public:
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+	void read ( SocketInputStream & iStream );
+	void write ( SocketOutputStream & oStream ) const;
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 };
 

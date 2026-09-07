@@ -18,8 +18,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-GCDeleteEffectFromTile::GCDeleteEffectFromTile () 
-     throw ()
+GCDeleteEffectFromTile::GCDeleteEffectFromTile ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -29,8 +28,7 @@ GCDeleteEffectFromTile::GCDeleteEffectFromTile ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-GCDeleteEffectFromTile::~GCDeleteEffectFromTile () 
-    throw ()
+GCDeleteEffectFromTile::~GCDeleteEffectFromTile ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -40,8 +38,7 @@ GCDeleteEffectFromTile::~GCDeleteEffectFromTile ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCDeleteEffectFromTile::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCDeleteEffectFromTile::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -59,7 +56,7 @@ void GCDeleteEffectFromTile::read ( SocketInputStream & iStream )
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
 void GCDeleteEffectFromTile::write ( SocketOutputStream & oStream ) 
-     const throw ( ProtocolException , Error )
+     const
 {
 	__BEGIN_TRY
 		
@@ -78,7 +75,7 @@ void GCDeleteEffectFromTile::write ( SocketOutputStream & oStream )
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string GCDeleteEffectFromTile::toString () 
-		const throw ()
+		const
 	{
 		__BEGIN_TRY
 

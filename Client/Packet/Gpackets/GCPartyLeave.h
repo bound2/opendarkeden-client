@@ -17,16 +17,16 @@
 class GCPartyLeave : public Packet 
 {
 public:
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_GC_PARTY_LEAVE; }
-	PacketSize_t getPacketSize() const throw() 
+	void read(SocketInputStream & iStream);
+	void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_PARTY_LEAVE; }
+	PacketSize_t getPacketSize() const 
 	{ 
 		return szBYTE*2 + m_Expeller.size() + m_Expellee.size();
 	}
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "GCPartyLeave"; }
-		std::string toString() const throw();
+		std::string getPacketName() const { return "GCPartyLeave"; }
+		std::string toString() const;
 	#endif
 
 public:
@@ -54,13 +54,13 @@ private:
 class GCPartyLeaveFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new GCPartyLeave(); }
+	Packet* createPacket() { return new GCPartyLeave(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "GCPartyLeave"; }
+		std::string getPacketName() const { return "GCPartyLeave"; }
 	#endif
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_PARTY_LEAVE; }
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE*2 + 20; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_PARTY_LEAVE; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE*2 + 20; }
 };
 
 
@@ -71,7 +71,7 @@ public:
 class GCPartyLeaveHandler 
 {
 public:
-	static void execute(GCPartyLeave* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(GCPartyLeave* pPacket, Player* pPlayer);
 };
 
 #endif

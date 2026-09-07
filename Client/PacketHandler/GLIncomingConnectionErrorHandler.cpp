@@ -22,8 +22,7 @@
 // 
 //--------------------------------------------------------------------------------
 void GLIncomingConnectionErrorHandler::execute ( GLIncomingConnectionError * pPacket )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 

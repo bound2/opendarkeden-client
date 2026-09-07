@@ -7,8 +7,7 @@
 #include "CGRequestUnion.h"
 
 
-void CGRequestUnion::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGRequestUnion::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -17,8 +16,7 @@ void CGRequestUnion::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGRequestUnion::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGRequestUnion::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -29,7 +27,6 @@ void CGRequestUnion::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 string CGRequestUnion::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

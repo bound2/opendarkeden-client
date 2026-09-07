@@ -32,29 +32,29 @@ class BloodBibleBonusInfo {
 public :
 	
 	// constructor
-	BloodBibleBonusInfo () throw ();
+	BloodBibleBonusInfo ();
 	
 	// destructor
-	~BloodBibleBonusInfo () throw ();
+	~BloodBibleBonusInfo ();
 
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read (SocketInputStream & iStream) throw (ProtocolException, Error);
+    void read (SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write (SocketOutputStream & oStream) const throw (ProtocolException, Error);
+    void write (SocketOutputStream & oStream) const;
 
 	// get packet's body size
-	PacketSize_t getSize () throw () { return szRace; }//szBYTE + szBYTE+ szBYTE + m_OptionTypeList.size(); }
+	PacketSize_t getSize () noexcept { return szRace; }//szBYTE + szBYTE+ szBYTE + m_OptionTypeList.size(); }
 
 	// get packet's max size
-	static uint getMaxSize() throw() { return szRace; }//szBYTE + szBYTE + szBYTE + 255; }
+	static uint getMaxSize() noexcept { return szRace; }//szBYTE + szBYTE + szBYTE + 255; }
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet's debug std::string
-	std::string toString () const throw ();
+	std::string toString () const;
 #endif
 
 	// get/set BloodBibleBonus Type

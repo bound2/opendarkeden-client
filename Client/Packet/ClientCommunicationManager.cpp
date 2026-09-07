@@ -70,7 +70,6 @@ ClientCommunicationManager::~ClientCommunicationManager ()
 // send datagram to datagram-socket
 //--------------------------------------------------------------------------------
 void ClientCommunicationManager::sendDatagram ( Datagram * pDatagram )
-    throw ( ConnectException , Error )
 {
     __BEGIN_TRY
 
@@ -101,7 +100,6 @@ void ClientCommunicationManager::sendDatagram ( Datagram * pDatagram )
 // send datagram-packet to datagram-socket
 //--------------------------------------------------------------------------------
 void ClientCommunicationManager::sendPacket ( const std::string& host , uint port , DatagramPacket * pPacket )
-    throw ( ConnectException , Error )
 {
     __BEGIN_TRY
     __BEGIN_DEBUG

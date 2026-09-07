@@ -40,22 +40,22 @@ enum
 class GCTradeFinish : public Packet 
 {
 public:
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
-	PacketID_t getPacketID () const throw () { return PACKET_GC_TRADE_FINISH; }
-	PacketSize_t getPacketSize () const throw () { return szObjectID + szBYTE; }
+	void read ( SocketInputStream & iStream );
+	void write ( SocketOutputStream & oStream ) const;
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_TRADE_FINISH; }
+	PacketSize_t getPacketSize () const noexcept { return szObjectID + szBYTE; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "GCTradeFinish"; }
-		std::string toString () const throw ();
+		std::string getPacketName () const { return "GCTradeFinish"; }
+		std::string toString () const;
 	#endif
 
 public:
-	ObjectID_t getTargetObjectID() const throw() { return m_TargetObjectID; }
-	void setTargetObjectID(ObjectID_t id) throw() { m_TargetObjectID = id; }
+	ObjectID_t getTargetObjectID() const noexcept { return m_TargetObjectID; }
+	void setTargetObjectID(ObjectID_t id) noexcept { m_TargetObjectID = id; }
 
-	BYTE getCode() const throw() { return m_Code; }
-	void setCode(BYTE code) throw() { m_Code = code; }
+	BYTE getCode() const noexcept { return m_Code; }
+	void setCode(BYTE code) noexcept { m_Code = code; }
 
 private:
 	ObjectID_t m_TargetObjectID; // 교환을 원하는 상대방의 ObjectID
@@ -74,14 +74,14 @@ private:
 class GCTradeFinishFactory : public PacketFactory 
 {
 public:
-	Packet * createPacket () throw () { return new GCTradeFinish(); }
+	Packet * createPacket () { return new GCTradeFinish(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "GCTradeFinish"; }
+		std::string getPacketName () const { return "GCTradeFinish"; }
 	#endif
 
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_TRADE_FINISH; }
-	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szBYTE; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_TRADE_FINISH; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID + szBYTE; }
 
 };
 
@@ -95,7 +95,7 @@ public:
 class GCTradeFinishHandler 
 {
 public:
-	static void execute ( GCTradeFinish * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCTradeFinish * pPacket , Player * pPlayer );
 
 };
 

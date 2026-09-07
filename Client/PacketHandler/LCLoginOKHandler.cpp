@@ -38,8 +38,7 @@ bool	ChecknProtectCRC(HINSTANCE dll, char* FilePath);
 //
 //----------------------------------------------------------------------
 void LCLoginOKHandler::execute ( LCLoginOK * pPacket , Player * pPlayer )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 

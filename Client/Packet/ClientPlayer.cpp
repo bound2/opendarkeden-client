@@ -37,7 +37,6 @@
 //
 //--------------------------------------------------------------------------------
 ClientPlayer::ClientPlayer ( Socket * pSocket )
-	 throw ( ProtocolException , Error )
 : m_PlayerStatus(CPS_NONE)
 {
 	__BEGIN_TRY
@@ -75,8 +74,7 @@ ClientPlayer::ClientPlayer ( Socket * pSocket )
 // destructor
 //
 //--------------------------------------------------------------------------------
-ClientPlayer::~ClientPlayer ()
-	 throw ( ProtocolException , Error )
+ClientPlayer::~ClientPlayer () noexcept(false)
 {
 	__BEGIN_TRY
 		
@@ -94,7 +92,7 @@ ClientPlayer::~ClientPlayer ()
 	__END_CATCH
 }
 
-void ClientPlayer::setPlayerStatus ( PlayerStatus playerStatus ) throw () { 
+void ClientPlayer::setPlayerStatus ( PlayerStatus playerStatus ) { 
 	m_PlayerStatus = playerStatus; 
 	DEBUG_ADD_FORMAT_ERR("[ClientPlayer::setPlayerStatus] %d", playerStatus);
 }
@@ -106,7 +104,6 @@ void ClientPlayer::setPlayerStatus ( PlayerStatus playerStatus ) throw () {
 //
 //--------------------------------------------------------------------------------
 void ClientPlayer::processCommand () 
-     throw ( IOException , Error )
 {
 	__BEGIN_TRY
 
@@ -325,7 +322,6 @@ void ClientPlayer::processCommand ()
 // disconnect player
 //--------------------------------------------------------------------------------
 void ClientPlayer::disconnect ( bool bDisconnected )
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -374,7 +370,6 @@ void ClientPlayer::disconnect ( bool bDisconnected )
 //
 //--------------------------------------------------------------------------------
 Packet * ClientPlayer::getOldPacket ( uint prev )
-	throw ( OutOfBoundException , NoSuchElementException )
 {
 	__BEGIN_TRY
 
@@ -400,7 +395,6 @@ Packet * ClientPlayer::getOldPacket ( uint prev )
 //
 //--------------------------------------------------------------------------------
 Packet * ClientPlayer::getOldPacket ( PacketID_t packetID )
-	throw ( NoSuchElementException )
 {
 	__BEGIN_TRY
 
@@ -430,7 +424,6 @@ Packet * ClientPlayer::getOldPacket ( PacketID_t packetID )
 //
 //--------------------------------------------------------------------------------
 std::string ClientPlayer::toString () const
-       throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 		
@@ -451,7 +444,6 @@ std::string ClientPlayer::toString () const
 // 암호화 코드를 설정한다.
 
 void ClientPlayer::setEncryptCode()
-	throw( Error )
 {
 #ifdef __USE_ENCRYPTER__
     __BEGIN_TRY

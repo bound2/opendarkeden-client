@@ -38,21 +38,21 @@ public:
 
 
 public:
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
-	PacketID_t getPacketID () const throw () { return PACKET_CG_SHOP_REQUEST_SELL; }
-	PacketSize_t getPacketSize () const throw () { return szObjectID+szObjectID+szBYTE; }
+	void read ( SocketInputStream & iStream );
+	void write ( SocketOutputStream & oStream ) const;
+	PacketID_t getPacketID () const noexcept { return PACKET_CG_SHOP_REQUEST_SELL; }
+	PacketSize_t getPacketSize () const noexcept { return szObjectID+szObjectID+szBYTE; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "CGShopRequestSell"; }
-		std::string toString () const throw ();
+		std::string getPacketName () const { return "CGShopRequestSell"; }
+		std::string toString () const;
 	#endif
 	
 public:
-	ObjectID_t getObjectID() throw () { return m_ObjectID; }
-	void setObjectID( ObjectID_t ObjectID ) throw() { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() noexcept { return m_ObjectID; }
+	void setObjectID( ObjectID_t ObjectID ) noexcept { m_ObjectID = ObjectID; }
 
-	ObjectID_t getItemObjectID() throw() { return m_ItemObjectID;}
+	ObjectID_t getItemObjectID() noexcept { return m_ItemObjectID;}
 	void setItemObjectID(ObjectID_t oid) { m_ItemObjectID = oid;}
 
 	BYTE getOpCode(void) const { return m_OpCode; }
@@ -74,14 +74,14 @@ private:
 class CGShopRequestSellFactory : public PacketFactory 
 {
 public:
-	Packet * createPacket () throw () { return new CGShopRequestSell(); }
+	Packet * createPacket () { return new CGShopRequestSell(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "CGShopRequestSell"; }
+		std::string getPacketName () const { return "CGShopRequestSell"; }
 	#endif
 
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_SHOP_REQUEST_SELL; }
-	PacketSize_t getPacketMaxSize () const throw () { return szObjectID+szObjectID+szBYTE; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_SHOP_REQUEST_SELL; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID+szObjectID+szBYTE; }
 
 };
 
@@ -94,14 +94,14 @@ public:
 class CGShopRequestSellHandler 
 {
 public:
-	static void execute ( CGShopRequestSell * pPacket , Player * player ) throw ( ProtocolException , Error );
+	static void execute ( CGShopRequestSell * pPacket , Player * player );
 
-	static void executeNormal ( CGShopRequestSell * pPacket , Player * player ) throw ( ProtocolException , Error );
-	static void executeMotorcycle ( CGShopRequestSell * pPacket , Player * player ) throw ( ProtocolException , Error );
+	static void executeNormal ( CGShopRequestSell * pPacket , Player * player );
+	static void executeMotorcycle ( CGShopRequestSell * pPacket , Player * player );
 
-	static void executeOpAllSkull ( CGShopRequestSell * pPacket , Player * player ) throw ( ProtocolException , Error );
+	static void executeOpAllSkull ( CGShopRequestSell * pPacket , Player * player );
 
-	static void sendFailPacket ( CGShopRequestSell * pPacket , Player * player ) throw ( ProtocolException , Error );
+	static void sendFailPacket ( CGShopRequestSell * pPacket , Player * player );
 };
 #endif
 #endif

@@ -21,14 +21,14 @@
 class CGStashRequestBuy : public Packet 
 {
 public:
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
-	PacketID_t getPacketID () const throw () { return PACKET_CG_STASH_REQUEST_BUY; }
-	PacketSize_t getPacketSize () const throw () { return 0; }
+	void read ( SocketInputStream & iStream );
+	void write ( SocketOutputStream & oStream ) const;
+	PacketID_t getPacketID () const noexcept { return PACKET_CG_STASH_REQUEST_BUY; }
+	PacketSize_t getPacketSize () const noexcept { return 0; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "CGStashRequestBuy"; }
-		std::string toString () const throw ();
+		std::string getPacketName () const { return "CGStashRequestBuy"; }
+		std::string toString () const;
 	#endif
 	
 };
@@ -44,12 +44,12 @@ public:
 class CGStashRequestBuyFactory : public PacketFactory 
 {
 public:
-	Packet * createPacket () throw () { return new CGStashRequestBuy(); }
+	Packet * createPacket () { return new CGStashRequestBuy(); }
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "CGStashRequestBuy"; }
+		std::string getPacketName () const { return "CGStashRequestBuy"; }
 	#endif
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_STASH_REQUEST_BUY; }
-	PacketSize_t getPacketMaxSize () const throw () { return 0; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_STASH_REQUEST_BUY; }
+	PacketSize_t getPacketMaxSize () const noexcept { return 0; }
 
 };
 
@@ -62,7 +62,7 @@ public:
 	class CGStashRequestBuyHandler 
 	{
 	public :
-		static void execute ( CGStashRequestBuy * pPacket , Player * player ) throw ( ProtocolException , Error );
+		static void execute ( CGStashRequestBuy * pPacket , Player * player );
 	};
 #endif
 

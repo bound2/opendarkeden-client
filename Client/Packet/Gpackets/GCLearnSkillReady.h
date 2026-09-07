@@ -28,38 +28,38 @@ class GCLearnSkillReady : public Packet {
 public :
 	
 	// constructor
-	GCLearnSkillReady () throw ();
+	GCLearnSkillReady ();
 	
 	// destructor
-	~GCLearnSkillReady () throw ();
+	~GCLearnSkillReady ();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_LEARN_SKILL_READY; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_LEARN_SKILL_READY; }
 	
 	// get packet size
-	PacketSize_t getPacketSize () const throw () { return szSkillDomainType; }
+	PacketSize_t getPacketSize () const noexcept { return szSkillDomainType; }
 	
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCLearnSkillReady"; }
+		std::string getPacketName () const { return "GCLearnSkillReady"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 	
-	SkillDomainType_t getSkillDomainType() const throw() { return m_SkillDomainType;}
-	void setSkillDomainType( SkillDomainType_t SkillDomainType) throw()
+	SkillDomainType_t getSkillDomainType() const noexcept { return m_SkillDomainType;}
+	void setSkillDomainType( SkillDomainType_t SkillDomainType)
 	{
 		m_SkillDomainType = SkillDomainType;
 	}
@@ -84,27 +84,27 @@ class  GCLearnSkillReadyFactory : public PacketFactory {
 public :
 	
 	// constructor
-	 GCLearnSkillReadyFactory () throw () {}
+	 GCLearnSkillReadyFactory () {}
 	
 	// destructor
-	virtual ~GCLearnSkillReadyFactory () throw () {}
+	virtual ~GCLearnSkillReadyFactory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCLearnSkillReady(); }
+	Packet * createPacket () { return new GCLearnSkillReady(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCLearnSkillReady"; }	
+		std::string getPacketName () const { return "GCLearnSkillReady"; }	
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_LEARN_SKILL_READY; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_LEARN_SKILL_READY; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szSkillDomainType;}
+	PacketSize_t getPacketMaxSize() const noexcept { return szSkillDomainType;}
 
 };
 
@@ -120,7 +120,7 @@ class  GCLearnSkillReadyHandler {
 public :
 
 	// execute packet's handler
-	static void execute (  GCLearnSkillReady * pGCLearnSkillReady , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute (  GCLearnSkillReady * pGCLearnSkillReady , Player * pPlayer );
 
 };
 

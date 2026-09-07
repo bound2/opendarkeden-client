@@ -9,9 +9,12 @@ endif()
 
 project(DarkEdenClient VERSION 1.0.0)
 
-# C++ standard
+# C++ standard. EXTENSIONS OFF asks GCC and Clang for -std=c++20 rather
+# than gnu++20; MSVC has no equivalent switch here, so its conformance
+# mode is set with the other MSVC options below.
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Note: We do NOT define _DEBUG here because it conflicts with DebugInfo.h
 # Instead, rely on the new DebugLog.h system which is always available
@@ -191,6 +194,17 @@ if(MSVC)
     add_compile_options($<$<COMPILE_LANGUAGE:C,CXX>:/MP>)
 
     message(STATUS "Parallel compilation: /MP (per-project, all targets)")
+
+    # Strict conformance. /permissive- turns off the MSVC extensions that
+    # would let removed syntax back in silently; /Zc:__cplusplus reports
+    # the real standard so library code can test it. Added through
+    # add_compile_options, not CMAKE_CXX_FLAGS: overriding the flags
+    # variable drops CMake's MSVC defaults, /EHsc among them, and without
+    # it a C++ exception cannot be caught by type.
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/permissive->)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/Zc:__cplusplus>)
+
+    message(STATUS "Conformance: /permissive- /Zc:__cplusplus (all C++ targets)")
 endif()
 
 # Add SDL2 include directory BEFORE add_subdirectory

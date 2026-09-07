@@ -17,14 +17,14 @@
 class CGResurrect : public Packet 
 {
 public:
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_RESURRECT; }
-	PacketSize_t getPacketSize() const throw() { return 0; }
+	void read(SocketInputStream & iStream);
+	void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_RESURRECT; }
+	PacketSize_t getPacketSize() const noexcept { return 0; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "CGResurrect"; }
-		std::string toString() const throw();
+		std::string getPacketName() const { return "CGResurrect"; }
+		std::string toString() const;
 	#endif
 };
 
@@ -34,14 +34,14 @@ public:
 class CGResurrectFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new CGResurrect(); }
+	Packet* createPacket() { return new CGResurrect(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "CGResurrect"; }
+		std::string getPacketName() const { return "CGResurrect"; }
 	#endif
 
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_RESURRECT; }
-	PacketSize_t getPacketMaxSize() const throw() { return 0; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_RESURRECT; }
+	PacketSize_t getPacketMaxSize() const noexcept { return 0; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -51,7 +51,7 @@ public:
 	class CGResurrectHandler 
 	{
 	public:
-		static void execute(CGResurrect* pPacket, Player* player) throw(ProtocolException, Error);
+		static void execute(CGResurrect* pPacket, Player* player);
 	};
 #endif
 

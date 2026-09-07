@@ -31,60 +31,60 @@ class GCChangeShape : public Packet {
 public :
 	
 	// constructor
-	GCChangeShape () throw ();
+	GCChangeShape ();
 	
 	// destructor
-	~GCChangeShape () throw ();
+	~GCChangeShape ();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_CHANGE_SHAPE; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_CHANGE_SHAPE; }
 	
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getPacketSize () const throw () { return szObjectID + szBYTE + szItemType + szOptionType + szSpeed + szBYTE ; }
+	PacketSize_t getPacketSize () const noexcept { return szObjectID + szBYTE + szItemType + szOptionType + szSpeed + szBYTE ; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCChangeShape"; }
+		std::string getPacketName () const { return "GCChangeShape"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 	// get Object ID 
-	ObjectID_t getObjectID () const throw () { return m_ObjectID; }
-	void setObjectID ( ObjectID_t objectID ) throw () { m_ObjectID = objectID; }
+	ObjectID_t getObjectID () const noexcept { return m_ObjectID; }
+	void setObjectID ( ObjectID_t objectID ) noexcept { m_ObjectID = objectID; }
 
 	// get/set ItemClass
-	BYTE getItemClass() const throw() { return m_ItemClass; }
-	void setItemClass( BYTE ItemClass ) throw() { m_ItemClass = ItemClass; }
+	BYTE getItemClass() const noexcept { return m_ItemClass; }
+	void setItemClass( BYTE ItemClass ) noexcept { m_ItemClass = ItemClass; }
 
 	// get / set ItemType
-	ItemType_t getItemType() const throw() { return m_ItemType; }
-	void setItemType( ItemType_t ItemType ) throw() { m_ItemType = ItemType ; }
+	ItemType_t getItemType() const noexcept { return m_ItemType; }
+	void setItemType( ItemType_t ItemType ) noexcept { m_ItemType = ItemType ; }
 
 	// get / set OptionType
-	OptionType_t getOptionType() const throw() { return m_OptionType; }
-	void setOptionType( OptionType_t OptionType ) throw() { m_OptionType = OptionType ; }
+	OptionType_t getOptionType() const noexcept { return m_OptionType; }
+	void setOptionType( OptionType_t OptionType ) noexcept { m_OptionType = OptionType ; }
 
 	// get / set OptionType
-	Speed_t getAttackSpeed() const throw() { return m_AttackSpeed; }
-	void setAttackSpeed( Speed_t AttackSpeed ) throw() { m_AttackSpeed = AttackSpeed; }
+	Speed_t getAttackSpeed() const noexcept { return m_AttackSpeed; }
+	void setAttackSpeed( Speed_t AttackSpeed ) noexcept { m_AttackSpeed = AttackSpeed; }
 
 	// -_- 2003.4.14 퀘스트 아이템 땜빵 코드 
-	BYTE	getFlag()	const throw() { return m_Flag; }
-	void	setFlag(BYTE flag)	throw() { m_Flag = flag; }
+	BYTE	getFlag()	const noexcept { return m_Flag; }
+	void	setFlag(BYTE flag) noexcept { m_Flag = flag; }
 
 private :
 
@@ -121,27 +121,27 @@ class GCChangeShapeFactory : public PacketFactory {
 public :
 	
 	// constructor
-	GCChangeShapeFactory () throw () {}
+	GCChangeShapeFactory () {}
 	
 	// destructor
-	virtual ~GCChangeShapeFactory () throw () {}
+	virtual ~GCChangeShapeFactory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCChangeShape(); }
+	Packet * createPacket () { return new GCChangeShape(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCChangeShape"; }
+		std::string getPacketName () const { return "GCChangeShape"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_CHANGE_SHAPE; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_CHANGE_SHAPE; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szBYTE + szItemType + szOptionType + szSpeed + szBYTE; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szBYTE + szItemType + szOptionType + szSpeed + szBYTE; }
 
 };
 
@@ -157,7 +157,7 @@ class GCChangeShapeHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCChangeShape * pGCChangeShape , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCChangeShape * pGCChangeShape , Player * pPlayer );
 
 };
 

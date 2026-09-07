@@ -18,7 +18,6 @@
 void GCShopListHandler::execute ( GCShopList * pPacket , Player * pPlayer )
 	 
 
-throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 

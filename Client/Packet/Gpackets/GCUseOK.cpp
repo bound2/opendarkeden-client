@@ -15,7 +15,6 @@
 // Constructor
 //////////////////////////////////////////////////////////////////////
 GCUseOK::GCUseOK()
-	throw()
 {
 	__BEGIN_TRY
 
@@ -26,7 +25,6 @@ GCUseOK::GCUseOK()
 // Destructor
 //////////////////////////////////////////////////////////////////////
 GCUseOK::~GCUseOK()
-	throw()
 {
 	__BEGIN_TRY
 	
@@ -36,8 +34,7 @@ GCUseOK::~GCUseOK()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCUseOK::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCUseOK::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -50,8 +47,7 @@ void GCUseOK::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void GCUseOK::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCUseOK::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -67,7 +63,6 @@ void GCUseOK::write ( SocketOutputStream & oStream ) const
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string GCUseOK::toString () const
-		   throw ()
 	{
 		__BEGIN_TRY
 
@@ -83,7 +78,6 @@ void GCUseOK::write ( SocketOutputStream & oStream ) const
 
 //----------------------------------------GCUseSkillCardOK-------------------
 GCUseSkillCardOK::GCUseSkillCardOK()
-	throw()
 {
 	__BEGIN_TRY
 
@@ -94,7 +88,6 @@ GCUseSkillCardOK::GCUseSkillCardOK()
 // Destructor
 //////////////////////////////////////////////////////////////////////
 GCUseSkillCardOK::~GCUseSkillCardOK()
-	throw()
 {
 	__BEGIN_TRY
 	
@@ -104,8 +97,7 @@ GCUseSkillCardOK::~GCUseSkillCardOK()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCUseSkillCardOK::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCUseSkillCardOK::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -118,8 +110,7 @@ void GCUseSkillCardOK::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void GCUseSkillCardOK::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCUseSkillCardOK::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -135,7 +126,6 @@ void GCUseSkillCardOK::write ( SocketOutputStream & oStream ) const
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string GCUseSkillCardOK::toString () const
-		   throw ()
 	{
 		__BEGIN_TRY
 

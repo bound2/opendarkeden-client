@@ -29,13 +29,13 @@ enum DonationType
 class CGDonationMoney : public Packet 
 {
 public:
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_DONATION_MONEY; }
-	PacketSize_t getPacketSize() const throw() { return szGold + szBYTE; }
+	void read(SocketInputStream & iStream);
+	void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_DONATION_MONEY; }
+	PacketSize_t getPacketSize() const noexcept { return szGold + szBYTE; }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "CGDonationMoney"; }
-	string toString() const throw();
+	string getPacketName() const { return "CGDonationMoney"; }
+	string toString() const;
 #endif	
 public:
 	// get / set gold
@@ -61,12 +61,12 @@ private:
 class CGDonationMoneyFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new CGDonationMoney(); }
+	Packet* createPacket() { return new CGDonationMoney(); }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "CGDonationMoney"; }
+	string getPacketName() const { return "CGDonationMoney"; }
 #endif
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_DONATION_MONEY; }
-	PacketSize_t getPacketMaxSize() const throw() { return szGold + szBYTE; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_DONATION_MONEY; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szGold + szBYTE; }
 };
 
 
@@ -78,7 +78,7 @@ public:
 class CGDonationMoneyHandler 
 {
 public:
-	static void execute(CGDonationMoney* pPacket, Player* player) throw(ProtocolException, Error);
+	static void execute(CGDonationMoney* pPacket, Player* player);
 };
 
 #endif

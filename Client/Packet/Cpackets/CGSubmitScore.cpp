@@ -6,22 +6,19 @@
 #include "Client_PCH.h"
 #include "CGSubmitScore.h"
 
-CGSubmitScore::CGSubmitScore () 
-     throw ()
+CGSubmitScore::CGSubmitScore ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGSubmitScore::~CGSubmitScore () 
-    throw ()
+CGSubmitScore::~CGSubmitScore ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGSubmitScore::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGSubmitScore::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -32,8 +29,7 @@ void CGSubmitScore::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 		    
-void CGSubmitScore::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGSubmitScore::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -46,7 +42,6 @@ void CGSubmitScore::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGSubmitScore::toString () const
-    throw ()
 {
 	__BEGIN_TRY
 		

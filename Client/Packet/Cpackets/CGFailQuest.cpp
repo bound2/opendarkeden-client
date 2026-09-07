@@ -6,8 +6,7 @@
 #include "CGFailQuest.h"
 
 
-void CGFailQuest::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGFailQuest::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 
@@ -16,8 +15,7 @@ void CGFailQuest::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGFailQuest::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGFailQuest::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -28,7 +26,6 @@ void CGFailQuest::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGFailQuest::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

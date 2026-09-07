@@ -38,34 +38,34 @@ class CGPortCheck : public DatagramPacket {
 public:
 	
     // Datagram 객체에서부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(Datagram & iDatagram) throw(ProtocolException, Error);
+    void read(Datagram & iDatagram);
 		    
     // Datagram 객체로 패킷의 바이너리 이미지를 보낸다.
-    void write(Datagram & oDatagram) const throw(ProtocolException, Error);
+    void write(Datagram & oDatagram) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_CG_PORT_CHECK; }
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_PORT_CHECK; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw() 
+	PacketSize_t getPacketSize() const 
 	{ 
 		return szBYTE + m_PCName.size();		// PC name
 	}
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName() const throw() { return "CGPortCheck"; }
+		std::string getPacketName() const { return "CGPortCheck"; }
 		
 		// get packet's debug std::string
-		std::string toString() const throw();
+		std::string toString() const;
 	#endif
 
 public:
 
 	// get/set pcName
-	std::string getPCName() const throw() { return m_PCName; }
-	void setPCName(const std::string& pcName) throw() { m_PCName = pcName; }
+	std::string getPCName() const { return m_PCName; }
+	void setPCName(const std::string& pcName) { m_PCName = pcName; }
 
 private :
 
@@ -87,20 +87,20 @@ class CGPortCheckFactory : public PacketFactory {
 public:
 	
 	// create packet
-	Packet* createPacket() throw() { return new CGPortCheck(); }
+	Packet* createPacket() { return new CGPortCheck(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName() const throw() { return "CGPortCheck"; }
+		std::string getPacketName() const { return "CGPortCheck"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_PORT_CHECK; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_PORT_CHECK; }
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static CGPortCheckPacketMaxSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize() const throw() 
+	PacketSize_t getPacketMaxSize() const 
 	{ 
 		return szBYTE + 20;		// PC name
 	}
@@ -120,7 +120,7 @@ class CGPortCheckHandler {
 public:
 
 	// execute packet's handler
-	static void execute(CGPortCheck* pPacket) throw(ProtocolException, Error);
+	static void execute(CGPortCheck* pPacket);
 
 };
 #endif

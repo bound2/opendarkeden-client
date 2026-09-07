@@ -10,8 +10,7 @@
 #include "PacketAssert.h"
 
 
-void CGMove::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGMove::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -41,8 +40,7 @@ void CGMove::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGMove::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGMove::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -71,7 +69,6 @@ void CGMove::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGMove::toString () const
-    throw ()
 {
 	__BEGIN_TRY
 		

@@ -11,7 +11,7 @@
 #include "PCVampireInfo.h"
 
 void PCVampireInfo::setShapeInfo(DWORD flag, Color_t color[VAMPIRE_COLOR_MAX]) 
-	throw()
+	noexcept
 {
 	// 현재는 vampire coat만 모양이 바뀌므로..
 	// 나중에 다른 부위도 바뀐다면 PCSlayerInfo를 참조해서 바꿔야될 것이다
@@ -23,7 +23,6 @@ void PCVampireInfo::setShapeInfo(DWORD flag, Color_t color[VAMPIRE_COLOR_MAX])
 // read data from socket input stream
 //----------------------------------------------------------------------
 void PCVampireInfo::read ( SocketInputStream & iStream ) 
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -119,7 +118,6 @@ void PCVampireInfo::read ( SocketInputStream & iStream )
 // write data to socket output stream
 //----------------------------------------------------------------------
 void PCVampireInfo::write ( SocketOutputStream & oStream ) const 
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -211,7 +209,6 @@ void PCVampireInfo::write ( SocketOutputStream & oStream ) const
 // get debug string
 //----------------------------------------------------------------------
 std::string PCVampireInfo::toString () const 
-	throw ()
 {
 
 	StringStream msg;

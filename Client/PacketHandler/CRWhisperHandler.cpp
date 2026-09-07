@@ -26,8 +26,7 @@ extern CMessageArray*		g_pNoticeMessage;
 //
 //////////////////////////////////////////////////////////////////////
 void CRWhisperHandler::execute ( CRWhisper * pPacket , Player * pPlayer )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 	

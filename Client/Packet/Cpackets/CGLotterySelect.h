@@ -36,32 +36,32 @@ class CGLotterySelect : public Packet
 public:
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_CG_LOTTERY_SELECT; }
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_LOTTERY_SELECT; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw() { return szBYTE + szDWORD + szDWORD; }
+	PacketSize_t getPacketSize() const noexcept { return szBYTE + szDWORD + szDWORD; }
 
 	// get packet name
-	std::string getPacketName() const throw() { return "CGLotterySelect"; }
+	std::string getPacketName() const { return "CGLotterySelect"; }
 
 	// get packet's debug string
-	std::string toString() const throw();
+	std::string toString() const;
 
-	BYTE getType() const throw() { return m_Type; }
+	BYTE getType() const noexcept { return m_Type; }
 	void setType( BYTE type ) { m_Type = type; }
 
-	DWORD getGiftID() const throw() { return m_GiftID; }
-	void setGiftID( DWORD GiftID ) throw() { m_GiftID = GiftID; }
+	DWORD getGiftID() const noexcept { return m_GiftID; }
+	void setGiftID( DWORD GiftID ) noexcept { m_GiftID = GiftID; }
 
-	DWORD getQuestLevel() const throw() { return m_QuestLevel; }
-	void setQuestLevel( DWORD QuestLevel ) throw() { m_QuestLevel = QuestLevel; }
+	DWORD getQuestLevel() const noexcept { return m_QuestLevel; }
+	void setQuestLevel( DWORD QuestLevel ) noexcept { m_QuestLevel = QuestLevel; }
 
 private :
 
@@ -85,25 +85,25 @@ class CGLotterySelectFactory : public PacketFactory {
 public:
 	
 	// constructor
-	CGLotterySelectFactory() throw() {}
+	CGLotterySelectFactory() {}
 	
 	// destructor
-	virtual ~CGLotterySelectFactory() throw() {}
+	virtual ~CGLotterySelectFactory() {}
 
 	
 public:
 	
 	// create packet
-	Packet* createPacket() throw() { return new CGLotterySelect(); }
+	Packet* createPacket() { return new CGLotterySelect(); }
 
 	// get packet name
-	std::string getPacketName() const throw() { return "CGLotterySelect"; }
+	std::string getPacketName() const { return "CGLotterySelect"; }
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_LOTTERY_SELECT; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_LOTTERY_SELECT; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE + szDWORD + szDWORD; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE + szDWORD + szDWORD; }
 };
 
 
@@ -118,7 +118,7 @@ class CGLotterySelectHandler {
 public:
 
 	// execute packet's handler
-	static void execute(CGLotterySelect* pCGLotterySelect, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(CGLotterySelect* pCGLotterySelect, Player* pPlayer);
 
 };
 

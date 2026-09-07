@@ -29,32 +29,32 @@ class CRDisconnect : public Packet
 public :
 	
 	// constructor
-	CRDisconnect () throw ();
+	CRDisconnect ();
 	
 	// destructor
-	~CRDisconnect () throw ();
+	~CRDisconnect ();
 	
 public :
-    PacketID_t getPacketID () const throw () { return PACKET_CR_DISCONNECT; }
+    PacketID_t getPacketID () const noexcept { return PACKET_CR_DISCONNECT; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "CRDisconnect"; }
+		std::string getPacketName () const { return "CRDisconnect"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getPacketSize () const throw () { return 0; }
-	static PacketSize_t getPacketMaxSize() throw() { return 0;}
+	PacketSize_t getPacketSize () const noexcept { return 0; }
+	static PacketSize_t getPacketMaxSize() noexcept { return 0;}
 
 protected :
 
@@ -73,27 +73,27 @@ class CRDisconnectFactory : public PacketFactory {
 public :
 	
 	// constructor
-	CRDisconnectFactory () throw () {}
+	CRDisconnectFactory () {}
 	
 	// destructor
-	virtual ~CRDisconnectFactory () throw () {}
+	virtual ~CRDisconnectFactory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new CRDisconnect(); }
+	Packet * createPacket () { return new CRDisconnect(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CRDisconnect"; }
+		std::string getPacketName () const { return "CRDisconnect"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CR_DISCONNECT; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CR_DISCONNECT; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize () const throw () { return 0;}
+	PacketSize_t getPacketMaxSize () const noexcept { return 0;}
 
 };
 
@@ -109,7 +109,7 @@ class CRDisconnectHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( CRDisconnect * pCRDisconnect , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( CRDisconnect * pCRDisconnect , Player * pPlayer );
 
 };
 

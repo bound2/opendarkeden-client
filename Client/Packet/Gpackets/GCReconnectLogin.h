@@ -28,17 +28,17 @@ class GCReconnectLogin : public Packet {
 public :
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_RECONNECT_LOGIN; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_RECONNECT_LOGIN; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () 
+	PacketSize_t getPacketSize () const 
 	{ 
 		return szBYTE + m_LoginServerIP.size() 	// 게임 서버 아이피
 			+ szuint							// 게임 서버 포트
@@ -47,25 +47,25 @@ public :
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCReconnectLogin"; }
+		std::string getPacketName () const { return "GCReconnectLogin"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 public :
 
 	// get/set game server's ip
-	std::string getLoginServerIP () const throw () { return m_LoginServerIP; }
-	void setLoginServerIP ( const std::string & ip ) throw () { m_LoginServerIP = ip; }
+	std::string getLoginServerIP () const { return m_LoginServerIP; }
+	void setLoginServerIP ( const std::string & ip ) { m_LoginServerIP = ip; }
 
 	// get/set game server's port
-	uint getLoginServerPort () const throw () { return m_LoginServerPort; }
-	void setLoginServerPort ( uint port ) throw () { m_LoginServerPort = port; }
+	uint getLoginServerPort () const noexcept { return m_LoginServerPort; }
+	void setLoginServerPort ( uint port ) noexcept { m_LoginServerPort = port; }
 
 	// get/set key
-	DWORD getKey () const throw () { return m_Key; }
-	void setKey ( DWORD key ) throw () { m_Key = key; }
+	DWORD getKey () const noexcept { return m_Key; }
+	void setKey ( DWORD key ) noexcept { m_Key = key; }
 
 private :
 	
@@ -94,20 +94,20 @@ class GCReconnectLoginFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCReconnectLogin(); }
+	Packet * createPacket () { return new GCReconnectLogin(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCReconnectLogin"; }
+		std::string getPacketName () const { return "GCReconnectLogin"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_RECONNECT_LOGIN; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_RECONNECT_LOGIN; }
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static GCReconnectLoginPacketMaxSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize () const throw () 
+	PacketSize_t getPacketMaxSize () const 
 	{ 
 		return szBYTE + 15 	// 게임 서버 아이피
 			+ szuint		// 게임 서버 포트
@@ -128,7 +128,7 @@ class GCReconnectLoginHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCReconnectLogin * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCReconnectLogin * pPacket , Player * pPlayer );
 
 };
 

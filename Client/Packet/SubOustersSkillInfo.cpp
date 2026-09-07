@@ -14,7 +14,6 @@
 // read data from socket input stream
 //----------------------------------------------------------------------
 void SubOustersSkillInfo::read ( SocketInputStream & iStream ) 
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 	try {
@@ -35,7 +34,6 @@ void SubOustersSkillInfo::read ( SocketInputStream & iStream )
 // write data to socket output stream
 //----------------------------------------------------------------------
 void SubOustersSkillInfo::write ( SocketOutputStream & oStream ) const 
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -58,7 +56,6 @@ void SubOustersSkillInfo::write ( SocketOutputStream & oStream ) const
 // get debug string
 //----------------------------------------------------------------------
 std::string SubOustersSkillInfo::toString () const 
-	throw ()
 {
 	StringStream msg;
 

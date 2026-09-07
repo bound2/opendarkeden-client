@@ -22,12 +22,12 @@
 class CGDepositPet : public Packet 
 {
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_DEPOSIT_PET; }
-	PacketSize_t getPacketSize() const throw() { return szObjectID + szBYTE; }
-	string getPacketName() const throw() { return "CGDepositPet"; }
-	string toString() const throw();
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_DEPOSIT_PET; }
+	PacketSize_t getPacketSize() const noexcept { return szObjectID + szBYTE; }
+	string getPacketName() const { return "CGDepositPet"; }
+	string toString() const;
 	
 public:
 	ObjectID_t	getObjectID() const { return m_ObjectID; }
@@ -52,10 +52,10 @@ private:
 class CGDepositPetFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new CGDepositPet(); }
-	string getPacketName() const throw() { return "CGDepositPet"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_DEPOSIT_PET; }
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szBYTE; }
+	Packet* createPacket() { return new CGDepositPet(); }
+	string getPacketName() const { return "CGDepositPet"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_DEPOSIT_PET; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szBYTE; }
 };
 
 
@@ -70,7 +70,7 @@ class CGDepositPetHandler {
 public:
 
 	// execute packet's handler
-	static void execute(CGDepositPet* pPacket, Player* player) throw(ProtocolException, Error);
+	static void execute(CGDepositPet* pPacket, Player* player);
 	//static void executeSlayer(CGDepositPet* pPacket, Player* player) throw(ProtocolException, Error);
 	//static void executeVampire(CGDepositPet* pPacket, Player* player) throw(ProtocolException, Error);
 };

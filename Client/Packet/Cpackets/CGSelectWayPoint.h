@@ -20,19 +20,19 @@
 class CGSelectWayPoint : public Packet 
 {
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_SELECT_WAYPOINT; }
-	PacketSize_t getPacketSize() const throw() { return szZoneID + szCoord*2; }
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_SELECT_WAYPOINT; }
+	PacketSize_t getPacketSize() const noexcept { return szZoneID + szCoord*2; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "CGSelectWayPoint"; }
-		std::string toString() const throw();
+		std::string getPacketName() const { return "CGSelectWayPoint"; }
+		std::string toString() const;
 	#endif
 
 public:
-	ZoneID_t getZoneID() const throw()  { return m_ZoneID; }
-	void setZoneID(ZoneID_t ZoneID) throw() { m_ZoneID = ZoneID; }
+	ZoneID_t getZoneID() const noexcept  { return m_ZoneID; }
+	void setZoneID(ZoneID_t ZoneID) noexcept { m_ZoneID = ZoneID; }
 
 	Coord_t getX(void) const { return m_X; }
 	void setX(Coord_t X) { m_X = X; }
@@ -52,14 +52,14 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 class CGSelectWayPointFactory : public PacketFactory 
 {
-	Packet* createPacket() throw() { return new CGSelectWayPoint(); }
+	Packet* createPacket() { return new CGSelectWayPoint(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "CGSelectWayPoint"; }
+		std::string getPacketName() const { return "CGSelectWayPoint"; }
 	#endif
 
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_SELECT_WAYPOINT; }
-	PacketSize_t getPacketMaxSize() const throw() { return szZoneID + szCoord*2; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_SELECT_WAYPOINT; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szZoneID + szCoord*2; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -69,7 +69,7 @@ class CGSelectWayPointFactory : public PacketFactory
 		class CGSelectWayPointHandler 
 		{
 		public:
-			static void execute(CGSelectWayPoint* pCGSelectWayPoint, Player* pPlayer) throw ( ProtocolException , Error );
+			static void execute(CGSelectWayPoint* pCGSelectWayPoint, Player* pPlayer);
 		};
 	#endif
 

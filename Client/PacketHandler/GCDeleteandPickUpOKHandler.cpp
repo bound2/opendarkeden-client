@@ -28,8 +28,7 @@ bool	IsBombMaterial(const MItem* pItem);
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 void GCDeleteandPickUpOKHandler::execute ( GCDeleteandPickUpOK * pPacket, Player * pPlayer )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 		

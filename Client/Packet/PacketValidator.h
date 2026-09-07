@@ -30,26 +30,26 @@ class PacketValidator {
 public :
 
 	// constructor
-	PacketValidator () throw ();
+	PacketValidator ();
 
 	// destructor
-	~PacketValidator () throw ();
+	~PacketValidator ();
 
 	// init
-	void init () throw ( ProtocolException , Error );
+	void init ();
 
 	// add packet id set
-	void addPacketIDSet ( PlayerStatus playerStatus , PacketIDSet * pPacketID ) throw ( DuplicatedException , Error );
+	void addPacketIDSet ( PlayerStatus playerStatus , PacketIDSet * pPacketID );
 
 	// delete packet id
-	void deletePacketIDSet ( PlayerStatus playerStatus , PacketIDSet * pPacketID ) throw ( NoSuchElementException , Error );
+	void deletePacketIDSet ( PlayerStatus playerStatus , PacketIDSet * pPacketID );
 
 	// is valid packet?
-	bool isValidPacketID ( PlayerStatus playerStatus , PacketID_t packetID ) throw ( NoSuchElementException , IgnorePacketException , Error );
+	bool isValidPacketID ( PlayerStatus playerStatus , PacketID_t packetID );
 
 	#ifdef __DEBUG_OUTPUT__
 		// get debug string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 private :

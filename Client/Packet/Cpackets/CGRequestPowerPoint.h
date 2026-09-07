@@ -17,17 +17,17 @@
 class CGRequestPowerPoint : public Packet
 {
 public:
-	CGRequestPowerPoint () throw ();
-	~CGRequestPowerPoint () throw ();
+	CGRequestPowerPoint ();
+	~CGRequestPowerPoint ();
 	
 public:
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
-    PacketID_t getPacketID () const throw () { return PACKET_CG_REQUEST_POWER_POINT; }
-	PacketSize_t getPacketSize () const throw () { return szBYTE + m_CellNum.size(); }
+    void read ( SocketInputStream & iStream );
+    void write ( SocketOutputStream & oStream ) const;
+    PacketID_t getPacketID () const noexcept { return PACKET_CG_REQUEST_POWER_POINT; }
+	PacketSize_t getPacketSize () const { return szBYTE + m_CellNum.size(); }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName () const throw () { return "CGRequestPowerPoint"; }
-	string toString () const throw ();
+	string getPacketName () const { return "CGRequestPowerPoint"; }
+	string toString () const;
 #endif
 public:
 	// get / set cell number
@@ -44,10 +44,10 @@ protected:
 class CGRequestPowerPointFactory : public PacketFactory 
 {
 public:
-	Packet * createPacket () throw () { return new CGRequestPowerPoint(); }
-	string getPacketName () const throw () { return "CGRequestPowerPoint"; }
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_REQUEST_POWER_POINT; }
-	PacketSize_t getPacketMaxSize () const throw () { return szBYTE + 12;}
+	Packet * createPacket () { return new CGRequestPowerPoint(); }
+	string getPacketName () const { return "CGRequestPowerPoint"; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_REQUEST_POWER_POINT; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szBYTE + 12;}
 };
 //////////////////////////////////////////////////////////////////////////////
 // class CGRequestPowerPointHandler;
@@ -56,7 +56,7 @@ public:
 class CGRequestPowerPointHandler 
 {
 public:
-	static void execute ( CGRequestPowerPoint * pCGRequestPowerPoint , Player * pPlayer ) throw (ProtocolException, Error);
+	static void execute ( CGRequestPowerPoint * pCGRequestPowerPoint , Player * pPlayer );
 };
 #endif
 

@@ -28,43 +28,43 @@ class GCCrossCounterOK1 : public ModifyInfo {
 public :
 	
 	// constructor
-	GCCrossCounterOK1 () throw ();
+	GCCrossCounterOK1 ();
 	
 	// destructor
-	~GCCrossCounterOK1 () throw ();
+	~GCCrossCounterOK1 ();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_CROSS_COUNTER_OK_1; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_CROSS_COUNTER_OK_1; }
 	
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getPacketSize () const throw () { return szObjectID + ModifyInfo::getPacketSize() + szSkillType; }
+	PacketSize_t getPacketSize () const { return szObjectID + ModifyInfo::getPacketSize() + szSkillType; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCCrossCounterOK1"; }
+		std::string getPacketName () const { return "GCCrossCounterOK1"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 	// get / set CEffectID
-	ObjectID_t getObjectID() const throw() { return m_ObjectID; }
-	void setObjectID( ObjectID_t ObjectID ) throw() { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() const noexcept { return m_ObjectID; }
+	void setObjectID( ObjectID_t ObjectID ) noexcept { m_ObjectID = ObjectID; }
 
-	SkillType_t getSkillType() const throw() { return m_SkillType; }
-	void setSkillType( SkillType_t SkillType ) throw() { m_SkillType = SkillType; }
+	SkillType_t getSkillType() const noexcept { return m_SkillType; }
+	void setSkillType( SkillType_t SkillType ) noexcept { m_SkillType = SkillType; }
 
 private :
 	
@@ -89,25 +89,25 @@ class GCCrossCounterOK1Factory : public PacketFactory {
 public :
 	
 	// constructor
-	GCCrossCounterOK1Factory () throw () {}
+	GCCrossCounterOK1Factory () {}
 	
 	// destructor
-	virtual ~GCCrossCounterOK1Factory () throw () {}
+	virtual ~GCCrossCounterOK1Factory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCCrossCounterOK1(); }
+	Packet * createPacket () { return new GCCrossCounterOK1(); }
 
 	// get packet name
-	std::string getPacketName () const throw () { return "GCCrossCounterOK1"; }
+	std::string getPacketName () const { return "GCCrossCounterOK1"; }
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_CROSS_COUNTER_OK_1; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_CROSS_COUNTER_OK_1; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + ModifyInfo::getPacketMaxSize() + szSkillType; }
+	PacketSize_t getPacketMaxSize () const { return szObjectID + ModifyInfo::getPacketMaxSize() + szSkillType; }
 
 };
 
@@ -123,7 +123,7 @@ class GCCrossCounterOK1Handler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCCrossCounterOK1 * pGCCrossCounterOK1 , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCCrossCounterOK1 * pGCCrossCounterOK1 , Player * pPlayer );
 
 };
 

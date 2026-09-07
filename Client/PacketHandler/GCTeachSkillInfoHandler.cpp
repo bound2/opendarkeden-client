@@ -19,8 +19,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 void GCTeachSkillInfoHandler::execute ( GCTeachSkillInfo * pPacket , Player * pPlayer )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 	

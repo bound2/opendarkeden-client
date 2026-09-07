@@ -18,8 +18,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-GCThrowBombOK1::GCThrowBombOK1 () 
-     throw ()
+GCThrowBombOK1::GCThrowBombOK1 ()
 {
 	__BEGIN_TRY
 
@@ -33,8 +32,7 @@ GCThrowBombOK1::GCThrowBombOK1 ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-GCThrowBombOK1::~GCThrowBombOK1 () 
-    throw ()
+GCThrowBombOK1::~GCThrowBombOK1 ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -44,8 +42,7 @@ GCThrowBombOK1::~GCThrowBombOK1 ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCThrowBombOK1::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCThrowBombOK1::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -75,7 +72,7 @@ void GCThrowBombOK1::read ( SocketInputStream & iStream )
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
 void GCThrowBombOK1::write ( SocketOutputStream & oStream ) 
-     const throw ( ProtocolException , Error )
+     const
 {
 	__BEGIN_TRY
 		
@@ -102,7 +99,6 @@ void GCThrowBombOK1::write ( SocketOutputStream & oStream )
 //
 //////////////////////////////////////////////////////////////////////
 void GCThrowBombOK1::addCListElement( ObjectID_t ObjectID )
-	throw()
 {
 	__BEGIN_TRY
 
@@ -147,7 +143,7 @@ void GCThrowBombOK1::deleteCListElement()
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string GCThrowBombOK1::toString () 
-		const throw ()
+		const
 	{
 		__BEGIN_TRY
 

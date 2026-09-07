@@ -15,7 +15,6 @@
 // constructor
 //////////////////////////////////////////////////////////////////////
 GCSweeperBonusInfo::GCSweeperBonusInfo()
-	throw()
 {
 }
 
@@ -23,7 +22,6 @@ GCSweeperBonusInfo::GCSweeperBonusInfo()
 // constructor
 //////////////////////////////////////////////////////////////////////
 GCSweeperBonusInfo::~GCSweeperBonusInfo()
-	throw()
 {
 	__BEGIN_TRY
 	
@@ -36,8 +34,7 @@ GCSweeperBonusInfo::~GCSweeperBonusInfo()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCSweeperBonusInfo::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCSweeperBonusInfo::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -58,8 +55,7 @@ void GCSweeperBonusInfo::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void GCSweeperBonusInfo::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCSweeperBonusInfo::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 		
@@ -77,7 +73,6 @@ void GCSweeperBonusInfo::write ( SocketOutputStream & oStream ) const
 
 
 void GCSweeperBonusInfo::clearSweeperBonusInfoList()
-	throw()
 {
 	__BEGIN_TRY
 
@@ -96,7 +91,6 @@ void GCSweeperBonusInfo::clearSweeperBonusInfoList()
 // get packet size
 //////////////////////////////////////////////////////////////////////
 PacketSize_t GCSweeperBonusInfo::getPacketSize() const
-	throw()
 {
 	__BEGIN_TRY
 
@@ -120,7 +114,6 @@ PacketSize_t GCSweeperBonusInfo::getPacketSize() const
 // get packet's debug string
 //////////////////////////////////////////////////////////////////////
 std::string GCSweeperBonusInfo::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

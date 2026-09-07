@@ -43,22 +43,22 @@ enum
 class CGTradePrepare : public Packet 
 {
 public:
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
-	PacketID_t getPacketID () const throw () { return PACKET_CG_TRADE_PREPARE; }
-	PacketSize_t getPacketSize () const throw () { return szObjectID + szBYTE; }
+	void read ( SocketInputStream & iStream );
+	void write ( SocketOutputStream & oStream ) const;
+	PacketID_t getPacketID () const noexcept { return PACKET_CG_TRADE_PREPARE; }
+	PacketSize_t getPacketSize () const noexcept { return szObjectID + szBYTE; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "CGTradePrepare"; }
-		std::string toString () const throw ();
+		std::string getPacketName () const { return "CGTradePrepare"; }
+		std::string toString () const;
 	#endif
 	
 public:
-	ObjectID_t getTargetObjectID() const throw() { return m_TargetObjectID; }
-	void setTargetObjectID(ObjectID_t id) throw() { m_TargetObjectID = id; }
+	ObjectID_t getTargetObjectID() const noexcept { return m_TargetObjectID; }
+	void setTargetObjectID(ObjectID_t id) noexcept { m_TargetObjectID = id; }
 
-	BYTE getCode(void) const throw() { return m_Code; }
-	void setCode(BYTE code) throw() { m_Code = code; }
+	BYTE getCode(void) const noexcept { return m_Code; }
+	void setCode(BYTE code) noexcept { m_Code = code; }
 
 private:
 	ObjectID_t m_TargetObjectID; // 교환을 원하는 상대방의 OID
@@ -75,14 +75,14 @@ private:
 class CGTradePrepareFactory : public PacketFactory 
 {
 public:
-	Packet * createPacket () throw () { return new CGTradePrepare(); }
+	Packet * createPacket () { return new CGTradePrepare(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "CGTradePrepare"; }
+		std::string getPacketName () const { return "CGTradePrepare"; }
 	#endif
 
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_TRADE_PREPARE; }
-	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szBYTE; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_TRADE_PREPARE; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID + szBYTE; }
 };
 
 
@@ -95,10 +95,10 @@ public:
 	class CGTradePrepareHandler 
 	{
 	public:
-		static void execute ( CGTradePrepare * pPacket , Player * player ) throw ( ProtocolException , Error );
-		static void executeSlayer ( CGTradePrepare * pPacket , Player * player ) throw ( ProtocolException , Error );
-		static void executeVampire ( CGTradePrepare * pPacket , Player * player ) throw ( ProtocolException , Error );
-		static void executeError ( CGTradePrepare * pPacket , Player * player, BYTE ErrorCode ) throw ( ProtocolException , Error );
+		static void execute ( CGTradePrepare * pPacket , Player * player );
+		static void executeSlayer ( CGTradePrepare * pPacket , Player * player );
+		static void executeVampire ( CGTradePrepare * pPacket , Player * player );
+		static void executeError ( CGTradePrepare * pPacket , Player * player, BYTE ErrorCode );
 	};
 #endif
 

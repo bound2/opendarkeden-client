@@ -21,17 +21,17 @@
 class GCAddVampirePortal : public Packet 
 {
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_GC_ADD_VAMPIRE_PORTAL; }
-	PacketSize_t getPacketSize() const throw() 
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_ADD_VAMPIRE_PORTAL; }
+	PacketSize_t getPacketSize() const 
 	{ 
 		return szObjectID + szBYTE + m_OwnerID.size() + szDuration 
 			+ szCoord*2 + szZoneID + szCoord*2 + szBYTE;
 	}
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "GCAddVampirePortal"; }
-		std::string toString() const throw();
+		std::string getPacketName() const { return "GCAddVampirePortal"; }
+		std::string toString() const;
 	#endif
 
 public:
@@ -82,14 +82,14 @@ private:
 class GCAddVampirePortalFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new GCAddVampirePortal(); }
+	Packet* createPacket() { return new GCAddVampirePortal(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "GCAddVampirePortal"; }
+		std::string getPacketName() const { return "GCAddVampirePortal"; }
 	#endif
 
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_ADD_VAMPIRE_PORTAL; }
-	PacketSize_t getPacketMaxSize() const throw()
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_ADD_VAMPIRE_PORTAL; }
+	PacketSize_t getPacketMaxSize() const
 	{ 
 		return szObjectID + szBYTE + 20 + szDuration 
 			+ szCoord*2 + szZoneID + szCoord*2 + szBYTE;
@@ -103,7 +103,7 @@ public:
 class GCAddVampirePortalHandler 
 {
 public:
-	static void execute(GCAddVampirePortal* pGCAddVampirePortal, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(GCAddVampirePortal* pGCAddVampirePortal, Player* pPlayer);
 };
 
 #endif

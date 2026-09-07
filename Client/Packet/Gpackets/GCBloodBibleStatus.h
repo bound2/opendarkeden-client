@@ -34,17 +34,17 @@ class GCBloodBibleStatus : public Packet {
 
 public :
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_GC_BLOOD_BIBLE_STATUS; }
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_BLOOD_BIBLE_STATUS; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw() 
+	PacketSize_t getPacketSize() const 
 	{ 
 		return szItemType 
 				+ szZoneID 
@@ -56,42 +56,42 @@ public :
 	}
 
 	// get packet name
-	std::string getPacketName() const throw() { return "GCBloodBibleStatus"; }
+	std::string getPacketName() const { return "GCBloodBibleStatus"; }
 	
 	// get packet's debug std::string
-	std::string toString() const throw();
+	std::string toString() const;
 
 	// get/set text color
-	ItemType_t getItemType() const throw() { return m_ItemType; }
-	void setItemType( ItemType_t itemType ) throw() { m_ItemType = itemType; }
+	ItemType_t getItemType() const noexcept { return m_ItemType; }
+	void setItemType( ItemType_t itemType ) noexcept { m_ItemType = itemType; }
 
 	// get/set text color
-	ZoneID_t getZoneID() const throw() { return m_ZoneID; }
-	void setZoneID( ZoneID_t zoneID ) throw() { m_ZoneID = zoneID; }
+	ZoneID_t getZoneID() const noexcept { return m_ZoneID; }
+	void setZoneID( ZoneID_t zoneID ) noexcept { m_ZoneID = zoneID; }
 
 	// get/set text color
-	Storage_t getStorage() const throw() { return m_Storage; }
-	void setStorage( Storage_t storage ) throw() { m_Storage = storage; }
+	Storage_t getStorage() const noexcept { return m_Storage; }
+	void setStorage( Storage_t storage ) noexcept { m_Storage = storage; }
 
 	// get/set chatting message
-	const std::string& getOwnerName() const throw() { return m_OwnerName; }
-	void setOwnerName(const std::string & OwnerName) throw() { m_OwnerName = OwnerName; }
+	const std::string& getOwnerName() const noexcept { return m_OwnerName; }
+	void setOwnerName(const std::string & OwnerName) { m_OwnerName = OwnerName; }
 
 	// get/set text color
-	Race_t getRace() const throw() { return m_Race; }
-	void setRace( Race_t race ) throw() { m_Race = race; }
+	Race_t getRace() const noexcept { return m_Race; }
+	void setRace( Race_t race ) noexcept { m_Race = race; }
 
 	// get/set text color
-	Race_t getShrineRace() const throw() { return m_ShrineRace; }
-	void setShrineRace( Race_t race ) throw() { m_ShrineRace = race; }
+	Race_t getShrineRace() const noexcept { return m_ShrineRace; }
+	void setShrineRace( Race_t race ) noexcept { m_ShrineRace = race; }
 
 	// get/set text color
-	ZoneCoord_t getX() const throw() { return m_X; }
-	void setX( ZoneCoord_t x ) throw() { m_X = x; }
+	ZoneCoord_t getX() const noexcept { return m_X; }
+	void setX( ZoneCoord_t x ) noexcept { m_X = x; }
 
 	// get/set text color
-	ZoneCoord_t getY() const throw() { return m_Y; }
-	void setY( ZoneCoord_t y ) throw() { m_Y = y; }
+	ZoneCoord_t getY() const noexcept { return m_Y; }
+	void setY( ZoneCoord_t y ) noexcept { m_Y = y; }
 
 private :
 	
@@ -121,18 +121,18 @@ class GCBloodBibleStatusFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet* createPacket() throw() { return new GCBloodBibleStatus(); }
+	Packet* createPacket() { return new GCBloodBibleStatus(); }
 
 	// get packet name
-	std::string getPacketName() const throw() { return "GCBloodBibleStatus"; }
+	std::string getPacketName() const { return "GCBloodBibleStatus"; }
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_BLOOD_BIBLE_STATUS; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_BLOOD_BIBLE_STATUS; }
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static GCBloodBibleStatusPacketMaxSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize() const throw() 
+	PacketSize_t getPacketMaxSize() const 
 	{ 
 		return szItemType 
 				+ szZoneID 
@@ -157,7 +157,7 @@ class GCBloodBibleStatusHandler {
 public :
 	
 	// execute packet's handler
-	static void execute(GCBloodBibleStatus* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(GCBloodBibleStatus* pPacket, Player* pPlayer);
 
 };
 

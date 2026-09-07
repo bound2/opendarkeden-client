@@ -14,8 +14,7 @@
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void CLLogin::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void CLLogin::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -52,8 +51,7 @@ void CLLogin::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void CLLogin::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void CLLogin::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -114,7 +112,6 @@ void CLLogin::write ( SocketOutputStream & oStream ) const
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string CLLogin::toString () const
-		throw ()
 	{
 		char szTemp[10];
 
@@ -137,7 +134,7 @@ void CLLogin::write ( SocketOutputStream & oStream ) const
 
 #endif
 
-PacketSize_t CLLogin::getPacketSize () const throw ()
+PacketSize_t CLLogin::getPacketSize () const
 {
 	if( !m_bNetmarble )
 	{

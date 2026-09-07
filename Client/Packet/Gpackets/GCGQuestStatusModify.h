@@ -31,17 +31,17 @@ public:
 		FAIL,			// 퀘스트가 실패했음
 	};
 
-	GCGQuestStatusModify() throw();
-	~GCGQuestStatusModify() throw();
+	GCGQuestStatusModify();
+	~GCGQuestStatusModify();
 	
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error) { iStream.read(m_Type); m_pInfo = new QuestStatusInfo(); m_pInfo->read(iStream); }
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error) { oStream.write(m_Type); m_pInfo->write(oStream); }
-	PacketID_t getPacketID() const throw() { return PACKET_GC_GQUEST_STATUS_MODIFY; }
-	PacketSize_t getPacketSize() const throw() { return szBYTE + m_pInfo->getSize(); }
+    void read(SocketInputStream & iStream) { iStream.read(m_Type); m_pInfo = new QuestStatusInfo(); m_pInfo->read(iStream); }
+    void write(SocketOutputStream & oStream) const { oStream.write(m_Type); m_pInfo->write(oStream); }
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_GQUEST_STATUS_MODIFY; }
+	PacketSize_t getPacketSize() const { return szBYTE + m_pInfo->getSize(); }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "GCGQuestStatusModify"; }
-	string toString() const throw();
+	string getPacketName() const { return "GCGQuestStatusModify"; }
+	string toString() const;
 #endif
 public:
 	BYTE	getType() const { return m_Type; }
@@ -63,16 +63,16 @@ private:
 class GCGQuestStatusModifyFactory : public PacketFactory 
 {
 public :
-	GCGQuestStatusModifyFactory() throw() {}
-	virtual ~GCGQuestStatusModifyFactory() throw() {}
+	GCGQuestStatusModifyFactory() {}
+	virtual ~GCGQuestStatusModifyFactory() {}
 	
 public:
-	Packet* createPacket() throw() { return new GCGQuestStatusModify(); }
+	Packet* createPacket() { return new GCGQuestStatusModify(); }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "GCGQuestStatusModify"; }
+	string getPacketName() const { return "GCGQuestStatusModify"; }
 #endif
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_GQUEST_STATUS_MODIFY; }
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE + QuestStatusInfo::getMaxSize(); }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_GQUEST_STATUS_MODIFY; }
+	PacketSize_t getPacketMaxSize() const { return szBYTE + QuestStatusInfo::getMaxSize(); }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -82,7 +82,7 @@ public:
 class GCGQuestStatusModifyHandler 
 {
 public:
-	static void execute(GCGQuestStatusModify* pGCGQuestStatusModify, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(GCGQuestStatusModify* pGCGQuestStatusModify, Player* pPlayer);
 
 };
 

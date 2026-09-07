@@ -25,19 +25,19 @@ class GCAddBurrowingCreature : public Packet {
 public :
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_ADD_BURROWING_CREATURE; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_ADD_BURROWING_CREATURE; }
 	
 	// get packet's body size
 	// *OPTIMIZATION HINT*
 	// const static GCAddBurrowingCreaturePacketSize 를 정의, 리턴하라.
-	PacketSize_t getPacketSize () const throw () 
+	PacketSize_t getPacketSize () const 
 	{ 
 		return szObjectID 
 			+ szBYTE + m_Name.size() 
@@ -46,31 +46,31 @@ public :
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCAddBurrowingCreature"; }
+		std::string getPacketName () const { return "GCAddBurrowingCreature"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif	
 
 
 public :
 
 	// get/set object id
-	ObjectID_t getObjectID () const throw () { return m_ObjectID; }
-	void setObjectID ( ObjectID_t creatureID ) throw () { m_ObjectID = creatureID; }
+	ObjectID_t getObjectID () const noexcept { return m_ObjectID; }
+	void setObjectID ( ObjectID_t creatureID ) noexcept { m_ObjectID = creatureID; }
 
 	// get/set name
-	std::string getName () const throw () { return m_Name; }
-	void setName ( std::string name ) throw () { m_Name = name; }
+	std::string getName () const { return m_Name; }
+	void setName ( std::string name ) { m_Name = name; }
 
 
 	// get/set X
-	Coord_t getX () const throw () { return m_X; }
-	void setX ( Coord_t x ) throw () { m_X = x; }
+	Coord_t getX () const noexcept { return m_X; }
+	void setX ( Coord_t x ) noexcept { m_X = x; }
 	
 	// get/set Y
-	Coord_t getY () const throw () { return m_Y; }
-	void setY ( Coord_t y ) throw () { m_Y = y; }
+	Coord_t getY () const noexcept { return m_Y; }
+	void setY ( Coord_t y ) noexcept { m_Y = y; }
 
 private :
 	
@@ -98,20 +98,20 @@ class GCAddBurrowingCreatureFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCAddBurrowingCreature(); }
+	Packet * createPacket () { return new GCAddBurrowingCreature(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCAddBurrowingCreature"; }
+		std::string getPacketName () const { return "GCAddBurrowingCreature"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_ADD_BURROWING_CREATURE; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_ADD_BURROWING_CREATURE; }
 
 	// get packet's body size
 	// *OPTIMIZATION HINT*
 	// const static GCAddBurrowingCreaturePacketSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize () const throw () 
+	PacketSize_t getPacketMaxSize () const 
 	{
 		return szObjectID 
 			+ szBYTE + 20
@@ -132,7 +132,7 @@ class GCAddBurrowingCreatureHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCAddBurrowingCreature * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCAddBurrowingCreature * pPacket , Player * pPlayer );
 
 };
 

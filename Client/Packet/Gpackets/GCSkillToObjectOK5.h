@@ -29,48 +29,48 @@ class GCSkillToObjectOK5 : public Packet {
 public :
 	
 	// constructor
-	GCSkillToObjectOK5() throw();
+	GCSkillToObjectOK5();
 	
 	// destructor
-	~GCSkillToObjectOK5() throw();
+	~GCSkillToObjectOK5();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_GC_SKILL_TO_OBJECT_OK_5; }
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_SKILL_TO_OBJECT_OK_5; }
 	
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getPacketSize() const throw() { return szObjectID + szSkillType + szObjectID + szDuration + szBYTE; }
+	PacketSize_t getPacketSize() const noexcept { return szObjectID + szSkillType + szObjectID + szDuration + szBYTE; }
 
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet's name
-	std::string getPacketName() const throw() { return "GCSkillToObjectOK5"; }
+	std::string getPacketName() const { return "GCSkillToObjectOK5"; }
 	
 	// get packet's debug string
-	std::string toString() const throw();
+	std::string toString() const;
 
 #endif
 
 	// get / set ObjectID
-	ObjectID_t getObjectID() const throw() { return m_ObjectID; }
-	void setObjectID(ObjectID_t ObjectID) throw() { m_ObjectID = ObjectID; }
-	ObjectID_t getTargetObjectID() const throw() { return m_TargetObjectID; }
-	void setTargetObjectID(ObjectID_t ObjectID) throw() { m_TargetObjectID = ObjectID; }
+	ObjectID_t getObjectID() const noexcept { return m_ObjectID; }
+	void setObjectID(ObjectID_t ObjectID) noexcept { m_ObjectID = ObjectID; }
+	ObjectID_t getTargetObjectID() const noexcept { return m_TargetObjectID; }
+	void setTargetObjectID(ObjectID_t ObjectID) noexcept { m_TargetObjectID = ObjectID; }
 
 	// get / set SkillType
-	SkillType_t getSkillType() const throw() { return m_SkillType; }
-	void setSkillType(SkillType_t SkillType) throw() { m_SkillType = SkillType; }
+	SkillType_t getSkillType() const noexcept { return m_SkillType; }
+	void setSkillType(SkillType_t SkillType) noexcept { m_SkillType = SkillType; }
 	
 /*
 	// get / set Target X,Y
@@ -80,15 +80,15 @@ public :
 */
 	
 	// get / set Duration
-	Duration_t getDuration() const throw() { return m_Duration; }
-	void setDuration(Duration_t Duration) throw() { m_Duration = Duration; }
+	Duration_t getDuration() const noexcept { return m_Duration; }
+	void setDuration(Duration_t Duration) noexcept { m_Duration = Duration; }
 	
 	// get / set CEffectID 
 //	CEffectID_t getCEffectID() const throw() { return m_CEffectID; }
 //	void setCEffectID(CEffectID_t e) throw() { m_CEffectID = e; }
 
-	BYTE getGrade() const throw() { return m_Grade; }
-	void setGrade( BYTE grade ) throw() { m_Grade = grade; }
+	BYTE getGrade() const noexcept { return m_Grade; }
+	void setGrade( BYTE grade ) noexcept { m_Grade = grade; }
 
 private :
 	
@@ -122,27 +122,27 @@ class GCSkillToObjectOK5Factory : public PacketFactory {
 public :
 	
 	// constructor
-	GCSkillToObjectOK5Factory() throw() {}
+	GCSkillToObjectOK5Factory() {}
 	
 	// destructor
-	virtual ~GCSkillToObjectOK5Factory() throw() {}
+	virtual ~GCSkillToObjectOK5Factory() {}
 
 	
 public :
 	
 	// create packet
-	Packet* createPacket() throw() { return new GCSkillToObjectOK5(); }
+	Packet* createPacket() { return new GCSkillToObjectOK5(); }
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet name
-	std::string getPacketName() const throw() { return "GCSkillToObjectOK5"; }
+	std::string getPacketName() const { return "GCSkillToObjectOK5"; }
 #endif
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_SKILL_TO_OBJECT_OK_5; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_SKILL_TO_OBJECT_OK_5; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szSkillType + szObjectID + szDuration + szBYTE; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szSkillType + szObjectID + szDuration + szBYTE; }
 
 };
 
@@ -158,7 +158,7 @@ class GCSkillToObjectOK5Handler {
 public :
 
 	// execute packet's handler
-	static void execute(GCSkillToObjectOK5* pGCSkillToObjectOK5, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(GCSkillToObjectOK5* pGCSkillToObjectOK5, Player* pPlayer);
 
 };
 

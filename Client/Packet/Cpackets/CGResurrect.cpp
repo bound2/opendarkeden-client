@@ -6,15 +6,13 @@
 #include "Client_PCH.h"
 #include "CGResurrect.h"
 
-void CGResurrect::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void CGResurrect::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 		    
-void CGResurrect::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void CGResurrect::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -22,7 +20,7 @@ void CGResurrect::write ( SocketOutputStream & oStream ) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGResurrect::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 

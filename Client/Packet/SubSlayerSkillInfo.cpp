@@ -14,7 +14,6 @@
 // read data from socket input stream
 //----------------------------------------------------------------------
 void SubSlayerSkillInfo::read ( SocketInputStream & iStream ) 
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 	try {
@@ -37,7 +36,6 @@ void SubSlayerSkillInfo::read ( SocketInputStream & iStream )
 // write data to socket output stream
 //----------------------------------------------------------------------
 void SubSlayerSkillInfo::write ( SocketOutputStream & oStream ) const 
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -62,7 +60,6 @@ void SubSlayerSkillInfo::write ( SocketOutputStream & oStream ) const
 //----------------------------------------------------------------------
 #ifdef __DEBUG_OUTPUT__
 	std::string SubSlayerSkillInfo::toString () const 
-		throw ()
 	{
 		StringStream msg;
 

@@ -26,49 +26,49 @@ class CGRelicToObject : public Packet {
 public:
 	
 	// constructor
-	CGRelicToObject() throw();
+	CGRelicToObject();
 	
 	// destructor
-	~CGRelicToObject() throw();
+	~CGRelicToObject();
 
 	
 public:
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_CG_RELIC_TO_OBJECT; }
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_RELIC_TO_OBJECT; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw() { return szObjectID + szObjectID + szCoord + szCoord; }
+	PacketSize_t getPacketSize() const noexcept { return szObjectID + szObjectID + szCoord + szCoord; }
 
 	// get/set Corpse's X
-	Coord_t getX() const throw() { return m_X; }
-	void setX(Coord_t X) throw() { m_X = X; }
+	Coord_t getX() const noexcept { return m_X; }
+	void setX(Coord_t X) noexcept { m_X = X; }
 
 	// get/set Corpse's Y
-	Coord_t getY() const throw() { return m_Y; }
-	void setY(Coord_t Y) throw() { m_Y = Y; }
+	Coord_t getY() const noexcept { return m_Y; }
+	void setY(Coord_t Y) noexcept { m_Y = Y; }
 
 	// get/set ObjectID
-	ObjectID_t getObjectID() const throw() { return m_ObjectID; }
-	ObjectID_t getItemObjectID() const throw() { return m_ItemObjectID; }
+	ObjectID_t getObjectID() const noexcept { return m_ObjectID; }
+	ObjectID_t getItemObjectID() const noexcept { return m_ItemObjectID; }
 
-	void setObjectID(ObjectID_t ObjectID) throw() { m_ObjectID = ObjectID; }
-	void setItemObjectID(ObjectID_t ItemObjectID) throw() { m_ItemObjectID = ItemObjectID; }
+	void setObjectID(ObjectID_t ObjectID) noexcept { m_ObjectID = ObjectID; }
+	void setItemObjectID(ObjectID_t ItemObjectID) noexcept { m_ItemObjectID = ItemObjectID; }
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet's debug std::string
-	std::string toString() const throw();
+	std::string toString() const;
 
 	// get packet name
-	std::string getPacketName() const throw() { return "CGRelicToObject"; }
+	std::string getPacketName() const { return "CGRelicToObject"; }
 #endif
 
 private :
@@ -94,25 +94,25 @@ class CGRelicToObjectFactory : public PacketFactory {
 public:
 	
 	// constructor
-	CGRelicToObjectFactory() throw() {}
+	CGRelicToObjectFactory() {}
 	
 	// destructor
-	virtual ~CGRelicToObjectFactory() throw() {}
+	virtual ~CGRelicToObjectFactory() {}
 
 	
 public:
 	
 	// create packet
-	Packet* createPacket() throw() { return new CGRelicToObject(); }
+	Packet* createPacket() { return new CGRelicToObject(); }
 
 	// get packet name
-	std::string getPacketName() const throw() { return "CGRelicToObject"; }
+	std::string getPacketName() const { return "CGRelicToObject"; }
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_RELIC_TO_OBJECT; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_RELIC_TO_OBJECT; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szObjectID + szCoord + szCoord; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szObjectID + szCoord + szCoord; }
 };
 
 #ifndef __GAME_CLIENT__
@@ -127,7 +127,7 @@ class CGRelicToObjectHandler {
 public:
 
 	// execute packet's handler
-	static void execute(CGRelicToObject* pCGRelicToObject, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(CGRelicToObject* pCGRelicToObject, Player* pPlayer);
 
 };
 #endif

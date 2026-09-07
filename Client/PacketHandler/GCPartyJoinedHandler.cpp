@@ -29,7 +29,6 @@ extern bool					g_bZonePlayerInLarge;
 void GCPartyJoinedHandler::execute (GCPartyJoined * pPacket , Player * pPlayer)
 	 
 
-throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 	

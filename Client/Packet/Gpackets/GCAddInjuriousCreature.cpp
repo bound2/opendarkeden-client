@@ -6,8 +6,7 @@
 #include "Client_PCH.h"
 #include "GCAddInjuriousCreature.h"
 
-void GCAddInjuriousCreature::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void GCAddInjuriousCreature::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -27,8 +26,7 @@ void GCAddInjuriousCreature::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 		    
-void GCAddInjuriousCreature::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void GCAddInjuriousCreature::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -51,7 +49,6 @@ void GCAddInjuriousCreature::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 	std::string GCAddInjuriousCreature::toString () const
-		   throw ()
 	{
 		__BEGIN_TRY
 			

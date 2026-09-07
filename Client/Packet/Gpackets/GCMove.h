@@ -28,11 +28,11 @@ class GCMove : public Packet {
 public :
 
 	// constructor
-	GCMove () throw ()
+	GCMove ()
 	{
 	}
 
-	GCMove ( ObjectID_t objectID , Coord_t x , Coord_t y , Dir_t dir ) throw ()
+	GCMove ( ObjectID_t objectID , Coord_t x , Coord_t y , Dir_t dir )
 		: m_ObjectID(objectID), m_X(x), m_Y(y), m_Dir(dir)
 	{
 	}
@@ -41,46 +41,46 @@ public :
 public :
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_MOVE; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_MOVE; }
 	
 	// get packet's body size
 	// *OPTIMIZATION HINT*
 	// const static GCMovePacketSize 를 정의, 리턴하라.
-	PacketSize_t getPacketSize () const throw () { return szObjectID + szCoord + szCoord + szDir ; }
+	PacketSize_t getPacketSize () const noexcept { return szObjectID + szCoord + szCoord + szDir ; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCMove"; }
+		std::string getPacketName () const { return "GCMove"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 
 public :
 
 	// get/set Creature ID 
-	ObjectID_t getObjectID () const throw () { return m_ObjectID; }
-	void setObjectID ( ObjectID_t objectID ) throw () { m_ObjectID = objectID; }
+	ObjectID_t getObjectID () const noexcept { return m_ObjectID; }
+	void setObjectID ( ObjectID_t objectID ) noexcept { m_ObjectID = objectID; }
 
 	// get/set X
-	Coord_t getX () const throw () { return m_X; }
-	void setX ( Coord_t x ) throw () { m_X = x; }
+	Coord_t getX () const noexcept { return m_X; }
+	void setX ( Coord_t x ) noexcept { m_X = x; }
 	
 	// get/set Y
-	Coord_t getY () const throw () { return m_Y; }
-	void setY ( Coord_t y ) throw () { m_Y = y; }
+	Coord_t getY () const noexcept { return m_Y; }
+	void setY ( Coord_t y ) noexcept { m_Y = y; }
 
 	// get/set Dir
-	Dir_t getDir () const throw () { return m_Dir; }
-	void setDir ( Dir_t dir ) throw () { m_Dir = dir; }
+	Dir_t getDir () const noexcept { return m_Dir; }
+	void setDir ( Dir_t dir ) noexcept { m_Dir = dir; }
 
 
 private :
@@ -106,20 +106,20 @@ class GCMoveFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCMove(); }
+	Packet * createPacket () { return new GCMove(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCMove"; }
+		std::string getPacketName () const { return "GCMove"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_MOVE; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_MOVE; }
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static GCMovePacketSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szCoord + szCoord + szDir ; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID + szCoord + szCoord + szDir ; }
 
 };
 
@@ -135,7 +135,7 @@ class GCMoveHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCMove * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCMove * pPacket , Player * pPlayer );
 
 };
 

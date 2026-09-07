@@ -14,7 +14,6 @@
 //
 //////////////////////////////////////////////////////////////////////
 void LCDeletePCOK::read ( SocketInputStream & iStream )
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -25,7 +24,6 @@ void LCDeletePCOK::read ( SocketInputStream & iStream )
 //
 //////////////////////////////////////////////////////////////////////
 void LCDeletePCOK::write ( SocketOutputStream & oStream ) const
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 	__END_CATCH

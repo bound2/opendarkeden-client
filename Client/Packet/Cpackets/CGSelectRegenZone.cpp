@@ -6,8 +6,7 @@
 #include "Client_PCH.h"
 #include "CGSelectRegenZone.h"
 
-void CGSelectRegenZone::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGSelectRegenZone::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 
@@ -16,8 +15,7 @@ void CGSelectRegenZone::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 		    
-void CGSelectRegenZone::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGSelectRegenZone::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -28,7 +26,6 @@ void CGSelectRegenZone::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGSelectRegenZone::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

@@ -8,8 +8,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGSelectWayPoint::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void CGSelectWayPoint::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -22,8 +21,7 @@ void CGSelectWayPoint::read ( SocketInputStream & iStream )
 		    
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGSelectWayPoint::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void CGSelectWayPoint::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 		
@@ -40,7 +38,6 @@ void CGSelectWayPoint::write ( SocketOutputStream & oStream ) const
 //////////////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string CGSelectWayPoint::toString () const
-		   throw ()
 	{
 		__BEGIN_TRY
 			

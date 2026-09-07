@@ -21,29 +21,29 @@
 class GCQuestStatus : public Packet 
 {
 public:
-	GCQuestStatus() throw();
-	~GCQuestStatus() throw();
+	GCQuestStatus();
+	~GCQuestStatus();
 	
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_GC_QUEST_STATUS; }
-	PacketSize_t getPacketSize() const throw() { return szWORD + szWORD + szDWORD; }
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_QUEST_STATUS; }
+	PacketSize_t getPacketSize() const noexcept { return szWORD + szWORD + szDWORD; }
 
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "GCQuestStatus"; }
-	std::string toString() const throw();
+	std::string getPacketName() const { return "GCQuestStatus"; }
+	std::string toString() const;
 #endif
 
 public:
-	WORD getQuestID() const throw() { return m_QuestID; }
-	void setQuestID(WORD e) throw() { m_QuestID = e; }
+	WORD getQuestID() const noexcept { return m_QuestID; }
+	void setQuestID(WORD e) noexcept { m_QuestID = e; }
 	
-	WORD getCurrentNum() const throw() { return m_CurrentNum; }
-	void setCurrentNul(WORD n) throw() { m_CurrentNum = n; }
+	WORD getCurrentNum() const noexcept { return m_CurrentNum; }
+	void setCurrentNul(WORD n) noexcept { m_CurrentNum = n; }
 
-	DWORD getRemainTime() const throw() { return m_Time; }
-	void setRemainTime(DWORD d) throw() { m_Time = d; }
+	DWORD getRemainTime() const noexcept { return m_Time; }
+	void setRemainTime(DWORD d) noexcept { m_Time = d; }
 	
 private :
 	WORD m_QuestID;
@@ -59,16 +59,16 @@ private :
 class GCQuestStatusFactory : public PacketFactory 
 {
 public :
-	GCQuestStatusFactory() throw() {}
-	virtual ~GCQuestStatusFactory() throw() {}
+	GCQuestStatusFactory() {}
+	virtual ~GCQuestStatusFactory() {}
 	
 public:
-	Packet* createPacket() throw() { return new GCQuestStatus(); }
+	Packet* createPacket() { return new GCQuestStatus(); }
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "GCQuestStatus"; }
+	std::string getPacketName() const { return "GCQuestStatus"; }
 #endif
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_QUEST_STATUS; }
-	PacketSize_t getPacketMaxSize() const throw() { return szWORD + szWORD + szDWORD; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_QUEST_STATUS; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szWORD + szWORD + szDWORD; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -78,7 +78,7 @@ public:
 class GCQuestStatusHandler 
 {
 public:
-	static void execute(GCQuestStatus* pGCQuestStatus, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(GCQuestStatus* pGCQuestStatus, Player* pPlayer);
 
 };
 

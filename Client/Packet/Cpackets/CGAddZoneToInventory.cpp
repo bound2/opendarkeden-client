@@ -10,22 +10,19 @@
 #include "PacketAssert.h"
 
 
-CGAddZoneToInventory::CGAddZoneToInventory () 
-     throw ()
+CGAddZoneToInventory::CGAddZoneToInventory ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-CGAddZoneToInventory::~CGAddZoneToInventory () 
-    throw ()
+CGAddZoneToInventory::~CGAddZoneToInventory ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGAddZoneToInventory::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGAddZoneToInventory::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -55,8 +52,7 @@ void CGAddZoneToInventory::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGAddZoneToInventory::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGAddZoneToInventory::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -88,7 +84,7 @@ void CGAddZoneToInventory::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGAddZoneToInventory::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 		

@@ -7,8 +7,7 @@
 #include "CGQuitUnionAccept.h"
 
 
-void CGQuitUnionAccept::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGQuitUnionAccept::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -17,8 +16,7 @@ void CGQuitUnionAccept::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGQuitUnionAccept::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGQuitUnionAccept::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -29,7 +27,6 @@ void CGQuitUnionAccept::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 string CGQuitUnionAccept::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

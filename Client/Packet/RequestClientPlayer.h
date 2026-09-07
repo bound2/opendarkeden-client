@@ -28,10 +28,10 @@ class RequestClientPlayer : public Player {
 public :
 	
 	// constructor
-	RequestClientPlayer ( Socket * pSocket ) throw ( ProtocolException , Error );
+	RequestClientPlayer ( Socket * pSocket );
 	
 	// destructor
-	~RequestClientPlayer () throw ( ProtocolException , Error );
+	~RequestClientPlayer () noexcept(false);
 
 public :
 
@@ -39,7 +39,7 @@ public :
 	//virtual void processInput () throw ( IOException , Error );
 	
 	// parse packet and execute handler for the packet
-	virtual void processCommand () throw ( IOException , Error );
+	virtual void processCommand ();
 	
 	// flush output buffer to socket's send buffer
 	//virtual void processOutput () throw ( IOException , Error );
@@ -47,8 +47,8 @@ public :
 	// send packet to player's output buffer
 	//virtual void sendPacket ( Packet * packet ) throw ( ProtocolException , Error );
 	
-	uint getInputStreamLength () const throw();
-	uint readInputStream ( char * buf , uint len ) 	throw ( ProtocolException , Error );
+	uint getInputStreamLength () const;
+	uint readInputStream ( char * buf , uint len );
 
 
 	void				setRequestServerName(const char* pName)	{ m_RequestServerName = pName; }
@@ -59,18 +59,18 @@ public :
 
 	// disconnect
 	// 정식 로그아웃의 경우 disconnect(UNDISCONNECTED)
-	virtual void disconnect ( bool bDisconnected = DISCONNECTED ) throw ( ProtocolException , Error );
+	virtual void disconnect ( bool bDisconnected = DISCONNECTED );
 	
 	// get debug string
-	virtual std::string toString () const throw ( ProtocolException , Error );
+	virtual std::string toString () const;
 	
 public :
 
 	// get player's status
-	PlayerStatus getPlayerStatus () const throw () { return m_PlayerStatus; }
+	PlayerStatus getPlayerStatus () const noexcept { return m_PlayerStatus; }
 
 	// set player's status
-	void setPlayerStatus ( PlayerStatus playerStatus ) throw () { m_PlayerStatus = playerStatus; }
+	void setPlayerStatus ( PlayerStatus playerStatus ) noexcept { m_PlayerStatus = playerStatus; }
 
 	void		setRequestMode(REQUEST_CLIENT_MODE mode)	{ m_RequestMode = mode; }
 	REQUEST_CLIENT_MODE			getRequestMode() const	{ return m_RequestMode; }

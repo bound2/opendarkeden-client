@@ -131,6 +131,25 @@ presets (the component described in step 5 is required). Configure the two
 trees sequentially: they share a manifest dependency installation under
 `build/presets/vcpkg_installed`.
 
+A second compiler checks that the sources are ISO C++20 rather than MSVC's
+dialect of it. The `windows-clang` preset builds every target with the
+clang-cl that ships with Visual Studio's "C++ Clang tools for Windows"
+component, through NMake, so it has to run from a **VS developer prompt**
+(`vcvars64.bat`, or the "x64 Native Tools Command Prompt"), where `clang-cl`
+and `nmake` are on the path:
+
+```powershell
+$env:VCPKG_ROOT = 'C:/vcpkg'
+cmake --preset windows-clang
+cmake --build --preset windows-clang
+ctest --test-dir build/presets/windows-clang --output-on-failure
+```
+
+NMake compiles one file at a time, so expect this tree to take several times
+longer than the Visual Studio one. The ratchet that counts translation units
+in the executable (R1) is skipped here, because it reads a `.vcxproj` that
+this generator does not produce.
+
 To run the same complete verification as CI, including checking that every
 required CTest entry is registered:
 

@@ -8,8 +8,7 @@
 
 //#include "Properties.h"
 
-void CGConnectSetKey::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGConnectSetKey::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 
@@ -19,8 +18,7 @@ void CGConnectSetKey::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGConnectSetKey::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGConnectSetKey::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 

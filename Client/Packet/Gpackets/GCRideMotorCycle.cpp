@@ -18,8 +18,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-GCRideMotorCycle::GCRideMotorCycle () 
-     throw ()
+GCRideMotorCycle::GCRideMotorCycle ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -29,8 +28,7 @@ GCRideMotorCycle::GCRideMotorCycle ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-GCRideMotorCycle::~GCRideMotorCycle () 
-    throw ()
+GCRideMotorCycle::~GCRideMotorCycle ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -40,8 +38,7 @@ GCRideMotorCycle::~GCRideMotorCycle ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCRideMotorCycle::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCRideMotorCycle::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -57,7 +54,7 @@ void GCRideMotorCycle::read ( SocketInputStream & iStream )
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
 void GCRideMotorCycle::write ( SocketOutputStream & oStream ) 
-     const throw ( ProtocolException , Error )
+     const
 {
 	__BEGIN_TRY
 		
@@ -75,7 +72,7 @@ void GCRideMotorCycle::write ( SocketOutputStream & oStream )
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string GCRideMotorCycle::toString () 
-		const throw ()
+		const
 	{
 		__BEGIN_TRY
 

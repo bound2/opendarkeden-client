@@ -19,14 +19,14 @@
 class CGSelectTileEffect : public Packet 
 {
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_SELECT_TILE_EFFECT; }
-	PacketSize_t getPacketSize() const throw() { return szObjectID; }
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_SELECT_TILE_EFFECT; }
+	PacketSize_t getPacketSize() const noexcept { return szObjectID; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "CGSelectTileEffect"; }
-		std::string toString() const throw();
+		std::string getPacketName() const { return "CGSelectTileEffect"; }
+		std::string toString() const;
 	#endif
 
 public:
@@ -42,14 +42,14 @@ private:
 // class CGSelectTileEffectFactory
 //////////////////////////////////////////////////////////////////////////////
 class CGSelectTileEffectFactory : public PacketFactory {
-	Packet* createPacket() throw() { return new CGSelectTileEffect(); }
+	Packet* createPacket() { return new CGSelectTileEffect(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "CGSelectTileEffect"; }
+		std::string getPacketName() const { return "CGSelectTileEffect"; }
 	#endif
 
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_SELECT_TILE_EFFECT; }
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_SELECT_TILE_EFFECT; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -62,8 +62,8 @@ class Effect;
 	class CGSelectTileEffectHandler 
 	{
 	public:
-		static void execute(CGSelectTileEffect* pCGSelectTileEffect, Player* pPlayer) throw ( ProtocolException , Error );
-		static void executeVampirePortal(CGSelectTileEffect* pCGSelectTileEffect, Player* pPlayer, Effect* pEffect) throw ( ProtocolException , Error );
+		static void execute(CGSelectTileEffect* pCGSelectTileEffect, Player* pPlayer);
+		static void executeVampirePortal(CGSelectTileEffect* pCGSelectTileEffect, Player* pPlayer, Effect* pEffect);
 	};
 #endif
 

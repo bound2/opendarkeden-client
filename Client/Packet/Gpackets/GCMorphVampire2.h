@@ -27,38 +27,38 @@ class GCMorphVampire2 : public Packet {
 public :
 
 	// constructor
-	GCMorphVampire2 () throw () {}
-	GCMorphVampire2 ( PCVampireInfo3 info ) throw () : m_VampireInfo3(info) {}
+	GCMorphVampire2 () {}
+	GCMorphVampire2 ( PCVampireInfo3 info ) : m_VampireInfo3(info) {}
 	
 public :
 
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_MORPH_VAMPIRE_2; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_MORPH_VAMPIRE_2; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () { return m_VampireInfo3.getSize(); }
+	PacketSize_t getPacketSize () const { return m_VampireInfo3.getSize(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCMorphVampire2"; }
+		std::string getPacketName () const { return "GCMorphVampire2"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 
 public :
 
 	// get/set vampire info
-	const PCVampireInfo3& getSlayerInfo () throw () { return m_VampireInfo3; }
-	void setVampireInfo ( PCVampireInfo3 info ) throw () { m_VampireInfo3 = info; }
+	const PCVampireInfo3& getSlayerInfo () noexcept { return m_VampireInfo3; }
+	void setVampireInfo ( PCVampireInfo3 info ) { m_VampireInfo3 = info; }
 
 
 private :
@@ -82,18 +82,18 @@ class GCMorphVampire2Factory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCMorphVampire2(); }
+	Packet * createPacket () { return new GCMorphVampire2(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCMorphVampire2"; }
+		std::string getPacketName () const { return "GCMorphVampire2"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_MORPH_VAMPIRE_2; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_MORPH_VAMPIRE_2; }
 
 	// get packet's body size
-	PacketSize_t getPacketMaxSize () const throw ()
+	PacketSize_t getPacketMaxSize () const
 	{ 
 		return PCVampireInfo3::getMaxSize();
 	}
@@ -112,7 +112,7 @@ class GCMorphVampire2Handler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCMorphVampire2 * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCMorphVampire2 * pPacket , Player * pPlayer );
 
 };
 

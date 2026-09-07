@@ -96,6 +96,27 @@ For a real upgrade, the build contract should:
 Passing `/std:c++20` in an ad hoc flags variable is useful for an audit but should
 not be the committed implementation.
 
+**Build-contract status (2026-09-07):** `CMAKE_CXX_STANDARD 20` with
+`CMAKE_CXX_STANDARD_REQUIRED ON` was already the contract (PR #83), and the
+root `CMakeLists.txt` now adds `CMAKE_CXX_EXTENSIONS OFF` and, for MSVC,
+`/permissive-` and `/Zc:__cplusplus` on every C++ target through
+`add_compile_options`, next to `/MP`. With findings 3 and 4 closed the whole
+tree - 1,241 translation units, the tests included - builds under
+`/permissive-` with **0 errors**, and every test passes in the plain and the
+ASan tree, so there was no strict-mode workload left to schedule: the
+string-literal fixes of finding 5 and the exception and `register` sweeps
+were the whole of it. One trap, recorded because the first probe fell into
+it: passing `/permissive-` in `-DCMAKE_CXX_FLAGS=` on the configure line
+replaces CMake's MSVC defaults, `/EHsc` among them, and without `/EHsc` a
+C++ exception cannot be caught by type - six tests failed with "uncaught
+exception of unknown type" and the receive-loop test saw packets leak on the
+throw path, none of which had anything to do with conformance. The committed
+change adds the option and keeps the defaults. The second-compiler job
+followed the same day: the `windows-clang` preset builds the whole tree with
+clang-cl 19 through NMake from a VS developer prompt (the ClangCL toolset is
+not installed, but the compiler is), and the experiments table below has the
+result. A Linux or macOS build is a port, not a language-mode question.
+
 ## Build experiments
 
 The audit used CMake 4.4.3, MSVC 19.44.35228, Windows SDK 10.0.22621, the existing
@@ -113,6 +134,7 @@ mode.
 | C++20 plus `_HAS_STD_BYTE=0`, `_HAS_AUTO_PTR_ETC=1`, and `/Zc:strictStrings-` probes | The complete target graph built; all six CTest entries passed. The unit binary reported **375 tests, 5,066 checks, 0 failures**. |
 | Clang 19.1.5 C++17 compile probe | Rejected non-empty dynamic exception specifications immediately; one representative packet translation unit hit Clang's 20-error limit in `SocketAPI.h`. |
 | Clang 19.1.5 SpriteLib probe | Rejected `register` declarations as invalid ISO C++17. |
+| clang-cl 19.1.5, whole tree, 2026-09-07 (NMake, the `windows-clang` preset) | With findings 3 and 4 closed: every library, every tool, `unit_tests` and `DarkEden` compile and link; the clang-built unit binary reports **596 tests, 294,382 checks, 0 failures** and every ctest passes. Two ISO defects MSVC had accepted as extensions were found and fixed: a `POINT` brace-initialised from `0xFFFFFFFF` (narrowing to `LONG`), and an `enum` whose first value `0xffff0000` gave it `int` as its underlying type, so that its members were negative `case` labels against an unsigned `id_t`; it now has `unsigned int` as its underlying type. |
 
 The `_HAS_*` macros and `/Zc:strictStrings-` were used only to expose the next
 layer of errors. They are **not proposed fixes**: they disable new library features
@@ -270,6 +292,162 @@ sit on test doubles that override wire interfaces
 bases declare, so they belong in the same commit as the base they mirror. The
 `throw()` half of that is the part that cannot be deferred: once a base is
 `noexcept`, an override that is not stops compiling.
+
+**Packet-root status (2026-09-07):** the 162 files directly under
+`Client/Packet` are at 0 - 143 of them carried a specification, 1,799 in
+all - and so is `tests/`; **R10 = 9,664**. The work went as
+four slices - the wire core (the exception header, the asserts, the string
+stream, the sockets, the datagram classes, the streams and the file API, 524
+sites), the packet framework and the player classes (224), the
+player-character info classes (558) and the remaining info classes (493) -
+plus the nine in `tests/`, which moved with the bases they mirror. The rule
+each slice applied, and the numbers it produced:
+
+- **A type list is deleted, not respelled** - 643 of them. MSVC ignored the
+  list already, and a function with no specification is what ISO C++ means
+  by potentially throwing, so deleting it changes nothing MSVC does. The
+  `noexcept(false)` this finding names above is the same thing said longer,
+  and is not written anywhere except in the one place it is not the same
+  thing: **a destructor**. A destructor with no specification is `noexcept`
+  by default, so the ten that carried `throw(ProtocolException, Error)` -
+  `Player` and its three subclasses, `Socket`, `SocketImpl`, `ServerSocket`,
+  `DatagramSocket` and the two streams - are spelled `noexcept(false)`, which
+  is what MSVC had read the list as. They can throw: the player destructors
+  hold an `Assert` on the session state, and the socket ones call `close()`.
+  The slices' first version deleted those lists too, and the compiler said
+  so: no C4297 for any of the ten on master, C4297 for all ten once the list
+  was gone.
+- **An empty `throw()` is a judgement per function**: 599 became `noexcept`
+  and 566 were deleted, 48 of the latter on destructors, which are `noexcept`
+  by default anyway. Promoted: the scalar, pointer, enum and array-indexed
+  getters and setters, the `getSize`/`getMaxSize` bodies that sum constants
+  (`std::string::size()` and `std::list::size()` are `noexcept` by the
+  standard), `clearList()` over `std::list::clear()`, and the bitset setters
+  in the slayer outlooks. Deleted: anything returning or assigning a
+  `std::string` or a container by value (every `getName`, `setName`,
+  `toString`, the `*Info3` copy constructors), anything wrapped in
+  `__BEGIN_TRY`/`__END_CATCH` (the pair rethrows), `new`, `front()` and
+  `pop_front()`, the bitset getters (`to_ulong` and `test` throw), and the
+  exception-class constructors - `Throwable` holds a `std::list<std::string>`
+  and MSVC's `std::list` default constructor allocates its sentinel node and
+  is not `noexcept`, so `Throwable()` and the 41 default constructors that
+  chain to it are deleted rather than promoted, though libstdc++ and libc++
+  would have allowed it.
+- **A virtual is promoted only when every override in the repository is
+  `throw()` or `noexcept` and passes the same test**, and the slices checked
+  by grep before promoting: `PCInfo::getPCType` and `PCInfo::getSize` (nine
+  overrides, all in the slice), and the three `getSize` overrides of
+  `PCSkillInfo` (whose base is deleted, since those overrides walk a list).
+  Deleted rather than promoted, on purpose: `PacketFactory::getPacketID` and
+  `getPacketMaxSize` (448 factory subclasses in the packet directories, still
+  `throw()` and rewritten by later slices; `GCPetStashListFactory` and
+  `GCGoodsListFactory` already call an unspecified `getPacketMaxSize`),
+  `DatagramPacket`'s pure virtuals, `ModifyInfo::getPacketSize` (not
+  virtual, but about thirty `Gpackets` classes declare a member of the same
+  name that hides it) and `WarInfo::getSize`, whose overrides add
+  `ValueList::getPacketSize`. A base with no specification compiles under any
+  override, which is the property the packet-directory slices need.
+- **The two things this finding said should travel with the slice did**:
+  `SocketAPI.cpp`'s five two-line specifications are gone, along with the
+  copies in the banner comments above them and the `MBindException` name one
+  of those had wrong; and the `WireHost.h` comment that said `readInputStream`
+  and `send` "are throw(ProtocolException, Error)" now says they propagate
+  those exceptions.
+
+Two facts about the files that the next slices should know. The packet-root
+files are **CRLF in the working tree** on this machine, and `Datagram.h` and
+`SocketInputStream.h` are stored with mixed endings; `grep -c $'\r'` reports
+0 for many of them and is not a line-ending check here - count bytes with
+perl, compare the changed-line count of `git diff --numstat` with the
+specification count per file, and expect the Edit tool to normalise a mixed
+file. And the compiler is a usable oracle for one direction: a `throw()`
+promoted to `noexcept` whose body can throw draws C4297, so a promotion that
+adds a C4297 to the build is wrong, while the C4297s that remain on the
+destructors wrapped in `__BEGIN_TRY` are the pre-existing concern this finding
+raises and not this slice's to settle.
+
+Verified: unit_tests in `build/tests` and `build/tests-asan`, 596 tests,
+294,382 checks, 0 failed in both; DarkEden in `build/vs2022` with 0 errors,
+which is the check that matters for the headers every handler includes; the
+wire inventory and every golden unchanged.
+
+**Small packet directories (2026-09-07):** `Lpackets` (319 sites, 36 files),
+`Upackets` (34, 4) and `Rpackets` (256, 22) are at 0 as well, and **R10 =
+9,055**. The packet classes are regular enough that this slice was done by
+script rather than by hand, with the same rule narrowed to what a script can
+prove: a type list is deleted (163; the script aborts on a destructor carrying
+one, and none does); a `throw()` becomes `noexcept` only on an inline
+one-line member that returns a constant or a scalar or reference member with
+no call in the expression, or assigns one scalar by-value parameter to a
+member (162 - the `getPacketID`, `getPacketSize` and `getPacketMaxSize`
+constants and the scalar getters and setters); every other `throw()` is
+deleted (284 - the `getPacketName` and `toString` that return a
+`std::string`, the `createPacket` that call `new`, the size functions with
+out-of-line or calling bodies, the string setters, the list operations and
+the eight destructors). Scalar means the fundamentals plus every typedef and
+enum declared under `Client/Packet`, `Client/Packet/Types`, `basic/` and the
+directory itself, so a `std::string` getter or a const-reference setter never
+qualifies. The script's tokenizer copies comments and string literals
+through, and a second tokenizer compared every file with its committed
+version - every comment and literal identical, every code token identical
+once the specifications and the `noexcept` tokens are erased. A body the rule
+does not recognise is deleted, never promoted, so the script can only err by
+leaving a nothrow function unspecified, which ISO C++ allows; the review of
+its output is a review of the 162 promoted lines, which reduce to about sixty
+distinct shapes. `Cpackets` (3,172) and `Gpackets` (5,883) are what remains,
+and the same script applies to them.
+
+**Cpackets (2026-09-07):** at 0, 3,172 sites in 326 files, **R10 = 5,883**.
+The script's decisions were 873 type lists deleted, 1,049 `throw()` promoted
+and 1,250 deleted, verified the same way (residual 0, every file compared
+token by token with its committed version, the promoted lines reduced to
+their shapes and read). The one thing the script cannot see is a packet
+deriving from another packet: `CGUseMessageItemFromInventory` derives from
+`CGUseItemFromInventory` and overrides its `getPacketSize` and its factory's
+`getPacketMaxSize` with multi-line bodies the script deletes, while the base's
+one-liners it promotes - and MSVC refused the pair, C2694, an override with a
+less restrictive specification than its base. The base's two functions are
+unspecified, by hand, and the build is the check that finds the next such
+pair; `Gpackets` should expect the same for its `OK1`/`OK2`-style families.
+
+**Gpackets (2026-09-07):** at 0, 5,883 sites in 516 files, and **R10 = 0**:
+every library a test binary can link is free of dynamic exception
+specifications, and the ratchet now holds the whole set at zero the way R9
+holds `basic/`. The script's decisions were 1,293 type lists deleted, 1,845
+`throw()` promoted and 2,745 deleted, verified as before; the promoted return
+and parameter types were listed and read (the `PacketID_t`/`PacketSize_t`
+constants, the `*_t` typedefs, the enums, the fundamentals, and const
+references to `std::string` and the `PC*Info3` classes). Five packets derive
+from another packet here; a scan of that shape ahead of the build found the
+two that override a promoted one-liner (`GCMakeItemOK` and `GCMakeItemFail`
+over `GCChangeInventoryItemNum::getPacketSize`), the base was left
+unspecified by hand, and the build agreed. What this finding still owes is
+outside R10: `Client/PacketHandler` (284) and the remaining executable
+sources (34), which the slice that clears them should put under a ratchet of
+their own, since a `throw()` there whose body throws is the same undefined
+behaviour it was in the libraries.
+
+**Executable side (2026-09-07): finding 3 is closed on the source side.**
+The 319 specifications outside the library set are gone: 284 in
+`Client/PacketHandler`, one on each handler's `execute` definition, all type
+lists; 32 in the two request-side packet factory managers under
+`Client/OtherClass`, whose constructors, destructors and `toString` had
+`throw()` (deleted: `__BEGIN_TRY` bodies and a `std::string`) and whose
+`getPacket`/`getPacketMaxSize` and validation entry points had lists; and
+three lists in `RequestFileManager` and `Updater/UpdateManager.h`. Nothing
+was promoted. The same script and the same token-by-token verification as
+the packet directories; the only test path is the executable build, since
+none of these files links into a test binary. Ratchet **R12 = 0** holds every
+`.h`, `.cpp` and `.inl` under `Client`, `VS_UI`, `basic`, `tools`,
+`third_party` and `tests` at zero, so R9 and R10 are now subsumed and kept
+only as the record of how the libraries got there. What this finding still
+does not settle is the pre-existing concern it raised at the top: the
+`throw()` functions whose bodies throw were undefined under MSVC's reading and
+now simply propagate, which is the behaviour ISO C++ gives an unspecified
+function and the one the callers were written against; the C4297 count in
+the build is what remains of it, on destructors wrapped in
+`__BEGIN_TRY`/`__END_CATCH`, which are `noexcept` by default whatever is
+written on them.
 
 ### 4. `register` remains in C++ source
 

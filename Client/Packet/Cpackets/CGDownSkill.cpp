@@ -6,8 +6,7 @@
 #include "Client_PCH.h"
 #include "CGDownSkill.h"
 
-void CGDownSkill::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGDownSkill::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -16,8 +15,7 @@ void CGDownSkill::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 		    
-void CGDownSkill::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGDownSkill::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -28,7 +26,6 @@ void CGDownSkill::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGDownSkill::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

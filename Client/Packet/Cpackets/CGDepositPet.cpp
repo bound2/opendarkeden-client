@@ -6,8 +6,7 @@
 #include "Client_PCH.h"
 #include "CGDepositPet.h"
 
-void CGDepositPet::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGDepositPet::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY 
 		
@@ -17,8 +16,7 @@ void CGDepositPet::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGDepositPet::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGDepositPet::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -29,7 +27,7 @@ void CGDepositPet::write (SocketOutputStream & oStream) const
 }
 
 string CGDepositPet::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 		

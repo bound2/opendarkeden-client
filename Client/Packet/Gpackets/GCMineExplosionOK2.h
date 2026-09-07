@@ -28,70 +28,70 @@ class GCMineExplosionOK2 : public Packet {
 public :
 	
 	// constructor
-	GCMineExplosionOK2 () throw ();
+	GCMineExplosionOK2 ();
 	
 	// destructor
-	~GCMineExplosionOK2 () throw ();
+	~GCMineExplosionOK2 ();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_MINE_EXPLOSION_OK_2; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_MINE_EXPLOSION_OK_2; }
 	
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getPacketSize () const throw () { return szCoord*2+ szDir + szItemType
+	PacketSize_t getPacketSize () const { return szCoord*2+ szDir + szItemType
 	   + szBYTE + szObjectID * m_CListNum; }
          //CListNum, SListNum, ListEle * CListNum, ListEle * SListNum * 5 
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCMineExplosionOK2"; }
+		std::string getPacketName () const { return "GCMineExplosionOK2"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 	// get / set X
-	Coord_t getX() const throw() { return m_X; }
-	void setX( Coord_t X ) throw() { m_X = X; }
+	Coord_t getX() const noexcept { return m_X; }
+	void setX( Coord_t X ) noexcept { m_X = X; }
 
 	// get / set Y
-	Coord_t getY() const throw() { return m_Y; }
-	void setY( Coord_t Y ) throw() { m_Y = Y; }
+	Coord_t getY() const noexcept { return m_Y; }
+	void setY( Coord_t Y ) noexcept { m_Y = Y; }
 	
 	// get / set Dir
-	Dir_t getDir() const throw() { return m_Dir; }
-	void setDir( Dir_t r ) throw() { m_Dir = r; }
+	Dir_t getDir() const noexcept { return m_Dir; }
+	void setDir( Dir_t r ) noexcept { m_Dir = r; }
 	
 	// get / set ItemType
-	ItemType_t getItemType() const throw() { return m_ItemType; }
-	void setItemType( ItemType_t r ) throw() { m_ItemType = r; }
+	ItemType_t getItemType() const noexcept { return m_ItemType; }
+	void setItemType( ItemType_t r ) noexcept { m_ItemType = r; }
 
-	void setXYDir( Coord_t X, Coord_t Y, Dir_t R) throw() { m_X = X; m_Y = Y; m_Dir = R;}
+	void setXYDir( Coord_t X, Coord_t Y, Dir_t R) { m_X = X; m_Y = Y; m_Dir = R;}
 
     // get / set Creature List Number
-    BYTE getCListNum() const throw() { return m_CListNum; }
-    void setCListNum( BYTE CListNum ) throw() { m_CListNum = CListNum; }
+    BYTE getCListNum() const noexcept { return m_CListNum; }
+    void setCListNum( BYTE CListNum ) noexcept { m_CListNum = CListNum; }
 
 
     // add / delete  Creature List
-    void addCListElement( ObjectID_t ObjectID ) throw();
+    void addCListElement( ObjectID_t ObjectID );
 
 	// Clear Creature List
-    void clearCList() throw() { m_CList.clear(); m_CListNum = 0; }
+    void clearCList() { m_CList.clear(); m_CListNum = 0; }
 
     // pop front Element in Status List
-    ObjectID_t popCListElement() throw() { ObjectID_t CreatureList = m_CList.front(); m_CList.pop_front(); return CreatureList; }
+    ObjectID_t popCListElement() { ObjectID_t CreatureList = m_CList.front(); m_CList.pop_front(); return CreatureList; }
 
 
 private :
@@ -128,27 +128,27 @@ class GCMineExplosionOK2Factory : public PacketFactory {
 public :
 	
 	// constructor
-	GCMineExplosionOK2Factory () throw () {}
+	GCMineExplosionOK2Factory () {}
 	
 	// destructor
-	virtual ~GCMineExplosionOK2Factory () throw () {}
+	virtual ~GCMineExplosionOK2Factory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCMineExplosionOK2(); }
+	Packet * createPacket () { return new GCMineExplosionOK2(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCMineExplosionOK2"; }
+		std::string getPacketName () const { return "GCMineExplosionOK2"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_MINE_EXPLOSION_OK_2; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_MINE_EXPLOSION_OK_2; }
 
 	// get Pakcet Max Size
-	PacketSize_t getPacketMaxSize () const throw () { return szCoord*2 + szDir + szItemType 
+	PacketSize_t getPacketMaxSize () const { return szCoord*2 + szDir + szItemType 
 		+ szBYTE + szWORD + szObjectID + 255; }
 };
 
@@ -164,7 +164,7 @@ class GCMineExplosionOK2Handler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCMineExplosionOK2 * pGCMineExplosionOK2 , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCMineExplosionOK2 * pGCMineExplosionOK2 , Player * pPlayer );
 
 };
 

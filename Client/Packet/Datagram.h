@@ -38,82 +38,82 @@ class Datagram {
 public :
 
 	// constructor
-	Datagram () throw ();
+	Datagram ();
 
 	// destructor
-	~Datagram () throw ();
+	~Datagram ();
 
 	// read DatagramPacket from datagram's internal buffer
-	void read ( char * buf , uint len ) throw ( ProtocolException , Error );
-	void read ( std::string & str , uint len ) throw ( ProtocolException , Error );
-	void read ( DatagramPacket * & pPacket ) throw ( ProtocolException , Error );
+	void read ( char * buf , uint len );
+	void read ( std::string & str , uint len );
+	void read ( DatagramPacket * & pPacket );
 
-	void read ( char   & buf ) throw ( ProtocolException , Error ) { read( (char*)&buf , szchar   ); }
-    void read ( uchar  & buf ) throw ( ProtocolException , Error ) { read( (char*)&buf , szuchar  ); }
-    void read ( short  & buf ) throw ( ProtocolException , Error ) { read( (char*)&buf , szshort  ); }
-    void read ( ushort & buf ) throw ( ProtocolException , Error ) { read( (char*)&buf , szushort ); }
-    void read ( int    & buf ) throw ( ProtocolException , Error ) { read( (char*)&buf , szint    ); }
-    void read ( uint   & buf ) throw ( ProtocolException , Error ) { read( (char*)&buf , szuint   ); }
-    void read ( long   & buf ) throw ( ProtocolException , Error ) {
+	void read ( char   & buf ) { read( (char*)&buf , szchar   ); }
+    void read ( uchar  & buf ) { read( (char*)&buf , szuchar  ); }
+    void read ( short  & buf ) { read( (char*)&buf , szshort  ); }
+    void read ( ushort & buf ) { read( (char*)&buf , szushort ); }
+    void read ( int    & buf ) { read( (char*)&buf , szint    ); }
+    void read ( uint   & buf ) { read( (char*)&buf , szuint   ); }
+    void read ( long   & buf ) {
         int32_t tmp = 0;
         read( (char*)&tmp , szlong );
         buf = static_cast<long>(tmp);
     }
-    void read ( ulong  & buf ) throw ( ProtocolException , Error ) {
+    void read ( ulong  & buf ) {
         uint32_t tmp = 0;
         read( (char*)&tmp , szulong );
         buf = static_cast<ulong>(tmp);
     }
 
 	// write DatagramPacket into datagram's internal buffer
-	void write ( const char * buf , uint len ) throw ( ProtocolException , Error );
-	void write ( const std::string & buf ) throw ( ProtocolException , Error );
-	void write ( const DatagramPacket * pPacket ) throw ( ProtocolException , Error );
+	void write ( const char * buf , uint len );
+	void write ( const std::string & buf );
+	void write ( const DatagramPacket * pPacket );
 
-	void write ( char   buf ) throw ( ProtocolException , Error ) { write( (char*)&buf , szchar   ); }
-    void write ( uchar  buf ) throw ( ProtocolException , Error ) { write( (char*)&buf , szuchar  ); }
-    void write ( short  buf ) throw ( ProtocolException , Error ) { write( (char*)&buf , szshort  ); }
-    void write ( ushort buf ) throw ( ProtocolException , Error ) { write( (char*)&buf , szushort ); }
-    void write ( int    buf ) throw ( ProtocolException , Error ) { write( (char*)&buf , szint    ); }
-    void write ( uint   buf ) throw ( ProtocolException , Error ) { write( (char*)&buf , szuint   ); }
-    void write ( long   buf ) throw ( ProtocolException , Error ) {
+	void write ( char   buf ) { write( (char*)&buf , szchar   ); }
+    void write ( uchar  buf ) { write( (char*)&buf , szuchar  ); }
+    void write ( short  buf ) { write( (char*)&buf , szshort  ); }
+    void write ( ushort buf ) { write( (char*)&buf , szushort ); }
+    void write ( int    buf ) { write( (char*)&buf , szint    ); }
+    void write ( uint   buf ) { write( (char*)&buf , szuint   ); }
+    void write ( long   buf ) {
         int32_t tmp = static_cast<int32_t>(buf);
         write( (char*)&tmp , szlong );
     }
-    void write ( ulong  buf ) throw ( ProtocolException , Error ) {
+    void write ( ulong  buf ) {
         uint32_t tmp = static_cast<uint32_t>(buf);
         write( (char*)&tmp , szulong );
     }
 
 	// get data
-	char * getData () throw () { return m_Data; }
+	char * getData () noexcept { return m_Data; }
 
 	// set data
-	void setData ( char * data , uint len ) throw ( ProtocolException , Error );
-	void setData ( uint len ) throw ( ProtocolException , Error ); 
+	void setData ( char * data , uint len );
+	void setData ( uint len ); 
 	
 	// get length
-	uint getLength () const throw () { return m_Length; }
+	uint getLength () const noexcept { return m_Length; }
 
 	// get address
-	SOCKADDR * getAddress () throw () { return (SOCKADDR*)&m_SockAddr; }
+	SOCKADDR * getAddress () noexcept { return (SOCKADDR*)&m_SockAddr; }
 
 	// set address
-	void setAddress ( SOCKADDR_IN * pSockAddr ) throw ( ProtocolException , Error );
+	void setAddress ( SOCKADDR_IN * pSockAddr );
 
 	// get host
-	std::string getHost () const throw () { return std::string( inet_ntoa( m_SockAddr.sin_addr ) ); }
+	std::string getHost () const { return std::string( inet_ntoa( m_SockAddr.sin_addr ) ); }
 
 	// set host
-	void setHost ( const std::string & host ) throw () { m_SockAddr.sin_addr.s_addr = inet_addr( host.c_str() ); }
+	void setHost ( const std::string & host ) noexcept { m_SockAddr.sin_addr.s_addr = inet_addr( host.c_str() ); }
 
 	// get port 
-	uint getPort () const throw () { return ntohs( m_SockAddr.sin_port ); }
+	uint getPort () const noexcept { return ntohs( m_SockAddr.sin_port ); }
 
 	// set port
-	void setPort ( uint port ) throw () { m_SockAddr.sin_port = htons(port); }
+	void setPort ( uint port ) noexcept { m_SockAddr.sin_port = htons(port); }
 
-	std::string toString () const throw ();
+	std::string toString () const;
 
 private :
 

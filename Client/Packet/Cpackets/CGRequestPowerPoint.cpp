@@ -11,22 +11,19 @@
 // class CGRequestPowerPoint member methods
 //////////////////////////////////////////////////////////////////////////////
 
-CGRequestPowerPoint::CGRequestPowerPoint () 
-     throw ()
+CGRequestPowerPoint::CGRequestPowerPoint ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 	
-CGRequestPowerPoint::~CGRequestPowerPoint () 
-    throw ()
+CGRequestPowerPoint::~CGRequestPowerPoint ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void CGRequestPowerPoint::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void CGRequestPowerPoint::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -45,7 +42,7 @@ void CGRequestPowerPoint::read ( SocketInputStream & iStream )
 }
 		    
 void CGRequestPowerPoint::write ( SocketOutputStream & oStream ) 
-     const throw ( ProtocolException , Error )
+     const
 {
 	__BEGIN_TRY
 		
@@ -66,7 +63,7 @@ void CGRequestPowerPoint::write ( SocketOutputStream & oStream )
 
 #ifdef __DEBUG_OUTPUT__
 string CGRequestPowerPoint::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 

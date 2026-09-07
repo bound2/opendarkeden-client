@@ -26,17 +26,17 @@ class GCShowGuildMemberInfo : public Packet {
 public :
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_GC_SHOW_GUILD_MEMBER_INFO; }
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_SHOW_GUILD_MEMBER_INFO; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw()
+	PacketSize_t getPacketSize() const
 	{ 
 		return szGuildID +					// Guild ID
 			   szBYTE +						// Name length
@@ -48,26 +48,26 @@ public :
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet name
-	std::string getPacketName() const throw() { return "GCShowGuildMemberInfo"; }
+	std::string getPacketName() const { return "GCShowGuildMemberInfo"; }
 	
 	// get packet's debug std::string
-	std::string toString() const throw();
+	std::string toString() const;
 #endif
 	// get/set Guild ID
-	GuildID_t getGuildID() const throw() { return m_GuildID; }
-	void setGuildID( GuildID_t GuildID ) throw() { m_GuildID = GuildID; }
+	GuildID_t getGuildID() const noexcept { return m_GuildID; }
+	void setGuildID( GuildID_t GuildID ) noexcept { m_GuildID = GuildID; }
 
 	// get/set Name
-	const std::string& getName() const throw() { return m_Name; }
-	void setName( const std::string& name ) throw() { m_Name = name; }
+	const std::string& getName() const noexcept { return m_Name; }
+	void setName( const std::string& name ) { m_Name = name; }
 
 	// get/set Guild Member Rank
-	GuildMemberRank_t getGuildMemberRank() const throw() { return m_GuildMemberRank; }
-	void setGuildMemberRank( GuildMemberRank_t guildMemberRank ) throw() { m_GuildMemberRank = guildMemberRank; }
+	GuildMemberRank_t getGuildMemberRank() const noexcept { return m_GuildMemberRank; }
+	void setGuildMemberRank( GuildMemberRank_t guildMemberRank ) noexcept { m_GuildMemberRank = guildMemberRank; }
 
 	// get/set Guild Member Intro
-	const std::string& getGuildMemberIntro() const throw() { return m_GuildMemberIntro; }
-	void setGuildMemberIntro( const std::string& intro ) throw() { m_GuildMemberIntro = intro; }
+	const std::string& getGuildMemberIntro() const noexcept { return m_GuildMemberIntro; }
+	void setGuildMemberIntro( const std::string& intro ) { m_GuildMemberIntro = intro; }
 
 private :
 	
@@ -98,18 +98,18 @@ class GCShowGuildMemberInfoFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet* createPacket() throw() { return new GCShowGuildMemberInfo(); }
+	Packet* createPacket() { return new GCShowGuildMemberInfo(); }
 
 	// get packet name
-	std::string getPacketName() const throw() { return "GCShowGuildMemberInfo"; }
+	std::string getPacketName() const { return "GCShowGuildMemberInfo"; }
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_SHOW_GUILD_MEMBER_INFO; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_SHOW_GUILD_MEMBER_INFO; }
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static GCSystemMessagePacketMaxSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize() const throw()
+	PacketSize_t getPacketMaxSize() const
 	{
 		return szGuildID +					// Guild ID
 			   szBYTE +						// Name length
@@ -132,7 +132,7 @@ class GCShowGuildMemberInfoHandler {
 public :
 	
 	// execute packet's handler
-	static void execute(GCShowGuildMemberInfo* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(GCShowGuildMemberInfo* pPacket, Player* pPlayer);
 
 };
 

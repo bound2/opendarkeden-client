@@ -24,34 +24,34 @@ typedef HashMapScriptParameter::const_iterator	HashMapScriptParameterConstItor;
 class GCNPCAskVariable : public Packet
 {
 public:
-	GCNPCAskVariable() throw();
-	virtual ~GCNPCAskVariable() throw();
+	GCNPCAskVariable();
+	virtual ~GCNPCAskVariable();
 
 public:
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_GC_NPC_ASK_VARIABLE; }
-	PacketSize_t getPacketSize() const throw();
+	void read(SocketInputStream & iStream);
+	void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_NPC_ASK_VARIABLE; }
+	PacketSize_t getPacketSize() const;
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "GCNPCAskVariable"; }
-	std::string toString() const throw();
+	std::string getPacketName() const { return "GCNPCAskVariable"; }
+	std::string toString() const;
 #endif 
 
 public:
-	ObjectID_t getObjectID(void) const throw() { return m_ObjectID; }
+	ObjectID_t getObjectID(void) const noexcept { return m_ObjectID; }
 #ifndef __GAME_CLIENT__
-	void setObjectID(ObjectID_t creatureID) throw() { m_ObjectID = creatureID; }
+	void setObjectID(ObjectID_t creatureID) noexcept { m_ObjectID = creatureID; }
 #endif
 
-	ScriptID_t getScriptID(void) const throw() { return m_ScriptID; }
+	ScriptID_t getScriptID(void) const noexcept { return m_ScriptID; }
 #ifndef __GAME_CLIENT__
-	void setScriptID(ScriptID_t id) throw() { m_ScriptID = id; }
+	void setScriptID(ScriptID_t id) noexcept { m_ScriptID = id; }
 #endif
 
-	void addScriptParameter( ScriptParameter* pParam ) throw(DuplicatedException);
-	void clearScriptParameters() throw();
+	void addScriptParameter( ScriptParameter* pParam );
+	void clearScriptParameters();
 	HashMapScriptParameter& getScriptParameters() { return m_ScriptParameters; }
-	std::string getValue( const std::string& name ) const throw(NoSuchElementException);
+	std::string getValue( const std::string& name ) const;
 
 private:
 	ObjectID_t m_ObjectID; // NPC's object id
@@ -66,10 +66,10 @@ private:
 class GCNPCAskVariableFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new GCNPCAskVariable(); }
-	std::string getPacketName() const throw() { return "GCNPCAskVariable"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_NPC_ASK_VARIABLE; }
-	PacketSize_t getPacketMaxSize() const throw()
+	Packet* createPacket() { return new GCNPCAskVariable(); }
+	std::string getPacketName() const { return "GCNPCAskVariable"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_NPC_ASK_VARIABLE; }
+	PacketSize_t getPacketMaxSize() const
 	{
 		return szObjectID
 			 + szScriptID
@@ -85,7 +85,7 @@ public:
 class GCNPCAskVariableHandler 
 {
 public:
-	static void execute(GCNPCAskVariable* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(GCNPCAskVariable* pPacket, Player* pPlayer);
 };
 
 #endif

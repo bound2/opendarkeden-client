@@ -17,8 +17,7 @@
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 void GCUseOKHandler::execute ( GCUseOK * pPacket , Player * pPlayer )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 		
@@ -53,7 +52,6 @@ throw ( ProtocolException , Error )
 void GCUseSkillCardOKHandler::execute ( GCUseSkillCardOK * pPacket , Player * pPlayer )
 	 
 
-throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 		

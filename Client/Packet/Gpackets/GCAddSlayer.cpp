@@ -27,7 +27,6 @@ GCAddSlayer::GCAddSlayer(const PCSlayerInfo3& info)
 }
 
 GCAddSlayer::~GCAddSlayer()
-	throw()
 {
 	__BEGIN_TRY
 	
@@ -36,8 +35,7 @@ GCAddSlayer::~GCAddSlayer()
 	__END_CATCH
 }
 
-void GCAddSlayer::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCAddSlayer::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -58,8 +56,7 @@ void GCAddSlayer::read ( SocketInputStream & iStream )
 	__END_CATCH
 }
 		    
-void GCAddSlayer::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCAddSlayer::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -92,8 +89,7 @@ void GCAddSlayer::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-PacketSize_t GCAddSlayer::getPacketSize() const 
-	throw()
+PacketSize_t GCAddSlayer::getPacketSize() const
 {   
 	__BEGIN_TRY
 
@@ -118,7 +114,6 @@ PacketSize_t GCAddSlayer::getPacketSize() const
 }
 #ifdef __DEBUG_OUTPUT__
 string GCAddSlayer::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 

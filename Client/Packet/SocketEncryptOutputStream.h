@@ -31,7 +31,7 @@ class SocketEncryptOutputStream : public SocketOutputStream {
 public :
 	
 	// constructor
-	SocketEncryptOutputStream (Socket* sock, uint BufferSize = DefaultSocketEncryptOutputBufferSize) throw (Error);
+	SocketEncryptOutputStream (Socket* sock, uint BufferSize = DefaultSocketEncryptOutputBufferSize);
 	~SocketEncryptOutputStream() {}
 	
 //////////////////////////////////////////////////
@@ -45,19 +45,19 @@ public :
 	// 그러나, std::string 의 크기를 BYTE/WORD 중 어느 것으로 할 건지는 의문이다.
 	// 패킷의 크기는 작을 수록 좋다는 정책하에서 필요에 따라서 std::string size 값을
 	// BYTE 또는 WORD 를 수동으로 사용하도록 한다.
-    uint writeEncrypt (bool   buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return write((const char*)&buf, szbool  ); }
-    uint writeEncrypt (char   buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return write((const char*)&buf, szchar  ); }
-    uint writeEncrypt (uchar  buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return writeWire(buf); }
-    uint writeEncrypt (short  buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return writeWire(buf); }
-    uint writeEncrypt (ushort buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return writeWire(buf); }
-    uint writeEncrypt (int    buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return writeWire(buf); }
-    uint writeEncrypt (uint   buf) throw (ProtocolException, Error) { buf = m_Encrypter.convert(buf); return writeWire(buf); }
-    uint writeEncrypt (long   buf) throw (ProtocolException, Error) {
+    uint writeEncrypt (bool   buf) { buf = m_Encrypter.convert(buf); return write((const char*)&buf, szbool  ); }
+    uint writeEncrypt (char   buf) { buf = m_Encrypter.convert(buf); return write((const char*)&buf, szchar  ); }
+    uint writeEncrypt (uchar  buf) { buf = m_Encrypter.convert(buf); return writeWire(buf); }
+    uint writeEncrypt (short  buf) { buf = m_Encrypter.convert(buf); return writeWire(buf); }
+    uint writeEncrypt (ushort buf) { buf = m_Encrypter.convert(buf); return writeWire(buf); }
+    uint writeEncrypt (int    buf) { buf = m_Encrypter.convert(buf); return writeWire(buf); }
+    uint writeEncrypt (uint   buf) { buf = m_Encrypter.convert(buf); return writeWire(buf); }
+    uint writeEncrypt (long   buf) {
         int32_t tmp = static_cast<int32_t>(buf);
         tmp = static_cast<int32_t>(m_Encrypter.convert(static_cast<long>(tmp)));
         return writeWire(tmp);
     }
-    uint writeEncrypt (ulong  buf) throw (ProtocolException, Error) {
+    uint writeEncrypt (ulong  buf) {
         uint32_t tmp = static_cast<uint32_t>(buf);
         tmp = static_cast<uint32_t>(m_Encrypter.convert(static_cast<ulong>(tmp)));
         return writeWire(tmp);

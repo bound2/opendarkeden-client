@@ -16,8 +16,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-CGCastingSkill::CGCastingSkill () 
-     throw ()
+CGCastingSkill::CGCastingSkill ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -27,8 +26,7 @@ CGCastingSkill::CGCastingSkill ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-CGCastingSkill::~CGCastingSkill () 
-    throw ()
+CGCastingSkill::~CGCastingSkill ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -38,8 +36,7 @@ CGCastingSkill::~CGCastingSkill ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void CGCastingSkill::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void CGCastingSkill::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -52,8 +49,7 @@ void CGCastingSkill::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void CGCastingSkill::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void CGCastingSkill::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 		
@@ -66,7 +62,6 @@ void CGCastingSkill::write ( SocketOutputStream & oStream ) const
 // get packet's debug std::string
 //////////////////////////////////////////////////////////////////////
 std::string CGCastingSkill::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

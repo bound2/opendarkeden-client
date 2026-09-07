@@ -20,7 +20,6 @@
 // constructor
 //////////////////////////////////////////////////////////////////////
 SlayerSkillInfo::SlayerSkillInfo () 
-     throw ()
 {
 	__BEGIN_TRY
 	m_bLearnNewSkill = false;
@@ -34,7 +33,6 @@ SlayerSkillInfo::SlayerSkillInfo ()
 // destructor
 //////////////////////////////////////////////////////////////////////
 SlayerSkillInfo::~SlayerSkillInfo () 
-    throw ()
 {
 	__BEGIN_TRY
 
@@ -53,7 +51,6 @@ SlayerSkillInfo::~SlayerSkillInfo ()
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
 void SlayerSkillInfo::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 		
@@ -77,7 +74,7 @@ void SlayerSkillInfo::read ( SocketInputStream & iStream )
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
 void SlayerSkillInfo::write ( SocketOutputStream & oStream ) 
-     const throw ( ProtocolException , Error )
+     const
 {
 	__BEGIN_TRY
 		
@@ -98,7 +95,7 @@ void SlayerSkillInfo::write ( SocketOutputStream & oStream )
 // getSize
 //--------------------------------------------------------------------
 PacketSize_t SlayerSkillInfo::getSize()
-	throw()
+	noexcept
 {
 
 	PacketSize_t PacketSize = szBYTE + szSkillDomainType + szBYTE;
@@ -121,7 +118,7 @@ PacketSize_t SlayerSkillInfo::getSize()
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string SlayerSkillInfo::toString () 
-		const throw ()
+		const
 	{
 		__BEGIN_TRY
 

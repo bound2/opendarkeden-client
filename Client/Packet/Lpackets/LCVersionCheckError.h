@@ -25,24 +25,24 @@ class LCVersionCheckError : public Packet {
 public :
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_LC_VERSION_CHECK_ERROR; }
+	PacketID_t getPacketID () const noexcept { return PACKET_LC_VERSION_CHECK_ERROR; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () { return 0; }
+	PacketSize_t getPacketSize () const noexcept { return 0; }
 	
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "LCVersionCheckError"; }
+		std::string getPacketName () const { return "LCVersionCheckError"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 	
 };
@@ -61,18 +61,18 @@ class LCVersionCheckErrorFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new LCVersionCheckError(); }
+	Packet * createPacket () { return new LCVersionCheckError(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "LCVersionCheckError"; }
+		std::string getPacketName () const { return "LCVersionCheckError"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_LC_VERSION_CHECK_ERROR; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_LC_VERSION_CHECK_ERROR; }
 
 	// get packet's max body size
-	PacketSize_t getPacketMaxSize () const throw () { return 0; }
+	PacketSize_t getPacketMaxSize () const noexcept { return 0; }
 	
 };
 
@@ -88,7 +88,7 @@ class LCVersionCheckErrorHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( LCVersionCheckError * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( LCVersionCheckError * pPacket , Player * pPlayer );
 
 };
 

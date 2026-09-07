@@ -17,8 +17,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-GCSkillToTileOK1::GCSkillToTileOK1 () 
-     throw ()
+GCSkillToTileOK1::GCSkillToTileOK1 ()
 {
 	__BEGIN_TRY
 
@@ -32,8 +31,7 @@ GCSkillToTileOK1::GCSkillToTileOK1 ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-GCSkillToTileOK1::~GCSkillToTileOK1 () 
-    throw ()
+GCSkillToTileOK1::~GCSkillToTileOK1 ()
 
 {
 	__BEGIN_TRY
@@ -44,8 +42,7 @@ GCSkillToTileOK1::~GCSkillToTileOK1 ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCSkillToTileOK1::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCSkillToTileOK1::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -78,7 +75,7 @@ void GCSkillToTileOK1::read ( SocketInputStream & iStream )
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
 void GCSkillToTileOK1::write ( SocketOutputStream & oStream ) 
-     const throw ( ProtocolException , Error )
+     const
 {
 	__BEGIN_TRY
 		
@@ -108,7 +105,6 @@ void GCSkillToTileOK1::write ( SocketOutputStream & oStream )
 //
 //////////////////////////////////////////////////////////////////////
 void GCSkillToTileOK1::addCListElement( ObjectID_t ObjectID )
-	throw()
 {
 	__BEGIN_TRY
 
@@ -152,7 +148,7 @@ void GCSkillToTileOK1::deleteCListElement()
 //
 //////////////////////////////////////////////////////////////////////
 std::string GCSkillToTileOK1::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 

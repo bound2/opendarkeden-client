@@ -32,18 +32,18 @@ public:
 
 	static const int szQuestInfo;
 	
-	GCMonsterKillQuestInfo() throw() { }
-	virtual ~GCMonsterKillQuestInfo() throw();
+	GCMonsterKillQuestInfo() { }
+	virtual ~GCMonsterKillQuestInfo();
 
 public:
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_GC_MONSTER_KILL_QUEST_INFO; }
-	PacketSize_t getPacketSize() const throw();
+	void read(SocketInputStream & iStream);
+	void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_MONSTER_KILL_QUEST_INFO; }
+	PacketSize_t getPacketSize() const;
 
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "GCMonsterKillQuestInfo"; }
-	std::string toString() const throw();
+	std::string getPacketName() const { return "GCMonsterKillQuestInfo"; }
+	std::string toString() const;
 #endif
 
 public:
@@ -62,13 +62,13 @@ private:
 class GCMonsterKillQuestInfoFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new GCMonsterKillQuestInfo(); }
+	Packet* createPacket() { return new GCMonsterKillQuestInfo(); }
 
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "GCMonsterKillQuestInfo"; }
+	std::string getPacketName() const { return "GCMonsterKillQuestInfo"; }
 #endif
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_MONSTER_KILL_QUEST_INFO; }
-	PacketSize_t getPacketMaxSize() const throw()
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_MONSTER_KILL_QUEST_INFO; }
+	PacketSize_t getPacketMaxSize() const
 	{
 		return szBYTE
 			 + GCMonsterKillQuestInfo::szQuestInfo * maxQuestNum;
@@ -82,7 +82,7 @@ public:
 class GCMonsterKillQuestInfoHandler 
 {
 public:
-	static void execute(GCMonsterKillQuestInfo* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(GCMonsterKillQuestInfo* pPacket, Player* pPlayer);
 };
 
 #endif

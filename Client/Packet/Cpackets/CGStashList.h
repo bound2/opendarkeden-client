@@ -22,19 +22,19 @@
 class CGStashList : public Packet 
 {
 public:
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
-	PacketID_t getPacketID () const throw () { return PACKET_CG_STASH_LIST; }
-	PacketSize_t getPacketSize () const throw () { return szObjectID; }
+	void read ( SocketInputStream & iStream );
+	void write ( SocketOutputStream & oStream ) const;
+	PacketID_t getPacketID () const noexcept { return PACKET_CG_STASH_LIST; }
+	PacketSize_t getPacketSize () const noexcept { return szObjectID; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "CGStashList"; }
-		std::string toString () const throw ();
+		std::string getPacketName () const { return "CGStashList"; }
+		std::string toString () const;
 	#endif
 
 public:
-	ObjectID_t getObjectID() throw() { return m_ObjectID; }
-	void setObjectID(ObjectID_t id) throw() { m_ObjectID = id; }
+	ObjectID_t getObjectID() noexcept { return m_ObjectID; }
+	void setObjectID(ObjectID_t id) noexcept { m_ObjectID = id; }
 
 private:
 	ObjectID_t m_ObjectID; // 플레이어 크리쳐의 object id
@@ -52,14 +52,14 @@ private:
 class CGStashListFactory : public PacketFactory 
 {
 public :
-	Packet * createPacket () throw () { return new CGStashList(); }
+	Packet * createPacket () { return new CGStashList(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "CGStashList"; }
+		std::string getPacketName () const { return "CGStashList"; }
 	#endif	
 
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CG_STASH_LIST; }
-	PacketSize_t getPacketMaxSize () const throw () { return szObjectID; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_STASH_LIST; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID; }
 
 };
 
@@ -72,7 +72,7 @@ public :
 	class CGStashListHandler 
 	{
 	public :
-		static void execute ( CGStashList * pPacket , Player * player ) throw ( ProtocolException , Error );
+		static void execute ( CGStashList * pPacket , Player * player );
 
 	};
 #endif

@@ -7,8 +7,7 @@
 #include "CGLotterySelect.h"
 
 
-void CGLotterySelect::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGLotterySelect::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -19,8 +18,7 @@ void CGLotterySelect::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGLotterySelect::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGLotterySelect::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -32,7 +30,6 @@ void CGLotterySelect::write (SocketOutputStream & oStream) const
 }
 
 std::string CGLotterySelect::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

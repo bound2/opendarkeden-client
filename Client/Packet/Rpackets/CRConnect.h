@@ -31,39 +31,39 @@ class CRConnect : public Packet
 public :
 	
 	// constructor
-	CRConnect () throw ();
+	CRConnect ();
 	
 	// destructor
-	~CRConnect () throw ();
+	~CRConnect ();
 	
 public :
-    PacketID_t getPacketID () const throw () { return PACKET_CR_CONNECT; }
+    PacketID_t getPacketID () const noexcept { return PACKET_CR_CONNECT; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "CRConnect"; }
+		std::string getPacketName () const { return "CRConnect"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getPacketSize () const throw () { return szBYTE + m_RequestServerName.size() + szBYTE + m_RequestClientName.size(); }
-	static PacketSize_t getPacketMaxSize() throw() { return  szBYTE + 10 + szBYTE + 10;}
+	PacketSize_t getPacketSize () const { return szBYTE + m_RequestServerName.size() + szBYTE + m_RequestClientName.size(); }
+	static PacketSize_t getPacketMaxSize() noexcept { return  szBYTE + 10 + szBYTE + 10;}
 
 	// get / set ListNumber
-	const std::string& getRequestServerName() const throw() { return m_RequestServerName; }
-	void setRequestServerName(const char* pName) throw() { m_RequestServerName = pName; }
+	const std::string& getRequestServerName() const noexcept { return m_RequestServerName; }
+	void setRequestServerName(const char* pName) { m_RequestServerName = pName; }
 
-	const std::string& getRequestClientName() const throw() { return m_RequestClientName; }
-	void setRequestClientName(const char* pName) throw() { m_RequestClientName = pName; }
+	const std::string& getRequestClientName() const noexcept { return m_RequestClientName; }
+	void setRequestClientName(const char* pName) { m_RequestClientName = pName; }
 	
 
 protected :
@@ -85,27 +85,27 @@ class CRConnectFactory : public PacketFactory {
 public :
 	
 	// constructor
-	CRConnectFactory () throw () {}
+	CRConnectFactory () {}
 	
 	// destructor
-	virtual ~CRConnectFactory () throw () {}
+	virtual ~CRConnectFactory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new CRConnect(); }
+	Packet * createPacket () { return new CRConnect(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CRConnect"; }
+		std::string getPacketName () const { return "CRConnect"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CR_CONNECT; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CR_CONNECT; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize () const throw () { return  szBYTE + 10 + szBYTE + 10; }
+	PacketSize_t getPacketMaxSize () const noexcept { return  szBYTE + 10 + szBYTE + 10; }
 
 };
 
@@ -121,7 +121,7 @@ class CRConnectHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( CRConnect * pCRConnect , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( CRConnect * pCRConnect , Player * pPlayer );
 
 };
 

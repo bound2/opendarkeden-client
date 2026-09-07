@@ -21,19 +21,19 @@
 class GCStashSell : public Packet 
 {
 public:
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
-	PacketID_t getPacketID () const throw () { return PACKET_GC_STASH_SELL; }
-	PacketSize_t getPacketSize () const throw () { return szGold; }
+	void read ( SocketInputStream & iStream );
+	void write ( SocketOutputStream & oStream ) const;
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_STASH_SELL; }
+	PacketSize_t getPacketSize () const noexcept { return szGold; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "GCStashSell"; }
-		std::string toString () const throw ();
+		std::string getPacketName () const { return "GCStashSell"; }
+		std::string toString () const;
 	#endif
 
 public:
-	Gold_t getPrice(void) const throw() { return m_Price; }
-	void  setPrice(Gold_t price) throw() { m_Price = price; }
+	Gold_t getPrice(void) const noexcept { return m_Price; }
+	void  setPrice(Gold_t price) noexcept { m_Price = price; }
 
 private:
 	Gold_t m_Price;
@@ -50,12 +50,12 @@ private:
 class GCStashSellFactory : public PacketFactory 
 {
 public:
-	Packet * createPacket () throw () { return new GCStashSell(); }
+	Packet * createPacket () { return new GCStashSell(); }
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "GCStashSell"; }
+		std::string getPacketName () const { return "GCStashSell"; }
 	#endif
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_STASH_SELL; }
-	PacketSize_t getPacketMaxSize () const throw () { return szGold; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_STASH_SELL; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szGold; }
 };
 
 
@@ -68,7 +68,7 @@ public:
 class GCStashSellHandler 
 {
 public:
-	static void execute ( GCStashSell * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCStashSell * pPacket , Player * pPlayer );
 
 };
 

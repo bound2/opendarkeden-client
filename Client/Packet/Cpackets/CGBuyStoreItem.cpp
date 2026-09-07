@@ -9,8 +9,7 @@
 #include "Client_PCH.h"
 #include "CGBuyStoreItem.h"
 
-void CGBuyStoreItem::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGBuyStoreItem::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		 
@@ -21,8 +20,7 @@ void CGBuyStoreItem::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGBuyStoreItem::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGBuyStoreItem::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -34,7 +32,7 @@ void CGBuyStoreItem::write (SocketOutputStream & oStream) const
 }
 
 string CGBuyStoreItem::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 

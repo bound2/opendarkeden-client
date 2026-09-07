@@ -38,7 +38,6 @@ extern uint receiveWithDebug (Socket *pSock, void * buf , uint len);
 // constructor
 //////////////////////////////////////////////////////////////////////
 SocketInputStream::SocketInputStream ( Socket * sock , uint BufferLen )
-	throw ( ProtocolException , Error )
 : m_pSocket(sock), m_Buffer(NULL), m_BufferLen(BufferLen), m_Head(0), m_Tail(0),
 	m_bFrameBounded(false), m_bFrameReadFailed(false), m_FrameRemaining(0)
 {
@@ -56,8 +55,7 @@ SocketInputStream::SocketInputStream ( Socket * sock , uint BufferLen )
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-SocketInputStream::~SocketInputStream ()
-	throw ( ProtocolException , Error )
+SocketInputStream::~SocketInputStream () noexcept(false)
 {
 	__BEGIN_TRY
 		
@@ -76,7 +74,6 @@ SocketInputStream::~SocketInputStream ()
 //
 //////////////////////////////////////////////////////////////////////
 uint SocketInputStream::read ( char * buf , uint len )
-	throw ( ProtocolException , Error )
 {
 	if (m_bFrameBounded && buf == NULL)
 		failRead("null packet read destination" );
@@ -90,7 +87,6 @@ uint SocketInputStream::read ( char * buf , uint len )
 //
 //////////////////////////////////////////////////////////////////////
 uint SocketInputStream::read ( std::span<char> buf )
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 	
@@ -163,7 +159,6 @@ uint SocketInputStream::read ( std::span<char> buf )
 // read a prefix into a bounded destination
 //////////////////////////////////////////////////////////////////////
 uint SocketInputStream::read ( std::span<char> buf , std::size_t len )
-	throw ( ProtocolException , Error )
 {
 	if ( len > buf.size() )
 		failRead("read length exceeds destination span");
@@ -177,7 +172,6 @@ uint SocketInputStream::read ( std::span<char> buf , std::size_t len )
 // read raw bytes into a bounded destination
 //////////////////////////////////////////////////////////////////////
 uint SocketInputStream::read ( std::span<std::byte> buf )
-	throw ( ProtocolException , Error )
 {
 	return read(std::span<char>(reinterpret_cast<char*>(buf.data()), buf.size()));
 }
@@ -186,7 +180,7 @@ uint SocketInputStream::read ( std::span<std::byte> buf )
 // read data from input buffer
 //////////////////////////////////////////////////////////////////////
 uint SocketInputStream::read ( std::string & str , uint len ) 
-throw ( ProtocolException , Error ) {
+{
 	__BEGIN_TRY
 		
 	if ( len == 0 )
@@ -291,7 +285,6 @@ void SocketInputStream::finishFrame() noexcept
 }
 
 void SocketInputStream::read ( Packet * pPacket ) 
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 		
@@ -353,7 +346,7 @@ void SocketInputStream::read ( Packet * pPacket )
 //////////////////////////////////////////////////////////////////////
 // peek data from buffer
 //////////////////////////////////////////////////////////////////////
-bool SocketInputStream::peek ( char * buf , uint len ) throw ( ProtocolException , Error )
+bool SocketInputStream::peek ( char * buf , uint len )
 {
 //	__BEGIN_TRY
 			
@@ -428,7 +421,6 @@ bool SocketInputStream::peek ( char * buf , uint len ) throw ( ProtocolException
 //
 //////////////////////////////////////////////////////////////////////
 void SocketInputStream::skip ( uint len ) 
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 		
@@ -492,7 +484,7 @@ void SocketInputStream::skip ( uint len )
 // 즉 내 맘대로야~~~ 이히히히히히~
 //
 //////////////////////////////////////////////////////////////////////
-uint SocketInputStream::fill () throw ( IOException , Error )
+uint SocketInputStream::fill ()
 {
 	__BEGIN_TRY
 		
@@ -675,7 +667,6 @@ uint SocketInputStream::fill () throw ( IOException , Error )
 //
 //////////////////////////////////////////////////////////////////////
 uint SocketInputStream::fill_RAW ()
-	 throw ( IOException , Error )
 {
 	__BEGIN_TRY
 		
@@ -738,7 +729,6 @@ uint SocketInputStream::fill_RAW ()
 // resize buffer
 //////////////////////////////////////////////////////////////////////
 void SocketInputStream::resize ( int size )
-	 throw ( IOException , Error )
 {
 	__BEGIN_TRY
 		
@@ -821,7 +811,6 @@ void SocketInputStream::resize ( int size )
 //
 //////////////////////////////////////////////////////////////////////
 uint SocketInputStream::length () const
-     throw ()
 {
 	__BEGIN_TRY
 
@@ -843,7 +832,6 @@ uint SocketInputStream::length () const
 // get debug string
 //////////////////////////////////////////////////////////////////////
 std::string SocketInputStream::toString () const
-	throw ()
 {
 	StringStream msg;
 

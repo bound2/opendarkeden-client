@@ -26,44 +26,44 @@ class GCAddSlayerCorpse : public Packet {
 public :
 
 	// constructor
-	GCAddSlayerCorpse () throw () { m_TreasureCount = 0; }
-	GCAddSlayerCorpse ( const PCSlayerInfo3 & slayerInfo ) throw () : m_SlayerInfo(slayerInfo) {}
+	GCAddSlayerCorpse () { m_TreasureCount = 0; }
+	GCAddSlayerCorpse ( const PCSlayerInfo3 & slayerInfo ) : m_SlayerInfo(slayerInfo) {}
 
 
 public :
 
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_ADD_SLAYER_CORPSE; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_ADD_SLAYER_CORPSE; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () { return m_SlayerInfo.getSize() + szBYTE; }
+	PacketSize_t getPacketSize () const { return m_SlayerInfo.getSize() + szBYTE; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCAddSlayerCorpse"; }
+		std::string getPacketName () const { return "GCAddSlayerCorpse"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 
 public :
 
 	// get slayer info
-	PCSlayerInfo3 & getSlayerInfo () throw () { return m_SlayerInfo; }
-	const PCSlayerInfo3 & getSlayerInfo () const throw () { return m_SlayerInfo; }
-	void setSlayerInfo ( const PCSlayerInfo3 & slayerInfo ) throw () { m_SlayerInfo = slayerInfo; }
+	PCSlayerInfo3 & getSlayerInfo () noexcept { return m_SlayerInfo; }
+	const PCSlayerInfo3 & getSlayerInfo () const noexcept { return m_SlayerInfo; }
+	void setSlayerInfo ( const PCSlayerInfo3 & slayerInfo ) { m_SlayerInfo = slayerInfo; }
 
 	// get/set Treasure Count
-	BYTE getTreasureCount() const throw() { return m_TreasureCount; }
-	void setTreasureCount( BYTE Count ) throw() { m_TreasureCount = Count; }
+	BYTE getTreasureCount() const noexcept { return m_TreasureCount; }
+	void setTreasureCount( BYTE Count ) noexcept { m_TreasureCount = Count; }
 
 private :
 	
@@ -89,20 +89,20 @@ class GCAddSlayerCorpseFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCAddSlayerCorpse(); }
+	Packet * createPacket () { return new GCAddSlayerCorpse(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCAddSlayerCorpse"; }
+		std::string getPacketName () const { return "GCAddSlayerCorpse"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_ADD_SLAYER_CORPSE; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_ADD_SLAYER_CORPSE; }
 
 	// get packet's body size
 	// *OPTIMIZATION HINT*
 	// const static GCAddSlayerCorpsePacketSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize () const throw ()
+	PacketSize_t getPacketMaxSize () const
 	{ 
 		return PCSlayerInfo3::getMaxSize() + szBYTE;
 	}
@@ -121,7 +121,7 @@ class GCAddSlayerCorpseHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCAddSlayerCorpse * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCAddSlayerCorpse * pPacket , Player * pPlayer );
 
 };
 

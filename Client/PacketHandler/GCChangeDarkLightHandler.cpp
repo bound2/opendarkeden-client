@@ -20,8 +20,7 @@
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
 void GCChangeDarkLightHandler::execute ( GCChangeDarkLight * pPacket , Player * pPlayer )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 		

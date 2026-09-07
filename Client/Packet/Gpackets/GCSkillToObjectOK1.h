@@ -29,56 +29,56 @@ class GCSkillToObjectOK1 : public ModifyInfo {
 public :
 	
 	// constructor
-	GCSkillToObjectOK1() throw();
+	GCSkillToObjectOK1();
 	
 	// destructor
-	~GCSkillToObjectOK1() throw();
+	~GCSkillToObjectOK1();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_GC_SKILL_TO_OBJECT_OK_1; }
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_SKILL_TO_OBJECT_OK_1; }
 	
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getPacketSize() const throw() { return szSkillType + szCEffectID + szObjectID + szDuration + szBYTE + ModifyInfo::getPacketSize(); }
+	PacketSize_t getPacketSize() const { return szSkillType + szCEffectID + szObjectID + szDuration + szBYTE + ModifyInfo::getPacketSize(); }
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet's name
-	std::string getPacketName() const throw() { return "GCSkillToObjectOK1"; }
+	std::string getPacketName() const { return "GCSkillToObjectOK1"; }
 	
 	// get packet's debug string
-	std::string toString() const throw();
+	std::string toString() const;
 #endif
 
 	// get / set SkillType
-	SkillType_t getSkillType() const throw() { return m_SkillType; }
-	void setSkillType(SkillType_t SkillType) throw() { m_SkillType = SkillType; }
+	SkillType_t getSkillType() const noexcept { return m_SkillType; }
+	void setSkillType(SkillType_t SkillType) noexcept { m_SkillType = SkillType; }
 
 
 	// get / set CEffectID
-	CEffectID_t getCEffectID() const throw() { return m_CEffectID; }
-	void setCEffectID(CEffectID_t CEffectID) throw() { m_CEffectID = CEffectID; }
+	CEffectID_t getCEffectID() const noexcept { return m_CEffectID; }
+	void setCEffectID(CEffectID_t CEffectID) noexcept { m_CEffectID = CEffectID; }
 
 	// get / set TargetObjectID
-	ObjectID_t getTargetObjectID() const throw() { return m_TargetObjectID; }
-	void setTargetObjectID(ObjectID_t TargetObjectID) throw() { m_TargetObjectID = TargetObjectID; }
+	ObjectID_t getTargetObjectID() const noexcept { return m_TargetObjectID; }
+	void setTargetObjectID(ObjectID_t TargetObjectID) noexcept { m_TargetObjectID = TargetObjectID; }
 
 	// get / set Duration
-	Duration_t getDuration() const throw() { return m_Duration; }
-	void setDuration(Duration_t Duration) throw() { m_Duration = Duration; }
+	Duration_t getDuration() const noexcept { return m_Duration; }
+	void setDuration(Duration_t Duration) noexcept { m_Duration = Duration; }
 
-	BYTE getGrade() const throw() { return m_Grade; }
-	void setGrade(BYTE grade) throw() { m_Grade = grade; }
+	BYTE getGrade() const noexcept { return m_Grade; }
+	void setGrade(BYTE grade) noexcept { m_Grade = grade; }
 
 private :
 	
@@ -112,27 +112,27 @@ class GCSkillToObjectOK1Factory : public PacketFactory {
 public :
 	
 	// constructor
-	GCSkillToObjectOK1Factory() throw() {}
+	GCSkillToObjectOK1Factory() {}
 	
 	// destructor
-	virtual ~GCSkillToObjectOK1Factory() throw() {}
+	virtual ~GCSkillToObjectOK1Factory() {}
 
 	
 public :
 	
 	// create packet
-	Packet* createPacket() throw() { return new GCSkillToObjectOK1(); }
+	Packet* createPacket() { return new GCSkillToObjectOK1(); }
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet name
-	std::string getPacketName() const throw() { return "GCSkillToObjectOK1"; }
+	std::string getPacketName() const { return "GCSkillToObjectOK1"; }
 #endif
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_SKILL_TO_OBJECT_OK_1; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_SKILL_TO_OBJECT_OK_1; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szSkillType + szCEffectID + szObjectID + szDuration + szBYTE + ModifyInfo::getPacketMaxSize(); }
+	PacketSize_t getPacketMaxSize() const { return szSkillType + szCEffectID + szObjectID + szDuration + szBYTE + ModifyInfo::getPacketMaxSize(); }
 
 };
 
@@ -148,7 +148,7 @@ class GCSkillToObjectOK1Handler {
 public :
 
 	// execute packet's handler
-	static void execute(GCSkillToObjectOK1* pGCSkillToObjectOK1, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(GCSkillToObjectOK1* pGCSkillToObjectOK1, Player* pPlayer);
 
 };
 

@@ -16,8 +16,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-GCAddNickname::GCAddNickname () 
-     throw ()
+GCAddNickname::GCAddNickname ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -27,8 +26,7 @@ GCAddNickname::GCAddNickname ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-GCAddNickname::~GCAddNickname () 
-    throw ()
+GCAddNickname::~GCAddNickname ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -38,8 +36,7 @@ GCAddNickname::~GCAddNickname ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCAddNickname::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCAddNickname::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -53,7 +50,7 @@ void GCAddNickname::read ( SocketInputStream & iStream )
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
 void GCAddNickname::write ( SocketOutputStream & oStream ) 
-     const throw ( ProtocolException , Error )
+     const
 {
 	__BEGIN_TRY
 
@@ -69,7 +66,7 @@ void GCAddNickname::write ( SocketOutputStream & oStream )
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 string GCAddNickname::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 

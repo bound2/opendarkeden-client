@@ -27,29 +27,29 @@ class GCAddInjuriousCreature : public Packet {
 public:
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_GC_ADD_INJURIOUS_CREATURE; }
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_ADD_INJURIOUS_CREATURE; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw() { return szBYTE + m_Name.size(); }
+	PacketSize_t getPacketSize() const { return szBYTE + m_Name.size(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName() const throw() { return "GCAddInjuriousCreature"; }
+		std::string getPacketName() const { return "GCAddInjuriousCreature"; }
 		
 		// get packet's debug std::string
-		std::string toString() const throw();
+		std::string toString() const;
 	#endif
 
 	// get/set Name
-	std::string getName() const throw() { return m_Name; }
-	void setName(const std::string & Name) throw() { m_Name = Name; }
+	std::string getName() const { return m_Name; }
+	void setName(const std::string & Name) { m_Name = Name; }
 
 private :
 
@@ -71,19 +71,19 @@ class GCAddInjuriousCreatureFactory : public PacketFactory {
 public:
 	
 	// create packet
-	Packet* createPacket() throw() { return new GCAddInjuriousCreature(); }
+	Packet* createPacket() { return new GCAddInjuriousCreature(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName() const throw() { return "GCAddInjuriousCreature"; }
+		std::string getPacketName() const { return "GCAddInjuriousCreature"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_ADD_INJURIOUS_CREATURE; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_ADD_INJURIOUS_CREATURE; }
 
 	// get packet's max body size
 	// message 의 최대 크기에 대한 설정이 필요하다.
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE + 10; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE + 10; }
 
 };
 
@@ -99,7 +99,7 @@ class GCAddInjuriousCreatureHandler {
 public:
 
 	// execute packet's handler
-	static void execute(GCAddInjuriousCreature* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(GCAddInjuriousCreature* pPacket, Player* pPlayer);
 
 };
 

@@ -19,17 +19,17 @@
 class GCAddStoreItem : public Packet
 {
 public:
-	GCAddStoreItem() throw() { }
-	virtual ~GCAddStoreItem() throw();
+	GCAddStoreItem() { }
+	virtual ~GCAddStoreItem();
 
 public:
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_GC_ADD_STORE_ITEM; }
-	PacketSize_t getPacketSize() const throw() { return szObjectID + szBYTE + m_Item.getSize(); }
+	void read(SocketInputStream & iStream);
+	void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_ADD_STORE_ITEM; }
+	PacketSize_t getPacketSize() const { return szObjectID + szBYTE + m_Item.getSize(); }
 #ifdef __DEBUG_OUTPUT__	
-	string getPacketName() const throw() { return "GCAddStoreItem"; }
-	string toString() const throw();
+	string getPacketName() const { return "GCAddStoreItem"; }
+	string toString() const;
 #endif
 	ObjectID_t	getOwnerObjectID() const { return m_OwnerObjectID; }
 	void		setOwnerObjectID(ObjectID_t oid) { m_OwnerObjectID = oid; }
@@ -52,12 +52,12 @@ private:
 class GCAddStoreItemFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new GCAddStoreItem(); }
+	Packet* createPacket() { return new GCAddStoreItem(); }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "GCAddStoreItem"; }
+	string getPacketName() const { return "GCAddStoreItem"; }
 #endif
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_ADD_STORE_ITEM; }
-	PacketSize_t getPacketMaxSize() const throw()
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_ADD_STORE_ITEM; }
+	PacketSize_t getPacketMaxSize() const
 	{
 		return szObjectID + szBYTE + StoreItemInfo::getMaxSize();
 	}
@@ -70,7 +70,7 @@ public:
 class GCAddStoreItemHandler 
 {
 public:
-	static void execute(GCAddStoreItem* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(GCAddStoreItem* pPacket, Player* pPlayer);
 };
 
 #endif

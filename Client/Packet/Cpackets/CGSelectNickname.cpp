@@ -7,8 +7,7 @@
 #include "CGSelectNickname.h"
 
 
-void CGSelectNickname::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGSelectNickname::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -17,8 +16,7 @@ void CGSelectNickname::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGSelectNickname::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGSelectNickname::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -28,7 +26,6 @@ void CGSelectNickname::write (SocketOutputStream & oStream) const
 }
 #ifdef __DEBUG_OUTPUT__
 string CGSelectNickname::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

@@ -32,17 +32,17 @@
 class GCGQuestStatusInfo : public Packet 
 {
 public:
-	GCGQuestStatusInfo() throw();
-	~GCGQuestStatusInfo() throw();
+	GCGQuestStatusInfo();
+	~GCGQuestStatusInfo();
 	
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_GQUEST_STATUS_INFO; }
-	PacketSize_t getPacketSize() const throw() ;/*{ return std::accumulate( m_Infos.begin(), m_Infos.end(), szBYTE, addSize ); }*/
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_GQUEST_STATUS_INFO; }
+	PacketSize_t getPacketSize() const ;/*{ return std::accumulate( m_Infos.begin(), m_Infos.end(), szBYTE, addSize ); }*/
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "GCGQuestStatusInfo"; }
-	string toString() const throw();
+	string getPacketName() const { return "GCGQuestStatusInfo"; }
+	string toString() const;
 #endif
 public:
 	std::list<QuestStatusInfo*>&	getInfos() { return m_Infos; }
@@ -60,16 +60,16 @@ private:
 class GCGQuestStatusInfoFactory : public PacketFactory 
 {
 public :
-	GCGQuestStatusInfoFactory() throw() {}
-	virtual ~GCGQuestStatusInfoFactory() throw() {}
+	GCGQuestStatusInfoFactory() {}
+	virtual ~GCGQuestStatusInfoFactory() {}
 	
 public:
-	Packet* createPacket() throw() { return new GCGQuestStatusInfo(); }
+	Packet* createPacket() { return new GCGQuestStatusInfo(); }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "GCGQuestStatusInfo"; }
+	string getPacketName() const { return "GCGQuestStatusInfo"; }
 #endif
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_GQUEST_STATUS_INFO; }
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE + QuestStatusInfo::getMaxSize() * MAX_QUEST_NUM; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_GQUEST_STATUS_INFO; }
+	PacketSize_t getPacketMaxSize() const { return szBYTE + QuestStatusInfo::getMaxSize() * MAX_QUEST_NUM; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ public:
 class GCGQuestStatusInfoHandler 
 {
 public:
-	static void execute(GCGQuestStatusInfo* pGCGQuestStatusInfo, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(GCGQuestStatusInfo* pGCGQuestStatusInfo, Player* pPlayer);
 
 };
 

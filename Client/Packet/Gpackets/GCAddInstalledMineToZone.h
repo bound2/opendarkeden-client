@@ -21,14 +21,14 @@
 class GCAddInstalledMineToZone : public GCAddItemToZone 
 {
 public:
-	GCAddInstalledMineToZone() throw();
-	~GCAddInstalledMineToZone() throw();
+	GCAddInstalledMineToZone();
+	~GCAddInstalledMineToZone();
 public:
-	PacketID_t getPacketID() const throw() { return PACKET_GC_ADD_INSTALLED_MINE_TO_ZONE; }
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_ADD_INSTALLED_MINE_TO_ZONE; }
 
 #ifdef __DEBUG_OUTPUT__	
-	std::string getPacketName() const throw() { return "GCAddInstalledMineToZone"; }
-	std::string toString() const throw();
+	std::string getPacketName() const { return "GCAddInstalledMineToZone"; }
+	std::string toString() const;
 #endif
 };
 
@@ -39,10 +39,10 @@ public:
 class GCAddInstalledMineToZoneFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new GCAddInstalledMineToZone(); }
-	std::string getPacketName() const throw() { return "GCAddInstalledMineToZone"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_ADD_INSTALLED_MINE_TO_ZONE; }
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szCoord + szCoord + szBYTE + szItemType + szBYTE + 255 + szDurability + szItemNum + szBYTE +(szObjectID + szBYTE + szItemType + szItemNum + szSlotID)* 12; }
+	Packet* createPacket() { return new GCAddInstalledMineToZone(); }
+	std::string getPacketName() const { return "GCAddInstalledMineToZone"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_ADD_INSTALLED_MINE_TO_ZONE; }
+	PacketSize_t getPacketMaxSize() const { return szObjectID + szCoord + szCoord + szBYTE + szItemType + szBYTE + 255 + szDurability + szItemNum + szBYTE +(szObjectID + szBYTE + szItemType + szItemNum + szSlotID)* 12; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ public:
 class GCAddInstalledMineToZoneHandler 
 {
 public:
-	static void execute(GCAddInstalledMineToZone* pPacket, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(GCAddInstalledMineToZone* pPacket, Player* pPlayer);
 };
 
 #endif

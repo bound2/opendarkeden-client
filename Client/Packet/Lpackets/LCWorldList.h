@@ -26,49 +26,49 @@ public:
 
 	// constructor
 	// PCInfo* 배열에 각각 NULL을 지정한다.
-	LCWorldList() throw();
+	LCWorldList();
 
 	// destructor
 	// PCInfo* 배열에 할당된 객체를 삭제한다.
-	~LCWorldList() throw();
+	~LCWorldList();
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_LC_WORLD_LIST; }
+	PacketID_t getPacketID() const noexcept { return PACKET_LC_WORLD_LIST; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw();
+	PacketSize_t getPacketSize() const;
 	
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName() const throw() { return "LCWorldList"; }
+		std::string getPacketName() const { return "LCWorldList"; }
 		
 		// get packet's debug std::string
-		std::string toString() const throw();
+		std::string toString() const;
 	#endif
 	
 public:
 
 	// 현재 월드
-	WorldID_t getCurrentWorldID() const throw() { return m_CurrentWorldID; }
-	void setCurrentWorldID( WorldID_t WorldID ) throw() { m_CurrentWorldID = WorldID; }
+	WorldID_t getCurrentWorldID() const noexcept { return m_CurrentWorldID; }
+	void setCurrentWorldID( WorldID_t WorldID ) noexcept { m_CurrentWorldID = WorldID; }
 
-    BYTE getListNum() const throw() { return m_WorldInfoList.size(); }
+    BYTE getListNum() const { return m_WorldInfoList.size(); }
 
 	// add / delete / clear S List
-	void addListElement(WorldInfo* pWorldInfo) throw() { m_WorldInfoList.push_back(pWorldInfo); }
+	void addListElement(WorldInfo* pWorldInfo) { m_WorldInfoList.push_back(pWorldInfo); }
 
 	// ClearList
-	void clearList() throw() { m_WorldInfoList.clear(); }
+	void clearList() { m_WorldInfoList.clear(); }
 
 	// pop front Element in Status List
-	WorldInfo* popFrontListElement() throw()
+	WorldInfo* popFrontListElement()
 	{
 		WorldInfo* TempWorldInfo = m_WorldInfoList.front(); m_WorldInfoList.pop_front(); return TempWorldInfo;
 	}
@@ -96,18 +96,18 @@ class LCWorldListFactory : public PacketFactory {
 public:
 	
 	// create packet
-	Packet* createPacket() throw() { return new LCWorldList(); }
+	Packet* createPacket() { return new LCWorldList(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName() const throw() { return "LCWorldList"; }
+		std::string getPacketName() const { return "LCWorldList"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_LC_WORLD_LIST; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_LC_WORLD_LIST; }
 
 	// get packet's max body size
-	PacketSize_t getPacketMaxSize() const throw() 
+	PacketSize_t getPacketMaxSize() const 
 	{ 
 		// 슬레이어 정보가 뱀파이어 정보보다 사이즈가 크기 때문에,
 		// 이 패킷의 최대 크기는 슬레이어 3 명일 경우이다.
@@ -128,7 +128,7 @@ class LCWorldListHandler {
 public:
 
 	// execute packet's handler
-	static void execute(LCWorldList* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(LCWorldList* pPacket, Player* pPlayer);
 
 };
 

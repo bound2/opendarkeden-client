@@ -23,8 +23,7 @@
 // 
 //----------------------------------------------------------------------
 void RCCharacterInfoHandler::execute ( RCCharacterInfo * pPacket )
-	 
-throw ( ProtocolException , Error )
+
 {
 	__BEGIN_TRY
 

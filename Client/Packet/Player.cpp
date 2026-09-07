@@ -27,7 +27,6 @@
 //
 //////////////////////////////////////////////////////////////////////
 Player::Player ()
-	 throw ( Error )
 : pHashTable(NULL), m_pSocket(NULL), m_pInputStream(NULL), m_pOutputStream(NULL)
 {
 	__BEGIN_TRY
@@ -60,7 +59,6 @@ Player::Player ()
 //
 //////////////////////////////////////////////////////////////////////
 Player::Player ( Socket * pSocket )
-	 throw ( ProtocolException , Error )
 : pHashTable(NULL), m_pSocket(pSocket), m_pInputStream(NULL), m_pOutputStream(NULL)
 {
 	__BEGIN_TRY
@@ -86,8 +84,7 @@ Player::Player ( Socket * pSocket )
 // destructor
 //
 //////////////////////////////////////////////////////////////////////
-Player::~Player ()
-	 throw ( ProtocolException , Error )
+Player::~Player () noexcept(false)
 {
 	__BEGIN_TRY
 
@@ -128,7 +125,6 @@ Player::~Player ()
 //
 //////////////////////////////////////////////////////////////////////
 void Player::processInput ()
-	throw ( IOException , Error )
 {
 	__BEGIN_TRY
 
@@ -147,7 +143,6 @@ void Player::processInput ()
 //
 //////////////////////////////////////////////////////////////////////
 void Player::processCommand () 
-     throw ( IOException , Error )
 {
 	__BEGIN_TRY
 
@@ -240,7 +235,6 @@ void Player::processCommand ()
 //
 //////////////////////////////////////////////////////////////////////
 void Player::processOutput ()
-	throw ( IOException , Error )
 {
 	__BEGIN_TRY
 
@@ -256,7 +250,6 @@ void Player::processOutput ()
 //
 //////////////////////////////////////////////////////////////////////
 void Player::sendPacket ( Packet * pPacket )
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -276,7 +269,6 @@ void Player::sendPacket ( Packet * pPacket )
 //
 //////////////////////////////////////////////////////////////////////
 void Player::disconnect ( bool bDisconnected )
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -300,7 +292,6 @@ void Player::disconnect ( bool bDisconnected )
 // set socket
 //////////////////////////////////////////////////////////////////////
 void Player::setSocket ( Socket * pSocket )
-	throw ()
 {
 	__BEGIN_TRY
 
@@ -326,7 +317,6 @@ void Player::setSocket ( Socket * pSocket )
 //
 //////////////////////////////////////////////////////////////////////
 std::string Player::toString () const
-       throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 		
@@ -344,7 +334,6 @@ std::string Player::toString () const
 }
 	//add by viva
 void Player::setKey(WORD EncryptKey, WORD HashKey) 
-	throw()
 {
 	// A second key used to leak the table the first one built.
 	if ( pHashTable != NULL )
@@ -367,7 +356,6 @@ void Player::setKey(WORD EncryptKey, WORD HashKey)
 		m_pOutputStream->setKey(EncryptKey, pHashTable);
 }
 void Player::delKey() 
-	throw()
 {
 	if(pHashTable)
 	{

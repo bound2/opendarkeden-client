@@ -30,36 +30,36 @@ class GCThrowBombOK1 : public ModifyInfo {
 public :
 	
 	// constructor
-	GCThrowBombOK1 () throw ();
+	GCThrowBombOK1 ();
 	
 	// destructor
-	~GCThrowBombOK1 () throw ();
+	~GCThrowBombOK1 ();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_THROW_BOMB_OK_1; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_THROW_BOMB_OK_1; }
 	
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getPacketSize () const throw () { return szCoord * 2
+	PacketSize_t getPacketSize () const { return szCoord * 2
 			+ szBYTE + szDir + szItemType + szObjectID * m_CListNum + ModifyInfo::getPacketSize(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCThrowBombOK1"; }
+		std::string getPacketName () const { return "GCThrowBombOK1"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 	// get / set X, Y
@@ -72,22 +72,22 @@ public :
 	Dir_t getDir() { return m_Dir;}
 	void setDir( Dir_t r) { m_Dir = r;}
 
-	ItemType_t getItemType() const throw() { return m_ItemType;}
-	void setItemType( ItemType_t i) throw() { m_ItemType = i;}
+	ItemType_t getItemType() const noexcept { return m_ItemType;}
+	void setItemType( ItemType_t i) noexcept { m_ItemType = i;}
 	
 
 	void setXYDir( Coord_t X, Coord_t Y, Dir_t R) { m_X = X; m_Y = Y; m_Dir = R;}
 
 	// get / set Creature List Number
-	BYTE getCListNum() const throw() { return m_CListNum; }
-	void setCListNum( BYTE CListNum ) throw() { m_CListNum = CListNum; }
+	BYTE getCListNum() const noexcept { return m_CListNum; }
+	void setCListNum( BYTE CListNum ) noexcept { m_CListNum = CListNum; }
 
 	// add / delete  Creature List
-	void addCListElement( ObjectID_t ObjectID ) throw();
-	void clearCList() throw() { m_CList.clear(); m_CListNum = 0; }
+	void addCListElement( ObjectID_t ObjectID );
+	void clearCList() { m_CList.clear(); m_CListNum = 0; }
 
 	// pop front Element in Status List
-	ObjectID_t popCListElement() throw() { ObjectID_t CreatureList = m_CList.front(); m_CList.pop_front(); return CreatureList; }
+	ObjectID_t popCListElement() { ObjectID_t CreatureList = m_CList.front(); m_CList.pop_front(); return CreatureList; }
 
 private :
 	
@@ -122,27 +122,27 @@ class GCThrowBombOK1Factory : public PacketFactory {
 public :
 	
 	// constructor
-	GCThrowBombOK1Factory () throw () {}
+	GCThrowBombOK1Factory () {}
 	
 	// destructor
-	virtual ~GCThrowBombOK1Factory () throw () {}
+	virtual ~GCThrowBombOK1Factory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCThrowBombOK1(); }
+	Packet * createPacket () { return new GCThrowBombOK1(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCThrowBombOK1"; }
+		std::string getPacketName () const { return "GCThrowBombOK1"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_THROW_BOMB_OK_1; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_THROW_BOMB_OK_1; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize () const throw () { return szCoord * 2
+	PacketSize_t getPacketMaxSize () const { return szCoord * 2
 			+ szBYTE + szBYTE + +szDir + szItemType + szWORD + szObjectID + ModifyInfo::getPacketMaxSize(); }
 
 };
@@ -157,7 +157,7 @@ class GCThrowBombOK1Handler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCThrowBombOK1 * pGCThrowBombOK1 , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCThrowBombOK1 * pGCThrowBombOK1 , Player * pPlayer );
 
 };
 

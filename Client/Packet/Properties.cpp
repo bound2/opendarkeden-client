@@ -55,14 +55,12 @@ const char * Properties::WhiteSpaces = " \t";
 // constructor
 //--------------------------------------------------------------------------------
 Properties::Properties () 
-	throw ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
 Properties::Properties ( const std::string & filename ) 
-	throw ()
 : m_Filename(filename)
 {
 	__BEGIN_TRY
@@ -74,7 +72,6 @@ Properties::Properties ( const std::string & filename )
 // destructor
 //--------------------------------------------------------------------------------
 Properties::~Properties () 
-	throw ()
 {	
 	__BEGIN_TRY
 		
@@ -89,7 +86,6 @@ Properties::~Properties ()
 // load from file
 //--------------------------------------------------------------------------------
 void Properties::load () 
-	throw ( IOException , Error )
 {
 	__BEGIN_TRY
 		
@@ -168,7 +164,6 @@ void Properties::load ()
 // save to file
 //--------------------------------------------------------------------------------
 void Properties::save () 
-	throw ( IOException )
 {
 	__BEGIN_TRY
 		
@@ -192,7 +187,6 @@ void Properties::save ()
 // get property
 //--------------------------------------------------------------------------------
 std::string Properties::getProperty ( std::string key ) const
-	throw ( NoSuchElementException )
 {
 	__BEGIN_TRY
 
@@ -207,7 +201,6 @@ std::string Properties::getProperty ( std::string key ) const
 // get property
 //--------------------------------------------------------------------------------
 std::string Properties::getProperty ( const char* key ) const
-throw ( NoSuchElementException )
 {
 	__BEGIN_TRY
 
@@ -231,7 +224,6 @@ throw ( NoSuchElementException )
 // get property as int
 //--------------------------------------------------------------------------------
 int Properties::getPropertyInt ( std::string key ) const 
-	throw ( NoSuchElementException )
 {
 	__BEGIN_TRY
 		
@@ -244,7 +236,6 @@ int Properties::getPropertyInt ( std::string key ) const
 // get property as int
 //--------------------------------------------------------------------------------
 int Properties::getPropertyInt ( const char* key ) const 
-throw ( NoSuchElementException )
 {
 	__BEGIN_TRY
 		
@@ -258,7 +249,6 @@ throw ( NoSuchElementException )
 // set property
 //--------------------------------------------------------------------------------
 void Properties::setProperty ( std::string key , std::string value )
-	throw ()
 {
 	__BEGIN_TRY
 		
@@ -273,7 +263,6 @@ void Properties::setProperty ( std::string key , std::string value )
 // get debug string
 //--------------------------------------------------------------------------------
 std::string Properties::toString () const
-    throw ()
 {
 	__BEGIN_TRY
 		

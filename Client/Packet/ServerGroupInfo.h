@@ -27,42 +27,42 @@ class ServerGroupInfo {
 public :
 	
 	// constructor
-	ServerGroupInfo () throw ();
+	ServerGroupInfo ();
 	
 	// destructor
-	~ServerGroupInfo () throw ();
+	~ServerGroupInfo ();
 
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getSize () throw ();
+	PacketSize_t getSize ();
 
-	static uint getMaxSize() throw() {
+	static uint getMaxSize() noexcept {
 		return ( szBYTE + szBYTE + 20 + szBYTE ) * 37;
 	}
 
 	// get packet's debug std::string
-	std::string toString () const throw ();
+	std::string toString () const;
 
 	// get / set GroupID
-	BYTE getGroupID() const throw() { return m_GroupID; }
-	void setGroupID( ServerGroupID_t GroupID ) throw() { m_GroupID = GroupID; }
+	BYTE getGroupID() const noexcept { return m_GroupID; }
+	void setGroupID( ServerGroupID_t GroupID ) noexcept { m_GroupID = GroupID; }
 
 	// get / set GroupName
-	std::string getGroupName() const throw() { return m_GroupName; }
-	void setGroupName( std::string GroupName ) throw() { m_GroupName = GroupName; }
+	std::string getGroupName() const { return m_GroupName; }
+	void setGroupName( std::string GroupName ) { m_GroupName = GroupName; }
 
 	// get / set Group Stat
-	BYTE getStat() const throw() { return m_Stat; }
-	void setStat( BYTE Stat ) throw() { m_Stat = Stat; }
+	BYTE getStat() const noexcept { return m_Stat; }
+	void setStat( BYTE Stat ) noexcept { m_Stat = Stat; }
 
 private :
 

@@ -6,8 +6,7 @@
 #include "Client_PCH.h"
 #include "CGGQuestAccept.h"
 
-void CGGQuestAccept::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGGQuestAccept::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -16,8 +15,7 @@ void CGGQuestAccept::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 		    
-void CGGQuestAccept::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGGQuestAccept::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -28,7 +26,6 @@ void CGGQuestAccept::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 string CGGQuestAccept::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

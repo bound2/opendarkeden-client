@@ -6,8 +6,7 @@
 #include "Client_PCH.h"
 #include "GCAuthKey.h"
 
-void GCAuthKey::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCAuthKey::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -16,8 +15,7 @@ void GCAuthKey::read ( SocketInputStream & iStream )
 	__END_CATCH
 }
 		    
-void GCAuthKey::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCAuthKey::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 		
@@ -28,7 +26,6 @@ void GCAuthKey::write ( SocketOutputStream & oStream ) const
 
 #ifdef __DEBUG_OUTPUT__
 string GCAuthKey::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

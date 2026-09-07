@@ -24,37 +24,37 @@ class GCChangeDarkLight : public Packet {
 public :
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_CHANGE_DARK_LIGHT; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_CHANGE_DARK_LIGHT; }
 	
 	// get packet's body size
 	// *OPTIMIZATION HINT*
 	// const static GCChangeDarkLightPacketSize 를 정의, 리턴하라.
-	PacketSize_t getPacketSize () const throw () { return szDarkLevel + szLightLevel; }
+	PacketSize_t getPacketSize () const noexcept { return szDarkLevel + szLightLevel; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCChangeDarkLight"; }
+		std::string getPacketName () const { return "GCChangeDarkLight"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 public :
 
 	// get/set dark level
-	DarkLevel_t getDarkLevel () const throw () { return m_DarkLevel; }
-	void setDarkLevel ( DarkLevel_t darkLevel ) throw () { m_DarkLevel = darkLevel; }
+	DarkLevel_t getDarkLevel () const noexcept { return m_DarkLevel; }
+	void setDarkLevel ( DarkLevel_t darkLevel ) noexcept { m_DarkLevel = darkLevel; }
 
 	// get/set light level
-	LightLevel_t getLightLevel () const throw () { return m_LightLevel; }
-	void setLightLevel ( LightLevel_t lightLevel ) throw () { m_LightLevel = lightLevel; }
+	LightLevel_t getLightLevel () const noexcept { return m_LightLevel; }
+	void setLightLevel ( LightLevel_t lightLevel ) noexcept { m_LightLevel = lightLevel; }
 
 
 public :
@@ -81,20 +81,20 @@ class GCChangeDarkLightFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCChangeDarkLight(); }
+	Packet * createPacket () { return new GCChangeDarkLight(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCChangeDarkLight"; }
+		std::string getPacketName () const { return "GCChangeDarkLight"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_CHANGE_DARK_LIGHT; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_CHANGE_DARK_LIGHT; }
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static GCChangeDarkLightPacketSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize () const throw () { return szDarkLevel + szLightLevel; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szDarkLevel + szLightLevel; }
 
 };
 
@@ -110,7 +110,7 @@ class GCChangeDarkLightHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCChangeDarkLight * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCChangeDarkLight * pPacket , Player * pPlayer );
 
 };
 

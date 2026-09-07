@@ -39,45 +39,45 @@ public :
 	// 나중에는 이거 인터페이스로 해결할 전망이다.
 
 	// read from socket input stream
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+	void read ( SocketInputStream & iStream );
 
 	// write to socket output stream
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+	void write ( SocketOutputStream & oStream ) const;
 
 	// get size of object
-	uint getSize () const throw () { return szWORD + szBYTE * 5; }
-	static uint getMaxSize () throw () { return szWORD + szBYTE * 5; }
+	uint getSize () const noexcept { return szWORD + szBYTE * 5; }
+	static uint getMaxSize () noexcept { return szWORD + szBYTE * 5; }
 
 
 public :
 
 
 	// get/set year
-	WORD getYear () const throw () { return m_Year; }
-	void setYear ( WORD year ) throw () { m_Year = year; }
+	WORD getYear () const noexcept { return m_Year; }
+	void setYear ( WORD year ) noexcept { m_Year = year; }
 
 	// get/set month
-	BYTE getMonth () const throw () { return m_Month; }
-	void setMonth ( BYTE month ) throw () { m_Month = month; }
+	BYTE getMonth () const noexcept { return m_Month; }
+	void setMonth ( BYTE month ) noexcept { m_Month = month; }
 
 	// get/set day
-	BYTE getDay () const throw () { return m_Day; }
-	void setDay ( BYTE day ) throw () { m_Day = day; }
+	BYTE getDay () const noexcept { return m_Day; }
+	void setDay ( BYTE day ) noexcept { m_Day = day; }
 
 	// get/set hour
-	BYTE getHour () const throw () { return m_Hour; }
-	void setHour ( BYTE hour ) throw () { m_Hour = hour; }
+	BYTE getHour () const noexcept { return m_Hour; }
+	void setHour ( BYTE hour ) noexcept { m_Hour = hour; }
 
 	// get/set minute
-	BYTE getMinute () const throw () { return m_Minute; }
-	void setMinute ( BYTE minute ) throw () { m_Minute = minute; }
+	BYTE getMinute () const noexcept { return m_Minute; }
+	void setMinute ( BYTE minute ) noexcept { m_Minute = minute; }
 
 	// get/set second
-	BYTE getSecond () const throw () { return m_Second; }
-	void setSecond ( BYTE second ) throw () { m_Second = second; }
+	BYTE getSecond () const noexcept { return m_Second; }
+	void setSecond ( BYTE second ) noexcept { m_Second = second; }
 
 	// get english month std::string
-	std::string getMonthString () const throw ()
+	std::string getMonthString () const
 	{
 		switch ( m_Month ) {
 			case 1 : return "JAN";
@@ -97,7 +97,7 @@ public :
 	}
 
 	// get debug std::string
-	std::string toString () const throw ();
+	std::string toString () const;
 
 private :
 

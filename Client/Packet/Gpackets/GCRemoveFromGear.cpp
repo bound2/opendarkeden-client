@@ -16,8 +16,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-GCRemoveFromGear::GCRemoveFromGear () 
-     throw ()
+GCRemoveFromGear::GCRemoveFromGear ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -27,8 +26,7 @@ GCRemoveFromGear::GCRemoveFromGear ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-GCRemoveFromGear::~GCRemoveFromGear () 
-    throw ()
+GCRemoveFromGear::~GCRemoveFromGear ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -38,8 +36,7 @@ GCRemoveFromGear::~GCRemoveFromGear ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCRemoveFromGear::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCRemoveFromGear::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -52,8 +49,7 @@ void GCRemoveFromGear::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void GCRemoveFromGear::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCRemoveFromGear::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -67,7 +63,6 @@ void GCRemoveFromGear::write ( SocketOutputStream & oStream ) const
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string GCRemoveFromGear::toString () const
-		throw ()
 	{
 		__BEGIN_TRY
 			

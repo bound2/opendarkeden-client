@@ -14,7 +14,6 @@
 // read data from socket input stream
 //----------------------------------------------------------------------
 void SubServerInfo::read ( SocketInputStream & iStream ) 
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 	try {
@@ -43,7 +42,6 @@ void SubServerInfo::read ( SocketInputStream & iStream )
 // write data to socket output stream
 //----------------------------------------------------------------------
 void SubServerInfo::write ( SocketOutputStream & oStream ) const 
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -75,7 +73,6 @@ void SubServerInfo::write ( SocketOutputStream & oStream ) const
 //----------------------------------------------------------------------
 #ifdef __DEBUG_OUTPUT__
 	std::string SubServerInfo::toString () const 
-		throw ()
 	{
 		StringStream msg;
 

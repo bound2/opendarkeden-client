@@ -27,40 +27,40 @@ class GCDownSkillFailed : public Packet
 
 public: 
 
-	GCDownSkillFailed() throw();
-	virtual ~GCDownSkillFailed() throw();
+	GCDownSkillFailed();
+	virtual ~GCDownSkillFailed();
 
 	
 public:
 	
 	// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+	void read(SocketInputStream & iStream);
 			
 	// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+	void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_GC_DOWN_SKILL_FAILED; }
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_DOWN_SKILL_FAILED; }
 	
 	// get packet size
-	PacketSize_t getPacketSize() const throw() { return szSkillType+szBYTE; }
+	PacketSize_t getPacketSize() const noexcept { return szSkillType+szBYTE; }
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet's name
-	std::string getPacketName() const throw() { return "GCDownSkillFailed"; }
+	std::string getPacketName() const { return "GCDownSkillFailed"; }
 	
 	// get packet's debug string
-	std::string toString() const throw();
+	std::string toString() const;
 #endif
 	
 	// get/set skill type
-	SkillType_t getSkillType(void) const throw() { return m_SkillType; }
-	void setSkillType(SkillType_t SkillType) throw() { m_SkillType = SkillType; }
+	SkillType_t getSkillType(void) const noexcept { return m_SkillType; }
+	void setSkillType(SkillType_t SkillType) noexcept { m_SkillType = SkillType; }
 
 	// get/set description
-	BYTE getDesc(void) const throw() { return m_Desc;}
-	void setDesc(BYTE desc) throw() { m_Desc = desc;}
+	BYTE getDesc(void) const noexcept { return m_Desc;}
+	void setDesc(BYTE desc) noexcept { m_Desc = desc;}
 
 private:
 
@@ -84,27 +84,27 @@ class  GCDownSkillFailedFactory : public PacketFactory {
 public :
 	
 	// constructor
-	 GCDownSkillFailedFactory() throw() {}
+	 GCDownSkillFailedFactory() {}
 	
 	// destructor
-	virtual ~GCDownSkillFailedFactory() throw() {}
+	virtual ~GCDownSkillFailedFactory() {}
 
 	
 public :
 	
 	// create packet
-	Packet* createPacket() throw() { return new GCDownSkillFailed(); }
+	Packet* createPacket() { return new GCDownSkillFailed(); }
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet name
-	std::string getPacketName() const throw() { return "GCDownSkillFailed"; }
+	std::string getPacketName() const { return "GCDownSkillFailed"; }
 #endif
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_DOWN_SKILL_FAILED; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_DOWN_SKILL_FAILED; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szSkillType+szBYTE; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szSkillType+szBYTE; }
 
 };
 
@@ -120,7 +120,7 @@ class  GCDownSkillFailedHandler {
 public :
 
 	// execute packet's handler
-	static void execute( GCDownSkillFailed* pGCDownSkillFailed, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute( GCDownSkillFailed* pGCDownSkillFailed, Player* pPlayer);
 
 };
 

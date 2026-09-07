@@ -6,8 +6,7 @@
 #include "Client_PCH.h"
 #include "CGModifyTaxRatio.h"
 
-void CGModifyTaxRatio::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGModifyTaxRatio::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -16,8 +15,7 @@ void CGModifyTaxRatio::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 
-void CGModifyTaxRatio::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGModifyTaxRatio::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 
@@ -28,7 +26,6 @@ void CGModifyTaxRatio::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGModifyTaxRatio::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

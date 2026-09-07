@@ -33,46 +33,46 @@ class GCAddVampireFromTransformation : public Packet {
 public :
 
 	// constructor
-	GCAddVampireFromTransformation () throw () : m_pEffectInfo(NULL) {}
-	GCAddVampireFromTransformation ( const PCVampireInfo3 & vampireInfo ) throw () : m_VampireInfo(vampireInfo), m_pEffectInfo(NULL) {}
+	GCAddVampireFromTransformation () : m_pEffectInfo(NULL) {}
+	GCAddVampireFromTransformation ( const PCVampireInfo3 & vampireInfo ) : m_VampireInfo(vampireInfo), m_pEffectInfo(NULL) {}
 
-	virtual ~GCAddVampireFromTransformation() throw();
+	virtual ~GCAddVampireFromTransformation();
 
 	
 public :
 
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_ADD_VAMPIRE_FROM_TRANSFORMATION; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_ADD_VAMPIRE_FROM_TRANSFORMATION; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () { return m_VampireInfo.getSize() + m_pEffectInfo->getSize(); }
+	PacketSize_t getPacketSize () const { return m_VampireInfo.getSize() + m_pEffectInfo->getSize(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCAddVampireFromTransformation"; }
+		std::string getPacketName () const { return "GCAddVampireFromTransformation"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 
 public :
 
 	// get/set vampire info
-	PCVampireInfo3 & getVampireInfo () throw () { return m_VampireInfo; }
-	const PCVampireInfo3 & getVampireInfo () const throw () { return m_VampireInfo; }
-	void setVampireInfo ( const PCVampireInfo3 & vampireInfo ) throw () { m_VampireInfo = vampireInfo; }
+	PCVampireInfo3 & getVampireInfo () noexcept { return m_VampireInfo; }
+	const PCVampireInfo3 & getVampireInfo () const noexcept { return m_VampireInfo; }
+	void setVampireInfo ( const PCVampireInfo3 & vampireInfo ) { m_VampireInfo = vampireInfo; }
 
 	// get /set Effect Info
-	EffectInfo * getEffectInfo () const throw() { return m_pEffectInfo; }
-	void setEffectInfo ( EffectInfo * pEffectInfo ) throw() { m_pEffectInfo = pEffectInfo; }
+	EffectInfo * getEffectInfo () const { return m_pEffectInfo; }
+	void setEffectInfo ( EffectInfo * pEffectInfo ) { m_pEffectInfo = pEffectInfo; }
 
 
 private :
@@ -99,18 +99,18 @@ class GCAddVampireFromTransformationFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCAddVampireFromTransformation(); }
+	Packet * createPacket () { return new GCAddVampireFromTransformation(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCAddVampireFromTransformation"; }
+		std::string getPacketName () const { return "GCAddVampireFromTransformation"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_ADD_VAMPIRE_FROM_TRANSFORMATION; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_ADD_VAMPIRE_FROM_TRANSFORMATION; }
 
 	// get packet's body size
-	PacketSize_t getPacketMaxSize () const throw ()
+	PacketSize_t getPacketMaxSize () const
 	{ 
 		return PCVampireInfo3::getMaxSize() + EffectInfo::getMaxSize();
 	}
@@ -129,7 +129,7 @@ class GCAddVampireFromTransformationHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCAddVampireFromTransformation * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCAddVampireFromTransformation * pPacket , Player * pPlayer );
 
 };
 

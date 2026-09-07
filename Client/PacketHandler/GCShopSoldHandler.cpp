@@ -20,7 +20,6 @@ void GCShopSoldHandler::execute ( GCShopSold * pPacket , Player * pPlayer )
 	 
 
 
-throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 	

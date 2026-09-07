@@ -24,7 +24,6 @@ NPCInfo::~NPCInfo()
 }
 
 void NPCInfo::read(SocketInputStream& iStream)
-	throw (ProtocolException, Error)
 {
 	__BEGIN_TRY
 
@@ -42,7 +41,6 @@ void NPCInfo::read(SocketInputStream& iStream)
 }
 
 void NPCInfo::write(SocketOutputStream& oStream) const
-	throw (ProtocolException, Error)
 {
 	__BEGIN_TRY
 

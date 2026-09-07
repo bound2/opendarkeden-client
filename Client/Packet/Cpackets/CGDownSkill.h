@@ -19,18 +19,18 @@
 class CGDownSkill : public Packet 
 {
 public:
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_CG_DOWN_SKILL; }
-	PacketSize_t getPacketSize() const throw() { return szSkillType; }
+	void read(SocketInputStream & iStream);
+	void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_CG_DOWN_SKILL; }
+	PacketSize_t getPacketSize() const noexcept { return szSkillType; }
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "CGDownSkill"; }
-	std::string toString() const throw();
+	std::string getPacketName() const { return "CGDownSkill"; }
+	std::string toString() const;
 #endif
 
 public:
-	SkillType_t getSkillType() const throw()  { return m_SkillType; }
-	void setSkillType(SkillType_t SkillType) throw() { m_SkillType = SkillType; }
+	SkillType_t getSkillType() const noexcept  { return m_SkillType; }
+	void setSkillType(SkillType_t SkillType) noexcept { m_SkillType = SkillType; }
 
 private:
 	SkillType_t       m_SkillType;  // 기술의 종류
@@ -43,12 +43,12 @@ private:
 class CGDownSkillFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new CGDownSkill(); }
+	Packet* createPacket() { return new CGDownSkill(); }
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "CGDownSkill"; }
+	std::string getPacketName() const { return "CGDownSkill"; }
 #endif
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_DOWN_SKILL; }
-	PacketSize_t getPacketMaxSize() const throw() { return szSkillType; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_DOWN_SKILL; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szSkillType; }
 };
 
 
@@ -60,7 +60,7 @@ public:
 class CGDownSkillHandler 
 {
 public:
-	static void execute(CGDownSkill* pCGDownSkill, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(CGDownSkill* pCGDownSkill, Player* pPlayer);
 };
 #endif
 

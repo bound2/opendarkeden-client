@@ -6,8 +6,7 @@
 #include "Client_PCH.h"
 #include "CGWhisper.h"
 
-void CGWhisper::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void CGWhisper::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
@@ -41,8 +40,7 @@ void CGWhisper::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 		    
-void CGWhisper::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void CGWhisper::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
@@ -81,7 +79,6 @@ void CGWhisper::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string CGWhisper::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		
