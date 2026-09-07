@@ -1282,14 +1282,16 @@ bool C_VS_UI_NEWCHAR::ChangeColor(int _x, int _y)
 	for (int j=0; j < COLOR_LIST_Y; j++)
 		for (int i=0; i < COLOR_LIST_X; i++)
 		{
-			if (_x >= TABLE_X+i*COLOR_UNIT_X && _x < TABLE_X+i*COLOR_UNIT_X+COLOR_UNIT_X &&
+			if (m_p_slot->Race != RACE_OUSTERS &&
+				_x >= TABLE_X+i*COLOR_UNIT_X && _x < TABLE_X+i*COLOR_UNIT_X+COLOR_UNIT_X &&
 				 _y >= TABLE_Y2+j*COLOR_UNIT_Y && _y < TABLE_Y2+j*COLOR_UNIT_Y+COLOR_UNIT_Y)
 			{
 				m_skin_point.Set(i, j);
 				m_p_slot->skin_color = m_skin_color_array[i][j];
 				return true;
 			}
-			if (_x >= TABLE_X+i*COLOR_UNIT_X && _x < TABLE_X+i*COLOR_UNIT_X+COLOR_UNIT_X &&
+			if (m_p_slot->Race != RACE_VAMPIRE &&
+				_x >= TABLE_X+i*COLOR_UNIT_X && _x < TABLE_X+i*COLOR_UNIT_X+COLOR_UNIT_X &&
 				 _y >= TABLE_Y+j*COLOR_UNIT_Y && _y < TABLE_Y+j*COLOR_UNIT_Y+COLOR_UNIT_Y)
 			{
 				m_hair_point.Set(i, j);
@@ -2343,52 +2345,36 @@ void C_VS_UI_NEWCHAR::Show()
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
 		int i, j;
-		S_SURFACEINFO	surfaceinfo;
-		gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surfaceinfo);
+        // Draw through the surface backend; the legacy free rectangle helpers
+        // are stubs on SDL and leave both palettes and selection marks invisible.
+        auto drawColorTable = [&](bool skin, const Point& selected) {
+            const int top = skin ? TABLE_Y2 : TABLE_Y;
+            for (j = 0; j < COLOR_LIST_Y; ++j) {
+                for (i = 0; i < COLOR_LIST_X; ++i) {
+                    RECT cell = {TABLE_X + COLOR_UNIT_X * i, top + COLOR_UNIT_Y * j,
+                                 TABLE_X + COLOR_UNIT_X * (i + 1), top + COLOR_UNIT_Y * (j + 1)};
+                    gpC_base->m_p_DDSurface_back->FillRect(&cell, GetColor(i, j, skin));
+                }
+            }
+            const int x = TABLE_X + selected.x * COLOR_UNIT_X;
+            const int y = top + selected.y * COLOR_UNIT_Y;
+            const WORD color = ga_blink_color_table[g_blink_value];
+            auto* surface = gpC_base->m_p_DDSurface_back;
+            surface->HLine(x, y, COLOR_UNIT_X, color);
+            surface->HLine(x, y + COLOR_UNIT_Y - 1, COLOR_UNIT_X, color);
+            surface->VLine(x, y, COLOR_UNIT_Y, color);
+            surface->VLine(x + COLOR_UNIT_X - 1, y, COLOR_UNIT_Y, color);
+        };
 
-		Rect color_unit_rect;
+        if (m_p_slot->Race != RACE_VAMPIRE)
+            drawColorTable(false, m_hair_point);
+        else
+            m_p_slot->hair_color = 377;
 
-		color_unit_rect.WH(COLOR_UNIT_X, COLOR_UNIT_Y);
-
-		// hair
-		if(m_p_slot->Race != RACE_VAMPIRE)
-		{
-			for (j=0; j < COLOR_LIST_Y; j++)
-				for (i=0; i < COLOR_LIST_X; i++)
-				{
-					color_unit_rect.XY(TABLE_X+COLOR_UNIT_X*i, TABLE_Y+COLOR_UNIT_Y*j);
-					
-					FillRect(&surfaceinfo, &color_unit_rect, GetColor(i, j, false));
-				}
-				
-				// show select mark
-				color_unit_rect.XY(TABLE_X+m_hair_point.x*COLOR_UNIT_X, TABLE_Y+m_hair_point.y*COLOR_UNIT_Y);
-				rectangle(&surfaceinfo, &color_unit_rect, ga_blink_color_table[g_blink_value]);
-		}
-		else
-		{
-			m_p_slot->hair_color = 377;
-		}
-
-		if(m_p_slot->Race != RACE_OUSTERS)
-		{
-			// body
-			for (j=0; j < COLOR_LIST_Y; j++)
-				for (i=0; i < COLOR_LIST_X; i++)
-				{
-					color_unit_rect.XY(TABLE_X+COLOR_UNIT_X*i, TABLE_Y2+COLOR_UNIT_Y*j);
-
-					FillRect(&surfaceinfo, &color_unit_rect, GetColor(i, j, true));
-				}
-
-			// show select mark
-			color_unit_rect.XY(TABLE_X+m_skin_point.x*COLOR_UNIT_X, TABLE_Y2+m_skin_point.y*COLOR_UNIT_Y);
-			rectangle(&surfaceinfo, &color_unit_rect, ga_blink_color_table[g_blink_value]);
-		}
-		else
-		{
-			m_p_slot->skin_color = 377;
-		}
+        if (m_p_slot->Race != RACE_OUSTERS)
+            drawColorTable(true, m_skin_point);
+        else
+            m_p_slot->skin_color = 377;
 
 		m_pC_button_group->Show();
 		gpC_base->m_p_DDSurface_back->Unlock();
