@@ -271,6 +271,82 @@ bases declare, so they belong in the same commit as the base they mirror. The
 `throw()` half of that is the part that cannot be deferred: once a base is
 `noexcept`, an override that is not stops compiling.
 
+**Packet-root status (2026-09-07):** the 155 files directly under
+`Client/Packet` are at 0, from 1,799, and **R10 = 9,664**. The work went as
+four slices - the wire core (the exception header, the asserts, the string
+stream, the sockets, the datagram classes, the streams and the file API, 524
+sites), the packet framework and the player classes (224), the
+player-character info classes (558) and the remaining info classes (493) -
+plus the nine in `tests/`, which moved with the bases they mirror. The rule
+each slice applied, and the numbers it produced:
+
+- **A type list is deleted, not respelled** - 643 of them. MSVC ignored the
+  list already, and a function with no specification is what ISO C++ means
+  by potentially throwing, so deleting it changes nothing MSVC does. The
+  `noexcept(false)` this finding names above is the same thing said longer,
+  and is not written anywhere except in the one place it is not the same
+  thing: **a destructor**. A destructor with no specification is `noexcept`
+  by default, so the ten that carried `throw(ProtocolException, Error)` -
+  `Player` and its three subclasses, `Socket`, `SocketImpl`, `ServerSocket`,
+  `DatagramSocket` and the two streams - are spelled `noexcept(false)`, which
+  is what MSVC had read the list as. They can throw: the player destructors
+  hold an `Assert` on the session state, and the socket ones call `close()`.
+  The slices' first version deleted those lists too, and the compiler said
+  so: no C4297 for any of the ten on master, C4297 for all ten once the list
+  was gone.
+- **An empty `throw()` is a judgement per function**: 599 became `noexcept`
+  and 566 were deleted, 48 of the latter on destructors, which are `noexcept`
+  by default anyway. Promoted: the scalar, pointer, enum and array-indexed
+  getters and setters, the `getSize`/`getMaxSize` bodies that sum constants
+  (`std::string::size()` and `std::list::size()` are `noexcept` by the
+  standard), `clearList()` over `std::list::clear()`, and the bitset setters
+  in the slayer outlooks. Deleted: anything returning or assigning a
+  `std::string` or a container by value (every `getName`, `setName`,
+  `toString`, the `*Info3` copy constructors), anything wrapped in
+  `__BEGIN_TRY`/`__END_CATCH` (the pair rethrows), `new`, `front()` and
+  `pop_front()`, the bitset getters (`to_ulong` and `test` throw), and the
+  exception-class constructors - `Throwable` holds a `std::list<std::string>`
+  and MSVC's `std::list` default constructor allocates its sentinel node and
+  is not `noexcept`, so `Throwable()` and the 41 default constructors that
+  chain to it are deleted rather than promoted, though libstdc++ and libc++
+  would have allowed it.
+- **A virtual is promoted only when every override in the repository is
+  `throw()` or `noexcept` and passes the same test**, and the slices checked
+  by grep before promoting: `PCInfo::getPCType` and `PCInfo::getSize` (nine
+  overrides, all in the slice), and the three `getSize` overrides of
+  `PCSkillInfo` (whose base is deleted, since those overrides walk a list).
+  Deleted rather than promoted, on purpose: `PacketFactory::getPacketID` and
+  `getPacketMaxSize` (448 factory subclasses in the packet directories, still
+  `throw()` and rewritten by later slices; `GCPetStashListFactory` and
+  `GCGoodsListFactory` already call an unspecified `getPacketMaxSize`),
+  `DatagramPacket`'s pure virtuals, `ModifyInfo::getPacketSize` (about
+  thirty overrides in `Gpackets`) and `WarInfo::getSize`, whose overrides add
+  `ValueList::getPacketSize`. A base with no specification compiles under any
+  override, which is the property the packet-directory slices need.
+- **The two things this finding said should travel with the slice did**:
+  `SocketAPI.cpp`'s five two-line specifications are gone, along with the
+  copies in the banner comments above them and the `MBindException` name one
+  of those had wrong; and the `WireHost.h` comment that said `readInputStream`
+  and `send` "are throw(ProtocolException, Error)" now says they propagate
+  those exceptions.
+
+Two facts about the files that the next slices should know. The packet-root
+files are **CRLF in the working tree** on this machine, and `Datagram.h` and
+`SocketInputStream.h` are stored with mixed endings; `grep -c $'\r'` reports
+0 for many of them and is not a line-ending check here - count bytes with
+perl, compare the changed-line count of `git diff --numstat` with the
+specification count per file, and expect the Edit tool to normalise a mixed
+file. And the compiler is a usable oracle for one direction: a `throw()`
+promoted to `noexcept` whose body can throw draws C4297, so a promotion that
+adds a C4297 to the build is wrong, while the C4297s that remain on the
+destructors wrapped in `__BEGIN_TRY` are the pre-existing concern this finding
+raises and not this slice's to settle.
+
+Verified: unit_tests in `build/tests` and `build/tests-asan`, 596 tests,
+294,382 checks, 0 failed in both; DarkEden in `build/vs2022` with 0 errors,
+which is the check that matters for the headers every handler includes; the
+wire inventory and every golden unchanged.
+
 ### 4. `register` remains in C++ source
 
 There are roughly 650 declaration-like uses of the removed `register` storage

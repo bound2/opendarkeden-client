@@ -831,7 +831,15 @@ R9_BASELINE=0
 # functions declared throw(ProtocolException, Error) by design, and
 # giving them noexcept would turn a designed peer teardown into
 # std::terminate.
-R10_BASELINE=11463
+#
+# R10 = 9,664 (2026-09-07): the 155 files directly under Client/Packet
+# are at 0 - the wire core, the packet framework and players, and the
+# info classes, 1,799 sites. What is left is the packet directories:
+# Cpackets, Gpackets, Lpackets, Rpackets, Upackets and Types. Ten
+# destructors that carried a type list are spelled noexcept(false),
+# which this pattern does not count; everything else is deleted or
+# noexcept.
+R10_BASELINE=9664
 
 # Identifiers, `::` and commas between the parens, and nothing else. The
 # leading alternation rather than \b for the reason R8's comment gives:
