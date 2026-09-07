@@ -151,6 +151,3 @@ Client/MStringArray.cpp
 Client/MStringArray.h
 Client/CTypeTable.h
 Client/MTypeDef.h
-
-# Display-only cleanup for legacy asset branding
-Client/LegacyDisplayText.h
