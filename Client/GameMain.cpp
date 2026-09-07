@@ -3571,11 +3571,8 @@ MakeScreenShot()
 			// surface -> BMP/JPEG) or via stb_image_write; see 참고자료/작업필요stub.md.
 			printf("Screenshot functionality not yet implemented on this platform\n");
 
-#ifdef PLATFORM_WINDOWS
-			_close(fd);
-#else
-			close(fd);
-#endif // PLATFORM_WINDOWS
+			// The open failed, so there is no descriptor to close. On Windows,
+			// _close(-1) invokes the CRT invalid-parameter handler and aborts.
 			g_ScreenShotNumber++;
 			return;
 		}
