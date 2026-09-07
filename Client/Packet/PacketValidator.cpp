@@ -14,7 +14,6 @@
 // constructor
 //----------------------------------------------------------------------
 PacketValidator::PacketValidator () 
-	throw ()
 {
 	__BEGIN_TRY
 
@@ -27,7 +26,6 @@ PacketValidator::PacketValidator ()
 // destructor
 //----------------------------------------------------------------------
 PacketValidator::~PacketValidator () 
-	throw ()
 {
 	__BEGIN_TRY
 
@@ -47,7 +45,6 @@ PacketValidator::~PacketValidator ()
 // initialize packet validators
 //----------------------------------------------------------------------
 void PacketValidator::init ()
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -359,7 +356,6 @@ void PacketValidator::init ()
 // add packet id set
 //----------------------------------------------------------------------
 void PacketValidator::addPacketIDSet ( PlayerStatus playerStatus , PacketIDSet * pPacketIDSet ) 
-	throw ( DuplicatedException , Error )
 {
 	__BEGIN_TRY
 
@@ -378,7 +374,6 @@ void PacketValidator::addPacketIDSet ( PlayerStatus playerStatus , PacketIDSet *
 // delete packet id set
 //----------------------------------------------------------------------
 void PacketValidator::deletePacketIDSet ( PlayerStatus playerStatus , PacketIDSet * pPacketIDSet ) 
-	throw ( NoSuchElementException , Error )
 {
 	__BEGIN_TRY
 
@@ -397,7 +392,6 @@ void PacketValidator::deletePacketIDSet ( PlayerStatus playerStatus , PacketIDSe
 // is valid packet?
 //----------------------------------------------------------------------
 bool PacketValidator::isValidPacketID ( PlayerStatus playerStatus , PacketID_t packetID ) 
-	throw ( NoSuchElementException , IgnorePacketException , Error )
 {
 	__BEGIN_TRY
 
@@ -417,7 +411,6 @@ bool PacketValidator::isValidPacketID ( PlayerStatus playerStatus , PacketID_t p
 //----------------------------------------------------------------------
 #ifdef __DEBUG_OUTPUT__
 	std::string PacketValidator::toString () const
-		throw ()
 	{
 		StringStream msg;
 

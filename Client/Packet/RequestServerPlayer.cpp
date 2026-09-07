@@ -29,7 +29,6 @@
 //
 //--------------------------------------------------------------------------------
 RequestServerPlayer::RequestServerPlayer ( Socket * pSocket )
-	throw ( ProtocolException , Error )
 : Player(pSocket), m_PlayerStatus(CPS_NONE)
 {
 	m_RequestMode = REQUEST_CLIENT_MODE_NULL;
@@ -44,7 +43,6 @@ RequestServerPlayer::RequestServerPlayer ( Socket * pSocket )
 //
 //--------------------------------------------------------------------------------
 RequestServerPlayer::~RequestServerPlayer ()
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 	
@@ -63,7 +61,6 @@ RequestServerPlayer::~RequestServerPlayer ()
 //
 //--------------------------------------------------------------------------------
 void RequestServerPlayer::processCommand () 
-     throw ( IOException , Error )
 {
 	__BEGIN_TRY
 
@@ -250,7 +247,6 @@ void RequestServerPlayer::processCommand ()
 // disconnect player
 //--------------------------------------------------------------------------------
 void RequestServerPlayer::disconnect ( bool bDisconnected )
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -288,7 +284,6 @@ void RequestServerPlayer::disconnect ( bool bDisconnected )
 
 uint
 RequestServerPlayer::send(const char* pBuffer, uint nBytes) 
-	throw( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -307,7 +302,6 @@ RequestServerPlayer::send(const char* pBuffer, uint nBytes)
 //
 //--------------------------------------------------------------------------------
 std::string RequestServerPlayer::toString () const
-       throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 		

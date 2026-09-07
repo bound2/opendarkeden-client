@@ -59,32 +59,32 @@ public :
 public :
 	
 	// constructor
-	Properties () throw ();
-	Properties ( const std::string & filename ) throw ();
+	Properties ();
+	Properties ( const std::string & filename );
 	
 	// destructor
-	~Properties () throw ();
+	~Properties ();
 	
 
 public :
 	
 	// load from file
-	void load () throw ( IOException , Error );
-	void load ( const std::string & filename ) throw ( IOException , Error ) { m_Filename = filename; load(); }
+	void load ();
+	void load ( const std::string & filename ) { m_Filename = filename; load(); }
 
 	// save to file
-	void save () throw ( IOException );
-	void save ( const std::string & filename ) throw ( IOException ) { m_Filename = filename; save(); }
+	void save ();
+	void save ( const std::string & filename ) { m_Filename = filename; save(); }
 
 	// get/set property
-	std::string getProperty ( std::string key ) const throw ( NoSuchElementException );
-	int getPropertyInt ( std::string key ) const throw ( NoSuchElementException );
-	std::string getProperty ( const char* key ) const throw ( NoSuchElementException );
-	int getPropertyInt ( const char* key ) const throw ( NoSuchElementException );
-	void setProperty ( std::string key , std::string value ) throw ();
+	std::string getProperty ( std::string key ) const;
+	int getPropertyInt ( std::string key ) const;
+	std::string getProperty ( const char* key ) const;
+	int getPropertyInt ( const char* key ) const;
+	void setProperty ( std::string key , std::string value );
 
 	// get debug string
-	std::string toString () const throw ();
+	std::string toString () const;
 	
 private :
 	

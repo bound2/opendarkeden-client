@@ -30,10 +30,10 @@ class ClientPlayer : public Player {
 public :
 	
 	// constructor
-	ClientPlayer ( Socket * pSocket ) throw ( ProtocolException , Error );
+	ClientPlayer ( Socket * pSocket );
 	
 	// destructor
-	~ClientPlayer () throw ( ProtocolException , Error );
+	~ClientPlayer ();
 
 public :
 
@@ -41,7 +41,7 @@ public :
 	//virtual void processInput () throw ( IOException , Error );
 	
 	// parse packet and execute handler for the packet
-	virtual void processCommand () throw ( IOException , Error );
+	virtual void processCommand ();
 	
 	// flush output buffer to socket's send buffer
 	//virtual void processOutput () throw ( IOException , Error );
@@ -51,49 +51,49 @@ public :
 
 	// disconnect
 	// 정식 로그아웃의 경우 disconnect(UNDISCONNECTED)
-	virtual void disconnect ( bool bDisconnected = DISCONNECTED ) throw ( ProtocolException , Error );
+	virtual void disconnect ( bool bDisconnected = DISCONNECTED );
 	
 	// get debug std::string
-	virtual std::string toString () const throw ( ProtocolException , Error );
+	virtual std::string toString () const;
 	
 public :
 
 	// return recent N-th packet
 	// 최근 전송된 N 번째 패킷을 리턴한다.
-	Packet * getOldPacket ( uint prev = 0 ) throw ( OutOfBoundException , NoSuchElementException );
+	Packet * getOldPacket ( uint prev = 0 );
 
 	// return recent packet which has packetID
 	// 특정 ID를 가진 패킷 중 가장 최근의 패킷을 리턴한다.
-	Packet * getOldPacket ( PacketID_t packetID ) throw ( NoSuchElementException );
+	Packet * getOldPacket ( PacketID_t packetID );
 
 	// get player's status
-	PlayerStatus getPlayerStatus () const throw () { return m_PlayerStatus; }
+	PlayerStatus getPlayerStatus () const noexcept { return m_PlayerStatus; }
 
 	// set player's status
-	void setPlayerStatus ( PlayerStatus playerStatus ) throw ();
+	void setPlayerStatus ( PlayerStatus playerStatus );
 
 	// get/set PC Type
-	PCType getPCType () const throw () { return m_PCType; }
-	void setPCType ( PCType pcType ) throw () { m_PCType = pcType; }
+	PCType getPCType () const noexcept { return m_PCType; }
+	void setPCType ( PCType pcType ) noexcept { m_PCType = pcType; }
 
 	// get/set PC Name
-	std::string getPCName () const throw () { return m_PCName; }
-	void setPCName ( const std::string & pcName ) throw () { m_PCName = pcName; }
+	std::string getPCName () const { return m_PCName; }
+	void setPCName ( const std::string & pcName ) { m_PCName = pcName; }
 
 	// get/set X,Y,Dir
-	Coord_t getX () const throw () { return m_X; }
-	void setX ( Coord_t x ) throw () { m_X = x; }
+	Coord_t getX () const noexcept { return m_X; }
+	void setX ( Coord_t x ) noexcept { m_X = x; }
 
-	Coord_t getY () const throw () { return m_Y; }
-	void setY ( Coord_t y ) throw () { m_Y = y; }
+	Coord_t getY () const noexcept { return m_Y; }
+	void setY ( Coord_t y ) noexcept { m_Y = y; }
 
-	Dir_t getDir () const throw () { return m_Dir; }
-	void setDir ( Dir_t dir ) throw () { m_Dir = dir; }
+	Dir_t getDir () const noexcept { return m_Dir; }
+	void setDir ( Dir_t dir ) noexcept { m_Dir = dir; }
 
-	void setXY ( Coord_t x , Coord_t y ) throw () { m_X = x; m_Y = y; }
+	void setXY ( Coord_t x , Coord_t y ) noexcept { m_X = x; m_Y = y; }
 
 	// 암호화 코드를 설정한다.
-	void setEncryptCode() throw( Error );
+	void setEncryptCode();
 
 private :
 

@@ -128,7 +128,7 @@ struct WireHost {
 // which a test asserts across every server number a byte can hold
 // rather than leaving to this comment.
 //----------------------------------------------------------------------
-uchar	WireEncryptSeed ( ZoneID_t zoneID , int serverID , bool bEnglishSeed ) throw ();
+uchar	WireEncryptSeed ( ZoneID_t zoneID , int serverID , bool bEnglishSeed ) noexcept;
 
 //----------------------------------------------------------------------
 // The wire layer's view of it
@@ -138,26 +138,26 @@ class Wire {
 public :
 
 	// Installed once at start-up; NULL puts every default back.
-	static void	SetHost ( const WireHost * pHost ) throw () { s_pHost = pHost; }
+	static void	SetHost ( const WireHost * pHost ) noexcept { s_pHost = pHost; }
 
-	static int	MaxProcessPacket () throw ();
-	static int	MaxRequestService () throw ();
-	static uint	ClientCommunicationUDPPort () throw ();
-	static Player *	BugReportTarget () throw ();
-	static ZoneID_t	EncryptZoneID () throw ();
-	static int	EncryptServerID () throw ();
-	static bool	EncryptUsesEnglishSeed () throw ();
+	static int	MaxProcessPacket ();
+	static int	MaxRequestService ();
+	static uint	ClientCommunicationUDPPort ();
+	static Player *	BugReportTarget ();
+	static ZoneID_t	EncryptZoneID ();
+	static int	EncryptServerID ();
+	static bool	EncryptUsesEnglishSeed ();
 
-	static DWORD	CurrentTime () throw ();
-	static bool	InGameMode () throw ();
+	static DWORD	CurrentTime ();
+	static bool	InGameMode ();
 
 	// These two are NOT nothrow, and the omission is deliberate. The
 	// file-transfer manager behind them reads and writes the peer
 	// socket, and throwing is how a transfer ends: RequestFileManager::
 	// SendOtherRequest throws ConnectException("No File to Send"), and
 	// both reach RequestClientPlayer::readInputStream /
-	// RequestServerPlayer::send, which are throw(ProtocolException,
-	// Error). The call sites sit outside processCommand's try, so the
+	// RequestServerPlayer::send, which propagate ProtocolException and
+	// Error. The call sites sit outside processCommand's try, so the
 	// exception unwinds to RequestServerPlayerManager::Update's
 	// catch (Throwable&), which disconnects that peer - the designed
 	// teardown. A throw() here would make that path undefined under
@@ -165,10 +165,10 @@ public :
 	static bool	ReceiveMyRequest ( const std::string & name , RequestClientPlayer * pPlayer );
 	static bool	SendOtherRequest ( const std::string & name , RequestServerPlayer * pPlayer );
 
-	static bool	HasMyRequest ( const std::string & name ) throw ();
-	static bool	RemoveMyRequest ( const std::string & name ) throw ();
-	static bool	HasOtherRequest ( const std::string & name ) throw ();
-	static bool	RemoveOtherRequest ( const std::string & name ) throw ();
+	static bool	HasMyRequest ( const std::string & name );
+	static bool	RemoveMyRequest ( const std::string & name );
+	static bool	HasOtherRequest ( const std::string & name );
+	static bool	RemoveOtherRequest ( const std::string & name );
 
 private :
 

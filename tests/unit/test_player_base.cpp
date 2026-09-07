@@ -89,12 +89,12 @@ public:
 class ReceiveLoopPacketFactory : public PacketFactory
 {
 public:
-	Packet* createPacket() throw () { return new ReceiveLoopPacket(); }
+	Packet* createPacket() { return new ReceiveLoopPacket(); }
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw () { return "ReceiveLoopPacket"; }
+	std::string getPacketName() const { return "ReceiveLoopPacket"; }
 #endif
-	PacketID_t getPacketID() const throw () { return RECEIVE_LOOP_PACKET_ID; }
-	PacketSize_t getPacketMaxSize() const throw () { return 2; }
+	PacketID_t getPacketID() const noexcept { return RECEIVE_LOOP_PACKET_ID; }
+	PacketSize_t getPacketMaxSize() const noexcept { return 2; }
 };
 
 class ReceiveLoopPlayer : public Player

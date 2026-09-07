@@ -18,7 +18,7 @@ const WireHost *	Wire::s_pHost = NULL;
 // sets for them (Client/ClientConfig.cpp).
 //----------------------------------------------------------------------
 int
-Wire::MaxProcessPacket () throw ()
+Wire::MaxProcessPacket ()
 {
 	if (s_pHost==NULL || s_pHost->MaxProcessPacket==NULL)
 	{
@@ -29,7 +29,7 @@ Wire::MaxProcessPacket () throw ()
 }
 
 int
-Wire::MaxRequestService () throw ()
+Wire::MaxRequestService ()
 {
 	if (s_pHost==NULL || s_pHost->MaxRequestService==NULL)
 	{
@@ -40,7 +40,7 @@ Wire::MaxRequestService () throw ()
 }
 
 uint
-Wire::ClientCommunicationUDPPort () throw ()
+Wire::ClientCommunicationUDPPort ()
 {
 	if (s_pHost==NULL || s_pHost->ClientCommunicationUDPPort==NULL)
 	{
@@ -51,7 +51,7 @@ Wire::ClientCommunicationUDPPort () throw ()
 }
 
 Player *
-Wire::BugReportTarget () throw ()
+Wire::BugReportTarget ()
 {
 	if (s_pHost==NULL || s_pHost->BugReportTarget==NULL)
 	{
@@ -70,7 +70,7 @@ Wire::BugReportTarget () throw ()
 // one caller runs only after MoveZone/LoadZone (see WireEncryptSeed).
 //----------------------------------------------------------------------
 ZoneID_t
-Wire::EncryptZoneID () throw ()
+Wire::EncryptZoneID ()
 {
 	if (s_pHost==NULL || s_pHost->EncryptZoneID==NULL)
 	{
@@ -81,7 +81,7 @@ Wire::EncryptZoneID () throw ()
 }
 
 int
-Wire::EncryptServerID () throw ()
+Wire::EncryptServerID ()
 {
 	if (s_pHost==NULL || s_pHost->EncryptServerID==NULL)
 	{
@@ -92,7 +92,7 @@ Wire::EncryptServerID () throw ()
 }
 
 bool
-Wire::EncryptUsesEnglishSeed () throw ()
+Wire::EncryptUsesEnglishSeed ()
 {
 	if (s_pHost==NULL || s_pHost->EncryptUsesEnglishSeed==NULL)
 	{
@@ -116,7 +116,7 @@ Wire::EncryptUsesEnglishSeed () throw ()
 // has one cleans up instead of waiting on a manager that is not there.
 //----------------------------------------------------------------------
 DWORD
-Wire::CurrentTime () throw ()
+Wire::CurrentTime ()
 {
 	if (s_pHost==NULL || s_pHost->CurrentTime==NULL)
 	{
@@ -127,7 +127,7 @@ Wire::CurrentTime () throw ()
 }
 
 bool
-Wire::InGameMode () throw ()
+Wire::InGameMode ()
 {
 	if (s_pHost==NULL || s_pHost->InGameMode==NULL)
 	{
@@ -149,7 +149,7 @@ Wire::ReceiveMyRequest ( const std::string & name , RequestClientPlayer * pPlaye
 }
 
 bool
-Wire::HasMyRequest ( const std::string & name ) throw ()
+Wire::HasMyRequest ( const std::string & name )
 {
 	if (s_pHost==NULL || s_pHost->HasMyRequest==NULL)
 	{
@@ -160,7 +160,7 @@ Wire::HasMyRequest ( const std::string & name ) throw ()
 }
 
 bool
-Wire::RemoveMyRequest ( const std::string & name ) throw ()
+Wire::RemoveMyRequest ( const std::string & name )
 {
 	if (s_pHost==NULL || s_pHost->RemoveMyRequest==NULL)
 	{
@@ -182,7 +182,7 @@ Wire::SendOtherRequest ( const std::string & name , RequestServerPlayer * pPlaye
 }
 
 bool
-Wire::HasOtherRequest ( const std::string & name ) throw ()
+Wire::HasOtherRequest ( const std::string & name )
 {
 	if (s_pHost==NULL || s_pHost->HasOtherRequest==NULL)
 	{
@@ -193,7 +193,7 @@ Wire::HasOtherRequest ( const std::string & name ) throw ()
 }
 
 bool
-Wire::RemoveOtherRequest ( const std::string & name ) throw ()
+Wire::RemoveOtherRequest ( const std::string & name )
 {
 	if (s_pHost==NULL || s_pHost->RemoveOtherRequest==NULL)
 	{
@@ -213,7 +213,7 @@ Wire::RemoveOtherRequest ( const std::string & name ) throw ()
 // same expression written three times.
 //----------------------------------------------------------------------
 uchar
-WireEncryptSeed ( ZoneID_t zoneID , int serverID , bool bEnglishSeed ) throw ()
+WireEncryptSeed ( ZoneID_t zoneID , int serverID , bool bEnglishSeed ) noexcept
 {
 	if (bEnglishSeed)
 	{

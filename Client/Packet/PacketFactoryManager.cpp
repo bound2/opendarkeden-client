@@ -578,7 +578,6 @@
 //
 //////////////////////////////////////////////////////////////////////
 PacketFactoryManager::PacketFactoryManager () 
-	throw ()
 : m_Factories(NULL) , m_Size(Packet::PACKET_MAX)
 {
 	__BEGIN_TRY
@@ -602,7 +601,6 @@ PacketFactoryManager::PacketFactoryManager ()
 //
 //////////////////////////////////////////////////////////////////////
 PacketFactoryManager::~PacketFactoryManager () 
-	throw ()
 {
 	__BEGIN_TRY
 		
@@ -643,7 +641,6 @@ PacketFactoryManager::~PacketFactoryManager ()
 //
 //////////////////////////////////////////////////////////////////////
 void PacketFactoryManager::init ()
-	 throw (Error)
 {
 	__BEGIN_TRY
 		
@@ -1218,7 +1215,6 @@ void PacketFactoryManager::init ()
 //
 //////////////////////////////////////////////////////////////////////
 void PacketFactoryManager::addFactory (PacketFactory * pFactory) 
-	 throw (Error)
 {
 	__BEGIN_TRY
 		
@@ -1249,7 +1245,6 @@ void PacketFactoryManager::addFactory (PacketFactory * pFactory)
 //
 //////////////////////////////////////////////////////////////////////
 Packet * PacketFactoryManager::createPacket (PacketID_t packetID) 
-	   throw (InvalidProtocolException , Error)
 {
 	__BEGIN_TRY
 
@@ -1273,7 +1268,6 @@ Packet * PacketFactoryManager::createPacket (PacketID_t packetID)
 //
 //////////////////////////////////////////////////////////////////////
 PacketSize_t PacketFactoryManager::getPacketMaxSize (PacketID_t packetID) 
-	   throw (InvalidProtocolException , Error)
 {
 	__BEGIN_TRY
 
@@ -1298,7 +1292,6 @@ PacketSize_t PacketFactoryManager::getPacketMaxSize (PacketID_t packetID)
 //////////////////////////////////////////////////////////////////////
 #if !defined(__GAME_CLIENT__) || defined(__GAME_CLIENT__) && defined(__DEBUG_OUTPUT__)
 string PacketFactoryManager::getPacketName (PacketID_t packetID) 
-	   throw (InvalidProtocolException , Error)
 {
 	__BEGIN_TRY
 
@@ -1320,7 +1313,6 @@ string PacketFactoryManager::getPacketName (PacketID_t packetID)
 // get debug string
 //////////////////////////////////////////////////////////////////////
 string PacketFactoryManager::toString () const
-	throw ()
 {
 	__BEGIN_TRY
 

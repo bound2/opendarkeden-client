@@ -22,14 +22,14 @@ template <class T>
 class ValueList 
 {
 public:
-    void read (SocketInputStream & iStream) throw (ProtocolException, Error);
-    void write (SocketOutputStream & oStream) const throw (ProtocolException, Error);
+    void read (SocketInputStream & iStream);
+    void write (SocketOutputStream & oStream) const;
 
-	PacketSize_t 	getPacketSize () const throw()		{ return szBYTE + sizeof(T) * m_Values.size(); }
-	static uint 	getPacketMaxSize() throw() 	{ return szBYTE + sizeof(T) * 255; }
+	PacketSize_t 	getPacketSize () const noexcept		{ return szBYTE + sizeof(T) * m_Values.size(); }
+	static uint 	getPacketMaxSize() noexcept 	{ return szBYTE + sizeof(T) * 255; }
 
 #ifdef __GAME_CLIENT__
-	std::string toString () const throw ();
+	std::string toString () const;
 	std::list<T>&					GetList() { return m_Values; }
 	typename std::list<T>::const_iterator		Begin() { return m_Values.begin(); }
 	typename std::list<T>::const_iterator		End() { return m_Values.end(); }
@@ -37,11 +37,11 @@ public:
 #endif
 
 public:
-	int getSize() const throw() 			{ return m_Values.size(); }
+	int getSize() const noexcept 			{ return m_Values.size(); }
 
-	void addValue(const T& info) throw() 	{ m_Values.push_back(info); }
+	void addValue(const T& info) 	{ m_Values.push_back(info); }
 
-	T popValue() throw() 
+	T popValue() 
 	{ 
 		const T info = m_Values.front(); 
 		m_Values.pop_front(); 
@@ -59,7 +59,6 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 template <class T>
 void ValueList<T>::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 		
@@ -83,7 +82,7 @@ void ValueList<T>::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////////////
 template <class T>
 void ValueList<T>::write ( SocketOutputStream & oStream ) 
-     const throw ( ProtocolException , Error )
+     const
 {
 	__BEGIN_TRY
 		
@@ -107,7 +106,7 @@ void ValueList<T>::write ( SocketOutputStream & oStream )
 //////////////////////////////////////////////////////////////////////////////
 template <class T>
 std::string ValueList<T>::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 
