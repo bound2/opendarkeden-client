@@ -126,7 +126,7 @@ public:
     void EndCursor() { m_Editor.EndCursor(); }
 
     // Set text color
-    void SetInputStringColor(unsigned long rgb) { m_CursorColor = rgb; }  // Use cursor color for text color
+    void SetInputStringColor(unsigned long rgb) { m_PrintInfo.text_color = rgb; }
 
     // Editor mode (stub for compatibility)
     void SetEditorMode(int gap, int height = 0) { /* Stub: not needed for SDL implementation */ }

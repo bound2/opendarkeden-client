@@ -5491,10 +5491,11 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 	m_check[CHECK_BLOOD_DROP] = g_pUserOption->BloodDrop?CHECK_CHECK:CHECK_NOT;
 	m_check[CHECK_ALPHA_DEPTH] = CHECK_DISABLE;
 	m_check[CHECK_DEFAULT_ALPHA] = g_pUserOption->DefaultAlpha?CHECK_CHECK:CHECK_NOT;
+	// Initialize even when the backend cannot change gamma.
+	m_value_gamma = max(MIN_GAMMA_VALUE, min(MIN_GAMMA_VALUE+MAX_GAMMA_VALUE, g_pUserOption->GammaValue));
 	if(CSDLGraphics::IsSupportGammaControl())
 	{
 		m_check[CHECK_GAMMA] = g_pUserOption->UseGammaControl?CHECK_CHECK:CHECK_NOT;
-		m_value_gamma = g_pUserOption->GammaValue;
 	}
 	else	m_check[CHECK_GAMMA] = CHECK_DISABLE;
 
@@ -5658,7 +5659,7 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 		// sound_tab 버튼들
 		m_pC_sound_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_SOUND_MAX; i++)
-			m_pC_sound_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_etc_spk->GetWidth(CHECK_BACK_DISABLE), m_pC_etc_spk->GetHeight(CHECK_BACK_DISABLE), CHECK_SOUND_TAB+i, this, CHECK_BACK_DISABLE) );
+			m_pC_sound_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+SOUND_CHECK_GAP*i, m_pC_etc_spk->GetWidth(CHECK_BACK_DISABLE), m_pC_etc_spk->GetHeight(CHECK_BACK_DISABLE), CHECK_SOUND_TAB+i, this, CHECK_BACK_DISABLE) );
 
 		// game_tab 버튼들
 		m_pC_game_button_group = new ButtonGroup(this);
@@ -5666,8 +5667,8 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 			m_pC_game_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_etc_spk->GetWidth(CHECK_BACK_DISABLE), m_pC_etc_spk->GetHeight(CHECK_BACK_DISABLE), CHECK_GAME_TAB+i, this, CHECK_BACK_DISABLE) );
 
 		m_rt_value[1].Set(m_check_x+120, m_check_y+GRAPHIC_CHECK_GAP*(CHECK_GAMMA-CHECK_GRAPHIC_TAB) , m_pC_etc_spk->GetWidth(VOLUME_BAR), 15);
-		m_rt_value[2].Set(m_check_x+120, m_check_y+m_check_gap*(CHECK_SOUND-CHECK_SOUND_TAB), m_pC_etc_spk->GetWidth(VOLUME_BAR), 15);
-		m_rt_value[3].Set(m_check_x+120, m_check_y+m_check_gap*(CHECK_MUSIC-CHECK_SOUND_TAB), m_pC_etc_spk->GetWidth(VOLUME_BAR), 15);
+		m_rt_value[2].Set(m_check_x+15, m_check_y+SOUND_SLIDER_Y+SOUND_CHECK_GAP*(CHECK_SOUND-CHECK_SOUND_TAB), m_pC_etc_spk->GetWidth(VOLUME_BAR), 15);
+		m_rt_value[3].Set(m_check_x+15, m_check_y+SOUND_SLIDER_Y+SOUND_CHECK_GAP*(CHECK_MUSIC-CHECK_SOUND_TAB), m_pC_etc_spk->GetWidth(VOLUME_BAR), 15);
 		m_rt_value[4].Set(m_check_x+120, m_check_y+GRAPHIC_CHECK_GAP*(CHECK_ALPHA_DEPTH-CHECK_GRAPHIC_TAB), m_pC_etc_spk->GetWidth(VOLUME_BAR), 15);
 
 	}
@@ -5704,15 +5705,15 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 		// sound_tab 버튼들
 		m_pC_sound_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_SOUND_MAX; i++)
-			m_pC_sound_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_main_spk->GetWidth(TITLE_CHECK_BACK), m_pC_main_spk->GetHeight(TITLE_CHECK_BACK), CHECK_SOUND_TAB+i, this, TITLE_CHECK_BACK) );
+			m_pC_sound_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+SOUND_CHECK_GAP*i, m_pC_main_spk->GetWidth(TITLE_CHECK_BACK), m_pC_main_spk->GetHeight(TITLE_CHECK_BACK), CHECK_SOUND_TAB+i, this, TITLE_CHECK_BACK) );
 		// game_tab 버튼들
 		m_pC_game_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_GAME_MAX; i++)
 			m_pC_game_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_main_spk->GetWidth(TITLE_CHECK_BACK), m_pC_main_spk->GetHeight(TITLE_CHECK_BACK), CHECK_GAME_TAB+i, this, TITLE_CHECK_BACK) );
 
 		m_rt_value[1].Set(m_check_x+120, m_check_y+GRAPHIC_CHECK_GAP*(CHECK_GAMMA-CHECK_GRAPHIC_TAB) , m_pC_main_spk->GetWidth(TITLE_VOLUME_BAR), 15);
-		m_rt_value[2].Set(m_check_x+120, m_check_y+m_check_gap*(CHECK_SOUND-CHECK_SOUND_TAB), m_pC_main_spk->GetWidth(TITLE_VOLUME_BAR), 15);
-		m_rt_value[3].Set(m_check_x+120, m_check_y+m_check_gap*(CHECK_MUSIC-CHECK_SOUND_TAB), m_pC_main_spk->GetWidth(TITLE_VOLUME_BAR), 15);
+		m_rt_value[2].Set(m_check_x+15, m_check_y+SOUND_SLIDER_Y+SOUND_CHECK_GAP*(CHECK_SOUND-CHECK_SOUND_TAB), m_pC_main_spk->GetWidth(TITLE_VOLUME_BAR), 15);
+		m_rt_value[3].Set(m_check_x+15, m_check_y+SOUND_SLIDER_Y+SOUND_CHECK_GAP*(CHECK_MUSIC-CHECK_SOUND_TAB), m_pC_main_spk->GetWidth(TITLE_VOLUME_BAR), 15);
 		m_rt_value[4].Set(m_check_x+120, m_check_y+GRAPHIC_CHECK_GAP*(CHECK_ALPHA_DEPTH-CHECK_GRAPHIC_TAB), m_pC_main_spk->GetWidth(TITLE_VOLUME_BAR), 15);
 
 	}
@@ -6531,7 +6532,7 @@ bool C_VS_UI_OPTION::MouseControl(UINT message, int _x, int _y)
 			{
 				gC_vs_ui.SetAccelMode(ACCEL_NULL+14+m_focus_hotkey);
 			}
-			if(m_i_selected_tab == TAB_GRAPHIC && (m_check[CHECK_GAMMA] && m_rt_value[RECT_GAMMA].IsInRect(_x, _y) || m_check[CHECK_ALPHA_DEPTH] && m_rt_value[RECT_ALPHA].IsInRect(_x, _y)))
+			if(m_i_selected_tab == TAB_GRAPHIC && (m_check[CHECK_GAMMA] == CHECK_CHECK && m_rt_value[RECT_GAMMA].IsInRect(_x, _y) || m_check[CHECK_ALPHA_DEPTH] == CHECK_CHECK && m_rt_value[RECT_ALPHA].IsInRect(_x, _y)))
 			{
 				m_bLBPush = true;
 				if(m_rt_value[RECT_GAMMA].IsInRect(_x, _y))
@@ -7033,21 +7034,21 @@ void C_VS_UI_OPTION::Show()
 				if(false == m_IsTitle)
 				{
 					m_pC_etc_spk->BltLocked(x+m_vampire_plus_x+m_rt_value[RECT_GAMMA].x, y+m_vampire_plus_y+m_rt_value[RECT_GAMMA].y+5, VOLUME_BAR);
-					if(m_check[CHECK_GAMMA])
+					if(m_check[CHECK_GAMMA] == CHECK_CHECK)
 						m_pC_etc_spk->BltLocked(x+m_vampire_plus_x+m_rt_value[RECT_GAMMA].x-m_pC_etc_spk->GetWidth(VOLUME_TAG)/2+(m_value_gamma-MIN_GAMMA_VALUE)*m_rt_value[RECT_GAMMA].w/MAX_GAMMA_VALUE, y+m_vampire_plus_y+m_rt_value[RECT_GAMMA].y, VOLUME_TAG);
 					
 					m_pC_etc_spk->BltLocked(x+m_vampire_plus_x+m_rt_value[RECT_ALPHA].x, y+m_vampire_plus_y+m_rt_value[RECT_ALPHA].y+5, VOLUME_BAR);
-					if(m_check[CHECK_ALPHA_DEPTH])
+					if(m_check[CHECK_ALPHA_DEPTH] == CHECK_CHECK)
 						m_pC_etc_spk->BltLocked(x+m_vampire_plus_x+m_rt_value[RECT_ALPHA].x-m_pC_etc_spk->GetWidth(VOLUME_TAG)/2+(g_pUserOption->ALPHA_DEPTH)*m_rt_value[RECT_ALPHA].w/MAX_ALPHA_DEPTH, y+m_vampire_plus_y+m_rt_value[RECT_ALPHA].y, VOLUME_TAG);
 				}
 				else
 				{
 					m_pC_main_spk->BltLocked(x+m_vampire_plus_x+m_rt_value[RECT_GAMMA].x, y+m_vampire_plus_y+m_rt_value[RECT_GAMMA].y+5, TITLE_VOLUME_BAR);
-					if(m_check[CHECK_GAMMA])
+					if(m_check[CHECK_GAMMA] == CHECK_CHECK)
 						m_pC_main_spk->BltLocked(x+m_vampire_plus_x+m_rt_value[RECT_GAMMA].x-m_pC_main_spk->GetWidth(TITLE_VOLUME_TAG)/2+(m_value_gamma-MIN_GAMMA_VALUE)*m_rt_value[RECT_GAMMA].w/MAX_GAMMA_VALUE, y+m_vampire_plus_y+m_rt_value[RECT_GAMMA].y, TITLE_VOLUME_TAG);
 					
 					m_pC_main_spk->BltLocked(x+m_vampire_plus_x+m_rt_value[RECT_ALPHA].x, y+m_vampire_plus_y+m_rt_value[RECT_ALPHA].y+5, TITLE_VOLUME_BAR);
-					if(m_check[CHECK_ALPHA_DEPTH])
+					if(m_check[CHECK_ALPHA_DEPTH] == CHECK_CHECK)
 						m_pC_main_spk->BltLocked(x+m_vampire_plus_x+m_rt_value[RECT_ALPHA].x-m_pC_main_spk->GetWidth(TITLE_VOLUME_TAG)/2+(g_pUserOption->ALPHA_DEPTH)*m_rt_value[RECT_ALPHA].w/MAX_ALPHA_DEPTH, y+m_vampire_plus_y+m_rt_value[RECT_ALPHA].y, TITLE_VOLUME_TAG);
 				}
 				m_pC_graphic_button_group->Show();
@@ -7067,7 +7068,7 @@ void C_VS_UI_OPTION::Show()
 
 			g_FL2_GetDC();
 			for(i = 0; i < CHECK_SOUND_MAX; i++)
-				g_PrintColorStr(x+m_vampire_plus_x+m_check_x+15, y+m_vampire_plus_y+m_check_y+m_check_gap*i, check_string[i], gpC_base->m_user_id_pi, RGB_BLACK);
+				g_PrintColorStr(x+m_vampire_plus_x+m_check_x+15, y+m_vampire_plus_y+m_check_y+SOUND_CHECK_GAP*i, check_string[i], gpC_base->m_user_id_pi, RGB_BLACK);
 //			g_PrintColorStr(x+m_vampire_plus_x+m_check_x+80, y+m_vampire_plus_y+m_check_y+m_check_gap*i, "WAV", gpC_base->m_user_id_pi, RGB_BLACK);
 //			g_PrintColorStr(x+m_vampire_plus_x+m_check_x+140, y+m_vampire_plus_y+m_check_y+m_check_gap*i, "MIDI", gpC_base->m_user_id_pi, RGB_BLACK);
 			g_FL2_ReleaseDC();
