@@ -33,9 +33,9 @@ CIndexSprite555::SaveToFile(ofstream& file)
 
 	int colorCount, transPair, indexCount;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 
 	//--------------------------------
 	// 5:6:5
@@ -140,8 +140,8 @@ CIndexSprite555::LoadFromFile(ifstream& file)
 
 	WORD len;
 
-	register int j;
-	register int k;
+	int j;
+	int k;
 	//--------------------------------
 	// 5:6:5
 	//--------------------------------

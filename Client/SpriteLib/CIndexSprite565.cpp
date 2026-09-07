@@ -31,8 +31,8 @@ CIndexSprite565::SaveToFile(ofstream& file)
 
 	int colorCount, transPair, indexCount;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//--------------------------------
 	// 5:6:5
@@ -93,7 +93,7 @@ CIndexSprite565::LoadFromFile(ifstream& file)
 	m_Pixels = new WORD* [m_Height];	
 	WORD len;
 
-	register int i;
+	int i;
 
 	//--------------------------------
 	// 5:6:5

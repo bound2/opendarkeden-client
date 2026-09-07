@@ -239,8 +239,8 @@ CShadowSprite::SetPixel(WORD *pSource, WORD pitch, WORD width, WORD height)
 	// height줄 만큼 memory잡기
 	m_Pixels = new WORD* [height];
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	for (int i=0; i<height; i++)
 	{
@@ -338,8 +338,8 @@ CShadowSprite::SetPixel(CIndexSprite& ispr)
 	
 	WORD	*pPixels;
 
-	register int i;
-	register int j;	
+	int i;
+	int j;	
 
 	// height줄 만큼 memory잡기
 	m_Pixels = new WORD* [m_Height];
@@ -401,8 +401,8 @@ CShadowSprite::SetPixel(CSprite& spr)
 	
 	WORD	*pPixels;
 
-	register int i;
-	register int j;	
+	int i;
+	int j;	
 
 	// height줄 만큼 memory잡기
 	m_Pixels = new WORD* [m_Height];
@@ -475,7 +475,7 @@ CShadowSprite::IsColorPixel(short x, short y)
 			colorCount,
 			index = 0;
 
-	for (int register i=0; i<count; i++)
+	for (int i=0; i<count; i++)
 	{
 		transCount = *pPixels++;
 		colorCount = *pPixels++;
@@ -516,8 +516,8 @@ CShadowSprite::Blt(WORD *pDest, WORD pitch)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	for (int i=0; i<m_Height; i++)
 	{			
@@ -568,8 +568,8 @@ CShadowSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -701,8 +701,8 @@ CShadowSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	for (int i=pRect->top; i<pRect->bottom; i++)
 	{
@@ -801,8 +801,8 @@ CShadowSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 			index,
 			dist;
 
-	register short i;
-	register short j;
+	short i;
+	short j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -992,8 +992,8 @@ CShadowSprite::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 			*pPixels;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	for (int i=pRect->top; i<pRect->bottom; i++)
 	{			
@@ -1043,8 +1043,8 @@ CShadowSprite::BltDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	for (int i=0; i<m_Height; i++)
 	{			
@@ -1098,8 +1098,8 @@ CShadowSprite::BltDarknessClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE Da
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -1236,8 +1236,8 @@ CShadowSprite::BltDarknessClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE D
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	for (int i=pRect->top; i<pRect->bottom; i++)
 	{
@@ -1340,8 +1340,8 @@ CShadowSprite::BltDarknessClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE D
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -1541,8 +1541,8 @@ CShadowSprite::BltDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 			*pPixels;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	for (int i=pRect->top; i<pRect->bottom; i++)
 	{			
@@ -1586,7 +1586,7 @@ CShadowSprite::memcpyShadowDarkness(WORD* pDest, WORD pixels)
 {
 	QWORD	*qpDest		= (QWORD*)pDest;
 
-	register int j;
+	int j;
 
 	BYTE qTimes = pixels >> 2;	// pixels / 4
 
@@ -1683,7 +1683,7 @@ CShadowSprite::Blt4444(WORD *pDest, WORD pitch, WORD pixel)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	for (register int i=0; i<m_Height; i++)
+	for (int i=0; i<m_Height; i++)
 	{			
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
@@ -1691,7 +1691,7 @@ CShadowSprite::Blt4444(WORD *pDest, WORD pitch, WORD pixel)
 		// (투명수,색깔수)의 반복 수		
 		count	= *pPixels++;		
  		// 한 줄 출력
-		for (register int j=0; j<count; j++)
+		for (int j=0; j<count; j++)
 		{				
 			pDestTemp += *pPixels++;			// 투명색만큼 건너 뛴다.
 			colorCount = *pPixels++;		// 투명 아닌 색 수				
@@ -1731,8 +1731,8 @@ CShadowSprite::Blt4444ClipLeft(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel)
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -1862,8 +1862,8 @@ CShadowSprite::Blt4444ClipRight(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	for (int i=pRect->top; i<pRect->bottom; i++)
 	{
@@ -1962,8 +1962,8 @@ CShadowSprite::Blt4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD pixel
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -2156,8 +2156,8 @@ CShadowSprite::Blt4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD pixe
 			*pPixels;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	for (int i=pRect->top; i<pRect->bottom; i++)
 	{			
@@ -2195,7 +2195,7 @@ CShadowSprite::Blt4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD pixe
 void	
 CShadowSprite::memcpyShadow4444(WORD* pDest, WORD pixels)
 {
-	register int i = pixels;
+	int i = pixels;
 
 	if (i>0)
 	{
@@ -2240,8 +2240,8 @@ CShadowSprite::BltSmall(WORD *pDest, WORD pitch, BYTE shift)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	if (m_Height > 0)
 	{
@@ -2336,8 +2336,8 @@ CShadowSprite::BltSmallClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE shift
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -2480,8 +2480,8 @@ CShadowSprite::BltSmallClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE shif
 			colorCount,			
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	int stepY = 1 << shift;		// y줄 건너띄는 pixel수
 	int endY = pRect->bottom << shift;
@@ -2583,8 +2583,8 @@ CShadowSprite::BltSmallClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE shif
 			index,
 			dist;
 
-	register short i;
-	register short j;
+	short i;
+	short j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -2787,8 +2787,8 @@ CShadowSprite::BltSmallClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE shi
 			*pPixels;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 	
 	int stepY = 1 << shift;		// y줄 건너띄는 pixel수
 	int endY = pRect->bottom << shift;
@@ -2860,8 +2860,8 @@ CShadowSprite::BltSmall4444(WORD *pDest, WORD pitch, WORD pixel, BYTE shift)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	/*
 	int stepY = 1 << shift;		// y줄 건너띄는 pixel수		
@@ -3030,8 +3030,8 @@ CShadowSprite::BltSmall4444ClipLeft(WORD* pDest, WORD pitch, RECT* pRect, WORD p
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -3177,8 +3177,8 @@ CShadowSprite::BltSmall4444ClipRight(WORD* pDest, WORD pitch, RECT* pRect, WORD 
 			colorCount,			
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	int stepY = 1 << shift;		// y줄 건너띄는 pixel수
 	int endY = pRect->bottom << shift;
@@ -3283,8 +3283,8 @@ CShadowSprite::BltSmall4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD 
 			index,
 			dist;
 
-	register short i;
-	register short j;
+	short i;
+	short j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -3490,8 +3490,8 @@ CShadowSprite::BltSmall4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD
 			*pPixels;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 	
 	int stepY = 1 << shift;		// y줄 건너띄는 pixel수
 	int endY = pRect->bottom << shift;

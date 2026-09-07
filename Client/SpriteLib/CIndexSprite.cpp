@@ -544,8 +544,8 @@ CIndexSprite::operator = (const CIndexSprite& Sprite)
 	
 	// 압축 된 것 저장
 	int index;	
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int colorCount, transPair, indexCount;
 
@@ -697,11 +697,11 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 	WORD	*pSourceTemp2;
 	pSourceTemp = pSource;
 
-	for (register int i=0; i<height; i++)
+	for (int i=0; i<height; i++)
 	{
 		pSourceTemp2 = pSourceTemp;
 
-		for (register int j=0; j<width; j++)
+		for (int j=0; j<width; j++)
 		{
 			// 투명색
 			if (*pSourceTemp2==s_Colorkey)
@@ -765,7 +765,7 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 		//--------------------------------------------------
 		// 줄 단위 체크..
 		//--------------------------------------------------
-		for (register int j=0; j<width; j++)
+		for (int j=0; j<width; j++)
 		{
 			//--------------------------------------------------
 			// 투명색이라면..
@@ -945,7 +945,7 @@ CIndexSprite::GenerateFromIndex(WORD** ppColor,
 	//int* m_pLineIndex = new int [height];
 
 
-	for (register int  i=0; i<height; i++)
+	for (int  i=0; i<height; i++)
 	{
 		index = 0;
 		transPairCount = 0;
@@ -955,7 +955,7 @@ CIndexSprite::GenerateFromIndex(WORD** ppColor,
 		//------------------------------------------------------------
 		// 각 line에 대해서 압축~
 		//------------------------------------------------------------
-		for (register int  j=0; j<width; j++)
+		for (int  j=0; j<width; j++)
 		{
 			//--------------------------------------------------
 			// Index가 투명색인 경우
@@ -1565,10 +1565,10 @@ CIndexSprite::GetIndexInfo(WORD**& ppIndex)
 	WORD	*pDest,
 			*pPixels;
 
-	register int i;
-	register int j;
-	register int k;
-	register int l;
+	int i;
+	int j;
+	int k;
+	int l;
 
 	for (int i=0; i<m_Height; i++)
 	{			
@@ -1644,7 +1644,7 @@ CIndexSprite::IsColorPixel(short x, short y)
 		//                 (indexSet번호, gradation번호), 
 		//                 (indexSet번호, gradation번호), 
 
-		register int i;
+		int i;
 
 		if (count > 0)
 		{
@@ -1715,7 +1715,7 @@ CIndexSprite::GetPixel(int x, int y) const
 		//                 (indexSet번호, gradation번호), 
 		//                 (indexSet번호, gradation번호), 
 
-		register int i;
+		int i;
 
 		if (count > 0)
 		{
@@ -1787,9 +1787,9 @@ CIndexSprite::Blt(WORD *pDest, WORD pitch)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 	int rectBottom = m_Height;	
 
 	
@@ -1878,9 +1878,9 @@ CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 			index,
 			dist;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 
 	int colorSet, colorGradation;
 	int rectBottom = pRect->bottom;
@@ -2096,9 +2096,9 @@ CIndexSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
-	register int	k;
+	int	i;
+	int	j;
+	int	k;
 
 	int colorSet, colorGradation;
 
@@ -2257,9 +2257,9 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 			index,
 			dist;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 
 	int colorSet, colorGradation;
 
@@ -2539,9 +2539,9 @@ CIndexSprite::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 			*pPixels;
 
 
-	register int  i;
-	register int  j;
-	register int  k;
+	int  i;
+	int  j;
+	int  k;
 
 	int colorSet, colorGradation;
 	int rectBottom = pRect->bottom;
@@ -2609,9 +2609,9 @@ CIndexSprite::BltDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 	int rectBottom = m_Height;
 	
 	if (rectBottom > 0)
@@ -2687,9 +2687,9 @@ CIndexSprite::BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE Dar
 			index,
 			dist;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 
 	int colorSet, colorGradation;
 
@@ -2898,9 +2898,9 @@ CIndexSprite::BltDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
-	register int	k;
+	int	i;
+	int	j;
+	int	k;
 
 	int colorSet, colorGradation;
 
@@ -3049,9 +3049,9 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 			index,
 			dist;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 
 	int colorSet, colorGradation;
 
@@ -3330,9 +3330,9 @@ CIndexSprite::BltDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 			*pPixels;
 
 
-	register int  i;
-	register int  j;
-	register int  k;
+	int  i;
+	int  j;
+	int  k;
 
 	int colorSet, colorGradation;
 	int rectBottom = pRect->bottom;
@@ -3399,9 +3399,9 @@ CIndexSprite::BltAlpha(WORD *pDest, WORD pitch, BYTE alpha)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 	int rectBottom = m_Height;
 	
 	if (rectBottom > 0)
@@ -3478,9 +3478,9 @@ CIndexSprite::BltAlphaClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 			index,
 			dist;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 
 	int colorSet, colorGradation;
 
@@ -3688,9 +3688,9 @@ CIndexSprite::BltAlphaClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
-	register int	k;
+	int	i;
+	int	j;
+	int	k;
 
 	int colorSet, colorGradation;
 
@@ -3839,9 +3839,9 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 			index,
 			dist;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 
 	int colorSet, colorGradation;
 
@@ -4119,9 +4119,9 @@ CIndexSprite::BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alph
 			*pPixels;
 
 
-	register int  i;
-	register int  j;
-	register int  k;
+	int  i;
+	int  j;
+	int  k;
 
 	int colorSet, colorGradation;
 	int rectBottom = pRect->bottom;
@@ -4296,9 +4296,9 @@ CIndexSprite::BltColor(WORD *pDest, WORD pitch, BYTE rgb)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 	int rectBottom = m_Height;
 	
 	if (rectBottom > 0)
@@ -4376,9 +4376,9 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 			index,
 			dist;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 
 	int colorSet, colorGradation;
 
@@ -4591,9 +4591,9 @@ CIndexSprite::BltColorClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
-	register int	k;
+	int	i;
+	int	j;
+	int	k;
 
 	int colorSet, colorGradation;
 
@@ -4745,9 +4745,9 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 			index,
 			dist;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 
 	int colorSet, colorGradation;
 
@@ -5031,9 +5031,9 @@ CIndexSprite::BltColorClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 			*pPixels;
 
 
-	register int  i;
-	register int  j;
-	register int  k;
+	int  i;
+	int  j;
+	int  k;
 
 	int colorSet, colorGradation;
 	int rectBottom = pRect->bottom;
@@ -5102,9 +5102,9 @@ CIndexSprite::BltColorSet(WORD *pDest, WORD pitch, WORD colorSet)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 	int rectBottom = m_Height;
 	
 	if (rectBottom > 0)
@@ -5182,9 +5182,9 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 			index,
 			dist;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 
 	int //colorSet, 
 		colorGradation;
@@ -5398,9 +5398,9 @@ CIndexSprite::BltColorSetClipRight(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
-	register int	k;
+	int	i;
+	int	j;
+	int	k;
 
 	int //colorSet, 
 		colorGradation;
@@ -5553,9 +5553,9 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 			index,
 			dist;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 
 	int //colorSet, 
 		colorGradation;
@@ -5840,9 +5840,9 @@ CIndexSprite::BltColorSetClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD c
 			*pPixels;
 
 
-	register int  i;
-	register int  j;
-	register int  k;
+	int  i;
+	int  j;
+	int  k;
 
 	int //colorSet, 
 		colorGradation;
@@ -5920,8 +5920,8 @@ CIndexSprite::BltEffect(WORD *pDest, WORD pitch)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 	//register int k;
 	int rectBottom = m_Height;	
 
@@ -6006,8 +6006,8 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 //	register int k;
 
 	//int colorSet, colorGradation;
@@ -6215,8 +6215,8 @@ CIndexSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 	//register int	k;
 
 	//int colorSet, colorGradation;
@@ -6373,8 +6373,8 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 //	register int k;
 
 	//int colorSet, colorGradation;
@@ -6648,8 +6648,8 @@ CIndexSprite::BltEffectClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 			*pPixels;
 
 
-	register int  i;
-	register int  j;
+	int  i;
+	int  j;
 //	register int  k;
 
 	//int colorSet, colorGradation;
@@ -6862,7 +6862,7 @@ void
 CIndexSprite::memcpyEffectNet(WORD* pDest, WORD* pSource, WORD pixels)
 {
 	// 찍는점(1) + 건너띄는점(s_Value1)
-	register int i = pixels;
+	int i = pixels;
 	int skipPixels = 1 + CSpriteSurface::s_Value1;
 
 	int colorSet, colorGradation;	
@@ -6892,7 +6892,7 @@ CIndexSprite::memcpyEffectNet(WORD* pDest, WORD* pSource, WORD pixels)
 void		
 CIndexSprite::memcpyEffectGrayScaleVarious(WORD* pDest, WORD* pSource, WORD pixels)
 {
-	register int i = pixels;
+	int i = pixels;
 	int colorSet, colorGradation;	
 	//int grayValue = s_Value1;
 
@@ -6949,9 +6949,9 @@ CIndexSprite::BltBrightness(WORD *pDest, WORD pitch, BYTE DarkBits)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 	int rectBottom = m_Height;
 	
 	if (rectBottom > 0)
@@ -7028,9 +7028,9 @@ CIndexSprite::BltBrightnessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 			index,
 			dist;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 
 	int colorSet, colorGradation;
 
@@ -7239,9 +7239,9 @@ CIndexSprite::BltBrightnessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
-	register int	k;
+	int	i;
+	int	j;
+	int	k;
 
 	int colorSet, colorGradation;
 
@@ -7390,9 +7390,9 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 			index,
 			dist;
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 
 	int colorSet, colorGradation;
 
@@ -7671,9 +7671,9 @@ CIndexSprite::BltBrightnessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE
 			*pPixels;
 
 
-	register int  i;
-	register int  j;
-	register int  k;
+	int  i;
+	int  j;
+	int  k;
 
 	int colorSet, colorGradation;
 	int rectBottom = pRect->bottom;

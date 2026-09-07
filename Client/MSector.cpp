@@ -890,7 +890,7 @@ MSector::GetImageObject(TYPE_OBJECTID id) const
 
 		// 있으면 ImageObject 개수만큼 비교를 하고..		
 		// 도중에 ID가 id인 ImageObject가 있으면 return한다.
-		for (register BYTE i=0; i<m_nImageObject; i++)
+		for (BYTE i=0; i<m_nImageObject; i++)
 		{
 			// 같은 ID이면 return한다.
 			if ( ((*iObject).second)->GetID() == id )
@@ -1331,7 +1331,7 @@ MSector::RemoveImageObject(TYPE_OBJECTID id, MImageObject*& pImageObject)
 		
 		// 있으면 모든 ImageObject와 ID를 비교해서..
 		// 같은 경우, 그 Object를 넘겨줄 수 있도록 pImageObject에 저장한다.
-		for (register BYTE i=0; i<m_nImageObject; i++)
+		for (BYTE i=0; i<m_nImageObject; i++)
 		{
 			// ID가 같은 경우..
 			if (((*iObject).second)->GetID() == id)
@@ -1609,7 +1609,7 @@ MSector::RemoveImageObject(TYPE_OBJECTID id)
 		// 있으면 
 		// ID를 비교해서 같은 경우,
 		// 그 Object를 넘겨줄 수 있도록 pImageObject에 저장한다.
-		for (register BYTE i=0; i<m_nImageObject; i++)
+		for (BYTE i=0; i<m_nImageObject; i++)
 		{
 			if (((*iObject).second)->GetID() == id)
 			{

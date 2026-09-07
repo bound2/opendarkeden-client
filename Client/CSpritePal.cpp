@@ -265,8 +265,8 @@ void CSpritePal::SetPixel(BYTE *pSource, WORD pitch, WORD width, WORD height)
 	BYTE **Pixels = new BYTE* [height];
 	std::vector<int> PixelSize;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	for (int i=0; i<height; i++)
 	{
@@ -370,9 +370,9 @@ void CSpritePal::Blt(int x, int y, WORD* pDest, int pitch, MPalette &pal)
 	WORD	*pDestTemp;
 	BYTE	*pPixels;
 	
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 	int rectBottom = m_Height;
 	
 	pDest = (WORD*)((BYTE*)pDest + y*pitch +x*2);
@@ -429,7 +429,7 @@ bool CSpritePal::LoadFromFile(std::ifstream &file)
 
 	file.read((char *)m_pData, m_Size);
 
-	register int i;
+	int i;
 	
 	WORD *indexArray = new WORD[m_Height];
 
@@ -473,7 +473,7 @@ bool CSpritePal::SaveToFile(std::ofstream &file)
 	file.write((const char *)&m_Height, 2);
 	file.write((const char *)m_pData, m_Size);
 
-	register int i;
+	int i;
 
 	WORD index;
 
@@ -507,7 +507,7 @@ void CSpritePal::operator = (const CSpritePal& sprite)
 	
 	memcpy(m_pData, sprite.m_pData, m_Size);
 
-	register int i;
+	int i;
 	for(i = 0; i < m_Height; i++)
 	{
 		m_pPixels[i] = m_pData + (sprite.m_pPixels[i]-sprite.m_pData);
@@ -574,7 +574,7 @@ bool CSpritePalPack::LoadFromFile(std::ifstream &file)
 	
 	Init(m_Size);
 	
-	register int i;
+	int i;
 
 	for(i = 0; i < m_Size; i++)
 	{

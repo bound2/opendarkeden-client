@@ -426,12 +426,12 @@ LoadImageToSurface(const char* pFilename, CDirectDrawSurface& surface)
 					{
 						if (bpp == 1)
 						{
-							for (register int y = 0; y < height; y++)
+							for (int y = 0; y < height; y++)
 							{
 								pDataTemp = pData;
 								pSurfaceTemp = pSurface;								
 
-								for (register int x = 0; x < width; x++)
+								for (int x = 0; x < width; x++)
 								{
 									BYTE temp_data = *pDataTemp++;	//p_data[y*(pitch)+x];
 									BYTE r = temp_data>>3;
@@ -447,12 +447,12 @@ LoadImageToSurface(const char* pFilename, CDirectDrawSurface& surface)
 						}
 						else if (bpp == 3)
 						{
-							for (register int y = 0; y < height; y++)
+							for (int y = 0; y < height; y++)
 							{
 								pDataTemp = pData;
 								pSurfaceTemp = pSurface;	
 
-								for (register int x = 0; x < width; x++)
+								for (int x = 0; x < width; x++)
 								{
 									//char *temp_data = &p_data[y*pitch+x*bpp];
 									BYTE r = *(pDataTemp+2) >> 3;		//temp_data[2]>>3;
@@ -553,11 +553,11 @@ SaveSurfaceToImage(const char* pFilename, CDirectDrawSurface& surface)
 			BYTE* p_data = new BYTE[width*height*out_bpp/8];
 			BYTE* p_dataTemp = p_data;
 
-			for (register int y = 0; y < height; y++)
+			for (int y = 0; y < height; y++)
 			{
 				WORD *pSurfacePointTemp = pSurfacePoint;
 
-				for (register int x = 0; x < width; x++)
+				for (int x = 0; x < width; x++)
 				{
 					WORD color = *pSurfacePointTemp;
 					p_dataTemp[0] = CSDLGraphics::Blue(*pSurfacePointTemp)<<3;

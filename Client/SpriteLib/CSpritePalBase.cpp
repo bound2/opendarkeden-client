@@ -241,7 +241,7 @@ bool CSpritePalBase::SaveToFile(std::ofstream &file)
 	file.write((const char *)&m_Height, 2);
 	file.write((const char *)m_pData, m_Size);
 
-	register int i;
+	int i;
 
 	WORD index;
 
@@ -275,7 +275,7 @@ void CSpritePalBase::operator = (const CSpritePalBase& sprite)
 	
 	memcpy(m_pData, sprite.m_pData, m_Size);
 
-	register int i;
+	int i;
 	for(i = 0; i < m_Height; i++)
 	{
 		m_pPixels[i] = m_pData + (sprite.m_pPixels[i]-sprite.m_pData);

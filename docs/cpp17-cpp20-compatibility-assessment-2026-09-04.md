@@ -460,6 +460,42 @@ MSVC accepts the C++ occurrences as extensions. Clang 19 rejects them in C++17.
 Removing `register` is mechanical and has no intended runtime effect, but it must
 be included for an ISO-clean result.
 
+**Conformance status (2026-09-07):** closed. The exact count, measured with
+comments and string literals removed, was **627 declarations in 23 C++
+files** - 584 of them in `Client/SpriteLib` (the blitters in `CSprite.cpp`,
+`CIndexSprite.cpp`, the alpha, shadow, palette and surface variants,
+`CFilter.cpp`, and one in `CTypePackVector.h`), 17 in `Client/MTopView.cpp`,
+and the rest in `Client/CSpritePal.cpp`, `UtilityFunction.cpp`,
+`MEventManager.cpp`, `MSector.cpp` and `VS_UI/src/vs_ui_gamecommon2.cpp`.
+All 627 are deleted, seven of them written `int register i` rather than
+`register int i`. The edit was scripted through a tokenizer that copies
+comments and string literals through untouched, so the commented-out copies
+of blitter loops that still say `register` inside `/* */` blocks are left as
+they were, and a second tokenizer then compared every changed file with its
+master version: every comment and literal identical, every code token
+different only by the keyword and one run of blanks. That verifier exists
+because the first pass of the sweep was run through a tokenizer whose string
+class had been corrupted in transit and edited six NPC script lines in
+`MNPCScriptTableEnglish.cpp` that say "register as a couple", "register a
+team", "a clan" or "a guild"; the sweep was redone from master. The 21
+declarations in the three `.c` files (`deflate.c`, `inftrees.c`, `trees.c`)
+stay, as this finding said they should - this finding's "twenty-six in the
+`.c` files" was a line count that included the prose in `crc32.c`'s comments,
+which has no declaration at all. Ratchet **R11 = 0** holds the line over
+every `.cpp`, `.h` and `.inl` under `Client`, `VS_UI`, `basic`, `tools`,
+`third_party` and `tests`, counted by `tests/tools/count_register.pl`, which
+also accepts the `WORD register i` spelling with any type name in front, not
+only the seven `int register i` the sweep met; it does not reuse the R9/R10
+comment-stripping pipeline, because that pipeline strips `/* */` before `//`
+and so reads the blitters' `//*pDest = ...` line comments as block-comment
+openers - measured over the 23 files on master it saw 538 of the 627, and
+the figure moves with the order the files are joined in, because a swallowed
+comment runs across file boundaries - and because it does not strip string
+literals, so those six NPC lines would count as declarations to it. An
+under-count is tolerable for a ratchet that must stay at zero only if nothing
+can hide there. The same weakness applies to R10, where it can only
+under-count, and is noted for the slice that next moves that baseline.
+
 ### 5. C++20 makes legacy string-literal conversions hard errors
 
 With the two removed-library issues bypassed, MSVC C++20 reported at least **126

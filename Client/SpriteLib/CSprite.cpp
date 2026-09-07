@@ -153,8 +153,8 @@ CSprite::operator = (const CSprite& Sprite)
 	
 	// 압축 된 것 저장
 	int index;	
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	// 메모리 잡기
 	m_Pixels = new WORD* [m_Height];
@@ -260,8 +260,8 @@ CSprite::SetPixel(WORD *pSource, WORD pitch, WORD width, WORD height)
 	// height줄 만큼 memory잡기
 	m_Pixels = new WORD* [height];
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	for (int i=0; i<height; i++)
 	{
@@ -373,8 +373,8 @@ CSprite::SetPixelNoColorkey(WORD *pSource, WORD pitch, WORD width, WORD height)
 	// height줄 만큼 memory잡기
 	m_Pixels = new WORD* [height];
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	for (int i=0; i<height; i++)
 	{
@@ -523,7 +523,7 @@ void
 CSprite::GetTightColorRect(WORD *pSource, WORD pitch, WORD width, WORD height, WORD colorkey, RECT& rect)
 {
 	WORD	*pSourceTemp, *pSourceTemp2;
-	register int i, j;
+	int i, j;
 
 	rect.left = 0;
 	rect.right = 0;
@@ -654,7 +654,7 @@ CSprite::IsColorPixel(short x, short y)
 
 		if (count > 0)
 		{
-			register int i = count;
+			int i = count;
 			do {		
 				transCount = *pPixels++;
 				colorCount = *pPixels++;
@@ -710,7 +710,7 @@ CSprite::GetPixel(int x, int y) const
 
 		if (count > 0)
 		{
-			register int i = count;
+			int i = count;
 			do {		
 				transCount = *pPixels++;
 				colorCount = *pPixels++;
@@ -791,8 +791,8 @@ CSprite::BltClip(WORD* pDest, WORD pitch, RECT* pRect)
 
 	BOOL	bPut;		
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 	int rectBottom = pRect->bottom;	
 
 	for (int i=pRect->top; i<rectBottom; i++)
@@ -896,8 +896,8 @@ CSprite::Blt(WORD *pDest, WORD pitch)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 	int rectBottom = m_Height;
 
 	if (rectBottom > 0)
@@ -980,8 +980,8 @@ CSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -1109,8 +1109,8 @@ CSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	int rectBottom = pRect->bottom;
 	int rectRight = pRect->right;
@@ -1205,8 +1205,8 @@ CSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -1392,8 +1392,8 @@ CSprite::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 			*pPixels;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	for (int i=pRect->top; i<rectBottom; i++)
@@ -1435,7 +1435,7 @@ CSprite::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 void	
 CSprite::memcpyDarkerFilter(WORD* pDest, WORD* pSource, BYTE* pFilter, WORD pixels)
 {
-	register int i = pixels;
+	int i = pixels;
 	
 	///*
 	BYTE	darker;			
@@ -1529,8 +1529,8 @@ CSprite::BltHalf(WORD *pDest, WORD pitch)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i=0;
-	register int j=0;
+	int i=0;
+	int j=0;
 	int rectBottom = m_Height;
 	
 	if (rectBottom > 0)
@@ -1589,8 +1589,8 @@ CSprite::BltHalfClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -1718,8 +1718,8 @@ CSprite::BltHalfClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	int rectBottom = pRect->bottom;
 	int rectRight = pRect->right;
@@ -1814,8 +1814,8 @@ CSprite::BltHalfClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -2000,8 +2000,8 @@ CSprite::BltHalfClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 			*pPixels;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	for (int i=pRect->top; i<rectBottom; i++)
@@ -2053,8 +2053,8 @@ CSprite::BltAlpha(WORD *pDest, WORD pitch, BYTE alpha)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = m_Height;
 	
@@ -2118,8 +2118,8 @@ CSprite::BltAlphaClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -2251,8 +2251,8 @@ CSprite::BltAlphaClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	int rectBottom = pRect->bottom;
 	int rectRight = pRect->right;
@@ -2350,8 +2350,8 @@ CSprite::BltAlphaClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE alpha)
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -2540,8 +2540,8 @@ CSprite::BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 			*pPixels;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	for (int i=pRect->top; i<rectBottom; i++)
@@ -2591,8 +2591,8 @@ CSprite::BltColor(WORD *pDest, WORD pitch, BYTE rgb)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = m_Height;
 	
@@ -2655,8 +2655,8 @@ CSprite::BltColorClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE rgb)
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -2788,8 +2788,8 @@ CSprite::BltColorClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE rgb)
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	int rectBottom = pRect->bottom;
 	int rectRight = pRect->right;
@@ -2887,8 +2887,8 @@ CSprite::BltColorClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE rgb)
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -3075,8 +3075,8 @@ CSprite::BltColorClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 			*pPixels;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	for (int i=pRect->top; i<rectBottom; i++)
@@ -3125,8 +3125,8 @@ CSprite::BltScale(WORD *pDest, WORD pitch, BYTE scale)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = m_Height;
 	for (int i=0; i<rectBottom; i++)
@@ -3183,8 +3183,8 @@ CSprite::BltScaleClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE scale)
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -3315,8 +3315,8 @@ CSprite::BltScaleClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE scale)
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	int rectBottom = pRect->bottom;
 	int rectRight = pRect->right;
@@ -3414,8 +3414,8 @@ CSprite::BltScaleClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE scale)
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -3602,8 +3602,8 @@ CSprite::BltScaleClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE scale)
 			*pPixels;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	for (int i=pRect->top; i<rectBottom; i++)
@@ -3654,8 +3654,8 @@ CSprite::BltDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = m_Height;
 	
@@ -3718,8 +3718,8 @@ CSprite::BltDarknessClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBits
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -3850,8 +3850,8 @@ CSprite::BltDarknessClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBit
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	int rectBottom = pRect->bottom;
 	int rectRight = pRect->right;
@@ -3949,8 +3949,8 @@ CSprite::BltDarknessClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE DarkBit
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -4137,8 +4137,8 @@ CSprite::BltDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBi
 			*pPixels;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	for (int i=pRect->top; i<rectBottom; i++)
@@ -4187,8 +4187,8 @@ CSprite::BltColorSet(WORD *pDest, WORD pitch, WORD colorSet)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = m_Height;
 	
@@ -4251,8 +4251,8 @@ CSprite::BltColorSetClipLeft(WORD* pDest, WORD pitch, RECT* pRect, WORD colorSet
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -4383,8 +4383,8 @@ CSprite::BltColorSetClipRight(WORD* pDest, WORD pitch, RECT* pRect, WORD colorSe
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	int rectBottom = pRect->bottom;
 	int rectRight = pRect->right;
@@ -4482,8 +4482,8 @@ CSprite::BltColorSetClipWidth(WORD* pDest, WORD pitch, RECT* pRect, WORD colorSe
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -4670,8 +4670,8 @@ CSprite::BltColorSetClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD colorS
 			*pPixels;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	for (int i=pRect->top; i<rectBottom; i++)
@@ -4717,8 +4717,8 @@ CSprite::BltEffect(WORD *pDest, WORD pitch)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = m_Height;
 	if (rectBottom > 0)
@@ -4777,8 +4777,8 @@ CSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -4906,8 +4906,8 @@ CSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	int rectBottom = pRect->bottom;
 	int rectRight = pRect->right;
@@ -5002,8 +5002,8 @@ CSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -5186,8 +5186,8 @@ CSprite::BltEffectClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 			*pPixels;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	for (int i=pRect->top; i<rectBottom; i++)
@@ -5310,10 +5310,10 @@ CSprite::BltAlphaFilter(WORD *pDest, WORD pitch)
 	BYTE	*pFilter;
 	int		dist;
 
-	register int	yIndex = -s_Y + m_Height - 1;
-	register int	xIndex;
-	register int i;
-	register int j;
+	int	yIndex = -s_Y + m_Height - 1;
+	int	xIndex;
+	int i;
+	int j;
 
 	int rectBottom = m_Height;
 	if (rectBottom > 0)
@@ -5470,11 +5470,11 @@ CSprite::BltAlphaFilterClipLeft(WORD *pDest, WORD pitch, RECT* pRect)
 	BYTE	*pFilter;
 	int		dist, dist2;
 
-	register int	yIndex = -s_Y + pRect->top;
-	register int	xIndex;
+	int	yIndex = -s_Y + pRect->top;
+	int	xIndex;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -5911,11 +5911,11 @@ CSprite::BltAlphaFilterClipRight(WORD *pDest, WORD pitch, RECT* pRect)
 	BYTE	*pFilter;
 	int		dist, dist2;
 
-	register int	yIndex = -s_Y + pRect->top;
-	register int	xIndex;
+	int	yIndex = -s_Y + pRect->top;
+	int	xIndex;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	int rectBottom = pRect->bottom;
 	int rectRight = pRect->right;
@@ -6225,11 +6225,11 @@ CSprite::BltAlphaFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect)
 	BYTE	*pFilter;
 	int		dist, dist2;
 
-	register int	yIndex = -s_Y + pRect->top;
-	register int	xIndex;
+	int	yIndex = -s_Y + pRect->top;
+	int	xIndex;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -6824,11 +6824,11 @@ CSprite::BltAlphaFilterClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 	BYTE	*pFilter;
 	int		dist;
 
-	register int	yIndex = -s_Y + pRect->top;
-	register int	xIndex;
+	int	yIndex = -s_Y + pRect->top;
+	int	xIndex;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	for (int i=pRect->top; i<rectBottom; i++)
@@ -6972,7 +6972,7 @@ CSprite::memcpyAlphaFilter(WORD* pDest, WORD* pSource, BYTE* pFilter, WORD pixel
 	//register int		sr,sg,sb,dr,dg,db;
 	//static WORD		temp, temp2;
 
-	register int j = pixels;
+	int j = pixels;
 	
 	//BYTE alpha;
 
@@ -7045,11 +7045,11 @@ CSprite::BltAlphaFilterDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
 	BYTE	*pFilter;
 	int		dist;
 
-	register int	yIndex = -s_Y + m_Height - 1;
-	register int	xIndex;
+	int	yIndex = -s_Y + m_Height - 1;
+	int	xIndex;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = m_Height;
 	for (int i=0; i<rectBottom; i++)
@@ -7204,11 +7204,11 @@ CSprite::BltAlphaFilterDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BY
 	BYTE	*pFilter;
 	int		dist, dist2;
 
-	register int	yIndex = -s_Y + pRect->top;
-	register int	xIndex;
+	int	yIndex = -s_Y + pRect->top;
+	int	xIndex;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -7647,11 +7647,11 @@ CSprite::BltAlphaFilterDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, B
 	BYTE	*pFilter;
 	int		dist, dist2;
 
-	register int	yIndex = -s_Y + pRect->top;
-	register int	xIndex;
+	int	yIndex = -s_Y + pRect->top;
+	int	xIndex;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	int rectBottom = pRect->bottom;
 	int rectRight = pRect->right;
@@ -7953,11 +7953,11 @@ CSprite::BltAlphaFilterDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, B
 	BYTE	*pFilter;
 	int		dist, dist2;
 
-	register int	yIndex = -s_Y + pRect->top;
-	register int	xIndex;
+	int	yIndex = -s_Y + pRect->top;
+	int	xIndex;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -8549,11 +8549,11 @@ CSprite::BltAlphaFilterDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, 
 	BYTE	*pFilter;
 	int		dist;
 
-	register int	yIndex = -s_Y + pRect->top;
-	register int	xIndex;
+	int	yIndex = -s_Y + pRect->top;
+	int	xIndex;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	for (int i=pRect->top; i<rectBottom; i++)
@@ -8693,11 +8693,11 @@ CSprite::BltAlphaFilterDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, 
 void
 CSprite::memcpyAlphaFilterDarkness(WORD* pDest, WORD* pSource, BYTE* pFilter, WORD pixels)
 {
-	register WORD		sTemp,dTemp;
-	register int		sr,sg,sb,dr,dg,db;
+	WORD		sTemp,dTemp;
+	int		sr,sg,sb,dr,dg,db;
 	//static WORD		temp, temp2;
 
-	register int j = pixels;
+	int j = pixels;
 
 	BYTE alpha;
 
@@ -8756,8 +8756,8 @@ CSprite::BltDarkerFilter(WORD *pDest, WORD pitch)
 			*pPixels;
 	BYTE	*pFilter;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = m_Height;
 	
@@ -8822,8 +8822,8 @@ CSprite::BltDarkerFilterClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -8957,8 +8957,8 @@ CSprite::BltDarkerFilterClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	int rectBottom = pRect->bottom;
 	int rectRight = pRect->right;
@@ -9057,8 +9057,8 @@ CSprite::BltDarkerFilterClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -9252,8 +9252,8 @@ CSprite::BltDarkerFilterClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 	BYTE	*pFilter;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	for (int i=pRect->top; i<rectBottom; i++)
@@ -9306,8 +9306,8 @@ CSprite::BltAlpha4444NotTrans(WORD *pDest, WORD pitch, BYTE alpha)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = m_Height;
 
@@ -9365,11 +9365,11 @@ CSprite::BltAlpha4444NotTrans(WORD *pDest, WORD pitch, BYTE alpha)
 void	
 CSprite::memcpyAlpha4444(WORD* pDest, WORD* pSource, WORD pixels)
 {
-	register WORD		sTemp;
-	register int		sr,sg,sb;
+	WORD		sTemp;
+	int		sr,sg,sb;
 	//static WORD		temp, temp2;
 
-	register int i = pixels;
+	int i = pixels;
 
 	// Alpha Channel Blending
 	// 한점씩 찍기
@@ -9418,8 +9418,8 @@ CSprite::BltAlpha4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE alpha, BYTE shi
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = m_Height;
 
@@ -9488,11 +9488,11 @@ CSprite::BltAlpha4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE alpha, BYTE shi
 void	
 CSprite::memcpyAlpha4444Small(WORD* pDest, WORD* pSource, WORD pixels)
 {
-	register WORD		sTemp;
-	register int		sr,sg,sb;
+	WORD		sTemp;
+	int		sr,sg,sb;
 	//static WORD		temp, temp2;
 
-	register int i = pixels >> s_Value2;
+	int i = pixels >> s_Value2;
 
 	// 한 값으로 Alpha Blending
 	// 한점씩 찍기
@@ -9533,8 +9533,8 @@ CSprite::Blt1555NotTrans(WORD *pDest, WORD pitch)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = m_Height;
 
@@ -9592,11 +9592,11 @@ CSprite::Blt1555NotTrans(WORD *pDest, WORD pitch)
 void	
 CSprite::memcpy1555(WORD* pDest, WORD* pSource, WORD pixels)
 {
-	register int		sTemp;
-	register int		sr,sg,sb;
+	int		sTemp;
+	int		sr,sg,sb;
 	//static WORD		temp, temp2;
 
-	register int i = pixels;
+	int i = pixels;
 
 	// Alpha Channel Blending
 	// 한점씩 찍기
@@ -9645,8 +9645,8 @@ CSprite::Blt1555SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift)
 	WORD	*pDestTemp,
 			*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = m_Height;
 
@@ -9714,11 +9714,11 @@ CSprite::Blt1555SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift)
 void	
 CSprite::memcpy1555Small(WORD* pDest, WORD* pSource, WORD pixels)
 {
-	register int		sTemp;
-	register int		sr,sg,sb;
+	int		sTemp;
+	int		sr,sg,sb;
 	//static WORD		temp, temp2;
 
-	register int i = pixels >> s_Value2;
+	int i = pixels >> s_Value2;
 
 	// 한점씩 찍기
 	while (i--)
@@ -9756,8 +9756,8 @@ CSprite::GetFileSize()
 	// 압축 된 것 저장
 	WORD index;	
 	
-	register int i;
-	register int j;
+	int i;
+	int j;
 	
 	//--------------------------------
 	// 5:6:5

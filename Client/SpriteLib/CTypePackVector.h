@@ -89,7 +89,7 @@ bool CTypePackVector<Type>::LoadFromFile(std::ifstream &file)
 	WORD m_Size;
 	file.read((char *)&m_Size, 2);
 	
-	register int i;
+	int i;
 
 	for(i = 0; i < m_Size; i++)
 	{
