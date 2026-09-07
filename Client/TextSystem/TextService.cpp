@@ -391,7 +391,6 @@ void TextService::DrawLine(RenderTarget& target, const std::string& text,
 	const char* p = normalized.c_str();
 	int remaining = static_cast<int>(normalized.size());
 	int penX = drawX;
-	int ascent = m_backend->GetFontAscent(style.font);
 
 	while (*p && remaining > 0) {
 		int len = 0;
@@ -406,24 +405,12 @@ void TextService::DrawLine(RenderTarget& target, const std::string& text,
 
 		const Glyph* glyph = m_backend->GetGlyph(style.font, codepoint, style.color);
 		if (glyph) {
-			// Calculate draw position
-			// y is the baseline position
-			// bearingY is the distance from baseline to the top of the glyph
-			// The rendered glyph surface starts at (baseline - ascent - miny)
-			// So we need to offset by: y - (ascent + miny - bearingY)
-			// But since bearingY = ascent + miny, this simplifies to: y
-			//
-			// Actually, TTF_RenderUTF8_Blended returns a surface that:
-			// - Has origin (0,0) at the glyph's bounding box top-left
-			// - The baseline is at position (-miny) within the surface
-			//
-			// So if we want to draw at baseline position y:
-			// - We need to offset the surface so the baseline aligns
-			// - drawY = y - (-miny) = y + miny
-			// - But miny is negative, so: drawY = y - ascent + bearingY
-
-			int drawY = y - ascent + metrics.bearingY;
-			m_backend->DrawGlyph(target, *glyph, penX + metrics.bearingX, drawY, style.color.a);
+			// SDL_ttf renders each UTF-8 glyph on a full line-height surface.
+			// Its baseline is already positioned inside that surface. Applying
+			// ink bearings again raises descenders (g, p, y) and shifts capitals.
+			// Only compensate for padding SDL_ttf adds for a negative left bearing.
+			m_backend->DrawGlyph(target, *glyph,
+				penX + (std::min)(0, metrics.bearingX), y, style.color.a);
 		}
 
 		penX += metrics.advance;

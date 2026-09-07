@@ -81,3 +81,62 @@ TEST(CIndexSpriteColorSet, LegacySeedsAreScaledForRgb565)
 		CHECK_EQ(expected.blue, ColorDraw::Blue(seedColor));
 	}
 }
+
+
+#include "CIndexSprite565.h"
+#include "CSpriteSurface.h"
+
+namespace {
+class PaletteTestSprite : public CIndexSprite565 {
+public:
+    PaletteTestSprite() {
+        // Transparent pixel, four independently recolorable pixels, fixed pixel.
+        m_Width = 6;
+        m_Height = 1;
+        m_Pixels = new WORD*[1];
+        m_Pixels[0] = new WORD[9]{1, 1, 4, 10, 0x10a, 0x20a, 0xff0a, 1, 0xf81f};
+        m_bInit = true;
+    }
+};
+}
+
+TEST(CIndexSpriteColorSet, CachedBlitsFollowEachPaletteChannel)
+{
+    CHECK_EQ(0, spritectl_init());
+    CIndexSprite::SetColorSet();
+    CSpriteSurface surface;
+    CHECK(surface.Init(6, 1));
+    if (!surface.GetBackendSurface()) return;
+    PaletteTestSprite sprite;
+    POINT origin = {0, 0};
+    const BYTE channels[] = {0, 1, 2, 255};
+    int saved[4];
+    int chosen[4] = {30, 60, 90, 120};
+    for (int i = 0; i < 4; ++i) {
+        saved[i] = CIndexSprite::GetUsingColorSet(channels[i]);
+        CIndexSprite::SetUsingColorSetOnly(channels[i], chosen[i]);
+    }
+    // Reuse the same decoded sprite, changing skin/hair and higher channels,
+    // then switch back as when two characters share one animation frame.
+    for (int pass = 0; pass < 9; ++pass) {
+        if (pass > 0) {
+            const int i = (pass - 1) % 4;
+            chosen[i] += pass <= 4 ? 150 : -150;
+            CIndexSprite::SetUsingColorSetOnly(channels[i], chosen[i]);
+        }
+        surface.FillSurface(0x1234);
+        surface.BltIndexSprite(&origin, &sprite);
+        DWORD pitch = 0;
+        const WORD* pixels = static_cast<const WORD*>(surface.Lock(nullptr, &pitch));
+        CHECK(pixels != nullptr);
+        if (pixels) {
+            CHECK_EQ(0x1234, pixels[0]);
+            for (int i = 0; i < 4; ++i)
+                CHECK_EQ(CIndexSprite::ColorSet[chosen[i]][10], pixels[i + 1]);
+            CHECK_EQ(0xf81f, pixels[5]);
+            surface.Unlock();
+        }
+    }
+    for (int i = 0; i < 4; ++i)
+        CIndexSprite::SetUsingColorSetOnly(channels[i], saved[i]);
+}

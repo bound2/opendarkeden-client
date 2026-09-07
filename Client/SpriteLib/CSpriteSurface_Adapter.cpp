@@ -359,10 +359,11 @@ static spritectl_sprite_t get_backend_index_sprite(CIndexSprite* pSprite)
 
 		free(pixels);
 		pSprite->SetBackendSprite(new_sprite);
+		pSprite->CaptureBackendPalette();
 		pSprite->SetBackendDirty(false);
 	}
-	/* Sync if dirty */
-	else if (pSprite->IsBackendDirty()) {
+	/* A decoded RGB sprite also depends on the selected palette channels. */
+	else if (pSprite->IsBackendDirty() || !pSprite->IsBackendPaletteCurrent()) {
 		/* Destroy old sprite and recreate */
 		spritectl_destroy_sprite(pSprite->GetBackendSprite());
 		pSprite->SetBackendSprite(SPRITECTL_INVALID_SPRITE);

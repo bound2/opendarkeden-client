@@ -450,6 +450,39 @@ CIndexSprite::CIndexSprite()
 #endif
 }
 
+#ifdef SPRITELIB_BACKEND_SDL
+bool CIndexSprite::IsBackendPaletteCurrent() const
+{
+    for (const auto& channel : m_backend_palette) {
+        if (s_IndexValue[channel.first] != channel.second)
+            return false;
+    }
+    return true;
+}
+
+void CIndexSprite::CaptureBackendPalette()
+{
+    bool used[MAX_COLORSET_USE] = {};
+    m_backend_palette.clear();
+    for (int y = 0; y < m_Height; ++y) {
+        const WORD* pixels = m_Pixels[y];
+        int pairs = *pixels++;
+        while (pairs-- > 0) {
+            ++pixels; // Transparent run.
+            int indexed = *pixels++;
+            while (indexed-- > 0)
+                used[(*pixels++ >> 8) & 0xff] = true;
+            const int fixed = *pixels++;
+            pixels += fixed;
+        }
+    }
+    for (int channel = 0; channel < MAX_COLORSET_USE; ++channel) {
+        if (used[channel])
+            m_backend_palette.emplace_back(static_cast<BYTE>(channel), s_IndexValue[channel]);
+    }
+}
+#endif
+
 CIndexSprite::~CIndexSprite()
 {
 	Release();
@@ -468,6 +501,7 @@ void
 CIndexSprite::Release()
 {
 #ifdef SPRITELIB_BACKEND_SDL
+	m_backend_palette.clear();
 	if (m_backend_sprite != SPRITECTL_INVALID_SPRITE) {
 		spritectl_destroy_sprite(m_backend_sprite);
 		m_backend_sprite = SPRITECTL_INVALID_SPRITE;

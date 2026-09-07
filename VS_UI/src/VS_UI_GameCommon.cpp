@@ -2,6 +2,8 @@
 
 #include "Client_PCH.h"
 #include "VS_UI_GameCommon.h"
+#include "TextSystem/TextService.h"
+#include "TextSystem/FontHandleUtil.h"
 #include "VS_UI_GameCommon2.h"
 #include "VS_UI_GlobalResource.h"
 #include "VS_UI_filepath.h"
@@ -3789,40 +3791,37 @@ bool C_VS_UI_GEAR::TestSlotRect(int _x, int _y) const
 - ResetScroll
 - 
 -----------------------------------------------------------------------------*/
+namespace {
+int ChatPrefixWidth(const C_VS_UI_CHAT_LINE& line)
+{
+	if (!line.GetIdString()) return 0;
+	return g_GetStringWidth(line.GetIdString(), gpC_base->m_user_id_pi.hfont)
+		+ g_GetStringWidth(g_sz_chat_id_divisor[line.GetCondition()], gpC_base->m_chatting_pi.hfont) + 2;
+}
+
+std::vector<std::string> WrapChatHistory(const C_VS_UI_CHAT_LINE& line, int width)
+{
+	auto& text = TextSystem::TextService::Get();
+	auto style = text.GetDefaultStyle();
+	const auto font = line.GetCondition() == CLD_ZONECHAT
+		? gpC_base->m_user_id_pi.hfont : gpC_base->m_chatting_pi.hfont;
+	style.font = text.GetFont(TextSystem::DecodeFontSizeHandle(font));
+	return text.WrapText(line.GetMsgString() ? line.GetMsgString() : "", style,
+		max(1, width - ChatPrefixWidth(line)));
+}
+}
+
 void C_VS_UI_CHATTING::ResetScroll()
 {
-	
 	m_pC_scroll_bar->SetSize(Rect(w-23, 35, -1, h-79));
-	
-	int i=0, line = 0;
-	C_VS_UI_CHAT_LINE * p_line;	
-	while(p_line = m_pC_history_list.GetLine(i))
-	{
-		i++;
-		const int _ID_GAP = 2;
-		
-		if(m_chat_filter[p_line->GetCondition()] == false)
-			continue;
-		
-		int vx = CHAT_LINE_START_X;
-		
-		int bl_backup = 0;
-		char *p_temp = NULL;
-		if (p_temp = (char *)p_line->GetMsgString())
-		{
-			int cut_index = CHAT_WINDOW_WIDTH/g_GetStringWidth("F", gpC_base->m_chatting_pi.hfont) - (p_line->GetIdString()==NULL?0:(strlen(p_line->GetIdString())+2));
-			
-			if(cut_index < strlen(p_temp))
-			{
-				line++;
-			}
-			
-			line++;
-		}
+	int lineCount = 0;
+	for (int i = 0; auto* line = m_pC_history_list.GetLine(i); ++i) {
+		if (m_chat_filter[line->GetCondition()] && line->GetMsgString())
+			lineCount += static_cast<int>(WrapChatHistory(*line, CHAT_WINDOW_WIDTH).size());
 	}
-	m_pC_scroll_bar->SetPosMax(line-g_HISTORY_LINE+1);
+	// SetPosMax takes a count, including the zero (newest) position.
+	m_pC_scroll_bar->SetPosMax(max(1, lineCount-g_HISTORY_LINE+1));
 	m_pC_scroll_bar->SetScrollPos(0);
-	
 }
 
 //-----------------------------------------------------------------------------
@@ -4944,127 +4943,31 @@ void C_VS_UI_CHATTING::Show()
 		}
 	}	
 	g_FL2_GetDC();	
-	for (int i=0, line = 0, scroll = 0; line < g_HISTORY_LINE; line++, i++)
-	{
-		// by larosel
-		C_VS_UI_CHAT_LINE * p_line;	
-		p_line = m_pC_history_list.GetLine(i);
-		
-		const int _ID_GAP = 2;
-		
-		if (p_line)
-		{
-			if(m_chat_filter[p_line->GetCondition()] == false)
-			{
-				line--;
-				continue;
+	// Draw newest messages from the bottom, using the same measured wrapping
+	// as the scrollbar. Byte counts based on the width of "F" overflowed for
+	// wide letters and could split UTF-8 sequences.
+	int row = 0, scroll = 0;
+	for (int i = 0; row < g_HISTORY_LINE; ++i) {
+		auto* entry = m_pC_history_list.GetLine(i);
+		if (!entry) break;
+		if (!m_chat_filter[entry->GetCondition()] || !entry->GetMsgString()) continue;
+		const auto lines = WrapChatHistory(*entry, CHAT_WINDOW_WIDTH);
+		const int textX = CHAT_LINE_START_X + 22 + ChatPrefixWidth(*entry);
+		for (int part = static_cast<int>(lines.size()) - 1; part >= 0 && row < g_HISTORY_LINE; --part) {
+			if (scroll++ < m_pC_scroll_bar->GetScrollPos()) continue;
+			const int textY = CHAT_HISTORY_START_Y - FONT_GAP * row++;
+			if (part == 0 && entry->GetIdString()) {
+				int colorTab = entry->GetCondition();
+				if (strstr(entry->GetIdString(), GetGameString(UI_STRING_MESSAGE_MASTER_NAME)))
+					colorTab = CLD_MASTER;
+				int idX = g_PrintColorStr(CHAT_LINE_START_X + 22, textY, entry->GetIdString(),
+					gpC_base->m_user_id_pi, m_color_tab[colorTab]);
+				g_PrintColorStr(idX, textY, g_sz_chat_id_divisor[entry->GetCondition()],
+					gpC_base->m_chatting_pi, m_color_tab[colorTab]);
 			}
-			int vx = CHAT_LINE_START_X + 22;  //modify by viva : hostory_line
-			
-			int bl_backup = 0;
-			if (p_line->GetMsgString())
-			{
-				char *p_temp = (char *)p_line->GetMsgString();
-				int cut_index = 0;
-				
-				if(p_line->GetCondition() == CLD_ZONECHAT)
-				{
-					//으아악~~!!! 하드코딩이다아아아!!!!
-					// BOLD를 먹여보리면 한글이랑 영문이랑 글씨크기가 제멋대로자나-ㅅ-					
-					char sz_temp[130];
-					int smart_size = CHAT_WINDOW_WIDTH  - g_GetStringWidth(p_line->GetIdString(), gpC_base->m_user_id_pi.hfont) -g_GetStringWidth(g_sz_chat_id_divisor[p_line->GetCondition()], gpC_base->m_chatting_pi.hfont) -_ID_GAP;
-					cut_index = strlen(p_temp);
-					if(g_GetStringWidth(p_temp, gpC_base->m_user_id_pi.hfont) > smart_size)
-					{
-						strcpy(sz_temp, p_temp);
-						while(g_GetStringWidth(sz_temp, gpC_base->m_user_id_pi.hfont) > smart_size)
-						{
-							sz_temp[cut_index--] = '\0';
-						}
-					}
-				}
-				else
-					cut_index = (CHAT_WINDOW_WIDTH  - g_GetStringWidth(p_line->GetIdString(), gpC_base->m_user_id_pi.hfont) -g_GetStringWidth(g_sz_chat_id_divisor[p_line->GetCondition()], gpC_base->m_chatting_pi.hfont) -_ID_GAP)/(g_GetStringWidth("F", gpC_base->m_chatting_pi.hfont));
-				
-				char backup_char;
-				
-				if(cut_index < strlen(p_temp))
-				{
-					if (!g_PossibleStringCut(p_temp, cut_index))
-						cut_index--;
-					
-					bl_backup = 1;
-					
-					assert(cut_index > 0);
-				}
-				
-				// 스크롤 체크.. 왜 여기서 하지-.-
-				if(scroll < m_pC_scroll_bar->GetScrollPos())
-				{
-					if(bl_backup)
-					{
-						scroll++;
-					}
-					scroll++;
-					line--;
-					if(scroll <= m_pC_scroll_bar->GetScrollPos())
-					{
-						continue;
-					}
-				}
-				
-				vx += g_GetStringWidth(p_line->GetIdString(), gpC_base->m_user_id_pi.hfont);
-				vx += g_GetStringWidth(g_sz_chat_id_divisor[p_line->GetCondition()], gpC_base->m_chatting_pi.hfont);
-				vx += _ID_GAP;
-				
-				if(bl_backup)
-				{
-					if(line < g_HISTORY_LINE && line >= 0)
-					{
-						if (p_line->GetCondition() == CLD_ZONECHAT)
-						{
-							g_PrintColorStr(vx, CHAT_HISTORY_START_Y-(FONT_GAP*line), p_temp+cut_index, gpC_base->m_user_id_pi, p_line->GetColor());
-						}
-						else
-						{
-							g_PrintColorStr(vx, CHAT_HISTORY_START_Y-(FONT_GAP*line), p_temp+cut_index, gpC_base->m_chatting_pi, p_line->GetColor());
-						}
-					}
-					line++;
-					
-					backup_char = p_temp[cut_index];
-					p_temp[cut_index] = '\0';
-				}
-				
-				if(line < g_HISTORY_LINE && line >= 0)
-				{
-					if (p_line->GetIdString())
-					{
-						int tabvalue=0;
-						if(strstr(p_line->GetIdString(), (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetString()) != NULL)
-							tabvalue=CLD_MASTER;
-						else
-							tabvalue=p_line->GetCondition();
-						//modify by viva : +22 hostory_line
-						vx = g_PrintColorStr(CHAT_LINE_START_X + 22, CHAT_HISTORY_START_Y-(FONT_GAP*line), p_line->GetIdString(), gpC_base->m_user_id_pi, m_color_tab[tabvalue]);
-						vx = g_PrintColorStr(vx, CHAT_HISTORY_START_Y-(FONT_GAP*line), g_sz_chat_id_divisor[p_line->GetCondition()], gpC_base->m_chatting_pi, m_color_tab[tabvalue]);
-						vx += _ID_GAP;
-					}
-					
-					if (p_line->GetCondition() == CLD_ZONECHAT)
-					{
-						g_PrintColorStr(vx, CHAT_HISTORY_START_Y-(FONT_GAP*line), p_temp, gpC_base->m_user_id_pi, p_line->GetColor());
-					}
-					else
-					{
-						g_PrintColorStr(vx, CHAT_HISTORY_START_Y-(FONT_GAP*line), p_temp, gpC_base->m_chatting_pi, p_line->GetColor());
-					}
-				}
-				if(bl_backup)
-				{
-					p_temp[cut_index] = backup_char;
-				}
-			}
+			auto& printInfo = entry->GetCondition() == CLD_ZONECHAT
+				? gpC_base->m_user_id_pi : gpC_base->m_chatting_pi;
+			g_PrintColorStr(textX, textY, lines[part].c_str(), printInfo, entry->GetColor());
 		}
 	}
 	if(gap)

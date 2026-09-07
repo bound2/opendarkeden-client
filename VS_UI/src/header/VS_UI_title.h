@@ -1119,6 +1119,8 @@ public :
 
 	// Fit thirteen graphics rows within the existing ten-row panel.
 	static constexpr int GRAPHIC_CHECK_GAP = 15;
+	static constexpr int SOUND_CHECK_GAP = 44;
+	static constexpr int SOUND_SLIDER_Y = 22;
 
 	enum EXEC_CHECK_ID
 	{

@@ -21,6 +21,7 @@
 #endif
 #include <string>
 #include "TextSystem/TextService.h"
+#include "TextSystem/RenderTargetSpriteSurface.h"
 #include "Client.h"
 #include "PacketDispatcher.h"
 #include "GameObject.h"
@@ -5165,10 +5166,15 @@ CGameUpdate::UpdateDraw()
 				//-----------------------------------------------------------------				
 				sprintf(str, "%d FPS", g_FrameRate);	
 				
-				// g_pLast->GDI_Text(11,11, str, RGB(20,20,20));
-				TextSystem::TextService::RenderText(11, 11, str);
-				// g_pLast->GDI_Text(10,10, str, 0xFFFFFF);
-				TextSystem::TextService::RenderText(10, 10, str);
+				// Keep the counter below the HP frame, with a real dark shadow.
+				TextSystem::SpriteSurfaceRenderTarget target(g_pLast);
+				auto& text = TextSystem::TextService::Get();
+				auto style = text.GetDefaultStyle();
+				style.font = text.GetFont(12);
+				style.color = TextSystem::ColorFromRGB(0x141414);
+				text.DrawLine(target, str, 11, 41, 0, style);
+				style.color = TextSystem::ColorFromRGB(0xFFFFFF);
+				text.DrawLine(target, str, 10, 40, 0, style);
 			}
 		__END_PROFILE("DrawFPS")
 

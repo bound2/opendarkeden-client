@@ -62,6 +62,8 @@
 
 #ifdef SPRITELIB_BACKEND_SDL
 #include "SpriteLibBackend.h"
+#include <vector>
+#include <utility>
 #endif
 
 #include <fstream>
@@ -157,6 +159,8 @@ class CIndexSprite {
 
 #ifdef SPRITELIB_BACKEND_SDL
 		/* Backend sprite management */
+		bool IsBackendPaletteCurrent() const;
+		void CaptureBackendPalette();
 		spritectl_sprite_t GetBackendSprite() const	{ return m_backend_sprite; }
 		bool IsBackendDirty() const			{ return m_backend_dirty; }
 		void SetBackendSprite(spritectl_sprite_t sprite)	{ m_backend_sprite = sprite; }
@@ -256,6 +260,8 @@ class CIndexSprite {
 		bool			m_bInit;		// data가 있는가?
 
 #ifdef SPRITELIB_BACKEND_SDL
+		// Only channels referenced by this sprite participate in cache invalidation.
+		std::vector<std::pair<BYTE, int>> m_backend_palette;
 		spritectl_sprite_t	m_backend_sprite;	// Backend sprite handle
 		bool			m_backend_dirty;	// True if m_Pixels changed but not synced to backend
 #endif
