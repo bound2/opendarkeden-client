@@ -854,7 +854,14 @@ R9_BASELINE=0
 # build refused the base's promoted size functions under the derived
 # class's unpromoted overrides, so the base is unspecified too. Gpackets
 # is all that is left.
-R10_BASELINE=5883
+#
+# R10 = 0 (2026-09-07): Gpackets is at 0, 5,883 sites by the same
+# script, with GCChangeInventoryItemNum::getPacketSize left unspecified
+# under the two packets that derive from it. The whole library set is
+# clean, and this ratchet now holds it there the way R9 holds basic/.
+# What it never covered - Client/PacketHandler (284) and the remaining
+# executable sources (34) - is the next slice, with a ratchet of its own.
+R10_BASELINE=0
 
 # Identifiers, `::` and commas between the parens, and nothing else. The
 # leading alternation rather than \b for the reason R8's comment gives:

@@ -32,42 +32,42 @@ class GCActiveGuildList : public Packet {
 public :
 
 	// constructor
-	GCActiveGuildList() throw();
+	GCActiveGuildList();
 
 	// destructor
-	~GCActiveGuildList() throw();
+	~GCActiveGuildList();
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_GC_ACTIVE_GUILD_LIST; }
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_ACTIVE_GUILD_LIST; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw();
+	PacketSize_t getPacketSize() const;
 
 	// get packet name
-	std::string getPacketName() const throw() { return "GCActiveGuildList"; }
+	std::string getPacketName() const { return "GCActiveGuildList"; }
 	
 	// get packet's debug std::string
-	std::string toString() const throw();
+	std::string toString() const;
 
 public:
 
-	BYTE getListNum() const throw() { return m_GuildInfoList.size(); }
+	BYTE getListNum() const { return m_GuildInfoList.size(); }
 
 	// add GuildInfo
-	void addGuildInfo( GuildInfo* pGuildInfo ) throw() { m_GuildInfoList.push_front( pGuildInfo ); }
+	void addGuildInfo( GuildInfo* pGuildInfo ) { m_GuildInfoList.push_front( pGuildInfo ); }
 
 	// clear GuildInfoList
-	void clearGuildInfoList() throw();
+	void clearGuildInfoList();
 
 	// pop front Element in GuildInfoList
-	GuildInfo* popFrontGuildInfoList() throw()
+	GuildInfo* popFrontGuildInfoList()
 	{
 		if ( !m_GuildInfoList.empty() )
 		{
@@ -98,18 +98,18 @@ class GCActiveGuildListFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet* createPacket() throw() { return new GCActiveGuildList(); }
+	Packet* createPacket() { return new GCActiveGuildList(); }
 
 	// get packet name
-	std::string getPacketName() const throw() { return "GCActiveGuildList"; }
+	std::string getPacketName() const { return "GCActiveGuildList"; }
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_ACTIVE_GUILD_LIST; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_ACTIVE_GUILD_LIST; }
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static GCSystemMessagePacketMaxSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize() const throw() { return szWORD + (GuildInfo::getMaxSize() * 5000); }
+	PacketSize_t getPacketMaxSize() const { return szWORD + (GuildInfo::getMaxSize() * 5000); }
 
 };
 
@@ -125,7 +125,7 @@ class GCActiveGuildListHandler {
 public :
 	
 	// execute packet's handler
-	static void execute(GCActiveGuildList* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(GCActiveGuildList* pPacket, Player* pPlayer);
 
 };
 

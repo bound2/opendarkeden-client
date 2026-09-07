@@ -24,27 +24,27 @@ class GCRequestFailed : public Packet
 {
 
 public:
-	GCRequestFailed() throw() { m_Code = REQUEST_FAILED_NULL; }
-	virtual ~GCRequestFailed() throw() {}
+	GCRequestFailed() { m_Code = REQUEST_FAILED_NULL; }
+	virtual ~GCRequestFailed() {}
 
 public:
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+	void read ( SocketInputStream & iStream );
+	void write ( SocketOutputStream & oStream ) const;
 
-	PacketID_t getPacketID () const throw () { return PACKET_GC_REQUEST_FAILED; }
-	PacketSize_t getPacketSize () const throw ()	{ return szBYTE + szBYTE + m_Name.size(); }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_REQUEST_FAILED; }
+	PacketSize_t getPacketSize () const	{ return szBYTE + szBYTE + m_Name.size(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "GCRequestFailed"; }
-		std::string toString () const throw ();
+		std::string getPacketName () const { return "GCRequestFailed"; }
+		std::string toString () const;
 	#endif
 	
 public:
-	BYTE getCode(void) const throw() { return m_Code;}
-	void setCode(WORD code) throw() { m_Code = code;}
+	BYTE getCode(void) const noexcept { return m_Code;}
+	void setCode(WORD code) noexcept { m_Code = code;}
 
-	const std::string& getName(void) const throw() { return m_Name;}
-	void setName(const char* Name) throw() { m_Name = Name;}
+	const std::string& getName(void) const noexcept { return m_Name;}
+	void setName(const char* Name) { m_Name = Name;}
 
 private: 
 	BYTE m_Code;	
@@ -60,14 +60,14 @@ private:
 class GCRequestFailedFactory : public PacketFactory 
 {
 public:
-	Packet * createPacket () throw () { return new GCRequestFailed(); }
+	Packet * createPacket () { return new GCRequestFailed(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "GCRequestFailed"; }
+		std::string getPacketName () const { return "GCRequestFailed"; }
 	#endif
 
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_REQUEST_FAILED; }
-	PacketSize_t getPacketMaxSize () const throw () { return szBYTE + szBYTE + 10; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_REQUEST_FAILED; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szBYTE + szBYTE + 10; }
 };
 
 
@@ -78,7 +78,7 @@ public:
 class GCRequestFailedHandler 
 {
 public:
-	static void execute (  GCRequestFailed * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute (  GCRequestFailed * pPacket , Player * pPlayer );
 };
 
 #endif

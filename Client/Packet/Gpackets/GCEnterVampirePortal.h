@@ -19,19 +19,19 @@
 class GCEnterVampirePortal : public Packet 
 {
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_GC_ENTER_VAMPIRE_PORTAL; }
-	PacketSize_t getPacketSize() const throw() { return szObjectID + szCoord*2; }
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_ENTER_VAMPIRE_PORTAL; }
+	PacketSize_t getPacketSize() const noexcept { return szObjectID + szCoord*2; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "GCEnterVampirePortal"; }
-		std::string toString() const throw();
+		std::string getPacketName() const { return "GCEnterVampirePortal"; }
+		std::string toString() const;
 	#endif
 
 public:
-	ObjectID_t getObjectID() const throw() { return m_ObjectID; }
-	void setObjectID(const ObjectID_t & creatureID) throw() { m_ObjectID = creatureID; }
+	ObjectID_t getObjectID() const noexcept { return m_ObjectID; }
+	void setObjectID(const ObjectID_t & creatureID) { m_ObjectID = creatureID; }
 
 	Coord_t getX(void) const { return m_X; }
 	void setX(Coord_t X) { m_X = X; }
@@ -52,14 +52,14 @@ private:
 class GCEnterVampirePortalFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new GCEnterVampirePortal(); }
+	Packet* createPacket() { return new GCEnterVampirePortal(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "GCEnterVampirePortal"; }
+		std::string getPacketName() const { return "GCEnterVampirePortal"; }
 	#endif
 
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_ENTER_VAMPIRE_PORTAL; }
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szCoord*2; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_ENTER_VAMPIRE_PORTAL; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szCoord*2; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -69,7 +69,7 @@ public:
 class GCEnterVampirePortalHandler 
 {
 public:
-	static void execute(GCEnterVampirePortal* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(GCEnterVampirePortal* pPacket, Player* pPlayer);
 };
 
 #endif

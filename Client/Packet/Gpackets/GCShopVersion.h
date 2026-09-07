@@ -25,53 +25,53 @@ class GCShopVersion : public Packet
 
 public :
 
-	GCShopVersion() throw ();
-	virtual ~GCShopVersion() throw ();
+	GCShopVersion();
+	virtual ~GCShopVersion();
 	
 	// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+	void read ( SocketInputStream & iStream );
 		    
 	// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+	void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_SHOP_VERSION; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_SHOP_VERSION; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () { return szObjectID + szShopVersion*3+ szMarketCond; }
+	PacketSize_t getPacketSize () const noexcept { return szObjectID + szShopVersion*3+ szMarketCond; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCShopVersion"; }
+		std::string getPacketName () const { return "GCShopVersion"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 
 public :
 
 	// get/set NPC's object id
-	ObjectID_t getObjectID () const throw () { return m_ObjectID; }
-	void setObjectID ( ObjectID_t creatureID ) throw () { m_ObjectID = creatureID; }
+	ObjectID_t getObjectID () const noexcept { return m_ObjectID; }
+	void setObjectID ( ObjectID_t creatureID ) noexcept { m_ObjectID = creatureID; }
 
 	// get/set shop version
-	ShopVersion_t getVersion(ShopRackType_t type) const throw()
+	ShopVersion_t getVersion(ShopRackType_t type) const
 	{
 		if (type >= SHOP_RACK_TYPE_MAX) throw ("GCShopVersion::getVersion() : Out of Bound!");
 		return m_Version[type];
 	}
 	
-	void setVersion(ShopRackType_t type, ShopVersion_t ver) throw()
+	void setVersion(ShopRackType_t type, ShopVersion_t ver)
 	{
 		if (type >= SHOP_RACK_TYPE_MAX) throw ("GCShopVersion::setVersion() : Out of Bound!");
 		m_Version[type] = ver;
 	}
 
 	// get/set market condition sell
-	MarketCond_t getMarketCondSell(void) const throw() { return m_MarketCondSell;}
-	void setMarketCondSell(MarketCond_t cond) throw() { m_MarketCondSell = cond;}
+	MarketCond_t getMarketCondSell(void) const noexcept { return m_MarketCondSell;}
+	void setMarketCondSell(MarketCond_t cond) noexcept { m_MarketCondSell = cond;}
 	
 private :
 	
@@ -100,20 +100,20 @@ class GCShopVersionFactory : public PacketFactory
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCShopVersion(); }
+	Packet * createPacket () { return new GCShopVersion(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCShopVersion"; }
+		std::string getPacketName () const { return "GCShopVersion"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_SHOP_VERSION; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_SHOP_VERSION; }
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static GCShopVersionPacketMaxSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szShopVersion*3+ szMarketCond; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID + szShopVersion*3+ szMarketCond; }
 
 };
 
@@ -130,7 +130,7 @@ class GCShopVersionHandler
 public :
 	
 	// execute packet's handler
-	static void execute ( GCShopVersion * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCShopVersion * pPacket , Player * pPlayer );
 
 };
 

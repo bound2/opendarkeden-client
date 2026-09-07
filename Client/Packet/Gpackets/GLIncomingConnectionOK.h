@@ -25,17 +25,17 @@ class GLIncomingConnectionOK : public DatagramPacket {
 public :
 	
     // Datagram 객체에서부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( Datagram & iDatagram ) throw ( ProtocolException , Error );
+    void read ( Datagram & iDatagram );
 		    
     // Datagram 객체로 패킷의 바이너리 이미지를 보낸다.
-    void write ( Datagram & oDatagram ) const throw ( ProtocolException , Error );
+    void write ( Datagram & oDatagram ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GL_INCOMING_CONNECTION_OK; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GL_INCOMING_CONNECTION_OK; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () 
+	PacketSize_t getPacketSize () const 
 	{ 
 		return szBYTE + m_PlayerID.size() 
 				+ szuint
@@ -44,25 +44,25 @@ public :
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GLIncomingConnectionOK"; }
+		std::string getPacketName () const { return "GLIncomingConnectionOK"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 public :
 
 	// get/set player id
-	std::string getPlayerID () const throw () { return m_PlayerID; }
-	void setPlayerID ( std::string playerID ) throw () { m_PlayerID = playerID; }
+	std::string getPlayerID () const { return m_PlayerID; }
+	void setPlayerID ( std::string playerID ) { m_PlayerID = playerID; }
 
 	// get/set tcp port
-	uint getTCPPort () const throw () { return m_TCPPort; }
-	void setTCPPort ( uint tcpPort ) throw () { m_TCPPort = tcpPort; }
+	uint getTCPPort () const noexcept { return m_TCPPort; }
+	void setTCPPort ( uint tcpPort ) noexcept { m_TCPPort = tcpPort; }
 
 	// get/set auth key
-	DWORD getKey () const throw () { return m_Key; }
-	void setKey ( DWORD key ) throw () { m_Key = key; }
+	DWORD getKey () const noexcept { return m_Key; }
+	void setKey ( DWORD key ) noexcept { m_Key = key; }
 
 private :
 
@@ -92,20 +92,20 @@ class GLIncomingConnectionOKFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GLIncomingConnectionOK(); }
+	Packet * createPacket () { return new GLIncomingConnectionOK(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GLIncomingConnectionOK"; }
+		std::string getPacketName () const { return "GLIncomingConnectionOK"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GL_INCOMING_CONNECTION_OK; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GL_INCOMING_CONNECTION_OK; }
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static GLIncomingConnectionOKPacketMaxSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize () const throw () 
+	PacketSize_t getPacketMaxSize () const 
 	{ 
 		return szBYTE + 20
 				+ szuint
@@ -126,7 +126,7 @@ class GLIncomingConnectionOKHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( GLIncomingConnectionOK * pPacket ) throw ( ProtocolException , Error );
+	static void execute ( GLIncomingConnectionOK * pPacket );
 
 };
 

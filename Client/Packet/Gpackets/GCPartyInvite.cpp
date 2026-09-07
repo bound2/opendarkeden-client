@@ -11,8 +11,7 @@
 // class GCPartyInvite member methods
 //////////////////////////////////////////////////////////////////////////////
 
-void GCPartyInvite::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void GCPartyInvite::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 
@@ -22,8 +21,7 @@ void GCPartyInvite::read (SocketInputStream & iStream)
 	__END_CATCH
 }
 		    
-void GCPartyInvite::write (SocketOutputStream & oStream) const 
-     throw (ProtocolException , Error)
+void GCPartyInvite::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 	
@@ -35,7 +33,6 @@ void GCPartyInvite::write (SocketOutputStream & oStream) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string GCPartyInvite::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

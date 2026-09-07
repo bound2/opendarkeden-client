@@ -10,8 +10,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////////////
-void GCNoticeEvent::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCNoticeEvent::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -54,8 +53,7 @@ void GCNoticeEvent::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////////////
-void GCNoticeEvent::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCNoticeEvent::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -98,7 +96,6 @@ void GCNoticeEvent::write ( SocketOutputStream & oStream ) const
 //////////////////////////////////////////////////////////////////////////////
 
 PacketSize_t GCNoticeEvent::getPacketSize () const 
-	throw() 
 {
 	__BEGIN_TRY
 
@@ -144,7 +141,6 @@ PacketSize_t GCNoticeEvent::getPacketSize () const
 // get packet's debug std::string
 //////////////////////////////////////////////////////////////////////////////
 std::string GCNoticeEvent::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 

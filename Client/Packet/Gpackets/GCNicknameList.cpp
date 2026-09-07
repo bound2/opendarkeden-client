@@ -16,8 +16,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-GCNicknameList::GCNicknameList () 
-	 throw ()
+GCNicknameList::GCNicknameList ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -27,8 +26,7 @@ GCNicknameList::GCNicknameList ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-GCNicknameList::~GCNicknameList () 
-	throw ()
+GCNicknameList::~GCNicknameList ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -37,8 +35,7 @@ GCNicknameList::~GCNicknameList ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCNicknameList::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCNicknameList::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -62,7 +59,7 @@ void GCNicknameList::read ( SocketInputStream & iStream )
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
 void GCNicknameList::write ( SocketOutputStream & oStream ) 
-	 const throw ( ProtocolException , Error )
+	 const
 {
 	__BEGIN_TRY
 
@@ -80,7 +77,7 @@ void GCNicknameList::write ( SocketOutputStream & oStream )
 	__END_CATCH
 }
 
-PacketSize_t GCNicknameList::getPacketSize() const throw()
+PacketSize_t GCNicknameList::getPacketSize() const
 {
 	__BEGIN_TRY
 
@@ -106,7 +103,7 @@ PacketSize_t GCNicknameList::getPacketSize() const throw()
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 string GCNicknameList::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 

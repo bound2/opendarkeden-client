@@ -25,30 +25,30 @@ class GCRealWearingInfo : public Packet {
 public :
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_REAL_WEARING_INFO; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_REAL_WEARING_INFO; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () { return szDWORD; }
+	PacketSize_t getPacketSize () const noexcept { return szDWORD; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCRealWearingInfo"; }
+		std::string getPacketName () const { return "GCRealWearingInfo"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 	
 public :
 
-	DWORD getInfo(void) const throw() { return m_Info;}
-	void setInfo(DWORD info) throw() { m_Info = info;}
+	DWORD getInfo(void) const noexcept { return m_Info;}
+	void setInfo(DWORD info) noexcept { m_Info = info;}
 
 private :
 	
@@ -70,20 +70,20 @@ class GCRealWearingInfoFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCRealWearingInfo(); }
+	Packet * createPacket () { return new GCRealWearingInfo(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCRealWearingInfo"; }
+		std::string getPacketName () const { return "GCRealWearingInfo"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_REAL_WEARING_INFO; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_REAL_WEARING_INFO; }
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static GCRealWearingInfoPacketSize 를 정의해서 리턴하라.
-	PacketSize_t getPacketMaxSize () const throw () { return szDWORD; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szDWORD; }
 
 };
 
@@ -99,7 +99,7 @@ class GCRealWearingInfoHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCRealWearingInfo * pPacket , Player * player ) throw ( ProtocolException , Error );
+	static void execute ( GCRealWearingInfo * pPacket , Player * player );
 };
 
 #endif

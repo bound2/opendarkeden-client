@@ -13,8 +13,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-GCDownSkillOK::GCDownSkillOK () 
-     throw ()
+GCDownSkillOK::GCDownSkillOK ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -24,8 +23,7 @@ GCDownSkillOK::GCDownSkillOK ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-GCDownSkillOK::~GCDownSkillOK () 
-    throw ()
+GCDownSkillOK::~GCDownSkillOK ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -35,8 +33,7 @@ GCDownSkillOK::~GCDownSkillOK ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCDownSkillOK::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCDownSkillOK::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 	iStream.read( m_SkillType );
@@ -47,8 +44,7 @@ void GCDownSkillOK::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void GCDownSkillOK::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCDownSkillOK::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 	oStream.write( m_SkillType );
@@ -62,7 +58,6 @@ void GCDownSkillOK::write ( SocketOutputStream & oStream ) const
 //
 //////////////////////////////////////////////////////////////////////
 std::string GCDownSkillOK::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 

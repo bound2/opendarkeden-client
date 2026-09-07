@@ -18,8 +18,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-GCChangeInventoryItemNum::GCChangeInventoryItemNum () 
-     throw ()
+GCChangeInventoryItemNum::GCChangeInventoryItemNum ()
 {
 	__BEGIN_TRY
 	m_ChangedItemListNum = 0;
@@ -30,8 +29,7 @@ GCChangeInventoryItemNum::GCChangeInventoryItemNum ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-GCChangeInventoryItemNum::~GCChangeInventoryItemNum () 
-    throw ()
+GCChangeInventoryItemNum::~GCChangeInventoryItemNum ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -41,8 +39,7 @@ GCChangeInventoryItemNum::~GCChangeInventoryItemNum ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCChangeInventoryItemNum::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCChangeInventoryItemNum::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -70,7 +67,7 @@ void GCChangeInventoryItemNum::read ( SocketInputStream & iStream )
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
 void GCChangeInventoryItemNum::write ( SocketOutputStream & oStream ) 
-     const throw ( ProtocolException , Error )
+     const
 {
 	__BEGIN_TRY
 		
@@ -95,7 +92,6 @@ void GCChangeInventoryItemNum::write ( SocketOutputStream & oStream )
 //
 //////////////////////////////////////////////////////////////////////
 void GCChangeInventoryItemNum::addChangedItemListElement( ObjectID_t id, ItemNum_t num)
-	throw()
 {
 	__BEGIN_TRY
 
@@ -117,7 +113,7 @@ void GCChangeInventoryItemNum::addChangedItemListElement( ObjectID_t id, ItemNum
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string GCChangeInventoryItemNum::toString () 
-		const throw ()
+		const
 	{
 		__BEGIN_TRY
 

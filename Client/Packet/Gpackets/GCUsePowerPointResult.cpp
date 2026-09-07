@@ -14,7 +14,6 @@
 // constructor
 //--------------------------------------------------------------------------------
 GCUsePowerPointResult::GCUsePowerPointResult ()
-	throw ()
 	: m_ErrorCode(0), m_ItemCode(0)
 {
 }
@@ -23,7 +22,6 @@ GCUsePowerPointResult::GCUsePowerPointResult ()
 // destructor
 //--------------------------------------------------------------------------------
 GCUsePowerPointResult::~GCUsePowerPointResult ()
-	throw ()
 {
 }
 
@@ -31,8 +29,7 @@ GCUsePowerPointResult::~GCUsePowerPointResult ()
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 
 //--------------------------------------------------------------------------------
-void GCUsePowerPointResult::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCUsePowerPointResult::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -52,8 +49,7 @@ void GCUsePowerPointResult::read ( SocketInputStream & iStream )
 //--------------------------------------------------------------------------------
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //--------------------------------------------------------------------------------
-void GCUsePowerPointResult::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCUsePowerPointResult::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -75,7 +71,6 @@ void GCUsePowerPointResult::write ( SocketOutputStream & oStream ) const
 // get packet's debug string
 //--------------------------------------------------------------------------------
 string GCUsePowerPointResult::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

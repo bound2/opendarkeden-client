@@ -17,8 +17,7 @@
 // constructor
 //--------------------------------------------------------------------
 
-GCShopSellFail::GCShopSellFail() 
-	throw ()
+GCShopSellFail::GCShopSellFail()
 {
 	__BEGIN_TRY 
 	
@@ -28,8 +27,7 @@ GCShopSellFail::GCShopSellFail()
 //--------------------------------------------------------------------
 // destructor
 //--------------------------------------------------------------------
-GCShopSellFail::~GCShopSellFail() 
-	throw ()
+GCShopSellFail::~GCShopSellFail()
 {
 	__BEGIN_TRY 
 	
@@ -40,8 +38,7 @@ GCShopSellFail::~GCShopSellFail()
 //--------------------------------------------------------------------
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //--------------------------------------------------------------------
-void GCShopSellFail::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCShopSellFail::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -57,8 +54,7 @@ void GCShopSellFail::read ( SocketInputStream & iStream )
 //--------------------------------------------------------------------------------
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //--------------------------------------------------------------------------------
-void GCShopSellFail::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCShopSellFail::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 		
@@ -75,7 +71,6 @@ void GCShopSellFail::write ( SocketOutputStream & oStream ) const
 //--------------------------------------------------------------------------------
 #ifdef __DEBUG_OUTPUT__
 	std::string GCShopSellFail::toString () const
-		   throw ()
 	{
 		__BEGIN_TRY
 			

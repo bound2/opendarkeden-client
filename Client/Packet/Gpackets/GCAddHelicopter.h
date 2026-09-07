@@ -20,14 +20,14 @@
 class GCAddHelicopter : public Packet 
 {
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_GC_ADD_HELICOPTER; }
-	PacketSize_t getPacketSize() const throw() { return szObjectID + szBYTE; }
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_ADD_HELICOPTER; }
+	PacketSize_t getPacketSize() const noexcept { return szObjectID + szBYTE; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "GCAddHelicopter"; }
-		std::string toString() const throw();
+		std::string getPacketName() const { return "GCAddHelicopter"; }
+		std::string toString() const;
 	#endif
 
 public:
@@ -49,14 +49,14 @@ private:
 class GCAddHelicopterFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new GCAddHelicopter(); }
+	Packet* createPacket() { return new GCAddHelicopter(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName() const throw() { return "GCAddHelicopter"; }
+		std::string getPacketName() const { return "GCAddHelicopter"; }
 	#endif
 
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_ADD_HELICOPTER; }
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szBYTE; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_ADD_HELICOPTER; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szBYTE; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ public:
 class GCAddHelicopterHandler 
 {
 public:
-	static void execute(GCAddHelicopter* pGCAddHelicopter, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(GCAddHelicopter* pGCAddHelicopter, Player* pPlayer);
 };
 
 #endif

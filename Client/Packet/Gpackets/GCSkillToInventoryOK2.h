@@ -29,48 +29,48 @@ class GCSkillToInventoryOK2 : public Packet {
 public :
 	
 	// constructor
-	GCSkillToInventoryOK2 () throw ();
+	GCSkillToInventoryOK2 ();
 	
 	// destructor
-	~GCSkillToInventoryOK2 () throw ();
+	~GCSkillToInventoryOK2 ();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_SKILL_TO_INVENTORY_OK_2; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_SKILL_TO_INVENTORY_OK_2; }
 	
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getPacketSize () const throw () { return szSkillType + szObjectID + szDuration; }
+	PacketSize_t getPacketSize () const noexcept { return szSkillType + szObjectID + szDuration; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCSkillToInventoryOK2"; }
+		std::string getPacketName () const { return "GCSkillToInventoryOK2"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 	// get / set ObjectID 
-	CEffectID_t getObjectID() const throw() { return m_ObjectID; }
-	void setObjectID( ObjectID_t ObjectID ) throw() { m_ObjectID = ObjectID; }
+	CEffectID_t getObjectID() const noexcept { return m_ObjectID; }
+	void setObjectID( ObjectID_t ObjectID ) noexcept { m_ObjectID = ObjectID; }
 
 	// get / set SkillType
-	SkillType_t getSkillType() const throw() { return m_SkillType; }
-	void setSkillType( SkillType_t SkillType ) throw() { m_SkillType = SkillType; }
+	SkillType_t getSkillType() const noexcept { return m_SkillType; }
+	void setSkillType( SkillType_t SkillType ) noexcept { m_SkillType = SkillType; }
 
 	// get / set Duration
-	Duration_t getDuration() const throw() { return m_Duration; }
-	void setDuration ( Duration_t Duration ) throw() { m_Duration = Duration; }
+	Duration_t getDuration() const noexcept { return m_Duration; }
+	void setDuration ( Duration_t Duration ) noexcept { m_Duration = Duration; }
 
 private :
 	
@@ -99,27 +99,27 @@ class GCSkillToInventoryOK2Factory : public PacketFactory {
 public :
 	
 	// constructor
-	GCSkillToInventoryOK2Factory () throw () {}
+	GCSkillToInventoryOK2Factory () {}
 	
 	// destructor
-	virtual ~GCSkillToInventoryOK2Factory () throw () {}
+	virtual ~GCSkillToInventoryOK2Factory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCSkillToInventoryOK2(); }
+	Packet * createPacket () { return new GCSkillToInventoryOK2(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCSkillToInventoryOK2"; }
+		std::string getPacketName () const { return "GCSkillToInventoryOK2"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_SKILL_TO_INVENTORY_OK_2; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_SKILL_TO_INVENTORY_OK_2; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize () const throw () { return szSkillType + szObjectID + szDuration; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szSkillType + szObjectID + szDuration; }
 };
 
 
@@ -134,7 +134,7 @@ class GCSkillToInventoryOK2Handler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCSkillToInventoryOK2 * pGCSkillToInventoryOK2 , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCSkillToInventoryOK2 * pGCSkillToInventoryOK2 , Player * pPlayer );
 
 };
 

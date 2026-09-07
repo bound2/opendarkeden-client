@@ -30,41 +30,41 @@ class GCHolyLandBonusInfo : public Packet {
 public :
 
 	// constructor
-	GCHolyLandBonusInfo() throw();
+	GCHolyLandBonusInfo();
 
 	// destructor
-	~GCHolyLandBonusInfo() throw();
+	~GCHolyLandBonusInfo();
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_GC_HOLY_LAND_BONUS_INFO; }
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_HOLY_LAND_BONUS_INFO; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw();
+	PacketSize_t getPacketSize() const;
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet name
-	std::string getPacketName() const throw() { return "GCHolyLandBonusInfo"; }
+	std::string getPacketName() const { return "GCHolyLandBonusInfo"; }
 	
 	// get packet's debug std::string
-	std::string toString() const throw();
+	std::string toString() const;
 #endif
 
 public:
 
-	BYTE getListNum() const throw() { return m_BloodBibleBonusInfoList.size(); }
+	BYTE getListNum() const { return m_BloodBibleBonusInfoList.size(); }
 
-	void addBloodBibleBonusInfo( BloodBibleBonusInfo* pBloodBibleBonusInfo ) throw() { m_BloodBibleBonusInfoList.push_back( pBloodBibleBonusInfo ); }
+	void addBloodBibleBonusInfo( BloodBibleBonusInfo* pBloodBibleBonusInfo ) { m_BloodBibleBonusInfoList.push_back( pBloodBibleBonusInfo ); }
 
-	void clearBloodBibleBonusInfoList() throw();
+	void clearBloodBibleBonusInfoList();
 
-	BloodBibleBonusInfo* popFrontBloodBibleBonusInfoList() throw()
+	BloodBibleBonusInfo* popFrontBloodBibleBonusInfoList()
 	{
 		if ( !m_BloodBibleBonusInfoList.empty() )
 		{
@@ -95,18 +95,18 @@ class GCHolyLandBonusInfoFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet* createPacket() throw() { return new GCHolyLandBonusInfo(); }
+	Packet* createPacket() { return new GCHolyLandBonusInfo(); }
 
 	// get packet name
-	std::string getPacketName() const throw() { return "GCHolyLandBonusInfo"; }
+	std::string getPacketName() const { return "GCHolyLandBonusInfo"; }
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_HOLY_LAND_BONUS_INFO; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_HOLY_LAND_BONUS_INFO; }
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static GCSystemMessagePacketMaxSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE + BloodBibleBonusInfo::getMaxSize()*12; }
+	PacketSize_t getPacketMaxSize() const { return szBYTE + BloodBibleBonusInfo::getMaxSize()*12; }
 
 };
 
@@ -122,7 +122,7 @@ class GCHolyLandBonusInfoHandler {
 public :
 	
 	// execute packet's handler
-	static void execute(GCHolyLandBonusInfo* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(GCHolyLandBonusInfo* pPacket, Player* pPlayer);
 
 };
 

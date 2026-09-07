@@ -42,21 +42,21 @@ enum
 class GCTradePrepare : public Packet 
 {
 public:
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
-	PacketID_t getPacketID () const throw () { return PACKET_GC_TRADE_PREPARE; }
-	PacketSize_t getPacketSize () const throw () { return szObjectID + szBYTE; }
+	void read ( SocketInputStream & iStream );
+	void write ( SocketOutputStream & oStream ) const;
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_TRADE_PREPARE; }
+	PacketSize_t getPacketSize () const noexcept { return szObjectID + szBYTE; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "GCTradePrepare"; }
-		std::string toString () const throw ();
+		std::string getPacketName () const { return "GCTradePrepare"; }
+		std::string toString () const;
 	#endif
 
 public:
-	ObjectID_t getTargetObjectID() const throw() { return m_TargetObjectID; }
-	void setTargetObjectID(ObjectID_t id) throw() { m_TargetObjectID = id; }
+	ObjectID_t getTargetObjectID() const noexcept { return m_TargetObjectID; }
+	void setTargetObjectID(ObjectID_t id) noexcept { m_TargetObjectID = id; }
 
-	BYTE getCode() const throw() { return m_Code; }
+	BYTE getCode() const noexcept { return m_Code; }
 	void setCode(BYTE code) { m_Code = code; }
 
 private :
@@ -75,14 +75,14 @@ private :
 class GCTradePrepareFactory : public PacketFactory 
 {
 public:
-	Packet * createPacket () throw () { return new GCTradePrepare(); }
+	Packet * createPacket () { return new GCTradePrepare(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "GCTradePrepare"; }
+		std::string getPacketName () const { return "GCTradePrepare"; }
 	#endif
 
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_TRADE_PREPARE; }
-	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szBYTE; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_TRADE_PREPARE; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID + szBYTE; }
 
 };
 
@@ -96,7 +96,7 @@ public:
 class GCTradePrepareHandler 
 {
 public:
-	static void execute ( GCTradePrepare * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCTradePrepare * pPacket , Player * pPlayer );
 
 };
 

@@ -18,13 +18,13 @@
 class GCCreateItem : public Packet 
 {
 public:
-	GCCreateItem() throw();
+	GCCreateItem();
 
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_GC_CREATE_ITEM; }
-	PacketSize_t getPacketSize() const throw() 
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_CREATE_ITEM; }
+	PacketSize_t getPacketSize() const 
 	{ 
 		return szObjectID +  // 아이템 오브젝트 ID
 			szBYTE +         // 아이템 클래스
@@ -40,52 +40,52 @@ public:
 	}
 
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "GCCreateItem"; }
-	std::string toString() const throw();
+	std::string getPacketName() const { return "GCCreateItem"; }
+	std::string toString() const;
 #endif
 
 public:
-	ObjectID_t getObjectID() const throw() { return m_ObjectID; }
-	void setObjectID(ObjectID_t ObjectID) throw() { m_ObjectID = ObjectID; }
+	ObjectID_t getObjectID() const noexcept { return m_ObjectID; }
+	void setObjectID(ObjectID_t ObjectID) noexcept { m_ObjectID = ObjectID; }
 
-	BYTE getItemClass() const throw() { return m_ItemClass; }
-	void setItemClass(BYTE ItemClass) throw() { m_ItemClass = ItemClass; }
+	BYTE getItemClass() const noexcept { return m_ItemClass; }
+	void setItemClass(BYTE ItemClass) noexcept { m_ItemClass = ItemClass; }
 
-	ItemType_t getItemType() const throw() { return m_ItemType; }
-	void setItemType(ItemType_t ItemType) throw() { m_ItemType = ItemType; }
+	ItemType_t getItemType() const noexcept { return m_ItemType; }
+	void setItemType(ItemType_t ItemType) noexcept { m_ItemType = ItemType; }
 
-	int getOptionTypeSize() const throw() { return m_OptionType.size(); }
-	const std::list<OptionType_t>& getOptionType() const throw() { return m_OptionType; }
-	OptionType_t popOptionType() throw()
+	int getOptionTypeSize() const { return m_OptionType.size(); }
+	const std::list<OptionType_t>& getOptionType() const { return m_OptionType; }
+	OptionType_t popOptionType()
 	{
 		if (m_OptionType.empty()) return 0;
 		OptionType_t optionType = m_OptionType.front();
 		m_OptionType.pop_front();
 		return optionType;
 	}
-	void addOptionType(OptionType_t OptionType) throw() { m_OptionType.push_back( OptionType ); }
-	void setOptionType(const std::list<OptionType_t>& OptionTypes) throw() { m_OptionType = OptionTypes; }
+	void addOptionType(OptionType_t OptionType) { m_OptionType.push_back( OptionType ); }
+	void setOptionType(const std::list<OptionType_t>& OptionTypes) { m_OptionType = OptionTypes; }
 
-	Durability_t getDurability() const throw() { return m_Durability; }
-	void setDurability(Durability_t Durability) throw() { m_Durability = Durability; }
+	Durability_t getDurability() const noexcept { return m_Durability; }
+	void setDurability(Durability_t Durability) noexcept { m_Durability = Durability; }
 
-	Silver_t getSilver() const throw() { return m_Silver; }
-	void setSilver(Silver_t silver) throw() { m_Silver = silver; }
+	Silver_t getSilver() const noexcept { return m_Silver; }
+	void setSilver(Silver_t silver) noexcept { m_Silver = silver; }
 
-	Grade_t getGrade() const throw() { return m_Grade; }
-	void setGrade(Grade_t grade) throw() { m_Grade = grade; }
+	Grade_t getGrade() const noexcept { return m_Grade; }
+	void setGrade(Grade_t grade) noexcept { m_Grade = grade; }
 
-	EnchantLevel_t getEnchantLevel() const throw() { return m_EnchantLevel; }
-	void setEnchantLevel(EnchantLevel_t level) throw() { m_EnchantLevel = level; }
+	EnchantLevel_t getEnchantLevel() const noexcept { return m_EnchantLevel; }
+	void setEnchantLevel(EnchantLevel_t level) noexcept { m_EnchantLevel = level; }
 
-	ItemNum_t getItemNum() const throw() { return m_ItemNum; }
-	void setItemNum(ItemNum_t num) throw() { m_ItemNum = num; }
+	ItemNum_t getItemNum() const noexcept { return m_ItemNum; }
+	void setItemNum(ItemNum_t num) noexcept { m_ItemNum = num; }
 
-	CoordInven_t getInvenX() const throw() { return m_InvenX; }
-	void setInvenX(CoordInven_t InvenX) throw() { m_InvenX = InvenX; }
+	CoordInven_t getInvenX() const noexcept { return m_InvenX; }
+	void setInvenX(CoordInven_t InvenX) noexcept { m_InvenX = InvenX; }
 
-	CoordInven_t getInvenY() const throw() { return m_InvenY; }
-	void setInvenY(CoordInven_t InvenY) throw() { m_InvenY = InvenY; }
+	CoordInven_t getInvenY() const noexcept { return m_InvenY; }
+	void setInvenY(CoordInven_t InvenY) noexcept { m_InvenY = InvenY; }
 
 private:
 	ObjectID_t     		m_ObjectID;     // 오브젝트 ID
@@ -110,10 +110,10 @@ private:
 class GCCreateItemFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new GCCreateItem(); }
-	std::string getPacketName() const throw() { return "GCCreateItem"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_CREATE_ITEM; }
-	PacketSize_t getPacketMaxSize() const throw() 
+	Packet* createPacket() { return new GCCreateItem(); }
+	std::string getPacketName() const { return "GCCreateItem"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_CREATE_ITEM; }
+	PacketSize_t getPacketMaxSize() const 
 	{ 
 		return szObjectID +  // 아이템 오브젝트 ID
 			szBYTE +         // 아이템 클래스
@@ -137,7 +137,7 @@ public:
 class GCCreateItemHandler 
 {
 public:
-	static void execute(GCCreateItem* pPacket, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(GCCreateItem* pPacket, Player* pPlayer);
 
 };
 

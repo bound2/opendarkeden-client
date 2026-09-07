@@ -94,9 +94,9 @@ public:
 	void read(SocketInputStream & iStream);
 	void write(SocketOutputStream & oStream) const;
 
-	PacketSize_t getPacketSize() const throw();
-	PacketID_t getPacketID() const throw() { return PACKET_GC_EXCHANGE_LIST; }
-	string getPacketName() const throw() { return "GCExchangeList"; }
+	PacketSize_t getPacketSize() const;
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_EXCHANGE_LIST; }
+	string getPacketName() const { return "GCExchangeList"; }
 	string toString() const;
 
 	// Getters
@@ -126,9 +126,9 @@ private:
 class GCExchangeListFactory : public PacketFactory
 {
 public:
-	Packet* createPacket() throw() { return new GCExchangeList(); }
-	string getPacketName() const throw() { return "GCExchangeList"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_EXCHANGE_LIST; }
+	Packet* createPacket() { return new GCExchangeList(); }
+	string getPacketName() const { return "GCExchangeList"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_EXCHANGE_LIST; }
 
 	// Must equal the server repo's GCExchangeListFactory::getPacketMaxSize().
 	// Header : int32 page + int32 pageSize + int32 total + uint16 count = 14,
@@ -136,7 +136,7 @@ public:
 	// clamps each string to kMaxListingString and read() refuses a count above
 	// kMaxListingsPerPage, so getPacketSize() can never exceed this.
 	// 14 + 20 * 1855 = 37114
-	PacketSize_t getPacketMaxSize() const throw()
+	PacketSize_t getPacketMaxSize() const
 	{
 		// One string at its cap : length byte + body = 256
 		const PacketSize_t kMaxString = 1 + GCExchangeList::kMaxListingString;

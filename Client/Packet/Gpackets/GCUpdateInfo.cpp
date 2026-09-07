@@ -22,7 +22,6 @@
 // constructor
 //--------------------------------------------------------------------------------
 GCUpdateInfo::GCUpdateInfo ()
-	throw ()
 : m_pPCInfo(NULL), m_pInventoryInfo(NULL), m_pGearInfo(NULL), m_pExtraInfo(NULL), m_pEffectInfo(NULL), m_hasMotorcycle(false), m_pRideMotorcycleInfo(NULL), m_fPremium(0), m_pNicknameInfo(NULL), m_NonPK(0), m_pBloodBibleSign(NULL)
 {
 	// m_pBloodBibleSign is only assigned by read(); the client-side
@@ -36,7 +35,6 @@ GCUpdateInfo::GCUpdateInfo ()
 // destructor
 //--------------------------------------------------------------------------------
 GCUpdateInfo::~GCUpdateInfo ()
-	throw ()
 {
 	SAFE_DELETE(m_pPCInfo);
 	SAFE_DELETE(m_pInventoryInfo);
@@ -71,8 +69,7 @@ GCUpdateInfo::~GCUpdateInfo ()
 //--------------------------------------------------------------------------------
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //--------------------------------------------------------------------------------
-void GCUpdateInfo::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCUpdateInfo::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -209,8 +206,7 @@ void GCUpdateInfo::read ( SocketInputStream & iStream )
 //--------------------------------------------------------------------------------
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //--------------------------------------------------------------------------------
-void GCUpdateInfo::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCUpdateInfo::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -347,7 +343,6 @@ void GCUpdateInfo::write ( SocketOutputStream & oStream ) const
 //--------------------------------------------------------------------------------
 #ifdef __DEBUG_OUTPUT__
 std::string GCUpdateInfo::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

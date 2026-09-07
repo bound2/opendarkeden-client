@@ -259,26 +259,26 @@ class GCNPCResponse : public Packet
 {
 
 public:
-	GCNPCResponse() throw() { m_Code = NPC_RESPONSE_MAX; m_Parameter = 0;}
-	virtual ~GCNPCResponse() throw() {}
+	GCNPCResponse() { m_Code = NPC_RESPONSE_MAX; m_Parameter = 0;}
+	virtual ~GCNPCResponse() {}
 
 public:
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+	void read(SocketInputStream & iStream);
+	void write(SocketOutputStream & oStream) const;
 
-	PacketID_t getPacketID() const throw() { return PACKET_GC_NPC_RESPONSE; }
-	PacketSize_t getPacketSize() const throw();
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_NPC_RESPONSE; }
+	PacketSize_t getPacketSize() const;
 #ifdef __DEBUG_OUTPUT__
-	std::string getPacketName() const throw() { return "GCNPCResponse"; }
-	std::string toString() const throw();
+	std::string getPacketName() const { return "GCNPCResponse"; }
+	std::string toString() const;
 #endif 
 	
 public:
-	WORD getCode(void) const throw() { return m_Code;}
-	void setCode(WORD code) throw() { m_Code = code;}
+	WORD getCode(void) const noexcept { return m_Code;}
+	void setCode(WORD code) noexcept { m_Code = code;}
 
-	uint getParameter(void) const throw() { return m_Parameter; }
-	void setParameter(uint parameter) throw() { m_Parameter = parameter; }
+	uint getParameter(void) const noexcept { return m_Parameter; }
+	void setParameter(uint parameter) noexcept { m_Parameter = parameter; }
 
 private: 
 	WORD m_Code;
@@ -294,10 +294,10 @@ private:
 class GCNPCResponseFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new GCNPCResponse(); }
-	std::string getPacketName() const throw() { return "GCNPCResponse"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_NPC_RESPONSE; }
-	PacketSize_t getPacketMaxSize() const throw() { return szWORD + szuint; }
+	Packet* createPacket() { return new GCNPCResponse(); }
+	std::string getPacketName() const { return "GCNPCResponse"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_NPC_RESPONSE; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szWORD + szuint; }
 };
 
 
@@ -308,7 +308,7 @@ public:
 class GCNPCResponseHandler 
 {
 public:
-	static void execute( GCNPCResponse* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute( GCNPCResponse* pPacket, Player* pPlayer);
 };
 
 #endif

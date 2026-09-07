@@ -7,8 +7,7 @@
 #include "Client_PCH.h"
 #include "GCNotifyWin.h"
 
-void GCNotifyWin::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCNotifyWin::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -29,8 +28,7 @@ void GCNotifyWin::read ( SocketInputStream & iStream )
 	__END_CATCH
 }
 		    
-void GCNotifyWin::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCNotifyWin::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 		
@@ -53,7 +51,6 @@ void GCNotifyWin::write ( SocketOutputStream & oStream ) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string GCNotifyWin::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

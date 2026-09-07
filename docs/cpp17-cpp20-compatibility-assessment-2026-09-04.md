@@ -388,6 +388,23 @@ less restrictive specification than its base. The base's two functions are
 unspecified, by hand, and the build is the check that finds the next such
 pair; `Gpackets` should expect the same for its `OK1`/`OK2`-style families.
 
+**Gpackets (2026-09-07):** at 0, 5,883 sites in 516 files, and **R10 = 0**:
+every library a test binary can link is free of dynamic exception
+specifications, and the ratchet now holds the whole set at zero the way R9
+holds `basic/`. The script's decisions were 1,293 type lists deleted, 1,845
+`throw()` promoted and 2,745 deleted, verified as before; the promoted return
+and parameter types were listed and read (the `PacketID_t`/`PacketSize_t`
+constants, the `*_t` typedefs, the enums, the fundamentals, and const
+references to `std::string` and the `PC*Info3` classes). Five packets derive
+from another packet here; a scan of that shape ahead of the build found the
+two that override a promoted one-liner (`GCMakeItemOK` and `GCMakeItemFail`
+over `GCChangeInventoryItemNum::getPacketSize`), the base was left
+unspecified by hand, and the build agreed. What this finding still owes is
+outside R10: `Client/PacketHandler` (284) and the remaining executable
+sources (34), which the slice that clears them should put under a ratchet of
+their own, since a `throw()` there whose body throws is the same undefined
+behaviour it was in the libraries.
+
 ### 4. `register` remains in C++ source
 
 There are roughly 650 declaration-like uses of the removed `register` storage

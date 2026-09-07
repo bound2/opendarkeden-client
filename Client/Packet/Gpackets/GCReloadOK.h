@@ -26,37 +26,37 @@ class GCReloadOK : public Packet {
 public :
 
 	// Constructor
-	GCReloadOK() throw();
+	GCReloadOK();
 
 	// Desctructor
-	~GCReloadOK() throw();
+	~GCReloadOK();
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_RELOAD_OK; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_RELOAD_OK; }
 	
 	// get packet's body size
 	// *OPTIMIZATION HINT*
 	// const static GCReloadOKPacketSize 를 정의해서 리턴하라.
-	PacketSize_t getPacketSize () const throw () { return szBullet; }
+	PacketSize_t getPacketSize () const noexcept { return szBullet; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCReloadOK"; }
+		std::string getPacketName () const { return "GCReloadOK"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 	// get / set BulletNum
-	Bullet_t getBulletNum() const throw() { return m_BulletNum; }
-	void setBulletNum( Bullet_t BulletNum ) throw() { m_BulletNum = BulletNum; }
+	Bullet_t getBulletNum() const noexcept { return m_BulletNum; }
+	void setBulletNum( Bullet_t BulletNum ) noexcept { m_BulletNum = BulletNum; }
 	
 
 private :
@@ -80,20 +80,20 @@ class GCReloadOKFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCReloadOK(); }
+	Packet * createPacket () { return new GCReloadOK(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCReloadOK"; }
+		std::string getPacketName () const { return "GCReloadOK"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_RELOAD_OK; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_RELOAD_OK; }
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static GCReloadOKPacketSize 를 정의해서 리턴하라.
-	PacketSize_t getPacketMaxSize () const throw () { return szBullet; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szBullet; }
 
 };
 
@@ -109,7 +109,7 @@ class GCReloadOKHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCReloadOK * pPacket , Player * player ) throw ( ProtocolException , Error );
+	static void execute ( GCReloadOK * pPacket , Player * player );
 };
 
 #endif

@@ -27,35 +27,35 @@ class GCGetOffMotorCycleOK : public Packet {
 public :
 	
 	// constructor
-	GCGetOffMotorCycleOK () throw ();
+	GCGetOffMotorCycleOK ();
 	
 	// destructor
-	~GCGetOffMotorCycleOK () throw ();
+	~GCGetOffMotorCycleOK ();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_GET_OFF_MOTORCYCLE_OK; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_GET_OFF_MOTORCYCLE_OK; }
 	
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getPacketSize () const throw () { return 0; }
+	PacketSize_t getPacketSize () const noexcept { return 0; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCGetOffMotorCycleOK"; }
+		std::string getPacketName () const { return "GCGetOffMotorCycleOK"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 private :
@@ -75,27 +75,27 @@ class GCGetOffMotorCycleOKFactory : public PacketFactory {
 public :
 	
 	// constructor
-	GCGetOffMotorCycleOKFactory () throw () {}
+	GCGetOffMotorCycleOKFactory () {}
 	
 	// destructor
-	virtual ~GCGetOffMotorCycleOKFactory () throw () {}
+	virtual ~GCGetOffMotorCycleOKFactory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCGetOffMotorCycleOK(); }
+	Packet * createPacket () { return new GCGetOffMotorCycleOK(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCGetOffMotorCycleOK"; }
+		std::string getPacketName () const { return "GCGetOffMotorCycleOK"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_GET_OFF_MOTORCYCLE_OK; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_GET_OFF_MOTORCYCLE_OK; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize () const throw () { return 0; }
+	PacketSize_t getPacketMaxSize () const noexcept { return 0; }
 
 };
 
@@ -110,7 +110,7 @@ class GCGetOffMotorCycleOKHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCGetOffMotorCycleOK * pGCGetOffMotorCycleOK , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCGetOffMotorCycleOK * pGCGetOffMotorCycleOK , Player * pPlayer );
 
 };
 

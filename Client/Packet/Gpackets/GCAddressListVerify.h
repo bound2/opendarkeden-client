@@ -43,25 +43,25 @@ public:
 
 	};
 
-	GCAddressListVerify() throw() { m_Code = ADDRESS_LIST_VERIFY_MAX; m_Parameter = 0;}
-	virtual ~GCAddressListVerify() throw() {}
+	GCAddressListVerify() { m_Code = ADDRESS_LIST_VERIFY_MAX; m_Parameter = 0;}
+	virtual ~GCAddressListVerify() {}
 
 public:
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+	void read(SocketInputStream & iStream);
+	void write(SocketOutputStream & oStream) const;
 
-	PacketID_t getPacketID() const throw() { return PACKET_GC_ADDRESS_LIST_VERIFY; }
-	PacketSize_t getPacketSize() const throw() { return szBYTE + szDWORD; }
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_ADDRESS_LIST_VERIFY; }
+	PacketSize_t getPacketSize() const noexcept { return szBYTE + szDWORD; }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "GCAddressListVerify"; }
-	string toString() const throw();
+	string getPacketName() const { return "GCAddressListVerify"; }
+	string toString() const;
 #endif	
 public:
-	BYTE getCode(void) const throw() { return m_Code;}
-	void setCode(BYTE code) throw() { m_Code = code;}
+	BYTE getCode(void) const noexcept { return m_Code;}
+	void setCode(BYTE code) noexcept { m_Code = code;}
 
-	DWORD getParameter(void) const throw() { return m_Parameter; }
-	void setParameter(uint parameter) throw() { m_Parameter = parameter; }
+	DWORD getParameter(void) const noexcept { return m_Parameter; }
+	void setParameter(uint parameter) noexcept { m_Parameter = parameter; }
 
 private: 
 	BYTE m_Code;
@@ -76,10 +76,10 @@ private:
 class GCAddressListVerifyFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new GCAddressListVerify(); }
-	string getPacketName() const throw() { return "GCAddressListVerify"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_ADDRESS_LIST_VERIFY; }
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE + szDWORD; }
+	Packet* createPacket() { return new GCAddressListVerify(); }
+	string getPacketName() const { return "GCAddressListVerify"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_ADDRESS_LIST_VERIFY; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE + szDWORD; }
 };
 
 
@@ -90,7 +90,7 @@ public:
 class GCAddressListVerifyHandler 
 {
 public:
-	static void execute( GCAddressListVerify* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute( GCAddressListVerify* pPacket, Player* pPlayer);
 };
 
 #endif

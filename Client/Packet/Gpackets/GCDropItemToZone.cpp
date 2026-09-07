@@ -14,8 +14,7 @@
 //--------------------------------------------------------------------
 // Constructor
 //--------------------------------------------------------------------
-GCDropItemToZone::GCDropItemToZone() 
-     throw ()
+GCDropItemToZone::GCDropItemToZone()
 {
 	__BEGIN_TRY
 
@@ -28,22 +27,19 @@ GCDropItemToZone::GCDropItemToZone()
 //--------------------------------------------------------------------
 // Destructor
 //--------------------------------------------------------------------
-GCDropItemToZone::~GCDropItemToZone() 
-    throw ()
+GCDropItemToZone::~GCDropItemToZone()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void GCDropItemToZone::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCDropItemToZone::read ( SocketInputStream & iStream )
 {
 	GCAddItemToZone::read(iStream);
 	iStream.read( m_DropPetOID );
 }
 
-void GCDropItemToZone::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCDropItemToZone::write ( SocketOutputStream & oStream ) const
 {
 	GCAddItemToZone::write(oStream);
 	oStream.write( m_DropPetOID );
@@ -54,7 +50,6 @@ void GCDropItemToZone::write ( SocketOutputStream & oStream ) const
 // toString
 //////////////////////////////////////////////////////////////////////
 std::string GCDropItemToZone::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 

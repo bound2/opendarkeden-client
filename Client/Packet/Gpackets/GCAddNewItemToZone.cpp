@@ -14,8 +14,7 @@
 //--------------------------------------------------------------------
 // Constructor
 //--------------------------------------------------------------------
-GCAddNewItemToZone::GCAddNewItemToZone() 
-     throw ()
+GCAddNewItemToZone::GCAddNewItemToZone()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -25,8 +24,7 @@ GCAddNewItemToZone::GCAddNewItemToZone()
 //--------------------------------------------------------------------
 // Destructor
 //--------------------------------------------------------------------
-GCAddNewItemToZone::~GCAddNewItemToZone() 
-    throw ()
+GCAddNewItemToZone::~GCAddNewItemToZone()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -40,7 +38,6 @@ GCAddNewItemToZone::~GCAddNewItemToZone()
 //
 //////////////////////////////////////////////////////////////////////
 std::string GCAddNewItemToZone::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 

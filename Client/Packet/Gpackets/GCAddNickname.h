@@ -23,17 +23,17 @@
 class GCAddNickname : public Packet 
 {
 public:
-	GCAddNickname() throw();
-	~GCAddNickname() throw();
+	GCAddNickname();
+	~GCAddNickname();
 	
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_GC_ADD_NICKNAME; }
-	PacketSize_t getPacketSize() const throw() { return m_NicknameInfo.getSize(); }
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_ADD_NICKNAME; }
+	PacketSize_t getPacketSize() const { return m_NicknameInfo.getSize(); }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "GCAddNickname"; }
-	string toString() const throw();
+	string getPacketName() const { return "GCAddNickname"; }
+	string toString() const;
 #endif
 public:
 	NicknameInfo&	getNicknameInfo() { return m_NicknameInfo; }
@@ -50,16 +50,16 @@ private :
 class GCAddNicknameFactory : public PacketFactory 
 {
 public :
-	GCAddNicknameFactory() throw() {}
-	virtual ~GCAddNicknameFactory() throw() {}
+	GCAddNicknameFactory() {}
+	virtual ~GCAddNicknameFactory() {}
 	
 public:
-	Packet* createPacket() throw() { return new GCAddNickname(); }
+	Packet* createPacket() { return new GCAddNickname(); }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "GCAddNickname"; }
+	string getPacketName() const { return "GCAddNickname"; }
 #endif
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_ADD_NICKNAME; }
-	PacketSize_t getPacketMaxSize() const throw() { return NicknameInfo::getMaxSize(); }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_ADD_NICKNAME; }
+	PacketSize_t getPacketMaxSize() const { return NicknameInfo::getMaxSize(); }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -69,7 +69,7 @@ public:
 class GCAddNicknameHandler 
 {
 public:
-	static void execute(GCAddNickname* pGCAddNickname, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(GCAddNickname* pGCAddNickname, Player* pPlayer);
 
 };
 

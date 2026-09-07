@@ -21,7 +21,6 @@
 // constructor
 //--------------------------------------------------------------------------------
 GCNPCInfo::GCNPCInfo ()
-	throw ()
 {
 }
 
@@ -29,7 +28,6 @@ GCNPCInfo::GCNPCInfo ()
 // destructor
 //--------------------------------------------------------------------------------
 GCNPCInfo::~GCNPCInfo ()
-	throw ()
 {
 #ifdef __GAME_CLIENT__
 	std::list<NPCInfo*>::iterator itr = m_NPCInfos.begin();
@@ -47,8 +45,7 @@ GCNPCInfo::~GCNPCInfo ()
 //--------------------------------------------------------------------------------
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //--------------------------------------------------------------------------------
-void GCNPCInfo::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCNPCInfo::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -71,8 +68,7 @@ void GCNPCInfo::read ( SocketInputStream & iStream )
 //--------------------------------------------------------------------------------
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //--------------------------------------------------------------------------------
-void GCNPCInfo::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCNPCInfo::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -97,7 +93,6 @@ void GCNPCInfo::write ( SocketOutputStream & oStream ) const
 // get packet's debug std::string
 //--------------------------------------------------------------------------------
 std::string GCNPCInfo::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 	StringStream msg;

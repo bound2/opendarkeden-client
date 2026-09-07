@@ -11,8 +11,7 @@
 // class GCRequestedIP member methods
 //////////////////////////////////////////////////////////////////////
 
-GCRequestedIP::GCRequestedIP () 
-     throw ()
+GCRequestedIP::GCRequestedIP ()
 {
 	__BEGIN_TRY
 
@@ -21,15 +20,13 @@ GCRequestedIP::GCRequestedIP ()
 	__END_CATCH
 }
 
-GCRequestedIP::~GCRequestedIP () 
-    throw ()
+GCRequestedIP::~GCRequestedIP ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void GCRequestedIP::read (SocketInputStream & iStream) 
-	 throw (ProtocolException , Error)
+void GCRequestedIP::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 
@@ -48,7 +45,7 @@ void GCRequestedIP::read (SocketInputStream & iStream)
 }
 		    
 void GCRequestedIP::write (SocketOutputStream & oStream) 
-     const throw (ProtocolException , Error)
+     const
 {
 	__BEGIN_TRY
 		
@@ -68,7 +65,7 @@ void GCRequestedIP::write (SocketOutputStream & oStream)
 
 #ifdef __DEBUG_OUTPUT__
 std::string GCRequestedIP::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 

@@ -8,8 +8,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void GCEnterVampirePortal::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCEnterVampirePortal::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -22,8 +21,7 @@ void GCEnterVampirePortal::read ( SocketInputStream & iStream )
 		    
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void GCEnterVampirePortal::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCEnterVampirePortal::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 		
@@ -40,7 +38,6 @@ void GCEnterVampirePortal::write ( SocketOutputStream & oStream ) const
 //////////////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 std::string GCEnterVampirePortal::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

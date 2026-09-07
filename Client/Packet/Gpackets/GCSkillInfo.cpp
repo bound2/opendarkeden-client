@@ -17,7 +17,6 @@
 // constructor
 //--------------------------------------------------------------------------------
 GCSkillInfo::GCSkillInfo ()
-	throw ()
 {
 }
 
@@ -25,7 +24,6 @@ GCSkillInfo::GCSkillInfo ()
 // destructor
 //--------------------------------------------------------------------------------
 GCSkillInfo::~GCSkillInfo ()
-	throw ()
 {
 	while( !m_pPCSkillInfoList.empty() ) {
 		PCSkillInfo * pPCSkillInfo = m_pPCSkillInfoList.front();
@@ -37,8 +35,7 @@ GCSkillInfo::~GCSkillInfo ()
 //--------------------------------------------------------------------------------
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //--------------------------------------------------------------------------------
-void GCSkillInfo::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCSkillInfo::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -91,8 +88,7 @@ void GCSkillInfo::read ( SocketInputStream & iStream )
 //--------------------------------------------------------------------------------
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //--------------------------------------------------------------------------------
-void GCSkillInfo::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCSkillInfo::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -115,7 +111,6 @@ void GCSkillInfo::write ( SocketOutputStream & oStream ) const
 // getSize
 //--------------------------------------------------------------------
 PacketSize_t GCSkillInfo::getPacketSize() const
-	throw()
 {
 
 	PacketSize_t PacketSize = szBYTE + szBYTE; // PC type and list count.
@@ -135,7 +130,6 @@ PacketSize_t GCSkillInfo::getPacketSize() const
 //--------------------------------------------------------------------------------
 #ifdef __DEBUG_OUTPUT__
 	std::string GCSkillInfo::toString () const
-		   throw ()
 	{
 		__BEGIN_TRY
 			

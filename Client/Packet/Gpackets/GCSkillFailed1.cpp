@@ -8,22 +8,19 @@
 #include "GCSkillFailed1.h"
 
 
-GCSkillFailed1::GCSkillFailed1 () 
-     throw ()
+GCSkillFailed1::GCSkillFailed1 ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 	
-GCSkillFailed1::~GCSkillFailed1 () 
-    throw ()
+GCSkillFailed1::~GCSkillFailed1 ()
 {
 	__BEGIN_TRY
 	__END_CATCH
 }
 
-void GCSkillFailed1::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCSkillFailed1::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -34,8 +31,7 @@ void GCSkillFailed1::read ( SocketInputStream & iStream )
 	__END_CATCH
 }
 		    
-void GCSkillFailed1::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCSkillFailed1::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -48,7 +44,6 @@ void GCSkillFailed1::write ( SocketOutputStream & oStream ) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string GCSkillFailed1::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 

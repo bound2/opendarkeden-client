@@ -7,8 +7,7 @@
 #include "Client_PCH.h"
 #include "GCNPCSay.h"
 
-void GCNPCSay::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCNPCSay::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -19,8 +18,7 @@ void GCNPCSay::read ( SocketInputStream & iStream )
 	__END_CATCH
 }
 		    
-void GCNPCSay::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCNPCSay::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 		
@@ -33,7 +31,6 @@ void GCNPCSay::write ( SocketOutputStream & oStream ) const
 
 #ifdef __DEBUG_OUTPUT__
 std::string GCNPCSay::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

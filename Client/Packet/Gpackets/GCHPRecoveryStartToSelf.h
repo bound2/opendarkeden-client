@@ -28,48 +28,48 @@ class GCHPRecoveryStartToSelf : public Packet {
 public :
 	
 	// constructor
-	GCHPRecoveryStartToSelf () throw ();
+	GCHPRecoveryStartToSelf ();
 	
 	// destructor
-	~GCHPRecoveryStartToSelf () throw ();
+	~GCHPRecoveryStartToSelf ();
 
 	
 public :
 	
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_GC_HP_RECOVERY_START_TO_SELF; }
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_HP_RECOVERY_START_TO_SELF; }
 	
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getPacketSize () const throw () { return szBYTE + szHP + szHP; }
+	PacketSize_t getPacketSize () const noexcept { return szBYTE + szHP + szHP; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "GCHPRecoveryStartToSelf"; }
+		std::string getPacketName () const { return "GCHPRecoveryStartToSelf"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 	// get / set Delay
-	BYTE getDelay() const throw() { return m_Delay; }
-	void setDelay( BYTE Delay ) throw() { m_Delay = Delay; }
+	BYTE getDelay() const noexcept { return m_Delay; }
+	void setDelay( BYTE Delay ) noexcept { m_Delay = Delay; }
 
 	// get / set Period
-	HP_t getPeriod() const throw() { return m_Period; }
-	void setPeriod( HP_t Period ) throw() { m_Period = Period; }
+	HP_t getPeriod() const noexcept { return m_Period; }
+	void setPeriod( HP_t Period ) noexcept { m_Period = Period; }
 
 	// get / set Quantity
-	HP_t getQuantity() const throw() { return m_Quantity; }
-	void setQuantity( HP_t Quantity ) throw() { m_Quantity = Quantity; }
+	HP_t getQuantity() const noexcept { return m_Quantity; }
+	void setQuantity( HP_t Quantity ) noexcept { m_Quantity = Quantity; }
 
 private :
 	
@@ -99,27 +99,27 @@ class GCHPRecoveryStartToSelfFactory : public PacketFactory {
 public :
 	
 	// constructor
-	GCHPRecoveryStartToSelfFactory () throw () {}
+	GCHPRecoveryStartToSelfFactory () {}
 	
 	// destructor
-	virtual ~GCHPRecoveryStartToSelfFactory () throw () {}
+	virtual ~GCHPRecoveryStartToSelfFactory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new GCHPRecoveryStartToSelf(); }
+	Packet * createPacket () { return new GCHPRecoveryStartToSelf(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "GCHPRecoveryStartToSelf"; }
+		std::string getPacketName () const { return "GCHPRecoveryStartToSelf"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_HP_RECOVERY_START_TO_SELF; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_HP_RECOVERY_START_TO_SELF; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize () const throw () { return szBYTE + szHP + szHP; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szBYTE + szHP + szHP; }
 
 };
 
@@ -135,7 +135,7 @@ class GCHPRecoveryStartToSelfHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( GCHPRecoveryStartToSelf * pGCHPRecoveryStartToSelf , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCHPRecoveryStartToSelf * pGCHPRecoveryStartToSelf , Player * pPlayer );
 
 };
 

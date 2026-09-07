@@ -13,8 +13,7 @@
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCShowMessageBox::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCShowMessageBox::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -35,8 +34,7 @@ void GCShowMessageBox::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void GCShowMessageBox::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCShowMessageBox::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 		
@@ -57,7 +55,6 @@ void GCShowMessageBox::write ( SocketOutputStream & oStream ) const
 // get packet's debug std::string
 //////////////////////////////////////////////////////////////////////
 std::string GCShowMessageBox::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		

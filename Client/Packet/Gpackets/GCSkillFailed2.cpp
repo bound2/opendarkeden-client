@@ -15,8 +15,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-GCSkillFailed2::GCSkillFailed2 () 
-     throw ()
+GCSkillFailed2::GCSkillFailed2 ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -26,8 +25,7 @@ GCSkillFailed2::GCSkillFailed2 ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-GCSkillFailed2::~GCSkillFailed2 () 
-    throw ()
+GCSkillFailed2::~GCSkillFailed2 ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -37,8 +35,7 @@ GCSkillFailed2::~GCSkillFailed2 ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCSkillFailed2::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCSkillFailed2::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 	iStream.read( m_ObjectID );
@@ -52,8 +49,7 @@ void GCSkillFailed2::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void GCSkillFailed2::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCSkillFailed2::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 	oStream.write( m_ObjectID );
@@ -70,7 +66,6 @@ void GCSkillFailed2::write ( SocketOutputStream & oStream ) const
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string GCSkillFailed2::toString () const
-		   throw ()
 	{
 		__BEGIN_TRY
 

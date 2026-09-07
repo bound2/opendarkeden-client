@@ -13,8 +13,7 @@
 //--------------------------------------------------------------------
 // Constructor
 //--------------------------------------------------------------------
-GCAddInstalledMineToZone::GCAddInstalledMineToZone() 
-     throw ()
+GCAddInstalledMineToZone::GCAddInstalledMineToZone()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -24,8 +23,7 @@ GCAddInstalledMineToZone::GCAddInstalledMineToZone()
 //--------------------------------------------------------------------
 // Destructor
 //--------------------------------------------------------------------
-GCAddInstalledMineToZone::~GCAddInstalledMineToZone() 
-    throw ()
+GCAddInstalledMineToZone::~GCAddInstalledMineToZone()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -39,7 +37,6 @@ GCAddInstalledMineToZone::~GCAddInstalledMineToZone()
 //
 //////////////////////////////////////////////////////////////////////
 std::string GCAddInstalledMineToZone::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 

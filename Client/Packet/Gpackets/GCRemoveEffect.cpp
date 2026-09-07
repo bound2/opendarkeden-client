@@ -19,8 +19,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-GCRemoveEffect::GCRemoveEffect () 
-     throw ()
+GCRemoveEffect::GCRemoveEffect ()
 {
 	__BEGIN_TRY
 	m_ListNum = 0;
@@ -31,8 +30,7 @@ GCRemoveEffect::GCRemoveEffect ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-GCRemoveEffect::~GCRemoveEffect () 
-    throw ()
+GCRemoveEffect::~GCRemoveEffect ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -42,8 +40,7 @@ GCRemoveEffect::~GCRemoveEffect ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCRemoveEffect::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCRemoveEffect::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -66,7 +63,7 @@ void GCRemoveEffect::read ( SocketInputStream & iStream )
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
 void GCRemoveEffect::write ( SocketOutputStream & oStream ) 
-     const throw ( ProtocolException , Error )
+     const
 {
 	__BEGIN_TRY
 		
@@ -91,7 +88,6 @@ void GCRemoveEffect::write ( SocketOutputStream & oStream )
 //
 //////////////////////////////////////////////////////////////////////
 void GCRemoveEffect::addEffectList( EffectID_t Value )
-	throw()
 {
 	__BEGIN_TRY
 
@@ -111,7 +107,7 @@ void GCRemoveEffect::addEffectList( EffectID_t Value )
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string GCRemoveEffect::toString () 
-		const throw ()
+		const
 	{
 		__BEGIN_TRY
 

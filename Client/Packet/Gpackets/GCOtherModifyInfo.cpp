@@ -7,8 +7,7 @@
 #include "Client_PCH.h"
 #include "GCOtherModifyInfo.h"
 
-void GCOtherModifyInfo::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCOtherModifyInfo::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -19,7 +18,7 @@ void GCOtherModifyInfo::read ( SocketInputStream & iStream )
 }
 		    
 void GCOtherModifyInfo::write ( SocketOutputStream & oStream ) 
-     const throw ( ProtocolException , Error )
+     const
 {
 	__BEGIN_TRY
 		
@@ -30,8 +29,7 @@ void GCOtherModifyInfo::write ( SocketOutputStream & oStream )
 }
 
 #ifdef __DEBUG_OUTPUT__
-std::string GCOtherModifyInfo::toString () const 
-	throw ()
+std::string GCOtherModifyInfo::toString () const
 {
 	__BEGIN_TRY
 

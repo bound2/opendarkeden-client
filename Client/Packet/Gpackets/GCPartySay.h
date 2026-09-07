@@ -28,26 +28,26 @@ class GCPartySay : public Packet
 public :
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_GC_PARTY_SAY; }
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_PARTY_SAY; }
 	
 	// get packet's body size
 	// *OPTIMIZATION HINT*
 	// const static GCPartySayPacketSize 를 정의, 리턴하라.
-	PacketSize_t getPacketSize() const throw() { return szBYTE + m_Name.size() + szBYTE + m_Message.size() + szuint; }
+	PacketSize_t getPacketSize() const { return szBYTE + m_Name.size() + szBYTE + m_Message.size() + szuint; }
 
 #ifdef __DEBUG_OUTPUT__
 	// get packet's name
-	string getPacketName() const throw() { return "GCPartySay"; }
+	string getPacketName() const { return "GCPartySay"; }
 	
 	// get packet's debug string
-	string toString() const throw();
+	string toString() const;
 #endif
 
 public :
@@ -57,8 +57,8 @@ public :
 	string	getMessage() const { return m_Message; }
 	void	setMessage( const string& msg ) { m_Message = msg; }
 
-	uint getColor() const throw() { return m_Color; }
-	void setColor( uint color ) throw() { m_Color = color; }
+	uint getColor() const noexcept { return m_Color; }
+	void setColor( uint color ) noexcept { m_Color = color; }
 
 private :
 	string	m_Name;
@@ -80,18 +80,18 @@ class GCPartySayFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet* createPacket() throw() { return new GCPartySay(); }
+	Packet* createPacket() { return new GCPartySay(); }
 
 	// get packet name
-	string getPacketName() const throw() { return "GCPartySay"; }
+	string getPacketName() const { return "GCPartySay"; }
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_PARTY_SAY; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_PARTY_SAY; }
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static GCPartySayPacketSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE + 20 + szBYTE + 128 + szuint; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE + 20 + szBYTE + 128 + szuint; }
 
 };
 
@@ -107,7 +107,7 @@ class GCPartySayHandler {
 public :
 
 	// execute packet's handler
-	static void execute(GCPartySay* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(GCPartySay* pPacket, Player* pPlayer);
 
 };
 

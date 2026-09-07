@@ -22,18 +22,18 @@
 class GCPetUseSkill : public Packet 
 {
 public:
-	GCPetUseSkill() throw();
-	~GCPetUseSkill() throw();
+	GCPetUseSkill();
+	~GCPetUseSkill();
 	
 public:
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_GC_PET_USE_SKILL; }
-	PacketSize_t getPacketSize() const throw() { return szObjectID + szObjectID; }
+    void read(SocketInputStream & iStream);
+    void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_PET_USE_SKILL; }
+	PacketSize_t getPacketSize() const noexcept { return szObjectID + szObjectID; }
 
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "GCPetUseSkill"; }
-	string toString() const throw();
+	string getPacketName() const { return "GCPetUseSkill"; }
+	string toString() const;
 #endif
 
 public:
@@ -55,14 +55,14 @@ private:
 class GCPetUseSkillFactory : public PacketFactory 
 {
 public :
-	GCPetUseSkillFactory() throw() {}
-	virtual ~GCPetUseSkillFactory() throw() {}
+	GCPetUseSkillFactory() {}
+	virtual ~GCPetUseSkillFactory() {}
 	
 public:
-	Packet* createPacket() throw() { return new GCPetUseSkill(); }
-	string getPacketName() const throw() { return "GCPetUseSkill"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_PET_USE_SKILL; }
-	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szObjectID; }
+	Packet* createPacket() { return new GCPetUseSkill(); }
+	string getPacketName() const { return "GCPetUseSkill"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_PET_USE_SKILL; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szObjectID; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -72,7 +72,7 @@ public:
 class GCPetUseSkillHandler 
 {
 public:
-	static void execute(GCPetUseSkill* pGCPetUseSkill, Player* pPlayer) throw ( ProtocolException , Error );
+	static void execute(GCPetUseSkill* pGCPetUseSkill, Player* pPlayer);
 
 };
 

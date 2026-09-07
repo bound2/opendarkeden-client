@@ -26,7 +26,6 @@ GCAddOusters::GCAddOusters(const PCOustersInfo3& info)
 }
 
 GCAddOusters::~GCAddOusters()
-	throw()
 {
 	__BEGIN_TRY
 	
@@ -35,8 +34,7 @@ GCAddOusters::~GCAddOusters()
 	__END_CATCH
 }
 
-void GCAddOusters::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCAddOusters::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -56,8 +54,7 @@ void GCAddOusters::read ( SocketInputStream & iStream )
 	__END_CATCH
 }
 		    
-void GCAddOusters::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCAddOusters::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -90,8 +87,7 @@ void GCAddOusters::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-PacketSize_t GCAddOusters::getPacketSize() const 
-	throw()
+PacketSize_t GCAddOusters::getPacketSize() const
 {   
 	__BEGIN_TRY
 
@@ -115,7 +111,6 @@ PacketSize_t GCAddOusters::getPacketSize() const
 }
 #ifdef __DEBUG_OUTPUT__
 string GCAddOusters::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 

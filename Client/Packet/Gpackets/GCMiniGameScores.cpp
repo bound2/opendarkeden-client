@@ -16,8 +16,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-GCMiniGameScores::GCMiniGameScores () 
-     throw ()
+GCMiniGameScores::GCMiniGameScores ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -27,8 +26,7 @@ GCMiniGameScores::GCMiniGameScores ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-GCMiniGameScores::~GCMiniGameScores () 
-    throw ()
+GCMiniGameScores::~GCMiniGameScores ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -38,8 +36,7 @@ GCMiniGameScores::~GCMiniGameScores ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCMiniGameScores::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCMiniGameScores::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -69,7 +66,7 @@ void GCMiniGameScores::read ( SocketInputStream & iStream )
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
 void GCMiniGameScores::write ( SocketOutputStream & oStream ) 
-     const throw ( ProtocolException , Error )
+     const
 {
 	__BEGIN_TRY
 
@@ -94,7 +91,7 @@ void GCMiniGameScores::write ( SocketOutputStream & oStream )
 	__END_CATCH
 }
 
-PacketSize_t GCMiniGameScores::getPacketSize() const throw()
+PacketSize_t GCMiniGameScores::getPacketSize() const
 {
 	PacketSize_t ret = szBYTE + szBYTE + szBYTE;
 
@@ -119,7 +116,7 @@ PacketSize_t GCMiniGameScores::getPacketSize() const throw()
 //
 //////////////////////////////////////////////////////////////////////
 std::string GCMiniGameScores::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 

@@ -26,22 +26,22 @@ public:
 		PET_STASH_RACK_IS_EMPTY			// 찾으려고 한 위치에 아이템이 없습니다.
 	};
 
-	GCPetStashVerify() throw() { m_Code = PET_STASH_OK; }
-	virtual ~GCPetStashVerify() throw() {}
+	GCPetStashVerify() { m_Code = PET_STASH_OK; }
+	virtual ~GCPetStashVerify() {}
 
 public:
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+	void read(SocketInputStream & iStream);
+	void write(SocketOutputStream & oStream) const;
 
-	PacketID_t getPacketID() const throw() { return PACKET_GC_PET_STASH_VERIFY; }
-	PacketSize_t getPacketSize() const throw() { return szBYTE; }
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_PET_STASH_VERIFY; }
+	PacketSize_t getPacketSize() const noexcept { return szBYTE; }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "GCPetStashVerify"; }
-	string toString() const throw();
+	string getPacketName() const { return "GCPetStashVerify"; }
+	string toString() const;
 #endif	
 public:
-	BYTE getCode(void) const throw() { return m_Code;}
-	void setCode(BYTE code) throw() { m_Code = code;}
+	BYTE getCode(void) const noexcept { return m_Code;}
+	void setCode(BYTE code) noexcept { m_Code = code;}
 
 private: 
 	BYTE m_Code;
@@ -55,10 +55,10 @@ private:
 class GCPetStashVerifyFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new GCPetStashVerify(); }
-	string getPacketName() const throw() { return "GCPetStashVerify"; }
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_PET_STASH_VERIFY; }
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE; }
+	Packet* createPacket() { return new GCPetStashVerify(); }
+	string getPacketName() const { return "GCPetStashVerify"; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_PET_STASH_VERIFY; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE; }
 };
 
 
@@ -69,7 +69,7 @@ public:
 class GCPetStashVerifyHandler 
 {
 public:
-	static void execute( GCPetStashVerify* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute( GCPetStashVerify* pPacket, Player* pPlayer);
 };
 
 #endif

@@ -16,8 +16,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-GCGQuestStatusModify::GCGQuestStatusModify () 
-     throw ()
+GCGQuestStatusModify::GCGQuestStatusModify ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -26,8 +25,7 @@ GCGQuestStatusModify::GCGQuestStatusModify ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-GCGQuestStatusModify::~GCGQuestStatusModify () 
-    throw ()
+GCGQuestStatusModify::~GCGQuestStatusModify ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -41,7 +39,7 @@ GCGQuestStatusModify::~GCGQuestStatusModify ()
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 string GCGQuestStatusModify::toString () 
-	const throw ()
+	const
 {
 	__BEGIN_TRY
 

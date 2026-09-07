@@ -18,21 +18,21 @@
 class GCNPCSayDynamic : public Packet 
 {
 public:
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
-	PacketID_t getPacketID () const throw () { return PACKET_GC_NPC_SAY_DYNAMIC; }
-	PacketSize_t getPacketSize () const throw () { return szObjectID + szBYTE + m_Message.size(); }
+    void read ( SocketInputStream & iStream );
+    void write ( SocketOutputStream & oStream ) const;
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_NPC_SAY_DYNAMIC; }
+	PacketSize_t getPacketSize () const { return szObjectID + szBYTE + m_Message.size(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "GCNPCSayDynamic"; }
-		std::string toString () const throw ();
+		std::string getPacketName () const { return "GCNPCSayDynamic"; }
+		std::string toString () const;
 	#endif
 
-	ObjectID_t getObjectID () const throw () { return m_ObjectID; }
-	void setObjectID ( const ObjectID_t & creatureID ) throw () { m_ObjectID = creatureID; }
+	ObjectID_t getObjectID () const noexcept { return m_ObjectID; }
+	void setObjectID ( const ObjectID_t & creatureID ) { m_ObjectID = creatureID; }
 
-	std::string getMessage () const throw () { return m_Message; }
-	void setMessage ( const std::string & msg ) throw () { m_Message = msg; }
+	std::string getMessage () const { return m_Message; }
+	void setMessage ( const std::string & msg ) { m_Message = msg; }
 
 private:
 	ObjectID_t m_ObjectID; // NPC's object id
@@ -49,14 +49,14 @@ private:
 class GCNPCSayDynamicFactory : public PacketFactory 
 {
 public:
-	Packet * createPacket () throw () { return new GCNPCSayDynamic(); }
+	Packet * createPacket () { return new GCNPCSayDynamic(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "GCNPCSayDynamic"; }
+		std::string getPacketName () const { return "GCNPCSayDynamic"; }
 	#endif
 
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_NPC_SAY_DYNAMIC; }
-	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szBYTE + 2048 ; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_NPC_SAY_DYNAMIC; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID + szBYTE + 2048 ; }
 };
 
 
@@ -67,7 +67,7 @@ public:
 class GCNPCSayDynamicHandler 
 {
 public:
-	static void execute ( GCNPCSayDynamic * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCNPCSayDynamic * pPacket , Player * pPlayer );
 
 };
 

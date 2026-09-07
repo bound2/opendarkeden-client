@@ -312,7 +312,7 @@ void GCExchangeList::write(SocketOutputStream & oStream) const
 	__END_CATCH
 }
 
-PacketSize_t GCExchangeList::getPacketSize() const throw()
+PacketSize_t GCExchangeList::getPacketSize() const
 {
 	PacketSize_t size = szint * 3		// page, pageSize, total
 		+ sizeof(uint16_t);				// count

@@ -18,30 +18,30 @@
 class GCNPCAsk : public Packet 
 {
 public:
-	GCNPCAsk() throw ();
-	virtual ~GCNPCAsk() throw ();
+	GCNPCAsk();
+	virtual ~GCNPCAsk();
 
 public:
-	void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
-	void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
-	PacketID_t getPacketID () const throw () { return PACKET_GC_NPC_ASK; }
-	PacketSize_t getPacketSize () const throw () { return szObjectID + szScriptID + szNPCID; }
+	void read ( SocketInputStream & iStream );
+	void write ( SocketOutputStream & oStream ) const;
+	PacketID_t getPacketID () const noexcept { return PACKET_GC_NPC_ASK; }
+	PacketSize_t getPacketSize () const noexcept { return szObjectID + szScriptID + szNPCID; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "GCNPCAsk"; }
-		std::string toString () const throw ();
+		std::string getPacketName () const { return "GCNPCAsk"; }
+		std::string toString () const;
 	#endif
 
 
 public:
-	ObjectID_t getObjectID(void) const throw() { return m_ObjectID; }
-	void setObjectID(ObjectID_t creatureID) throw () { m_ObjectID = creatureID; }
+	ObjectID_t getObjectID(void) const noexcept { return m_ObjectID; }
+	void setObjectID(ObjectID_t creatureID) noexcept { m_ObjectID = creatureID; }
 
-	ScriptID_t getScriptID(void) const throw() { return m_ScriptID; }
-	void setScriptID(ScriptID_t id) throw() { m_ScriptID = id; }
+	ScriptID_t getScriptID(void) const noexcept { return m_ScriptID; }
+	void setScriptID(ScriptID_t id) noexcept { m_ScriptID = id; }
 
-	NPCID_t		getNPCID(void) const throw() { return m_NpcID; }
-	void		setNPCID(NPCID_t id) throw() { m_NpcID = id;}
+	NPCID_t		getNPCID(void) const noexcept { return m_NpcID; }
+	void		setNPCID(NPCID_t id) noexcept { m_NpcID = id;}
 
 private:
 	ObjectID_t m_ObjectID; // NPC's object id
@@ -57,14 +57,14 @@ private:
 class GCNPCAskFactory : public PacketFactory 
 {
 public:
-	Packet * createPacket () throw () { return new GCNPCAsk(); }
+	Packet * createPacket () { return new GCNPCAsk(); }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "GCNPCAsk"; }
+		std::string getPacketName () const { return "GCNPCAsk"; }
 	#endif
 
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_GC_NPC_ASK; }
-	PacketSize_t getPacketMaxSize () const throw () { return szObjectID + szScriptID + szNPCID; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_NPC_ASK; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID + szScriptID + szNPCID; }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -74,7 +74,7 @@ public:
 class GCNPCAskHandler 
 {
 public:
-	static void execute ( GCNPCAsk * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( GCNPCAsk * pPacket , Player * pPlayer );
 };
 
 #endif

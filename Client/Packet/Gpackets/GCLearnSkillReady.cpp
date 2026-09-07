@@ -15,8 +15,7 @@
 //////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////
-GCLearnSkillReady::GCLearnSkillReady () 
-     throw ()
+GCLearnSkillReady::GCLearnSkillReady ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -26,8 +25,7 @@ GCLearnSkillReady::GCLearnSkillReady ()
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-GCLearnSkillReady::~GCLearnSkillReady () 
-    throw ()
+GCLearnSkillReady::~GCLearnSkillReady ()
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -37,8 +35,7 @@ GCLearnSkillReady::~GCLearnSkillReady ()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCLearnSkillReady::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCLearnSkillReady::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 	iStream.read( m_SkillDomainType);
@@ -49,8 +46,7 @@ void GCLearnSkillReady::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void GCLearnSkillReady::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCLearnSkillReady::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 	oStream.write( m_SkillDomainType);
@@ -64,7 +60,6 @@ void GCLearnSkillReady::write ( SocketOutputStream & oStream ) const
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string GCLearnSkillReady::toString () const
-		   throw ()
 	{
 		__BEGIN_TRY
 

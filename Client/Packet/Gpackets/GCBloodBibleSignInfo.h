@@ -18,17 +18,17 @@
 class GCBloodBibleSignInfo : public Packet
 {
 public:
-	GCBloodBibleSignInfo() throw() { }
-	virtual ~GCBloodBibleSignInfo() throw();
+	GCBloodBibleSignInfo() { }
+	virtual ~GCBloodBibleSignInfo();
 
 public:
-	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
-	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
-	PacketID_t getPacketID() const throw() { return PACKET_GC_BLOOD_BIBLE_SIGN_INFO; }
-	PacketSize_t getPacketSize() const throw() { return m_pInfo->getSize(); }
+	void read(SocketInputStream & iStream);
+	void write(SocketOutputStream & oStream) const;
+	PacketID_t getPacketID() const noexcept { return PACKET_GC_BLOOD_BIBLE_SIGN_INFO; }
+	PacketSize_t getPacketSize() const { return m_pInfo->getSize(); }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "GCBloodBibleSignInfo"; }
-	string toString() const throw();
+	string getPacketName() const { return "GCBloodBibleSignInfo"; }
+	string toString() const;
 #endif
 public:
 	BloodBibleSignInfo* getSignInfo() const { return m_pInfo; }
@@ -45,12 +45,12 @@ private:
 class GCBloodBibleSignInfoFactory : public PacketFactory 
 {
 public:
-	Packet* createPacket() throw() { return new GCBloodBibleSignInfo(); }
+	Packet* createPacket() { return new GCBloodBibleSignInfo(); }
 #ifdef __DEBUG_OUTPUT__
-	string getPacketName() const throw() { return "GCBloodBibleSignInfo"; }
+	string getPacketName() const { return "GCBloodBibleSignInfo"; }
 #endif
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_GC_BLOOD_BIBLE_SIGN_INFO; }
-	PacketSize_t getPacketMaxSize() const throw()
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_BLOOD_BIBLE_SIGN_INFO; }
+	PacketSize_t getPacketMaxSize() const
 	{
 		return BloodBibleSignInfo::getMaxSize();
 	}
@@ -63,7 +63,7 @@ public:
 class GCBloodBibleSignInfoHandler 
 {
 public:
-	static void execute(GCBloodBibleSignInfo* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(GCBloodBibleSignInfo* pPacket, Player* pPlayer);
 };
 
 #endif

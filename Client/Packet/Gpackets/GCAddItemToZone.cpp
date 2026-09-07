@@ -15,8 +15,7 @@
 //--------------------------------------------------------------------
 // Constructor
 //--------------------------------------------------------------------
-GCAddItemToZone::GCAddItemToZone() 
-     throw ()
+GCAddItemToZone::GCAddItemToZone()
 {
 	__BEGIN_TRY
 	m_ListNum = 0;
@@ -27,8 +26,7 @@ GCAddItemToZone::GCAddItemToZone()
 //--------------------------------------------------------------------
 // Destructor
 //--------------------------------------------------------------------
-GCAddItemToZone::~GCAddItemToZone() 
-    throw ()
+GCAddItemToZone::~GCAddItemToZone()
 {
 	__BEGIN_TRY
 
@@ -45,8 +43,7 @@ GCAddItemToZone::~GCAddItemToZone()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void GCAddItemToZone::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void GCAddItemToZone::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -104,8 +101,7 @@ void GCAddItemToZone::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void GCAddItemToZone::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void GCAddItemToZone::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 		
