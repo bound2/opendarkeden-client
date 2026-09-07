@@ -10,6 +10,13 @@ import zipfile
 from pathlib import Path
 
 V1_SHA256 = '9401fd9c294123173222744fc4298ba503fb92ca1004356d983a228db3447985'
+ORIGINAL_SHA256 = 'c7e277c1104a13db305619e2c5b1d4b69fa27d6e7e6919ab2239713ac6042e21'
+MISSING_V1_FILES = (
+    'Data/Info/NPC.inf', 'Data/Info/NPCScript.inf',
+    'Data/Ui/spk/mixingforge.spk', 'Data/Ui/spk/mixingforge.spki',
+    'Data/Ui/spk/monsterlevel.spk', 'Data/Ui/spk/monsterlevel.spki',
+    'Data/Ui/spk/trace.spk', 'Data/Ui/spk/trace.spki',
+)
 BRAND = re.compile(rb'dk2th', re.I)
 TOKEN = re.compile(rb'(?<![A-Za-z0-9\x80-\xff])(?:https?://)?(?:www\.)?dk2th(?:\.com)?(?![A-Za-z0-9\x80-\xff])', re.I)
 
@@ -132,12 +139,27 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('source', type=Path)
     p.add_argument('output', type=Path)
+    p.add_argument('--original', type=Path, required=True,
+                   help='Original DARKEDEN.zip containing hidden files omitted from v1')
     p.add_argument('--audit-only', action='store_true')
     args = p.parse_args()
     if sha256(args.source) != V1_SHA256:
         raise ValueError('Input is not the published assets-v1 archive')
+    if sha256(args.original) != ORIGINAL_SHA256:
+        raise ValueError('Original distribution checksum does not match')
     replacements, report = {}, {}
+    additions = {}
+    with zipfile.ZipFile(args.original) as original:
+        for name in MISSING_V1_FILES:
+            data = original.read(name)
+            if BRAND.search(data):
+                raise ValueError(f'Branding in restored file: {name}')
+            additions[name] = (copy.copy(original.getinfo(name)), data)
+            report[name] = {'restored_from': 'DARKEDEN.zip',
+                            'sha256': hashlib.sha256(data).hexdigest()}
     with zipfile.ZipFile(args.source) as src:
+        if set(additions).intersection(src.namelist()):
+            raise ValueError('A restored file already exists in v1')
         for info in src.infolist():
             if info.filename in ('Data/Info/Item.inf', 'Data/Info/Zone.inf',
                                   'Data/Info/Creature.inf', 'Data/Info/String.inf'):
@@ -164,9 +186,13 @@ def main():
                 else:
                     with src.open(info) as incoming, dst.open(copy.copy(info), 'w') as outgoing:
                         shutil.copyfileobj(incoming, outgoing, 1024 * 1024)
+            for info, data in additions.values():
+                dst.writestr(copy.copy(info), data)
         print('Verifying archive contents and CRCs...', flush=True)
         with zipfile.ZipFile(args.output) as dst:
-            assert dst.namelist() == src.namelist()
+            assert dst.namelist() == src.namelist() + list(additions)
+            for name, (_, data) in additions.items():
+                assert dst.read(name) == data
             for info in src.infolist():
                 data = dst.read(info.filename)
                 if info.filename in replacements:
