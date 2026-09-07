@@ -160,11 +160,9 @@ add_library(SpriteLib STATIC ${SPRITELIB_SOURCES})
 # get basic on the final link line.
 target_link_libraries(SpriteLib PUBLIC basic)
 
-# Pinned, vendored xBRZ: the renderer filter also works in offline builds.
-add_library(darkeden_xbrz STATIC ${CMAKE_SOURCE_DIR}/third_party/xbrz/xbrz.cpp)
-target_include_directories(darkeden_xbrz PUBLIC ${CMAKE_SOURCE_DIR}/third_party/xbrz)
-target_compile_features(darkeden_xbrz PUBLIC cxx_std_20)
-set_target_properties(darkeden_xbrz PROPERTIES POSITION_INDEPENDENT_CODE ON)
+# Pinned, vendored xBRZ, built optimised in every configuration (see its
+# CMakeLists.txt); the renderer filter also works in offline builds.
+add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/xbrz ${CMAKE_BINARY_DIR}/third_party/xbrz)
 find_package(Threads REQUIRED)
 target_link_libraries(SpriteLib PRIVATE darkeden_xbrz Threads::Threads)
 

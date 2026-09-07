@@ -336,7 +336,9 @@ xBRZ runs on up to four CPU threads at an integer scale of 2x to 4x, then SDL fi
 the window. Buffers and textures are reused, and unchanged frames reuse the
 filtered texture. The intermediate image is capped at 64 MiB; texture/allocation
 failures restore original presentation. Moving scenes still require filtering
-each new frame, so compare frame time with the toggle on your machine.
+each new frame, so compare frame time with the toggle on your machine. The
+vendored filter is compiled with `/O2` in every configuration, Debug included:
+unoptimised it costs about three times as much per frame.
 
 The pinned xBRZ source and upstream license are under `third_party/xbrz/`.
 
