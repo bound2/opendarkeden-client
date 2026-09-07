@@ -6,6 +6,7 @@
 // 물론 .. MTopView에는 ItemDropFPK와 ItemDropFPK가 제대로 된게 있어야 겠지..
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
+#include "LegacyDisplayText.h"
 #include "MItemTable.h"
 #include "SoundDef.h"
 #include "MGameStringTable.h"
@@ -263,6 +264,9 @@ ITEMTABLE_INFO::LoadFromFile(std::ifstream& file)
 	EName.LoadFromFile( file );
 	HName.LoadFromFile( file );
 	Description.LoadFromFile( file );
+	CleanLegacyDisplayText(EName);
+	CleanLegacyDisplayText(HName);
+	CleanLegacyDisplayText(Description);
 
 	// Frame ID
 	file.read((char*)&TileFrameID, SIZE_FRAMEID);

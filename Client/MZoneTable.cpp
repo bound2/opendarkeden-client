@@ -2,6 +2,7 @@
 // MZoneTable.cpp
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
+#include "LegacyDisplayText.h"
 #include "MZoneTable.h"
 
 //----------------------------------------------------------------------
@@ -133,6 +134,7 @@ ZONETABLE_INFO::LoadFromFile(std::ifstream& file)
 {
 	file.read((char*)&ID, SIZE_ZONEID);
 	Name.LoadFromFile( file );
+	CleanLegacyDisplayText(Name);
 	file.read((char*)&Property, 1);
 	file.read((char*)&MusicIDSlayer, SIZE_MUSICID);
 	file.read((char*)&MusicIDVampire, SIZE_MUSICID);

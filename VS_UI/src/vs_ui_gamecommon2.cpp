@@ -675,7 +675,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 		if (pCurrentFocusItem->GetPocketNumber() != -1)
 		{
 			vx = g_PrintColorStr(strX, strY, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_POCKET_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			sprintf(sz_buf, "%d %s", pCurrentFocusItem->GetPocketNumber(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());
+			SafeFormat::Format(sz_buf, "%d %s", pCurrentFocusItem->GetPocketNumber(), GetGameString(UI_STRING_MESSAGE_DESC_NUMBER));
 			g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 			strY += line_gap;
 		}			
@@ -683,7 +683,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 		if (pCurrentFocusItem->IsPileItem() == true)
 		{
 			vx = g_PrintColorStr(strX, strY, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ITEM_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			sprintf(sz_buf, "%d %s", pCurrentFocusItem->GetNumber(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());
+			SafeFormat::Format(sz_buf, "%d %s", pCurrentFocusItem->GetNumber(), GetGameString(UI_STRING_MESSAGE_DESC_NUMBER));
 			g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);			
 			strY += line_gap;
 		}

@@ -888,7 +888,8 @@ InitGameStringTable()
 	(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEFT_NUM] = "Uses left : ";
 	(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ARRIVAL_LOCATION] = "Destination : ";
 	(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NOT_EXIST] = "None";
-	(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER] = "";
+	// English has no count suffix. Empty assignment stores NULL in MString.
+	(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].Init(0);
 	(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_COUNT] = " rounds";
 	(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_TILE_PIECE] = " tiles";
 	(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PARTY_NAME] = "Party";

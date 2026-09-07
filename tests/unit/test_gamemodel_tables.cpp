@@ -422,3 +422,84 @@ TEST(ItemOptionInfo, ConstructsWithEveryFieldZero)
 	CHECK(info.Name.GetString() == NULL);
 	CHECK(info.EName.GetString() == NULL);
 }
+
+#include "LegacyDisplayText.h"
+#include "MItemTable.h"
+
+TEST(LegacyDisplayText, RemovesAssetBrandingWithoutChangingNamesOrFormatting)
+{
+    const char* cases[][2] = {
+        {"Ouster Village dk2th", "Ouster Village"},
+        {"Adam_dk2th", "Adam"},
+        {"Cabra dk2th  B1", "Cabra B1"},
+        {"Dk2th Yer Ring III", "Yer Ring III"},
+        {"www.dk2th.com           ", ""},
+        {"https://www.DK2TH.com", ""},
+        {"Ring dk2th %s +%d", "Ring %s +%d"},
+        {"\xe5\x9f\x8e dk2th", "\xe5\x9f\x8e"},
+        {"Sword  II", "Sword  II"},
+        {"mydk2thname", "mydk2thname"},
+        {"dk2thSword", "dk2thSword"}
+    };
+    for (const auto& entry : cases) {
+        MString text(entry[0]);
+        CleanLegacyDisplayText(text);
+        CHECK(text.GetString() != nullptr);
+        CHECK(std::strcmp(entry[1], text.GetString()) == 0);
+        CHECK_EQ(std::strlen(entry[1]), text.GetLength());
+        CleanLegacyDisplayText(text);
+        CHECK(std::strcmp(entry[1], text.GetString()) == 0);
+    }
+    MString empty;
+    CleanLegacyDisplayText(empty);
+    CHECK(empty.GetString() == nullptr);
+}
+
+TEST(LegacyDisplayText, ItemLoaderCleansBothNamesAndDescriptionWithoutShiftingRecords)
+{
+    ITEMTABLE_INFO source;
+    source.EName = "Dk2th Yer Ring III";
+    source.HName = "Yer Ring III dk2th";
+    source.Description = "www.dk2th.com           ";
+    source.Price = 12345;
+    source.DescriptionFrameID = 321;
+    {
+        std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+        source.SaveToFile(out);
+        source.EName = "Next Ring";
+        source.Price = 6789;
+        source.SaveToFile(out);
+    }
+    {
+        std::ifstream in(kTempFile, std::ios::binary);
+        ITEMTABLE_INFO first, second;
+        first.LoadFromFile(in);
+        second.LoadFromFile(in);
+        CHECK(!in.fail());
+        CHECK(std::strcmp(first.EName.GetString(), "Yer Ring III") == 0);
+        CHECK(std::strcmp(first.HName.GetString(), "Yer Ring III") == 0);
+        CHECK(first.Description.GetString() != nullptr);
+        CHECK_EQ(0u, first.Description.GetLength());
+        CHECK_EQ(12345, first.Price);
+        CHECK_EQ(321, first.DescriptionFrameID);
+        CHECK(std::strcmp(second.EName.GetString(), "Next Ring") == 0);
+        CHECK_EQ(6789, second.Price);
+    }
+    std::remove(kTempFile);
+}
+
+TEST(GameStringTable, EnglishItemCounterIsReadableEmptyText)
+{
+    MStringArray table;
+    MStringArray* saved = g_pGameStringTable;
+    g_pGameStringTable = &table;
+    InitGameStringTable();
+    const char* counter = table[UI_STRING_MESSAGE_DESC_NUMBER].GetString();
+    CHECK(counter != nullptr);
+    if (counter) CHECK_EQ(0, std::strlen(counter));
+    CHECK(std::strcmp(GetGameString(UI_STRING_MESSAGE_DESC_NUMBER), "") == 0);
+    // Older localized tables may omit the counter entirely.
+    table.Release();
+    CHECK(std::strcmp(GetGameString(UI_STRING_MESSAGE_DESC_NUMBER), "") == 0);
+    g_pGameStringTable = saved;
+}
