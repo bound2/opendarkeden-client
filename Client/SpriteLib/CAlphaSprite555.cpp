@@ -28,9 +28,9 @@ CAlphaSprite555::SaveToFile(ofstream& file)
 	// 압축 된 것 저장
 	WORD index;	
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 
 	//--------------------------------
 	// 5:5:5
@@ -144,7 +144,7 @@ CAlphaSprite555::LoadFromFile(ifstream& file)
 	// The data was stored as 5:6:5, so it is converted to 5:5:5 here.
 	int	count, index, colorCount;
 
-	register int j;
+	int j;
 
 	for (int i=0; i<m_Height; i++)
 	{

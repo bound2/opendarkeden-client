@@ -33,8 +33,8 @@ void CSpritePal::SetPixel(BYTE *pSource, WORD pitch, WORD width, WORD height)
 	BYTE **Pixels = new BYTE* [height];
 	std::vector<int> PixelSize;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	for (int i=0; i<height; i++)
 	{
@@ -160,9 +160,9 @@ void CSpritePal::Blt(int x, int y, WORD* pDest, int pitch, MPalette &pal)
 	WORD	*pDestTemp;
 	BYTE	*pPixels;
 	
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 	int rectBottom = m_Height;
 	
 	pDest = (WORD*)((BYTE*)pDest + y*pitch +x*2);
@@ -215,8 +215,8 @@ CSpritePal::BltEffect(WORD *pDest, WORD pitch, MPalette &pal)
 	WORD	*pDestTemp;
 	BYTE	*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = m_Height;
 	if (rectBottom > 0)
@@ -275,8 +275,8 @@ CSpritePal::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect, MPalette &pa
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -404,8 +404,8 @@ CSpritePal::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect, MPalette &p
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	int rectBottom = pRect->bottom;
 	int rectRight = pRect->right;
@@ -500,8 +500,8 @@ CSpritePal::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect, MPalette &p
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	//---------------------------------------------
 	// 출력해야하는 모든 줄에 대해서..
@@ -684,8 +684,8 @@ CSpritePal::BltEffectClipHeight(WORD *pDest, WORD pitch, RECT* pRect, MPalette &
 	BYTE	*pPixels;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	for (int i=pRect->top; i<rectBottom; i++)
@@ -734,8 +734,8 @@ CSpritePal::Blt1555NotTrans(WORD *pDest, WORD pitch, MPalette &pal)
 	WORD	*pDestTemp;
 	BYTE	*pPixels;
 	
-	register int i;
-	register int j;
+	int i;
+	int j;
 	
 	int rectBottom = m_Height;
 	
@@ -805,8 +805,8 @@ CSpritePal::Blt1555SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift, MPalette &
 	WORD	*pDestTemp;
 	BYTE	*pPixels;
 	
-	register int i;
-	register int j;
+	int i;
+	int j;
 	
 	int rectBottom = m_Height;
 	
@@ -871,11 +871,11 @@ CSpritePal::Blt1555SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift, MPalette &
 void	
 CSpritePal::memcpy1555(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	register int		sTemp;
-	register int		sr,sg,sb;
+	int		sTemp;
+	int		sr,sg,sb;
 	//static WORD		temp, temp2;
 	
-	register int i = pixels;
+	int i = pixels;
 	
 	// Alpha Channel Blending
 	// 한점씩 찍기
@@ -914,11 +914,11 @@ CSpritePal::memcpy1555(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 void	
 CSpritePal::memcpy1555Small(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	register int		sTemp;
-	register int		sr,sg,sb;
+	int		sTemp;
+	int		sr,sg,sb;
 	//static WORD		temp, temp2;
 	
-	register int i = pixels >> s_Value2;
+	int i = pixels >> s_Value2;
 	
 	// 한점씩 찍기
 	while (i--)
@@ -950,7 +950,7 @@ CSpritePal::IsColorPixel( short x, short y )
 	
 	const BYTE	*pPixels = m_pPixels[y];
 	
-	register int j;
+	int j;
 	
 	count	= *pPixels++;		
 	// 한 줄 출력
@@ -977,7 +977,7 @@ CSpritePal::GetPixel( short x, short y, MPalette &pal )
 	
 	const BYTE *pPixels = m_pPixels[y];
 	int offset=0, colorCount,count;
-	register int j;
+	int j;
 
 	count = *pPixels++;
 

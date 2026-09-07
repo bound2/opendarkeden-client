@@ -953,6 +953,46 @@ else
 fi
 
 #----------------------------------------------------------------------
+# R11 - the `register` storage class in C++ sources.
+#
+# Removed in C++17; MSVC accepts it as an extension, clang 19 rejects it
+# (assessment finding 4). Counted by tests/tools/count_register.pl,
+# which strips comments and strings with a tokenizer, per file, instead
+# of the joined-stream pipeline R9/R10 use - that pipeline reads the
+# blitters' `//*pDest = ...` line comments as block-comment openers and
+# saw 538 of the 627 declarations over the 23 files on master (a figure
+# that moves with file order), and it does not strip string literals,
+# so the NPC script lines that say "register as a couple" would count
+# (the script's header has the detail).
+#
+# The set is every C++ source the tree compiles or may compile: the
+# libraries, the executable, VS_UI, the tools (the viewers are
+# unconditional targets, the engine sprite tool is behind BUILD_ENGINE),
+# the vendored third_party sources and tests/, so nothing built here can
+# reintroduce it. .c files are outside: they are compiled as C, where
+# the keyword is still valid, and the 21 in deflate.c, inftrees.c and
+# trees.c stay (crc32.c has the word only in its comments).
+#
+# R11 = 0 as of 2026-09-07, from 627 in 23 files (SpriteLib's blitters,
+# MTopView.cpp, and a few UI and table loops).
+R11_BASELINE=0
+
+register_members () {
+	find Client VS_UI basic tools third_party tests \( -name '*.cpp' -o -name '*.h' -o -name '*.inl' \) 2>/dev/null
+}
+
+if [ ! -f tests/tools/count_register.pl ]; then
+	echo "FAIL R11: tests/tools/count_register.pl is missing"
+	FAIL=1
+elif [ "$(register_members | wc -l)" -eq 0 ]; then
+	echo "FAIL R11: no C++ sources enumerated - a zero here would measure nothing"
+	FAIL=1
+else
+	R11=$(register_members | sort -u | perl tests/tools/count_register.pl)
+	check "R11 (register storage class in C++ sources)" "$R11" "$R11_BASELINE"
+fi
+
+#----------------------------------------------------------------------
 # R6 was here for exactly one slice, and retired by doing its job.
 #
 # Task 5.1 stubbed SendBugReport in tests/stubs/client_globals.cpp so

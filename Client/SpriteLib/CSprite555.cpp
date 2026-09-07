@@ -33,9 +33,9 @@ CSprite555::SaveToFile(ofstream& file)
 	// 압축 된 것 저장
 	WORD index;	
 
-	register int i;
-	register int j;
-	register int k;
+	int i;
+	int j;
+	int k;
 
 	//--------------------------------
 	// 5:5:5
@@ -177,8 +177,8 @@ CSprite555::LoadFromFile(ifstream& file)
 	WORD index;
 	int	count, colorCount;
 
-	register int j;
-	register int k;
+	int j;
+	int k;
 
 	// Scanline lengths are kept for the decode pass below.
 	WORD*	pLengths = new WORD [m_Height];

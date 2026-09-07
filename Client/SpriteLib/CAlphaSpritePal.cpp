@@ -45,8 +45,8 @@ void CAlphaSpritePal::SetPixel(BYTE *pSource, WORD pitch, BYTE *pSourceAlpha, WO
 	BYTE **Pixels = new BYTE* [height];
 	std::vector<int> PixelSize;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	for (int i=0; i<height; i++)
 	{
@@ -199,8 +199,8 @@ void CAlphaSpritePal::Blt(int x, int y, WORD* pDest, int pitch, MPalette &pal)
 	WORD	*pDestTemp;
 	BYTE	*pPixels;
 	
-	register int i;
-	register int j;
+	int i;
+	int j;
 	int rectBottom = m_Height;
 	
 	pDest = (WORD*)((BYTE*)pDest + y*pitch +x*2);
@@ -248,10 +248,10 @@ void CAlphaSpritePal::Blt(int x, int y, WORD* pDest, int pitch, MPalette &pal)
 void	
 CAlphaSpritePal::memcpyAlpha(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	register WORD		sTemp,dTemp;
-	register int		sr,sg,sb,dr,dg,db;
+	WORD		sTemp,dTemp;
+	int		sr,sg,sb,dr,dg,db;
 
-	register int i = pixels;
+	int i = pixels;
 	
 	BYTE alpha;
 	
@@ -300,11 +300,11 @@ CAlphaSpritePal::memcpyAlpha(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &
 void	
 CAlphaSpritePal::memcpyAlpha4444(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	register WORD		sTemp;
-	register int		sr,sg,sb;
+	WORD		sTemp;
+	int		sr,sg,sb;
 	//static WORD		temp, temp2;
 
-	register int i = pixels;
+	int i = pixels;
 
 	BYTE alpha;
 
@@ -361,8 +361,8 @@ CAlphaSpritePal::BltClip(WORD* pDest, WORD pitch, RECT* pRect, MPalette &pal)
 
 	BOOL	bPut;		
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 	int rectBottom = pRect->bottom;	
 
 	for (int i=pRect->top; i<rectBottom; i++)
@@ -466,8 +466,8 @@ CAlphaSpritePal::Blt(WORD *pDest, WORD pitch, MPalette &pal)
 	WORD	*pDestTemp;
 	BYTE	*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 	int rectBottom = m_Height;
 
 	// The run lengths read below are sprite file data. Drawing stops at
@@ -563,8 +563,8 @@ CAlphaSpritePal::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect, MPalette &pal
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -694,8 +694,8 @@ CAlphaSpritePal::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect, MPalette &pa
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	int rectBottom = pRect->bottom;
 	int rectRight = pRect->right;
@@ -792,8 +792,8 @@ CAlphaSpritePal::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect, MPalette &pa
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -976,8 +976,8 @@ CAlphaSpritePal::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect, MPalette &p
 	BYTE	*pPixels;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 
@@ -1025,8 +1025,8 @@ CAlphaSpritePal::Blt4444(WORD *pDest, WORD pitch, MPalette &pal)
 	WORD	*pDestTemp;
 	BYTE	*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = m_Height;
 
@@ -1089,8 +1089,8 @@ CAlphaSpritePal::Blt4444ClipLeft(WORD* pDest, WORD pitch, RECT* pRect, MPalette 
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -1220,8 +1220,8 @@ CAlphaSpritePal::Blt4444ClipRight(WORD* pDest, WORD pitch, RECT* pRect, MPalette
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	int rectBottom = pRect->bottom;
 	int rectRight = pRect->right;
@@ -1318,8 +1318,8 @@ CAlphaSpritePal::Blt4444ClipWidth(WORD* pDest, WORD pitch, RECT* pRect, MPalette
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -1477,8 +1477,8 @@ CAlphaSpritePal::Blt4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect, MPalett
 	BYTE	*pPixels;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 
@@ -1528,8 +1528,8 @@ CAlphaSpritePal::Blt4444NotTrans(WORD *pDest, WORD pitch, MPalette &pal)
 	WORD	*pDestTemp;
 	BYTE	*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = m_Height;
 
@@ -1595,8 +1595,8 @@ CAlphaSpritePal::Blt4444NotTransClipLeft(WORD* pDest, WORD pitch, RECT* pRect, M
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -1730,8 +1730,8 @@ CAlphaSpritePal::Blt4444NotTransClipRight(WORD* pDest, WORD pitch, RECT* pRect, 
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	int rectBottom = pRect->bottom;
 	int rectRight = pRect->right;
@@ -1831,8 +1831,8 @@ CAlphaSpritePal::Blt4444NotTransClipWidth(WORD* pDest, WORD pitch, RECT* pRect, 
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -1996,8 +1996,8 @@ CAlphaSpritePal::Blt4444NotTransClipHeight(WORD *pDest, WORD pitch, RECT* pRect,
 	BYTE	*pPixels;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 
@@ -2052,8 +2052,8 @@ CAlphaSpritePal::BltAlpha(WORD *pDest, WORD pitch, BYTE alpha, MPalette &pal)
 	WORD	*pDestTemp;
 	BYTE	*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 	int rectBottom = m_Height;
 
 	if (rectBottom > 0)
@@ -2116,8 +2116,8 @@ CAlphaSpritePal::BltAlphaClipLeft(WORD* pDest, WORD pitch, RECT* pRect, BYTE alp
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -2249,8 +2249,8 @@ CAlphaSpritePal::BltAlphaClipRight(WORD* pDest, WORD pitch, RECT* pRect, BYTE al
 			colorCount,
 			index;
 
-	register int	i;
-	register int	j;
+	int	i;
+	int	j;
 
 	int rectBottom = pRect->bottom;
 	int rectRight = pRect->right;
@@ -2349,8 +2349,8 @@ CAlphaSpritePal::BltAlphaClipWidth(WORD* pDest, WORD pitch, RECT* pRect, BYTE al
 			index,
 			dist;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -2537,8 +2537,8 @@ CAlphaSpritePal::BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE a
 	BYTE	*pPixels;
 
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = pRect->bottom;
 
@@ -2584,11 +2584,11 @@ CAlphaSpritePal::BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE a
 void	
 CAlphaSpritePal::memcpyAlphaValue(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	register WORD		sTemp,dTemp;
-	register int		sr,sg,sb,dr,dg,db;
+	WORD		sTemp,dTemp;
+	int		sr,sg,sb,dr,dg,db;
 	//static WORD		temp, temp2;
 
-	register int i = pixels;
+	int i = pixels;
 
 	//BYTE alpha;
 
@@ -2682,8 +2682,8 @@ CAlphaSpritePal::Blt4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift, MPale
 	WORD	*pDestTemp;
 	BYTE	*pPixels;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	int rectBottom = m_Height;
 
@@ -2792,11 +2792,11 @@ CAlphaSpritePal::Blt4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift, MPale
 void	
 CAlphaSpritePal::memcpyAlpha4444Small(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	register WORD		sTemp;
-	register int		sr,sg,sb;
+	WORD		sTemp;
+	int		sr,sg,sb;
 	//static WORD		temp, temp2;
 
-	register int i = pixels >> s_Value1;
+	int i = pixels >> s_Value1;
 
 	BYTE alpha;
 	
@@ -2836,7 +2836,7 @@ CAlphaSpritePal::IsColorPixel(short x, short y)
 
 	const BYTE	*pPixels = m_pPixels[y];
 	
-	register int j;
+	int j;
 	count	= *pPixels++;		
 	if (count > 0)
 	{	
@@ -2861,7 +2861,7 @@ CAlphaSpritePal::GetPixel( short x, short y, MPalette &pal )
 	
 	const BYTE *pPixels = m_pPixels[y];
 	int offset=0, colorCount,count;
-	register int j;
+	int j;
 
 	count = *pPixels++;
 

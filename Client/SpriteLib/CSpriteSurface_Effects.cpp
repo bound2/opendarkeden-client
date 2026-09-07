@@ -26,7 +26,7 @@
 void
 CSpriteSurface::memcpyPalEffectDarker(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	register int i = pixels;
+	int i = pixels;
 
 	//------------------------------------------------------------	
 	// Darker : BG - SPR_Filter
@@ -59,7 +59,7 @@ CSpriteSurface::memcpyPalEffectDarker(WORD* pDest, BYTE* pSource, WORD pixels, M
 void	
 CSpriteSurface::memcpyPalEffectGrayScale(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	register int i = pixels;
+	int i = pixels;
 
 	//------------------------------------------------------------	
 	// Gray Scale : color value = (R+G+B)/3
@@ -89,7 +89,7 @@ CSpriteSurface::memcpyPalEffectGrayScale(WORD* pDest, BYTE* pSource, WORD pixels
 void	
 CSpriteSurface::memcpyPalEffectLighten(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	register int i = pixels;
+	int i = pixels;
 
 	//------------------------------------------------------------	
 	// Lighten : max(BG, SPR)
@@ -114,7 +114,7 @@ CSpriteSurface::memcpyPalEffectLighten(WORD* pDest, BYTE* pSource, WORD pixels, 
 void	
 CSpriteSurface::memcpyPalEffectDarken(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	register int i = pixels;
+	int i = pixels;
 
 	//------------------------------------------------------------	
 	// Darken : min(BG, SPR)
@@ -141,7 +141,7 @@ CSpriteSurface::memcpyPalEffectDarken(WORD* pDest, BYTE* pSource, WORD pixels, M
 void	
 CSpriteSurface::memcpyPalEffectColorDodge(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	register int i = pixels;
+	int i = pixels;
 	
 	//------------------------------------------------------------	
 	// Color Dodge : (BG*MAXDAC)/(MAXDAC-SPR)
@@ -169,7 +169,7 @@ CSpriteSurface::memcpyPalEffectColorDodge(WORD* pDest, BYTE* pSource, WORD pixel
 void	
 CSpriteSurface::memcpyPalEffectScreen(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	register int i = pixels;
+	int i = pixels;
 
 	//------------------------------------------------------------	
 	// Screen :  TempSum=(MAXDAC-max(BG,SPR))/MAXDAC*min(BG,SPR)
@@ -230,7 +230,7 @@ CSpriteSurface::memcpyPalEffectScreenAlpha(WORD* pDest, BYTE* pSource, WORD pixe
 void	
 CSpriteSurface::memcpyPalEffectDodgeBurn(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	register int i = pixels;
+	int i = pixels;
 
 	//------------------------------------------------------------	
 	// DodgeBurn = (BG*(MAXDAC-SPR))/MAXDAC
@@ -258,7 +258,7 @@ CSpriteSurface::memcpyPalEffectDodgeBurn(WORD* pDest, BYTE* pSource, WORD pixels
 void	
 CSpriteSurface::memcpyPalEffectDifferent(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	register int i = pixels;
+	int i = pixels;
 
 	//------------------------------------------------------------	
 	// Different=(max(BG,SPR)-min(BG,SPR))
@@ -299,7 +299,7 @@ CSpriteSurface::memcpyPalEffectDifferent(WORD* pDest, BYTE* pSource, WORD pixels
 void	
 CSpriteSurface::memcpyPalEffectGradation(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	register int i = pixels;
+	int i = pixels;
 
 	//------------------------------------------------------------	
 	// Different=(max(BG,SPR)-min(BG,SPR))
@@ -358,7 +358,7 @@ CSpriteSurface::memcpyPalEffectSimpleOutline(WORD* pDest, BYTE* pSource, WORD pi
 void		
 CSpriteSurface::memcpyPalEffectWipeOut(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	register int i = pixels;
+	int i = pixels;
 
 	int skipPixels = (pixels * s_Value1) >> 6;	// / 64
 	int drawPixels = (pixels - skipPixels)>>1;
@@ -404,7 +404,7 @@ CSpriteSurface::memcpyPalEffectWipeOut(WORD* pDest, BYTE* pSource, WORD pixels, 
 void		
 CSpriteSurface::memcpyPalEffectNet(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	register int i = pixels;
+	int i = pixels;
 
 	int skipPixels = 1 + s_Value1;
 	
@@ -433,7 +433,7 @@ CSpriteSurface::memcpyPalEffectNet(WORD* pDest, BYTE* pSource, WORD pixels, MPal
 void	
 CSpriteSurface::memcpyPalEffectGrayScaleVarious(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	register int i = pixels;
+	int i = pixels;
 
 	//int grayValue = s_Value1;
 

@@ -90,8 +90,8 @@ CFilter::SetFilter(WORD* pSurface, WORD pitch, WORD width, WORD height)
 		Init(width, height);
 
 	
-	register int i;
-	register int j;
+	int i;
+	int j;
 			
 
 	//------------------------------------------------------------
@@ -155,8 +155,8 @@ CFilter::SetFilterDarkness(const CFilter& filter, BYTE DarkBits)
 	// memory 잡기
 	Init( filter.m_Width, filter.m_Height );
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	// 각 filter값마다 DarkBits만큼 어둡게 한다.
 	for (int i=0; i<m_Height; i++)
@@ -265,8 +265,8 @@ CFilter::BltFilter(int x, int y, const CFilter& filter)
 	int startY, endY;						// y관련
 	int sourceStartX, destStartX, width;	// x관련
 	
-	register int sourceIndex;
-	register int destIndex;
+	int sourceIndex;
+	int destIndex;
 
 	//-------------------------------------------------
 	// Y출력 범위 지정
@@ -391,8 +391,8 @@ CFilter::BltFilterAdd(int x, int y, const CFilter& filter)
 	int startY, endY;						// y관련
 	int sourceStartX, destStartX, width;	// x관련
 	
-	register int sourceIndex;
-	register int destIndex;
+	int sourceIndex;
+	int destIndex;
 
 	//-------------------------------------------------
 	// Y출력 범위 지정
@@ -506,7 +506,7 @@ CFilter::BltFilterAdd(int x, int y, const CFilter& filter)
 		//------------------------------------------------------------
 		// width만큼 pDest에 pSource를 blt한다.
 		//memcpyLighten( pDest, pSource, width );		
-		register int i = width;
+		int i = width;
 		
 		if (i>0)
 		{
@@ -548,8 +548,8 @@ CFilter::BltFilterSub(int x, int y, const CFilter& filter)
 	int startY, endY;						// y관련
 	int sourceStartX, destStartX, width;	// x관련
 	
-	register int sourceIndex;
-	register int destIndex;
+	int sourceIndex;
+	int destIndex;
 
 	//-------------------------------------------------
 	// Y출력 범위 지정
@@ -663,7 +663,7 @@ CFilter::BltFilterSub(int x, int y, const CFilter& filter)
 		//------------------------------------------------------------
 		// width만큼 pDest에 pSource를 blt한다.
 		//memcpyLighten( pDest, pSource, width );		
-		register int i = width;
+		int i = width;
 		
 		if (i>0)
 		{
@@ -724,8 +724,8 @@ CFilter::BltFilterSub(int x, int y, const CFilter& filter)
 void
 CFilter::Blt4444(WORD* pSurface, WORD pitch)
 {
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	BYTE* pFilter;
 	WORD* pSurfaceTemp;
@@ -765,8 +765,8 @@ CFilter::Blt4444Color(WORD* pSurface, WORD pitch, WORD color)
 	// R:G:B만 살린다.
 	color &= 0x0FFF;
 
-	register int i;
-	register int j;
+	int i;
+	int j;
 
 	BYTE* pFilter;
 	WORD* pSurfaceTemp;

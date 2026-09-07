@@ -5662,7 +5662,7 @@ MTopView::LoadFromFileTileSPKLargeZone(std::ifstream & file)
 		COrderedList<TYPE_SPRITEID>	oldTileID;
 		COrderedList<TYPE_SPRITEID>	newTileID;
 
-		register int i;
+		int i;
 
 		DEBUG_ADD( "Sort Part1");
 
@@ -5763,7 +5763,7 @@ MTopView::LoadFromFileImageObjectSPKLargeZone(std::ifstream & file)
 		COrderedList<TYPE_SPRITEID>	oldImageObjectID;
 		COrderedList<TYPE_SPRITEID>	newImageObjectID;
 
-		register int i;
+		int i;
 
 		// Sort
 		for (i=pOldImageObjectSFPA->GetSize()-1; i>=0; i--)
@@ -5874,7 +5874,7 @@ MTopView::LoadFromFileTileSPKSmallZone(std::ifstream & file)
 		COrderedList<TYPE_SPRITEID>	oldTileID;
 		COrderedList<TYPE_SPRITEID>	newTileID;
 
-		register int i;
+		int i;
 
 		DEBUG_ADD( "Sort Part1");
 
@@ -5976,7 +5976,7 @@ MTopView::LoadFromFileImageObjectSPKSmallZone(std::ifstream & file)
 		COrderedList<TYPE_SPRITEID>	oldImageObjectID;
 		COrderedList<TYPE_SPRITEID>	newImageObjectID;
 
-		register int i;
+		int i;
 
 		// Sort
 		for (i=pOldImageObjectSFPA->GetSize()-1; i>=0; i--)
@@ -6812,8 +6812,8 @@ MTopView::GetSelectedObject(int x, int y)
 
 
 	// 현재 check하는 좌표
-	register int currentX;
-	register int currentY;
+	int currentX;
+	int currentY;
 
 	int numCreature = 0;
 
@@ -7626,8 +7626,8 @@ MTopView::GetSelectedObjectSprite(int x, int y)
 
 
 	// 현재 check하는 좌표
-	register int currentX;
-	register int currentY;
+	int currentX;
+	int currentY;
 
 	int numCreature = 0;
 
@@ -8688,7 +8688,7 @@ MTopView::ClearLightBufferFilter3D()
 		//--------------------------------------------------
 		BYTE* pBuffer;
 
-		register int i = SCREENLIGHT_HEIGHT-1;
+		int i = SCREENLIGHT_HEIGHT-1;
 		do {		
 			pBuffer = m_LightBufferFilter.GetFilter( i );
 			memset(pBuffer, DarkColor, SCREENLIGHT_WIDTH);				
@@ -8750,7 +8750,7 @@ MTopView::ClearLightBufferFilter2D()
 		//--------------------------------------------------
 		BYTE* pBuffer;
 
-		register int i = SCREENLIGHT_HEIGHT-1;
+		int i = SCREENLIGHT_HEIGHT-1;
 		do {
 			pBuffer = m_LightBufferFilter.GetFilter( i );
 			memset(pBuffer, DarkColor, SCREENLIGHT_WIDTH);
@@ -11702,9 +11702,9 @@ MTopView::DrawZone(int firstPointX,int firstPointY)
 	POINT	tilePoint, point;
 	RECT	rect;
 
-	register int x;
-	register int y;
-	register int i;
+	int x;
+	int y;
+	int i;
 
 	//-------------------------------------------------
 	// Player를 가리는 ImageObject들에 대한 정보
@@ -12564,7 +12564,7 @@ MTopView::DrawZone(int firstPointX,int firstPointY)
 		//   부분적으로 Tile들을 갱신하기..
 		//
 		//------------------------------------------------------
-		register int n;
+		int n;
 		for (n=0; n<changeCount; n++)
 		{			
 			POINT tilePointTemp;
@@ -14826,8 +14826,8 @@ MTopView::DrawTileSurface()
 	POINT tilePointTemp;
 	tilePointTemp.y = tilePoint.y;
 
-	register int x;
-	register int y;
+	int x;
+	int y;
 
 	DEBUG_ADD_FORMAT("[DrawTileSurface] (%d, %d) ~ (%d, %d)", sX1, sX2, sY1, sY2);
 
@@ -15064,7 +15064,7 @@ int
 	int maxLen = 0;
 	int numString = g_pClientConfig->MAX_CHATSTRING;
 	int maxWidth = 0;
-	for (register int i=g_pClientConfig->MAX_CHATSTRING_MINUS_1; i>=0; i--)
+	for (int i=g_pClientConfig->MAX_CHATSTRING_MINUS_1; i>=0; i--)
 	{
 		const char *str = pCreature->GetChatString(i);		
 

@@ -311,12 +311,12 @@ bool MEventManager::AssertEventBackground(EVENTBACKGROUND_ID id)
 				{
 					if (bpp == 1)
 					{
-						for (register int y = 0; y < height; y++)
+						for (int y = 0; y < height; y++)
 						{
 							pDataTemp = pData;
 							pSurfaceTemp = pSurface;								
 							
-							for (register int x = 0; x < width; x++)
+							for (int x = 0; x < width; x++)
 							{
 								BYTE temp_data = *pDataTemp++;	//p_data[y*(pitch)+x];
 								BYTE r = temp_data>>3;
@@ -332,12 +332,12 @@ bool MEventManager::AssertEventBackground(EVENTBACKGROUND_ID id)
 					}
 					else if (bpp == 3)
 					{
-						for (register int y = 0; y < height; y++)
+						for (int y = 0; y < height; y++)
 						{
 							pDataTemp = pData;
 							pSurfaceTemp = pSurface;	
 							
-							for (register int x = 0; x < width; x++)
+							for (int x = 0; x < width; x++)
 							{
 								//char *temp_data = &p_data[y*pitch+x*bpp];
 								BYTE r = *(pDataTemp+2) >> 3;		//temp_data[2]>>3;
