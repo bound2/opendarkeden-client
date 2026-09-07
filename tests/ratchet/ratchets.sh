@@ -841,7 +841,13 @@ R9_BASELINE=0
 # destructors that carried a type list are spelled noexcept(false),
 # which this pattern does not count; everything else is deleted or
 # noexcept.
-R10_BASELINE=9664
+#
+# R10 = 9,055 (2026-09-07): Lpackets, Upackets and Rpackets are at 0 as
+# well, 609 sites, by script this time - the packet classes are regular
+# enough for one, and it promotes only an inline one-liner returning a
+# constant or a scalar member. Cpackets (3,172) and Gpackets (5,883) are
+# what is left; Types carries none.
+R10_BASELINE=9055
 
 # Identifiers, `::` and commas between the parens, and nothing else. The
 # leading alternation rather than \b for the reason R8's comment gives:

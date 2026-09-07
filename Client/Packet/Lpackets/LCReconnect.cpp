@@ -13,8 +13,7 @@
 //----------------------------------------------------------------------
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //----------------------------------------------------------------------
-void LCReconnect::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void LCReconnect::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 		
@@ -89,8 +88,7 @@ void LCReconnect::read ( SocketInputStream & iStream )
 //----------------------------------------------------------------------
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //----------------------------------------------------------------------
-void LCReconnect::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void LCReconnect::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 		
@@ -127,7 +125,6 @@ void LCReconnect::write ( SocketOutputStream & oStream ) const
 //----------------------------------------------------------------------
 #ifdef __DEBUG_OUTPUT__
 	std::string LCReconnect::toString () const
-		   throw ()
 	{
 		__BEGIN_TRY
 			

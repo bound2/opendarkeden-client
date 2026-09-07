@@ -35,38 +35,38 @@ class RCRequestVerify : public Packet {
 public :
 	
 	// constructor
-	RCRequestVerify () throw ();
+	RCRequestVerify ();
 	
 	// destructor
-	~RCRequestVerify () throw ();
+	~RCRequestVerify ();
 
 	
 public :
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_RC_REQUEST_VERIFY; }
+	PacketID_t getPacketID () const noexcept { return PACKET_RC_REQUEST_VERIFY; }
 	
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getPacketSize () const throw () { return szBYTE; }
+	PacketSize_t getPacketSize () const noexcept { return szBYTE; }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "RCRequestVerify"; }
+		std::string getPacketName () const { return "RCRequestVerify"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
-	REQUEST_VERIFY getCode() const throw () { return m_Code ; }
-	void setCode ( REQUEST_VERIFY code ) throw () { m_Code = code ; }
+	REQUEST_VERIFY getCode() const noexcept { return m_Code ; }
+	void setCode ( REQUEST_VERIFY code ) noexcept { m_Code = code ; }
 
 
 private :
@@ -87,27 +87,27 @@ class RCRequestVerifyFactory : public PacketFactory {
 public :
 	
 	// constructor
-	RCRequestVerifyFactory () throw () {}
+	RCRequestVerifyFactory () {}
 	
 	// destructor
-	virtual ~RCRequestVerifyFactory () throw () {}
+	virtual ~RCRequestVerifyFactory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new RCRequestVerify(); }
+	Packet * createPacket () { return new RCRequestVerify(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "RCRequestVerify"; }
+		std::string getPacketName () const { return "RCRequestVerify"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_RC_REQUEST_VERIFY; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_RC_REQUEST_VERIFY; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE; }
 
 };
 
@@ -123,7 +123,7 @@ class RCRequestVerifyHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( RCRequestVerify * pRCRequestVerify , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( RCRequestVerify * pRCRequestVerify , Player * pPlayer );
 
 };
 

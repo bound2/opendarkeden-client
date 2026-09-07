@@ -37,27 +37,27 @@ class LCSelectPCError : public Packet {
 public:
 	
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_LC_SELECT_PC_ERROR; }
+	PacketID_t getPacketID() const noexcept { return PACKET_LC_SELECT_PC_ERROR; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw() { return szBYTE; }
+	PacketSize_t getPacketSize() const noexcept { return szBYTE; }
 	
 	// get packet's name
-	std::string getPacketName() const throw() { return "LCSelectPCError"; }
+	std::string getPacketName() const { return "LCSelectPCError"; }
 	
 	// get packet's debug std::string
-	std::string toString() const throw();
+	std::string toString() const;
 	
 	// get/set error message
-	BYTE getCode() const throw() { return m_Code; }
-	void setCode(BYTE code) throw() { m_Code = code; }
+	BYTE getCode() const noexcept { return m_Code; }
+	void setCode(BYTE code) noexcept { m_Code = code; }
 
 private : 
 
@@ -80,16 +80,16 @@ class LCSelectPCErrorFactory : public PacketFactory {
 public:
 	
 	// create packet
-	Packet* createPacket() throw() { return new LCSelectPCError(); }
+	Packet* createPacket() { return new LCSelectPCError(); }
 
 	// get packet name
-	std::string getPacketName() const throw() { return "LCSelectPCError"; }
+	std::string getPacketName() const { return "LCSelectPCError"; }
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_LC_SELECT_PC_ERROR; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_LC_SELECT_PC_ERROR; }
 
 	// get packet's max body size
-	PacketSize_t getPacketMaxSize() const throw() { return szBYTE; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE; }
 	
 };
 
@@ -105,7 +105,7 @@ class LCSelectPCErrorHandler {
 public:
 
 	// execute packet's handler
-	static void execute(LCSelectPCError* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(LCSelectPCError* pPacket, Player* pPlayer);
 
 };
 

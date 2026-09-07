@@ -349,6 +349,32 @@ Verified: unit_tests in `build/tests` and `build/tests-asan`, 596 tests,
 which is the check that matters for the headers every handler includes; the
 wire inventory and every golden unchanged.
 
+**Small packet directories (2026-09-07):** `Lpackets` (319 sites, 36 files),
+`Upackets` (34, 4) and `Rpackets` (256, 22) are at 0 as well, and **R10 =
+9,055**. The packet classes are regular enough that this slice was done by
+script rather than by hand, with the same rule narrowed to what a script can
+prove: a type list is deleted (163; the script aborts on a destructor carrying
+one, and none does); a `throw()` becomes `noexcept` only on an inline
+one-line member that returns a constant or a scalar or reference member with
+no call in the expression, or assigns one scalar by-value parameter to a
+member (162 - the `getPacketID`, `getPacketSize` and `getPacketMaxSize`
+constants and the scalar getters and setters); every other `throw()` is
+deleted (284 - the `getPacketName` and `toString` that return a
+`std::string`, the `createPacket` that call `new`, the size functions with
+out-of-line or calling bodies, the string setters, the list operations and
+the eight destructors). Scalar means the fundamentals plus every typedef and
+enum declared under `Client/Packet`, `Client/Packet/Types`, `basic/` and the
+directory itself, so a `std::string` getter or a const-reference setter never
+qualifies. The script's tokenizer copies comments and string literals
+through, and a second tokenizer compared every file with its committed
+version - every comment and literal identical, every code token identical
+once the specifications and the `noexcept` tokens are erased. A body the rule
+does not recognise is deleted, never promoted, so the script can only err by
+leaving a nothrow function unspecified, which ISO C++ allows; the review of
+its output is a review of the 162 promoted lines, which reduce to about sixty
+distinct shapes. `Cpackets` (3,172) and `Gpackets` (5,883) are what remains,
+and the same script applies to them.
+
 ### 4. `register` remains in C++ source
 
 There are roughly 650 declaration-like uses of the removed `register` storage

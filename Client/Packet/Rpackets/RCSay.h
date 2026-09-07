@@ -27,17 +27,17 @@ class RCSay : public DatagramPacket {
 public :
 	
     // Datagram 객체에서부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( Datagram & iDatagram ) throw ( ProtocolException , Error );
+    void read ( Datagram & iDatagram );
 		    
     // Datagram 객체로 패킷의 바이너리 이미지를 보낸다.
-    void write ( Datagram & oDatagram ) const throw ( ProtocolException , Error );
+    void write ( Datagram & oDatagram ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_RC_SAY; }
+	PacketID_t getPacketID () const noexcept { return PACKET_RC_SAY; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () 
+	PacketSize_t getPacketSize () const 
 	{ 
 		return szBYTE + m_Name.size()
 				+ szBYTE + m_Message.size()
@@ -46,25 +46,25 @@ public :
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "RCSay"; }
+		std::string getPacketName () const { return "RCSay"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 public :
 
 	// get/set Name
-	std::string getName () const throw () { return m_Name; }
-	void setName ( std::string msg ) throw () { m_Name = msg; }
+	std::string getName () const { return m_Name; }
+	void setName ( std::string msg ) { m_Name = msg; }
 
 	// get/set Message
-	std::string getMessage () const throw () { return m_Message; }
-	void setMessage ( std::string msg ) throw () { m_Message = msg; }
+	std::string getMessage () const { return m_Message; }
+	void setMessage ( std::string msg ) { m_Message = msg; }
 	
 	//get/set text color
-	uint getColor() const throw() { return m_Color; }
-	void setColor( uint color ) throw() { m_Color = color; }
+	uint getColor() const noexcept { return m_Color; }
+	void setColor( uint color ) noexcept { m_Color = color; }
 	
 private :
 	std::string m_Name;
@@ -88,17 +88,17 @@ class RCSayFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new RCSay(); }
+	Packet * createPacket () { return new RCSay(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "RCSay"; }
+		std::string getPacketName () const { return "RCSay"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_RC_SAY; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_RC_SAY; }
 
-	PacketSize_t getPacketMaxSize () const throw () 
+	PacketSize_t getPacketMaxSize () const 
 	{ 
 		return szBYTE + 128 + szBYTE + 20 + szDWORD;			
 	}
@@ -117,7 +117,7 @@ class RCSayHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( RCSay * pPacket ) throw ( ProtocolException , Error );
+	static void execute ( RCSay * pPacket );
 
 };
 

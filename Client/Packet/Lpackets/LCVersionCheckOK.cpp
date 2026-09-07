@@ -14,7 +14,6 @@
 //
 //////////////////////////////////////////////////////////////////////
 void LCVersionCheckOK::read ( SocketInputStream & iStream )
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 	__END_CATCH
@@ -25,7 +24,6 @@ void LCVersionCheckOK::read ( SocketInputStream & iStream )
 //
 //////////////////////////////////////////////////////////////////////
 void LCVersionCheckOK::write ( SocketOutputStream & oStream ) const
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 	__END_CATCH

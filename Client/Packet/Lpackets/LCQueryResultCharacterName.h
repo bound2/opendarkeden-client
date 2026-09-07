@@ -27,22 +27,22 @@ class LCQueryResultCharacterName : public Packet {
 public:
 
 	// constructor
-	LCQueryResultCharacterName() throw() : m_bExist(false) {}
+	LCQueryResultCharacterName() : m_bExist(false) {}
 
 public:
 
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read(SocketInputStream & iStream) throw(ProtocolException, Error);
+    void read(SocketInputStream & iStream);
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
+    void write(SocketOutputStream & oStream) const;
 
 
 	// get packet id
-	PacketID_t getPacketID() const throw() { return PACKET_LC_QUERY_RESULT_CHARACTER_NAME; }
+	PacketID_t getPacketID() const noexcept { return PACKET_LC_QUERY_RESULT_CHARACTER_NAME; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize() const throw() 
+	PacketSize_t getPacketSize() const 
 	{ 
 		return szbool
 			+ szBYTE + m_CharacterName.size(); 
@@ -50,21 +50,21 @@ public:
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName() const throw() { return "LCQueryResultCharacterName"; }
+		std::string getPacketName() const { return "LCQueryResultCharacterName"; }
 		
 		// get packet's debug std::string
-		std::string toString() const throw();
+		std::string toString() const;
 	#endif
 
 public:
 
 	// get/set player id
-	std::string getCharacterName() const throw() { return m_CharacterName; }
-	void setCharacterName(const std::string & playerID) throw() { m_CharacterName = playerID; }
+	std::string getCharacterName() const { return m_CharacterName; }
+	void setCharacterName(const std::string & playerID) { m_CharacterName = playerID; }
 
 	// get/set player id's existence
-	bool isExist() const throw() { return m_bExist; }
-	void setExist(bool bExist = true) throw() { m_bExist = bExist; }
+	bool isExist() const noexcept { return m_bExist; }
+	void setExist(bool bExist = true) noexcept { m_bExist = bExist; }
 
 private :
 
@@ -90,18 +90,18 @@ class LCQueryResultCharacterNameFactory : public PacketFactory {
 public:
 	
 	// create packet
-	Packet* createPacket() throw() { return new LCQueryResultCharacterName(); }
+	Packet* createPacket() { return new LCQueryResultCharacterName(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName() const throw() { return "LCQueryResultCharacterName"; }
+		std::string getPacketName() const { return "LCQueryResultCharacterName"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID() const throw() { return Packet::PACKET_LC_QUERY_RESULT_CHARACTER_NAME; }
+	PacketID_t getPacketID() const noexcept { return Packet::PACKET_LC_QUERY_RESULT_CHARACTER_NAME; }
 
 	// get packet's max body size
-	PacketSize_t getPacketMaxSize() const throw()
+	PacketSize_t getPacketMaxSize() const
 	{ 
 		return szbool
 			+ szBYTE + 20; 
@@ -121,7 +121,7 @@ class LCQueryResultCharacterNameHandler {
 public:
 
 	// execute packet's handler
-	static void execute(LCQueryResultCharacterName* pPacket, Player* pPlayer) throw(ProtocolException, Error);
+	static void execute(LCQueryResultCharacterName* pPacket, Player* pPlayer);
 
 };
 

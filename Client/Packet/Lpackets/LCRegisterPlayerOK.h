@@ -26,35 +26,35 @@ class LCRegisterPlayerOK : public Packet {
 public :
 
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_LC_REGISTER_PLAYER_OK; }
+	PacketID_t getPacketID () const noexcept { return PACKET_LC_REGISTER_PLAYER_OK; }
 	
 	// get packet body size
 	// *OPTIMIZATION HINT*
 	// const static LCRegisterPlayerOKPacketSize 를 정의, 리턴하라.
-	PacketSize_t getPacketSize () const throw () { return szBYTE + m_GroupName.size() + szBYTE; }
+	PacketSize_t getPacketSize () const { return szBYTE + m_GroupName.size() + szBYTE; }
 	
 	
     // get / set Groupname
-	std::string getGroupName() const throw() { return m_GroupName; }
-	void setGroupName( const std::string & GroupName ) throw() { m_GroupName = GroupName; }
+	std::string getGroupName() const { return m_GroupName; }
+	void setGroupName( const std::string & GroupName ) { m_GroupName = GroupName; }
 	
 	// get / set GoreLevel
-	bool isAdult() const throw() { return m_isAdult; }
-	void setAdult( bool isAdult ) throw() { m_isAdult = isAdult; }
+	bool isAdult() const noexcept { return m_isAdult; }
+	void setAdult( bool isAdult ) noexcept { m_isAdult = isAdult; }
 	
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's name
-		std::string getPacketName () const throw () { return "LCRegisterPlayerOK"; }
+		std::string getPacketName () const { return "LCRegisterPlayerOK"; }
 
 		// get packet's debug std::string
-		std::string toString () const throw () { return "LCRegisterPlayerOK"; }
+		std::string toString () const { return "LCRegisterPlayerOK"; }
 	#endif
 
 private :
@@ -81,18 +81,18 @@ class LCRegisterPlayerOKFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new LCRegisterPlayerOK(); }
+	Packet * createPacket () { return new LCRegisterPlayerOK(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "LCRegisterPlayerOK"; }
+		std::string getPacketName () const { return "LCRegisterPlayerOK"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_LC_REGISTER_PLAYER_OK; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_LC_REGISTER_PLAYER_OK; }
 
 	// get packet's max body size
-	PacketSize_t getPacketMaxSize () const throw () { return szBYTE + 20 + szBYTE; }
+	PacketSize_t getPacketMaxSize () const noexcept { return szBYTE + 20 + szBYTE; }
 	
 };
 
@@ -108,7 +108,7 @@ class LCRegisterPlayerOKHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( LCRegisterPlayerOK * pPacket , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( LCRegisterPlayerOK * pPacket , Player * pPlayer );
 
 };
 

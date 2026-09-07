@@ -23,8 +23,7 @@ RCRequestedFileInfo::RCRequestedFileInfo()
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void RCRequestedFileInfo::read ( SocketInputStream & iStream ) 
-	 throw ( ProtocolException , Error )
+void RCRequestedFileInfo::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
@@ -59,8 +58,7 @@ void RCRequestedFileInfo::read ( SocketInputStream & iStream )
 //////////////////////////////////////////////////////////////////////
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void RCRequestedFileInfo::write ( SocketOutputStream & oStream ) const 
-     throw ( ProtocolException , Error )
+void RCRequestedFileInfo::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
@@ -96,7 +94,6 @@ void RCRequestedFileInfo::write ( SocketOutputStream & oStream ) const
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 std::string RCRequestedFileInfo::toString () const
-       throw ()
 {
 	__BEGIN_TRY
 		
@@ -126,7 +123,6 @@ RCRequestedFile::~RCRequestedFile()
 
 void
 RCRequestedFile::Release()
-	throw()
 {
 	while (!m_FileInfos.empty())
 	{
@@ -139,7 +135,7 @@ RCRequestedFile::Release()
 }
 
 PacketSize_t 
-RCRequestedFile::getPacketSize () const throw ()
+RCRequestedFile::getPacketSize () const
 {
 	PacketSize_t ps = szBYTE;	// for listNum
 
@@ -159,7 +155,7 @@ RCRequestedFile::getPacketSize () const throw ()
 
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 void 
-RCRequestedFile::read ( SocketInputStream & iStream ) throw ( ProtocolException , Error )
+RCRequestedFile::read ( SocketInputStream & iStream )
 {
 	Release();
 
@@ -180,7 +176,7 @@ RCRequestedFile::read ( SocketInputStream & iStream ) throw ( ProtocolException 
 		
 // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
 void 
-RCRequestedFile::write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error )
+RCRequestedFile::write ( SocketOutputStream & oStream ) const
 {
 	BYTE listNum = m_FileInfos.size();
 
@@ -200,7 +196,7 @@ RCRequestedFile::write ( SocketOutputStream & oStream ) const throw ( ProtocolEx
 
 #ifdef __DEBUG_OUTPUT__
 std::string 
-RCRequestedFile::toString () const throw ()
+RCRequestedFile::toString () const
 {
 	StringStream msg;
 

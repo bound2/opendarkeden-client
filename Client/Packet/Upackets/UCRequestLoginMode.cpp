@@ -15,7 +15,6 @@
 // read from socket input stream
 //--------------------------------------------------------------------------------
 void UCRequestLoginMode::read ( Socket * pSocket )
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -32,7 +31,6 @@ void UCRequestLoginMode::read ( Socket * pSocket )
 // write to socket output stream
 //--------------------------------------------------------------------------------
 void UCRequestLoginMode::write ( Socket * pSocket ) const
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -49,7 +47,6 @@ void UCRequestLoginMode::write ( Socket * pSocket ) const
 //--------------------------------------------------------------------------------
 #ifdef __DEBUG_OUTPUT__
 string UCRequestLoginMode::toString () const
-	throw ()
 {
 	StringStream msg;
 

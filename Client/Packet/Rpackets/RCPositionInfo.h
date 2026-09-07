@@ -29,45 +29,45 @@ public :
 	RCPositionInfo();
 	
     // Datagram 객체에서부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( Datagram & iDatagram ) throw ( ProtocolException , Error );
+    void read ( Datagram & iDatagram );
 		    
     // Datagram 객체로 패킷의 바이너리 이미지를 보낸다.
-    void write ( Datagram & oDatagram ) const throw ( ProtocolException , Error );
+    void write ( Datagram & oDatagram ) const;
 
 
 	// get packet id
-	PacketID_t getPacketID () const throw () { return PACKET_RC_POSITION_INFO; }
+	PacketID_t getPacketID () const noexcept { return PACKET_RC_POSITION_INFO; }
 	
 	// get packet's body size
-	PacketSize_t getPacketSize () const throw () 
+	PacketSize_t getPacketSize () const 
 	{ 
 		return szBYTE + m_Name.size() + szZoneID + szCoord + szCoord;			
 	}
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "RCPositionInfo"; }
+		std::string getPacketName () const { return "RCPositionInfo"; }
 		
 		// get packet's debug string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 public :
 	// get/set ZoneID
-	ZoneID_t getZoneID () const throw () { return m_ZoneID; }
-	void setZoneID ( const ZoneID_t & zoneID ) throw () { m_ZoneID = zoneID; }
+	ZoneID_t getZoneID () const noexcept { return m_ZoneID; }
+	void setZoneID ( const ZoneID_t & zoneID ) { m_ZoneID = zoneID; }
 
 	// get / set ZoneX
-	Coord_t getZoneX() const throw() { return m_ZoneX; }
+	Coord_t getZoneX() const noexcept { return m_ZoneX; }
 	void setZoneX( Coord_t ZoneX ) { m_ZoneX = ZoneX; }
 
 	// get / set ZoneY
-	Coord_t getZoneY() const throw() { return m_ZoneY; }
+	Coord_t getZoneY() const noexcept { return m_ZoneY; }
 	void setZoneY( Coord_t ZoneY ) { m_ZoneY = ZoneY; }
 
 	// get/set chatting Name
-	std::string getName () const throw () { return m_Name; }
-	void setName ( const std::string & msg ) throw () { m_Name = msg; }
+	std::string getName () const { return m_Name; }
+	void setName ( const std::string & msg ) { m_Name = msg; }
 
 protected :
 	std::string		m_Name;
@@ -93,17 +93,17 @@ class RCPositionInfoFactory : public PacketFactory {
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new RCPositionInfo(); }
+	Packet * createPacket () { return new RCPositionInfo(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "RCPositionInfo"; }
+		std::string getPacketName () const { return "RCPositionInfo"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_RC_POSITION_INFO; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_RC_POSITION_INFO; }
 
-	PacketSize_t getPacketMaxSize () const throw () 
+	PacketSize_t getPacketMaxSize () const 
 	{ 
 		return szBYTE + 20 + szZoneID + szCoord + szCoord;	
 	}
@@ -122,7 +122,7 @@ class RCPositionInfoHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( RCPositionInfo * pPacket ) throw ( ProtocolException , Error );
+	static void execute ( RCPositionInfo * pPacket );
 
 };
 

@@ -19,8 +19,7 @@ RCStatusHP::RCStatusHP()
 //////////////////////////////////////////////////////////////////////
 // Datagram 객체로부터 데이타를 읽어서 패킷을 초기화한다.
 //////////////////////////////////////////////////////////////////////
-void RCStatusHP::read ( Datagram & iDatagram ) 
-	 throw ( ProtocolException , Error )
+void RCStatusHP::read ( Datagram & iDatagram )
 {
 	__BEGIN_TRY
 
@@ -51,8 +50,7 @@ void RCStatusHP::read ( Datagram & iDatagram )
 //////////////////////////////////////////////////////////////////////
 // Datagram 객체로 패킷의 바이너리 이미지를 보낸다.
 //////////////////////////////////////////////////////////////////////
-void RCStatusHP::write ( Datagram & oDatagram ) const 
-     throw ( ProtocolException , Error )
+void RCStatusHP::write ( Datagram & oDatagram ) const
 {
 	__BEGIN_TRY
 
@@ -82,7 +80,6 @@ void RCStatusHP::write ( Datagram & oDatagram ) const
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
 	std::string RCStatusHP::toString () const
-		throw ()
 	{
 		StringStream msg;
 		

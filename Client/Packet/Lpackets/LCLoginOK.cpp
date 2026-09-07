@@ -14,7 +14,6 @@
 //
 //////////////////////////////////////////////////////////////////////
 void LCLoginOK::read ( SocketInputStream & iStream )
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -32,7 +31,6 @@ void LCLoginOK::read ( SocketInputStream & iStream )
 //
 //////////////////////////////////////////////////////////////////////
 void LCLoginOK::write ( SocketOutputStream & oStream ) const
-	throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
@@ -46,7 +44,7 @@ void LCLoginOK::write ( SocketOutputStream & oStream ) const
 	__END_CATCH
 }
 
-PacketSize_t LCLoginOK::getPacketSize() const throw() 
+PacketSize_t LCLoginOK::getPacketSize() const 
 { 
 	return szBYTE + szBYTE + szBYTE + szWORD; 
 }

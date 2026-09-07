@@ -38,39 +38,39 @@ class CRRequest : public Packet
 public :
 	
 	// constructor
-	CRRequest () throw ();
+	CRRequest ();
 	
 	// destructor
-	~CRRequest () throw ();
+	~CRRequest ();
 	
 public :
-    PacketID_t getPacketID () const throw () { return PACKET_CR_REQUEST; }
+    PacketID_t getPacketID () const noexcept { return PACKET_CR_REQUEST; }
 
 	#ifdef __DEBUG_OUTPUT__
-		std::string getPacketName () const throw () { return "CRRequest"; }
+		std::string getPacketName () const { return "CRRequest"; }
 		
 		// get packet's debug std::string
-		std::string toString () const throw ();
+		std::string toString () const;
 	#endif
 
 
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-    void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
+    void read ( SocketInputStream & iStream );
 		    
     // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
-    void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
+    void write ( SocketOutputStream & oStream ) const;
 
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
-	PacketSize_t getPacketSize () const throw () { return szBYTE + szBYTE + m_RequestName.size(); }
-	static PacketSize_t getPacketMaxSize() throw() { return szBYTE + szBYTE + 20;}
+	PacketSize_t getPacketSize () const { return szBYTE + szBYTE + m_RequestName.size(); }
+	static PacketSize_t getPacketMaxSize() noexcept { return szBYTE + szBYTE + 20;}
 
 	// get / set ListNumber
-	CR_REQUEST_CODE getCode() const throw() { return m_Code; }
-	void setCode( CR_REQUEST_CODE code) throw() { m_Code = code; }
+	CR_REQUEST_CODE getCode() const noexcept { return m_Code; }
+	void setCode( CR_REQUEST_CODE code) noexcept { m_Code = code; }
 
-	const std::string& getRequestName() const throw() { return m_RequestName; }
-	void setRequestName(const char* pName) throw() { m_RequestName = pName; }
+	const std::string& getRequestName() const noexcept { return m_RequestName; }
+	void setRequestName(const char* pName) { m_RequestName = pName; }
 
 protected :
 	
@@ -92,27 +92,27 @@ class CRRequestFactory : public PacketFactory {
 public :
 	
 	// constructor
-	CRRequestFactory () throw () {}
+	CRRequestFactory () {}
 	
 	// destructor
-	virtual ~CRRequestFactory () throw () {}
+	virtual ~CRRequestFactory () {}
 
 	
 public :
 	
 	// create packet
-	Packet * createPacket () throw () { return new CRRequest(); }
+	Packet * createPacket () { return new CRRequest(); }
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
-		std::string getPacketName () const throw () { return "CRRequest"; }
+		std::string getPacketName () const { return "CRRequest"; }
 	#endif
 	
 	// get packet id
-	PacketID_t getPacketID () const throw () { return Packet::PACKET_CR_REQUEST; }
+	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CR_REQUEST; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize () const throw () { return szBYTE + szBYTE + 20;}
+	PacketSize_t getPacketMaxSize () const noexcept { return szBYTE + szBYTE + 20;}
 
 };
 
@@ -128,7 +128,7 @@ class CRRequestHandler {
 public :
 
 	// execute packet's handler
-	static void execute ( CRRequest * pCRRequest , Player * pPlayer ) throw ( ProtocolException , Error );
+	static void execute ( CRRequest * pCRRequest , Player * pPlayer );
 
 };
 
