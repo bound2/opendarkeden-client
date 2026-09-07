@@ -42,7 +42,7 @@ public :
 	Socket ( SocketImpl * impl );
 	
 	// destructor
-	virtual ~Socket ();
+	virtual ~Socket () noexcept(false);
 
 	
 //////////////////////////////////////////////////

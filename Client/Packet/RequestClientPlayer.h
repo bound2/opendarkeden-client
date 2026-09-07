@@ -31,7 +31,7 @@ public :
 	RequestClientPlayer ( Socket * pSocket );
 	
 	// destructor
-	~RequestClientPlayer ();
+	~RequestClientPlayer () noexcept(false);
 
 public :
 

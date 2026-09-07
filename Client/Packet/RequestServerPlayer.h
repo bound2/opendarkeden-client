@@ -30,7 +30,7 @@ public :
 	RequestServerPlayer ( Socket * pSocket );
 	
 	// destructor
-	~RequestServerPlayer ();
+	~RequestServerPlayer () noexcept(false);
 
 public :
 

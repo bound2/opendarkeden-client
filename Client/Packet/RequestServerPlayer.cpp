@@ -42,7 +42,7 @@ RequestServerPlayer::RequestServerPlayer ( Socket * pSocket )
 // destructor
 //
 //--------------------------------------------------------------------------------
-RequestServerPlayer::~RequestServerPlayer ()
+RequestServerPlayer::~RequestServerPlayer () noexcept(false)
 {
 	__BEGIN_TRY
 	

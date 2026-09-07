@@ -74,7 +74,7 @@ ClientPlayer::ClientPlayer ( Socket * pSocket )
 // destructor
 //
 //--------------------------------------------------------------------------------
-ClientPlayer::~ClientPlayer ()
+ClientPlayer::~ClientPlayer () noexcept(false)
 {
 	__BEGIN_TRY
 		

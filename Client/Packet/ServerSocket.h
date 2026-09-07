@@ -35,7 +35,7 @@ public :
 	ServerSocket ( uint port , uint backlog = 5 );
 	
 	// destructor
-	~ServerSocket ();
+	~ServerSocket () noexcept(false);
 	
 
 //////////////////////////////////////////////////

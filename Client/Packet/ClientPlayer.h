@@ -33,7 +33,7 @@ public :
 	ClientPlayer ( Socket * pSocket );
 	
 	// destructor
-	~ClientPlayer ();
+	~ClientPlayer () noexcept(false);
 
 public :
 

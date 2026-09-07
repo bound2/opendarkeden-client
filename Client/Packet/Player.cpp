@@ -84,7 +84,7 @@ Player::Player ( Socket * pSocket )
 // destructor
 //
 //////////////////////////////////////////////////////////////////////
-Player::~Player ()
+Player::~Player () noexcept(false)
 {
 	__BEGIN_TRY
 

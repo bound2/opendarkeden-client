@@ -55,7 +55,7 @@ SocketInputStream::SocketInputStream ( Socket * sock , uint BufferLen )
 //////////////////////////////////////////////////////////////////////
 // destructor
 //////////////////////////////////////////////////////////////////////
-SocketInputStream::~SocketInputStream ()
+SocketInputStream::~SocketInputStream () noexcept(false)
 {
 	__BEGIN_TRY
 		

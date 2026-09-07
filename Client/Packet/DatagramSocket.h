@@ -37,7 +37,7 @@ public :
 	DatagramSocket ( uint port );
 
 	// destructor
-	~DatagramSocket ();
+	~DatagramSocket () noexcept(false);
 
 	// send datagram to peer
 	uint send ( Datagram * pDatagram );

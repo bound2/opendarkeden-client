@@ -41,7 +41,7 @@ public :
 	SocketOutputStream ( Socket * sock , uint BufferSize = DefaultSocketOutputBufferSize );
 	
 	// destructor
-	virtual ~SocketOutputStream ();
+	virtual ~SocketOutputStream () noexcept(false);
 
 	
 //////////////////////////////////////////////////

@@ -62,7 +62,7 @@ RequestClientPlayer::readInputStream ( char * buf , uint len )
 // destructor
 //
 //--------------------------------------------------------------------------------
-RequestClientPlayer::~RequestClientPlayer ()
+RequestClientPlayer::~RequestClientPlayer () noexcept(false)
 {
 	__BEGIN_TRY
 	

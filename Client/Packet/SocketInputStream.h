@@ -53,7 +53,7 @@ public :
 	SocketInputStream ( Socket * sock , uint BufferSize = DefaultSocketInputBufferSize );
 	
 	// destructor
-	virtual ~SocketInputStream ();
+	virtual ~SocketInputStream () noexcept(false);
 
 	
 //////////////////////////////////////////////////

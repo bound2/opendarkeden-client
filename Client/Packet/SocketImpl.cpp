@@ -93,7 +93,7 @@ SocketImpl::SocketImpl ( const SocketImpl & impl )
 //     Error
 //
 ////////////////////////////////////////////////////////////////////////
-SocketImpl::~SocketImpl ()
+SocketImpl::~SocketImpl () noexcept(false)
 {
 	__BEGIN_TRY 
 
