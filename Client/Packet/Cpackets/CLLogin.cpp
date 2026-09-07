@@ -59,11 +59,8 @@ void CLLogin::write ( SocketOutputStream & oStream ) const
 
 	if( !m_bNetmarble )
 	{
-		// Both caps run on the std::string's own size, BEFORE the
-		// narrowing to the BYTE that goes on the wire: (BYTE)286 is 30,
-		// so a 286-character id used to pass its cap and then go out
-		// whole behind a length byte claiming 30 - and the password
-		// after it would be read out of the id's tail.
+		// Cap both std::strings' own sizes, before narrowing to the
+		// length bytes.
 		if ( m_ID.size() > 30 )
 			throw InvalidProtocolException("too large ID length");
 

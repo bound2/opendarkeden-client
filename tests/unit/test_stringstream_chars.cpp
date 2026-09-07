@@ -2,44 +2,10 @@
 // test_stringstream_chars.cpp
 //----------------------------------------------------------------------
 //
-// The NUL StringStream appended after every streamed character, the
-// three texts it corrupted, and the buffer toString() failed to clear.
-//
-// This is a second StringStream file beside test_stringstream.cpp, which
-// pins the numeric operators' buffer sizing (docs/RESTRUCTURING.md task
-// 1.3). It is kept separate because what it pins is not the formatter
-// but its reach: the two character overloads, and the diagnostic text
-// three consumers build out of them.
-//
-// The defect: operator<<(char) built a std::string(2, '\0') and wrote
-// the character into the first byte only, so the second byte survived
-// into the list; operator<<(uchar) did the same, and toString()
-// concatenates the list verbatim. Every streamed character therefore
-// carried a NUL with it.
-//
-// What that reached, the server-visible one first:
-//
-//   Throwable::toString() streams a '\n' between the message and the
-//   stack trace, and getStackTrace() streams one after every frame. The
-//   four SendBugReport("%s", t.toString().c_str()) sites
-//   (Client/GameMain.cpp, Client/Packet/ClientCommunicationManager.cpp)
-//   were so handed a *bug_report cut off before the stack trace the
-//   report exists to carry. SendBugReport (Client/Packet/WireHost.cpp)
-//   then cuts at 100 bytes of its own, so what the server sees is
-//   still bounded; the fix makes the whole text reach that cut.
-//
-//   __assert__ (Client/Packet/PacketAssert.cpp) streams eos first, so
-//   assertion_failed.log received a bare newline per failed Assert, and
-//   the AssertionError's message was unreadable through c_str().
-//
-//   Every LOG_ERROR and strstr consumer of toString().c_str() saw only
-//   the first line.
-//
-// The pins below are in two halves: the operators' own contract, and
-// the text the consumers build. Each consumer pin asserts the exact
-// string plus the two properties that make it usable through a C
-// interface at all - no embedded NUL, and a c_str() as long as the
-// std::string it came from.
+// StringStream's two character overloads, and the diagnostic text
+// Throwable and __assert__ build out of them: one streamed character is
+// one byte, with no embedded NUL to cut the text short through c_str().
+// Also toString()'s rebuild after a further insertion.
 //
 //----------------------------------------------------------------------
 
@@ -57,23 +23,14 @@
 
 namespace {
 
-//----------------------------------------------------------------------
-// A failing assertion appends its message to assertion_failed.log in the
-// working directory, exactly as it always has. The test that provokes
-// one removes the file afterwards, so the ctest directory does not grow
-// a line per run.
-//----------------------------------------------------------------------
+// A failing assertion appends to assertion_failed.log; clean it up.
 void	RemoveAssertionLog()
 {
 	std::error_code	Error;
 	std::filesystem::remove("assertion_failed.log", Error);
 }
 
-//----------------------------------------------------------------------
-// The two properties a diagnostic string needs to survive being handed
-// to a C interface - which is what every consumer of these texts does,
-// through c_str().
-//----------------------------------------------------------------------
+// Whether the text survives being handed to a C interface whole.
 bool	IsWholeThroughCStr(const std::string& text)
 {
 	return text.find('\0') == std::string::npos
@@ -92,9 +49,6 @@ bool	StartsWith(const std::string& text, const std::string& prefix)
 // The two character overloads
 //----------------------------------------------------------------------
 
-//----------------------------------------------------------------------
-// One character means one byte. The old code appended two.
-//----------------------------------------------------------------------
 TEST(StringStream, CharAppendsExactlyOneByte)
 {
 	StringStream	ss;
@@ -105,10 +59,7 @@ TEST(StringStream, CharAppendsExactlyOneByte)
 	CHECK(IsWholeThroughCStr(ss.toString()));
 }
 
-//----------------------------------------------------------------------
-// The uchar overload had the identical shape, and is what carries a
-// byte outside the signed range.
-//----------------------------------------------------------------------
+// The uchar overload is what carries a byte outside the signed range.
 TEST(StringStream, UCharAppendsExactlyOneByte)
 {
 	{
@@ -127,11 +78,6 @@ TEST(StringStream, UCharAppendsExactlyOneByte)
 	}
 }
 
-//----------------------------------------------------------------------
-// A stream mixing the character overloads with the others must read as
-// the text it spells. The old code produced eight bytes here, with a
-// NUL at index 3 and another at index 7.
-//----------------------------------------------------------------------
 TEST(StringStream, MixedInsertionsCarryNoNul)
 {
 	StringStream	ss;
@@ -149,13 +95,7 @@ TEST(StringStream, MixedInsertionsCarryNoNul)
 // Throwable, the consumer the server sees
 //----------------------------------------------------------------------
 
-//----------------------------------------------------------------------
-// A two-frame stack trace, and the toString() that wraps it. addStack
-// pushes to the front, so the most recent frame is rendered first, at
-// one leading space, and each frame ends in a streamed newline - which
-// is where the NULs came from. toString() streams one more between the
-// message and the trace, which is the one that truncated *bug_report.
-//----------------------------------------------------------------------
+// addStack pushes to the front, so the most recent frame renders first.
 TEST(Throwable, StackTraceAndToStringCarryNoNul)
 {
 	Throwable	t("boom");
@@ -172,8 +112,6 @@ TEST(Throwable, StackTraceAndToStringCarryNoNul)
 	CHECK(text == std::string("Throwable : boom\n Outer.cpp:20\n  Inner.cpp:10\n"));
 	CHECK(IsWholeThroughCStr(text));
 
-	// What SendBugReport("%s", t.toString().c_str()) actually transmits:
-	// the whole text, stack trace included, rather than the first line.
 	CHECK(std::string(text.c_str()).find("Inner.cpp:10") != std::string::npos);
 }
 
@@ -182,13 +120,8 @@ TEST(Throwable, StackTraceAndToStringCarryNoNul)
 // __assert__, the consumer that writes a file
 //----------------------------------------------------------------------
 
-//----------------------------------------------------------------------
-// The message opens with a streamed eos, so under the old code byte 1
-// was a NUL and assertion_failed.log received a bare newline. The
-// four-argument entry point is used here because it names its own file
-// and line, which keeps the pinned prefix independent of this file's
-// layout.
-//----------------------------------------------------------------------
+// The four-argument entry point names its own file and line, which keeps
+// the pinned prefix independent of this file's layout.
 TEST(PacketAssert, AssertionMessageCarriesNoNul)
 {
 	bool	b_caught = false;
@@ -220,14 +153,7 @@ TEST(PacketAssert, AssertionMessageCarriesNoNul)
 // toString() after a further insertion
 //----------------------------------------------------------------------
 
-//----------------------------------------------------------------------
-// toString() caches its result and rebuilds only after something new
-// was inserted. The rebuild used to append the whole list to the
-// previous result rather than replace it, so the second call below
-// answered "aab". Every caller in the tree calls toString() once, or
-// twice with nothing between, which is why nobody saw it; the
-// adversarial review of the NUL fix above read it.
-//----------------------------------------------------------------------
+// toString() caches its result and rebuilds after a further insertion.
 TEST(StringStream, ToStringIsRebuiltFromScratchAfterAnInsertion)
 {
 	StringStream	ss;

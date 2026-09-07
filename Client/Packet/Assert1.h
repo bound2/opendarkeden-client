@@ -17,22 +17,15 @@
 // When NDEBUG is defined in Config.h, every Assert is ignored. Otherwise a
 // failed Assert logs to a file and then throws AssertionError.
 //
-// This header is an unreferenced duplicate of PacketAssert.h - nothing
-// includes it, and it carries the same include guard, so it could not be
-// included alongside it anyway. It is kept in step with its twin rather
-// than left behind, because a stale duplicate beside live code is a
-// correctness trap the day someone edits the wrong one.
+// An unreferenced duplicate of PacketAssert.h, kept in step with it.
 //
 //--------------------------------------------------------------------------------
 
-// Compatibility entry point, for the call sites that name a file and a line
-// explicitly. It writes exactly what it is given.
+// Compatibility entry point, for call sites that name a file and a line.
 void __assert__ ( const char * file , uint line , const char * func , const char * expr ) throw ( AssertionError );
 
-// C++20 entry point. The failing site arrives through the defaulted
-// DiagnosticSite (Exception.h), so the macros below no longer forward
-// __FILE__ and __LINE__. No dynamic exception specification, as in
-// PacketAssert.h.
+// C++20 entry point: the failing site arrives through the defaulted
+// DiagnosticSite (Exception.h).
 void __assert__ ( const char * func , const char * expr , const DiagnosticSite & site = DiagnosticSite() );
 
 #if defined(NDEBUG)

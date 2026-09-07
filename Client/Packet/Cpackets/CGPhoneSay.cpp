@@ -47,9 +47,7 @@ void CGPhoneSay::write ( SocketOutputStream & oStream ) const
 	
 	oStream.write( m_SlotID );
 		
-	// The cap runs on the std::string's own size, BEFORE the narrowing:
-	// (BYTE)300 is 44, so a 300-byte message used to pass this test and
-	// then go out whole behind a length byte claiming 44.
+	// Cap the std::string's own size, before narrowing to the length byte.
 	if ( m_Message.size() > 128 )
 		throw InvalidProtocolException("too large message length");
 

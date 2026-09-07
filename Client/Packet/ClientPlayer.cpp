@@ -301,13 +301,6 @@ void ClientPlayer::processCommand ()
 				if (++processedPacket > maxProcessPacket)
 				{
 					const LogSite site;
-					// The message repeats the file and the line the log
-					// line already carries in its header. Both now come
-					// from the one captured site above, so the two
-					// halves of this line cannot disagree; the text is
-					// what DEBUG_ADD_FORMAT produced here before, since
-					// the site is captured on the line the macro
-					// occupied.
 					log_write_at(site, LOG_LEVEL_INFO, "[PacketSkip] So many Packets. MaxProcessPacket:%d, CurrentPacket:%d, File:%s, Line:%d",maxProcessPacket,processedPacket, site.file,site.line);
 					//DEBUG_ADD_FORMAT_WAR(szBuf);
 

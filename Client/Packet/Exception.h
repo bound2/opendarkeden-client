@@ -25,26 +25,9 @@
 //
 // struct DiagnosticSite
 //
-// Where a diagnostic was raised. The one shape carrying both what a
-// C++20 entry point captured for itself and what an older (file, line)
-// entry point was handed, since a std::source_location cannot be built
-// with a file and a line of one's own choosing.
-//
-// The default constructor captures the CALLER's location: a
-// std::source_location::current() written as a default argument is
-// evaluated at the call site rather than here, which is what lets
-// __END_CATCH and Assert() stop forwarding __FILE__ and __LINE__ by
-// hand and still record the line of the macro use. That nesting - this
-// constructor is itself the default argument of the entry point - is
-// the part a compiler could plausibly get wrong by reporting this
-// header's own line, so tests/unit/test_packet_source_location.cpp
-// compares every capture against the test translation unit's own
-// __FILE__ and __LINE__ rather than checking it for being plausible.
-//
-// The shape matches basic/BasicException.h's ExceptionSite and
-// basic/DebugLog.h's LogSite deliberately; it is a separate type only
-// because the wire layer's exception header may not drag in the enum
-// and the _Error macros those carry.
+// Where a diagnostic was raised: a file and a line, either captured at
+// the caller by the defaulted std::source_location or supplied
+// explicitly.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -54,9 +37,6 @@ struct DiagnosticSite {
 	int		line;
 	const char *	function;	// NULL when only a file and a line were supplied
 
-	// noexcept rather than the throw () the rest of this header spells:
-	// dynamic exception specifications are the conformance workload the
-	// assessment's finding 3 counts, and new declarations do not add to it.
 	DiagnosticSite ( const std::source_location & location = std::source_location::current() ) noexcept
 		: file(location.file_name()),
 		  line((int)location.line()),
@@ -101,11 +81,8 @@ public :
 		m_Stacks.push_front( s.toString());
 	}
 
-	// The same, with the location captured instead of forwarded: this
-	// is what __END_CATCH calls, so no method wrapped in it spells
-	// __FILE__ and __LINE__ any more. It pushes the identical
-	// "file:line" string, because it hands the captured file and line
-	// straight to the overload above.
+	// The same, with the location captured at the caller rather than
+	// forwarded. This is what __END_CATCH calls.
 	void addStack ( const DiagnosticSite & site = DiagnosticSite() ) noexcept
 	{
 		addStack( site.file, site.line );

@@ -3,34 +3,12 @@
 //----------------------------------------------------------------------
 //
 // The client skill-activation family - CGSkillToSelf, CGSkillToObject,
-// CGSkillToTile and CGSkillToNamed - after its migration onto the C++20
-// std::span and readWire/writeWire entry points (the second slice of
-// the priority-3 and priority-4 items in
-// docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md).
+// CGSkillToTile and CGSkillToNamed - at field level, over every encrypt
+// code: every field survives a write/read cycle, a truncated body
+// underflows, and CGSkillToNamed's length byte and name body agree.
 //
-// The wire BYTES of these four are pinned in test_packet_goldens.cpp,
-// which is the contract: three of them against goldens recorded for all
-// six encrypt codes before this work started, the fourth against a
-// golden recorded in the commit before the migration. This file pins
-// what a byte golden cannot see:
-//
-//   - every FIELD survives a write/read cycle under every encrypt code,
-//     checked through the packet's own getters, and the body is exactly
-//     getPacketSize() long, so a width change on either side shows up.
-//     Field ORDER is the goldens' job: two same-width fields swapped in
-//     both directions read back symmetric here and pass, and only the
-//     byte pin in test_packet_goldens.cpp catches that;
-//   - a truncated body is refused with InsufficientDataException, the
-//     same exception the raw pointer/length read threw, because both
-//     spellings now reach the same bounded core (failUnderflow in
-//     SocketInputStream::read(std::span<char>));
-//   - CGSkillToNamed's length byte and name body always agree, which is
-//     the property the bounded write exists to hold.
-//
-// Only the plain branch of read()/write() was migrated; the encrypter
-// branch (SHUFFLE_STATEMENT_*/readEncrypt/writeEncrypt) is untouched.
-// The round-trips therefore run over every encrypt code, so a change
-// that reached only one of the two branches shows up here.
+// The wire bytes and the field ORDER are pinned in
+// test_packet_goldens.cpp, not here.
 //
 // Compiled with the packetwire defines (tests/CMakeLists.txt).
 //
@@ -102,9 +80,7 @@ void	SkillReadBody(PacketT& dst, const std::vector<unsigned char>& body, uchar c
 	CHECK(f.m_Stream.isEmpty());
 }
 
-// True when read() refuses `body` by running out of bytes. The bounded
-// span core and the pointer/length adapter share failUnderflow(), so the
-// migrated packets must still raise exactly this.
+// True when read() refuses `body` by running out of bytes.
 template <class PacketT>
 bool	UnderflowsOn(const std::vector<unsigned char>& body, uchar code)
 {
@@ -133,8 +109,7 @@ std::vector<unsigned char>	TruncatedBody(const Packet& packet, uchar code)
 	return body;
 }
 
-// Fixture values distinct from test_packet_goldens.cpp's, so a getter
-// wired to the wrong member cannot pass by coincidence with that file.
+// Fixture values distinct from test_packet_goldens.cpp's.
 void	FillSelf(CGSkillToSelf& p)
 {
 	p.setSkillType(0x81C2);
@@ -217,9 +192,7 @@ TEST(CGSkillToTile, WireMigrationPreservesEveryFieldUnderEveryCode)
 }
 
 // CGSkillToNamed never reaches the encrypter, so its bytes and its
-// parse must be identical under every code - the same property
-// EncrypterFree() asserts for it in test_packet_goldens.cpp, restated
-// here at field level because this file is where its span write lives.
+// parse must be identical under every code.
 TEST(CGSkillToNamed, WireMigrationPreservesEveryFieldUnderEveryCode)
 {
 	CGSkillToNamed reference;
@@ -258,9 +231,8 @@ TEST(SkillPacketFamily, TruncatedBodiesRaiseInsufficientData)
 	FillTile(tile);
 	CHECK(UnderflowsOn<CGSkillToTile>(TruncatedBody(tile, 0), 0));
 
-	// Two truncations for the named packet: the first lands inside the
-	// name body (the std::string read the length byte drives), the second
-	// inside the scalar header itself (the readWire path).
+	// Two truncations: the first inside the name body, the second inside
+	// the scalar header.
 	CGSkillToNamed named;
 	FillNamed(named);
 	CHECK(UnderflowsOn<CGSkillToNamed>(TruncatedBody(named, 0), 0));
@@ -293,9 +265,7 @@ TEST(CGSkillToNamed, NameAtTheCapRoundTrips)
 }
 
 // write() refuses anything over the cap instead of emitting a body its
-// own length byte does not describe. 276 is the case the BYTE narrowing
-// used to hide: (BYTE)276 is 20, which passed the old cap check while
-// write() went on to emit all 276 characters.
+// own length byte does not describe. 276 narrows to 20 in a BYTE.
 TEST(CGSkillToNamed, WriteRefusesNamesLongerThanTheCap)
 {
 	const size_t lengths[] = { 21, 255, 256, 276, 300 };
@@ -317,8 +287,7 @@ TEST(CGSkillToNamed, WriteRefusesNamesLongerThanTheCap)
 	}
 }
 
-// An empty name is refused on both sides, as it always was: write()
-// cannot express a zero length byte the reader accepts.
+// An empty name is refused on both sides.
 TEST(CGSkillToNamed, EmptyNameIsRefusedOnBothSides)
 {
 	CGSkillToNamed packet;

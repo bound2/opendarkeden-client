@@ -26,18 +26,12 @@
 //
 //--------------------------------------------------------------------------------
 
-// Compatibility entry point, for the call sites that name a file and a line
-// explicitly. It writes exactly what it is given.
+// Compatibility entry point, for call sites that name a file and a line.
 void __assert__ ( const char * file , uint line , const char * func , const char * expr ) throw ( AssertionError );
 
-// C++20 entry point. The failing site arrives through the defaulted
-// DiagnosticSite (Exception.h), so the macros below no longer forward
-// __FILE__ and __LINE__; only the two things a location cannot carry - the
-// function spelling this platform wants and the stringized expression - are
-// still passed by hand. It writes the same message, because it hands the
-// captured file and line straight to the overload above. It carries no
-// dynamic exception specification: those are the conformance workload the
-// assessment's finding 3 counts, and a new declaration does not add to it.
+// C++20 entry point: the failing site arrives through the defaulted
+// DiagnosticSite (Exception.h). func is still passed by hand, because the
+// function spelling each platform wants is decided by the macro below.
 void __assert__ ( const char * func , const char * expr , const DiagnosticSite & site = DiagnosticSite() );
 
 #if defined(NDEBUG)

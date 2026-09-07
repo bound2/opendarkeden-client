@@ -41,13 +41,8 @@ void CGRegistGuild::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
-	// Both caps run on the std::string's own size, BEFORE the narrowing
-	// to the BYTE that goes on the wire: (BYTE)286 is 30, so a
-	// 286-character guild name used to pass its cap and then go out
-	// whole behind a length byte claiming 30. The intro's cap was worse
-	// than that - 256 is not a value a BYTE can hold, so the old test
-	// could never fire at all, and a length byte cannot express 256
-	// either. 255 is what the wire has always allowed.
+	// Cap both std::strings' own sizes, before narrowing to the length
+	// bytes. 255 is the most a length byte can express.
 	if ( m_GuildName.size() > 30 )
 		throw InvalidProtocolException( "szGuildName > 30" );
 

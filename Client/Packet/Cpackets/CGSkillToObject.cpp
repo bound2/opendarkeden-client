@@ -11,9 +11,7 @@
 
 #include <cstdint>
 
-// The staged read below narrows ObjectID_t through an exact-width type.
-// Pin the two widths together so a change to ObjectID_t is a compile
-// error here rather than a silent change of how many bytes go on the wire.
+// Pin the wire width so a change to ObjectID_t is a compile error here.
 static_assert(sizeof(ObjectID_t) == sizeof(std::uint32_t),
 	"CGSkillToObject stages its target ObjectID as a 32-bit wire scalar");
 
@@ -52,15 +50,11 @@ void CGSkillToObject::read (SocketInputStream & iStream)
 	else 
 #endif
 	{
-		// SkillType_t and CEffectID_t are both WORD, so the wire scalar
-		// constraint pins them at their exact 16-bit width.
 		iStream.readWire(m_SkillType);
 		iStream.readWire(m_CEffectID);
 
-		// ObjectID_t is DWORD, which on this toolchain is unsigned long -
-		// four bytes wide, but not one of the exact-width types the
-		// constraint accepts. Stage it in the exact-width equivalent the
-		// static_assert above ties to it, exactly as CGAttack does.
+		// ObjectID_t is DWORD, not one of the exact-width types readWire
+		// accepts, so it is staged in the equivalent.
 		std::uint32_t targetObjectID = 0;
 		iStream.readWire(targetObjectID);
 		m_TargetObjectID = static_cast<ObjectID_t>(targetObjectID);

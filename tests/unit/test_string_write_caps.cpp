@@ -3,62 +3,19 @@
 //----------------------------------------------------------------------
 //
 // Every client packet write() that puts a BYTE-length-prefixed string on
-// the wire, over the lengths that the length byte cannot express.
+// the wire, over the lengths a length byte cannot express - the window
+// a `BYTE sz = m_Message.size();` before the cap used to let through.
 //
-// The shape these all share, and the defect in it:
+// Per field: write() refuses everything above min(cap, 255) and leaves
+// only the fields ahead of it in the ring; a string of exactly the cap
+// emits exactly getPacketSize() bytes; and where read() accepts the same
+// length, the field survives a write/read cycle. Several of these
+// packets are asymmetric, so the read cap is given per field.
 //
-//	BYTE szMessage = m_Message.size();	// narrows
-//	if (szMessage > 128) throw ...;		// caps the NARROWED value
-//	oStream.write(szMessage);
-//	oStream.write(m_Message);		// writes the WHOLE string
+// CLRegisterPlayer is absent: its setters truncate, so no over-cap
+// string can reach its write() at all.
 //
-// (BYTE)276 is 20, so a 276-character message narrows below the cap,
-// passes the test, and then goes out as 276 bytes behind a length byte
-// claiming 20. The framing header is written from getPacketSize(), which
-// counts the real size, so the frame is the right length and its
-// CONTENTS are not: the peer takes 20 bytes as the message and parses
-// the other 256 as whatever packet follows. This repo's frame-bounded
-// reader rejects the tail; the server's legacy reader does not.
-//
-// The window is exactly 256 + 1 .. 256 + cap (and 512 + 1 .. 512 + cap,
-// which no caller can build). Below it, 129..255 already threw; at 256
-// the narrowed length is 0, which the "== 0" test rejects in the packets
-// that have one - and in the packets that do NOT have one, 256 writes a
-// zero length byte and no body against a header claiming 256 bytes,
-// which desynchronises just as badly. So the tests below refuse
-// everything above the cap the length byte can express, which is
-// min(cap, 255).
-//
-// What each field is checked for:
-//
-//   - write() throws InvalidProtocolException at every length above that
-//     cap, and the output ring holds exactly the bytes of the FIELDS
-//     BEFORE it - nothing of the string, and nothing after it. The
-//     framing header is not involved: these tests call write(stream)
-//     directly rather than through write(const Packet*), which is what
-//     puts the header in the ring (test_output_stream_rollback.cpp
-//     covers that half);
-//   - a string of exactly the cap is accepted, and the body write emits
-//     exactly getPacketSize() bytes. That is the property the bounded
-//     write exists to hold: the framing header, the length byte and the
-//     bytes that follow it all agree;
-//   - where read() accepts the same length, the field survives a
-//     write/read cycle. The read cap is given per field because several
-//     of these packets are ASYMMETRIC - CGWhisper::write caps a name at
-//     128 and CGWhisper::read at 10 - and the round-trip runs at
-//     whichever is smaller. The cycle compares the field, not the whole
-//     stream: CLLogin::write emits a login-mode byte its own read() does
-//     not consume, which is upstream's and none of this change's
-//     business.
-//
-// CLRegisterPlayer is deliberately absent. It has the same eleven narrowed
-// lengths, but every one of its setters truncates to the same maximum
-// the write tests against (setID does `id.substr(0, maxIDLength)`), so
-// no over-cap string can reach its write() at all. A test there would
-// pin the setters, not the writer.
-//
-// Compiled with the packetwire defines (tests/CMakeLists.txt), so the
-// Packet and stream definitions are identical to the library's.
+// Compiled with the packetwire defines (tests/CMakeLists.txt).
 //
 //----------------------------------------------------------------------
 
@@ -106,13 +63,8 @@ namespace {
 
 //----------------------------------------------------------------------
 // Streams over a never-used socket (see tests/support/packet_stream_access.h).
-//
-// The ENCRYPTING streams, at code 0, which is the plain branch of every
-// packet that has one and byte-identical to the plain stream (the same
-// choice test_packet_skill_family_wire.cpp makes, against goldens).
-// CGUseItemFromInventory::write dynamic_casts its stream and Asserts the
-// cast under __USE_ENCRYPTER__, so a plain SocketOutputStream throws an
-// Error out of that one before it reaches any cap at all.
+// The encrypting streams at code 0, because CGUseItemFromInventory::write
+// Asserts the dynamic_cast to one under __USE_ENCRYPTER__.
 //----------------------------------------------------------------------
 struct CapOutFixture
 {
@@ -141,8 +93,8 @@ struct CapInFixture
 };
 
 //----------------------------------------------------------------------
-// The whole point of the exercise, spelled once: what a length byte can
-// say. A cap of 255 or 256 in the source is a cap of 255 on the wire.
+// What a length byte can say: a cap of 255 or 256 in the source is a cap
+// of 255 on the wire.
 //----------------------------------------------------------------------
 size_t	WireCap ( size_t cap )
 {
@@ -168,8 +120,7 @@ struct CapCase
 	size_t		m_Prefix;
 
 	// The longest string read() accepts for this field; 0 when the
-	// round-trip does not apply (read() is not compiled, or does not
-	// come from a SocketInputStream).
+	// round-trip does not apply.
 	size_t		m_ReadCap;
 };
 
@@ -181,16 +132,13 @@ void	CheckStringWriteCap ( const CapCase<PacketT> & c )
 {
 	const size_t	cap = WireCap(c.m_Cap);
 
-	// cap + 1 and 255 always threw. 256 narrows to zero. 257 and
-	// 256 + cap are the window the narrowing hid, and 300 is a plain
-	// long chat line - 100 Korean characters out of the chat box.
+	// 257 and 256 + cap are the window the narrowing hid; 300 is a long
+	// chat line, 100 Korean characters out of the chat box.
 	const size_t	lengths[] = { cap + 1, 255, 256, 257, 256 + cap, 300 };
 
 	for (size_t i = 0; i < sizeof(lengths) / sizeof(lengths[0]); i++)
 	{
-		// A 255-byte string is inside a 255-byte cap, and a
-		// 300-byte one is not over a 511-byte one. Only the
-		// lengths this field really must refuse are asserted.
+		// Only the lengths this field really must refuse.
 		if (lengths[i] <= cap)
 			continue;
 
@@ -211,8 +159,7 @@ void	CheckStringWriteCap ( const CapCase<PacketT> & c )
 	}
 
 	// Exactly the cap goes out whole, and the body is as long as the
-	// framing header says it is - so the length byte cannot disagree
-	// with the bytes after it.
+	// framing header says it is.
 	{
 		PacketT		packet;
 		CapOutFixture	out;
@@ -223,8 +170,7 @@ void	CheckStringWriteCap ( const CapCase<PacketT> & c )
 		CHECK_EQ((size_t)packet.getPacketSize(), (size_t)out.m_Stream.size());
 	}
 
-	// And what the reader takes back out of those bytes is the field
-	// that went in.
+	// And the reader takes the same field back out of those bytes.
 	if (c.m_ReadCap > 0)
 	{
 		const size_t	len = c.m_ReadCap < cap ? c.m_ReadCap : cap;
@@ -256,11 +202,8 @@ void	CheckStringWriteCap ( const CapCase<PacketT> & c )
 //----------------------------------------------------------------------
 // Chat: the reachable half of this family
 //
-// The chat box bounds its input with LineEditor::m_Limit, which counts
-// CHARACTERS (the editor holds UTF-32) while the packet counts BYTES of
-// the UTF-8 it hands over. C_VS_UI_GAME_COMMON sets that limit to 100,
-// so a line of 100 Korean characters is 300 bytes - inside the window
-// these tests cover, and typed by an ordinary player.
+// The chat box limits its input to 100 CHARACTERS while the packet
+// counts BYTES, so 100 Korean characters is a 300-byte line.
 //----------------------------------------------------------------------
 TEST(StringWriteCaps, CGSayMessage)
 {
@@ -317,8 +260,7 @@ TEST(StringWriteCaps, CGPhoneSayMessage)
 // Whisper: two strings, and two caps that do not match its reader
 //
 // write() bounds the name at 128 while read() bounds it at 10, which is
-// upstream's asymmetry and not this change's to close - the round-trip
-// below therefore runs at 10.
+// upstream's asymmetry; the round-trip below runs at 10.
 //----------------------------------------------------------------------
 TEST(StringWriteCaps, CGWhisperName)
 {
@@ -345,8 +287,7 @@ TEST(StringWriteCaps, CGWhisperMessage)
 //----------------------------------------------------------------------
 // The guild packets
 //
-// Four of these cap at 255 or 256 - tests that a BYTE could never fail,
-// so before this change their writers had no working cap at all.
+// Four of these cap at 255 or 256, which a BYTE could never exceed.
 //----------------------------------------------------------------------
 TEST(StringWriteCaps, CGAppointSubmasterName)
 {
@@ -568,9 +509,7 @@ TEST(StringWriteCaps, CLSelectPCPCName)
 // The one that writes a Datagram rather than a stream
 //
 // CGPortCheck::write takes a Datagram, which exposes no output offset,
-// so only the refusal itself is observable here. Its one caller in
-// GameMain.cpp is commented out, so this is a guard rather than a
-// reachable path.
+// so only the refusal itself is observable here.
 //----------------------------------------------------------------------
 TEST(StringWriteCaps, CGPortCheckPCName)
 {

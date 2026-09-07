@@ -46,12 +46,9 @@ void CGWhisper::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
-	// Write the name. Both caps below run on the std::string's own size,
-	// BEFORE the narrowing to the BYTE that goes on the wire: (BYTE)300
-	// is 44, so a 300-byte name or message used to pass its cap and then
-	// go out whole behind a length byte claiming 44, leaving the peer to
-	// parse the tail as the next packet. (read() bounds the name at 10,
-	// not 128; that asymmetry is upstream's and is left alone.)
+	// Write the name. Cap both std::strings' own sizes, before narrowing
+	// to the length bytes. (read() bounds the name at 10, not 128; that
+	// asymmetry is upstream's and is left alone.)
 	if (m_Name.size() > 128)
 		throw InvalidProtocolException("too large name length");
 

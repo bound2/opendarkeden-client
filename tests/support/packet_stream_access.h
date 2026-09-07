@@ -79,22 +79,16 @@ public:
 		return out;
 	}
 
-	// Drops the first `count` live bytes, exactly as flush() does after a
-	// successful send of that many - the only way the head ever moves
-	// off zero, and the only way to put the ring into a wrapped state
-	// (head past tail) without a peer to send to. `count` must not exceed
-	// length(); a test that asks for more has misjudged its own fixture.
+	// Drops the first `count` live bytes, as flush() does after a
+	// successful send of that many.
 	static void Consume(SocketOutputStream& stream, unsigned int count)
 	{
 		CHECK(count <= stream.length());
 		stream.m_Head = (stream.m_Head + count) % stream.m_BufferLen;
 	}
 
-	// The ring indices themselves, for the one thing Bytes() cannot say:
-	// where in the buffer the live run sits. A drained flush() normalises
-	// both back to zero, and a partial one has to leave the head on the
-	// first byte the socket did not take - two states whose byte content
-	// is identical (empty) or indistinguishable from a head at zero.
+	// The ring indices, for the one thing Bytes() cannot say: where in
+	// the buffer the live run sits.
 	static unsigned int Head(const SocketOutputStream& stream)
 	{
 		return stream.m_Head;

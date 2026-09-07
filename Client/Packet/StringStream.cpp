@@ -49,17 +49,7 @@ StringStream & StringStream::operator << ( bool T )
 	return *this;
 }
 
-// One streamed character is one byte. Both overloads below used to build
-// a std::string(2,'\0') and write the character into the first byte only,
-// so the trailing NUL survived into toString()'s result - which cut every
-// text a consumer read through c_str() off at the first streamed
-// character. Throwable::toString() streams a '\n' between the message and
-// the stack trace, so SendBugReport("%s", t.toString().c_str()) was
-// handed a bug report cut off at its first line (SendBugReport then cuts
-// at 100 bytes of its own, so the server still sees at most that much),
-// and __assert__ streams eos first, so assertion_failed.log received a
-// bare newline per failed Assert. Pinned by
-// tests/unit/test_stringstream_chars.cpp.
+// One streamed character is one byte: no trailing NUL into toString().
 
 StringStream & StringStream::operator << ( char T )
 	throw ()
@@ -281,11 +271,7 @@ std::string StringStream::toString () const
 
 		m_bInserted = false;
 
-		// The rebuild starts from nothing. It used to append the whole
-		// list to the previous result, so a second toString() after a
-		// further insertion returned the old text followed by all of it
-		// again - latent only because every caller in the tree calls it
-		// once, or twice with nothing inserted between.
+		// The rebuild starts from nothing.
 		m_Buffer.clear();
 
 		// Reserve the whole size up front so the appends do not copy.

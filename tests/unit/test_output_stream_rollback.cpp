@@ -2,45 +2,14 @@
 // test_output_stream_rollback.cpp
 //----------------------------------------------------------------------
 //
-// SocketOutputStream::write(const Packet*) frames a packet: it puts the
-// packet id, getPacketSize() and the sequence byte into the ring, bumps
-// the sequence counter, and only then asks the packet to write its body.
+// SocketOutputStream::write(const Packet*) frames a packet - id, size,
+// sequence byte - and only then asks the packet to write its body. The
+// body write can throw, and the frame has to come back out of the ring
+// when it does, with the sequence counter it consumed.
 //
-// The body write can throw. Every bounded write() in the tree does -
-// CGSkillToNamed::write() refuses a target name over its 20-byte cap
-// (595e994), and the stream's own span core throws on an oversized
-// span - and the header is already in the ring when it happens. Nothing
-// used to roll it back, so the ring kept a header announcing a body that
-// never followed and the peer parsed the NEXT packet's bytes as that
-// body; the sequence counter had also advanced for a packet that never
-// went out. That defect is what this file pins.
-//
-// What is asserted is the observable contract at the ring, not a crash:
-//
-//   - a failed write leaves Bytes() exactly as it found them, whether
-//     the ring was empty, already held a framed packet, or had to be
-//     resized by the doomed body itself;
-//   - the exception still reaches the caller, with its own type;
-//   - the sequence byte the NEXT packet gets is the one it would have
-//     had if the failed write had never been attempted;
-//   - the non-throwing path is byte for byte what it always was: id and
-//     size in host (little-endian) order at their declared widths, then
-//     the sequence byte, then the body. tests/golden/*.hex owns the body
-//     bytes; this pins the frame around them.
-//
-// SocketEncryptOutputStream inherits write(const Packet*) unchanged - it
-// overrides only the writeEncrypt scalar family - so the same cases run
-// over it, which is the proof that the one fix covers both streams. The
-// real packet used as the well-behaved witness, CGSkillToSelf, is only
-// ever framed on an encrypt stream: its write() Asserts on the
-// dynamic_cast to SocketEncryptOutputStream, so a plain stream is not a
-// shape any real packet is written to. The plain-stream cases therefore
-// use the local packet below, which writes through the base interface.
-//
-// That local packet is never registered with a factory, so the factory
-// tables, tests/wire-layout.txt and the wire goldens are all untouched
-// by it, and the number of body bytes it emits before throwing can be
-// dialled to reach the resize path.
+// The local TestBodyPacket writes through the base interface (a real
+// packet Asserts on the cast to SocketEncryptOutputStream) and is never
+// registered with a factory, so the wire tables are untouched by it.
 //
 // Compiled with the packetwire defines (tests/CMakeLists.txt).
 //
@@ -62,10 +31,8 @@
 
 namespace {
 
-//----------------------------------------------------------------------
 // Streams over a never-used socket (see packet_stream_access.h). Both
 // take an explicit ring size so a test can force write() to resize.
-//----------------------------------------------------------------------
 struct PlainOutFixture
 {
 	Socket			m_Socket;
@@ -95,9 +62,7 @@ struct EncryptOutFixture
 // class TestBodyPacket
 //
 // A packet whose body write emits m_Prefix bytes and then either returns
-// or refuses. getPacketSize() is whatever the constructor was told,
-// exactly as a real packet's would be: the header goes out before the
-// body decides whether it can honour it.
+// or refuses. getPacketSize() is whatever the constructor was told.
 //
 //----------------------------------------------------------------------
 class TestBodyPacket : public Packet {
@@ -121,13 +86,11 @@ public :
 			throw InvalidProtocolException("test packet refuses to write its body");
 	}
 
-	// A real id, so the framed bytes look like the real thing. Nothing
-	// dispatches on it here.
+	// A real id, so the framed bytes look like the real thing.
 	PacketID_t   getPacketID () const { return PACKET_CG_SKILL_TO_SELF; }
 	PacketSize_t getPacketSize () const { return m_Claimed; }
 
-	// The same single condition Packet.h declares these under, so the two
-	// cannot be emitted twice when both macros happen to be set.
+	// The same single condition Packet.h declares these under.
 	#if !defined(__GAME_CLIENT__) || defined(__DEBUG_OUTPUT__)
 		std::string getPacketName () const { return "TestBodyPacket"; }
 		std::string toString () const { return "TestBodyPacket"; }
@@ -145,18 +108,14 @@ private :
 	bool		m_bThrow;
 };
 
-//----------------------------------------------------------------------
-// Fixture values distinct from the other wire tests', so a header field
-// read out of the wrong member cannot pass by coincidence.
-//----------------------------------------------------------------------
+// Fixture values distinct from the other wire tests'.
 void	FillSelf(CGSkillToSelf& p)
 {
 	p.setSkillType(0x71B2);
 	p.setCEffectID(0x83C4);
 }
 
-// The packet's own body, with no frame around it. CGSkillToSelf needs an
-// encrypt stream even at code 0 (see the file header).
+// The packet's own body, with no frame around it.
 std::vector<unsigned char>	Body(const Packet& packet, uchar code)
 {
 	EncryptOutFixture f;
@@ -166,8 +125,7 @@ std::vector<unsigned char>	Body(const Packet& packet, uchar code)
 }
 
 // Writes `packet` through the framing entry point and reports whether it
-// refused with InvalidProtocolException. The bytes are left in the
-// stream for the caller to inspect.
+// refused with InvalidProtocolException.
 bool	FramesAndThrows(SocketOutputStream& stream, const Packet& packet)
 {
 	try {
@@ -186,10 +144,6 @@ bool	FramesAndThrows(SocketOutputStream& stream, const Packet& packet)
 // A failed body write leaves nothing behind
 //----------------------------------------------------------------------
 
-// Nothing at all was in the ring, so nothing may be in it afterwards -
-// not the id, not the size, not the sequence byte. Both the case where
-// the body writes no bytes before refusing and the case where it writes
-// some, which is the shape a bounded field write has.
 TEST(SocketOutputStream, FailedBodyWriteLeavesTheRingEmpty)
 {
 	const uint prefixes[] = { 0, 1, 5, 64 };
@@ -206,9 +160,6 @@ TEST(SocketOutputStream, FailedBodyWriteLeavesTheRingEmpty)
 	}
 }
 
-// A packet that was framed successfully before the failure must survive
-// it byte for byte: the rollback may only drop what the failed write
-// itself put in.
 TEST(SocketOutputStream, FailedWriteLeavesAnEarlierPacketIntact)
 {
 	PlainOutFixture f;
@@ -227,11 +178,8 @@ TEST(SocketOutputStream, FailedWriteLeavesAnEarlierPacketIntact)
 	CHECK_EQ((long long)before.size(), (long long)f.m_Stream.length());
 }
 
-// The doomed body is large enough to make write() resize the ring, which
-// reallocates it and moves the retained bytes to offset zero. The
-// rollback therefore cannot simply restore the old tail index; it has to
-// restore the amount of data the ring held, from wherever the head now
-// is.
+// A resize moves the retained bytes to offset zero, so the rollback has
+// to restore a length rather than the old tail index.
 TEST(SocketOutputStream, FailedWriteRollsBackAcrossARingResize)
 {
 	PlainOutFixture f(64);
@@ -252,14 +200,8 @@ TEST(SocketOutputStream, FailedWriteRollsBackAcrossARingResize)
 	CHECK_EQ((long long)before.size(), (long long)f.m_Stream.length());
 }
 
-// The head is off zero and the live bytes wrap around the end of the
-// ring, which is the state a partial flush() leaves behind. This is the
-// case that separates "restore the saved length from the head" from
-// "restore the saved tail index": with the ring wrapped and the doomed
-// body forcing a resize, the retained bytes move to offset zero and the
-// old tail index (0, at the wrap) names the wrong place. Without the
-// resize the two spellings agree, and that variant is here so the
-// wrapped state itself is shown to survive a plain rollback too.
+// The head off zero with the live bytes wrapped, which is the state a
+// partial flush() leaves behind; run with and without a resize.
 TEST(SocketOutputStream, FailedWriteRollsBackWhenTheRingHasWrapped)
 {
 	for (int iResize = 0; iResize < 2; iResize++)
@@ -304,8 +246,6 @@ TEST(SocketOutputStream, FailedWriteRollsBackWhenTheRingHasWrapped)
 // The sequence counter
 //----------------------------------------------------------------------
 
-// The sequence byte the peer sees must count packets that were actually
-// framed. A failed write on a fresh stream may not consume sequence 0.
 TEST(SocketOutputStream, FailedWriteDoesNotConsumeTheFirstSequenceNumber)
 {
 	TestBodyPacket good(6, 6, false);
@@ -323,8 +263,7 @@ TEST(SocketOutputStream, FailedWriteDoesNotConsumeTheFirstSequenceNumber)
 	CHECK(SocketOutputStreamTestAccess::Bytes(f.m_Stream) == expected);
 }
 
-// The same property in the middle of a session: good, failed, good must
-// be byte-identical to good, good.
+// good, failed, good must be byte-identical to good, good.
 TEST(SocketOutputStream, AFailedWriteIsInvisibleToTheNextPacket)
 {
 	TestBodyPacket good(6, 6, false);
@@ -348,10 +287,8 @@ TEST(SocketOutputStream, AFailedWriteIsInvisibleToTheNextPacket)
 // The non-throwing path is unchanged
 //----------------------------------------------------------------------
 
-// The frame around a body: the id and the size in host order at their
-// declared widths, then the sequence byte, then the body the packet's
-// own write() produces. The body bytes themselves are pinned by
-// tests/golden/*.hex; nothing here may move them.
+// The frame around a body: id and size in host order at their declared
+// widths, then the sequence byte, then the body.
 TEST(SocketOutputStream, FramingIsUnchangedOnTheNonThrowingPath)
 {
 	CGSkillToSelf packet;
@@ -377,8 +314,7 @@ TEST(SocketOutputStream, FramingIsUnchangedOnTheNonThrowingPath)
 	CHECK(SocketOutputStreamTestAccess::Bytes(f.m_Stream) == expected);
 	CHECK_EQ((long long)(szPacketHeader + size), (long long)f.m_Stream.length());
 
-	// The second packet on the same stream differs only in its sequence
-	// byte, which is the counter the rollback has to leave alone.
+	// The second packet differs only in its sequence byte.
 	f.m_Stream.write( &packet );
 	const std::vector<unsigned char> both =
 		SocketOutputStreamTestAccess::Bytes(f.m_Stream);
@@ -391,9 +327,7 @@ TEST(SocketOutputStream, FramingIsUnchangedOnTheNonThrowingPath)
 //----------------------------------------------------------------------
 
 // SocketEncryptOutputStream overrides only the writeEncrypt scalar
-// family, so write(const Packet*) - and therefore the rollback - is the
-// base's. Restated here over a real packet at a real encrypt code, so a
-// future override cannot quietly lose it.
+// family, so write(const Packet*) is the base's.
 TEST(SocketEncryptOutputStream, FailedWriteRollsTheFrameBack)
 {
 	CGSkillToSelf good;

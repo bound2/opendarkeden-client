@@ -458,15 +458,8 @@ void	Fill(CGSkillToInventory& p)
 void	Fill(CGAddMouseToZone& p)	{ p.setObjectID(0x14253647); }
 void	Fill(CGDropMoney& p)		{ p.setAmount(0x8899AABB); }
 
-// CGSkillToNamed is the fifth member of the CGSkillTo* family and the
-// only one that never reaches the encrypter: the same SkillType and
-// CEffectID header the other four carry, then a BYTE-length-prefixed
-// target name. Pinned at code 0 only, like every encrypter-free packet
-// in this file. The two scalars are distinct from each other and from
-// the rest of the family's; like every sibling fixture in this family
-// their low bytes sit below 128, so they do not meet the high-bit rule
-// stated at the top of the file, and the golden is recorded from them as
-// they are rather than re-cut to a rule the family never followed.
+// CGSkillToNamed: the CGSkillTo* family's encrypter-free member, pinned
+// at code 0 only.
 void	Fill(CGSkillToNamed& p)
 {
 	p.setSkillType(0x8C4D);

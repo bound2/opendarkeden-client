@@ -173,8 +173,7 @@ public:
 	void	Finish();
 
 	void	Show();
-	// Upperchar() moved with its only caller, the suffix filter, into
-	// basic/FileDialogListing.cpp (docs/RESTRUCTURING.md task 3.1).
+	// Upperchar() moved with the suffix filter into basic/FileDialogListing.cpp.
 
 	bool	Timer(bool reset);
 };

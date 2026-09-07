@@ -2,45 +2,13 @@
 // test_output_stream_flush.cpp
 //----------------------------------------------------------------------
 //
-// SocketOutputStream::flush() hands the output ring to the socket. The
-// socket does not have to take all of it: send() returns the number of
-// bytes it accepted, which may be fewer than it was offered, and
-// SocketAPI::send_ex turns a would-block into a NonBlockingIOException
-// only when the underlying send() returned SOCKET_ERROR - that is, when
-// nothing at all went out on that call. So the count of bytes actually
-// sent is always known: the loops add every returned count into m_Head,
-// and the call that throws transferred nothing.
+// SocketOutputStream::flush() hands the output ring to the socket, which
+// does not have to take all of it. What is asserted is the state of the
+// ring and what the peer received: the remainder is kept, the next flush
+// sends it first, and only a drained ring normalises back to zero.
 //
-// flush() nevertheless caught that exception, swallowed it, and then ran
-// `m_Head = m_Tail = 0;` unconditionally, which threw away every byte the
-// socket had not taken. The peer got a frame cut mid-packet and the next
-// flush started a fresh packet inside it. That defect is what this file
-// pins.
-//
-// What is asserted is the observable contract at the ring and at the
-// peer, not a crash:
-//
-//   - after a partial send the ring still holds exactly the bytes the
-//     socket did not take, and length()/isEmpty() agree;
-//   - the next flush() sends that remainder first, so the peer's byte
-//     stream, concatenated across flushes, is the queued one with
-//     nothing dropped and nothing reordered - including over a real
-//     framed packet, which is the symptom the defect had;
-//   - the wrapped ring (head past tail, live bytes running over the end
-//     of the buffer) behaves the same in both of its segments, whether
-//     the first segment is cut short or goes out whole and the second is
-//     cut short;
-//   - a would-block before any byte goes out leaves the ring exactly as
-//     it found it;
-//   - a fully drained flush still normalises head and tail back to zero,
-//     which is the one thing the old unconditional reset got right.
-//
-// The seam is the socket. Socket::send forwards to SocketImpl::send,
-// which is virtual for this (see the note in SocketImpl.h); the impl
-// below is scripted with one cap per call, so a partial send is an
-// input the test can state rather than a congested peer it would have to
-// arrange. It also records everything handed to it, which is what makes
-// "the peer sees the queued bytes, contiguous" assertable at all.
+// The seam is SocketImpl::send, which is virtual for this; the impl
+// below is scripted with one cap per call and records everything it took.
 //
 // Compiled with the packetwire defines (tests/CMakeLists.txt).
 //
@@ -77,9 +45,7 @@ public :
 	ScriptedSendSocketImpl () throw () : m_nNextCall(0) {}
 
 	// One cap per send() call, in order. A call past the end of the
-	// script takes everything it is offered; a cap of 0 is the
-	// would-block, which is the only way a real send() reports failure
-	// with nothing sent.
+	// script takes everything it is offered; a cap of 0 is a would-block.
 	void	setScript ( const std::vector<uint> & Script ) throw ()
 	{
 		m_Script = Script;
@@ -120,11 +86,8 @@ private :
 	ByteVec			m_Peer;
 };
 
-//----------------------------------------------------------------------
-// Streams over a scripted socket. Socket takes ownership of the impl and
-// deletes it, so m_pImpl is only valid for the fixture's lifetime; see
-// packet_stream_access.h for why Winsock has to be up first.
-//----------------------------------------------------------------------
+// Streams over a scripted socket. Socket takes ownership of the impl, so
+// m_pImpl is only valid for the fixture's lifetime.
 struct FlushFixture
 {
 	ScriptedSendSocketImpl *	m_pImpl;
@@ -153,10 +116,8 @@ struct EncryptFlushFixture
 	}
 };
 
-//----------------------------------------------------------------------
 // A run of distinct byte values, so a dropped, duplicated or reordered
 // stretch cannot pass as the right one.
-//----------------------------------------------------------------------
 ByteVec	Pattern ( uint len , unsigned char first )
 {
 	ByteVec out;
@@ -206,13 +167,9 @@ void	Script ( FlushFixture & f , uint a , uint b , uint c )
 	f.m_pImpl->setScript(script);
 }
 
-//----------------------------------------------------------------------
 // Leaves the ring wrapped in a 64-byte buffer: head at 30, tail at 16,
-// 50 live bytes running over the end of the buffer and round to the
-// front. Consume() moves the head exactly as a successful send does
-// (packet_stream_access.h), which is the only way to reach that state
-// without a peer. Returns the live bytes, in order.
-//----------------------------------------------------------------------
+// 50 live bytes over the end and round to the front. Returns them in
+// order.
 ByteVec	FillWrapped ( SocketOutputStream & stream )
 {
 	const ByteVec first = Pattern(40, 0x10);
@@ -231,8 +188,7 @@ ByteVec	FillWrapped ( SocketOutputStream & stream )
 // A partial send keeps its remainder
 //----------------------------------------------------------------------
 
-// The socket takes 8 of 20 bytes and then refuses. The 12 it did not
-// take are the next flush's job, not litter to be dropped.
+// The socket takes 8 of 20 bytes and then refuses.
 TEST(SocketOutputStream, PartialFlushKeepsTheUnsentRemainder)
 {
 	FlushFixture f(64);
@@ -248,21 +204,17 @@ TEST(SocketOutputStream, PartialFlushKeepsTheUnsentRemainder)
 	CHECK_EQ(false, f.m_Stream.isEmpty());
 	CHECK(SocketOutputStreamTestAccess::Bytes(f.m_Stream) == Slice(queued, 8, 20));
 
-	// The head has to name the first byte the socket did not take, or
-	// the next flush would send bytes the peer already has.
+	// The head names the first byte the socket did not take.
 	CHECK_EQ(8, SocketOutputStreamTestAccess::Head(f.m_Stream));
 	CHECK_EQ(20, SocketOutputStreamTestAccess::Tail(f.m_Stream));
 
-	// And the next flush sends that remainder first, so what the peer
-	// received across the two flushes is the queued run, contiguous.
+	// The next flush sends that remainder first.
 	CHECK_EQ(12, f.m_Stream.flush());
 	CHECK(f.m_pImpl->getPeer() == queued);
 	CHECK(f.m_Stream.isEmpty());
 }
 
-// The same property when the socket reports the short count instead of
-// throwing: send() returning fewer bytes than it was offered is an
-// ordinary return, and the loop calls it again until one call blocks.
+// A short count is an ordinary return; the loop calls send() again.
 TEST(SocketOutputStream, ShortSendsLoopAndTheirRemainderSurvives)
 {
 	FlushFixture f(64);
@@ -282,9 +234,7 @@ TEST(SocketOutputStream, ShortSendsLoopAndTheirRemainderSurvives)
 	CHECK(f.m_pImpl->getPeer() == queued);
 }
 
-// A would-block on the very first call sent nothing, so the ring must be
-// exactly as it was - which for a wrapped ring is a state the old
-// unconditional reset could not even represent.
+// A would-block on the very first call sent nothing.
 TEST(SocketOutputStream, AWouldBlockBeforeAnyByteLeavesTheRingUntouched)
 {
 	FlushFixture f(64);
@@ -307,9 +257,7 @@ TEST(SocketOutputStream, AWouldBlockBeforeAnyByteLeavesTheRingUntouched)
 // The wrapped ring, in both of its segments
 //----------------------------------------------------------------------
 
-// The live bytes run over the end of the buffer, so flush() sends them
-// as two segments. Here the FIRST segment is cut short: 20 of its 34
-// bytes go out and the ring stays wrapped around the remaining 30.
+// flush() sends a wrapped ring as two segments; the first is cut short.
 TEST(SocketOutputStream, PartialFlushOfAWrappedRingKeepsTheFirstSegment)
 {
 	FlushFixture f(64);
@@ -330,9 +278,8 @@ TEST(SocketOutputStream, PartialFlushOfAWrappedRingKeepsTheFirstSegment)
 	CHECK(f.m_Stream.isEmpty());
 }
 
-// And here the first segment goes out WHOLE - which is where flush()
-// resets the head to zero on its own - and the second is cut short. The
-// ring is left unwrapped, head off zero, holding the last 10 bytes.
+// The first segment goes out whole - where flush() resets the head to
+// zero on its own - and the second is cut short.
 TEST(SocketOutputStream, PartialFlushOfAWrappedRingKeepsTheSecondSegment)
 {
 	FlushFixture f(64);
@@ -357,9 +304,7 @@ TEST(SocketOutputStream, PartialFlushOfAWrappedRingKeepsTheSecondSegment)
 // The drained path is unchanged
 //----------------------------------------------------------------------
 
-// A flush the socket takes whole still empties the ring and normalises
-// both indices to zero, so a long session cannot walk the live run into
-// a wrap it never needed. Both the ordinary and the wrapped shape.
+// Both the ordinary and the wrapped shape.
 TEST(SocketOutputStream, AFullFlushEmptiesAndNormalisesTheRing)
 {
 	{
@@ -404,9 +349,7 @@ TEST(SocketOutputStream, FlushingAnEmptyRingSendsNothing)
 // What is written after a partial flush queues behind the remainder
 //----------------------------------------------------------------------
 
-// The head is off zero when the next packet is written, which is the
-// state write() has to extend correctly for the remainder to keep its
-// place in front of it.
+// The head is off zero when the next packet is written.
 TEST(SocketOutputStream, WritesAfterAPartialFlushQueueBehindTheRemainder)
 {
 	FlushFixture f(64);
@@ -432,11 +375,8 @@ TEST(SocketOutputStream, WritesAfterAPartialFlushQueueBehindTheRemainder)
 // The symptom: a real frame, cut mid-packet
 //----------------------------------------------------------------------
 
-// Two real framed packets, with the socket taking 9 bytes and refusing
-// the rest - a cut inside the first packet's body (the frame header is
-// seven bytes: id, size, sequence; the body starts at offset 7). What
-// the peer ends up with must be the two frames byte for byte, which is
-// exactly what the old reset made impossible.
+// Two real framed packets, with the cut inside the first packet's body
+// (the frame header is seven bytes: id, size, sequence).
 TEST(SocketEncryptOutputStream, APartialFlushDeliversTheFrameContiguously)
 {
 	CGSkillToSelf packet;

@@ -2,24 +2,11 @@
 // test_cpp20_container_helpers_2.cpp
 //----------------------------------------------------------------------
 //
-// The second slice of library sites converted to the C++20 container,
-// string and range helpers
-// (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md, the
-// post-migration backlog's priority 2): a map lookup compared with the
-// end iterator written as contains(), four line-prefix tests written as
-// starts_with(), and three hand written scans written as
-// std::ranges::find / any_of / none_of.
-//
-// The conversion is meant to be invisible at run time, so these tests
-// pin the OBSERVABLE contract of each converted function rather than
-// its spelling, with the inputs that tell the two spellings apart:
-// present versus absent, the empty container, the empty line, the line
-// that is one character short of the keyword, and the line that is
-// nothing but the character being tested for. They were written against
-// the pre-conversion code and pass unchanged after it.
-//
-// Every check here goes through a public entry point of the library the
-// converted line lives in; nothing reaches into a container directly.
+// The observable contract of the library sites written with contains(),
+// starts_with() and std::ranges::find / any_of / none_of: present versus
+// absent, the empty container, the empty line, the line one character
+// short of the keyword, and the line that is only the character tested
+// for. Every check goes through a public entry point.
 //
 //----------------------------------------------------------------------
 
@@ -41,9 +28,7 @@ namespace {
 
 //----------------------------------------------------------------------
 // The skill fixture: a three-step chain, one level apart, so
-// MSkillDomain's tree walk has children to go down into. Same shape as
-// test_skill_core.cpp's - the clock is all the skill core wants from an
-// item host.
+// MSkillDomain's tree walk has children to go down into.
 //----------------------------------------------------------------------
 DWORD	s_Frame = 0;
 DWORD	s_Now = 0;
@@ -115,8 +100,7 @@ bool	LoadScript(SystemAvailabilitiesManager& m, const char* text)
 } // namespace
 
 //----------------------------------------------------------------------
-// MSkillDomain::IsExistSkillStep - std::map membership, with the empty
-// map the old lookup answered by comparing against the end iterator
+// MSkillDomain::IsExistSkillStep - std::map membership
 //----------------------------------------------------------------------
 TEST(Cpp20ContainerHelpers2, SkillDomainAnswersStepMembershipFromTheMap)
 {
@@ -142,8 +126,7 @@ TEST(Cpp20ContainerHelpers2, SkillDomainAnswersStepMembershipFromTheMap)
 	CHECK(domain.IsExistSkillStep(SKILL_STEP_MASTER) == FALSE);
 	CHECK(domain.IsExistSkillStep(SKILL_STEP_NULL) == FALSE);
 
-	// The answer follows the map rather than a remembered flag: a clear
-	// takes both steps away again.
+	// A clear takes both steps away again.
 	domain.Clear();
 	CHECK(domain.IsExistSkillStep(SKILL_STEP_APPRENTICE) == FALSE);
 	CHECK(domain.IsExistSkillStep(SKILL_STEP_ADEPT) == FALSE);
@@ -152,23 +135,15 @@ TEST(Cpp20ContainerHelpers2, SkillDomainAnswersStepMembershipFromTheMap)
 
 //----------------------------------------------------------------------
 // MSkillDomain::AddSkillStep - the scan that asks whether a skill is in
-// the step list already.
-//
-// Its "already there" arm has no reachable input through the public API
-// today: every caller reaches AddSkillStep once per skill between two
-// clears (the tree walk skips a skill the domain already holds, and
-// LoadFromFile clears before it rebuilds), so the scan answers "not in
-// it" every time it runs. What the tests below pin is the arm that does
-// run - over the empty list a step starts as, and over the list that
-// already holds other skills - and the invariant the guard is there
-// for, which is that no step list names a skill twice.
+// the step list already. Its "already there" arm has no reachable input
+// through the public API, so what is pinned is the arm that does run and
+// the invariant it holds: no step list names a skill twice.
 //----------------------------------------------------------------------
 TEST(Cpp20ContainerHelpers2, AStepListTakesEachSkillOnceHoweverOftenTheWalkRuns)
 {
 	SkillWorld world;
 
-	// All three in one step, and the learn levels run against the order
-	// the tree walk meets them, so the list order is worth pinning too.
+	// All three in one step, in the order the tree walk meets them.
 	(*g_pSkillInfoTable)[kRoot].SetSkillStep(SKILL_STEP_APPRENTICE);
 	(*g_pSkillInfoTable)[kChild].SetSkillStep(SKILL_STEP_APPRENTICE);
 	(*g_pSkillInfoTable)[kLeaf].SetSkillStep(SKILL_STEP_APPRENTICE);
@@ -178,8 +153,7 @@ TEST(Cpp20ContainerHelpers2, AStepListTakesEachSkillOnceHoweverOftenTheWalkRuns)
 
 	MSkillDomain domain;
 
-	// The first skill of a step goes into a list that is still empty -
-	// the scan has nothing to walk and must answer "not in it".
+	// The first skill of a step goes into a list that is still empty.
 	domain.SetRootSkill(kRoot);
 
 	const MSkillDomain::SKILL_STEP_LIST* pList = domain.GetSkillStepList(SKILL_STEP_APPRENTICE);
@@ -225,7 +199,7 @@ TEST(Cpp20ContainerHelpers2, AStepListTakesEachSkillOnceHoweverOftenTheWalkRuns)
 
 //----------------------------------------------------------------------
 // UseEnglishTextFrom - the language file's comment lines and its
-// LANGUAGE keyword, which is a PREFIX test and not a whole-word one
+// LANGUAGE keyword, which is a prefix test and not a whole-word one
 //----------------------------------------------------------------------
 TEST(Cpp20ContainerHelpers2, LanguageFileKeywordIsMatchedAsAPrefix)
 {
@@ -252,8 +226,7 @@ TEST(Cpp20ContainerHelpers2, LanguageFileKeywordIsMatchedAsAPrefix)
 	WriteLanguageFile(";LANGUAGE 0\n");
 	CHECK(UseEnglishTextFrom(kLanguageFile));
 
-	// One character short of the keyword, with nothing after it. The
-	// test may not read past the end of the line to decide that.
+	// One character short of the keyword, with nothing after it.
 	WriteLanguageFile("LANGUAG");
 	CHECK(UseEnglishTextFrom(kLanguageFile));
 
@@ -267,8 +240,7 @@ TEST(Cpp20ContainerHelpers2, LanguageFileKeywordIsMatchedAsAPrefix)
 	CHECK(UseEnglishTextFrom(kLanguageFile));
 
 	// A prefix match with no separator is still a match, and the digit
-	// right behind the keyword is still read - this is the case that
-	// tells a prefix test from a whole-word one.
+	// right behind the keyword is still read.
 	WriteLanguageFile("LANGUAGE0\n");
 	CHECK(!UseEnglishTextFrom(kLanguageFile));
 
@@ -301,9 +273,8 @@ TEST(Cpp20ContainerHelpers2, AvailabilityScriptRecognisesEveryLineKind)
 	SystemAvailabilitiesManager m;
 	CHECK(LoadScript(m, kScript));
 
-	// The '*' block: both of its rows are in force, which they only are
-	// if the empty line and the comment line were skipped rather than
-	// counted - either would have closed the block one row early.
+	// The '*' block: both rows are in force, which they only are if the
+	// empty line and the comment line were skipped rather than counted.
 	m.SetFlag(~(1u << 4));
 	CHECK(!m.ScriptFiltering(10, 1));
 	CHECK(!m.ScriptFiltering(11, 1));
@@ -316,8 +287,7 @@ TEST(Cpp20ContainerHelpers2, AvailabilityScriptRecognisesEveryLineKind)
 	CHECK(m.ZoneFiltering(200));
 	CHECK(!m.ZoneFiltering(300));
 
-	// The 'S' block: its row names zone 999, which degree 0 does not
-	// open, so that script is refused and its neighbours are not.
+	// The 'S' block: its row names zone 999, which degree 0 does not open.
 	CHECK(!m.ScriptFiltering(20, 2));
 	CHECK(m.ScriptFiltering(20, 1));
 	CHECK(m.ScriptFiltering(21, 2));
@@ -325,7 +295,7 @@ TEST(Cpp20ContainerHelpers2, AvailabilityScriptRecognisesEveryLineKind)
 
 //----------------------------------------------------------------------
 // SystemAvailabilitiesManager::ZoneFiltering - the scan over a degree's
-// zone list, over an empty list and over the wildcard row
+// zone list, an empty list and the wildcard row
 //----------------------------------------------------------------------
 TEST(Cpp20ContainerHelpers2, ZoneFilterAnswersFromTheDegreeList)
 {
@@ -345,7 +315,7 @@ TEST(Cpp20ContainerHelpers2, ZoneFilterAnswersFromTheDegreeList)
 	// The default degree is past every list, so nothing is consulted.
 	CHECK(m.ZoneFiltering(100));
 
-	// Degree 0's list is empty: the scan has nothing to walk.
+	// Degree 0's list is empty.
 	m.SetOpenDegree(0);
 	CHECK(!m.ZoneFiltering(100));
 	CHECK(!m.ZoneFiltering(90909));
@@ -355,8 +325,8 @@ TEST(Cpp20ContainerHelpers2, ZoneFilterAnswersFromTheDegreeList)
 	CHECK(m.ZoneFiltering(100));
 	CHECK(m.ZoneFiltering(12345));
 
-	// Degree 2 adds a list with one ordinary zone in it; the walk goes
-	// down to degree 0, so the wildcard is still reachable.
+	// Degree 2 adds a list with one ordinary zone; the walk goes down to
+	// degree 0, so the wildcard is still reachable.
 	m.SetOpenDegree(2);
 	CHECK(m.ZoneFiltering(100));
 	CHECK(m.ZoneFiltering(12345));
@@ -364,8 +334,7 @@ TEST(Cpp20ContainerHelpers2, ZoneFilterAnswersFromTheDegreeList)
 
 //----------------------------------------------------------------------
 // SystemAvailabilitiesManager::CheckScript, through ScriptFiltering -
-// the scan over one system's filter rows, which has to match on BOTH
-// the script and the answer
+// the scan over one system's filter rows, matching on both ids
 //----------------------------------------------------------------------
 TEST(Cpp20ContainerHelpers2, ScriptFilterMatchesOnBothIDsOrNotAtAll)
 {
@@ -386,9 +355,8 @@ TEST(Cpp20ContainerHelpers2, ScriptFilterMatchesOnBothIDsOrNotAtAll)
 	CHECK(!m.ScriptFiltering(10, 1));
 	CHECK(!m.ScriptFiltering(20, 3));
 
-	// The right script with the wrong answer, and the right answer with
-	// the wrong script, are both allowed - a scan that matched on one
-	// id would refuse them.
+	// The right script with the wrong answer, and the reverse, are both
+	// allowed.
 	CHECK(m.ScriptFiltering(10, 3));
 	CHECK(m.ScriptFiltering(20, 1));
 

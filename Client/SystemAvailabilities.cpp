@@ -1,9 +1,9 @@
 #include "Client_PCH.h"
 #include "SystemAvailabilities.h"
-#include <algorithm>	// std::ranges::any_of / none_of, for the two filter scans
+#include <algorithm>
 #include <istream>
 #include <string>
-#include <string_view>	// starts_with, for the script file's line prefixes
+#include <string_view>
 #include <string.h>
 #include <stdio.h>
 
@@ -64,11 +64,7 @@ bool	SystemAvailabilitiesManager::ZoneFiltering( int zoneID ) const
 
 	for(int i = m_OpenDegree; i >= 0; i-- )
 	{
-		// A membership test over the degree's allowed zones: 90909 is
-		// the row that allows every zone, so either it or the zone
-		// asked about is enough. The hand written scan tested the two
-		// in this order on each element and returned on the first hit,
-		// which is what any_of over the same predicate does.
+		// 90909 is the row that allows every zone.
 		const bool bAllowed = std::ranges::any_of( m_ZoneFilter[i],
 				[zoneID]( int AllowZoneID )
 				{
@@ -83,10 +79,6 @@ bool	SystemAvailabilitiesManager::ZoneFiltering( int zoneID ) const
 
 bool	SystemAvailabilitiesManager::CheckScript( const std::list<FilterScript>& List, int &scriptID, int& answerID ) const
 {
-	// A membership test over the filter rows: a script that is in the
-	// list is blocked, and one that is not may be used. The scan this
-	// replaces walked the same rows with the same predicate and
-	// returned on the first hit.
 	return std::ranges::none_of( List,
 			[&]( const FilterScript& Script )
 			{
@@ -130,10 +122,6 @@ bool	SystemAvailabilitiesManager::LoadFromStream(std::istream& in)
 		szLine[sizeof(szLine)-1] = '\0';
 
 		// One view over the truncated copy the rest of the loop reads.
-		// A view built from a char* measures it with strlen, so empty()
-		// is the test the explicit strlen() call made, and it is still
-		// the copy - not the std::string - that is measured, so a line
-		// carrying an embedded null is as short here as it always was.
 		const std::string_view	svLine( szLine );
 
 		// '*' starts a key, ';' starts a comment.

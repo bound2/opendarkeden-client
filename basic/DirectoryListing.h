@@ -3,82 +3,28 @@
 	DirectoryListing.h
 
 	Directory enumeration on std::filesystem, replacing the _findfirst /
-	_findnext / _findclose walks that were spread through the client
-	(docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md, priority 6).
+	_findnext / _findclose walks that were spread through the client. The
+	caller gets a snapshot vector and owns no search handle.
 
-	The point of the helper is that it owns no search handle: the caller
-	gets a snapshot vector and there is no _findclose to forget, no
-	intptr_t handle to truncate into a long, and no window in which the
-	loop body can be re-entered by an entry it has just created.
+	Kept from _findfirst / FindFirstFileA:
 
-	-------------------------------------------------------------------------
-	Semantics PRESERVED from _findfirst / FindFirstFileA
-	-------------------------------------------------------------------------
+	  * '*' matches zero or more characters, dots included; '?' exactly one.
+	  * Matching is case-insensitive.
+	  * Result order is the NTFS index order: case-insensitive ordinal.
+	  * Directories are enumerated when the caller asks for them.
 
-	  * Wildcards. '*' matches zero or more characters, dots included.
-	    '?' matches exactly one character. Verified against FindFirstFileW
-	    on NTFS: "*.spk*" matches "x.spk.tmp" - that is, the '*' before a
-	    '.' is an ordinary star here, not the "up to the final dot"
-	    DOS_STAR of the kernel's own expression evaluator.
+	Deliberately not kept:
 
-	  * Case-insensitive matching, so "*.spk*" finds "Upper.SPK".
+	  * 8.3 short names are not matched against.
+	  * DOS_DOT: '.' is a literal here, so "*.*" loses dotless names.
+	  * "." and ".." are never in the result.
+	  * DOS_QM: a trailing '?' does not match zero characters.
+	  * Folding and ordering are byte-wise and ASCII only, not UTF-16.
+	  * A snapshot, not a live walk.
+	  * All or nothing on a mid-walk error: false, with an empty result.
 
-	  * Return ORDER. _findfirst on NTFS yields entries in the directory
-	    index order, which is a case-insensitive ordinal sort of the name.
-	    ListDirectory sorts its result the same way, so an NTFS listing
-	    comes back in the order the legacy walk produced. (On FAT/exFAT
-	    _findfirst yields creation order instead; there the helper is
-	    sorted where the legacy walk was not.)
-
-	  * Directories are enumerated when the caller asks for them, exactly
-	    as the legacy patterns did - "*.*" matched subdirectories too.
-
-	-------------------------------------------------------------------------
-	Semantics DELIBERATELY NOT preserved
-	-------------------------------------------------------------------------
-
-	  * 8.3 short names. FindFirstFile also matches a pattern against the
-	    short name NTFS keeps for a long file name, so "*.SPK" can find a
-	    file called "long name.spkbackup" through its "LONGNA~1.SPK" alias.
-	    That is not emulated and will not be; a caller that needs it has
-	    the wrong tool.
-
-	  * DOS_DOT. Win32 treats "*.*" as "*": verified against FindFirstFileW
-	    on NTFS, the two return the identical set, a name with no dot
-	    included. Here the '.' in a pattern is a literal, so "*.*" finds
-	    only names that contain a dot. A walk being migrated off a "*.*"
-	    pattern has to ask for "*" instead - InitProfiles does - or it
-	    silently loses every dotless entry.
-
-	  * "." and "..". std::filesystem::directory_iterator never produces
-	    them, so they are never in the result. _findfirst returned both,
-	    first, for any pattern that matched them ("*" and, on Win32,
-	    "*.*" do).
-
-	  * DOS_QM. The kernel lets a trailing '?' match zero characters, so
-	    "ab?" finds "ab" as well as "abc". Here '?' is exactly one
-	    character. No pattern in this tree uses '?'.
-
-	  * Byte-wise, ASCII-only case folding. Matching and ordering fold
-	    'a'-'z' only and compare the remaining bytes as unsigned values.
-	    Win32 matches and NTFS sorts on upcased UTF-16, so for a name
-	    outside ASCII in the active narrow code page (CP949 here) both the
-	    fold and the order can differ - a CP949 trail byte that happens to
-	    look like an ASCII letter is folded, which Win32 would not do.
-
-	  * A snapshot, not a live walk. Entries created or removed while the
-	    caller iterates the returned vector are invisible to it, where
-	    _findnext might or might not have surfaced them.
-
-	  * All or nothing on a mid-walk error. If the iterator fails part way
-	    through, ListDirectory clears the result and returns false, so the
-	    caller processes none of the entries. _findnext reported such an
-	    error with the same non-zero return as end-of-list, so the legacy
-	    loop kept whatever it had already handled.
-
-	Nothing here throws: a directory that is absent or cannot be read is
-	reported by a false return with an empty result, and every filesystem
-	call is made through its std::error_code overload.
+	Nothing here throws; every filesystem call goes through its
+	std::error_code overload.
 
 	2026.09.05
 
@@ -93,9 +39,8 @@
 namespace Basic {
 
 /*-----------------------------------------------------------------------------
-  One enumerated entry. The name carries no directory part, matching
-  _finddata_t::name, and is in the narrow encoding the rest of the client
-  uses for paths.
+  One enumerated entry. The name carries no directory part, and is in the
+  narrow encoding the rest of the client uses for paths.
 -----------------------------------------------------------------------------*/
 struct SDirectoryEntry
 {
@@ -104,12 +49,9 @@ struct SDirectoryEntry
 };
 
 /*-----------------------------------------------------------------------------
-  Whether subdirectories join the result. LIST_FILES_ONLY is the sane
-  default for new code. LIST_FILES_AND_DIRECTORIES is what a legacy
-  _findfirst walk saw; a migrated walk asks for it only when its body
-  could act on a directory (InitProfiles does), and a walk that only
-  remove()s or opens each entry lists files, because neither call can
-  act on a directory.
+  Whether subdirectories join the result. Ask for
+  LIST_FILES_AND_DIRECTORIES only when the loop body could act on a
+  directory.
 -----------------------------------------------------------------------------*/
 enum EListFilter
 {

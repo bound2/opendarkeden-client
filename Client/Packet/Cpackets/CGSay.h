@@ -35,12 +35,8 @@ class CGSay : public Packet {
 
 public:
 
-	// The longest message this packet carries. read() and write() both
-	// THROW above it rather than truncating, so a caller that builds
-	// the text itself - SendBugReport (Client/Packet/WireHost.cpp),
-	// which prefixes "*bug_report " to it - has to fit inside this or
-	// have its report dropped instead of shortened. One name for the
-	// number so the two sides cannot drift.
+	// The longest message this packet carries; read() and write() both
+	// throw above it rather than truncating.
 	enum { MAX_MESSAGE_SIZE = 128 };
 
     // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
@@ -106,9 +102,6 @@ public:
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_SAY; }
 
 	// get packet's max body size
-	// Upstream's note here asked for a setting for the message's maximum
-	// size; MAX_MESSAGE_SIZE above is now the one name for it, and the
-	// packet enforces the same number it advertises.
 	PacketSize_t getPacketMaxSize() const throw() { return szuint + szBYTE + CGSay::MAX_MESSAGE_SIZE; }
 
 };
