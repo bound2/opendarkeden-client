@@ -224,7 +224,19 @@ std::string	Basic::FindDataRoot(const std::vector<std::string>& vCandidates)
 		const std::filesystem::path Marker(ResolveDataPath((Root / "Data/Info/FileDef.inf").generic_string()));
 
 		if (std::filesystem::is_regular_file(Marker, Error) && !Error)
-			return std::filesystem::absolute(Root, Error).lexically_normal().generic_string();
+		{
+			// absolute(".") is "<cwd>/." and lexically_normal() keeps
+			// that as "<cwd>/" on libstdc++ and libc++, where MSVC's
+			// GetFullPathName has already dropped the dot; one spelling,
+			// without the trailing separator, on every platform.
+			std::string sRoot = std::filesystem::absolute(Root, Error).lexically_normal().generic_string();
+
+			const std::string sRootPath = std::filesystem::path(sRoot).root_path().generic_string();
+			while (sRoot.size() > sRootPath.size() && sRoot.back() == '/')
+				sRoot.pop_back();
+
+			return sRoot;
+		}
 	}
 
 	return std::string();

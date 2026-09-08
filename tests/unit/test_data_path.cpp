@@ -243,5 +243,11 @@ TEST(DataPath, FindDataRootAcceptsARelativeCandidateAndReturnsItAbsolute)
 	std::filesystem::current_path(Before, Error);
 
 	CHECK(std::filesystem::path(sFound).is_absolute());
-	CHECK(Scratch.Name() == Basic::ResolveDataPath(sFound));
+	// absolute(".") ends in "/." and the normalised form of that ends
+	// in "/" on libstdc++ and libc++; the caller gets one spelling.
+	CHECK(!sFound.empty() && sFound.back() != '/');
+	// By identity, not spelling: current_path() is the real path, and
+	// on macOS the temp directory is reached through a symlink
+	// (/var/folders -> /private/var/folders).
+	CHECK(std::filesystem::equivalent(Scratch.Path, std::filesystem::path(sFound), Error));
 }
