@@ -30758,7 +30758,6 @@ void	C_VS_UI_BRING_FEE::Show()
 		g_PrintColorStrShadow(bring_fee_x,bring_fee_y,(*g_pGameStringTable)[UI_STRING_MESSAGE_HOLY_LAND_CAN_BRING_FEE].GetString(),
 			gpC_base->m_dialog_msg_pi,RGB(255,255,255),RGB(20,20,20));
 
-		money_buf[100];
 		wsprintf(money_buf, "%d", m_BringFee);
 		sstr = money_buf;
 		
@@ -33340,13 +33339,16 @@ void	C_VS_UI_QUEST_STATUS::ShowDesc(int strX,int strY,const char *str)
 	char sz_string[512] = {0,};
 	while(sstr.size() > next)
 	{
-		if(sstr.size() - next > 2048)
-		{
-			memcpy(sz_string,sstr.c_str()+next,2047);
-			sz_string[2047] = '\0';
-		}
-		else
-			strcpy(sz_string, sstr.c_str()+next);
+		// One window of the text per line drawn. The window used to be
+		// 2047 bytes, or the whole remainder, into this 512-byte buffer -
+		// a stack overflow for any description over 511 bytes (found by
+		// Apple Clang's -Warray-bounds in the macOS port). A line is
+		// cut_pos characters, far fewer than the window holds.
+		size_t copy_len = sstr.size() - next;
+		if(copy_len > sizeof(sz_string) - 1)
+			copy_len = sizeof(sz_string) - 1;
+		memcpy(sz_string, sstr.c_str()+next, copy_len);
+		sz_string[copy_len] = '\0';
 		
 		char *sz_string2 = sz_string;
 		
@@ -34224,13 +34226,16 @@ void	C_VS_UI_LOTTERY_CARD::ShowDesc(int strX,int strY,const char *str)
 	char sz_string[512] = {0,};
 	while(sstr.size() > next)
 	{
-		if(sstr.size() - next > 2048)
-		{
-			memcpy(sz_string,sstr.c_str()+next,2047);
-			sz_string[2047] = '\0';
-		}
-		else
-			strcpy(sz_string, sstr.c_str()+next);
+		// One window of the text per line drawn. The window used to be
+		// 2047 bytes, or the whole remainder, into this 512-byte buffer -
+		// a stack overflow for any description over 511 bytes (found by
+		// Apple Clang's -Warray-bounds in the macOS port). A line is
+		// cut_pos characters, far fewer than the window holds.
+		size_t copy_len = sstr.size() - next;
+		if(copy_len > sizeof(sz_string) - 1)
+			copy_len = sizeof(sz_string) - 1;
+		memcpy(sz_string, sstr.c_str()+next, copy_len);
+		sz_string[copy_len] = '\0';
 		
 		char *sz_string2 = sz_string;
 		
