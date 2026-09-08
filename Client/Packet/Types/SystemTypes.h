@@ -7,16 +7,12 @@
 #ifndef __SYSTEM_TYPES_H__
 #define __SYSTEM_TYPES_H__
 
-/* Platform detection */
-#if defined(_WIN32) || defined(_WIN64)
-	#ifndef PLATFORM_WINDOWS
-		#define PLATFORM_WINDOWS
-	#endif
-#elif defined(__APPLE__)
-	#define PLATFORM_MACOS
-#elif defined(__linux__)
-	#define PLATFORM_LINUX
-#endif
+/* Platform detection is basic/Platform.h's: PLATFORM_WINDOWS,
+   PLATFORM_LINUX, PLATFORM_MACOS, and PLATFORM_POSIX for the last two
+   together. This header used to run a copy of its own, and spelled
+   Linux as __LINUX__ - a macro no build ever defined - so its POSIX
+   branches compiled on no platform at all. */
+#include "Platform.h"
 
 #ifdef PLATFORM_WINDOWS
 	/* WIN32_LEAN_AND_MEAN keeps <Windows.h> from pulling in mmsystem.h,
@@ -26,7 +22,7 @@
 		#define WIN32_LEAN_AND_MEAN
 		#include <Windows.h>
 	#endif
-#elif defined(__LINUX__) || defined(PLATFORM_MACOS)
+#elif defined(PLATFORM_POSIX)
 	#include <sys/types.h>
 #endif
 
@@ -46,19 +42,15 @@ typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 
-#if defined(__LINUX__) || defined(__WIN_CONSOLE__) || defined(PLATFORM_MACOS)
-	typedef unsigned char  BYTE;
-	typedef unsigned short WORD;
-//	typedef unsigned int DWORD;
-    typedef uint32_t DWORD;
-	typedef unsigned long long ulonglong;
-#elif defined(_MSC_VER) /* MSVC compiler */
+/* BYTE, WORD and DWORD come from Platform.h on every platform: the
+   Win32 headers on Windows, fixed-width typedefs elsewhere. */
+#if defined(_MSC_VER) /* MSVC compiler */
 	typedef unsigned __int64 ulonglong;
 #else
 	typedef unsigned long long ulonglong;
 #endif
 
-#if defined(__LINUX__) || defined(PLATFORM_MACOS)
+#if defined(PLATFORM_POSIX)
 	const char separatorChar = '/';
 	const std::string separator = "/";
 #elif defined(__WINDOWS__)

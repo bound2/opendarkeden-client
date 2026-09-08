@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef PLATFORM_MACOS
+#ifdef PLATFORM_POSIX
 #include <SDL2/SDL.h>
 #include "../../../Client/TextSystem/TextService.h"
 #include "../../../Client/TextSystem/RenderTargetSpriteSurface.h"
@@ -22,7 +22,7 @@ extern int g_GetStringHeight(const char* sz_str, void* hfont);
 extern CI* gC_ci;
 
 // External reference to back buffer surface (for spritectl blt)
-#ifdef PLATFORM_MACOS
+#ifdef PLATFORM_POSIX
 // External reference to SDL renderer
 extern SDL_Renderer* g_pSDLRenderer;
 extern CSpriteSurface* g_pBack;
@@ -331,7 +331,7 @@ LineEditorVisual::LineEditorVisual()
 	m_PrintInfo.text_align = 0;
 	m_CursorColor = 0xFFFFFF;
 
-#ifdef PLATFORM_MACOS
+#ifdef PLATFORM_POSIX
 	m_GlyphCache = NULL;
 	m_Layout = NULL;
 	m_LayoutDirty = true;
@@ -358,7 +358,7 @@ void LineEditorVisual::Acquire()
 	m_Editor.Acquire();
 	m_bAcquired = true;
 
-#ifdef PLATFORM_MACOS
+#ifdef PLATFORM_POSIX
 	// Enable SDL text input on macOS
 	SDL_StartTextInput();
 #endif
@@ -374,7 +374,7 @@ void LineEditorVisual::Unacquire()
 	m_Editor.Unacquire();
 	m_bAcquired = false;
 
-#ifdef PLATFORM_MACOS
+#ifdef PLATFORM_POSIX
 	// Disable SDL text input on macOS
 	SDL_StopTextInput();
 #endif
@@ -464,7 +464,7 @@ void LineEditorVisual::Show() const
 		textToDisplay = displayText.c_str();
 	}
 
-#ifdef PLATFORM_MACOS
+#ifdef PLATFORM_POSIX
 	// Use TextService for unified rendering
 	extern CSpriteSurface* g_pLast;
 

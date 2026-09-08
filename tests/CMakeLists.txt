@@ -72,12 +72,12 @@ target_include_directories(unit_tests PRIVATE
 # must see the identical definitions - Packet's virtual set changes
 # under these macros, so a mismatch would be a real ODR/vtable break,
 # not a style issue. One list, used by every such TU below, so the two
-# blocks cannot drift apart.
+# blocks cannot drift apart; its platform half is the top-level
+# DARKEDEN_PLATFORM_DEFINITIONS, the list packetwire itself compiles
+# with, so it cannot drift from the library either (off Windows that
+# list is empty on both sides - basic/Platform.h does the detecting).
 #----------------------------------------------------------------------
-set(PACKETWIRE_TEST_DEFINITIONS "__GAME_CLIENT__=1")
-if(WIN32)
-	list(APPEND PACKETWIRE_TEST_DEFINITIONS "__WIN32__" "__WINDOWS__")
-endif()
+set(PACKETWIRE_TEST_DEFINITIONS "__GAME_CLIENT__=1" ${DARKEDEN_PLATFORM_DEFINITIONS})
 
 #----------------------------------------------------------------------
 # Wire-layout inventory (unit/test_wire_layout.cpp).

@@ -993,6 +993,66 @@ else
 fi
 
 #----------------------------------------------------------------------
+# R13 - platform macros spelled anywhere but basic/Platform.h.
+#
+# basic/Platform.h reads the platform off the compiler builtins and
+# defines PLATFORM_WINDOWS, PLATFORM_LINUX, PLATFORM_MACOS and
+# PLATFORM_POSIX. Before the port's build-contract slice (the assessment
+# of 2026-09-07, area A) four spellings of "Linux" coexisted and the
+# build defined none of them - __LINUX__ (63 sites, mostly the socket
+# and file APIs, which therefore compiled neither their Windows nor
+# their POSIX branch off Windows), _LINUX (1), the builtin __linux__
+# and PLATFORM_LINUX - while every non-Windows target was handed
+# PLATFORM_MACOS by CMake, in six places, so a Linux build was told it
+# was macOS. The sum of three counts, each of which must be 0:
+#
+#   __LINUX__ or _LINUX as a token in any .h/.cpp/.inl under Client,
+#   VS_UI, basic, tools, third_party and tests (the POSIX branches
+#   test PLATFORM_POSIX now; a Linux-only one tests PLATFORM_LINUX);
+#
+#   PLATFORM_MACOS as a token in the same set minus basic/, where the
+#   shim's genuinely Darwin-only code (mach-o/dyld, _NSGetExecutablePath)
+#   is the one legitimate user - everywhere else the macro meant "not
+#   Windows", and that is PLATFORM_POSIX;
+#
+#   PLATFORM_MACOS in any CMakeLists.txt or .cmake outside build
+#   trees, comment tails stripped - the build defines no platform
+#   macro off Windows, and one here would disagree with the compiler.
+#
+# Tokens are counted by tests/tools/count_identifier.pl, which strips
+# comments and strings per file for the reason count_register.pl gives.
+# Blind to a spelling assembled by the preprocessor and to the CMake
+# variable that carries the Windows wire macros (DARKEDEN_PLATFORM_-
+# DEFINITIONS is the intended single point). R13 = 0 as of 2026-09-08.
+#----------------------------------------------------------------------
+R13_BASELINE=0
+
+r13_cxx_members () {
+	find Client VS_UI basic tools third_party tests \( -name '*.cpp' -o -name '*.h' -o -name '*.inl' \) 2>/dev/null
+}
+r13_cxx_members_outside_basic () {
+	find Client VS_UI tools third_party tests \( -name '*.cpp' -o -name '*.h' -o -name '*.inl' \) 2>/dev/null
+}
+r13_cmake_members () {
+	find . -path ./build -prune -o \( -name 'CMakeLists.txt' -o -name '*.cmake' \) -print 2>/dev/null | grep -v '^\./build/'
+}
+
+if [ ! -f tests/tools/count_identifier.pl ]; then
+	echo "FAIL R13: tests/tools/count_identifier.pl is missing"
+	FAIL=1
+elif [ "$(r13_cxx_members | wc -l)" -eq 0 ] || [ "$(r13_cmake_members | wc -l)" -eq 0 ]; then
+	echo "FAIL R13: no sources enumerated - a zero here would measure nothing"
+	FAIL=1
+else
+	R13_LINUX=$(r13_cxx_members | sort -u | perl tests/tools/count_identifier.pl '__LINUX__|_LINUX')
+	R13_MACOS=$(r13_cxx_members_outside_basic | sort -u | perl tests/tools/count_identifier.pl 'PLATFORM_MACOS')
+	R13_CMAKE=$(r13_cmake_members | sort -u | tr '\n' '\0' | xargs -0 cat 2>/dev/null \
+		| sed -e 's/#.*//' | grep -aoE '\bPLATFORM_MACOS\b' | wc -l)
+	R13=$((R13_LINUX + R13_MACOS + R13_CMAKE))
+	check "R13 (platform macros spelled outside basic/Platform.h: __LINUX__/_LINUX $R13_LINUX, PLATFORM_MACOS outside basic/ $R13_MACOS, PLATFORM_MACOS in CMake $R13_CMAKE)" "$R13" "$R13_BASELINE"
+fi
+
+#----------------------------------------------------------------------
 # R6 was here for exactly one slice, and retired by doing its job.
 #
 # Task 5.1 stubbed SendBugReport in tests/stubs/client_globals.cpp so

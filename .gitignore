@@ -56,6 +56,9 @@ Makefile
 # tests/tools/check_wire_inventory_fresh.cmake went missing from the
 # commit that registered the test using it.
 !tests/tools/*.cmake
+# The same blanket rule would swallow a hand-written module under
+# cmake/ the moment one is added (the Linux/macOS port plans to).
+!cmake/*.cmake
 .cache
 
 # ==========================================

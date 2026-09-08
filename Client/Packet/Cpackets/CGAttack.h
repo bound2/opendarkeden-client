@@ -15,10 +15,6 @@
 #include "Packet.h"
 #include "PacketFactory.h"
 
-#ifdef __LINUX__
-//#include "GCGlobalHandler.h"
-#endif // __LINUX__
-
 
 //////////////////////////////////////////////////////////////////////
 //
