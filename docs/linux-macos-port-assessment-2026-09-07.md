@@ -376,7 +376,7 @@ right and wrong:
 | E. Executable link | 3-4 days | Four translation units and no undefined references: areas A to D had paid for the rest. |
 | F. Runtime | 5-10 days | First slice only: `basic/DataPath.h` resolves the Windows-spelled paths, and the headless client loads every table, reaches the main menu and exits cleanly on `SDL_QUIT`. Login, zone and chat against the server, and anything on a display, are open. |
 | G. macOS | 2-4 days | Not started; the `macos` preset exists and is untested. |
-| H. CI | 2-3 days | `.github/workflows/linux.yml` (three presets, on push to master and on pull requests), `tools/ci/verify-linux.sh`, `tools/linux/Dockerfile`, R1 measured from `build.ninja`, README and CLAUDE.md. The adversarial review of the whole series ran on 2026-09-08 (four fresh-context reviewers) and its findings are repaired in the last commit; the review's own record is in that commit message. |
+| H. CI | 2-3 days | `.github/workflows/linux.yml` (three presets, on push to master like the Windows job), `tools/ci/verify-linux.sh`, `tools/linux/Dockerfile`, R1 measured from `build.ninja`, README and CLAUDE.md. The adversarial review of the whole series ran on 2026-09-08 (four fresh-context reviewers) and its findings are repaired in the last commit; the review's own record is in that commit message. |
 
 The build-side steps came in under their estimates, mostly because the
 macOS port of February had left more shim than the measured state
