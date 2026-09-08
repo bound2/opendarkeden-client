@@ -21,6 +21,10 @@
 #include "MCrashReportManager.h"
 #include "ServerInfo.h"
 
+// Everything down to RecordExceptionInfo is the dbghelp stack walk, Windows
+// only; the non-Windows RecordExceptionInfo at the end is a stub that
+// nothing installs (InitCrashReport is Windows-only in ClientMain).
+#ifdef PLATFORM_WINDOWS
 ///////////////////////////////////////////////////////////////////////////////
 // GetExceptionDescription
 //
@@ -134,7 +138,6 @@ tSGMB pSGMB = NULL;
 
 extern BOOL GetWinVersion(char *szVersion);
 
-#ifdef PLATFORM_WINDOWS
 LONG __stdcall RecordExceptionInfo( _EXCEPTION_POINTERS* pExp )
 {
 	if( g_pSocket != NULL )
