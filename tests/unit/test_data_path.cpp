@@ -171,12 +171,20 @@ TEST(DataPath, NormalizeIsIdentityOnWindowsAndResolvesElsewhere)
 }
 
 //----------------------------------------------------------------------
-// FindDataRoot: the first candidate holding Data/Info/FileDef.inf, as an
-// absolute path, or empty. The candidates a Finder launch or a bundle
-// produces are a working directory without the data ("/"), then the
-// executable's directory, then the directory beside the bundle - and
-// the data tree may spell its directories in any case off Windows.
+// FindDataRoot: the first candidate holding the marker file, as an
+// absolute, case-resolved path with no trailing separator, or empty.
+// The candidates a Finder launch or a bundle produces are a working
+// directory without the data ("/"), then the executable's directory,
+// then the directory beside the bundle - and the data tree may spell
+// its directories in any case off Windows. The marker is passed the way
+// the game spells it, backslashes included.
 //----------------------------------------------------------------------
+
+namespace {
+
+const char* const kMarker = "Data\\Info\\FileDef.inf";
+
+} // namespace
 
 TEST(DataPath, FindDataRootPicksTheFirstCandidateWithTheMarker)
 {
@@ -188,10 +196,11 @@ TEST(DataPath, FindDataRootPicksTheFirstCandidateWithTheMarker)
 	const std::string sEmpty = (Scratch.Path / "empty").generic_string();
 	const std::string sRoot  = Scratch.Path.generic_string();
 
-	const std::string sFound = Basic::FindDataRoot({ sEmpty, sRoot, sEmpty });
+	const std::string sFound = Basic::FindDataRoot({ sEmpty, sRoot, sEmpty }, kMarker);
 
-	CHECK(Scratch.Name() == Basic::ResolveDataPath(sFound));
+	CHECK(Scratch.Name() == sFound);
 	CHECK(std::filesystem::path(sFound).is_absolute());
+	CHECK(!sFound.empty() && sFound.back() != '/');
 }
 
 TEST(DataPath, FindDataRootIsEmptyWhenNoCandidateHasTheMarker)
@@ -204,8 +213,10 @@ TEST(DataPath, FindDataRootIsEmptyWhenNoCandidateHasTheMarker)
 	const std::string sEmpty = (Scratch.Path / "empty").generic_string();
 	const std::string sMissing = (Scratch.Path / "missing").generic_string();
 
-	CHECK("" == Basic::FindDataRoot({ sEmpty, sMissing, "" }));
-	CHECK("" == Basic::FindDataRoot({}));
+	CHECK("" == Basic::FindDataRoot({ sEmpty, sMissing, "" }, kMarker));
+	CHECK("" == Basic::FindDataRoot({}, kMarker));
+	// A file is not a directory the data could be under.
+	CHECK("" == Basic::FindDataRoot({ (Scratch.Path / "Data/Info/FileDef.inf").generic_string() }, kMarker));
 }
 
 TEST(DataPath, FindDataRootSeesAMarkerSpelledInAnotherCase)
@@ -223,9 +234,32 @@ TEST(DataPath, FindDataRootSeesAMarkerSpelledInAnotherCase)
 		File << "x";
 	}
 
-	const std::string sFound = Basic::FindDataRoot({ Other.generic_string() });
+	const std::string sFound = Basic::FindDataRoot({ Other.generic_string() }, kMarker);
 
-	CHECK(Basic::ResolveDataPath(Other.generic_string()) == Basic::ResolveDataPath(sFound));
+	CHECK(Basic::ResolveDataPath(Other.generic_string()) == sFound);
+}
+
+TEST(DataPath, FindDataRootReturnsTheCandidateAsTheDiskSpellsIt)
+{
+	// A candidate asked for as "Beside" when the directory is "beside":
+	// on a case-sensitive disk chdir() accepts only the disk's spelling,
+	// so that is what comes back - with the candidate's trailing
+	// separator gone, as a bundle-relative candidate carries one.
+	SScratchDirectory Scratch;
+
+	std::error_code Error;
+	const std::filesystem::path Beside = Scratch.Path / "beside";
+	std::filesystem::create_directories(Beside / "Data" / "Info", Error);
+	{
+		std::ofstream File(Beside / "Data" / "Info" / "FileDef.inf", std::ios::binary);
+		File << "x";
+	}
+
+	const std::string sAsked = (Scratch.Path / "Beside").generic_string() + "/";
+	const std::string sFound = Basic::FindDataRoot({ sAsked }, kMarker);
+
+	CHECK(Basic::ResolveDataPath(Beside.generic_string()) == sFound);
+	CHECK(!sFound.empty() && sFound.back() != '/');
 }
 
 TEST(DataPath, FindDataRootAcceptsARelativeCandidateAndReturnsItAbsolute)
@@ -238,7 +272,7 @@ TEST(DataPath, FindDataRootAcceptsARelativeCandidateAndReturnsItAbsolute)
 	const std::filesystem::path Before = std::filesystem::current_path(Error);
 	std::filesystem::current_path(Scratch.Path, Error);
 
-	const std::string sFound = Basic::FindDataRoot({ "." });
+	const std::string sFound = Basic::FindDataRoot({ "." }, kMarker);
 
 	std::filesystem::current_path(Before, Error);
 

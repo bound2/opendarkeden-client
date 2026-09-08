@@ -511,11 +511,21 @@ The executable is `build/presets/macos/bin/DarkEden`, run with the `Data/`
 tree beside it as on Linux. Launched from Finder or as a bundle
 (`-DDARKEDEN_MACOS_BUNDLE=ON` builds `bin/DarkEden.app`), the client looks
 for `Data/Info/FileDef.inf` under its working directory, its executable's
-directory, the bundle's `Contents/Resources` and the directory the bundle
-sits in, and runs from the first that has it. The bundle does not copy the
-data: put `Data/` beside `DarkEden.app`.
+directory and the directory the bundle sits in, runs from the first that
+has it, and says on stderr which directories it tried when none has it.
+The bundle does not copy the data, and the game writes beside its data
+(`UserSet/`, `Log/`), so the data does not go inside the bundle: put
+`Data/` beside `DarkEden.app`. A bundle downloaded with a quarantine flag
+is run by macOS from a random read-only copy (App Translocation), where
+"beside the bundle" is nowhere; build it locally or clear the flag with
+`xattr -d com.apple.quarantine`.
 
 The window asks for `SDL_WINDOW_ALLOW_HIGHDPI`, so on a Retina display the
 game frame is scaled to the native pixel grid and mouse points are mapped
 through the point-to-pixel ratio (`tests/unit/test_present_geometry.cpp`
-pins the mapping; no test machine has such a display).
+pins the mapping; no test machine has such a display). Whether macOS
+honours the flag for a bare executable, which has no `Info.plist` to say
+`NSHighResolutionCapable`, or magnifies it as it does an app without the
+key, has not been seen; the bundle declares the key. The xBRZ filter's
+factor is chosen from the pixel size, so the same display costs more CPU
+per frame than a non-Retina one of the same point size.

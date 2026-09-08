@@ -467,13 +467,13 @@ MOustersGear::AddItem(MItem* pItem, GEAR_OUSTERS n)
 // Remove Item ( n)
 //----------------------------------------------------------------------
 MItem*			
-MOustersGear::RemoveItem(GEAR_OUSTERS n)
+MOustersGear::RemoveItem(int n)
 {
 	//-----------------------------------------------------
 	// The slot arrives in GCRemoveFromGear, so it is bounded
 	// before it indexes the array.
 	//-----------------------------------------------------
-	if ((unsigned int)n >= (unsigned int)m_Size)
+	if (n < 0 || n >= (int)m_Size)
 	{
 		return NULL;
 	}

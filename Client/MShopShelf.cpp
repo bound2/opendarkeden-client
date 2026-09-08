@@ -53,7 +53,7 @@ MShopShelf::~MShopShelf()
 // ShelfClass에 맞는 class의 객체를 생성해서(new) 넘겨준다.
 //----------------------------------------------------------------------
 MShopShelf*		
-MShopShelf::NewShelf(MShopShelf::SHELF_TYPE ShelfClass)
+MShopShelf::NewShelf(int ShelfClass)
 {
 	DEBUG_ADD_FORMAT("MShopShelf::NewShelf %d", ShelfClass);
 
@@ -61,7 +61,7 @@ MShopShelf::NewShelf(MShopShelf::SHELF_TYPE ShelfClass)
 	// indexes the factory table - one past the table is a code pointer to
 	// call through. The two shop-list handlers return on NULL; MNPC and
 	// GCShopVersionHandler pass in-range enumerators and never see one.
-	if ((unsigned int)ShelfClass >= (unsigned int)MAX_SHELF)
+	if (ShelfClass < 0 || ShelfClass >= (int)MAX_SHELF)
 	{
 		DEBUG_ADD_FORMAT_ERR("[Error] MShopShelf::NewShelf: invalid shelf type %d", ShelfClass);
 		return NULL;

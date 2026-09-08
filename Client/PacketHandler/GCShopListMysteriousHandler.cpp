@@ -55,7 +55,7 @@ void GCShopListMysteriousHandler::execute ( GCShopListMysterious * pPacket , Pla
 			//------------------------------------------------------
 			// 새로운 Shelf를 생성한다.
 			//------------------------------------------------------
-			MShopShelf* pShelf = MShopShelf::NewShelf( (MShopShelf::SHELF_TYPE)pPacket->getShopType() );
+			MShopShelf* pShelf = MShopShelf::NewShelf( pPacket->getShopType() );
 			if (pShelf == NULL)
 			{
 				DEBUG_ADD_FORMAT("[Error] GCShopListMysterious: invalid shelf type %d", (int)pPacket->getShopType());

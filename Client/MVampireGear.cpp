@@ -406,13 +406,13 @@ MVampireGear::AddItem(MItem* pItem, GEAR_VAMPIRE n)
 // Remove Item ( n)
 //----------------------------------------------------------------------
 MItem*			
-MVampireGear::RemoveItem(GEAR_VAMPIRE n)
+MVampireGear::RemoveItem(int n)
 {
 	//-----------------------------------------------------
 	// The slot arrives in GCRemoveFromGear, so it is bounded
 	// before it indexes the array.
 	//-----------------------------------------------------
-	if ((unsigned int)n >= (unsigned int)m_Size)
+	if (n < 0 || n >= (int)m_Size)
 	{
 		return NULL;
 	}

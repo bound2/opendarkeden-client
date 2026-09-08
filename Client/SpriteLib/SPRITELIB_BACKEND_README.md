@@ -346,8 +346,8 @@ cd /path/to/opendarkeden/client/build
 **Error**: `undefined reference to spritectl_*`
 - **Solution**: Link against SpriteLib library
 
-**Error**: `SDL2/SDL.h: No such file or directory`
-- **Solution**: Install SDL2 development packages or add SDL2 include path
+**Error**: `SDL.h: No such file or directory`
+- **Solution**: Install SDL2 development packages; the include directory comes from the `SDL2::SDL2` target, so the target that fails must link it. The spelling is `<SDL.h>`, never `<SDL2/SDL.h>` (see `basic/Platform.h`)
 
 ### Runtime Errors
 

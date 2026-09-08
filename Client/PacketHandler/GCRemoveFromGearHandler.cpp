@@ -36,7 +36,7 @@ void GCRemoveFromGearHandler::execute ( GCRemoveFromGear * pPacket , Player * pP
 	{
 	case RACE_SLAYER:
 	{
-		MItem* pRemovedItem = g_pSlayerGear->RemoveItem( (MSlayerGear::GEAR_SLAYER)slotID );
+		MItem* pRemovedItem = g_pSlayerGear->RemoveItem( slotID );
 
 		
 		if (pRemovedItem==NULL)
@@ -165,7 +165,7 @@ void GCRemoveFromGearHandler::execute ( GCRemoveFromGear * pPacket , Player * pP
 	// Vampire인 경우
 	//----------------------------------------------------------------------
 	{
-		MItem* pRemovedItem = g_pVampireGear->RemoveItem( (MVampireGear::GEAR_VAMPIRE)slotID );
+		MItem* pRemovedItem = g_pVampireGear->RemoveItem( slotID );
 
 		if (pRemovedItem==NULL)
 		{
@@ -288,7 +288,7 @@ void GCRemoveFromGearHandler::execute ( GCRemoveFromGear * pPacket , Player * pP
 
 	case RACE_OUSTERS:
 	{
-		MItem* pRemovedItem = g_pOustersGear->RemoveItem( (MOustersGear::GEAR_OUSTERS)slotID );
+		MItem* pRemovedItem = g_pOustersGear->RemoveItem( slotID );
 
 		if (pRemovedItem==NULL)
 		{

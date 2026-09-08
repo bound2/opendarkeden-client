@@ -161,15 +161,26 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **607 tests, 294,433 checks, 0 failed** in both Windows trees, and
-**607 tests, 294,432 checks, 0 failed** on Linux (GCC, Clang, and GCC with
-`-DUSE_ASAN=ON -DUSE_UBSAN=ON`, where UBSan reports nothing); the one-check
+baseline: **617 tests, 294,467 checks, 0 failed** in both Windows trees, and
+**617 tests, 294,466 checks, 0 failed** on Linux (GCC, Clang, and GCC with
+`-DUSE_ASAN=ON -DUSE_UBSAN=ON`, where UBSan reports nothing) and on macOS
+(Apple Clang, with and without ASan and UBSan); the one-check
 difference is a platform-conditional test, not a failure. The Linux
 recipe is the `linux`, `linux-clang` and `linux-asan` presets in
-`CMakePresets.json`. `DarkEden` builds and links there too, and run headless
+`CMakePresets.json`, the macOS one the `macos` and `macos-asan` presets.
+**Clang's UBSan checks enum loads and GCC's does not**: a wire byte cast to
+an enum before its range check passed the Linux job and aborted the first
+macOS sanitizer run, so a Clang sanitizer build (the `macos-asan` preset, or
+the Linux container with `clang++` and the `libclang-rt` package) is the
+one that sees that class.
+`DarkEden` builds and links on both, and on Linux run headless
 (`SDL_VIDEODRIVER=dummy`) with the data tree beside it reaches the main menu and
 exits cleanly on `SDL_QUIT`; login and beyond are unverified off Windows (the
-port assessment's area F).
+port assessment's area F). **Nobody here has a Mac**: the macOS numbers come
+from GitHub's arm64 runner (`.github/workflows/macos.yml`, which also runs on
+pull requests for that reason), nothing has been watched on a Mac's display,
+and a `<SDL2/...>` include spelling breaks the Homebrew build - it is
+`<SDL.h>` everywhere (`basic/Platform.h` says why).
 
 ## Traps
 

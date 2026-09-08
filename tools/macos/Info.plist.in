@@ -2,12 +2,15 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
   The Info.plist of bin/DarkEden.app, built when DARKEDEN_MACOS_BUNDLE is
-  ON (CMakeLists.txt, the DarkEden target). CMake's stock template plus
-  two keys it does not write: NSHighResolutionCapable, without which
-  macOS magnifies the whole application on a Retina display and the
-  SDL_WINDOW_ALLOW_HIGHDPI flag CSDLGraphics::Init asks for has no
-  effect, and LSMinimumSystemVersion at the port assessment's floor. The
-  @MACOSX_BUNDLE_*@ values come from the target's properties.
+  ON (CMakeLists.txt, the DarkEden target). The keys of CMake's stock
+  template that a game needs (no icon, signature, copyright or info
+  string), plus three it does not write: NSHighResolutionCapable, without
+  which macOS magnifies the whole application on a Retina display and
+  the SDL_WINDOW_ALLOW_HIGHDPI flag CSDLGraphics::Init asks for has no
+  effect; LSMinimumSystemVersion at the port assessment's floor, which
+  the macos presets' CMAKE_OSX_DEPLOYMENT_TARGET is what actually
+  enforces; and NSPrincipalClass. The @MACOSX_BUNDLE_*@ values come from
+  the target's properties.
 -->
 <plist version="1.0">
 <dict>

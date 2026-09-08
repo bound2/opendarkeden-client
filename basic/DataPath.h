@@ -44,18 +44,21 @@ std::string	ResolveDataPath(std::string_view sPath);
 std::string	NormalizeDataPath(std::string_view sPath);
 
 // The directory the game should run in: the first candidate under which
-// Data/Info/FileDef.inf exists (resolved as above), as an absolute path,
-// or empty when none qualifies. The game reads its data relative to the
-// working directory; on Windows that is the executable's own directory,
-// and off Windows the launcher decides it - a shell gives the directory
-// it was in, Finder gives "/", and an application bundle keeps the
-// executable three directories below anything a user would put the data
-// beside. Client.cpp offers the working directory, the executable's
-// directory (the bundle's Resources directory, inside one) and the
-// directory beside the bundle, in that order, and changes to the first
-// that has the data (docs/linux-macos-port-assessment-2026-09-07.md,
+// the marker file (Data\Info\FileDef.inf, as the game spells it - the
+// caller passes it, so this header need not know) exists, resolved as
+// above; returned absolute, case-resolved and without a trailing
+// separator, so the caller can chdir to it and record it. Empty when no
+// candidate qualifies; a candidate that cannot be made absolute is
+// skipped, not fatal. The game reads its data relative to the working
+// directory; on Windows that is the executable's own directory, and off
+// Windows the launcher decides it - a shell gives the directory it was
+// in, Finder gives "/", and an application bundle keeps the executable
+// three directories below anything a user would put the data beside.
+// Client.cpp offers the working directory, the executable's directory
+// and the directory beside the bundle, in that order, and changes to the
+// first that has the data (docs/linux-macos-port-assessment-2026-09-07.md,
 // areas F and G).
-std::string	FindDataRoot(const std::vector<std::string>& vCandidates);
+std::string	FindDataRoot(const std::vector<std::string>& vCandidates, std::string_view sMarker);
 
 } // namespace Basic
 

@@ -102,7 +102,7 @@ void GCShopVersionHandler::execute ( GCShopVersion * pPacket , Player * pPlayer 
 				{
 					// i is SHOP_RACK_SPECIAL here, which is SHELF_SPECIAL
 					// (both 1): inside the factory table, never NULL.
-					pShopShelf = MShopShelf::NewShelf( (MShopShelf::SHELF_TYPE)i );
+					pShopShelf = MShopShelf::NewShelf( i );
 
 					pShop->SetShelf( (MShopShelf::SHELF_TYPE)i, pShopShelf );
 				}

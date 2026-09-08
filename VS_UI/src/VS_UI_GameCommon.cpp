@@ -26646,6 +26646,13 @@ void C_VS_UI_TEAM_INFO::Show()
 			int cut_pos = (x+w-30 -vx)/char_width;
 			if(!g_PossibleStringCut(sz_string2, cut_pos))
 				cut_pos--;
+			// Never past what the window holds: the leading spaces were
+			// skipped in place, so cut_pos is measured from inside it.
+			{
+				const int remaining = (int)strlen(sz_string2);
+				if(cut_pos > remaining)
+					cut_pos = remaining;
+			}
 			sz_string2[cut_pos] = NULL;
 			
 			char *return_char = NULL;
@@ -30787,7 +30794,13 @@ void	C_VS_UI_BRING_FEE::Show()
 
 		while(str.size() > next)
 		{
-			strcpy(sz_string, str.c_str()+next);
+			// One window of the text per line, bounded by the buffer; the
+			// string-table entry it comes from has no length limit.
+			size_t copy_len = str.size() - next;
+			if(copy_len > sizeof(sz_string) - 1)
+				copy_len = sizeof(sz_string) - 1;
+			memcpy(sz_string, str.c_str()+next, copy_len);
+			sz_string[copy_len] = '\0';
 			
 			char *sz_string2 = sz_string;
 			
@@ -30801,6 +30814,13 @@ void	C_VS_UI_BRING_FEE::Show()
 			
 			if(!g_PossibleStringCut(sz_string2, cut_pos))
 				cut_pos--;
+			// Never past what the window holds: the leading spaces were
+			// skipped in place, so cut_pos is measured from inside it.
+			{
+				const int remaining = (int)strlen(sz_string2);
+				if(cut_pos > remaining)
+					cut_pos = remaining;
+			}
 			sz_string2[cut_pos] = NULL;
 			
 			char *return_char = NULL;
@@ -32063,7 +32083,13 @@ void	C_VS_UI_INPUT_NAME::Show()
 
 		while(str.size() > next)
 		{
-			strcpy(sz_string, str.c_str()+next);
+			// One window of the text per line, bounded by the buffer; the
+			// string-table entry it comes from has no length limit.
+			size_t copy_len = str.size() - next;
+			if(copy_len > sizeof(sz_string) - 1)
+				copy_len = sizeof(sz_string) - 1;
+			memcpy(sz_string, str.c_str()+next, copy_len);
+			sz_string[copy_len] = '\0';
 			
 			char *sz_string2 = sz_string;
 			
@@ -32077,6 +32103,13 @@ void	C_VS_UI_INPUT_NAME::Show()
 			
 			if(!g_PossibleStringCut(sz_string2, cut_pos))
 				cut_pos--;
+			// Never past what the window holds: the leading spaces were
+			// skipped in place, so cut_pos is measured from inside it.
+			{
+				const int remaining = (int)strlen(sz_string2);
+				if(cut_pos > remaining)
+					cut_pos = remaining;
+			}
 			sz_string2[cut_pos] = NULL;
 			
 			char *return_char = NULL;
@@ -32532,13 +32565,14 @@ void	C_VS_UI_POPUP_MESSAGE::Show()
 
 		while(m_Str.size() > next)
 		{
-			if(m_Str.size() - next > 2048)
-			{
-				memcpy(sz_string,m_Str.c_str()+next,2047);
-				sz_string[2047] = '\0';
-			}
-			else
-				strcpy(sz_string, m_Str.c_str()+next);
+			// One window of the text per line, bounded by the buffer: the
+			// old split copied a remainder of exactly 2048 bytes with strcpy,
+			// one byte past the end.
+			size_t copy_len = m_Str.size() - next;
+			if(copy_len > sizeof(sz_string) - 1)
+				copy_len = sizeof(sz_string) - 1;
+			memcpy(sz_string, m_Str.c_str()+next, copy_len);
+			sz_string[copy_len] = '\0';
 			
 			char *sz_string2 = sz_string;
 			
@@ -32553,6 +32587,13 @@ void	C_VS_UI_POPUP_MESSAGE::Show()
 			if(!g_PossibleStringCut(sz_string2, cut_pos))
 				cut_pos--;
 			
+			// Never past what the window holds: the leading spaces were
+			// skipped in place, so cut_pos is measured from inside it.
+			{
+				const int remaining = (int)strlen(sz_string2);
+				if(cut_pos > remaining)
+					cut_pos = remaining;
+			}
 			sz_string2[cut_pos] = NULL;
 			
 			char *return_char = NULL;
@@ -33362,6 +33403,13 @@ void	C_VS_UI_QUEST_STATUS::ShowDesc(int strX,int strY,const char *str)
 		
 		if(!g_PossibleStringCut(sz_string2, cut_pos))
 			cut_pos--;
+		// Never past what the window holds: the leading spaces were
+		// skipped in place, so cut_pos is measured from inside it.
+		{
+			const int remaining = (int)strlen(sz_string2);
+			if(cut_pos > remaining)
+				cut_pos = remaining;
+		}
 		sz_string2[cut_pos] = NULL;
 		
 		char *return_char = NULL;
@@ -34249,6 +34297,13 @@ void	C_VS_UI_LOTTERY_CARD::ShowDesc(int strX,int strY,const char *str)
 		
 		if(!g_PossibleStringCut(sz_string2, cut_pos))
 			cut_pos--;
+		// Never past what the window holds: the leading spaces were
+		// skipped in place, so cut_pos is measured from inside it.
+		{
+			const int remaining = (int)strlen(sz_string2);
+			if(cut_pos > remaining)
+				cut_pos = remaining;
+		}
 		sz_string2[cut_pos] = NULL;
 		
 		char *return_char = NULL;

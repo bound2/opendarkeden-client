@@ -686,7 +686,7 @@ target_link_libraries(sprite_viewer PRIVATE
 	SDL2::SDL2
 )
 
-# main() gets renamed to SDL_main by <SDL2/SDL.h> on Windows; SDL2main.lib
+# main() gets renamed to SDL_main by <SDL.h> on Windows; SDL2main.lib
 # supplies the real WinMain/main that forwards to it. Unlike DarkEden (which
 # defines its own WinMain and must skip this), this tool has no WinMain of
 # its own, so it needs SDL2main - without it, link fails with LNK2019 on

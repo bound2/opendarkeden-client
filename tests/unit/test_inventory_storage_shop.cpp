@@ -314,8 +314,11 @@ TEST(ShopShelf, FactoryRefusesAnUnknownType)
 
 	CHECK(MShopShelf::NewShelf(MShopShelf::MAX_SHELF) == NULL);
 	CHECK(MShopShelf::NewShelf(MShopShelf::SHELF_BASE) == NULL);
-	CHECK(MShopShelf::NewShelf((MShopShelf::SHELF_TYPE)255) == NULL);
-	CHECK(MShopShelf::NewShelf((MShopShelf::SHELF_TYPE)-1) == NULL);
+	// As the handlers pass it: the raw wire byte, never cast to the enum
+	// (that conversion is undefined for an out-of-range value).
+	CHECK(MShopShelf::NewShelf(255) == NULL);
+	CHECK(MShopShelf::NewShelf(-1) == NULL);
+	CHECK(MShopShelf::NewShelf(0x7fffffff) == NULL);
 }
 
 TEST(ShopShelf, FillsTheFirstEmptySlotAndReplacesByDeleting)

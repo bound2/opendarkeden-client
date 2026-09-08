@@ -1349,8 +1349,13 @@ cleanup:
  * g_present_dest is in renderer output pixels; the window's size in points
  * is kept beside it because the two differ on a high-DPI display when the
  * window was created with SDL_WINDOW_ALLOW_HIGHDPI (a Retina Mac: 2x), and
- * mouse events arrive in points. Zero until a present has a window to ask,
- * which the software-renderer tests never do. */
+ * mouse events arrive in points. The window is whichever one
+ * spritectl_set_present_window was given (CSDLGraphics::Init, which
+ * creates it); a present with none - the tests' software renderer over a
+ * surface - records no window size and the mapping is the identity. It
+ * used to be asked of the renderer through SDL_RenderGetWindow, which is
+ * SDL 2.0.22: on an older SDL the ratio silently vanished while the
+ * ALLOW_HIGHDPI flag that needs it stayed. */
 static SDL_Rect g_present_dest = { 0, 0, 0, 0 };
 static int g_present_game_w = 0;
 static int g_present_game_h = 0;
@@ -1358,6 +1363,7 @@ static int g_present_output_w = 0;
 static int g_present_output_h = 0;
 static int g_present_window_w = 0;
 static int g_present_window_h = 0;
+static SDL_Window* g_present_window = NULL;
 
 /* Intermediate render target for sharp-bilinear upscaling: the game frame is
  * first enlarged by an integer factor with nearest (crisp pixels), then that
@@ -1404,6 +1410,10 @@ static int present_renderer_accelerated(SDL_Renderer* renderer) {
 	return cached_accelerated;
 }
 
+void spritectl_set_present_window(void* window) {
+	g_present_window = static_cast<SDL_Window*>(window);
+}
+
 void spritectl_set_present_geometry(int window_w, int window_h,
 	int output_w, int output_h,
 	int dest_x, int dest_y, int dest_w, int dest_h,
@@ -1434,7 +1444,8 @@ void spritectl_window_to_game_coords(int* x, int* y) {
 	 * a renderer with no window) is the identity here. */
 	long long px = *x;
 	long long py = *y;
-	if (g_present_window_w > 0 && g_present_window_h > 0) {
+	if (g_present_window_w > 0 && g_present_window_h > 0 &&
+		g_present_output_w > 0 && g_present_output_h > 0) {
 		px = (px * g_present_output_w) / g_present_window_w;
 		py = (py * g_present_output_h) / g_present_window_h;
 	}
@@ -1497,22 +1508,16 @@ int spritectl_present_surface(spritectl_surface_t surface, void* renderer_ptr) {
 	g_present_game_w = sdl_surface->w;
 	g_present_game_h = sdl_surface->h;
 
-	/* The window's size in points, for the mouse mapping. Only a renderer
-	 * with a window has one (SDL_RenderGetWindow, 2.0.22); the tests'
-	 * software renderer over a surface has none, and stays at the
-	 * identity. */
+	/* The window's size in points, for the mouse mapping; none without a
+	 * window (the tests' software renderer over a surface), and then the
+	 * mapping is the identity. */
 	g_present_output_w = out_w;
 	g_present_output_h = out_h;
 	g_present_window_w = 0;
 	g_present_window_h = 0;
-#if SDL_VERSION_ATLEAST(2, 0, 22)
-	{
-		SDL_Window* window = SDL_RenderGetWindow(renderer);
-		if (window != NULL && out_w > 0 && out_h > 0) {
-			SDL_GetWindowSize(window, &g_present_window_w, &g_present_window_h);
-		}
+	if (g_present_window != NULL && out_w > 0 && out_h > 0) {
+		SDL_GetWindowSize(g_present_window, &g_present_window_w, &g_present_window_h);
 	}
-#endif
 
 	if (g_xbrz_enabled) {
 		if (g_frame_upscaler.Draw(sdl_surface, renderer, dest_rect)) return 0;

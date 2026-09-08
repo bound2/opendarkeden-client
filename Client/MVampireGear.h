@@ -95,7 +95,12 @@ class MVampireGear : public MPlayerGear	{
 		//------------------------------------------------
 		// RemoveItem : slot(n)의 item을 제거한다.
 		//------------------------------------------------
-		MItem*			RemoveItem(GEAR_VAMPIRE n);
+		// Takes an int, not the enum: the slot arrives in GCRemoveFromGear
+		// as a wire byte, and converting an out-of-range value to an enum
+		// with no fixed underlying type is undefined before this can check
+		// it (Clang's -fsanitize=enum reports the load; the macOS
+		// sanitizer build caught it). An enumerator still converts.
+		MItem*			RemoveItem(int n);
 
 		//------------------------------------------------
 		// RemoveItem : id가 같은 item을 제거한다.
