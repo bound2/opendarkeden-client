@@ -132,9 +132,11 @@ void CheckHighBitEncryptionCode(uchar code,
 		(std::numeric_limits<int>::min)(), -1,
 		(std::numeric_limits<int>::max)()
 	};
+	// The wire long is 32 bits whatever sizeof(long) is (LP64 makes it
+	// 64), so the boundaries are int32_t's, not long's.
 	const std::array<long, 3> longValues = {
-		(std::numeric_limits<long>::min)(), -1,
-		(std::numeric_limits<long>::max)()
+		static_cast<long>((std::numeric_limits<std::int32_t>::min)()), -1,
+		static_cast<long>((std::numeric_limits<std::int32_t>::max)())
 	};
 
 	f.m_Output.setEncryptCode(code);
