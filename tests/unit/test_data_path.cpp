@@ -60,9 +60,12 @@ struct SScratchDirectory
 		File << "x";
 	}
 
+	// The scratch directory's path as the resolver spells it: the resolver
+	// rewrites every component to the disk's case, and the temp directory's
+	// own spelling (TMP/TEMP on Windows) need not match the disk's.
 	std::string	Name() const
 	{
-		return Path.generic_string();
+		return Basic::ResolveDataPath(Path.generic_string());
 	}
 };
 

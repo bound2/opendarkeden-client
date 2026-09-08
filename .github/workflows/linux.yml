@@ -10,6 +10,8 @@ name: Linux build and tests
 on:
   push:
     branches: [master]
+  pull_request:
+    branches: [master]
   workflow_dispatch:
 
 permissions:

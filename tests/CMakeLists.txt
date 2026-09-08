@@ -150,11 +150,12 @@ set_source_files_properties(
 	# tests, and gamemodel_world.h besides, so it needs the same
 	# definitions.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_cpp20_container_helpers_2.cpp
-	# The second source_location slice. It expands Assert() itself, and
-	# Assert() is conditioned on __WIN32__ - without these definitions the
-	# macro would fall back to <assert.h>, a branch the library never
-	# compiles, and the test would pin nothing. (__END_CATCH, which it
-	# also expands, is conditioned on NDEBUG alone.)
+	# The second source_location slice. It expands Assert() itself and
+	# pins the message the library's Assert() produces; the macro is one
+	# spelling on every platform now (PacketAssert.h), but the TU still
+	# shares Exception.h's class definitions with the library, which
+	# switch on __WIN32__. (__END_CATCH, which it also expands, is
+	# conditioned on NDEBUG alone.)
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_source_location.cpp
 	# PacketIDSet::deletePacketID. It names CPS_NONE, which PlayerStatus.h
 	# declares only under __GAME_CLIENT__, and Packet.h conditions a member

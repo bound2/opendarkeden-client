@@ -27,15 +27,11 @@
 #define __GAME_CLIENT__
 #endif
 
-/* Platform types. Platform.h detects the platform from the compiler,
-   defines PLATFORM_WINDOWS / PLATFORM_LINUX / PLATFORM_MACOS /
-   PLATFORM_POSIX, and on Windows includes <windows.h> with
-   WIN32_LEAN_AND_MEAN, which keeps <mmsystem.h> and the DirectX-adjacent
-   headers out - basic/AudioTypes.h and DXLib/CDirectDraw.h define
-   SDL-backed stand-ins for those type names. */
-#include "../basic/Platform.h"
-
-/* Standard C and C++ library */
+/* Standard C and C++ library, ahead of Platform.h. On Windows Platform.h
+   brings <windows.h>, whose min and max macros are then live while any
+   later standard header is parsed; MSVC's STL survives that (it spells
+   them (min)()), but the old VS_UI PCH parsed the STL first and the
+   merged one should not narrow that. */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -55,6 +51,14 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+
+/* Platform types. Platform.h detects the platform from the compiler,
+   defines PLATFORM_WINDOWS / PLATFORM_LINUX / PLATFORM_MACOS /
+   PLATFORM_POSIX, and on Windows includes <windows.h> with
+   WIN32_LEAN_AND_MEAN, which keeps <mmsystem.h> and the DirectX-adjacent
+   headers out - basic/AudioTypes.h and DXLib/CDirectDraw.h define
+   SDL-backed stand-ins for those type names. */
+#include "../basic/Platform.h"
 
 #ifdef PLATFORM_WINDOWS
 	#include <io.h>

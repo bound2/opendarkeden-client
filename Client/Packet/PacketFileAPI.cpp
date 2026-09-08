@@ -440,7 +440,9 @@ bool FileAPI::getfilenonblocking_ex ( int fd )
 
 #if defined(PLATFORM_POSIX)
 	int flags = fcntl_ex( fd , F_GETFL , 0 );
-	return flags | O_NONBLOCK;
+	// Was `flags | O_NONBLOCK`, which is never zero; dead until the port made
+	// the POSIX branch live (nothing calls SocketImpl::isNonBlocking today).
+	return (flags & O_NONBLOCK) != 0;
 #elif __WINDOWS__
 	throw UnsupportedError();
 #endif

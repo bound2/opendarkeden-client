@@ -91,6 +91,7 @@
       "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin" },
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_PREFIX_PATH": "/opt/homebrew;/usr/local",
         "BUILD_TESTS": "ON",
         "REQUIRE_TEST_TOOLS": "ON",
         "USE_ASAN": "OFF",

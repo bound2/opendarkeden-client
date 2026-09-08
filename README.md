@@ -469,8 +469,8 @@ What is verified today, in the order its acceptance criteria list them:
   tree beside the executable (see *Point the build at the data*; the resolver
   in `basic/DataPath.h` takes care of the tables' backslashes and letter case),
   the client loads every data table, reaches the main menu and exits cleanly
-  on the window's close. That has been exercised headless
-  (`SDL_VIDEODRIVER=dummy`), not on a display. Login, character select, a zone
+  on `SDL_QUIT`. That has been exercised headless (`SDL_VIDEODRIVER=dummy`,
+  where the quit came from SIGTERM), not on a display. Login, character select, a zone
   and chat against the docker server are **not verified** off Windows.
 - **macOS:** the `macos` preset is written and has not been run on a Mac.
   Nothing has been built there.

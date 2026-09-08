@@ -1261,7 +1261,10 @@ InitDraw()
 		//--------------------------------------------------------
 		// 하드웨어 가속 사용 불가능
 		//--------------------------------------------------------
-		if (!bUse3D)
+		// Only after the HAL path above created the display: without g_bHAL
+		// the block below this one does the single 2D init, and this must not
+		// add a second (it used to - see the comment on that block).
+		if (g_bHAL && !bUse3D)
 		{
 			DEBUG_ADD("[ InitGame ]  3D Failed. Release Draw and Re-Init 2D");
 
@@ -1296,10 +1299,14 @@ InitDraw()
 
 	//--------------------------------------------------------
 	//
-	// 무조건 3D가속 안 할때
+	// No 3D acceleration at all: the plain 2D display. This was an `else`
+	// that paired with `if (!bUse3D)` above rather than with `if (g_bHAL)`,
+	// so with the HAL on the display was initialised twice at start-up
+	// (create, destroy, create off Windows), and with it off the 3D-failed
+	// block above did the work and this one was skipped.
 	//
 	//--------------------------------------------------------
-	else
+	if (!g_bHAL)
 	{
 		DEBUG_ADD("[ InitGame ]  Init 2D");
 
@@ -1329,9 +1336,9 @@ InitDraw()
 
 	CSpriteSurface::InitEffectTable();
 
-#ifdef PLATFORM_WINDOWS
+	// Platform-neutral (it reads CSDLGraphics::Is565() and picks a function);
+	// it was behind PLATFORM_WINDOWS, leaving s_GammaFunction NULL elsewhere.
 	CDirectDrawSurface::SetGammaFunction();
-#endif
 
 	return TRUE;
 }
@@ -2272,7 +2279,8 @@ InitSocket()
 		g_pRequestServerPlayerManager->Init();
 	}
 #else
-	// On macOS, disable server functionality to reduce CPU usage
+	// The request service is Windows-only; the managers still compile
+	// everywhere as packetwire members.
 	DEBUG_ADD("[ InitGame ] RequestServer functionality Windows only");
 #endif
 
@@ -2499,7 +2507,12 @@ void ReleaseAllObjects()
 
 	SAFE_DELETE( g_pZoneSoundTable );
 	SAFE_DELETE( g_pZoneSoundManager );
+#ifdef PLATFORM_WINDOWS
+	// WavePackFileManager.cpp is Windows-only (mmio); off Windows the class's
+	// vtable is never emitted, the pointer is never set, and UBSan's vptr
+	// check on this virtual delete would need the typeinfo to link.
 	SAFE_DELETE( g_pWavePackFileManager );
+#endif
 	
 	DEBUG_ADD("[Release] Sound");
 

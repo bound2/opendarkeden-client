@@ -47,9 +47,10 @@ check () {
 # R1 - translation units compiled directly into the DarkEden target.
 #
 # Counted from the generated DarkEden.vcxproj, which reflects the CMake
-# source lists after configure. Preference order: the build dir ctest
-# passed in, then the day-to-day tree. On generators that produce no
-# .vcxproj the ratchet is skipped with a message - skipped, not passed.
+# source lists after configure, or on the Ninja generator from
+# build.ninja (the branch below). Preference order: the build dir ctest
+# passed in, then the day-to-day tree. On a generator that produces
+# neither the ratchet is skipped with a message - skipped, not passed.
 #----------------------------------------------------------------------
 # 515: 516 - 1. Task 5.2 deleted MitemTableInit.cpp, the server's in-code
 # item data (dead here). History: 516 = 517 - 1 (task 4.4's first slice
@@ -169,8 +170,10 @@ elif [ -n "$BUILD_DIR" ] && [ -f "$BUILD_DIR/build.ninja" ]; then
 	# The Ninja generator (the Linux and macOS presets): the same count,
 	# read from build.ninja's object rules for the DarkEden target. Its
 	# own baseline, because the non-Windows source list is three files
-	# shorter (CMakeLists.txt's NOT WIN32 filters: the Immersion
-	# force-feedback code, EXECryptor, GetWinVer and the rest). Before
+	# shorter: of CMakeLists.txt's NOT WIN32 filters only GetWinVer,
+	# MInternetConnection and WavePackFileManager match anything the glob
+	# yields (the Immersion, D3D, EXECryptor and VolumeOut patterns match
+	# no file at all). Before
 	# this branch existed the ratchet SKIPPED on every non-MSVC tree,
 	# which the port assessment listed as fail-open (area A). build.ninja
 	# is rewritten on every configure, so its mtime is the configure time.
@@ -1030,8 +1033,11 @@ fi
 #
 #   PLATFORM_MACOS as a token in the same set minus basic/, where the
 #   shim's genuinely Darwin-only code (mach-o/dyld, _NSGetExecutablePath)
-#   is the one legitimate user - everywhere else the macro meant "not
-#   Windows", and that is PLATFORM_POSIX;
+#   lives - everywhere else the macro used to mean "not Windows", and
+#   that is PLATFORM_POSIX. A real Darwin branch outside basic/ is
+#   allowed and counted: there is one, the macOS font list in
+#   Client/TextSystem/TextBackendSDL.cpp, so this count is 1 and a
+#   second one is a deliberate baseline change;
 #
 #   PLATFORM_MACOS in any CMakeLists.txt or .cmake outside build
 #   trees, comment tails stripped - the build defines no platform
@@ -1041,9 +1047,12 @@ fi
 # comments and strings per file for the reason count_register.pl gives.
 # Blind to a spelling assembled by the preprocessor and to the CMake
 # variable that carries the Windows wire macros (DARKEDEN_PLATFORM_-
-# DEFINITIONS is the intended single point). R13 = 0 as of 2026-09-08.
+# DEFINITIONS is the intended single point), and to the compiler
+# builtins themselves (_WIN32, __APPLE__, __linux__), which a file that
+# does not include Platform.h still has to use - basic/DataPath.cpp
+# includes it for that reason. R13 = 1 as of 2026-09-08: the font list.
 #----------------------------------------------------------------------
-R13_BASELINE=0
+R13_BASELINE=1
 
 r13_cxx_members () {
 	find Client VS_UI basic tools third_party tests \( -name '*.cpp' -o -name '*.h' -o -name '*.inl' \) 2>/dev/null

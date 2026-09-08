@@ -1826,7 +1826,8 @@ InitApp(int nCmdShow)
 #else
 	// No native window off Windows: CSDLGraphics::Init creates the SDL
 	// window when InitGame() sets the display mode, and g_hWnd stays NULL.
-	// The Win32 cursor, show and focus calls below are the shim's no-ops.
+	// Of the Win32 calls below, ShowCursor drives SDL's cursor through the
+	// shim; SetCursor, ShowWindow, UpdateWindow and SetFocus are its no-ops.
 #endif
 
 // REMOVED: nProtect anti-cheat code (SDL migration - no longer needed)

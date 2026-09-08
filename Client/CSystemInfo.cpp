@@ -41,10 +41,11 @@ inline unsigned __int64 theCycleCount(void)
 
 static bool cpuid(unsigned long function, unsigned long& out_eax, unsigned long& out_ebx, unsigned long& out_ecx, unsigned long& out_edx)
 {
-#ifdef PLATFORM_POSIX
-	asm("cpuid": "=a" (out_eax), "=b" (out_ebx), "=c" (out_ecx), "=d" (out_edx) : "a" (function));
-	return true;
-#else
+	// This whole function sits inside the file's PLATFORM_WINDOWS block, so
+	// only the MSVC intrinsic is ever compiled. An inline-asm x86 cpuid used
+	// to sit here behind _LINUX, a macro nothing defined, and was carried
+	// through the port's macro collapse as PLATFORM_POSIX - still unreachable,
+	// and x86-only, so it is gone rather than left to trap the arm64 build.
 	int info[4];
 	__cpuid(info, (int)function);
 	out_eax = (unsigned long)info[0];
@@ -52,7 +53,6 @@ static bool cpuid(unsigned long function, unsigned long& out_eax, unsigned long&
 	out_ecx = (unsigned long)info[2];
 	out_edx = (unsigned long)info[3];
 	return true;
-#endif
 }
 
 long CSystemInfo::GetCpuClock()

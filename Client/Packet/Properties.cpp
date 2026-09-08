@@ -30,6 +30,10 @@
 static inline std::string ConvertPathSeparators(const std::string& path) {
 	if (path.find('\\') == std::string::npos && path.find('/') == std::string::npos)
 		return path;
+	// A URL is not a path: the resolver walks components and would fold
+	// its "//" (ServerInfo.inf's UpdateServerAddress holds one).
+	if (path.find("://") != std::string::npos)
+		return path;
 	return Basic::NormalizeDataPath(path);
 }
 
@@ -184,9 +188,8 @@ std::string Properties::getProperty ( std::string key ) const
 {
 	__BEGIN_TRY
 
-		std::string value = getProperty(key.c_str());
-		/* Convert path separators for cross-platform compatibility */
-		return ConvertPathSeparators(value);
+		// The const char* overload resolves the value already.
+		return getProperty(key.c_str());
 
 	__END_CATCH
 }
