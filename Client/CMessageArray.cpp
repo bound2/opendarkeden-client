@@ -4,6 +4,7 @@
 #include "Client_PCH.h"
 #include "CMessageArray.h"
 #include "DebugInfo.h"
+#include <sys/stat.h>
 
 #ifdef OUTPUT_DEBUG
 	//#define OUTPUT_FILE_LOG
@@ -26,11 +27,13 @@
 	#define PLATFORM_OPEN	_open
 	#define PLATFORM_CLOSE	_close
 	#define PLATFORM_LSEEK	_lseek
+	static constexpr int LogFileMode = _S_IREAD | _S_IWRITE;
 #else
 	#define PLATFORM_WRITE(fd, buf, len)	write(fd, buf, len)
 	#define PLATFORM_OPEN	open
 	#define PLATFORM_CLOSE	close
 	#define PLATFORM_LSEEK	lseek
+	static constexpr int LogFileMode = S_IRUSR | S_IWUSR;
 #endif
 
 // Platform-specific file flags
@@ -111,7 +114,7 @@ CMessageArray::Init(int max, int length, const char* filename)
 		m_Filename = new char [strlen(filename)+1];
 		strcpy(m_Filename, filename);
 
-		m_LogFile = PLATFORM_OPEN(filename, _O_WRONLY | _O_TEXT | _O_CREAT | _O_TRUNC);
+		m_LogFile = PLATFORM_OPEN(filename, _O_WRONLY | _O_TEXT | _O_CREAT | _O_TRUNC, LogFileMode);
 
 		if (m_LogFile!=-1)
 		{
@@ -198,7 +201,7 @@ CMessageArray::Add(const char *str)
 		// [ TEST CODE ] 화일 닫고 다시 열기
 		#ifdef OUTPUT_FILE_LOG
 			PLATFORM_CLOSE( m_LogFile );
-			m_LogFile = PLATFORM_OPEN(m_Filename, _O_WRONLY | _O_TEXT | _O_APPEND | _O_CREAT);
+			m_LogFile = PLATFORM_OPEN(m_Filename, _O_WRONLY | _O_TEXT | _O_APPEND | _O_CREAT, LogFileMode);
 		#endif
 	}	
 
@@ -251,7 +254,7 @@ CMessageArray::AddToFile(const char *str)
 		// [ TEST CODE ] 화일 닫고 다시 열기
 		#ifdef OUTPUT_FILE_LOG
 			PLATFORM_CLOSE( m_LogFile );
-			m_LogFile = PLATFORM_OPEN(m_Filename, _O_WRONLY | _O_TEXT | _O_APPEND | _O_CREAT);
+			m_LogFile = PLATFORM_OPEN(m_Filename, _O_WRONLY | _O_TEXT | _O_APPEND | _O_CREAT, LogFileMode);
 		#endif
 	}	
 
@@ -287,7 +290,7 @@ CMessageArray::StoreRow(const char* pBuffer, int nLength)
 		// [ TEST CODE ] close the file and open it again
 		#ifdef OUTPUT_FILE_LOG
 			PLATFORM_CLOSE( m_LogFile );
-			m_LogFile = PLATFORM_OPEN(m_Filename, _O_WRONLY | _O_TEXT | _O_APPEND | _O_CREAT);
+			m_LogFile = PLATFORM_OPEN(m_Filename, _O_WRONLY | _O_TEXT | _O_APPEND | _O_CREAT, LogFileMode);
 		#endif
 	}
 
