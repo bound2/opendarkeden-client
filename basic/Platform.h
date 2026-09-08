@@ -16,16 +16,15 @@
 
 #include <stdint.h>
 #include <stddef.h>
+/* The real assert, on every platform. This header used to define
+   assert(e) as ((void)(e)) off Windows, ahead of <assert.h>, which
+   silently turned every assertion in the tree into an evaluated
+   no-op there; an assertion that fails on Linux or macOS now aborts
+   the way it does on Windows (port assessment, area B). */
+#include <assert.h>
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-/* Define assert macro for non-Windows platforms */
-#ifndef PLATFORM_WINDOWS
-#ifndef assert
-#define assert(e) ((void)(e))
-#endif
 #endif
 
 /* ============================================================================
@@ -372,12 +371,9 @@ typedef struct tagLOGFONT {
 /* DirectDraw surface capabilities */
 #define DDSCAPS_SYSTEMMEMORY 0x00000800L
 
-/* GDI font creation function - stub implementation */
-static inline void* CreateFontIndirect(LOGFONT* lplf) {
-	(void)lplf;
-	/* Stub - would create a font on Windows */
-	return (void*)1; /* Return a non-null handle */
-}
+/* CreateFontIndirect has no stub: it returned (void*)1 as a font handle,
+   and nothing calls it any more - fonts are TextSystem's. A new caller
+   fails to compile here rather than drawing with a fake handle. */
 #endif
 
 /* DirectDraw surface capabilities - project-specific constants, not part of
@@ -524,10 +520,17 @@ typedef WORD			char_t;
 		#define _TCHAR	TCHAR
 	#endif
 
-	/* Stub for MessageBox - just prints to stderr */
+	/* MessageBox: a real dialog through SDL (platform_show_error, defined
+	   in PlatformSDL.cpp and declared again further down this header),
+	   plus the stderr line it always wrote, so a message the game shows
+	   the player is not lost to a terminal nobody is watching. Returns
+	   IDOK (1); the game's MessageBox calls do not branch on the answer
+	   off Windows. */
+	void platform_show_error(const char* title, const char* message);
 	static inline int MessageBox(void* hWnd, const char* lpText, const char* lpCaption, unsigned int uType) {
 		(void)hWnd; (void)uType;
-		fprintf(stderr, "[%s] %s\n", lpCaption, lpText);
+		fprintf(stderr, "[%s] %s\n", lpCaption ? lpCaption : "", lpText ? lpText : "");
+		platform_show_error(lpCaption ? lpCaption : "DarkEden", lpText ? lpText : "");
 		return 1;
 	}
 
@@ -1190,6 +1193,63 @@ void platform_event_close(platform_event_t event);
 
 #define PLATFORM_INFINITE	((DWORD)-1)
 
+/* The Win32 thread-wait names the game uses, over the event API above.
+   These lived in Client/MWorkThread.h, a game header, so GameMain.cpp,
+   CGameUpdate.cpp and MWorkThread.cpp reached them only through that
+   include, and it defined them on Windows as well, beside the real
+   declarations in <windows.h>. Off Windows only, here, like the rest
+   of the shim. */
+#ifndef PLATFORM_WINDOWS
+	typedef DWORD (*LPTHREAD_START_ROUTINE)(void* lpParameter);
+
+	#define THREAD_PRIORITY_NORMAL          0
+	#define THREAD_PRIORITY_ABOVE_NORMAL    1
+	#define THREAD_PRIORITY_BELOW_NORMAL   -1
+	#define THREAD_PRIORITY_HIGHEST          2
+	#define THREAD_PRIORITY_LOWEST          -2
+
+	#define WAIT_OBJECT_0                   0
+	#define WAIT_TIMEOUT                    258
+
+	/* Waits on an event handle only: the game's one caller waits on the
+	   file-loading event. A thread or mutex handle here is a misuse. */
+	static inline DWORD WaitForSingleObject(HANDLE event, DWORD timeout) {
+		platform_event_t evt = (platform_event_t)event;
+		if (platform_event_wait(evt, timeout) == 0) {
+			return WAIT_OBJECT_0;
+		}
+		return WAIT_TIMEOUT;
+	}
+
+	/* No-op: SDL threads are not re-prioritised after creation here. */
+	static inline BOOL SetThreadPriority(HANDLE thread, int priority) {
+		(void)thread; (void)priority;
+		return TRUE;
+	}
+
+	/* The request-service managers in Client/Packet used to carry their
+	   own copies of the next four, written over pthread_t, while the
+	   thread they applied them to came from platform_thread_create - an
+	   SDL_Thread*. pthread_cancel on an SDL_Thread* is not a thread
+	   cancel. These are honest instead: SDL has no cancel and no
+	   non-blocking exit-code query, so both report failure, and the
+	   caller's error path runs. The request service itself is created
+	   on Windows only (GameInit.cpp). */
+	#define STILL_ACTIVE 259
+	static inline BOOL TerminateThread(HANDLE thread, DWORD exitCode) {
+		(void)thread; (void)exitCode;
+		return FALSE;
+	}
+	static inline BOOL GetExitCodeThread(HANDLE thread, LPDWORD lpExitCode) {
+		(void)thread;
+		if (lpExitCode) *lpExitCode = STILL_ACTIVE;
+		return FALSE;
+	}
+	static inline HANDLE GetCurrentThread(void) {
+		return (HANDLE)(size_t)SDL_ThreadID();
+	}
+#endif
+
 /* ============================================================================
  * Dynamic Library Functions
  * ============================================================================ */
@@ -1359,6 +1419,19 @@ typedef struct tagPOINT {
     LONG x;
     LONG y;
 } POINT, *PPOINT, *LPPOINT;
+#endif
+
+/**
+ * Size structure (equivalent to Windows SIZE). Used to live in
+ * Client/Client_PCH.h alone, so a translation unit that reached this
+ * header another way had RECT and POINT but no SIZE.
+ */
+#ifndef SIZE_DEFINED
+#define SIZE_DEFINED
+typedef struct tagSIZE {
+    LONG cx;
+    LONG cy;
+} SIZE, *PSIZE, *LPSIZE;
 #endif
 
 /**
@@ -1586,14 +1659,6 @@ static inline HANDLE OpenProcess(DWORD dwDesiredAccess, BOOL bInheritHandle, DWO
 }
 #endif
 
-#ifndef ChangeDisplaySettingsA
-static inline LONG ChangeDisplaySettingsA(LPDEVMODE lpDevMode, DWORD dwflags) {
-	(void)lpDevMode; (void)dwflags;
-	return DISP_CHANGE_FAILED;
-}
-#define ChangeDisplaySettings ChangeDisplaySettingsA
-#endif
-
 #ifndef GetLastError
 static inline DWORD GetLastError() {
 	return 0;
@@ -1631,61 +1696,22 @@ typedef DWORD REGSAM;
 typedef HKEY* PHKEY;
 #endif
 
-/* Registry functions */
-#ifndef RegOpenKeyExA
-static inline LONG RegOpenKeyExA(HKEY hKey, LPCSTR lpSubKey, DWORD ulOptions, REGSAM samDesired, PHKEY phkResult) {
-	(void)hKey; (void)lpSubKey; (void)ulOptions; (void)samDesired;
-	if (phkResult) *phkResult = NULL;
-	return ERROR_SUCCESS;
-}
-#define RegOpenKeyEx RegOpenKeyExA
-#endif
-
-#ifndef RegQueryValueExA
-static inline LONG RegQueryValueExA(HKEY hKey, LPCSTR lpValueName, LPDWORD lpReserved, LPDWORD lpType, LPBYTE lpData, LPDWORD lpcbData) {
-	(void)hKey; (void)lpValueName; (void)lpReserved; (void)lpType;
-	if (lpData && lpcbData && *lpcbData > 0) {
-		lpData[0] = '\0';
-		*lpcbData = 1;
-	}
-	return ERROR_SUCCESS;
-}
-#define RegQueryValueEx RegQueryValueExA
-#endif
-
-#ifndef RegSetValueExA
-static inline LONG RegSetValueExA(HKEY hKey, LPCSTR lpValueName, DWORD Reserved, DWORD dwType, const BYTE* lpData, DWORD cbData) {
-	(void)hKey; (void)lpValueName; (void)Reserved; (void)dwType; (void)lpData; (void)cbData;
-	return ERROR_SUCCESS;
-}
-#define RegSetValueEx RegSetValueExA
-#endif
-
-#ifndef RegCloseKey
-static inline LONG RegCloseKey(HKEY hKey) {
-	(void)hKey;
-	return ERROR_SUCCESS;
-}
-#endif
+/* No registry stubs. RegOpenKeyEx/RegQueryValueEx/RegSetValueEx/RegCloseKey
+   used to return ERROR_SUCCESS here with empty data, so a caller could
+   not tell a missing key from a present one; the tree has no live
+   caller left (Client.cpp's Netmarble read is commented out), and the
+   replacement for a new one is platform_config_get_string /
+   platform_config_set_string below. */
 
 /* Registry access mask type */
 #ifndef REGSAM_DEFINED
 	#define REGSAM_DEFINED
 #endif
 
-#ifndef EnumDisplaySettingsA
-static inline BOOL EnumDisplaySettingsA(LPCSTR lpszDeviceName, DWORD iModeNum, LPDEVMODE lpDevMode) {
-	(void)lpszDeviceName; (void)iModeNum;
-	if (lpDevMode) {
-		lpDevMode->dmBitsPerPel = 32;
-		lpDevMode->dmPelsWidth = 1024;
-		lpDevMode->dmPelsHeight = 768;
-		lpDevMode->dmDisplayFrequency = 60;
-	}
-	return FALSE;
-}
-#define EnumDisplaySettings EnumDisplaySettingsA
-#endif
+/* No EnumDisplaySettings / ChangeDisplaySettings stubs: the former
+   reported a fixed 1024x768 whatever the display, the latter always
+   failed, and the only callers are commented out in Client.cpp. The
+   SDL display path is basic/DisplaySettings. */
 
 #ifndef Sleep
 	/* Sleep for specified milliseconds */
@@ -1906,39 +1932,39 @@ static inline void SetRect(LPRECT lprc, int xLeft, int yTop, int xRight, int yBo
 #define MCI_NOTIFY_SUCCESSFUL 0x0001
 #endif
 
-/* max and min macros for compatibility with Windows code */
+/* min and max: see the function templates after the extern "C" block
+   at the end of this header. They used to be macros here, and a
+   function-like macro named min breaks every `min(` in the standard
+   library headers included after this one - std::numeric_limits<T>::min()
+   for one - which is how 1,155 of 1,243 translation units failed the
+   first Linux compile (port assessment, step 0). */
 #ifndef PLATFORM_WINDOWS
-#ifndef max
-#define max(a, b) (((a) > (b)) ? (a) : (b))
-#endif
-#ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#endif
-/* __int64 Windows type - use long long on macOS */
+/* __int64 Windows type - use long long on POSIX */
 typedef long long __int64;
-/* _atoi64 Windows function - use atoll on macOS */
+/* _atoi64 Windows function - use atoll on POSIX */
 #define _atoi64(x) atoll(x)
 #endif
 
-/* wsprintf stub for macOS - writes formatted output to string */
+/* wsprintf for POSIX. The Win32 wsprintfA never writes more than 1024
+   bytes including the terminator, and the tree's 171 call sites size
+   their buffers against that; this used to be an unbounded vsprintf.
+   Returns the length written, as Win32 does, rather than vsnprintf's
+   would-have-been length. */
 #ifndef PLATFORM_WINDOWS
 #include <stdio.h>
 #include <stdarg.h>
 #include <unistd.h>
 #include <stdlib.h>
 static inline int wsprintf(char* buf, const char* fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#endif
-    int result = vsprintf(buf, fmt, args);
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#endif
-    va_end(args);
-    return result;
+	va_list args;
+	va_start(args, fmt);
+	int result = vsnprintf(buf, 1024, fmt, args);
+	va_end(args);
+	if (result < 0) {
+		buf[0] = '\0';
+		return 0;
+	}
+	return result >= 1024 ? 1023 : result;
 }
 
 /* Windows API stubs for file operations */
@@ -2096,6 +2122,37 @@ static inline void SetSurfaceInfo(S_SURFACEINFO* dest, const S_SURFACEINFO* src)
 #endif
 
 #ifdef __cplusplus
+}
+#endif
+
+/* min and max for the Windows code, off Windows.
+ *
+ * On Windows <windows.h> defines min and max as macros and the tree
+ * calls them unqualified, 518 lines in 65 files, mixing argument
+ * types freely (max(1, someShort + 3)). std::min and std::max refuse
+ * mixed types, so a plain `using std::min` would not carry that code.
+ * These templates take two independent types and return their common
+ * type, which is what the macro's conditional expression yielded.
+ *
+ * They coexist with `using namespace std;`: for a same-type call both
+ * std::min<T>(const T&, const T&) and this template are viable, and
+ * the standard one is the more specialized, so overload resolution
+ * picks it and there is no ambiguity; for a mixed-type call deduction
+ * fails for std::min and only this one remains. Not macros, so
+ * `std::numeric_limits<T>::min()` and every other `min(` inside the
+ * standard headers are left alone. C++ only: the C translation units
+ * (deflate.c and friends) never used the Windows macros. */
+#if defined(__cplusplus) && !defined(PLATFORM_WINDOWS)
+#include <type_traits>
+template <typename A, typename B>
+constexpr typename std::common_type<A, B>::type min(const A& a, const B& b)
+{
+	return (b < a) ? b : a;
+}
+template <typename A, typename B>
+constexpr typename std::common_type<A, B>::type max(const A& a, const B& b)
+{
+	return (a < b) ? b : a;
 }
 #endif
 

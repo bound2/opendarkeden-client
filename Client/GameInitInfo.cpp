@@ -8,14 +8,10 @@
 // Include files
 //-----------------------------------------------------------------------------
 
-// IMPORTANT: Include Platform.h BEFORE PCH to get correct CRITICAL_SECTION size
-// This prevents incomplete type issues with ProfileManager
-#ifdef PLATFORM_WINDOWS
-	#include <Windows.h>
-#else
-	#include "../basic/Platform.h"
-#endif
-
+// Client_PCH.h brings Platform.h, which defines CRITICAL_SECTION once
+// (the Win32 one on Windows, the pthread one elsewhere); the include
+// order dance that used to sit here guarded against a second definition
+// that no longer exists.
 #include "Client_PCH.h"
 // <MMSystem.h> not included: no real MM_ symbols are used in this file, and
 // including it conflicts with basic/Platform.h's timeGetTime()/GetTickCount()
