@@ -7,7 +7,7 @@
 #include <string.h>
 
 #ifdef PLATFORM_POSIX
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include "../../../Client/TextSystem/TextService.h"
 #include "../../../Client/TextSystem/RenderTargetSpriteSurface.h"
 #include "../../../Client/SpriteLib/CSpriteSurface.h"

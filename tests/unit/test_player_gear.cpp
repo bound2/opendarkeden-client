@@ -546,19 +546,21 @@ TEST(PlayerGear, EveryRaceRefusesAGearSlotPastItsRack)
 	ousters.Init();
 
 	// The slot arrives in GCRemoveFromGear, so a value past the rack -
-	// or a negative one - must not index the slot array.
+	// or a negative one - must not index the slot array. Passed as the
+	// handler passes it, the raw int: a cast to the enum is undefined
+	// for an out-of-range value before the check can run.
 	CHECK(slayer.RemoveItem(MSlayerGear::MAX_GEAR_SLAYER) == NULL);
-	CHECK(slayer.RemoveItem((MSlayerGear::GEAR_SLAYER)200) == NULL);
-	CHECK(slayer.RemoveItem((MSlayerGear::GEAR_SLAYER)-1) == NULL);
+	CHECK(slayer.RemoveItem(200) == NULL);
+	CHECK(slayer.RemoveItem(-1) == NULL);
 	CHECK(vampire.RemoveItem(MVampireGear::MAX_GEAR_VAMPIRE) == NULL);
-	CHECK(vampire.RemoveItem((MVampireGear::GEAR_VAMPIRE)-1) == NULL);
+	CHECK(vampire.RemoveItem(-1) == NULL);
 	CHECK(ousters.RemoveItem(MOustersGear::MAX_GEAR_OUSTERS) == NULL);
-	CHECK(ousters.RemoveItem((MOustersGear::GEAR_OUSTERS)-1) == NULL);
+	CHECK(ousters.RemoveItem(-1) == NULL);
 
 	// What is worn is still worn.
 	Helm* helm = new Helm(1);
 	CHECK(slayer.AddItem(helm, MSlayerGear::GEAR_SLAYER_HELM));
-	CHECK(slayer.RemoveItem((MSlayerGear::GEAR_SLAYER)200) == NULL);
+	CHECK(slayer.RemoveItem(200) == NULL);
 	CHECK(slayer.GetItem(MSlayerGear::GEAR_SLAYER_HELM) == helm);
 
 	slayer.Release();

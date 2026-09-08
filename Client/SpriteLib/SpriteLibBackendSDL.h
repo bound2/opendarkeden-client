@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 /* ============================================================================
  * Internal Surface Structure

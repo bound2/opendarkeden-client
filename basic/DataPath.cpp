@@ -207,3 +207,41 @@ std::string	Basic::NormalizeDataPath(std::string_view sPath)
 	return ResolveDataPath(sPath);
 #endif
 }
+
+std::string	Basic::FindDataRoot(const std::vector<std::string>& vCandidates, std::string_view sMarker)
+{
+	for (const std::string& sCandidate : vCandidates)
+	{
+		if (sCandidate.empty())
+			continue;
+
+		std::error_code Error;
+
+		// The candidate as the disk spells it: absolute, so the result
+		// survives the chdir it is about to cause, and case-resolved, so
+		// a "resources" that was asked for as "Resources" comes back as
+		// the name chdir will accept. absolute(".") is "<cwd>/." and
+		// lexically_normal() keeps that as "<cwd>/" on libstdc++ and
+		// libc++, where MSVC's GetFullPathName has already dropped the
+		// dot: one spelling, without the trailing separator, everywhere.
+		const std::filesystem::path Absolute = std::filesystem::absolute(sCandidate, Error);
+		if (Error)
+			continue;
+
+		std::string sRoot = ResolveDataPath(Absolute.lexically_normal().generic_string());
+
+		const std::string sRootPath = std::filesystem::path(sRoot).root_path().generic_string();
+		while (sRoot.size() > sRootPath.size() && sRoot.back() == '/')
+			sRoot.pop_back();
+
+		// The marker, resolved the way the game's own open will resolve
+		// it: a tree whose Data directory is spelled "data" is still the
+		// data tree off Windows.
+		const std::filesystem::path Marker(ResolveDataPath((std::filesystem::path(sRoot) / sMarker).generic_string()));
+
+		if (std::filesystem::is_regular_file(Marker, Error) && !Error)
+			return sRoot;
+	}
+
+	return std::string();
+}

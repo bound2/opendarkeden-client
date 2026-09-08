@@ -1,0 +1,81 @@
+name: macOS build and tests
+
+# The macOS half of the port assessment's CI ask (area H; the platform
+# work is area G). Two presets - Apple Clang, Ninja, Debug, every target,
+# Homebrew's SDL2, plain and under ASan and UBSan (whose enum check
+# Linux's GCC build does not have) - on GitHub's arm64 runner, through the same script
+# the Linux workflow runs, so a Mac at a desk and the runner verify the
+# same things: configure, a full build including the DarkEden
+# executable, the required-test inventory, then ctest.
+#
+# No Mac is available to the maintainers, so this job is the port's only
+# Darwin compiler. Unlike the Linux job it therefore also runs on pull
+# requests (a Linux build can be had from Docker on the desk; a Darwin
+# one cannot), and workflow_dispatch reaches it on any branch once the
+# file is on master - GitHub dispatches only workflows the default
+# branch has, which is why the macOS step of the port was built through
+# a draft pull request.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: ${{ matrix.preset }}
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [macos, macos-asan]
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Install the toolchain and SDL2
+        run: |
+          # No brew update: install updates what it needs, and a full
+          # update is minutes and a known way for a hosted job to fail.
+          brew install ninja sdl2 sdl2_image sdl2_ttf sdl2_mixer jpeg-turbo
+          # The fonts TextBackendSDL.cpp looks for on macOS. The first and
+          # last are on every macOS and the job fails without them; the
+          # others are listed for the record (PingFang is expected to be
+          # missing on 10.15 and later, the list says why).
+          ls -l "/System/Library/Fonts/AppleSDGothicNeo.ttc" "/System/Library/Fonts/Helvetica.ttc"
+          ls -l "/System/Library/Fonts/Supplemental/Arial Unicode.ttf" \
+                "/System/Library/Fonts/Hiragino Sans GB.ttc" \
+                "/System/Library/Fonts/PingFang.ttc" || true
+          # What the ratchet script runs under: the system's own bash
+          # (3.2) and BSD grep, sed and find, unless a Homebrew one is
+          # first on PATH - the record of which tools passed it.
+          sw_vers
+          clang --version
+          cmake --version
+          bash --version | head -n 1
+          which -a bash grep sed find perl
+          grep --version | head -n 1
+
+      - name: Configure, build and test
+        run: tools/ci/verify-linux.sh ${{ matrix.preset }}
+
+      - name: Upload build and test diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: diagnostics-${{ matrix.preset }}
+          retention-days: 7
+          path: |
+            build/verification/
+            build/presets/${{ matrix.preset }}/Testing/Temporary/
+            build/presets/${{ matrix.preset }}/CMakeFiles/CMakeConfigureLog.yaml

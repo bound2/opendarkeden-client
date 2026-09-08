@@ -84,7 +84,17 @@ void CSDLGraphics::Init(HWND hWnd, WORD width, WORD height, SCREENMODE mode, boo
 #ifdef PLATFORM_WINDOWS
 	m_pSDLWindow = SDL_CreateWindowFrom((void*)hWnd);
 #else
-	Uint32 flags = SDL_WINDOW_SHOWN;
+	// ALLOW_HIGHDPI: on a Retina display (and a scaled Wayland desktop)
+	// the renderer's output is then the display's native pixel grid and
+	// the letterbox upscale in spritectl_present_surface has every pixel
+	// to work with, instead of drawing at the window's point size and
+	// being magnified by the compositor. Window and mouse coordinates
+	// stay in points; spritectl_window_to_game_coords maps them through
+	// the point-to-pixel ratio, so the two do not have to agree. The
+	// cost: the xBRZ filter's factor (FrameUpscaler::ScaleFactor) is
+	// chosen from the pixel size, so a 2x display can ask for 3x or 4x
+	// where it asked for 2x, on the CPU, every frame.
+	Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
 	if (mode == FULLSCREEN)
 	{
 		flags |= SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_BORDERLESS;
@@ -101,6 +111,11 @@ void CSDLGraphics::Init(HWND hWnd, WORD width, WORD height, SCREENMODE mode, boo
 	{
 		return;
 	}
+
+	// The present path reads this window's point size against the
+	// renderer's pixel size for the mouse mapping; on Windows the two are
+	// equal and the mapping is unchanged.
+	spritectl_set_present_window(m_pSDLWindow);
 
 	// Vsync paces the render loop at the monitor refresh rate now that the
 	// game draws interpolated frames between its 62 ms logic ticks (see
@@ -149,6 +164,7 @@ void CSDLGraphics::ReleaseAll()
 		// window, and destroying it here only releases SDL's wrapper, not hWnd
 		// itself; off Windows the window is SDL's own (Init above) and this
 		// destroys it.
+		spritectl_set_present_window(NULL);
 		SDL_DestroyWindow(m_pSDLWindow);
 		m_pSDLWindow = NULL;
 	}

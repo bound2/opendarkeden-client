@@ -169,3 +169,119 @@ TEST(DataPath, NormalizeIsIdentityOnWindowsAndResolvesElsewhere)
 #endif
 	CHECK(Opens(sNormalized));
 }
+
+//----------------------------------------------------------------------
+// FindDataRoot: the first candidate holding the marker file, as an
+// absolute, case-resolved path with no trailing separator, or empty.
+// The candidates a Finder launch or a bundle produces are a working
+// directory without the data ("/"), then the executable's directory,
+// then the directory beside the bundle - and the data tree may spell
+// its directories in any case off Windows. The marker is passed the way
+// the game spells it, backslashes included.
+//----------------------------------------------------------------------
+
+namespace {
+
+const char* const kMarker = "Data\\Info\\FileDef.inf";
+
+} // namespace
+
+TEST(DataPath, FindDataRootPicksTheFirstCandidateWithTheMarker)
+{
+	SScratchDirectory Scratch;
+
+	std::error_code Error;
+	std::filesystem::create_directories(Scratch.Path / "empty", Error);
+
+	const std::string sEmpty = (Scratch.Path / "empty").generic_string();
+	const std::string sRoot  = Scratch.Path.generic_string();
+
+	const std::string sFound = Basic::FindDataRoot({ sEmpty, sRoot, sEmpty }, kMarker);
+
+	CHECK(Scratch.Name() == sFound);
+	CHECK(std::filesystem::path(sFound).is_absolute());
+	CHECK(!sFound.empty() && sFound.back() != '/');
+}
+
+TEST(DataPath, FindDataRootIsEmptyWhenNoCandidateHasTheMarker)
+{
+	SScratchDirectory Scratch;
+
+	std::error_code Error;
+	std::filesystem::create_directories(Scratch.Path / "empty", Error);
+
+	const std::string sEmpty = (Scratch.Path / "empty").generic_string();
+	const std::string sMissing = (Scratch.Path / "missing").generic_string();
+
+	CHECK("" == Basic::FindDataRoot({ sEmpty, sMissing, "" }, kMarker));
+	CHECK("" == Basic::FindDataRoot({}, kMarker));
+	// A file is not a directory the data could be under.
+	CHECK("" == Basic::FindDataRoot({ (Scratch.Path / "Data/Info/FileDef.inf").generic_string() }, kMarker));
+}
+
+TEST(DataPath, FindDataRootSeesAMarkerSpelledInAnotherCase)
+{
+	// The data tree is shipped with "data" and "info" in whatever case
+	// the archive gave them; the marker must be found through the same
+	// case-insensitive resolution the game's opens use.
+	SScratchDirectory Scratch;
+
+	std::error_code Error;
+	const std::filesystem::path Other = Scratch.Path / "other";
+	std::filesystem::create_directories(Other / "data" / "info", Error);
+	{
+		std::ofstream File(Other / "data" / "info" / "filedef.inf", std::ios::binary);
+		File << "x";
+	}
+
+	const std::string sFound = Basic::FindDataRoot({ Other.generic_string() }, kMarker);
+
+	CHECK(Basic::ResolveDataPath(Other.generic_string()) == sFound);
+}
+
+TEST(DataPath, FindDataRootReturnsTheCandidateAsTheDiskSpellsIt)
+{
+	// A candidate asked for as "Beside" when the directory is "beside":
+	// on a case-sensitive disk chdir() accepts only the disk's spelling,
+	// so that is what comes back - with the candidate's trailing
+	// separator gone, as a bundle-relative candidate carries one.
+	SScratchDirectory Scratch;
+
+	std::error_code Error;
+	const std::filesystem::path Beside = Scratch.Path / "beside";
+	std::filesystem::create_directories(Beside / "Data" / "Info", Error);
+	{
+		std::ofstream File(Beside / "Data" / "Info" / "FileDef.inf", std::ios::binary);
+		File << "x";
+	}
+
+	const std::string sAsked = (Scratch.Path / "Beside").generic_string() + "/";
+	const std::string sFound = Basic::FindDataRoot({ sAsked }, kMarker);
+
+	CHECK(Basic::ResolveDataPath(Beside.generic_string()) == sFound);
+	CHECK(!sFound.empty() && sFound.back() != '/');
+}
+
+TEST(DataPath, FindDataRootAcceptsARelativeCandidateAndReturnsItAbsolute)
+{
+	SScratchDirectory Scratch;
+
+	// "." is the first candidate Client.cpp offers: the working
+	// directory, whatever the launcher made it.
+	std::error_code Error;
+	const std::filesystem::path Before = std::filesystem::current_path(Error);
+	std::filesystem::current_path(Scratch.Path, Error);
+
+	const std::string sFound = Basic::FindDataRoot({ "." }, kMarker);
+
+	std::filesystem::current_path(Before, Error);
+
+	CHECK(std::filesystem::path(sFound).is_absolute());
+	// absolute(".") ends in "/." and the normalised form of that ends
+	// in "/" on libstdc++ and libc++; the caller gets one spelling.
+	CHECK(!sFound.empty() && sFound.back() != '/');
+	// By identity, not spelling: current_path() is the real path, and
+	// on macOS the temp directory is reached through a symlink
+	// (/var/folders -> /private/var/folders).
+	CHECK(std::filesystem::equivalent(Scratch.Path, std::filesystem::path(sFound), Error));
+}

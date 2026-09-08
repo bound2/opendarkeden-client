@@ -27,15 +27,26 @@
 
 #include "ClientMain.h"
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_main.h>
+#include <SDL.h>
+#include <SDL_main.h>
 
+#include <signal.h>
 #include <stdio.h>
 #include <string.h>
 #include <string>
 
 int main(int argc, char* argv[])
 {
+	// A send() on a connection the server has closed raises SIGPIPE on
+	// every POSIX system, and the default action kills the process with
+	// no log line - the outcome SocketOutputStream's destructor comments
+	// on and avoids by not flushing. Ignored, the send() fails with EPIPE
+	// instead and SocketAPI::send_ex turns that into the ConnectException
+	// the game already handles as a dropped connection. Linux could have
+	// set MSG_NOSIGNAL per call; macOS has no such flag (SO_NOSIGPIPE is
+	// per socket), and one line here covers both.
+	signal(SIGPIPE, SIG_IGN);
+
 	// The launch argument, as WinMain receives lpCmdLine: the first
 	// argument or nothing. ClientMain folds the display settings' launch
 	// command into it and may rewrite its own pointer, so it takes a

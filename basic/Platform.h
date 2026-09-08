@@ -80,15 +80,18 @@ extern "C" {
 	#endif
 #endif
 
-/* Allow explicit SDL selection on Windows */
+/* Allow explicit SDL selection on Windows.
+
+   <SDL.h>, never <SDL2/SDL.h>: the SDL2::SDL2 target every package
+   source exports (vcpkg, Debian, Homebrew, a source install) puts the
+   SDL2 header directory itself on the include path, and that is the
+   only spelling all of them share. Homebrew's autotools-built config
+   exports nothing above it, so <SDL2/SDL.h> resolves there only through
+   a compiler default path - /usr/local/include on Intel, nothing on
+   Apple Silicon. The tree used both spellings until the macOS step of
+   the port (docs/linux-macos-port-assessment-2026-09-07.md, area G). */
 #ifdef PLATFORM_USE_SDL
-	#if __has_include(<SDL2/SDL.h>)
-		#include <SDL2/SDL.h>
-	#elif __has_include(<SDL.h>)
-		#include <SDL.h>
-	#else
-		#include <SDL2/SDL.h>  // Try anyway - include path should be set via CMake
-	#endif
+	#include <SDL.h>
 #endif
 
 /* Include windows.h as early as possible on Windows builds so the rest of

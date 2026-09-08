@@ -6,7 +6,8 @@
 #   tools/ci/verify-linux.sh linux          GCC, Debug, every target
 #   tools/ci/verify-linux.sh linux-clang    Clang
 #   tools/ci/verify-linux.sh linux-asan     GCC with ASan and UBSan
-#   tools/ci/verify-linux.sh macos          Clang on macOS
+#   tools/ci/verify-linux.sh macos          Apple Clang on macOS
+#   tools/ci/verify-linux.sh macos-asan     Apple Clang with ASan and UBSan
 #
 # The same steps the Linux workflow runs, so a local run and the CI run
 # cannot drift, and the same steps tools/ci/verify-windows.ps1 runs on
@@ -22,6 +23,13 @@
 # reference image): build-essential clang cmake ninja-build perl
 # libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libsdl2-mixer-dev
 # libjpeg-dev libfreetype-dev fonts-dejavu-core fonts-noto-cjk.
+# On macOS (.github/workflows/macos.yml is the reference; the runner
+# has cmake already, a desk Mac takes it from Homebrew too): Xcode's
+# command-line tools and, from Homebrew, ninja sdl2 sdl2_image sdl2_ttf
+# sdl2_mixer jpeg-turbo; the fonts are the system's own. The ratchet
+# script uses no Bash 4 construct, and its grep patterns (\s, \b, \w,
+# --include) are GNU extensions that the runner's grep accepts - the
+# workflow prints which grep that was.
 #
 # Exit status: non-zero on the first failing step, with that step's
 # log tail on stderr. Logs go under build/verification/<preset>/.
@@ -30,8 +38,8 @@ set -u
 
 preset="${1:-}"
 case "$preset" in
-	linux|linux-clang|linux-asan|macos) ;;
-	*) echo "usage: $0 linux|linux-clang|linux-asan|macos" >&2; exit 2 ;;
+	linux|linux-clang|linux-asan|macos|macos-asan) ;;
+	*) echo "usage: $0 linux|linux-clang|linux-asan|macos|macos-asan" >&2; exit 2 ;;
 esac
 
 cd "$(dirname "$0")/../.." || exit 2
@@ -77,5 +85,9 @@ export ASAN_OPTIONS="detect_leaks=0:abort_on_error=1"
 export UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=1"
 
 run test ctest --preset "$preset"
+
+# The suite's own totals, which ctest prints only on failure: the line
+# CLAUDE.md's baseline is measured from.
+"build/presets/$preset/bin/unit_tests" 2>/dev/null | tail -n 1
 
 echo "== $preset: configure, build and test passed"

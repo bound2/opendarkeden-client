@@ -95,7 +95,13 @@ class MShopShelf {
 		//-------------------------------------------------------
 		// 원하는 class의 Item의 객체를 생성한다.
 		//-------------------------------------------------------
-		static MShopShelf*		NewShelf(MShopShelf::SHELF_TYPE shelfType);
+		// Takes an int, not SHELF_TYPE: the type arrives in a shop-list
+		// packet as a BYTE, and converting an out-of-range value to an enum
+		// with no fixed underlying type is undefined before any check can
+		// run (Clang's -fsanitize=enum reports the load; it is what the
+		// macOS sanitizer build caught). The range check is on the integer,
+		// and an enumerator still converts implicitly.
+		static MShopShelf*		NewShelf(int shelfType);
 
 		// 각 class별로 NewItem()에 대한 function pointer
 		static FUNCTION_NEWSHELFCLASS		s_NewShelfClassTable[MAX_SHELF];

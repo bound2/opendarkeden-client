@@ -9,7 +9,7 @@
 	#include <Windows.h>
 #else
 	#include "../../basic/Platform.h"
-	#include <SDL2/SDL.h>
+	#include <SDL.h>
 #endif
 #include "MFunctionManager.h"
 

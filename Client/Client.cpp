@@ -56,6 +56,7 @@
 #include <process.h>
 #else
 #include <unistd.h>
+#include <limits.h>		// PATH_MAX, for the data-root search in ClientMain
 #endif
 #include <time.h>
 #include <string>
@@ -65,6 +66,7 @@
 #include "ClientMain.h"
 #ifndef PLATFORM_WINDOWS
 #include "DXLib/DXLibBackend.h"	// dxlib_input_update(), the SDL event pump
+#include "DataPath.h"			// Basic::FindDataRoot, the working directory off Windows
 extern bool g_bRunning;			// cleared by the pump on SDL_QUIT (DXLibBackendSDL.cpp)
 #endif
 #include <system_error>
@@ -2923,8 +2925,11 @@ ApplyPatch()
 			{
 				if (g_pDebugMessage!=NULL)
 				{
-					char logFile[128];
-					strcpy(logFile, g_pDebugMessage->GetFilename());
+					// _MAX_PATH plus the suffix below: g_CWD alone can be 259 bytes,
+					// and off Windows it is now the absolute data directory.
+					char logFile[_MAX_PATH + 32];
+					strncpy(logFile, g_pDebugMessage->GetFilename(), sizeof(logFile) - 1);
+					logFile[sizeof(logFile) - 1] = '\0';
 				
 					if (g_pDebugMessage!=NULL)
 					{
@@ -2935,7 +2940,7 @@ ApplyPatch()
 					_chmod( logFile, _S_IREAD | _S_IWRITE );
 					remove( logFile );
 
-					sprintf(logFile, "%s\\Log\\Log%d.txt", g_CWD, timeGetTime());
+					snprintf(logFile, sizeof(logFile), "%s\\Log\\Log%d.txt", g_CWD, timeGetTime());
 					g_pDebugMessage = new CMessageArray;
 					g_pDebugMessage->Init(MAX_DEBUGMESSAGE, 256, logFile);
 
@@ -3043,9 +3048,51 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 	SetCurrentDirectory(g_CWD);
 #else
 	// The game's data is found relative to the working directory
-	// (GameInit.cpp), which on Windows is the executable's own; off
-	// Windows the launcher or the shell sets it, and g_CWD records it for
-	// the _chdir(g_CWD) calls below.
+	// (GameInit.cpp), which on Windows is the executable's own. Off
+	// Windows the launcher decides it - a shell gives its own directory,
+	// Finder gives "/" - so the data is looked for under the working
+	// directory first, then the executable's directory, then, for a
+	// macOS bundle (Contents/MacOS/DarkEden), the directory the bundle
+	// sits in; the first one that has the file definitions becomes the
+	// working directory. Not the bundle's own Resources directory: the
+	// game writes beside its data (UserSet/, Log/, the profile
+	// directory), which inside a bundle under /Applications fails or
+	// breaks the signature. None of them having it is reported and not
+	// fatal here: the game goes on to fail at its first open, as it
+	// always did, with the working directory it was given. g_CWD records
+	// the result for the _chdir(g_CWD) calls below.
+	{
+		std::vector<std::string> vCandidates;
+		vCandidates.push_back(".");
+
+		// PATH_MAX-sized, not _MAX_PATH (260): platform_get_executable_dir
+		// refuses a directory its buffer cannot hold rather than
+		// truncating, and a deep install would otherwise lose every
+		// candidate but "." without a word.
+		char szBase[PATH_MAX];
+		if (platform_get_executable_dir(szBase, sizeof(szBase)) == 0)
+		{
+			vCandidates.push_back(szBase);
+			vCandidates.push_back(std::string(szBase) + "../../../");
+		}
+		else
+		{
+			fprintf(stderr, "ClientMain: cannot determine the executable's directory; looking for the data under the working directory only\n");
+		}
+
+		const std::string sRoot = Basic::FindDataRoot(vCandidates, FILE_INFO_FILEDEF);
+		if (sRoot.empty())
+		{
+			fprintf(stderr, "ClientMain: no data tree (%s) under any of:\n", FILE_INFO_FILEDEF);
+			for (size_t i = 0; i < vCandidates.size(); i++)
+				fprintf(stderr, "    %s\n", vCandidates[i].c_str());
+		}
+		else if (chdir(sRoot.c_str()) != 0)
+		{
+			fprintf(stderr, "ClientMain: cannot change to the data directory %s\n", sRoot.c_str());
+		}
+	}
+
 	if (getcwd(g_CWD, _MAX_PATH) == NULL)
 	{
 		g_CWD[0] = '.';

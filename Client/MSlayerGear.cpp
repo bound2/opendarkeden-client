@@ -497,13 +497,13 @@ MSlayerGear::AddItem(MItem* pItem, GEAR_SLAYER n)
 // Remove Item ( n)
 //----------------------------------------------------------------------
 MItem*			
-MSlayerGear::RemoveItem(GEAR_SLAYER n)
+MSlayerGear::RemoveItem(int n)
 {
 	//-----------------------------------------------------
 	// The slot arrives in GCRemoveFromGear, so it is bounded
 	// before it indexes the array.
 	//-----------------------------------------------------
-	if ((unsigned int)n >= (unsigned int)m_Size)
+	if (n < 0 || n >= (int)m_Size)
 	{
 		return NULL;
 	}

@@ -472,9 +472,60 @@ What is verified today, in the order its acceptance criteria list them:
   on `SDL_QUIT`. That has been exercised headless (`SDL_VIDEODRIVER=dummy`,
   where the quit came from SIGTERM), not on a display. Login, character select, a zone
   and chat against the docker server are **not verified** off Windows.
-- **macOS:** the `macos` preset is written and has not been run on a Mac.
-  Nothing has been built there.
+- **macOS:** see the next section.
 
 The Korean IME is SDL text input on every platform, sound is SDL_mixer, and the
 launcher arguments and `UserSet/Display.ini` go through the same code as on
 Windows; none of that has been watched on a Linux display yet.
+
+## Build on macOS
+
+The same tree, the same tests, Apple Clang. Nobody maintaining this fork has
+a Mac: everything below was built and run on GitHub's arm64 runner
+(`.github/workflows/macos.yml`, macOS 15), and nothing has been watched on a
+Mac's display. Dependencies come from Homebrew, on Apple Silicon or Intel:
+
+```bash
+xcode-select --install
+brew install cmake ninja sdl2 sdl2_image sdl2_ttf sdl2_mixer jpeg-turbo
+```
+
+No font package: `Client/TextSystem/TextBackendSDL.cpp` uses the system's own
+(Apple SD Gothic Neo, Arial Unicode, Hiragino Sans GB, Helvetica). Two presets,
+each under `build/presets/<preset>/`; CMake finds Homebrew through the
+preset's prefix path, or through `HOMEBREW_PREFIX` when configuring by hand:
+
+| Preset | Compiler | Flags |
+|---|---|---|
+| `macos` | Apple Clang | Debug |
+| `macos-asan` | Apple Clang | `-fsanitize=address,undefined` |
+
+```bash
+cmake --preset macos
+cmake --build --preset macos
+ctest --test-dir build/presets/macos --output-on-failure
+```
+
+`tools/ci/verify-linux.sh macos` runs those steps the way the workflow does.
+The executable is `build/presets/macos/bin/DarkEden`, run with the `Data/`
+tree beside it as on Linux. Launched from Finder or as a bundle
+(`-DDARKEDEN_MACOS_BUNDLE=ON` builds `bin/DarkEden.app`), the client looks
+for `Data/Info/FileDef.inf` under its working directory, its executable's
+directory and the directory the bundle sits in, runs from the first that
+has it, and says on stderr which directories it tried when none has it.
+The bundle does not copy the data, and the game writes beside its data
+(`UserSet/`, `Log/`), so the data does not go inside the bundle: put
+`Data/` beside `DarkEden.app`. A bundle downloaded with a quarantine flag
+is run by macOS from a random read-only copy (App Translocation), where
+"beside the bundle" is nowhere; build it locally or clear the flag with
+`xattr -d com.apple.quarantine`.
+
+The window asks for `SDL_WINDOW_ALLOW_HIGHDPI`, so on a Retina display the
+game frame is scaled to the native pixel grid and mouse points are mapped
+through the point-to-pixel ratio (`tests/unit/test_present_geometry.cpp`
+pins the mapping; no test machine has such a display). Whether macOS
+honours the flag for a bare executable, which has no `Info.plist` to say
+`NSHighResolutionCapable`, or magnifies it as it does an app without the
+key, has not been seen; the bundle declares the key. The xBRZ filter's
+factor is chosen from the pixel size, so the same display costs more CPU
+per frame than a non-Retina one of the same point size.

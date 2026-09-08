@@ -11,7 +11,7 @@
 #include "Client/SpriteLib/CSpritePack.h"
 #include "Client/SpriteLib/CSpriteSurface.h"
 #include "Client/SpriteLib/SpriteLibBackend.h"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <iostream>
 #include <cstring>
 

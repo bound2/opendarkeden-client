@@ -69,7 +69,7 @@ void GCShopListHandler::execute ( GCShopList * pPacket , Player * pPlayer )
 				return;
 			}
 
-			MShopShelf* pShelf = MShopShelf::NewShelf( (MShopShelf::SHELF_TYPE) shopType);
+			MShopShelf* pShelf = MShopShelf::NewShelf( shopType );
 			if (pShelf == NULL)
 			{
 				return;

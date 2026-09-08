@@ -111,8 +111,19 @@ public:
 			"C:\\Windows\\Fonts\\simsun.ttc",
 			"C:\\Windows\\Fonts\\arial.ttf",
 #elif defined(PLATFORM_MACOS)
-			"/System/Library/Fonts/Helvetica.ttc",
+			// Every macOS since 10.8 ships Apple SD Gothic Neo (Hangul and
+			// Latin - the client's development strings are Korean), then
+			// the Chinese game tables' coverage: Arial Unicode under
+			// Supplemental (10.15 and later), Hiragino Sans GB, and
+			// PingFang where it is still a file (10.11 to 10.14; later
+			// releases keep it in a font asset catalog SDL_ttf cannot
+			// open). Helvetica is the Latin-only last resort; it and the
+			// first entry are the two a CI runner is certain to have.
+			"/System/Library/Fonts/AppleSDGothicNeo.ttc",
+			"/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
 			"/System/Library/Fonts/Hiragino Sans GB.ttc",
+			"/System/Library/Fonts/PingFang.ttc",
+			"/System/Library/Fonts/Helvetica.ttc",
 #else
 			// Linux: the Noto CJK package where Debian, Ubuntu and Fedora put
 			// it, then DejaVu, which nearly every distribution installs and

@@ -18,7 +18,7 @@
 #include "Client/MEffect.h"
 #include "Client/SpriteLib/SpriteLibBackend.h"
 #include "EffectSpriteTypeTable.h"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <iostream>
 #include <cstring>
 
