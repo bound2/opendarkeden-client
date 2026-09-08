@@ -207,3 +207,25 @@ std::string	Basic::NormalizeDataPath(std::string_view sPath)
 	return ResolveDataPath(sPath);
 #endif
 }
+
+std::string	Basic::FindDataRoot(const std::vector<std::string>& vCandidates)
+{
+	for (const std::string& sCandidate : vCandidates)
+	{
+		if (sCandidate.empty())
+			continue;
+
+		std::error_code Error;
+		const std::filesystem::path Root(sCandidate);
+
+		// The marker, resolved the way the game's own open will resolve
+		// it: a tree whose Data directory is spelled "data" is still the
+		// data tree off Windows.
+		const std::filesystem::path Marker(ResolveDataPath((Root / "Data/Info/FileDef.inf").generic_string()));
+
+		if (std::filesystem::is_regular_file(Marker, Error) && !Error)
+			return std::filesystem::absolute(Root, Error).lexically_normal().generic_string();
+	}
+
+	return std::string();
+}

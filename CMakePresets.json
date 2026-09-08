@@ -98,6 +98,13 @@
         "USE_TSAN": "OFF",
         "USE_UBSAN": "OFF"
       }
+    },
+    {
+      "name": "macos-asan",
+      "displayName": "macOS Clang with AddressSanitizer and UndefinedBehaviorSanitizer, all tests",
+      "inherits": "macos",
+      "binaryDir": "${sourceDir}/build/presets/macos-asan",
+      "cacheVariables": { "USE_ASAN": "ON", "USE_UBSAN": "ON" }
     }
   ],
   "buildPresets": [
@@ -108,7 +115,8 @@
     { "name": "linux", "configurePreset": "linux" },
     { "name": "linux-asan", "configurePreset": "linux-asan" },
     { "name": "linux-clang", "configurePreset": "linux-clang" },
-    { "name": "macos", "configurePreset": "macos" }
+    { "name": "macos", "configurePreset": "macos" },
+    { "name": "macos-asan", "configurePreset": "macos-asan" }
   ],
   "testPresets": [
     {
@@ -136,6 +144,7 @@
     },
     { "name": "linux-asan", "inherits": "linux", "configurePreset": "linux-asan" },
     { "name": "linux-clang", "inherits": "linux", "configurePreset": "linux-clang" },
-    { "name": "macos", "inherits": "linux", "configurePreset": "macos" }
+    { "name": "macos", "inherits": "linux", "configurePreset": "macos" },
+    { "name": "macos-asan", "inherits": "linux", "configurePreset": "macos-asan" }
   ]
 }

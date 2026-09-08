@@ -15,7 +15,7 @@
 #include "Client/SpriteLib/SpriteLibBackend.h"
 #include "Client/TileRenderer.h"  // Phase 3: Use TileRenderer
 #include "zoneloader.h"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <algorithm>  // std::sort - pulled in transitively by libstdc++/libc++, but not by MSVC's STL
 #include <iostream>
 #include <cstring>

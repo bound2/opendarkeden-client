@@ -14,7 +14,7 @@
 #include "Client/SpriteLib/CSpriteSurface.h"
 #include "Client/SpriteLib/SpriteLibBackend.h"
 #include "Client/framelib/CFramePack.h"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <iostream>
 #include <fstream>
 

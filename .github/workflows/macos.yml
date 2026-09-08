@@ -1,0 +1,70 @@
+name: macOS build and tests
+
+# The macOS half of the port assessment's CI ask (area H; the platform
+# work is area G). One preset - Apple Clang, Ninja, Debug, every target,
+# Homebrew's SDL2 - on GitHub's arm64 runner, through the same script
+# the Linux workflow runs, so a Mac at a desk and the runner verify the
+# same things: configure, a full build including the DarkEden
+# executable, the required-test inventory, then ctest.
+#
+# No Mac is available to the maintainers, so this job is the port's only
+# Darwin compiler: run it by hand (workflow_dispatch) on a branch that
+# touches the build or the platform layer before the pull request, the
+# way the macOS step of the port was built.
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: ${{ matrix.preset }}
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [macos, macos-asan]
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Install the toolchain and SDL2
+        run: |
+          brew update
+          brew install ninja sdl2 sdl2_image sdl2_ttf sdl2_mixer jpeg-turbo
+          # The fonts TextBackendSDL.cpp looks for on macOS; a missing one
+          # is a wrong path in that list, and this is the only Mac that
+          # can say so.
+          ls -l "/System/Library/Fonts/AppleSDGothicNeo.ttc" \
+                "/System/Library/Fonts/Supplemental/Arial Unicode.ttf" \
+                "/System/Library/Fonts/Hiragino Sans GB.ttc" \
+                "/System/Library/Fonts/PingFang.ttc" \
+                "/System/Library/Fonts/Helvetica.ttc" || true
+          sw_vers
+          clang --version
+          cmake --version
+          bash --version | head -n 1
+
+      - name: Configure, build and test
+        run: tools/ci/verify-linux.sh ${{ matrix.preset }}
+
+      - name: Upload build and test diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: diagnostics-${{ matrix.preset }}
+          retention-days: 7
+          path: |
+            build/verification/
+            build/presets/${{ matrix.preset }}/Testing/Temporary/
+            build/presets/${{ matrix.preset }}/CMakeFiles/CMakeConfigureLog.yaml

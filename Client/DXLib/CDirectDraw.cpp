@@ -84,7 +84,14 @@ void CSDLGraphics::Init(HWND hWnd, WORD width, WORD height, SCREENMODE mode, boo
 #ifdef PLATFORM_WINDOWS
 	m_pSDLWindow = SDL_CreateWindowFrom((void*)hWnd);
 #else
-	Uint32 flags = SDL_WINDOW_SHOWN;
+	// ALLOW_HIGHDPI: on a Retina display (and a scaled Wayland desktop)
+	// the renderer's output is then the display's native pixel grid and
+	// the letterbox upscale in spritectl_present_surface has every pixel
+	// to work with, instead of drawing at the window's point size and
+	// being magnified by the compositor. Window and mouse coordinates
+	// stay in points; spritectl_window_to_game_coords maps them through
+	// the point-to-pixel ratio, so the two do not have to agree.
+	Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
 	if (mode == FULLSCREEN)
 	{
 		flags |= SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_BORDERLESS;

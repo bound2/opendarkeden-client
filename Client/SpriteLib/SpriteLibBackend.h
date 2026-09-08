@@ -152,6 +152,26 @@ int spritectl_present_surface(spritectl_surface_t surface, void* renderer);
  */
 void spritectl_window_to_game_coords(int* x, int* y);
 
+/**
+ * What a present records for the mapping above, set by hand.
+ *
+ * The window's size in points and the renderer's output size in pixels
+ * differ on a high-DPI display (a Retina Mac, a scaled Wayland desktop)
+ * when the window has SDL_WINDOW_ALLOW_HIGHDPI; the letterbox rectangle
+ * is in output pixels and the mouse arrives in points. No test machine
+ * has such a display and SDL's dummy driver cannot fake one, so the
+ * tests of the mapping set the geometry directly. The next present
+ * overwrites it.
+ * @param window_w, window_h  Window size in points; 0 for "same as output".
+ * @param output_w, output_h  Renderer output size in pixels.
+ * @param dest_x, dest_y, dest_w, dest_h  Where the frame was placed, in pixels.
+ * @param game_w, game_h  The game frame's own size.
+ */
+void spritectl_set_present_geometry(int window_w, int window_h,
+	int output_w, int output_h,
+	int dest_x, int dest_y, int dest_w, int dest_h,
+	int game_w, int game_h);
+
 /* Render-thread-only whole-frame filter. Enabled by default; controlled by UserOption. */
 void spritectl_set_xbrz_enabled(int enabled);
 int spritectl_get_xbrz_enabled(void);

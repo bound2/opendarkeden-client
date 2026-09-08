@@ -65,6 +65,7 @@
 #include "ClientMain.h"
 #ifndef PLATFORM_WINDOWS
 #include "DXLib/DXLibBackend.h"	// dxlib_input_update(), the SDL event pump
+#include "DataPath.h"			// Basic::FindDataRoot, the working directory off Windows
 extern bool g_bRunning;			// cleared by the pump on SDL_QUIT (DXLibBackendSDL.cpp)
 #endif
 #include <system_error>
@@ -3043,9 +3044,36 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 	SetCurrentDirectory(g_CWD);
 #else
 	// The game's data is found relative to the working directory
-	// (GameInit.cpp), which on Windows is the executable's own; off
-	// Windows the launcher or the shell sets it, and g_CWD records it for
+	// (GameInit.cpp), which on Windows is the executable's own. Off
+	// Windows the launcher decides it - a shell gives its own directory,
+	// Finder gives "/" - so the data is looked for under the working
+	// directory first, then the executable's directory, then, for a
+	// macOS bundle (Contents/MacOS/DarkEden), the bundle's Resources
+	// directory and the directory the bundle sits in; the first one
+	// that has Data/Info/FileDef.inf becomes the working directory.
+	// None of them having it is not fatal here:
+	// the game goes on to fail at its first open, as it always did, with
+	// the working directory it was given. g_CWD records the result for
 	// the _chdir(g_CWD) calls below.
+	{
+		std::vector<std::string> vCandidates;
+		vCandidates.push_back(".");
+
+		char szBase[_MAX_PATH];
+		if (platform_get_executable_dir(szBase, sizeof(szBase)) == 0)
+		{
+			vCandidates.push_back(szBase);
+			vCandidates.push_back(std::string(szBase) + "../Resources/");
+			vCandidates.push_back(std::string(szBase) + "../../../");
+		}
+
+		const std::string sRoot = Basic::FindDataRoot(vCandidates);
+		if (!sRoot.empty() && chdir(sRoot.c_str()) != 0)
+		{
+			fprintf(stderr, "ClientMain: cannot change to the data directory %s\n", sRoot.c_str());
+		}
+	}
+
 	if (getcwd(g_CWD, _MAX_PATH) == NULL)
 	{
 		g_CWD[0] = '.';

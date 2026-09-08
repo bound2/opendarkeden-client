@@ -1,13 +1,21 @@
 cmake_minimum_required(VERSION 3.21)
 
-# Set SDL2 include path before project() for it to take effect
-if(EXISTS "/opt/homebrew/include/SDL2")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/opt/homebrew/include/SDL2")
-elseif(EXISTS "/usr/local/include/SDL2")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/local/include/SDL2")
-endif()
-
 project(DarkEdenClient VERSION 1.0.0)
+
+# Dependency discovery on macOS. Homebrew installs under /opt/homebrew on
+# Apple Silicon and /usr/local on Intel; CMake searches the second by
+# default and the first only through PATH (every <dir>/bin on PATH makes
+# <dir> a search prefix) or CMAKE_PREFIX_PATH. `brew shellenv` exports
+# HOMEBREW_PREFIX, so a shell that can run brew can find its packages
+# here without the preset. Every SDL2 package - Homebrew, vcpkg, a
+# source install - ships a CMake config that puts its own include
+# directory on the SDL2::SDL2 target, which is why the older global
+# `-I/opt/homebrew/include/SDL2` that used to sit above project() is
+# gone: it pre-empted whatever find_package() chose, and on a machine
+# with both Homebrew and vcpkg the headers and the library disagreed.
+if(APPLE AND DEFINED ENV{HOMEBREW_PREFIX} AND IS_DIRECTORY "$ENV{HOMEBREW_PREFIX}")
+	list(APPEND CMAKE_PREFIX_PATH "$ENV{HOMEBREW_PREFIX}")
+endif()
 
 # C++ standard. EXTENSIONS OFF asks GCC and Clang for -std=c++20 rather
 # than gnu++20; MSVC has no equivalent switch here, so its conformance
@@ -38,6 +46,7 @@ option(REQUIRE_TEST_TOOLS "Require the complete CTest suite and its Bash/Perl to
 if(REQUIRE_TEST_TOOLS AND NOT BUILD_TESTS)
     message(FATAL_ERROR "REQUIRE_TEST_TOOLS requires BUILD_TESTS=ON")
 endif()
+option(DARKEDEN_MACOS_BUNDLE "macOS: build DarkEden as an application bundle (bin/DarkEden.app) instead of a bare executable" OFF)
 
 # Platform macros, decided once.
 #
@@ -228,13 +237,6 @@ if(MSVC)
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/Zc:__cplusplus>)
 
     message(STATUS "Conformance: /permissive- /Zc:__cplusplus (all C++ targets)")
-endif()
-
-# Add SDL2 include directory BEFORE add_subdirectory
-if(EXISTS "/opt/homebrew/include/SDL2")
-	include_directories(/opt/homebrew/include/SDL2)
-elseif(EXISTS "/usr/local/include/SDL2")
-	include_directories(/usr/local/include/SDL2)
 endif()
 
 # Find SDL2 (needed for engine and DXLib)
@@ -622,14 +624,13 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		SDL2_ttf::SDL2_ttf
 	)
 
-	# See DarkEden target below: SDL2main collides with Client/Client.cpp's own
-	# WinAPI WinMain on Windows (VS_UI/WinMain.cpp, which used to duplicate this
-	# reasoning, is now excluded from the build - see the WIN32 filter above), so
-	# only link it (PUBLIC, so it still reaches consumers) on platforms where it
-	# isn't a real Windows entry point.
-	if(NOT WIN32)
-		target_link_libraries(VS_UI PUBLIC SDL2::SDL2main)
-	endif()
+	# No SDL2main here on any platform. On Windows it would collide with
+	# Client/Client.cpp's own WinAPI WinMain (VS_UI/WinMain.cpp, which
+	# used to duplicate this reasoning, is excluded by the WIN32 filter
+	# above); on Linux and macOS <SDL_main.h> leaves main() alone, so the
+	# library is empty there and the target is one a package may not
+	# even export (Homebrew's config creates it only when libSDL2main.a
+	# is present). The DarkEden target has the same note.
 
 	# Define _LIB to match the original VC6 library configuration: the
 	# #ifndef _LIB regions of VS_UI are its standalone UI test harness
@@ -1059,12 +1060,35 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		)
 	endif()
 
-	# SDL2main provides its own WinMain that forwards to SDL_main() on Windows.
-	# Client/Client.cpp defines WinMain directly (not via the SDL_main macro
-	# convention), so linking SDL2main on Windows would collide with it
-	# (LNK2005). It's a no-op on other platforms, so only link it there.
-	if(NOT WIN32)
-		target_link_libraries(DarkEden PRIVATE SDL2::SDL2main)
+	# SDL2main is not linked on any platform. On Windows it provides a
+	# WinMain that forwards to SDL_main(), and Client/Client.cpp defines
+	# WinMain directly (not via the SDL_main macro convention), so the two
+	# would collide (LNK2005). On Linux and macOS <SDL_main.h> does not
+	# rename main() - SDL_MAIN_NEEDED and SDL_MAIN_AVAILABLE are defined
+	# for neither - so SDLMain.cpp's main() is the real entry point and
+	# the library has nothing to add; it used to be linked there anyway,
+	# through a target Homebrew's config only exports when libSDL2main.a
+	# happens to be installed.
+
+	# The macOS application bundle, off by default: a bare executable in
+	# bin/ beside the Data tree is what the Linux and Windows builds
+	# produce and what tools/ci/verify-linux.sh runs. With the option on,
+	# bin/DarkEden.app is built instead and the game looks for its data
+	# in the bundle's Resources directory and then beside the bundle
+	# (Client/Client.cpp, the data-root search off Windows). The plist
+	# keys: NSHighResolutionCapable so a Retina display gives the SDL
+	# window a backing store at native scale rather than a magnified
+	# one, and the identifier the OS keys its preferences and its
+	# permission prompts on.
+	if(APPLE AND DARKEDEN_MACOS_BUNDLE)
+		set_target_properties(DarkEden PROPERTIES
+			MACOSX_BUNDLE TRUE
+			MACOSX_BUNDLE_BUNDLE_NAME "Dark Eden"
+			MACOSX_BUNDLE_GUI_IDENTIFIER "org.opendarkeden.client"
+			MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
+			MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
+			MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/tools/macos/Info.plist.in"
+		)
 	endif()
 
 	# Link iconv library (not needed for Emscripten - has stub implementations)
@@ -1144,5 +1168,8 @@ message(STATUS "  Build Tests:      ${BUILD_TESTS}")
 message(STATUS "  Use SDL Backend:  ${USE_SDL_BACKEND}")
 message(STATUS "  Build Engine:     ${BUILD_ENGINE}")
 message(STATUS "  C++ Standard:     ${CMAKE_CXX_STANDARD}")
+if(APPLE)
+	message(STATUS "  macOS bundle:     ${DARKEDEN_MACOS_BUNDLE}")
+endif()
 message(STATUS "=======================================")
 message(STATUS "")
