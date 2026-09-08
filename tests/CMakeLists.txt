@@ -119,6 +119,9 @@ set_source_files_properties(
 	# and its truncated-input contract, over the same stream classes.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_skill_family_wire.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_scalar.cpp
+	# The 32-bit width of long/ulong on the wire, pinned on every platform
+	# (the port assessment, area C), over the same streams.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_widths.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_stringstream.cpp
 	# The character overloads and the diagnostic texts built out of them
 	# (Throwable, __assert__), which is why this one reaches Exception.h

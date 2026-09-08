@@ -28,6 +28,20 @@ struct WireStorage<T, true>
 template <typename T>
 using WireStorageT = typename WireStorage<T>::type;
 
+// The eight exact-width types, plus long long and unsigned long long
+// by name. Under MSVC those two *are* int64_t and uint64_t; on LP64
+// Linux and macOS the exact-width pair is long, and `long long` is a
+// distinct type of the same width, which is what the tree's ulonglong
+// (unsigned long long off MSVC) is. Without the two names the exchange
+// packets' readWire(ulonglong&) has no overload there.
+//
+// Deliberately not by size: an "any 8-byte integral" rule would admit
+// `long` and `unsigned long` on LP64 as 8-byte scalars, while MSVC,
+// where they are 4 bytes and neither int32_t nor int64_t, rejects them
+// - the same source line would be two widths. As written, `long` is a
+// wire scalar only where it is the int64_t spelling; the narrowing
+// read(long&)/write(long) overloads are the way a long reaches the
+// wire, at four bytes on every platform (tests/unit/test_wire_widths.cpp).
 template <typename T>
 concept FixedWidthInteger =
 	std::same_as<std::remove_cv_t<T>, std::int8_t> ||
@@ -37,7 +51,9 @@ concept FixedWidthInteger =
 	std::same_as<std::remove_cv_t<T>, std::int32_t> ||
 	std::same_as<std::remove_cv_t<T>, std::uint32_t> ||
 	std::same_as<std::remove_cv_t<T>, std::int64_t> ||
-	std::same_as<std::remove_cv_t<T>, std::uint64_t>;
+	std::same_as<std::remove_cv_t<T>, std::uint64_t> ||
+	std::same_as<std::remove_cv_t<T>, long long> ||
+	std::same_as<std::remove_cv_t<T>, unsigned long long>;
 
 template <typename T>
 concept ScopedWireEnum =
