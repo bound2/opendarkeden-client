@@ -8,13 +8,17 @@ name: macOS build and tests
 # executable, the required-test inventory, then ctest.
 #
 # No Mac is available to the maintainers, so this job is the port's only
-# Darwin compiler: run it by hand (workflow_dispatch) on a branch that
-# touches the build or the platform layer before the pull request, the
-# way the macOS step of the port was built.
+# Darwin compiler. Unlike the Linux job it therefore also runs on pull
+# requests (a Linux build can be had from Docker on the desk; a Darwin
+# one cannot), and workflow_dispatch reaches it on any branch once the
+# file is on master - GitHub dispatches only workflows the default
+# branch has, which is why the macOS step of the port was built through
+# a draft pull request.
 
 on:
   push:
     branches: [master]
+  pull_request:
   workflow_dispatch:
 
 permissions:
