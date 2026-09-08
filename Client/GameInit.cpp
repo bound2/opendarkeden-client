@@ -1171,7 +1171,11 @@ InitDraw()
 	//                 DirectDraw
 	//
 	//--------------------------------------------------------
-#ifdef PLATFORM_WINDOWS
+// The display, through CSDLGraphics on every platform: on Windows it wraps
+// the Win32 window InitApp made, off Windows it creates the SDL window
+// itself. The three PLATFORM_WINDOWS guards that used to fence this step
+// (with an "SDL backend - no DirectX initialization" message in the gap)
+// dated from when SDLMain.cpp made its own window; nothing here is Win32.
 	//if (g_bHAL)
 	if( g_bHAL )
 	{
@@ -1199,9 +1203,7 @@ InitDraw()
 			}
 		}
 	}
-#endif // PLATFORM_WINDOWS
 
-#ifdef PLATFORM_WINDOWS
 		//--------------------------------------------------------
 		// Video Memory 얼마인가?
 		//--------------------------------------------------------
@@ -1291,18 +1293,7 @@ InitDraw()
 
 			g_bEnable3DHAL = FALSE;
 		}
-#endif // PLATFORM_WINDOWS
 
-#ifndef PLATFORM_WINDOWS
-	//--------------------------------------------------------
-	//
-	// SDL Backend - DirectX not available
-	//
-	//--------------------------------------------------------
-	DEBUG_ADD("[ InitGame ]  SDL backend - no DirectX initialization");
-#endif // PLATFORM_WINDOWS
-
-#ifdef PLATFORM_WINDOWS
 	//--------------------------------------------------------
 	//
 	// 무조건 3D가속 안 할때
@@ -1335,7 +1326,6 @@ InitDraw()
 			}
 		}
 	}
-#endif // PLATFORM_WINDOWS
 
 	CSpriteSurface::InitEffectTable();
 

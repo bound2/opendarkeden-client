@@ -161,13 +161,15 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **601 tests, 294,423 checks, 0 failed** in both Windows trees, and
-**601 tests, 294,422 checks, 0 failed** on Linux (GCC, Clang, and GCC with
+baseline: **607 tests, 294,433 checks, 0 failed** in both Windows trees, and
+**607 tests, 294,432 checks, 0 failed** on Linux (GCC, Clang, and GCC with
 `-DUSE_ASAN=ON -DUSE_UBSAN=ON`, where UBSan reports nothing); the one-check
 difference is a platform-conditional test, not a failure. The Linux
 recipe is the `linux`, `linux-clang` and `linux-asan` presets in
-`CMakePresets.json`; the `DarkEden` executable does not build there yet (the
-port assessment's areas D to F).
+`CMakePresets.json`. `DarkEden` builds and links there too, and run headless
+(`SDL_VIDEODRIVER=dummy`) with the data tree beside it reaches the main menu and
+exits cleanly on `SDL_QUIT`; login and beyond are unverified off Windows (the
+port assessment's area F).
 
 ## Traps
 

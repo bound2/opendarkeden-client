@@ -14,6 +14,7 @@
 #include "Client_PCH.h"
 #include "PacketFileAPI.h"
 #include "PacketAssert.h"
+#include "DataPath.h"
 
 
 #if __WINDOWS__
@@ -37,7 +38,8 @@ int FileAPI::open_ex ( const char * filename , int flags )
 	__BEGIN_TRY
 
 #if defined(PLATFORM_POSIX)
-	int fd = open(filename,flags);
+	// The game's spelling of the path, resolved to the disk's (basic/DataPath.h).
+	int fd = open(Basic::NormalizeDataPath(filename).c_str(),flags);
 #elif __WINDOWS__
 	int fd = _open(filename,flags);
 #endif
@@ -97,7 +99,7 @@ int FileAPI::open_ex ( const char * filename , int flags , int mode )
 	__BEGIN_TRY
 
 #if defined(PLATFORM_POSIX)
-	int fd = open(filename,flags,mode);
+	int fd = open(Basic::NormalizeDataPath(filename).c_str(),flags,mode);
 #elif __WINDOWS__
 	int fd = _open(filename,flags,mode);
 #endif
