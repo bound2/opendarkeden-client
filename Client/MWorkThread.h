@@ -51,36 +51,11 @@
 #ifndef __MWORKTHREAD_H__
 #define	__MWORKTHREAD_H__
 
+// LPTHREAD_START_ROUTINE, the THREAD_PRIORITY_* and WAIT_* constants,
+// WaitForSingleObject and SetThreadPriority come from <windows.h> on
+// Windows and from Platform.h's shim elsewhere. They used to be
+// defined here, on every platform, beside the real ones.
 #include "../basic/Platform.h"
-
-// Type definitions for thread function pointer (Windows API compatibility)
-typedef DWORD (*LPTHREAD_START_ROUTINE)(void* lpParameter);
-
-// Thread priority constants (Windows API compatibility)
-#define THREAD_PRIORITY_NORMAL          0
-#define THREAD_PRIORITY_ABOVE_NORMAL    1
-#define THREAD_PRIORITY_BELOW_NORMAL   -1
-#define THREAD_PRIORITY_HIGHEST          2
-#define THREAD_PRIORITY_LOWEST          -2
-
-// Wait constants (Windows API compatibility)
-#define WAIT_OBJECT_0                   0
-#define WAIT_TIMEOUT                    258
-
-// Stub for WaitForSingleObject - maps to event wait
-static inline DWORD WaitForSingleObject(HANDLE event, DWORD timeout) {
-    platform_event_t evt = (platform_event_t)event;
-    if (platform_event_wait(evt, timeout) == 0) {
-        return WAIT_OBJECT_0;
-    }
-    return WAIT_TIMEOUT;
-}
-
-// Stub for SetThreadPriority (not implemented on mingw/macOS)
-static inline BOOL SetThreadPriority(HANDLE thread, int priority) {
-    (void)thread; (void)priority;
-    return TRUE;
-}
 
 #include <deque>
 #include "MWorkNode.h"

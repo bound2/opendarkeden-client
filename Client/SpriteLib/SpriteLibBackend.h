@@ -13,12 +13,15 @@
 #ifndef __SPRITELIBBACKEND_H__
 #define __SPRITELIBBACKEND_H__
 
-/* Close Platform.h's extern "C" block to manage our own */
+/* Platform.h before this header's own extern "C" block: it ends in C++
+   (the min/max function templates for the Windows code), and a template
+   inside a linkage specification is ill-formed. Its C-linkage section
+   is self-contained. */
+#include "../basic/Platform.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "../basic/Platform.h"
 
 /* ============================================================================
  * Backend Selection

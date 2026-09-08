@@ -10,6 +10,7 @@
 #define __BASICEXCEPTION_H__
 
 #include <assert.h>
+#include <cstddef>       /* NULL: MSVC's <assert.h> brings it, libstdc++'s does not */
 #include <source_location>
 
 #define _Error(code)						g_BasicException(code, NULL)
