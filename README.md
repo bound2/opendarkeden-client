@@ -414,3 +414,67 @@ Existing launcher arguments remain optional overrides for compatibility:
 
 Set the login server IP and port in `Data/Info/GameClient.inf`. With a server in
 Docker on the same machine, use `127.0.0.1`.
+
+## Build on Linux
+
+Windows is the live platform; Linux builds every target, runs the same test
+suite, and the client starts (see the status at the end of this section).
+Ubuntu 24.04 is the reference, with GCC 13 or Clang 18 and the system SDL2:
+
+```bash
+sudo apt-get install build-essential clang cmake ninja-build perl \
+    libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libsdl2-mixer-dev \
+    libjpeg-dev libfreetype-dev fonts-dejavu-core fonts-noto-cjk
+```
+
+The fonts are not optional: nothing under `Data/` is a font, and
+`Client/TextSystem/TextBackendSDL.cpp` looks for Noto CJK and DejaVu under
+`/usr/share/fonts`. Without one of them the client draws no text.
+
+Three presets do the configure (`CMakePresets.json`); each writes under
+`build/presets/<preset>/`:
+
+| Preset | Compiler | Flags |
+|---|---|---|
+| `linux` | GCC | Debug |
+| `linux-clang` | Clang | Debug |
+| `linux-asan` | GCC | `-fsanitize=address,undefined` |
+
+```bash
+cmake --preset linux
+cmake --build --preset linux
+ctest --test-dir build/presets/linux --output-on-failure
+```
+
+`tools/ci/verify-linux.sh <preset>` runs those three steps the way the
+Linux workflow (`.github/workflows/linux.yml`) does, with UBSan reports made
+fatal under `linux-asan`. On a Windows machine with Docker,
+`tools/linux/Dockerfile` is the same environment as an image:
+
+```bash
+docker build -t darkeden-linux tools/linux
+docker run --rm -v "$PWD:/src" -v darkeden-build:/src/build darkeden-linux \
+    tools/ci/verify-linux.sh linux
+```
+
+### Status of the Linux client
+
+The port's plan and its sizing are `docs/linux-macos-port-assessment-2026-09-07.md`.
+What is verified today, in the order its acceptance criteria list them:
+
+- **Builds:** every library, `unit_tests` and `DarkEden`, with GCC and Clang,
+  and the GCC tree under ASan and UBSan with nothing reported. The suite is the
+  Windows suite.
+- **Runs, partly:** launched from `build/presets/linux/bin` with the `Data/`
+  tree beside the executable (see *Point the build at the data*; the resolver
+  in `basic/DataPath.h` takes care of the tables' backslashes and letter case),
+  the client loads every data table, reaches the main menu and exits cleanly
+  on `SDL_QUIT`. That has been exercised headless (`SDL_VIDEODRIVER=dummy`,
+  where the quit came from SIGTERM), not on a display. Login, character select, a zone
+  and chat against the docker server are **not verified** off Windows.
+- **macOS:** the `macos` preset is written and has not been run on a Mac.
+  Nothing has been built there.
+
+The Korean IME is SDL text input on every platform, sound is SDL_mixer, and the
+launcher arguments and `UserSet/Display.ini` go through the same code as on
+Windows; none of that has been watched on a Linux display yet.

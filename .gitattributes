@@ -9,6 +9,11 @@ tests/generated/*.inc text eol=lf
 tests/arch/*.txt text eol=lf
 tests/arch/*.pl text eol=lf
 tests/ratchet/*.sh text eol=lf
+# The Linux verification script, the reference image and the workflows:
+# executed by bash, docker and the runner, so LF for the same reason.
+tools/ci/*.sh text eol=lf
+tools/linux/Dockerfile text eol=lf
+.github/workflows/*.yml text eol=lf
 
 # The audit scripts, for the same reason: all three carry a shebang, and
 # all three are LF in the repository already - this only stops a CRLF

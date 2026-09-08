@@ -110,7 +110,7 @@ public:
 			"C:\\Windows\\Fonts\\msyh.ttc",
 			"C:\\Windows\\Fonts\\simsun.ttc",
 			"C:\\Windows\\Fonts\\arial.ttf",
-#elif defined(__APPLE__)
+#elif defined(PLATFORM_MACOS)
 			"/System/Library/Fonts/Helvetica.ttc",
 			"/System/Library/Fonts/Hiragino Sans GB.ttc",
 #else

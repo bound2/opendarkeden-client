@@ -52,9 +52,11 @@ endif()
 # On Windows the wire layer still wants __WIN32__ and __WINDOWS__ - the
 # original VC6 project passed both via /D, and Client/Packet branches
 # on them with bare `#if __WINDOWS__` (see the DarkEden target for the
-# history). One list, used by every target that compiles Client/
-# sources and by the test translation units that share their class
-# definitions, so the preprocessing cannot drift between them.
+# history). One list, used by the targets that share the wire layer's
+# class definitions - packetwire, gamemodel, the executable, and the
+# test translation units - so the preprocessing cannot drift between
+# them. The viewer tools compile a few Client/ files without it, as
+# they always did; they link neither packetwire nor gamemodel.
 set(DARKEDEN_PLATFORM_DEFINITIONS "")
 if(WIN32)
 	set(DARKEDEN_PLATFORM_DEFINITIONS __WIN32__ __WINDOWS__)
@@ -833,6 +835,18 @@ if(WIN32)
 	target_link_libraries(effect_viewer PRIVATE SDL2::SDL2main)
 endif()
 
+# This tool compiles Client/MEffect.cpp, which calls MEffectTarget through
+# its vtable, and stubs the rest of the game in stubs.cpp; the class's
+# key function is in Client/MEffectTarget.cpp, which reaches MPlayer and
+# the zone table, so the tool never links its typeinfo. That is fine
+# until UBSan's vptr check asks for the typeinfo at every virtual call
+# and the link fails. The vptr check is off for this one tool under the
+# sanitizer presets; the game and the libraries keep it.
+if(USE_UBSAN AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+	target_compile_options(effect_viewer PRIVATE -fno-sanitize=vptr)
+	target_link_options(effect_viewer PRIVATE -fno-sanitize=vptr)
+endif()
+
 # Set output directory for effect_viewer
 # Use CMAKE_BINARY_DIR to avoid nesting (build/debug-asan/bin/)
 if(CMAKE_BUILD_TYPE STREQUAL "debug-asan")
@@ -969,11 +983,10 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*VolumeOut.*\\.cpp")
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*WavePackFileManager\\.cpp")
 		# Exclude Windows-specific WinMain files. Client/Client.cpp is not
-		# filtered any more: off Windows its WinMain compiles as an
-		# ordinary, uncalled function over Platform.h's typedefs (which is
-		# how it compiled inside VS_UI), and the rest of the file is the
-		# game's startup, which every platform needs. SDLMain.cpp supplies
-		# main() there; the port assessment's area D unifies the two.
+		# filtered any more: its WinMain is behind PLATFORM_WINDOWS and the
+		# rest of the file is ClientMain, the game's startup on every
+		# platform (the port assessment's area D); SDLMain.cpp supplies
+		# main() off Windows and calls it.
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "WinLib/CWinMain\\.cpp")
 	endif()
 

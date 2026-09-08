@@ -7,8 +7,8 @@
 -----------------------------------------------------------------------------*/
 
 #include "DataPath.h"
+#include "Platform.h"
 
-#include <cctype>
 #include <filesystem>
 #include <mutex>
 #include <string>
@@ -23,24 +23,48 @@ namespace {
 // resolving, and the game opens some paths thousands of times (sprite
 // packs, sounds), so it is paid once per directory. The file thread
 // loads sprites beside the main thread, hence the mutex.
+//
+// The cache is keyed by the directory's absolute path: the game changes
+// its working directory (Client.cpp, ProfileManager.cpp, the updater),
+// and a relative key would hand a later resolve the listing of a
+// directory it is no longer in. Both objects are function-local statics
+// so a resolve from another translation unit's static initialiser finds
+// them constructed.
 //----------------------------------------------------------------------
-std::mutex									s_Mutex;
-std::unordered_map<std::string, std::vector<std::string> >	s_Listings;
+std::mutex&	ListingMutex()
+{
+	static std::mutex s_Mutex;
+	return s_Mutex;
+}
+
+std::unordered_map<std::string, std::vector<std::string> >&	Listings()
+{
+	static std::unordered_map<std::string, std::vector<std::string> > s_Listings;
+	return s_Listings;
+}
 
 const std::vector<std::string>&	ListingOf(const std::string& sDirectory)
 {
-	std::lock_guard<std::mutex> Lock(s_Mutex);
-
-	auto iFound = s_Listings.find(sDirectory);
-
-	if (iFound != s_Listings.end())
-		return iFound->second;
-
-	std::vector<std::string>& vNames = s_Listings[sDirectory];
-
 	std::error_code Error;
 
 	const std::filesystem::path Directory(sDirectory.empty() ? std::string(".") : sDirectory);
+	std::filesystem::path Key = std::filesystem::absolute(Directory, Error);
+
+	if (Error)
+		Key = Directory;
+
+	const std::string sKey = Key.lexically_normal().generic_string();
+
+	std::lock_guard<std::mutex> Lock(ListingMutex());
+
+	std::unordered_map<std::string, std::vector<std::string> >& mListings = Listings();
+
+	auto iFound = mListings.find(sKey);
+
+	if (iFound != mListings.end())
+		return iFound->second;
+
+	std::vector<std::string>& vNames = mListings[sKey];
 
 	std::filesystem::directory_iterator iEntry(Directory, Error);
 
@@ -62,6 +86,16 @@ const std::vector<std::string>&	ListingOf(const std::string& sDirectory)
 	return vNames;
 }
 
+//----------------------------------------------------------------------
+// ASCII letters only. The data's names are ASCII; folding through the
+// C locale's tolower would let a CP949 lead byte match the wrong entry
+// once anything calls setlocale.
+//----------------------------------------------------------------------
+char	FoldAscii(char c)
+{
+	return (c >= 'A' && c <= 'Z') ? (char)(c - 'A' + 'a') : c;
+}
+
 bool	EqualsIgnoringCase(const std::string& sA, const std::string& sB)
 {
 	if (sA.size() != sB.size())
@@ -69,7 +103,7 @@ bool	EqualsIgnoringCase(const std::string& sA, const std::string& sB)
 
 	for (size_t i = 0; i < sA.size(); i++)
 	{
-		if (std::tolower((unsigned char)sA[i]) != std::tolower((unsigned char)sB[i]))
+		if (FoldAscii(sA[i]) != FoldAscii(sB[i]))
 			return false;
 	}
 
@@ -167,7 +201,7 @@ std::string	Basic::ResolveDataPath(std::string_view sPath)
 
 std::string	Basic::NormalizeDataPath(std::string_view sPath)
 {
-#ifdef _WIN32
+#ifdef PLATFORM_WINDOWS
 	return std::string(sPath);
 #else
 	return ResolveDataPath(sPath);

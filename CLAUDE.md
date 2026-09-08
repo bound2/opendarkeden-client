@@ -205,6 +205,13 @@ port assessment's area F).
   runtime effect today.
 - **Sprite rejection is silent** — a rejected sprite is dropped with no log line and an
   ignored return value, so bad art would vanish without a signal.
+- **`grep` stops reading `VS_UI/src/VS_UI_GameCommon.cpp` at its first NUL byte.**
+  The file carries three NUL bytes, so ripgrep and `grep -I` class it as binary and
+  either skip it or stop at the first one; a tree-wide count that does not pass
+  `grep -a` (or read the file in binary mode, as `count_identifier.pl` does)
+  undercounts by whatever that file holds - 296 of the tree's ~364 `wsprintf` calls,
+  for one. Two counts in the port assessment were wrong by a factor of two for this
+  reason (found 2026-09-08). Force text mode for any measurement over `VS_UI/`.
 
 ## Conventions
 

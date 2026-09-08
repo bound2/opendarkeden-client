@@ -16,6 +16,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>   /* strcmp, for the MessageBox shim's video-driver test */
 /* The real assert, on every platform. This header used to define
    assert(e) as ((void)(e)) off Windows, ahead of <assert.h>, which
    silently turned every assertion in the tree into an evaluated
@@ -242,7 +243,7 @@ static inline void InitializeCriticalSection(CRITICAL_SECTION* cs) {
 	if (cs != NULL) {
 		pthread_mutexattr_t attr;
 		pthread_mutexattr_init(&attr);
-		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);  // 递归锁
+		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);  // recursive, as the Win32 CRITICAL_SECTION is
 		pthread_mutex_init(&cs->mutex, &attr);
 		pthread_mutexattr_destroy(&attr);
 		cs->initialized = 1;
@@ -520,17 +521,24 @@ typedef WORD			char_t;
 		#define _TCHAR	TCHAR
 	#endif
 
-	/* MessageBox: a real dialog through SDL (platform_show_error, defined
-	   in PlatformSDL.cpp and declared again further down this header),
-	   plus the stderr line it always wrote, so a message the game shows
-	   the player is not lost to a terminal nobody is watching. Returns
-	   IDOK (1); the game's MessageBox calls do not branch on the answer
-	   off Windows. */
+	/* MessageBox: the stderr line it always wrote, plus a modal SDL dialog
+	   (platform_show_error, PlatformSDL.cpp) when there is a real display
+	   to show it on - SDL video up and not the dummy or offscreen driver -
+	   so a message the game shows the player is not lost to a terminal
+	   nobody is watching, while a headless run, CI, or a unit test that
+	   reaches one of the library's MessageBox calls (CSpritePalBase.cpp's
+	   SaveToFile, for one) never blocks on a dialog. Returns IDOK (1); the
+	   game's MessageBox calls do not branch on the answer off Windows. */
 	void platform_show_error(const char* title, const char* message);
 	static inline int MessageBox(void* hWnd, const char* lpText, const char* lpCaption, unsigned int uType) {
 		(void)hWnd; (void)uType;
 		fprintf(stderr, "[%s] %s\n", lpCaption ? lpCaption : "", lpText ? lpText : "");
-		platform_show_error(lpCaption ? lpCaption : "DarkEden", lpText ? lpText : "");
+		if (SDL_WasInit(SDL_INIT_VIDEO) != 0) {
+			const char* driver = SDL_GetCurrentVideoDriver();
+			if (driver != NULL && strcmp(driver, "dummy") != 0 && strcmp(driver, "offscreen") != 0) {
+				platform_show_error(lpCaption ? lpCaption : "DarkEden", lpText ? lpText : "");
+			}
+		}
 		return 1;
 	}
 
@@ -626,12 +634,17 @@ typedef WORD			char_t;
 		return NULL; // No window finding on non-Windows platforms
 	}
 
-	/* ShowCursor over SDL: the game draws its own cursor and hides the
-	   system one at start-up (InitApp). Returns the Win32 display count
-	   shape, 0 for hidden. */
+	/* ShowCursor over SDL, with the Win32 contract: a display count that
+	   starts at 0 (shown), goes up on TRUE and down on FALSE, is returned
+	   after the change, and the cursor is visible while it is >= 0.
+	   UI_ShowWindowCursor / UI_HiddenWindowCursor (GameUI.cpp) loop on
+	   that count - a fixed return value inverted them. The game draws its
+	   own cursor and hides the system one at start-up (InitApp). */
 	static inline int ShowCursor(BOOL bShow) {
-		SDL_ShowCursor(bShow ? SDL_ENABLE : SDL_DISABLE);
-		return bShow ? 1 : 0;
+		static int s_nDisplayCount = 0;
+		s_nDisplayCount += bShow ? 1 : -1;
+		SDL_ShowCursor(s_nDisplayCount >= 0 ? SDL_ENABLE : SDL_DISABLE);
+		return s_nDisplayCount;
 	}
 
 	/* InitCommonControls stub - no-op on non-Windows */
@@ -1239,9 +1252,15 @@ void platform_event_close(platform_event_t event);
 	   thread they applied them to came from platform_thread_create - an
 	   SDL_Thread*. pthread_cancel on an SDL_Thread* is not a thread
 	   cancel. These are honest instead: SDL has no cancel and no
-	   non-blocking exit-code query, so both report failure, and the
-	   caller's error path runs. The request service itself is created
-	   on Windows only (GameInit.cpp). */
+	   non-blocking exit-code query, so both report failure. Neither
+	   caller checks: RequestClientPlayerManager discards TerminateThread's
+	   result and clears its handle list, so off Windows a connection
+	   thread it meant to kill keeps running, and its GetExitCodeThread
+	   loop never reaps a handle. That is what the service does off
+	   Windows today, and it is inert: the request service is created on
+	   Windows only (GameInit.cpp), and the managers exist off Windows
+	   because they are packetwire members. A real cancel needs a stop
+	   flag the thread functions poll. */
 	#define STILL_ACTIVE 259
 	static inline BOOL TerminateThread(HANDLE thread, DWORD exitCode) {
 		(void)thread; (void)exitCode;
@@ -1957,11 +1976,14 @@ typedef long long __int64;
 #define _atoi64(x) atoll(x)
 #endif
 
-/* wsprintf for POSIX. The Win32 wsprintfA never writes more than 1024
-   bytes including the terminator, and the tree's 171 call sites size
-   their buffers against that; this used to be an unbounded vsprintf.
-   Returns the length written, as Win32 does, rather than vsnprintf's
-   would-have-been length. */
+/* wsprintf for POSIX, with the Win32 wsprintfA contract: never more than
+   1024 bytes including the terminator, and the length written returned
+   rather than vsnprintf's would-have-been length. This used to be an
+   unbounded vsprintf. The cap is Win32's, not a promise about the
+   callers: the tree's wsprintf sites use buffers from 32 bytes up (a
+   char szString[32] in vs_ui_gamecommon2.cpp, several char szTemp[256]),
+   so a long format still overruns a short buffer here exactly as it
+   does on Windows - the sites themselves are the remaining risk. */
 #ifndef PLATFORM_WINDOWS
 #include <stdio.h>
 #include <stdarg.h>
@@ -1973,7 +1995,8 @@ static inline int wsprintf(char* buf, const char* fmt, ...) {
 	int result = vsnprintf(buf, 1024, fmt, args);
 	va_end(args);
 	if (result < 0) {
-		buf[0] = '\0';
+		if (buf != NULL)
+			buf[0] = '\0';
 		return 0;
 	}
 	return result >= 1024 ? 1023 : result;
@@ -2141,7 +2164,7 @@ static inline void SetSurfaceInfo(S_SURFACEINFO* dest, const S_SURFACEINFO* src)
 /* min and max for the Windows code, off Windows.
  *
  * On Windows <windows.h> defines min and max as macros and the tree
- * calls them unqualified, 518 lines in 65 files, mixing argument
+ * calls them unqualified, about 700 lines in 64 files, mixing argument
  * types freely (max(1, someShort + 3)). std::min and std::max refuse
  * mixed types, so a plain `using std::min` would not carry that code.
  * These templates take two independent types and return their common
@@ -2154,7 +2177,14 @@ static inline void SetSurfaceInfo(S_SURFACEINFO* dest, const S_SURFACEINFO* src)
  * fails for std::min and only this one remains. Not macros, so
  * `std::numeric_limits<T>::min()` and every other `min(` inside the
  * standard headers are left alone. C++ only: the C translation units
- * (deflate.c and friends) never used the Windows macros. */
+ * (deflate.c and friends) never used the Windows macros.
+ *
+ * Three ways this is not the macro, all compile-visible or benign:
+ * a same-type call in a `using namespace std` file returns std::min's
+ * const T& (so `const int& r = min(f(), g());` would dangle there and
+ * not elsewhere - no site does that); a call on two unsigned chars or
+ * shorts yields that type where the macro's conditional yielded int;
+ * and a class type needs operator< rather than operator> for max. */
 #if defined(__cplusplus) && !defined(PLATFORM_WINDOWS)
 #include <type_traits>
 template <typename A, typename B>

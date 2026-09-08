@@ -487,8 +487,12 @@ class MActionResultNodeSummonCasket : public MActionResultNode {
 //----------------------------------------------------------------------
 class MActionResultNodeOpenCasket : public MActionResultNode {
 	public :
-		MActionResultNodeOpenCasket(TYPE_OBJECTID tid=0);
-		~MActionResultNodeOpenCasket();
+		// Inline like the sibling nodes'. These two were declared and defined
+		// nowhere, so the class could never be instantiated, its vtable and
+		// typeinfo were never emitted, and UBSan's vptr check on Execute()
+		// below then had no typeinfo to link against.
+		MActionResultNodeOpenCasket(TYPE_OBJECTID tid=0) { m_TargetID = tid; }
+		~MActionResultNodeOpenCasket() {}
 
 		//------------------------------------------------------
 		// ActionResult의 종류

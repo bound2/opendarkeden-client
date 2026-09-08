@@ -145,8 +145,10 @@ void CSDLGraphics::ReleaseAll()
 
 	if (m_pSDLWindow != NULL)
 	{
-		// SDL_CreateWindowFrom() wraps an externally-owned native window, so
-		// destroying it here only releases SDL's wrapper, not hWnd itself.
+		// On Windows SDL_CreateWindowFrom() wrapped an externally-owned native
+		// window, and destroying it here only releases SDL's wrapper, not hWnd
+		// itself; off Windows the window is SDL's own (Init above) and this
+		// destroys it.
 		SDL_DestroyWindow(m_pSDLWindow);
 		m_pSDLWindow = NULL;
 	}

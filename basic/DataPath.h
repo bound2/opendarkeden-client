@@ -6,7 +6,7 @@
 	resolved to what the disk has.
 
 	The paths are Windows paths: backslashes (Data\Image\Etc.spk, in
-	FileDef.inf and in 35 source files), and a letter case that need not
+	FileDef.inf and in about 20 source files), and a letter case that need not
 	match the file - of the 206 entries in FileDef.inf, 38 exist only under
 	a different case in the shipped tree. Win32 accepts both; a
 	case-sensitive filesystem accepts neither, and the open fails.

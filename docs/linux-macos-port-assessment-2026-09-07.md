@@ -353,3 +353,34 @@ is that the conformance branches have already paid for the language half.
 - Modernising the platform layer beyond what the port needs, the `.rpk`
   extraction, and the intro video (`Client/CAvi.cpp`, stubbed on every
   platform) are out of scope.
+
+## Progress record
+
+**2026-09-08.** Eight stacked branches, one per step. Every step was built
+on the Windows Debug tree with the full test suite; the steps that touch
+library code (B, C, the libraries, the data paths) also on the Windows
+ASan tree; and from the libraries step on, in an Ubuntu 24.04 container
+under GCC 13, Clang 18, and GCC with ASan and UBSan - the earlier steps
+were compiled there only as far as the tree compiled at the time. Each
+commit message records exactly what it verified. What the estimates got
+right and wrong:
+
+| Step | Estimate | Outcome |
+|---|---:|---|
+| 0. Probe | 1 day | The first Linux compile failed 1,155 of 1,243 translation units on one line, `Platform.h`'s `min`/`max` macros, which masked everything else; the real inventory needed area B first. |
+| A. Build contract | 2-3 days | As planned, plus the `extern int errno` declarations (area C's) that its guards made live, and two `__LINUX__` blocks that were upstream's console test client, not platform branches. Ratchet R13 holds the macro spellings at zero. |
+| B. Shim hygiene | 2-3 days | The `min`/`max` macros became function templates that keep the tree's 518 mixed-type call sites; `assert` is real; the silent stubs are gone or loud; the thread shims left `MWorkThread.h` and the two request-service managers; one `Client_PCH.h`. The merged PCH exposed that `VS_UI` had compiled packet classes without `__GAME_CLIENT__`, a live vtable mismatch on Windows. |
+| C. Wire widths | 1-2 days | Already narrowed at every stream; what was missing was a test to pin it, `long long` in the wire-scalar concept, and one width defect the layout inventory caught (`ShopVersion_t` was `long`: GCShopBought 288 bytes on LP64 against the server's 284). |
+| Libraries green | 4-6 days | Five compile fixes, one link gap the key-function rule exposed (`MUsePotionItem::UseInventory`, now through `MItemHost`), four test assumptions, and 15 UBSan reports - every palette sprite's scanline pointer table sat at an odd offset - fixed with an aligned allocation. At that step 601 tests, 294,423 checks on Windows and 294,422 on Linux, on GCC, Clang and GCC with ASan and UBSan; the suite is 607 tests after the data-path step. |
+| D. Entry point | 3-5 days | `ClientMain` is `WinMain`'s body; `SDLMain.cpp` went from 572 lines to 60. `CSDLGraphics::Init` creates the SDL window off Windows. |
+| E. Executable link | 3-4 days | Four translation units and no undefined references: areas A to D had paid for the rest. |
+| F. Runtime | 5-10 days | First slice only: `basic/DataPath.h` resolves the Windows-spelled paths, and the headless client loads every table, reaches the main menu and exits cleanly on `SDL_QUIT`. Login, zone and chat against the server, and anything on a display, are open. |
+| G. macOS | 2-4 days | Not started; the `macos` preset exists and is untested. |
+| H. CI | 2-3 days | `.github/workflows/linux.yml` (three presets, on push to master like the Windows job), `tools/ci/verify-linux.sh`, `tools/linux/Dockerfile`, R1 measured from `build.ninja`, README and CLAUDE.md. The adversarial review of the whole series ran on 2026-09-08 (four fresh-context reviewers) and its findings are repaired in the last commit; the review's own record is in that commit message. |
+
+The build-side steps came in under their estimates, mostly because the
+macOS port of February had left more shim than the measured state
+suggested and the conformance branches had removed the language obstacles;
+the two things the estimates could not have priced - the `min`/`max`
+mask over the first probe and the `VS_UI` vtable mismatch - were both found
+by the compiler, not by reading.
