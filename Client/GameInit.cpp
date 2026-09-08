@@ -2268,8 +2268,8 @@ InitSocket()
 		g_UDPTest.Init();
 	#endif
 
-	// RequestServer functionality is for server mode only - not needed on macOS client
-#ifndef PLATFORM_MACOS
+	// RequestServer functionality is for server mode only - Windows only
+#ifdef PLATFORM_WINDOWS
 	if (g_pClientConfig->MAX_REQUEST_SERVICE > 0)
 	{
 		DEBUG_ADD("[ InitGame ] new RequestServerPlayerManager");
@@ -2283,7 +2283,7 @@ InitSocket()
 	}
 #else
 	// On macOS, disable server functionality to reduce CPU usage
-	DEBUG_ADD("[ InitGame ] RequestServer functionality disabled on macOS");
+	DEBUG_ADD("[ InitGame ] RequestServer functionality Windows only");
 #endif
 
 

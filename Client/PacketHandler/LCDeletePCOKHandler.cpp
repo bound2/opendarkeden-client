@@ -20,7 +20,9 @@
 
 //--------------------------------------------------------------------------------
 //
-// PC 를 성공적으로 삭제했다는 뜻이다.
+// The PC was deleted successfully. Upstream kept a second branch here
+// for its Linux console test client (a cout banner, no UI); this is
+// the game client's branch on every platform.
 //
 //--------------------------------------------------------------------------------
 void LCDeletePCOKHandler::execute ( LCDeletePCOK * pPacket , Player * pPlayer )
@@ -30,40 +32,20 @@ void LCDeletePCOKHandler::execute ( LCDeletePCOK * pPacket , Player * pPlayer )
 
 #ifdef __GAME_CLIENT__
 
-	#if __LINUX__
+	ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
 
-		ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
+	// The delete succeeded.
+	UI_DeleteCharacterOK();
 
-		cout << "                            " << endl;
-		cout << "+--------------------------+" << endl;
-		cout << "| PC deleted successfully! |" << endl;
-		cout << "+--------------------------+" << endl;
-		cout << "                            " << endl;
+	// Ask for the PC list again.
+	CLGetPCList clGetPCList;
+	pClientPlayer->sendPacket( &clGetPCList );
 
-		// 다시 PC LIST 를 받아와야 한다.
-		CLGetPCList clGetPCList;
-		pClientPlayer->sendPacket( &clGetPCList );	
+	pClientPlayer->setPlayerStatus( CPS_AFTER_SENDING_CL_GET_PC_LIST );
 
-		pClientPlayer->setPlayerStatus( CPS_AFTER_SENDING_CL_GET_PC_LIST );
+	// Wait for the PC list.
+	g_ModeNext = MODE_WAIT_PCLIST;
 
-	#elif __WINDOWS__
-
-		ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
-
-		// delete성공
-		UI_DeleteCharacterOK();
-
-		// 다시 PC LIST를 받아야 한다.
-		CLGetPCList clGetPCList;
-		pClientPlayer->sendPacket( &clGetPCList );	
-
-		pClientPlayer->setPlayerStatus( CPS_AFTER_SENDING_CL_GET_PC_LIST );
-
-		// PC List를 기다리는 mode
-		g_ModeNext = MODE_WAIT_PCLIST;
-
-	#endif
-	
 #endif
 
 	__END_CATCH

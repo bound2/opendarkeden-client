@@ -39,6 +39,27 @@ if(REQUIRE_TEST_TOOLS AND NOT BUILD_TESTS)
     message(FATAL_ERROR "REQUIRE_TEST_TOOLS requires BUILD_TESTS=ON")
 endif()
 
+# Platform macros, decided once.
+#
+# basic/Platform.h reads the platform off the compiler builtins and
+# defines PLATFORM_WINDOWS, PLATFORM_LINUX, PLATFORM_MACOS and
+# PLATFORM_POSIX; the build adds nothing to that on Linux or macOS. It
+# used to add PLATFORM_MACOS to every non-Windows target, in six
+# places, which told a Linux build it was macOS and left the Linux
+# spelling the socket layer tested for (__LINUX__) defined by nothing
+# (docs/linux-macos-port-assessment-2026-09-07.md, area A).
+#
+# On Windows the wire layer still wants __WIN32__ and __WINDOWS__ - the
+# original VC6 project passed both via /D, and Client/Packet branches
+# on them with bare `#if __WINDOWS__` (see the DarkEden target for the
+# history). One list, used by every target that compiles Client/
+# sources and by the test translation units that share their class
+# definitions, so the preprocessing cannot drift between them.
+set(DARKEDEN_PLATFORM_DEFINITIONS "")
+if(WIN32)
+	set(DARKEDEN_PLATFORM_DEFINITIONS __WIN32__ __WINDOWS__)
+endif()
+
 # Set output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -340,11 +361,7 @@ target_compile_definitions(packetwire PRIVATE
 	SPRITELIB_BACKEND_SDL
 	__GAME_CLIENT__=1
 )
-if(WIN32)
-	target_compile_definitions(packetwire PRIVATE __WIN32__ __WINDOWS__)
-else()
-	target_compile_definitions(packetwire PRIVATE PLATFORM_MACOS)
-endif()
+target_compile_definitions(packetwire PRIVATE ${DARKEDEN_PLATFORM_DEFINITIONS})
 
 target_link_libraries(packetwire PUBLIC basic)
 
@@ -403,11 +420,7 @@ target_compile_definitions(gamemodel PRIVATE
 	SPRITELIB_BACKEND_SDL
 	__GAME_CLIENT__=1
 )
-if(WIN32)
-	target_compile_definitions(gamemodel PRIVATE __WIN32__ __WINDOWS__)
-else()
-	target_compile_definitions(gamemodel PRIVATE PLATFORM_MACOS)
-endif()
+target_compile_definitions(gamemodel PRIVATE ${DARKEDEN_PLATFORM_DEFINITIONS})
 
 # packetwire for Properties (the file-definition table the string
 # table's language test reads); framelib for CAnimationFrame, the item
@@ -472,10 +485,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 			"TextSystem: iconv not found - CP949 game data will render as "
 			"replacement glyphs because NormalizeText cannot transcode it")
 	endif()
-	if(NOT WIN32)
-		target_compile_definitions(TextSystem PRIVATE PLATFORM_MACOS)
-	endif()
-
 	message(STATUS "TextSystem library will be built from ${TEXTSYSTEM_SOURCES}")
 endif()
 
@@ -540,18 +549,12 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# Client/*.cpp files (VS_UI_CLIENT_SOURCES) that the executable's glob
 	# compiled as well, and the executable's objects were the ones that
 	# linked; the list is gone and those files compile once, into the
-	# executable (docs/RESTRUCTURING.md task 4.0).
-	set(VS_UI_ALL_SOURCES ${VS_UI_SRC_SOURCES})
-	# The one exception, kept exactly as it was: the non-Windows executable
-	# filters Client/Client.cpp out (its WinMain entry point), and that
-	# platform got the file from VS_UI.lib. Unverified here - Windows is
-	# the live path - but not knowingly broken.
-	if(NOT WIN32)
-		list(APPEND VS_UI_ALL_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Client/Client.cpp)
-	endif()
-
-	# Create VS_UI static library
-	add_library(VS_UI STATIC ${VS_UI_ALL_SOURCES})
+	# executable (docs/RESTRUCTURING.md task 4.0). The last holdout was
+	# Client/Client.cpp, which the non-Windows build filtered out of the
+	# executable and appended here instead; it now compiles into the
+	# executable on every platform like the rest of Client/ (the port
+	# assessment, area A).
+	add_library(VS_UI STATIC ${VS_UI_SRC_SOURCES})
 
 	# VS_UI_WebBrowser.h/.cpp use ATL (atlbase.h, CComBSTR, CComVariant) for the
 	# legacy in-game IE browser control. ATL ships alongside the MSVC toolset
@@ -624,13 +627,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# isn't a real Windows entry point.
 	if(NOT WIN32)
 		target_link_libraries(VS_UI PUBLIC SDL2::SDL2main)
-	endif()
-
-	# Platform-specific definitions
-	if(NOT WIN32)
-		target_compile_definitions(VS_UI PRIVATE PLATFORM_MACOS)
-		# Also pass PLATFORM_MACOS to Client files compiled into VS_UI
-		target_compile_definitions(VS_UI PUBLIC PLATFORM_MACOS)
 	endif()
 
 	# Define _LIB to match the original VC6 library configuration: the
@@ -956,13 +952,12 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*EXECryptor.*")
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*GetWinVer.*")
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*MInternetConnection.*")
-		# Exclude Handler files in Client root only (not in Packet subdirectories)
-		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "^Client/[^/]+Handler\\.cpp")
-		# These two anchored patterns never match: the glob yields absolute
-		# paths. ClientFunction.cpp compiles into the executable on every
-		# platform; Client.cpp is excluded below by the unanchored pattern.
-		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "^Client/Client\\.cpp")
-		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "^Client/ClientFunction\\.cpp")
+		# Three anchored "^Client/..." filters used to sit here, for the
+		# root-level *Handler.cpp files, Client.cpp and ClientFunction.cpp.
+		# None ever matched: the glob yields absolute paths. There is no
+		# root-level *Handler.cpp any more, and the other two compile into
+		# the executable on every platform, so the filters are gone rather
+		# than fixed - fixing them would have changed what links.
 		# MWorkThread and MMusic are needed on all platforms
 		# list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*MWorkThread.*")
 		# list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*MMusic\\.cpp")
@@ -973,11 +968,13 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		# list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*ProfileManager\\.cpp")
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*VolumeOut.*\\.cpp")
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*WavePackFileManager\\.cpp")
-		# Exclude Windows-specific WinMain files
+		# Exclude Windows-specific WinMain files. Client/Client.cpp is not
+		# filtered any more: off Windows its WinMain compiles as an
+		# ordinary, uncalled function over Platform.h's typedefs (which is
+		# how it compiled inside VS_UI), and the rest of the file is the
+		# game's startup, which every platform needs. SDLMain.cpp supplies
+		# main() there; the port assessment's area D unifies the two.
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "WinLib/CWinMain\\.cpp")
-		# Exclude Client.cpp on non-Windows (uses WinMain); VS_UI carries it
-		# there, see the VS_UI_ALL_SOURCES block.
-		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX "Client/Client\\.cpp")
 	endif()
 
 	# Add DarkEden executable
@@ -1105,25 +1102,24 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		__GAME_CLIENT__=1
 	)
 
-	# Platform-specific definitions
-	if(NOT WIN32)
-		target_compile_definitions(DarkEden PRIVATE PLATFORM_MACOS)
-	else()
-		# __WIN32__ was always passed via /D in the original VC6 build
-		# (Client.dsp) and Client/Packet/Exception.h's __BEGIN_DEBUG/__END_DEBUG
-		# (and Assert1.h's Assert()) macros are conditioned on it. Without it,
-		# neither the NDEBUG nor the __WIN32__ branch matches on a Windows
-		# Debug build, leaving those macros undefined across every Packet/*
-		# translation unit that uses them.
-		# __WINDOWS__ was likewise always passed via /D in Client.dsp.
-		# Several Packet/*.cpp files (SocketAPI.cpp, PacketFileAPI.cpp, ...)
-		# branch on bare `#if __WINDOWS__`/`#elif __WINDOWS__` (not
-		# `defined(__WINDOWS__)`) to pick the Windows vs. POSIX code path;
-		# an undefined macro reads as 0 in a #if, so without this those
-		# branches silently compiled neither path, leaving locals like
-		# fd/result/client/nSent declared in the branch that never ran.
-		target_compile_definitions(DarkEden PRIVATE __WIN32__ __WINDOWS__)
-	endif()
+	# Platform-specific definitions: the one list from the top of this
+	# file. On Windows it carries __WIN32__ and __WINDOWS__, and here is
+	# why. __WIN32__ was always passed via /D in the original VC6 build
+	# (Client.dsp) and Client/Packet/Exception.h's __BEGIN_DEBUG/__END_DEBUG
+	# (and Assert1.h's Assert()) macros are conditioned on it. Without it,
+	# neither the NDEBUG nor the __WIN32__ branch matches on a Windows
+	# Debug build, leaving those macros undefined across every Packet/*
+	# translation unit that uses them.
+	# __WINDOWS__ was likewise always passed via /D in Client.dsp.
+	# Several Packet/*.cpp files (SocketAPI.cpp, PacketFileAPI.cpp, ...)
+	# branch on bare `#if __WINDOWS__`/`#elif __WINDOWS__` (not
+	# `defined(__WINDOWS__)`) to pick the Windows vs. POSIX code path;
+	# an undefined macro reads as 0 in a #if, so without this those
+	# branches silently compiled neither path, leaving locals like
+	# fd/result/client/nSent declared in the branch that never ran.
+	# Off Windows the list is empty: the POSIX branches test
+	# PLATFORM_POSIX, which basic/Platform.h derives from the compiler.
+	target_compile_definitions(DarkEden PRIVATE ${DARKEDEN_PLATFORM_DEFINITIONS})
 
 	message(STATUS "DarkEden executable will be built from remaining Client files (VS_UI compiled separately)")
 endif()

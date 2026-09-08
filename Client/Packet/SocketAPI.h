@@ -9,49 +9,30 @@
 #ifndef __SOCKET_API_H__
 #define __SOCKET_API_H__
 
-/* Platform detection */
-#if defined(_WIN32) || defined(_WIN64)
-	#ifndef PLATFORM_WINDOWS
-		#define PLATFORM_WINDOWS
-	#endif
-#elif defined(__APPLE__)
-	#define PLATFORM_MACOS
-#elif defined(__linux__)
-	#define PLATFORM_LINUX
-#endif
-
-// include files
+// include files. Platform detection is basic/Platform.h's, reached
+// through Types.h -> Types/SystemTypes.h; PLATFORM_POSIX covers Linux,
+// macOS and Emscripten alike, since all three have BSD sockets.
 #include "Types.h"
 #include "Exception.h"
 
 #if defined(PLATFORM_WINDOWS)
 #include <WinSock.h>
-#elif defined(PLATFORM_LINUX) || defined(PLATFORM_MACOS)
+#elif defined(PLATFORM_POSIX)
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#elif defined(__EMSCRIPTEN__)
-#include <netinet/in.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-// Emscripten doesn't have traditional sockets
-// Use stub types for demo compilation
-typedef int SOCKET;
-static const int INVALID_SOCKET = -1;
-static const int SOCKET_ERROR = -1;
 #endif
 
 
 //////////////////////////////////////////////////
 //
-// Windows에서는 SOCKET과 INVALID_SOCKET을 unsigned int으로
-// 정의한다. 그러나 Windows에서 WinSock.h를 include하지 않으면
-// SOCKET과 INVALID_SOCKET이 정의되어 있지 않다.
+// Windows defines SOCKET and INVALID_SOCKET as unsigned integers in
+// WinSock.h; the POSIX socket API has file descriptors and -1, so the
+// same names are defined here for that platform.
 //
 //////////////////////////////////////////////////
-#if defined(PLATFORM_LINUX) || defined(PLATFORM_MACOS)
+#if defined(PLATFORM_POSIX)
 
 	typedef int SOCKET;
 	static const int INVALID_SOCKET = -1;

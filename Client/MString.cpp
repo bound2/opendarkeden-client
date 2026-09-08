@@ -7,7 +7,7 @@
 #include "MString.h"
 #include "DebugLog.h"
 
-#ifdef PLATFORM_MACOS
+#ifdef PLATFORM_POSIX
 #include <iconv.h>
 #endif
 
@@ -305,7 +305,7 @@ namespace {
 // Convert GBK to UTF-8 - used by LoadFromFile for runtime conversion
 static char* ConvertGBKToUTF8(const char* gbkStr, size_t gbkLen, size_t& outLen)
 {
-#ifdef PLATFORM_MACOS
+#ifdef PLATFORM_POSIX
 	// Always try GBK conversion - don't skip even if it looks like valid UTF-8
 	// because GBK strings can sometimes pass UTF-8 validation (especially ASCII)
 
@@ -354,7 +354,7 @@ namespace {
 	// Convert encoding using iconv
 	std::string ConvertEncoding(const char* str, size_t len, const char* fromEncoding)
 	{
-#ifdef PLATFORM_MACOS
+#ifdef PLATFORM_POSIX
 		iconv_t cd = iconv_open("UTF-8", fromEncoding);
 		if (cd == (iconv_t)-1)
 			return std::string(str, len);

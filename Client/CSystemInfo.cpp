@@ -41,7 +41,7 @@ inline unsigned __int64 theCycleCount(void)
 
 static bool cpuid(unsigned long function, unsigned long& out_eax, unsigned long& out_ebx, unsigned long& out_ecx, unsigned long& out_edx)
 {
-#ifdef _LINUX
+#ifdef PLATFORM_POSIX
 	asm("cpuid": "=a" (out_eax), "=b" (out_ebx), "=c" (out_ecx), "=d" (out_edx) : "a" (function));
 	return true;
 #else

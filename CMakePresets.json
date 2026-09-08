@@ -48,13 +48,66 @@
         "VCPKG_INSTALLED_DIR": "${sourceDir}/build/presets/vcpkg_installed",
         "VCPKG_MANIFEST_MODE": "ON"
       }
+    },
+    {
+      "name": "linux",
+      "displayName": "Linux GCC, Ninja, Debug, all tests (system SDL2 or vcpkg)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/presets/linux",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "BUILD_TESTS": "ON",
+        "REQUIRE_TEST_TOOLS": "ON",
+        "USE_ASAN": "OFF",
+        "USE_TSAN": "OFF",
+        "USE_UBSAN": "OFF"
+      }
+    },
+    {
+      "name": "linux-asan",
+      "displayName": "Linux GCC with AddressSanitizer and UndefinedBehaviorSanitizer, all tests",
+      "inherits": "linux",
+      "binaryDir": "${sourceDir}/build/presets/linux-asan",
+      "cacheVariables": { "USE_ASAN": "ON", "USE_UBSAN": "ON" }
+    },
+    {
+      "name": "linux-clang",
+      "displayName": "Linux Clang, Ninja, Debug, all tests",
+      "inherits": "linux",
+      "binaryDir": "${sourceDir}/build/presets/linux-clang",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++"
+      }
+    },
+    {
+      "name": "macos",
+      "displayName": "macOS Clang, Ninja, Debug, all tests (Homebrew or vcpkg SDL2)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/presets/macos",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin" },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "BUILD_TESTS": "ON",
+        "REQUIRE_TEST_TOOLS": "ON",
+        "USE_ASAN": "OFF",
+        "USE_TSAN": "OFF",
+        "USE_UBSAN": "OFF"
+      }
     }
   ],
   "buildPresets": [
     { "name": "windows-debug", "configurePreset": "windows", "configuration": "Debug", "jobs": 2 },
     { "name": "windows-release", "configurePreset": "windows", "configuration": "Release", "jobs": 2 },
     { "name": "windows-asan", "configurePreset": "windows-asan", "configuration": "Debug", "jobs": 2 },
-    { "name": "windows-clang", "configurePreset": "windows-clang" }
+    { "name": "windows-clang", "configurePreset": "windows-clang" },
+    { "name": "linux", "configurePreset": "linux" },
+    { "name": "linux-asan", "configurePreset": "linux-asan" },
+    { "name": "linux-clang", "configurePreset": "linux-clang" },
+    { "name": "macos", "configurePreset": "macos" }
   ],
   "testPresets": [
     {
@@ -73,6 +126,15 @@
       "name": "windows-asan",
       "inherits": "windows-debug",
       "configurePreset": "windows-asan"
-    }
+    },
+    {
+      "name": "linux",
+      "configurePreset": "linux",
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "error", "timeout": 300 }
+    },
+    { "name": "linux-asan", "inherits": "linux", "configurePreset": "linux-asan" },
+    { "name": "linux-clang", "inherits": "linux", "configurePreset": "linux-clang" },
+    { "name": "macos", "inherits": "linux", "configurePreset": "macos" }
   ]
 }

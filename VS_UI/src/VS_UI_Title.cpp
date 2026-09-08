@@ -32,7 +32,7 @@
 #define _P_NOWAIT 1
 #endif
 
-#ifdef PLATFORM_MACOS
+#ifdef PLATFORM_POSIX
 #include "TextSystem/TextService.h"
 #endif
 
@@ -3994,7 +3994,7 @@ void C_VS_UI_SERVER_SELECT::Show()
 				break;
 			}
 		}
-#ifdef PLATFORM_MACOS
+#ifdef PLATFORM_POSIX
 		// SDL text rendering (white only for now)
 		TextSystem::TextService::RenderText(x+m_server_x+5, y+m_server_y+i*20, m_server_name[i+m_scroll]);
 		TextSystem::TextService::RenderText(x+m_server_x+150, y+m_server_y+i*20, server_status_string);

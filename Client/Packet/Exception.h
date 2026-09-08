@@ -180,7 +180,7 @@ private :
 #if defined(NDEBUG) || defined(__WIN32__)
 	#define __BEGIN_DEBUG ((void)0);
 	#define __END_DEBUG ((void)0);
-#elif defined(__LINUX__) || defined(__APPLE__) || defined(__macos__) || defined(__WIN_CONSOLE__) || defined(__EMSCRIPTEN__)
+#elif defined(PLATFORM_POSIX) || defined(__WIN_CONSOLE__)
 	#define __BEGIN_DEBUG \
 				try {
 	#define __END_DEBUG  \

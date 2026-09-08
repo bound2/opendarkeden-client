@@ -30,7 +30,7 @@ void __assert__ ( const char * func , const char * expr , const DiagnosticSite &
 
 #if defined(NDEBUG)
 	#define Assert(expr) ((void)0)
-#elif __LINUX__
+#elif defined(PLATFORM_POSIX)
 	#define Assert(expr) ((void)((expr)?0:(__assert__(__PRETTY_FUNCTION__,#expr),0)))
 #elif __WIN_CONSOLE__ || __WIN32__
 	#define Assert(expr) ((void)((expr)?0:(__assert__("",#expr),0)))

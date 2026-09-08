@@ -2850,15 +2850,15 @@ ProcessInputRButtonDown(MObject* pObject, bool bForceAttack = false)
 	// add by Sonic
 		//START_START
 		//CRYPT_START
-#ifndef PLATFORM_MACOS
-		// Windows-specific anti-cheat error check - disabled on macOS
+#ifdef PLATFORM_WINDOWS
+		// Windows-specific anti-cheat error check - Windows only
 		if(g_CheckErrorTime>=5)
 		{
 			g_CheckErrorTime=0;
 			SetMode(MODE_QUIT);
 			return;
 		}
-#endif // PLATFORM_MACOS
+#endif // PLATFORM_WINDOWS
 		//VM_END
 		//CRYPT_END
 	// end 
@@ -6292,8 +6292,8 @@ CGameUpdate::Update(void)
 		//------------------------------------------------------------------
 		// 1분 마다 한번씩 garbarge packet을 보낸다.
 		//------------------------------------------------------------------
-#ifndef PLATFORM_MACOS
-		// Windows-specific anti-cheat time verification - disabled on macOS
+#ifdef PLATFORM_WINDOWS
+		// Windows-specific anti-cheat time verification - Windows only
 		int nextTimeValue =60000;
 
 		// g_MyCheckTime measures how much time has passed since the 60-second
@@ -6345,7 +6345,7 @@ CGameUpdate::Update(void)
 			}
 			g_MyCheckTime=0;
 		}
-#endif // PLATFORM_MACOS
+#endif // PLATFORM_WINDOWS
 		/*
 		g_MyCheckTime+=72;
 		if(g_MyCheckTime>=67620)
@@ -6363,15 +6363,15 @@ CGameUpdate::Update(void)
 		// 디아처럼.. 갑자기 달리기는 어떨까? -_-;
 		//检测外挂
 
-#ifndef PLATFORM_MACOS
-		// Windows-specific anti-cheat error check - disabled on macOS
+#ifdef PLATFORM_WINDOWS
+		// Windows-specific anti-cheat error check - Windows only
 		if(g_CheckErrorTime>=5)
 		{
 			g_CheckErrorTime=0;
 			SetMode(MODE_QUIT);
 			return;
 		}
-#endif // PLATFORM_MACOS
+#endif // PLATFORM_WINDOWS
 		
 		static int OnetimeUpdateCount = 0;
 		if (k==0)

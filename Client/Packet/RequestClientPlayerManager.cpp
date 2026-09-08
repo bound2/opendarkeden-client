@@ -20,7 +20,7 @@
 #ifdef PLATFORM_WINDOWS
 	#include <windows.h>
 	#include <process.h>
-#elif defined(__APPLE__) || defined(__linux__) || defined(__EMSCRIPTEN__)
+#elif defined(PLATFORM_POSIX)
 	#include <pthread.h>
 	#include <unistd.h>
 #endif
@@ -30,7 +30,7 @@
 #include "Rpackets/CRRequest.h"
 
 // Platform-specific threading macros and stubs
-#if defined(__APPLE__) || defined(__linux__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_POSIX)
 	// Additional Windows type definitions
 	typedef DWORD* LPDWORD;
 	typedef void* (*LPTHREAD_START_ROUTINE)(void*);
@@ -82,7 +82,7 @@
 // Note: CreateThread stub removed - use platform_thread_create from Platform.h
 // #ifdef PLATFORM_WINDOWS... (removed)
 
-#endif /* __APPLE__ || __linux__ || __EMSCRIPTEN__ */
+#endif /* PLATFORM_POSIX */
 
 #if defined(_DEBUG) && defined(OUTPUT_DEBUG)
 	extern CMessageArray*		g_pGameMessage;

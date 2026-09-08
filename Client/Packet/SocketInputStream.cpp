@@ -19,7 +19,7 @@
 #include <cstdio>
 #include <limits>
 
-#if __LINUX__
+#if defined(PLATFORM_POSIX)
 	#include <sys/ioctl.h>
 #elif __WINDOWS__
 	#include <winsock.h>
@@ -670,7 +670,7 @@ uint SocketInputStream::fill_RAW ()
 {
 	__BEGIN_TRY
 		
-#if __LINUX__
+#if defined(PLATFORM_POSIX)
 	uint nfree = m_BufferLen - m_Tail - 1;	
 
 	int nread = recv( m_pSocket->getSOCKET() , &m_Buffer[m_Tail] , nfree , 0 );

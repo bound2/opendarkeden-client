@@ -11,7 +11,7 @@
 #ifdef PLATFORM_WINDOWS
 	#include <windows.h>
 	#include <process.h>
-#elif defined(__APPLE__) || defined(__linux__) || defined(__EMSCRIPTEN__)
+#elif defined(PLATFORM_POSIX)
 	#include <pthread.h>
 	#include <unistd.h>
 	#include <SDL2/SDL.h>  // For SDL_Delay on non-Windows platforms
@@ -57,7 +57,7 @@
 		}
 		return (HANDLE)0;
 }
-#endif // PLATFORM_WINDOWS / __APPLE__ || __linux__ || __EMSCRIPTEN__
+#endif // PLATFORM_WINDOWS / PLATFORM_POSIX
 
 // Note: CreateThread stub removed - use platform_thread_create from Platform.h
 // #ifdef PLATFORM_WINDOWS... (removed)

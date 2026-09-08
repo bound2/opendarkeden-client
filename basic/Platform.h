@@ -32,11 +32,22 @@ extern "C" {
  * Platform Detection
  * ============================================================================ */
 
-/* Detect platform */
+/* Detect platform. This block is the one place in the tree that decides
+   what the platform is: every other file reads these macros and none
+   defines them, and the build passes no platform macro of its own on
+   Linux or macOS - the compiler builtins are the truth, and a CMake
+   define could only disagree with them (it did: every non-Windows
+   target used to be told it was macOS). Ratchet R13 holds the older
+   spellings - __LINUX__, _LINUX and PLATFORM_MACOS in a build file - at
+   zero. */
 #if defined(_WIN32) || defined(_WIN64)
-	#define PLATFORM_WINDOWS
+	#ifndef PLATFORM_WINDOWS
+		#define PLATFORM_WINDOWS
+	#endif
 #elif defined(__linux__)
-	#define PLATFORM_LINUX
+	#ifndef PLATFORM_LINUX
+		#define PLATFORM_LINUX
+	#endif
 #elif defined(__APPLE__)
 	#include <TargetConditionals.h>
 	#if TARGET_OS_MAC
@@ -46,6 +57,16 @@ extern "C" {
 	#endif
 #else
 	#define PLATFORM_UNKNOWN
+#endif
+
+/* PLATFORM_POSIX: the non-Windows platforms as one. Sockets, files,
+   paths and threads are the same BSD/POSIX API on Linux and macOS, and
+   most of the tree only ever needs "not Windows". Test this, not
+   PLATFORM_MACOS, for anything that is not actually Darwin-specific. */
+#if defined(PLATFORM_LINUX) || defined(PLATFORM_MACOS) || defined(__unix__)
+	#ifndef PLATFORM_POSIX
+		#define PLATFORM_POSIX
+	#endif
 #endif
 
 /* ============================================================================

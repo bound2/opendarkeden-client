@@ -13,7 +13,7 @@
 #include "Exception.h"
 #include "SocketAPI.h"
 
-#if __LINUX__
+#if defined(PLATFORM_POSIX)
 	#include <sys/socket.h>
 	#include <arpa/inet.h>
 	#include <netinet/in.h>
