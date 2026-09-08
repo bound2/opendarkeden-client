@@ -54,7 +54,7 @@ class UserInformation {
 		// 조합형 한글
 		MString			UserID;				// 사용자의 ID
 		MString			Character[3];		// 캐릭터 이름
-		Race			Race[3];		// slayer 캐릭터인가?
+		enum Race		Race[3];		// the race of each character; "enum" because GCC rejects a member that hides its own type's name (-Wchanges-meaning)
 		MString			CharacterID;		// 선택된 Character ID
 		MString			GuildName;			// 내 길드 이름
 		BYTE			GuildGrade;			// 내 길드 안에서의 등급

@@ -34,6 +34,7 @@
 
 #include "CSpritePalBase.h"
 
+#include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <fstream>
@@ -73,6 +74,18 @@ public:
 		}
 
 		return true;
+	}
+
+	//------------------------------------------------------------
+	// The scanline table lives in the same allocation as the pixel
+	// data, after it. A pointer table at an odd byte offset is a
+	// misaligned load on every read of it - undefined behaviour that
+	// x86 tolerates and UBSan reports.
+	//------------------------------------------------------------
+	bool	ScanlineTableIsAligned() const
+	{
+		return m_pPixels == NULL ||
+			reinterpret_cast<std::uintptr_t>(m_pPixels) % alignof(BYTE*) == 0;
 	}
 
 protected:
@@ -184,6 +197,30 @@ TEST(CSpritePalBase, LoadFromFileReadsAWellFormedSprite)
 	CHECK(sprite.LoadFromFile(in));
 	CHECK_EQ(4, sprite.GetWidth());
 	CHECK_EQ(2, sprite.GetHeight());
+	CHECK(sprite.ScanlinePointersAreInsideData());
+
+	RemoveTempFile();
+}
+
+//----------------------------------------------------------------------
+// The pointer table is placed after the pixel data in one allocation.
+// With 13 bytes of pixel data (7 + 6) the table would start at an odd
+// address unless the loader pads up to the pointer alignment.
+//----------------------------------------------------------------------
+TEST(CSpritePalBase, LoadFromFileAlignsTheScanlineTable)
+{
+	std::vector<std::vector<unsigned char> >	scanlines;
+
+	scanlines.push_back(MakeScanline(0, 4));	// 1 + 2 + 4 = 7 bytes
+	scanlines.push_back(MakeScanline(1, 3));	// 1 + 2 + 3 = 6 bytes
+
+	WriteSprite(4, scanlines);
+
+	TestSpritePal	sprite;
+	std::ifstream	in(kTempFile, std::ios::binary);
+
+	CHECK(sprite.LoadFromFile(in));
+	CHECK(sprite.ScanlineTableIsAligned());
 	CHECK(sprite.ScanlinePointersAreInsideData());
 
 	RemoveTempFile();

@@ -2961,7 +2961,10 @@ static MMagazine*	EmptyMagazineFor(MItem* pGun)
 	return pMagazine;
 }
 
-static const MItemHost	s_ItemHost = { &g_CurrentFrame, ItemDropFrameCount, RefreshAffect, PlayItemSound, &g_CurrentTime, RecalculateStatus, ResetQuickItemSlot, RepairHint, EmptyMagazineFor };
+// MUsePotionItem::UseInventory's body (MItemUse.cpp); the member is the library's.
+void	UsePotionFromInventory(MItem* pPotion);
+
+static const MItemHost	s_ItemHost = { &g_CurrentFrame, ItemDropFrameCount, RefreshAffect, PlayItemSound, &g_CurrentTime, RecalculateStatus, ResetQuickItemSlot, RepairHint, EmptyMagazineFor, UsePotionFromInventory };
 
 //-----------------------------------------------------------------------------
 // The price manager's host (docs/RESTRUCTURING.md task 4.2): the player's

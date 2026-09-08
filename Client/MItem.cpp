@@ -506,10 +506,31 @@ MBomb::GetMaxNumber() const
 //----------------------------------------------------------------------
 // MSerum - Get MaxNumber
 //----------------------------------------------------------------------
-TYPE_ITEM_NUMBER	
+TYPE_ITEM_NUMBER
 MSerum::GetMaxNumber() const
 {
 	return MAX_SERUM_NUMBER;
+}
+
+//----------------------------------------------------------------------
+// MUsePotionItem - UseInventory
+//
+// The body lives in the executable (GameInit.cpp installs it through
+// the host), like the other use bodies in MItemUse.cpp; this one is
+// defined here because MSerum's key function is above, so GCC emits
+// MSerum's vtable in this library, and that vtable names the inherited
+// UseInventory - a definition in the executable would leave a test
+// binary with an undefined reference. MSVC emits vtables where an
+// object is constructed and never saw the gap.
+//----------------------------------------------------------------------
+#ifdef __TEST_SUB_INVENTORY__
+void	MUsePotionItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
+#else
+void	MUsePotionItem::UseInventory()
+#endif
+{
+	if (s_pHost != NULL && s_pHost->UsePotionFromInventory != NULL)
+		s_pHost->UsePotionFromInventory( this );
 }
 
 //----------------------------------------------------------------------

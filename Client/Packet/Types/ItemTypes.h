@@ -8,7 +8,7 @@
 #define __ITEM_TYPES_H__
 
 #include "SystemTypes.h"
-#include "RaceType.h"
+#include "../RaceType.h"   /* Client/Packet/RaceType.h; the bare name resolved only through MSVC's include-stack search */
 //////////////////////////////////////////////////////////////////////////////
 // MaxSlotItem : 한 슬랏에 들어갈 수 있는 최대 아이템의 갯수
 //////////////////////////////////////////////////////////////////////////////

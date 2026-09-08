@@ -8,7 +8,7 @@
 #include "SocketOutputStream.h"
 
 #include <list>
-#include <VECTOR>
+#include <vector>
 #define MAX_MISSION_NUM	100
 
 // ui에서 사용될 구조체 - string이 추가되어 있다.
