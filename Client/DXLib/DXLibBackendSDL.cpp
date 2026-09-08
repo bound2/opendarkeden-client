@@ -211,16 +211,11 @@ static int g_mouse_button_event_count = 0;
 /* Legacy global mouse coordinates (used by CWaitUIUpdate) */
 extern int g_x, g_y;
 
-/* Global game state. On non-Windows this is defined in SDLMain.cpp (the
-   main loop that reads it); SDLMain.cpp is compiled out on Windows (it's
-   the macOS/Linux entry point), so define it here instead - this file
-   (dxlib) is built on every platform, and nothing else provides it for
-   PLATFORM_WINDOWS. */
-#ifdef PLATFORM_WINDOWS
+/* Global game state: cleared by the event pump below on SDL_QUIT, read by
+   ClientMain's frame loop off Windows (Client.cpp). Defined here on every
+   platform - this file is built on all of them - since SDLMain.cpp, which
+   used to define it off Windows, is the bootstrap alone now. */
 bool g_bRunning = true;
-#else
-extern bool g_bRunning;
-#endif
 extern BOOL g_bActiveApp;
 
 /* DIK to SDL scancode mapping table */

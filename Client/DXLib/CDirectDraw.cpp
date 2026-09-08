@@ -7,6 +7,7 @@
 //----------------------------------------------------------------------
 
 #include "CDirectDraw.h"
+#include <stdio.h>
 // spritectl_init() only; CSDLGraphics::Flip() (which needs the full
 // CSpriteSurface definition) is implemented in Client/CSDLGraphicsFlip.cpp
 // instead, since this file is compiled into the standalone dxlib library
@@ -61,9 +62,15 @@ CSDLGraphics::~CSDLGraphics()
 //-----------------------------------------------------------------------------
 // Init
 //
-// hWnd is a real native window already created by CreateWindowEx() before
-// this is called; SDL_CreateWindowFrom() wraps it instead of creating a new
-// window, so SDL renders into the same window Win32 message handling uses.
+// On Windows hWnd is a real native window already created by
+// CreateWindowEx() before this is called; SDL_CreateWindowFrom() wraps it
+// instead of creating a new window, so SDL renders into the same window
+// Win32 message handling uses. Off Windows there is no native window -
+// InitApp skips CreateWindowEx and hWnd is NULL - so the window is SDL's
+// own, created here at the requested size: fullscreen as a borderless
+// desktop-sized window, which is what SDL scales the 800x600 or 1024x768
+// frame into, and window mode at the frame's own size. SDLMain.cpp used to
+// create a window of its own beside this class, which then had none.
 //-----------------------------------------------------------------------------
 void CSDLGraphics::Init(HWND hWnd, WORD width, WORD height, SCREENMODE mode, bool bUseHAL, bool bUseIME)
 {
@@ -74,7 +81,22 @@ void CSDLGraphics::Init(HWND hWnd, WORD width, WORD height, SCREENMODE mode, boo
 
 	spritectl_init();
 
+#ifdef PLATFORM_WINDOWS
 	m_pSDLWindow = SDL_CreateWindowFrom((void*)hWnd);
+#else
+	Uint32 flags = SDL_WINDOW_SHOWN;
+	if (mode == FULLSCREEN)
+	{
+		flags |= SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_BORDERLESS;
+	}
+	m_pSDLWindow = SDL_CreateWindow("Dark Eden",
+		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+		width, height, flags);
+	if (m_pSDLWindow == NULL)
+	{
+		fprintf(stderr, "CSDLGraphics::Init: SDL_CreateWindow failed: %s\n", SDL_GetError());
+	}
+#endif
 	if (m_pSDLWindow == NULL)
 	{
 		return;

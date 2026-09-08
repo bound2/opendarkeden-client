@@ -32,12 +32,11 @@
 #include "DXLib/DXLib.h"
 #include "SpriteLib/SP.h"
 #include "FR.h"
-#ifdef PLATFORM_WINDOWS
+// WinLib.h is CWinUpdate, the frame-update base, which is platform-neutral
+// (CWinUpdate.cpp compiles everywhere). The non-Windows branch used to
+// forward-declare the class instead, and ClientMain's loop, which calls
+// Update() through it, then had an incomplete type.
 #include "WinLib.h"
-#else
-// Forward declaration for non-Windows platforms
-class CWinUpdate;
-#endif
 
 
 #include "MZone.h"

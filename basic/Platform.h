@@ -621,10 +621,12 @@ typedef WORD			char_t;
 		return NULL; // No window finding on non-Windows platforms
 	}
 
-	/* ShowCursor stub - always returns 0 (cursor hidden) on non-Windows */
+	/* ShowCursor over SDL: the game draws its own cursor and hides the
+	   system one at start-up (InitApp). Returns the Win32 display count
+	   shape, 0 for hidden. */
 	static inline int ShowCursor(BOOL bShow) {
-		(void)bShow;
-		return 0;
+		SDL_ShowCursor(bShow ? SDL_ENABLE : SDL_DISABLE);
+		return bShow ? 1 : 0;
 	}
 
 	/* InitCommonControls stub - no-op on non-Windows */
@@ -1774,8 +1776,13 @@ static inline LRESULT DispatchMessage(const MSG* lpMsg) {
 #endif
 
 #ifndef WaitMessage
-static inline BOOL WaitMessage() {
-	return FALSE;
+/* WaitMessage blocks until a window message arrives; the frame loop calls
+   it when the application is inactive. The SDL events are pumped by the
+   loop itself, so the honest equivalent is a short sleep rather than a
+   busy spin. */
+static inline BOOL WaitMessage(void) {
+	SDL_Delay(10);
+	return TRUE;
 }
 #endif
 

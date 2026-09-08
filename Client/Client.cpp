@@ -62,6 +62,11 @@
 #include <vector>
 #include <sys/stat.h>
 #include <filesystem>
+#include "ClientMain.h"
+#ifndef PLATFORM_WINDOWS
+#include "DXLib/DXLibBackend.h"	// dxlib_input_update(), the SDL event pump
+extern bool g_bRunning;			// cleared by the pump on SDL_QUIT (DXLibBackendSDL.cpp)
+#endif
 #include <system_error>
 // std::filesystem directory enumeration, in place of the _findfirst /
 // _findnext walk CheckLogFile() used to run
@@ -1685,6 +1690,7 @@ color
 BOOL
 InitApp(int nCmdShow)
 {
+#ifdef PLATFORM_WINDOWS
 	WNDCLASS                    wc;
 	//生成随机类名,窗口标题
 	//char rnd_PROGRAM_NAME[50];
@@ -1817,6 +1823,11 @@ InitApp(int nCmdShow)
 	{
         return FALSE;
 	}
+#else
+	// No native window off Windows: CSDLGraphics::Init creates the SDL
+	// window when InitGame() sets the display mode, and g_hWnd stays NULL.
+	// The Win32 cursor, show and focus calls below are the shim's no-ops.
+#endif
 
 // REMOVED: nProtect anti-cheat code (SDL migration - no longer needed)
 
@@ -2986,14 +2997,31 @@ ApplyPatch()
 
 //-----------------------------------------------------------------------------
 // Name: WinMain()
-// Desc: Initialization, message loop
+// Desc: The Windows entry point. Records the instance handle and hands
+//       the rest to ClientMain, which is this function's old body.
 //-----------------------------------------------------------------------------
+#ifdef PLATFORM_WINDOWS
 int PASCAL
 WinMain(HINSTANCE hInstance,
         HINSTANCE hPrevInstance,
         LPSTR lpCmdLine,
         int nCmdShow)
-{	
+{
+	(void)hPrevInstance;
+	g_hInstance = hInstance;
+	return ClientMain(lpCmdLine, nCmdShow);
+}
+#endif
+
+//-----------------------------------------------------------------------------
+// Name: ClientMain()
+// Desc: Initialization, frame loop, shutdown - on every platform. This
+//       was WinMain's body (ClientMain.h says how it is shared); the
+//       Win32-only steps are behind PLATFORM_WINDOWS, with the SDL
+//       equivalent in the other branch where one is needed.
+//-----------------------------------------------------------------------------
+int ClientMain(char* lpCmdLine, int nCmdShow)
+{
 // 	char tttt[] = "0000000011";
 // 	memcpy(lpCmdLine,tttt,strlen(tttt));
 	//tttt += lpCmdLine;
@@ -3004,6 +3032,7 @@ WinMain(HINSTANCE hInstance,
 	tttt += lpCmdLine;
 #endif
 
+#ifdef PLATFORM_WINDOWS
 	GetModuleFileName(NULL, g_CWD, _MAX_PATH);
 	char *tempCut = strrchr(g_CWD, '\\');
 	if(tempCut == NULL)
@@ -3011,6 +3040,17 @@ WinMain(HINSTANCE hInstance,
 
 	*tempCut = '\0';
 	SetCurrentDirectory(g_CWD);
+#else
+	// The game's data is found relative to the working directory
+	// (GameInit.cpp), which on Windows is the executable's own; off
+	// Windows the launcher or the shell sets it, and g_CWD records it for
+	// the _chdir(g_CWD) calls below.
+	if (getcwd(g_CWD, _MAX_PATH) == NULL)
+	{
+		g_CWD[0] = '.';
+		g_CWD[1] = '\0';
+	}
+#endif
 
 	auto& displaySettings = GetDisplaySettings();
 	displaySettings.Load();
@@ -3112,9 +3152,16 @@ WinMain(HINSTANCE hInstance,
 
 	
 	//----------------------------------------------------------
-	// 하나의 application만 실행시킨다.
+	// Run a single instance of the application (Windows only: the
+	// named mutex and the FindWindow checks are Win32; off Windows
+	// there is no lock, and the ReleaseMutex calls further down hand
+	// the shim's no-op a NULL).
 	//----------------------------------------------------------
-	// 값 대충 넣기.. --;
+#ifndef PLATFORM_WINDOWS
+#ifndef OUTPUT_DEBUG
+	HANDLE hMutex = NULL;
+#endif
+#else
 	SECURITY_ATTRIBUTES sa;
 	sa.nLength = sizeof(sa);
     sa.lpSecurityDescriptor = NULL;
@@ -3122,8 +3169,8 @@ WinMain(HINSTANCE hInstance,
 
 
 #ifndef OUTPUT_DEBUG
-	// 2006.11.07 edit Coffee  修正为程序可以双开
-	HANDLE hMutex = CreateMutex(&sa, FALSE, "<<<DarkEden>>>");  
+	// 2006.11.07 edit Coffee: allow the program to run twice
+	HANDLE hMutex = CreateMutex(&sa, FALSE, "<<<DarkEden>>>");
 	/*
 	HANDLE hMutex = CreateMutex(&sa, FALSE, "<<<DarkEden>>>");   
 	
@@ -3170,8 +3217,9 @@ WinMain(HINSTANCE hInstance,
 		return -1;
 	}*/
 
-#endif
-	
+#endif // OUTPUT_DEBUG
+#endif // PLATFORM_WINDOWS
+
 		// 현재 directory를 저장해둔다.
 //	strcpy(g_CWD, __argv[0]);
 
@@ -3218,7 +3266,12 @@ WinMain(HINSTANCE hInstance,
 	default:
 		break;
 	}
-#else
+#elif defined(PLATFORM_WINDOWS)
+	// Windows only, all of it: closing a running launcher window,
+	// replacing Updater.exe, and the startup DLL whitelist. The
+	// whitelist judges *.dll names beside the executable; there are
+	// none off Windows and the shared libraries there are the loader's
+	// business, not the game's.
 //yckou:update the update.exe program
 /*
 	CFileFind finder;
@@ -3496,7 +3549,7 @@ WinMain(HINSTANCE hInstance,
 	// provides the debug-heap guard fills.
 	
 
-	g_hInstance = hInstance;
+	// g_hInstance is set by WinMain before this runs; it stays NULL off Windows.
 	// random
 	srand(time(NULL));
 
@@ -4148,7 +4201,8 @@ WinMain(HINSTANCE hInstance,
 		break;
 	}
 	
-#ifndef _DEBUG
+#if !defined(_DEBUG) && defined(PLATFORM_WINDOWS)
+	// The crash reporter is a Win32 structured-exception handler over dbghelp.
 	if( gC_ci->IsKorean() == true )
 		InitCrashReport();
 #endif
@@ -4232,6 +4286,14 @@ WinMain(HINSTANCE hInstance,
 		while (TRUE)
 		{
 //			Sleep(1);	//add by viva
+#ifndef PLATFORM_WINDOWS
+			// The SDL event pump: dxlib_input_update() drains the queue into the
+			// input state and clears g_bRunning on SDL_QUIT. PeekMessage below
+			// is the shim's stub and always says no, so the frame runs.
+			dxlib_input_update();
+			if (!g_bRunning)
+				break;
+#endif
 			if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
 			//if (GetMessage(&msg, NULL, 0, 0))
 			{	
@@ -4254,7 +4316,6 @@ WinMain(HINSTANCE hInstance,
 
 					//if (g_CurrentTime - lastTime > g_UpdateDelay)
 					{
-#ifdef PLATFORM_WINDOWS
 						if (g_pUpdate!=NULL)
 						{
 							// 노파심.. 으흠.. --;;
@@ -4267,10 +4328,6 @@ WinMain(HINSTANCE hInstance,
 							#endif
 
 						}
-#else
-						// On non-Windows platforms, game update is handled differently
-						// TODO: Implement SDL2-based game loop
-#endif
 						//lastTime = g_CurrentTime;
 					}
 // REMOVED: nProtect anti-cheat code (SDL migration - no longer needed)
