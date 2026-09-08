@@ -135,7 +135,11 @@ bool CMd5::Init()
 }
 bool CMd5::OpenFile()
 {
-	Sfile.open(fname,ios::in||ios::binary);
+	// Was `ios::in||ios::binary` - a logical OR, i.e. the bool true, which
+	// MSVC converted to openmode 1 (ios::in, text mode) and libstdc++
+	// rejects. Binary input is what an MD5 of a file means. Nothing in the
+	// tree constructs a CMd5 today.
+	Sfile.open(fname, ios::in | ios::binary);
 	if(!Sfile)
 	{   
 		SetErr(0);

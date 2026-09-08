@@ -226,7 +226,10 @@ Profiler::GetAverageTime(const char* pName) const
 void		
 Profiler::WriteToFile(const char* pFilename, bool bAppend) const
 {
-	DWORD flag = (bAppend? ios::app : 0);
+	// MSVC ORs ios::out into whatever mode an ofstream is given, so the old
+	// `(bAppend ? ios::app : 0)`, a DWORD, opened the same way; libstdc++
+	// wants the openmode type and the out bit spelled.
+	const std::ios_base::openmode flag = bAppend ? (ios::out | ios::app) : ios::out;
 
 	ofstream file(pFilename, flag);
 

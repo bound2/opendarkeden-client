@@ -569,8 +569,13 @@ typedef WORD			char_t;
 		return lpPoint ? TRUE : FALSE;
 	}
 
-	/* String comparison (case-insensitive) - Windows stricmp equivalent */
+	/* Case-insensitive string comparison - the MSVC CRT names over the POSIX
+	   ones (<strings.h>, which <string.h> includes on glibc and Darwin) */
+	#include <strings.h>
 	#define stricmp strcasecmp
+	#define _stricmp strcasecmp
+	#define _strnicmp strncasecmp
+	#define strnicmp strncasecmp
 
 	/* Microsoft-specific string functions - use standard equivalents */
 	#define _stscanf sscanf
