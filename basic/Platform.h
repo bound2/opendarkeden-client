@@ -1967,8 +1967,9 @@ static inline int wsprintf(char* buf, const char* fmt, ...) {
 	return result >= 1024 ? 1023 : result;
 }
 
-/* Windows API stubs for file operations */
+/* Windows file attribute bits, the Win32 values */
 #define FILE_ATTRIBUTE_DIRECTORY (0x00000010)
+#define FILE_ATTRIBUTE_NORMAL    (0x00000080)
 
 /* Windows Virtual Key Codes for keyboard input */
 #ifndef VK_UP

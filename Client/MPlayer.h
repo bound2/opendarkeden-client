@@ -121,7 +121,7 @@ class Comparison {
 					const bool bLeftStraight  = (left->pParent  != NULL && left->pParent->direction  == left->direction);
 					const bool bRightStraight = (right->pParent != NULL && right->pParent->direction == right->direction);
 
-					return !bLeftStraight && bRightStraight;	// right���� only when it alone is straight
+					return !bLeftStraight && bRightStraight;	// choose right only when it alone is straight
 				}
 				// 움직인 회수가 적은 것
 				else if (s>0) 

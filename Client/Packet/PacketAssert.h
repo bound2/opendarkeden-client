@@ -36,12 +36,15 @@ void __assert__ ( const char * func , const char * expr , const DiagnosticSite &
 
 #if defined(NDEBUG)
 	#define Assert(expr) ((void)0)
-#elif defined(PLATFORM_POSIX)
-	#define Assert(expr) ((void)((expr)?0:(__assert__(__PRETTY_FUNCTION__,#expr),0)))
-#elif __WIN_CONSOLE__ || __WIN32__
-	#define Assert(expr) ((void)((expr)?0:(__assert__("",#expr),0)))
-#elif __MFC__
+#elif defined(__MFC__)
 	#define Assert(expr) ASSERT(expr)
+#else
+	/* One spelling on every platform. The site comes from the defaulted
+	   DiagnosticSite (std::source_location), so the function name is left
+	   empty here; the POSIX branch used to pass __PRETTY_FUNCTION__ and
+	   produced a different message from the Windows one for the same
+	   assertion (test_packet_source_location.cpp pins the message). */
+	#define Assert(expr) ((void)((expr)?0:(__assert__("",#expr),0)))
 #endif
 
 #endif

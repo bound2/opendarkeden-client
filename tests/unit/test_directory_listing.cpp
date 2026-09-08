@@ -268,7 +268,9 @@ TEST(DirectoryListing, SubdirectoriesAreExcludedUnlessAskedFor)
 }
 
 
-// The file dialog hands over a directory with its trailing separator on.
+// The file dialog hands over a directory with its trailing separator on -
+// the platform's separator: a backslash is a filename character on POSIX,
+// where the dialog hands over a slash.
 TEST(DirectoryListing, ATrailingSeparatorOnTheDirectoryChangesNothing)
 {
 	const SScratchDirectory Scratch;
@@ -277,7 +279,11 @@ TEST(DirectoryListing, ATrailingSeparatorOnTheDirectoryChangesNothing)
 	std::vector<Basic::SDirectoryEntry> vBare;
 	std::vector<Basic::SDirectoryEntry> vSlashed;
 
+#ifdef _WIN32
 	const std::string sSlashed = Scratch.Name() + "\\";
+#else
+	const std::string sSlashed = Scratch.Name() + "/";
+#endif
 
 	CHECK_EQ(true, Basic::ListDirectory(Scratch.Name().c_str(), "*", vBare,
 			Basic::LIST_FILES_AND_DIRECTORIES));

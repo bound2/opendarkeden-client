@@ -134,8 +134,7 @@ void CSpritePal::SetPixel(BYTE *pSource, WORD pitch, WORD width, WORD height)
 		pSource = pSource + pitch;
 	}
 
-	m_pData = new BYTE[m_Size+sizeof(BYTE *)*height];
-	m_pPixels = (BYTE **)(m_pData+m_Size);
+	AllocateDataAndScanlineTable(m_Size, height);
 	BYTE *TempData = m_pData;
 
 	for(i = 0; i < height; i++)

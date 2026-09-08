@@ -85,6 +85,18 @@ protected:
 	bool		ValidateScanlines(int bytesPerPixel) const;
 
 	//---------------------------------------------------------
+	// One allocation for the pixel data and, after it, the scanline
+	// pointer table: m_pData gets size bytes and m_pPixels a table of
+	// height pointers at the first pointer-aligned offset past them.
+	// Every loader and the copy constructor go through this. Placing
+	// the table at m_pData + m_Size directly, as they used to, put it
+	// at whatever byte offset the pixel data happened to end on, and
+	// every read of it was then a misaligned load - undefined
+	// behaviour that x86 tolerates and UBSan reports.
+	//---------------------------------------------------------
+	void		AllocateDataAndScanlineTable(DWORD size, WORD height);
+
+	//---------------------------------------------------------
 	// Called by LoadFromFile once the scanline table has been built.
 	// Only the subclass knows how many bytes a pixel occupies.
 	//---------------------------------------------------------

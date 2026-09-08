@@ -36,8 +36,19 @@ void CSpritePalBase::Release()
 		m_pPixels = NULL;
 	}
 	
-	m_bInit = false;		// data가 있는가?
-	m_bLoading = false;		// Loading중인가?
+	m_bInit = false;		// is there data?
+	m_bLoading = false;		// still loading?
+}
+
+void CSpritePalBase::AllocateDataAndScanlineTable(DWORD size, WORD height)
+{
+	// new BYTE[] is aligned for any object; the table only has to start
+	// at a multiple of the pointer alignment within the block.
+	const size_t	tableOffset =
+		((size_t)size + alignof(BYTE*) - 1) & ~(size_t)(alignof(BYTE*) - 1);
+
+	m_pData = new BYTE[tableOffset + sizeof(BYTE*) * height];
+	m_pPixels = (BYTE**)(m_pData + tableOffset);
 }
 
 void CSpritePalBase::SetEmptySprite()
@@ -97,8 +108,7 @@ bool CSpritePalBase::LoadFromFile(std::ifstream &file)
 	m_Width		= width;
 	m_Height	= height;
 
-	m_pData = new BYTE[m_Size+sizeof(BYTE *)*m_Height];
-	m_pPixels = (BYTE **)(m_pData+m_Size);
+	AllocateDataAndScanlineTable(m_Size, m_Height);
 
 	file.read((char *)m_pData, m_Size);
 
@@ -270,8 +280,7 @@ void CSpritePalBase::operator = (const CSpritePalBase& sprite)
 	m_Height = sprite.m_Height;
 	m_bInit = true;
 
-	m_pData = new BYTE[m_Size+sizeof(BYTE *)*m_Height];
-	m_pPixels = (BYTE **)(m_pData+m_Size);
+	AllocateDataAndScanlineTable(m_Size, m_Height);
 	
 	memcpy(m_pData, sprite.m_pData, m_Size);
 

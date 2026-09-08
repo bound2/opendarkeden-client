@@ -92,29 +92,40 @@ public:
 			"Data/Font/NotoSans-Regular.ttf",
 			"Data/Font/DejaVuSans.ttf",
 			"Data/Font/Hiragino Sans GB.ttc",
-#ifdef _WIN32
-
-
-			// 위의 경로 중 어느 것도 Data/Font에 포함되지 않습니다(폰트가 게임 데이터에 전혀 포함되지 않습니다.
-			// SPRITELIB_BACKEND_README 참조 - 아래의 macOS 전용 /System/Library/Fonts 대체 경로 참조). 따라서
-			// Windows에서는 모든 AcquireFont() 호출이 위의 모든 경로를 거치지만 실패합니다.
-			// TextService::m_initialized는 영원히 false로 유지되고,
-			// EnsureInitialized()(DrawLine/MeasureText 등의 시작 부분에서 호출됨)는 모든 텍스트 호출을 아무 작업도 수행하지 않는 조용한 무작업으로 만들었습니다. 게임 텍스트가 어디에도 그려지지 않았습니다.
-			// 이 대화 상자뿐만 아니라 어디에도 표시되지 않았습니다.
-			// 따라서 모든 Windows 설치에 포함된 폰트로 대체합니다.
-			// Malgun Gothic은 광범위한
-			// 한글+중국어+라틴어 지원(이 클라이언트의 텍스트는 한국어 개발 문자열과 중국어 게임 문자열 테이블 데이터를 혼합하여 사용함), Microsoft
-			// YaHei는 간체 중국어를 전문적으로 지원하며, Arial은
-			// 최후의 수단으로 라틴어만 지원하는 대체 폰트입니다.
-
-
+			// None of the Data/Font paths above ship with the game data (no
+			// font is part of it - see SPRITELIB_BACKEND_README), so the
+			// system fonts below are what actually loads. Before they were
+			// listed, every AcquireFont() call on Windows walked the Data/Font
+			// paths, failed, left TextService::m_initialized false for good,
+			// and EnsureInitialized() (called at the top of DrawLine,
+			// MeasureText and the rest) turned every text call into a silent
+			// no-op: no game text was drawn anywhere, not just in this dialog.
+#if defined(_WIN32)
+			// Every Windows installation has these. Malgun Gothic covers
+			// Hangul, Chinese and Latin together (the client mixes Korean
+			// development strings with the Chinese game string tables),
+			// Microsoft YaHei specialises in Simplified Chinese, and Arial
+			// is the Latin-only last resort.
 			"C:\\Windows\\Fonts\\malgun.ttf",
 			"C:\\Windows\\Fonts\\msyh.ttc",
 			"C:\\Windows\\Fonts\\simsun.ttc",
 			"C:\\Windows\\Fonts\\arial.ttf",
-#else
+#elif defined(__APPLE__)
 			"/System/Library/Fonts/Helvetica.ttc",
 			"/System/Library/Fonts/Hiragino Sans GB.ttc",
+#else
+			// Linux: the Noto CJK package where Debian, Ubuntu and Fedora put
+			// it, then DejaVu, which nearly every distribution installs and
+			// which covers Latin, so the tests and the title screen have a
+			// font even where CJK does not. Nothing under /usr/share/fonts is
+			// guaranteed; a machine with none of these draws no text, loudly
+			// (the "Failed to load font" line below).
+			"/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+			"/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
+			"/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+			"/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+			"/usr/share/fonts/dejavu/DejaVuSans.ttf",
+			"/usr/share/fonts/TTF/DejaVuSans.ttf",
 #endif
 			NULL
 		};

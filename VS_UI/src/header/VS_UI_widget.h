@@ -36,6 +36,7 @@ public:
     void ForceUI(unsigned int ID) {}
     bool IsDevice() { return false; }  // Stub: no device on non-Windows platforms
     void Enable(bool enable) {}  // Stub: enable/disable device
+    void Enable() {}             // the no-argument form the option dialog and C_VS_UI::Init call
     void Disable() {}  // Stub: disable device
 };
 

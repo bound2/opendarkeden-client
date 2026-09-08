@@ -609,28 +609,30 @@ MMoonCardItem::GetMaxNumber() const
 //	Item Use
 //
 ///////////////////////////////////////////////////////////////////////////
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
-void	MUsePotionItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
-	#else
-void	MUsePotionItem::UseInventory()
-	#endif
+
+//----------------------------------------------------------------------
+// MUsePotionItem::UseInventory's body, reached through the item host
+// (MItemHost::UsePotionFromInventory, installed in GameInit.cpp). The
+// member itself is defined in MItem.cpp: MSerum inherits it and GCC
+// emits MSerum's vtable in the library, so the slot must resolve there.
+//----------------------------------------------------------------------
+void	UsePotionFromInventory(MItem* pPotion)
 {
 #ifdef __GAME_CLIENT__
 	CGUsePotionFromInventory _CGUsePotionFromInventory;
-	_CGUsePotionFromInventory.setObjectID( GetID() );
-	_CGUsePotionFromInventory.setX( GetGridX() );
-	_CGUsePotionFromInventory.setY( GetGridY() );
+	_CGUsePotionFromInventory.setObjectID( pPotion->GetID() );
+	_CGUsePotionFromInventory.setX( pPotion->GetGridX() );
+	_CGUsePotionFromInventory.setY( pPotion->GetGridY() );
 
 	g_pSocket->sendPacket( &_CGUsePotionFromInventory );
 
-	
-	// 일단(!) 그냥 없애고 본다.
+	// The item stays until the server confirms the use.
 	//(*g_pInventory).RemoveItem( pItem->GetID() );
 
 	//----------------------------------------------------
-	// Inventory에서 item을 사용하는 걸 검증받기를 기다린다.
+	// Wait for the server to verify the use from the inventory.
 	//----------------------------------------------------
-	g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
+	g_pPlayer->SetItemCheckBuffer( pPotion, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
 #endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包

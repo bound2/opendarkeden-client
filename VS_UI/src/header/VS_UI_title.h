@@ -235,7 +235,7 @@ struct S_SLOT_DATA
 	int									GRADE;
 	int									GRADE_EXP_REMAIN;
 
-	Race								Race;
+	enum Race						Race;		// "enum": GCC rejects a member hiding its own type's name (-Wchanges-meaning)
 	
 	int									ElementalFire;
 	int									ElementalWater;

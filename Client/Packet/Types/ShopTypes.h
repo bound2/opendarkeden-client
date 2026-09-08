@@ -32,9 +32,12 @@ const int SHOP_RACK_INDEX_MAX = 5*4; // width*height = 20
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 상점 런타임 버전 체크에 쓰이는 자료형
+// The shop's runtime version, checked against the server's. int32_t, as
+// the server spells it: it was `long`, and sizeof(long) is 8 on LP64, so a
+// Linux client sized GCShopBought four bytes larger than the server
+// (tests/wire-layout.txt caught it). The wire has always been four bytes.
 //////////////////////////////////////////////////////////////////////////////
-typedef long ShopVersion_t;
+typedef int32_t ShopVersion_t;
 const int szShopVersion = sizeof(ShopVersion_t);
 
 

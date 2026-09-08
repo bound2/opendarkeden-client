@@ -120,8 +120,7 @@ public:
 		m_Height	= 1;
 		m_Size		= (DWORD)scanline.size();
 
-		m_pData		= new BYTE[m_Size + sizeof(BYTE*) * m_Height];
-		m_pPixels	= (BYTE**)(m_pData + m_Size);
+		AllocateDataAndScanlineTable(m_Size, m_Height);
 
 		std::memcpy(m_pData, &scanline[0], m_Size);
 
