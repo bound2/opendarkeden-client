@@ -12,37 +12,26 @@
 #include <wtypes.h>
 #endif
 #include "Properties.h"
+#include "DataPath.h"
 #include <stdlib.h>			// atoi()
 #include <fstream>
 #include <iostream>
 
 //--------------------------------------------------------------------------------
-// Helper function to convert Windows path separators to Unix format
+// A property value that looks like a path - it holds a separator - goes
+// through Basic::NormalizeDataPath: the identity on Windows, and off
+// Windows the separator folding plus the case-insensitive component
+// resolution of basic/DataPath.h, since the data tables spell their
+// paths the Windows way (FileDef.inf: Data\Image\Etc.spk). A value with
+// no separator is left alone, so a plain word is never matched against
+// a file in the working directory. This used to fold backslashes only,
+// and only in the std::string overload of getProperty.
 //--------------------------------------------------------------------------------
-#ifdef PLATFORM_WINDOWS
-	/* On Windows, no conversion needed - inline function for efficiency */
-	static inline std::string ConvertPathSeparators(const std::string& path) {
-		return path;  // Return unchanged on Windows
-	}
-#else
-	/* On Unix/macOS, convert \\ to / */
-	static inline std::string ConvertPathSeparators(const std::string& path) {
-		std::string result = path;
-		size_t pos = 0;
-		/* Replace all \\ with / */
-		while ((pos = result.find("\\\\", pos)) != std::string::npos) {
-			result.replace(pos, 2, "/");
-			pos += 1;  // Move past the replaced /
-		}
-		/* Also replace single \ with / (for edge cases) */
-		pos = 0;
-		while ((pos = result.find('\\', pos)) != std::string::npos) {
-			result.replace(pos, 1, "/");
-			pos += 1;  // Move past the replaced /
-		}
-		return result;
-	}
-#endif
+static inline std::string ConvertPathSeparators(const std::string& path) {
+	if (path.find('\\') == std::string::npos && path.find('/') == std::string::npos)
+		return path;
+	return Basic::NormalizeDataPath(path);
+}
 
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
@@ -92,8 +81,13 @@ void Properties::load ()
 	if ( m_Filename.empty() )
 		throw Error("filename not specified");
 		
-	std::ifstream ifile( m_Filename.c_str() , std::ios::in );
-	
+	// The filename is the game's spelling of it (Data/Info/FileDef.inf, with
+	// backslashes, is the first one loaded); resolved for the disk by the
+	// helper above.
+	const std::string sResolved = ConvertPathSeparators( m_Filename );
+
+	std::ifstream ifile( sResolved.c_str() , std::ios::in );
+
 	if ( ! ifile )
 		throw FileNotExistException( m_Filename.c_str() );
 

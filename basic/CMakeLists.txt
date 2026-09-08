@@ -41,6 +41,11 @@ set(BASIC_SOURCES
 	# callers being migrated off _findfirst are in the executable, and
 	# basic is the one library every target already links.
 	DirectoryListing.cpp
+	# The game's Windows-spelled data paths resolved to the disk - separators
+	# folded, components matched case-insensitively - for the port (area F of
+	# docs/linux-macos-port-assessment-2026-09-07.md). Here because the open
+	# sites are in the executable, VS_UI and packetwire alike.
+	DataPath.cpp
 	DisplaySettings.cpp
 	# The file dialog's list building (docs/RESTRUCTURING.md task 3.1,
 	# "moved, then fixed"). Its caller is

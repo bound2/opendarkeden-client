@@ -6,6 +6,7 @@
 // Include files
 //-----------------------------------------------------------------------------
 #include "Client_PCH.h"
+#include "DataPath.h"
 
 #ifdef PLATFORM_WINDOWS
 // <MMSystem.h> not included: this file only uses timeGetTime()/GetTickCount(),
@@ -4449,19 +4450,11 @@ FileOpenBinary(const char* filename, std::ifstream& file)
 		file.close();
 	}
 
-	// Convert path separators to match platform
-	std::string convertedPath(filename);
-#ifndef PLATFORM_WINDOWS
-	for (size_t i = 0; i < convertedPath.length(); i++)
-	{
-		if (convertedPath[i] == '\\')
-		{
-			convertedPath[i] = '/';
-		}
-	}
-#else
-	// On Windows, keep backslashes as-is
-#endif // PLATFORM_WINDOWS
+	// The game's spelling of the path resolved to the disk's (basic/DataPath.h):
+	// the identity on Windows; off Windows the separators folded and each
+	// component matched case-insensitively, since the data tree's case does
+	// not always match the tables. This used to fold the separators alone.
+	const std::string convertedPath = Basic::NormalizeDataPath(filename);
 	file.open(convertedPath.c_str(), ios::binary);
 
 	if (!file.is_open())
