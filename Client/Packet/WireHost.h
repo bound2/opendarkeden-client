@@ -25,7 +25,11 @@
 
 #include "Types.h"
 #include "Types/ZoneTypes.h"
+#include "Types/SystemTypes.h"
+#include "RaceType.h"
+#include "WhisperMessage.h"
 
+#include <list>
 #include <string>
 
 class Player;
@@ -102,6 +106,44 @@ struct WireHost {
 	bool		(*HasOtherRequest)(const std::string& name);
 	bool		(*RemoveOtherRequest)(const std::string& name);
 
+	//------------------------------------------------------------------
+	// The last holdout (task 5.1's fifth slice):
+	// RequestClientPlayerManager, which opens the peer connections and
+	// decides what the first packet on each one says. That first packet
+	// names the character the client is logged in as, and the whisper
+	// variant carries the messages typed at the peer while the
+	// connection was still being made - both live in the executable.
+	//------------------------------------------------------------------
+
+	// The character the client is logged in as: what a CRConnect and a
+	// CRWhisper announce to the peer. With no host there is no
+	// character: an empty name, world 0 (UserInformation's own
+	// constructor value) and RACE_MAX, which is "no race" rather than
+	// the slayer that a zero would silently claim.
+	std::string	(*CharacterName)();
+	WorldID_t	(*CharacterWorldID)();
+	Race		(*CharacterRace)();
+
+	// The whisper queue, which stays executable-side: it is fed by the
+	// chat input and drained into the chat history. The manager asks
+	// whether anything waits for a peer, takes the list to put on the
+	// wire, and drops it once sent. The list stays owned by the queue;
+	// NULL means nothing waits. When a connection could not be made,
+	// TryToSendWhisperMessage counts the failed attempt against what
+	// the queue holds for that peer - after the third, the queue sends
+	// it through the game server instead.
+	bool		(*HasWhisperMessage)(const std::string& name);
+	const std::list<WHISPER_MESSAGE>*	(*GetWhisperMessages)(const std::string& name);
+	bool		(*RemoveWhisperMessage)(const std::string& name);
+	void		(*TryToSendWhisperMessage)(const std::string& name);
+
+	// The two other managers a failed connection is reported to: the
+	// address book of peers whose IP the client asked the server for
+	// (RequestUserManager::RemoveRequestUserLater) and the profile
+	// requests waiting on a peer (ProfileManager::RemoveRequire).
+	void		(*RemoveRequestUserLater)(const std::string& name);
+	void		(*RemoveProfileRequire)(const std::string& name);
+
 };
 
 //----------------------------------------------------------------------
@@ -169,6 +211,22 @@ public :
 	static bool	RemoveMyRequest ( const std::string & name );
 	static bool	HasOtherRequest ( const std::string & name );
 	static bool	RemoveOtherRequest ( const std::string & name );
+
+	// The logged-in character, and the whisper queue and the two
+	// managers a failed peer connection is reported to (the last
+	// holdout's seams). Nothrow like the six above them is NOT claimed:
+	// the queue and the managers lock and allocate.
+	static std::string	CharacterName ();
+	static WorldID_t	CharacterWorldID ();
+	static Race		CharacterRace ();
+
+	static bool	HasWhisperMessage ( const std::string & name );
+	static const std::list<WHISPER_MESSAGE> *	GetWhisperMessages ( const std::string & name );
+	static bool	RemoveWhisperMessage ( const std::string & name );
+	static void	TryToSendWhisperMessage ( const std::string & name );
+
+	static void	RemoveRequestUserLater ( const std::string & name );
+	static void	RemoveProfileRequire ( const std::string & name );
 
 private :
 

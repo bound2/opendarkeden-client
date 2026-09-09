@@ -2,19 +2,16 @@
 // RequestClientPlayerManager.cpp
 //--------------------------------------------------------------------------------
 
-//#include "RequestServerPlayerManager.h"
 #include "Client_PCH.h"
 #include "RequestClientPlayerManager.h"
-#include "WhisperManager.h"
 #include "WireHost.h"
-#include "MPlayer.h"
-#include "UserInformation.h"
-#include "MGameStringTable.h"
-#include "RequestUserManager.h"
-#include "ProfileManager.h"
 #include "DebugLog.h"
-#include "ServerInfo.h"
-#include "ClientDef.h"
+
+// What this file used to reach past the wire layer for - the logged-in
+// character (its name, world and race), the whisper queue, and the two
+// managers a failed connection is reported to - is behind WireHost now
+// (docs/RESTRUCTURING.md task 5.1, fifth slice). The in-game test was
+// already there.
 
 // Platform-specific threading includes. Off Windows the Win32 thread
 // names this file uses (TerminateThread, GetExitCodeThread,
@@ -32,11 +29,6 @@
 #include "Rpackets/CRConnect.h"
 #include "Rpackets/CRWhisper.h"
 #include "Rpackets/CRRequest.h"
-
-#if defined(_DEBUG) && defined(OUTPUT_DEBUG)
-	extern CMessageArray*		g_pGameMessage;
-#endif
-
 
 //--------------------------------------------------------------------------------
 // Global
@@ -183,16 +175,11 @@ RequestClientPlayerManager::Connect(const char* pIP, const char* pRequestName, R
 		return;
 	}
 
+	// Every peer listens on the same port. Upstream left a lookup of
+	// the per-user port commented out here; it was never live.
 	int port = 9650;
-	
-	//RequestUserInfo* pUserInfo = g_pRequestUserManager->GetUserInfo(pRequestName);
 
-	//if (pUserInfo!=NULL && pUserInfo->TCPPort!=0)
-	{
-	//	port = pUserInfo->TCPPort;
-	}
-
-	// 일단 하나 생성해서 thread로 넘겨준다.
+	// Build one and hand it to the thread.
 	CONNECTION_INFO* pInfo = new CONNECTION_INFO;
 	pInfo->name			= pRequestName;
 	pInfo->ip			= pIP;
@@ -347,22 +334,18 @@ RequestClientPlayerManager::AddRequestClientPlayer(RequestClientPlayer* pRequest
 
 	std::string serverName = pRequestClientPlayer->getRequestServerName();
 
-	if (g_Mode==MODE_GAME)
-	{		
-		// 넘 많을 경우는 더 이상 접속을 안하도록 해야한다.
+	if (Wire::InGameMode())
+	{
+		// Too many connections should refuse further ones; the test
+		// is commented out upstream and Connect() enforces the limit.
 		//if (m_mapRequestClientPlayer.size() < Wire::MaxRequestService())
 		{
 			//------------------------------------------------------------
-			// 일단 list에 넣어둔다.
+			// Put it in the list.
 			//------------------------------------------------------------
 			m_mapRequestClientPlayer[pRequestClientPlayer->getRequestServerName()] = pRequestClientPlayer;
 
 			pRequestClientPlayer->setPlayerStatus( CPS_REQUEST_CLIENT_BEGIN_SESSION );
-
-			#if defined(_DEBUG) && defined(OUTPUT_DEBUG)
-				if (g_pGameMessage!=NULL)
-					g_pGameMessage->AddFormat("Connected To %s", pRequestClientPlayer->getRequestServerName().c_str());
-			#endif
 
 			bAdd = true;
 		}
@@ -446,18 +429,18 @@ RequestClientPlayerManager::RemoveConnectionInfo(const char* pName)
 //--------------------------------------------------------------------------------
 // Process Mode
 //--------------------------------------------------------------------------------
-// RequestMode에 따른 특별한 처리
+// What the request mode asks for: the first packet on the connection.
 //--------------------------------------------------------------------------------
 void
 RequestClientPlayerManager::ProcessMode(RequestClientPlayer* pRequestClientPlayer)
 {
 	//------------------------------------------------------------
-	// 최초의 접속요구 패킷
+	// The first request packet
 	//------------------------------------------------------------
 	switch (pRequestClientPlayer->getRequestMode())
 	{
 		//------------------------------------------------------------
-		// 계속 접속유지 시켜서 뭔가 할떄..
+		// Keep the connection open for whatever follows.
 		//------------------------------------------------------------
 		case REQUEST_CLIENT_MODE_NULL :
 		{
@@ -465,10 +448,10 @@ RequestClientPlayerManager::ProcessMode(RequestClientPlayer* pRequestClientPlaye
 			{
 				CRConnect _CRConnect;
 				_CRConnect.setRequestServerName( pRequestClientPlayer->getRequestServerName().c_str() );
-				_CRConnect.setRequestClientName( g_pUserInformation->CharacterID.GetString() );
+				_CRConnect.setRequestClientName( Wire::CharacterName().c_str() );
 
-				// 접속 체크 설정
-				pRequestClientPlayer->setPlayerStatus( CPS_REQUEST_CLIENT_AFTER_SENDING_CONNECT );			
+				// Wait for the connect to be acknowledged.
+				pRequestClientPlayer->setPlayerStatus( CPS_REQUEST_CLIENT_AFTER_SENDING_CONNECT );
 
 				pRequestClientPlayer->sendPacket( &_CRConnect );
 			}
@@ -476,42 +459,34 @@ RequestClientPlayerManager::ProcessMode(RequestClientPlayer* pRequestClientPlaye
 		break;
 
 		//------------------------------------------------------------
-		// 귓속말 보낼 때..
+		// Sending a whisper.
 		//------------------------------------------------------------
 		case REQUEST_CLIENT_MODE_WHISPER :
 		{
 			if (pRequestClientPlayer->getPlayerStatus()==CPS_REQUEST_CLIENT_BEGIN_SESSION)
 			{
-				const char* pRequestServerName = pRequestClientPlayer->getRequestServerName().c_str();
+				const std::string& requestServerName = pRequestClientPlayer->getRequestServerName();
 
-				// 귓속말 체크.. 
-				if (g_pWhisperManager->HasWhisperMessage( pRequestServerName ))
+				// Anything waiting for this peer?
+				if (Wire::HasWhisperMessage( requestServerName ))
 				{
-					const std::list<WHISPER_MESSAGE>* pMessageList = g_pWhisperManager->GetWhisperMessages( pRequestServerName );
+					const std::list<WHISPER_MESSAGE>* pMessageList = Wire::GetWhisperMessages( requestServerName );
 
 					if (pMessageList)
 					{
-						// CRWhisper만들어서 packet보내기
+						// Build the CRWhisper and send it.
 						CRWhisper _CRWhisper;
 
-						_CRWhisper.setName( g_pUserInformation->CharacterID.GetString() );
-						_CRWhisper.setTargetName( pRequestServerName );
-						
-//						if (g_pPlayer->IsSlayer())
-//						{
-//							_CRWhisper.setSlayer();
-//						}
-//						else
-//						{
-//							_CRWhisper.setVampire();
-//						}
-						_CRWhisper.setRace(g_pPlayer->GetRace());
+						_CRWhisper.setName( Wire::CharacterName() );
+						_CRWhisper.setTargetName( requestServerName );
 
-						_CRWhisper.setWorldID(g_pUserInformation->WorldID);
+						_CRWhisper.setRace( Wire::CharacterRace() );
+
+						_CRWhisper.setWorldID( Wire::CharacterWorldID() );
 
 						std::list<WHISPER_MESSAGE>::const_iterator iMessage = pMessageList->begin();
 
-						// 모든 message 추가
+						// Every message
 						while (iMessage != pMessageList->end())
 						{
 							_CRWhisper.addMessage ( *iMessage );
@@ -524,8 +499,8 @@ RequestClientPlayerManager::ProcessMode(RequestClientPlayer* pRequestClientPlaye
 						pRequestClientPlayer->setPlayerStatus( CPS_REQUEST_CLIENT_NORMAL );
 					}
 
-					g_pWhisperManager->RemoveWhisperMessage( pRequestServerName );
-				}					
+					Wire::RemoveWhisperMessage( requestServerName );
+				}
 			}
 		}
 		break;
@@ -595,13 +570,9 @@ RequestClientPlayerManager::Update()
 
 					DEBUG_ADD_ERR( t.toString().c_str() );
 
-					// 나한테서도 짜른다.
-					//if (g_pRequestServerPlayerManager!=NULL)
-					{
-					//	g_pRequestServerPlayerManager->Disconnect( pPlayer->getRequestServerName().c_str() );
-					}
-
-					// exception이 나면 무조건 잘라버린다. --;
+					// Any exception drops the connection. (Upstream
+					// also meant to drop the peer's connection to us
+					// here, and left that commented out.)
 					pPlayer->disconnect(UNDISCONNECTED);
 					delete pPlayer;
 
@@ -681,36 +652,37 @@ RequestConnectionThreadProc(LPVOID lpParameter)
 			}
 
 			//------------------------------------------------------
-			// request mode에 따라서 접속이 안된 경우에 처리..
+			// What a failed connection means depends on why it was
+			// wanted.
 			//------------------------------------------------------
 			switch (pInfo->requestMode)
 			{
 				//------------------------------------------------------
-				// 귓속말 보낼려고 했는데 접속이 안 된 경우
+				// A whisper that could not be delivered directly.
 				//------------------------------------------------------
 				case REQUEST_CLIENT_MODE_WHISPER :
 
 					SetThreadPriority(hConnectionThread, THREAD_PRIORITY_NORMAL);
 
-					// 이렇게 하면..
-					// 서버에 다시 한번 IP를 요청해서 귓속말을 보내든지 말든지.. 그케 된다.
-//					UI_AddChatToHistory( (*g_pGameStringTable)[STRING_MESSAGE_WHISPER_FAILED].GetString(), NULL, 5 );
-					g_pRequestUserManager->RemoveRequestUserLater( pInfo->name.c_str() );
-//					g_pWhisperManager->RemoveWhisperMessage( pInfo->name.c_str() );
-					g_pWhisperManager->TryToSendWhisperMessage( pInfo->name.c_str() );					
+					// Forget the peer's address so the next whisper
+					// asks the server for it again, and count the
+					// attempt against the queued messages - the queue
+					// falls back to the game server after the third.
+					Wire::RemoveRequestUserLater( pInfo->name );
+					Wire::TryToSendWhisperMessage( pInfo->name );
 
 					SetThreadPriority(hConnectionThread, THREAD_PRIORITY_LOWEST);
 				break;
 
 				//------------------------------------------------------
-				// profile을 요청할려고 했는데 접속이 안 된 경우
+				// A profile that could not be fetched.
 				//------------------------------------------------------
 				case REQUEST_CLIENT_MODE_PROFILE :
-					g_pProfileManager->RemoveRequire(pInfo->name.c_str());
+					Wire::RemoveProfileRequire( pInfo->name );
 				break;
 			}
 
-			// CONNECTION_INFO 제거
+			// Drop the CONNECTION_INFO
 			g_pRequestClientPlayerManager->RemoveConnectionInfo(pInfo->name.c_str());
 		}
 	}

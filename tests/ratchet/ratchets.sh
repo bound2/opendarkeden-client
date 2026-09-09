@@ -140,7 +140,14 @@ check () {
 # g_pGameMessage use in all four files is inside
 # `#if defined(_DEBUG) && defined(OUTPUT_DEBUG)`, and nothing defines
 # OUTPUT_DEBUG.
-R1_BASELINE=489
+#
+# 488: 489 - 1. Task 5.1's fifth slice took the last holdout,
+# RequestClientPlayerManager.cpp, and Client/Packet is wire-only
+# (tests/arch/packetwire_holdouts.txt lists nothing). Its seams - the
+# logged-in character's name, world and race, the four whisper-queue
+# calls and the two failure notifications - are nine WireHost entries;
+# the Ninja baseline moves with it (486 -> 485).
+R1_BASELINE=488
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -177,7 +184,7 @@ elif [ -n "$BUILD_DIR" ] && [ -f "$BUILD_DIR/build.ninja" ]; then
 	# this branch existed the ratchet SKIPPED on every non-MSVC tree,
 	# which the port assessment listed as fail-open (area A). build.ninja
 	# is rewritten on every configure, so its mtime is the configure time.
-	R1_NINJA_BASELINE=486
+	R1_NINJA_BASELINE=485
 	R1_NINJA="$BUILD_DIR/build.ninja"
 	if [ CMakeLists.txt -nt "$R1_NINJA" ] || [ tests/arch/packetwire_files.txt -nt "$R1_NINJA" ]; then
 		echo "FAIL R1: $BUILD_DIR was configured before CMakeLists.txt or the packetwire membership file last changed - reconfigure that tree first"

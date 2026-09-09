@@ -3075,11 +3075,52 @@ static bool	WireHasOtherRequest(const std::string& name)
 static bool	WireRemoveOtherRequest(const std::string& name)
 		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->RemoveOtherRequest(name); }
 
+//-----------------------------------------------------------------------------
+// The last holdout's seams (task 5.1's fifth slice): the character the
+// client is logged in as, which RequestClientPlayerManager announces to a
+// peer, and the whisper queue and the two managers it reports a failed
+// connection to.
+//-----------------------------------------------------------------------------
+// The character is read the way ProcessMode read it - the login's
+// CharacterID and WorldID, and the race off the player object - but
+// guarded: with no login there is no name, and with no player there is no
+// race, which is what Wire answers with no host too. The three managers
+// are built in GameInitInfo and deleted at shutdown, like the file
+// manager above, and the same re-login window applies to them.
+//-----------------------------------------------------------------------------
+static std::string	WireCharacterName()
+{
+	if (g_pUserInformation==NULL || g_pUserInformation->CharacterID.GetString()==NULL)
+		return std::string();
+
+	return std::string(g_pUserInformation->CharacterID.GetString());
+}
+
+static WorldID_t	WireCharacterWorldID()	{ return g_pUserInformation!=NULL ? (WorldID_t)g_pUserInformation->WorldID : (WorldID_t)0; }
+static Race		WireCharacterRace()	{ return g_pPlayer!=NULL ? g_pPlayer->GetRace() : RACE_MAX; }
+
+static bool	WireHasWhisperMessage(const std::string& name)
+		{ return g_pWhisperManager!=NULL && g_pWhisperManager->HasWhisperMessage(name.c_str()); }
+static const std::list<WHISPER_MESSAGE>*	WireGetWhisperMessages(const std::string& name)
+		{ return g_pWhisperManager!=NULL ? g_pWhisperManager->GetWhisperMessages(name.c_str()) : NULL; }
+static bool	WireRemoveWhisperMessage(const std::string& name)
+		{ return g_pWhisperManager!=NULL && g_pWhisperManager->RemoveWhisperMessage(name.c_str()); }
+static void	WireTryToSendWhisperMessage(const std::string& name)
+		{ if (g_pWhisperManager!=NULL) g_pWhisperManager->TryToSendWhisperMessage(name.c_str()); }
+
+static void	WireRemoveRequestUserLater(const std::string& name)
+		{ if (g_pRequestUserManager!=NULL) g_pRequestUserManager->RemoveRequestUserLater(name.c_str()); }
+static void	WireRemoveProfileRequire(const std::string& name)
+		{ if (g_pProfileManager!=NULL) g_pProfileManager->RemoveRequire(name.c_str()); }
+
 static const WireHost	s_WireHost = { WireMaxProcessPacket, WireMaxRequestService, WireUDPPort, WireBugReportTarget,
 					WireEncryptZoneID, WireEncryptServerID, WireEncryptUsesEnglishSeed,
 					WireCurrentTime, WireInGameMode,
 					WireReceiveMyRequest, WireHasMyRequest, WireRemoveMyRequest,
-					WireSendOtherRequest, WireHasOtherRequest, WireRemoveOtherRequest };
+					WireSendOtherRequest, WireHasOtherRequest, WireRemoveOtherRequest,
+					WireCharacterName, WireCharacterWorldID, WireCharacterRace,
+					WireHasWhisperMessage, WireGetWhisperMessages, WireRemoveWhisperMessage, WireTryToSendWhisperMessage,
+					WireRemoveRequestUserLater, WireRemoveProfileRequire };
 
 //-----------------------------------------------------------------------------
 // Init GameObject

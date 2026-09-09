@@ -624,20 +624,67 @@ rounds settled* for the host rules). Test fixtures share
 
 ## Phase 5 — Long tail
 
-- [ ] **5.1 Split the debug facilities** so `DebugInfo.h`/`MinTr.h` stop
+- [x] **5.1 Split the debug facilities** so `DebugInfo.h`/`MinTr.h` stop
   gating `packetwire` membership. The task named `SocketAPI.cpp`,
   `DatagramSocket.cpp` and `NPCInfo.cpp`; the real list was
   `tests/arch/packetwire_holdouts.txt`, and the task became "take the
   holdouts in".
-  > **Status:** in progress — one holdout left,
-  > `RequestClientPlayerManager.cpp`, which reaches the whisper queue and
-  > the logged-in character (`g_pWhisperManager`, `g_pUserInformation`,
-  > `g_pPlayer`, `g_pProfileManager`, `g_pRequestUserManager`, `g_Mode`,
-  > `WHISPER_MESSAGE`), a bigger seam than a host of function pointers
-  > wants to be. The holdouts file lists what it reaches *with comments
-  > and dead `#ifdef` blocks removed first* — read that list, not the
-  > includes; two earlier entries were wrong because they were grepped.
-  > Done so far (PRs #63, #64, #74, #75): the logging facility
+  > **Status:** done (2026-09-09, fifth slice). **Every `.cpp` under
+  > `Client/Packet` is a `packetwire` member**; the holdouts file lists
+  > nothing and stays only because W0 reads it and the next holdout
+  > needs somewhere to be written down. The last one,
+  > `RequestClientPlayerManager.cpp`, reached the whisper queue and the
+  > logged-in character, and the earlier status called that "a bigger
+  > seam than a host of function pointers wants to be" — it is nine
+  > entries, three of them one-line accessors, and the alternative (a
+  > split, with `ProcessMode` executable-side) would have left the
+  > first-packet policy where no test reaches it while `Update` still
+  > called it, which is the stub pattern 5.3 retired. `WireHost` now
+  > also carries the character's name, world and race (a `CRConnect`
+  > and a `CRWhisper` announce them to the peer), the four whisper-queue
+  > calls (`HasWhisperMessage`, `GetWhisperMessages` — the queue's own
+  > list, read and then dropped — `RemoveWhisperMessage`,
+  > `TryToSendWhisperMessage`, which counts a failed attempt; the queue
+  > falls back to the game server after the third) and the two failure
+  > notifications (`RequestUserManager::RemoveRequestUserLater`,
+  > `ProfileManager::RemoveRequire`). Without a host there is no
+  > character: an empty name, world 0 and `RACE_MAX` — not
+  > `RACE_SLAYER`, which is what a zero would have read as. **Behaviour
+  > delta:** the old code read `CharacterID.GetString()` unguarded, and
+  > `MString` gives NULL for an empty string; the executable's accessor
+  > answers `""` for NULL and for no login, `CRConnect::write` refuses
+  > the empty name, and `Update` drops the connection as it drops any
+  > other failure — a test pins that nothing nameless reaches the wire.
+  > `test_request_client_manager.cpp` drives the map (add, refuse
+  > outside the game, find, send, disconnect, drop on a dead socket,
+  > refuse at the service limit) and `ProcessMode`'s three first
+  > packets over a player whose socket was never opened, reading the
+  > `CRConnect`/`CRWhisper`/`CRRequest` back out of the output ring;
+  > constructing the manager is the link proof (eleven LNK2019s with
+  > the file taken back out). Deleted rather than moved, because R4
+  > counts a `g_p*` name on a dead line: one `OUTPUT_DEBUG` block, the
+  > commented-out per-user port lookup in `Connect`, the commented-out
+  > peer-disconnect in `Update`'s catch and the commented-out chat line
+  > in the thread's failure path. **Known, not fixed:**
+  > `RemoveTerminatedThread` runs only after `Update`'s empty-map early
+  > return, so the handle of a connection thread that *failed* (the map
+  > stays empty) is closed only when some later connection succeeds or
+  > at `Release`; the thread's failure path calls
+  > `g_pRequestClientPlayerManager->RemoveConnectionInfo` unguarded
+  > where its success path tests the pointer; `Connect` tests
+  > `HasConnection`/`HasTryingConnection` under their own locks and
+  > records the attempt under a third, so a connection a worker thread
+  > adds in between is dialled twice; `ProcessMode`'s plain case moves
+  > the status to `AFTER_SENDING_CONNECT` before the send, so a refused
+  > send leaves a status the drop then discards (harmless);
+  > `RequestClientPlayer`'s destructor asserts `CPS_END_SESSION` and
+  > `Disconnect(name)` never sets it, so in a Debug build every
+  > `Disconnect` of a live peer throws `AssertionError` into the
+  > manager's catch and appends to `assertion_failed.log` — the test
+  > ends the session first and says why. The install order of the 24
+  > `s_WireHost` entries in `GameInit.cpp` is, as before, checked by
+  > reading, not by the suite.
+  > Done before that (PRs #63, #64, #74, #75): the logging facility
   > (`DebugLog.{h,cpp}`) lives in `basic/`, so every library may log and
   > the one object is no longer compiled into two libraries; `DebugInfo.h`
   > is one `#include "MinTr.h"` above two no-op macros and nothing in the
@@ -672,9 +719,12 @@ rounds settled* for the host rules). Test fixtures share
   > `Player::processCommand`, `processInput`, `processOutput`,
   > `sendPacket`, `disconnect` and `toString` dereference the socket or a
   > stream the default constructor leaves NULL.
-  - Owner: W0 over the holdouts file; `test_wire_host.cpp`,
-    `test_player_base.cpp`, and their address-taking link proofs
-    (non-virtual members — see *What the review rounds settled*).
+  - Owner: W0 over the (empty) holdouts file, so a new `Client/Packet`
+    source is a library member unless a line there says why not;
+    `test_wire_host.cpp`, `test_player_base.cpp` and their
+    address-taking link proofs (non-virtual members — see *What the
+    review rounds settled*); `test_request_client_manager.cpp`, which
+    constructs the last file's class.
 
 - [x] **5.2 Dead/duplicate source removal** (code-health priority 3).
   > **Status:** done for what the task named (PRs #49, #50, #52, #62).

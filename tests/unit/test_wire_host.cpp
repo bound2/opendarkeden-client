@@ -71,15 +71,41 @@ bool	HostSendOtherRequest(const std::string& n, RequestServerPlayer*)	{ Asked("S
 bool	HostHasOtherRequest(const std::string& n)			{ Asked("HasOther", n); return true; }
 bool	HostRemoveOtherRequest(const std::string& n)			{ Asked("RemoveOther", n); return true; }
 
+// The last holdout's seams: the logged-in character, and the whisper
+// queue and the two managers a failed peer connection is reported to.
+// The five name-taking entries record their names for the same reason
+// the six above do - three of them share a signature.
+std::string	s_CharacterName	= "Alice";
+WorldID_t	s_WorldID	= 0;
+Race		s_Race		= RACE_SLAYER;
+
+std::list<WHISPER_MESSAGE>	s_Whispers;
+
+std::string	HostCharacterName()	{ return s_CharacterName; }
+WorldID_t	HostCharacterWorldID()	{ return s_WorldID; }
+Race		HostCharacterRace()	{ return s_Race; }
+
+bool	HostHasWhisperMessage(const std::string& n)		{ Asked("HasWhisper", n); return true; }
+const std::list<WHISPER_MESSAGE>*	HostGetWhisperMessages(const std::string& n)
+								{ Asked("GetWhispers", n); return &s_Whispers; }
+bool	HostRemoveWhisperMessage(const std::string& n)		{ Asked("RemoveWhisper", n); return true; }
+void	HostTryToSendWhisperMessage(const std::string& n)	{ Asked("TryToSend", n); }
+void	HostRemoveRequestUserLater(const std::string& n)	{ Asked("RemoveUser", n); }
+void	HostRemoveProfileRequire(const std::string& n)		{ Asked("RemoveProfile", n); }
+
 const WireHost	s_Host = { HostMaxProcessPacket, HostMaxRequestService, HostUDPPort, HostBugReportTarget,
 				HostEncryptZoneID, HostEncryptServerID, HostEnglishSeed,
 				HostCurrentTime, HostInGameMode,
 				HostReceiveMyRequest, HostHasMyRequest, HostRemoveMyRequest,
-				HostSendOtherRequest, HostHasOtherRequest, HostRemoveOtherRequest };
+				HostSendOtherRequest, HostHasOtherRequest, HostRemoveOtherRequest,
+				HostCharacterName, HostCharacterWorldID, HostCharacterRace,
+				HostHasWhisperMessage, HostGetWhisperMessages, HostRemoveWhisperMessage, HostTryToSendWhisperMessage,
+				HostRemoveRequestUserLater, HostRemoveProfileRequire };
 
 // A host that answers nothing, which is not the same as no host.
 const WireHost	s_EmptyHost = { NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-				NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+				NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+				NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 
 // SendBugReport asks for a target only once it has decided the report
 // is worth sending, so the count is the observable half of a function
@@ -92,7 +118,10 @@ const WireHost	s_CountingHost = { HostMaxProcessPacket, HostMaxRequestService, H
 					HostEncryptZoneID, HostEncryptServerID, HostEnglishSeed,
 					HostCurrentTime, HostInGameMode,
 					HostReceiveMyRequest, HostHasMyRequest, HostRemoveMyRequest,
-					HostSendOtherRequest, HostHasOtherRequest, HostRemoveOtherRequest };
+					HostSendOtherRequest, HostHasOtherRequest, HostRemoveOtherRequest,
+					HostCharacterName, HostCharacterWorldID, HostCharacterRace,
+					HostHasWhisperMessage, HostGetWhisperMessages, HostRemoveWhisperMessage, HostTryToSendWhisperMessage,
+					HostRemoveRequestUserLater, HostRemoveProfileRequire };
 
 // Puts the library back the way every other test expects it.
 struct NoHost
@@ -458,4 +487,88 @@ TEST(WireHostSeam, TheRequestServiceObjectsAreInTheLibrary)
 	CHECK(pSend != NULL);
 	CHECK(pInit != NULL);
 	CHECK(pWait != NULL);
+}
+
+//----------------------------------------------------------------------
+// The last holdout's seams
+//----------------------------------------------------------------------
+TEST(WireHostSeam, WithNoHostThereIsNoCharacterAndNothingQueued)
+{
+	NoHost	restore;
+
+	Wire::SetHost(NULL);
+
+	// No character: an empty name, world 0 - UserInformation's own
+	// constructor value - and RACE_MAX, "no race". Not RACE_SLAYER,
+	// which is what a zero would have read as; a whisper written with
+	// it would have claimed a race the character does not have.
+	CHECK(Wire::CharacterName().empty());
+	CHECK_EQ(0, (int)Wire::CharacterWorldID());
+	CHECK_EQ((int)RACE_MAX, (int)Wire::CharacterRace());
+
+	// And an empty queue, answered the way the queue answers for a peer
+	// it holds nothing for.
+	CHECK_EQ(false, Wire::HasWhisperMessage("peer"));
+	CHECK(Wire::GetWhisperMessages("peer") == NULL);
+	CHECK_EQ(false, Wire::RemoveWhisperMessage("peer"));
+
+	// The three notifications have nobody to notify, and say so by
+	// returning.
+	Wire::TryToSendWhisperMessage("peer");
+	Wire::RemoveRequestUserLater("peer");
+	Wire::RemoveProfileRequire("peer");
+
+	// A host that answers nothing answers the same way, one entry at a
+	// time - see TheRequestSeamsAnswerConservativelyWithNoHost for why
+	// every entry is asked again here.
+	Wire::SetHost(&s_EmptyHost);
+	CHECK(Wire::CharacterName().empty());
+	CHECK_EQ(0, (int)Wire::CharacterWorldID());
+	CHECK_EQ((int)RACE_MAX, (int)Wire::CharacterRace());
+	CHECK_EQ(false, Wire::HasWhisperMessage("peer"));
+	CHECK(Wire::GetWhisperMessages("peer") == NULL);
+	CHECK_EQ(false, Wire::RemoveWhisperMessage("peer"));
+	Wire::TryToSendWhisperMessage("peer");
+	Wire::RemoveRequestUserLater("peer");
+	Wire::RemoveProfileRequire("peer");
+}
+
+TEST(WireHostSeam, AHostAnswersForTheCharacterAndIsAskedTheRightQueueCall)
+{
+	NoHost	restore;
+
+	s_CharacterName	= "Alice";
+	s_WorldID	= 3;
+	s_Race		= RACE_OUSTERS;
+	s_RequestAsked.clear();
+
+	Wire::SetHost(&s_Host);
+
+	CHECK(Wire::CharacterName() == "Alice");
+	CHECK_EQ(3, (int)Wire::CharacterWorldID());
+	CHECK_EQ((int)RACE_OUSTERS, (int)Wire::CharacterRace());
+
+	// Read each time: the character changes on every login, and the
+	// connection manager outlives the login.
+	s_CharacterName = "Bob";
+	CHECK(Wire::CharacterName() == "Bob");
+
+	// The list the queue hands over is the queue's own, not a copy -
+	// the manager reads it and then tells the queue to drop it.
+	CHECK(Wire::GetWhisperMessages("peer") == &s_Whispers);
+
+	// Which entry each forwarder reached. Three of the six share a
+	// signature, and the same caveat as the file-transfer six applies:
+	// this proves WireHost.cpp, not the initialiser in GameInit.cpp,
+	// which a test binary never links.
+	s_RequestAsked.clear();
+	Wire::HasWhisperMessage("a");
+	Wire::GetWhisperMessages("b");
+	Wire::RemoveWhisperMessage("c");
+	Wire::TryToSendWhisperMessage("d");
+	Wire::RemoveRequestUserLater("e");
+	Wire::RemoveProfileRequire("f");
+
+	CHECK(s_RequestAsked ==
+		"HasWhisper(a) GetWhispers(b) RemoveWhisper(c) TryToSend(d) RemoveUser(e) RemoveProfile(f) ");
 }

@@ -74,13 +74,16 @@ timed-item loaders it reads, and their string support, membership in
 `docs/RESTRUCTURING.md` tasks 4.1, 4.2, 4.3 and 4.4),
 `framelib`, `TextSystem`, `VS_UI`, and `packetwire` — the whole wire layer: the
 sockets (TCP and datagram), the socket streams, the `Player` base under all three
-player classes, the
+player classes, the three player classes and their connection managers, the
 encrypter, the info classes, every packet class in every direction and
 the factory/validator tables (`docs/RESTRUCTURING.md` tasks 1.1, 2.4 and 5.1;
 membership is `tests/arch/packetwire_files.txt`, read by CMake, the include checker
-and the ratchet script, and `tests/arch/packetwire_holdouts.txt` says what keeps
-the last one out — `RequestClientPlayerManager.cpp`, which reaches the
-whisper queue and the logged-in character). The logging facility (`DebugLog.h`) is in
+and the ratchet script). **Every `.cpp` under `Client/Packet` is a member**
+since 2026-09-09; `tests/arch/packetwire_holdouts.txt` is empty and is where
+the next exception, if one is ever needed, gets written down with what it
+*reaches*, not what it includes. What the wire layer needs from the program
+around it goes through `Client/Packet/WireHost.h`, 24 entries the executable
+installs in `GameInit.cpp`. The logging facility (`DebugLog.h`) is in
 `basic`, so every library may log; `Client/DebugInfo.h` is the executable's
 front end to it and pulls in `MinTr.h`, which is why the libraries may not
 include it. The checked formatter (`SafeFormat.h`, `docs/RESTRUCTURING.md`
@@ -161,8 +164,8 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **617 tests, 294,467 checks, 0 failed** in both Windows trees, and
-**617 tests, 294,466 checks, 0 failed** on Linux (GCC, Clang, and GCC with
+baseline: **628 tests, 294,554 checks, 0 failed** in both Windows trees, and
+**628 tests, 294,553 checks, 0 failed** on Linux (GCC, Clang, and GCC with
 `-DUSE_ASAN=ON -DUSE_UBSAN=ON`, where UBSan reports nothing) and on macOS
 (Apple Clang, with and without ASan and UBSan); the one-check
 difference is a platform-conditional test, not a failure. The Linux
