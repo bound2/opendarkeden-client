@@ -467,3 +467,32 @@ TEST(RequestClientManager, WithNoCharacterTheConnectPacketIsRefusedNotSentNamele
 	CHECK_EQ(true, refused);
 	CHECK_EQ((size_t)0, bob.p->Sent().size());
 }
+
+//----------------------------------------------------------------------
+// The packet the whisper branch builds
+//----------------------------------------------------------------------
+TEST(CRWhisperRace, TheThreePredicatesNameTheThreeRaces)
+{
+	// Found while reading the packet this file reads back: isSlayer()
+	// compared the race against RACE_VAMPIRE, so a vampire's whisper
+	// answered both isVampire() and isSlayer() and a slayer's answered
+	// neither. Nothing calls the predicates - CRWhisperHandler reads
+	// getRace() - which is why it survived; it is fixed because a
+	// predicate that lies is worse than one nobody calls yet.
+	CRWhisper	whisper;
+
+	whisper.setRace(RACE_SLAYER);
+	CHECK_EQ(true, whisper.isSlayer());
+	CHECK_EQ(false, whisper.isVampire());
+	CHECK_EQ(false, whisper.isOusters());
+
+	whisper.setRace(RACE_VAMPIRE);
+	CHECK_EQ(false, whisper.isSlayer());
+	CHECK_EQ(true, whisper.isVampire());
+	CHECK_EQ(false, whisper.isOusters());
+
+	whisper.setRace(RACE_OUSTERS);
+	CHECK_EQ(false, whisper.isSlayer());
+	CHECK_EQ(false, whisper.isVampire());
+	CHECK_EQ(true, whisper.isOusters());
+}
