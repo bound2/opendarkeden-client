@@ -370,12 +370,15 @@ R4_BASELINE=21
 
 lib_members () {
 	# The directory trees minus the files CMake excludes from the
-	# library builds (VS_UI/WinMain.cpp under WIN32; the hangul Ci/FL2
-	# pair under USE_SDL_BACKEND, which is forced ON) - the original
-	# raw find counted two never-compiled g_p-referencing files (WinMain, Ci) as library debt; FL2 is excluded for consistency though it references none.
+	# library builds (the hangul Ci/FL2 pair under USE_SDL_BACKEND,
+	# which is forced ON) - the original raw find counted two
+	# never-compiled g_p-referencing files (WinMain, Ci) as library
+	# debt; FL2 is excluded for consistency though it references none.
+	# VS_UI/WinMain.cpp was excluded here by name until task 5.2's sixth
+	# slice deleted it (2026-09-09); the number did not move.
 	find basic Client/SpriteLib Client/DXLib Client/framelib Client/TextSystem VS_UI \
 		-name '*.cpp' 2>/dev/null \
-		| grep -vE 'VS_UI/WinMain\.cpp$|VS_UI/src/hangul/(Ci|FL2)\.cpp$'
+		| grep -vE 'VS_UI/src/hangul/(Ci|FL2)\.cpp$'
 	sed -e 's/#.*//' tests/arch/packetwire_files.txt \
 		| grep -oE 'Client/Packet/[A-Za-z0-9_/]+\.cpp'
 	sed -e 's/#.*//' tests/arch/gamemodel_files.txt \

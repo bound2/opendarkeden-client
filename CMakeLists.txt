@@ -519,7 +519,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# Exclude Windows-specific files
 	if(NOT WIN32)
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX ".*Imm.*")
-		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX ".*WinMain.*")
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX ".*WebBrowser.*")
 		# U_edit is now cross-platform (SDL-based), so don't exclude it
 		# Exclude problematic files in VS_UI root directory
@@ -537,19 +536,12 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/hangul/FL2\\.cpp")
 	endif()
 
-	# Exclude VS_UI/WinMain.cpp on WIN32 too (already excluded above for NOT WIN32).
-	# It defines its own WinMain/InitApp/WindowProc/g_hWnd/g_GameRect/UI_ResultReceiver
-	# etc., which duplicate symbols already defined by Client/Client.cpp and
-	# Client/GameUI.cpp - the actual, functionally complete entry point (it alone
-	# calls InitGame()/g_pTopView->Init()/g_pUpdate, which Client/SDLMain.cpp's own
-	# header comment confirms it was ported from: "Based on WinMain from Client.cpp").
-	# VS_UI/WinMain.cpp never calls InitGame() at all - it only drives the VS_UI
-	# widget system (gC_vs_ui.Process()/Show()), so even where it happened to link
-	# it would never start the actual game. See
-	# 참고자료/커밋로그/2026-08-21_VS_UI_WinMain_cpp_죽은_진입점_제외.md.
-	if(WIN32)
-		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/WinMain\\.cpp")
-	endif()
+	# VS_UI/WinMain.cpp - a second, never-linked WinMain that drove the
+	# widget system without ever calling InitGame() - was excluded here on
+	# both platforms until docs/RESTRUCTURING.md task 5.2's sixth slice
+	# deleted it (2026-09-09), together with Client/OtherClass/, two
+	# request-side packet factory managers no target compiled and no file
+	# referenced. History keeps both.
 
 	# VS_UI builds from its own sources only. It used to add a list of
 	# Client/*.cpp files (VS_UI_CLIENT_SOURCES) that the executable's glob
@@ -627,9 +619,9 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	)
 
 	# No SDL2main here on any platform. On Windows it would collide with
-	# Client/Client.cpp's own WinAPI WinMain (VS_UI/WinMain.cpp, which
-	# used to duplicate this reasoning, is excluded by the WIN32 filter
-	# above); on Linux and macOS <SDL_main.h> leaves main() alone, so the
+	# Client/Client.cpp's own WinAPI WinMain (the deleted VS_UI/WinMain.cpp
+	# used to duplicate this reasoning); on Linux and macOS <SDL_main.h>
+	# leaves main() alone, so the
 	# library is empty there and the target is one a package may not
 	# even export (Homebrew's config creates it only when libSDL2main.a
 	# is present). The DarkEden target has the same note.

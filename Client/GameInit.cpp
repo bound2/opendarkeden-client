@@ -764,8 +764,9 @@ InitSurface()
 	// Get_ColorkeyColor()) already has no live callers in the current
 	// build (rectangle() has a local SDL-era replacement in
 	// RenderingFunctions.cpp; Convert24RGBto16()'s only
-	// caller, VS_UI/WinMain.cpp, is excluded on Windows), so this call is
-	// safe to drop rather than needing a stub function to keep around.
+	// caller was VS_UI/WinMain.cpp, which no target compiled and which is
+	// deleted), so this call is safe to drop rather than needing a stub
+	// function to keep around.
 
 	DEBUG_ADD("[ InitGame ]  Surface - Initialize Font");
 	DEBUG_ADD("[ InitGame ]  Surface - UI");

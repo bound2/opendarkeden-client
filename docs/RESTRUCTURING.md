@@ -723,15 +723,27 @@ rounds settled* for the host rules). Test fixtures share
   > its 171 function definitions was the only one. The client has always
   > loaded `Item.inf` and `SkillInfo.inf`; git history keeps the data.
   > Closes the review's Medium dead-code finding.
-  > **Candidates for a next slice:** `VS_UI/WinMain.cpp` is in no target
-  > at all; `CMakeLists.txt` has two `list(FILTER ...)` patterns anchored
-  > `^Client/` that the glob's absolute paths can never match (documented
-  > in place as dead); `MSkillDomain::SaveToFile`/`LoadFromFile` have no
-  > caller; the ~186 `__GAME_SERVER__`/`__GAME_CLIENT__` conditionals in
-  > the packet sources (2.4); `#ifndef __GAME_CLIENT__` residue outside
-  > `Client/Packet` — `RankBonusTable.cpp` (a save path), `MSectorInfo.h`
-  > (portal fields), `Updater/Update.cpp` and the two unbuilt
-  > `OtherClass/Request*PacketFactoryManager.cpp` files.
+  > **Sixth slice (2026-09-09):** deleted `VS_UI/WinMain.cpp` (3,799
+  > lines; a second `WinMain` that drove the widget system without ever
+  > calling `InitGame()`, excluded from every configuration by two
+  > `list(FILTER)` rules that went with it, and named by the ratchet
+  > script's R4 member list, which no longer needs to) and the four
+  > files of `Client/OtherClass/` (two request-side packet factory
+  > managers, 1,700 lines, in no glob and referenced by nothing; the
+  > R12 conformance slice had cleaned 32 exception specifications in
+  > files that were never compiled). R1 and R4 unchanged, because
+  > neither was ever built - the build is the owner, as before. The two
+  > `^Client/`-anchored filters the earlier list named were already
+  > gone.
+  > **Candidates for a next slice:** the ~186 `__GAME_SERVER__`/
+  > `__GAME_CLIENT__` conditionals in the packet sources (2.4), which
+  > the include checker evaluates as dead; `#ifndef __GAME_CLIENT__`
+  > residue outside `Client/Packet` — `RankBonusTable.cpp` (a save
+  > path), `MSectorInfo.h` (portal fields), `Updater/Update.cpp`;
+  > `MSkillDomain::SaveToFile`/`LoadFromFile`, which have no caller but
+  > are reached through `CTypeTable`'s file I/O template, so deleting
+  > them is a template question first. (The peer-to-peer whisper path
+  > this list once named is the seventh slice below.)
   > **Seventh slice (2026-09-09, on PR #144, at the user's request):**
   > the peer-to-peer whisper path, which upstream compiled out (`0 &&`
   > around every writer of `WhisperManager`'s queue and every
