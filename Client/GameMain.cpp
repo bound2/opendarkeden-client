@@ -64,10 +64,7 @@ extern "C" void spritectl_window_to_game_coords(int* x, int* y);
 #include "MZoneSoundManager.h"
 #include "SoundDef.h"
 #include "RequestServerPlayerManager.h"
-#include "RequestClientPlayerManager.h"
 #include "ClientCommunicationManager.h"
-#include "RequestUserManager.h"
-#include "RequestFileManager.h"
 #include "MJusticeAttackManager.h"
 #include "WavePackFileManager.h"
 #include "PCConfigTable.h"
@@ -312,19 +309,6 @@ UpdateSocketInput()
 			DEBUG_ADD( "RequestUpdate" );
 		#endif
 
-		if (g_pRequestUserManager!=NULL)
-		{
-			#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-				DEBUG_ADD( "RUM" );
-			#endif
-
-			g_pRequestUserManager->Update();
-
-			#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-				DEBUG_ADD( "RUM ok" );
-			#endif
-		}
-
 		if (g_pRequestServerPlayerManager!=NULL)
 		{
 			//int numRequest = g_pRequestServerPlayerManager->GetSize();
@@ -336,19 +320,6 @@ UpdateSocketInput()
 
 			#ifdef OUTPUT_DEBUG_UPDATE_LOOP
 				DEBUG_ADD( "RSPM ok" );
-			#endif
-		}
-
-		if (g_pRequestClientPlayerManager!=NULL)
-		{
-			#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-				DEBUG_ADD( "RCPM" );
-			#endif
-
-			g_pRequestClientPlayerManager->Update();
-
-			#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-				DEBUG_ADD( "RCPM ok" );
 			#endif
 		}
 
@@ -365,31 +336,6 @@ UpdateSocketInput()
 			#endif
 		}
 
-		if (g_pRequestFileManager!=NULL)
-		{
-			#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-				DEBUG_ADD( "RFM" );
-			#endif
-
-			g_pRequestFileManager->Update();
-
-			#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-				DEBUG_ADD( "RFM ok" );
-			#endif
-		}
-
-		if (g_pProfileManager!=NULL)
-		{
-			#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-				DEBUG_ADD( "PfM" );
-			#endif
-
-			g_pProfileManager->Update();
-
-			#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-				DEBUG_ADD( "PfM ok" );
-			#endif
-		}
 
 		// 초당 3번 update한다.
 		nextTime = g_CurrentTime + 330;

@@ -313,10 +313,7 @@
 #include "Rpackets/CRRequest.h"
 #include "Rpackets/CRWhisper.h"
 #include "Rpackets/RCCharacterInfo.h"
-#include "Rpackets/RCConnectVerify.h"
 #include "Rpackets/RCPositionInfo.h"
-#include "Rpackets/RCRequestVerify.h"
-#include "Rpackets/RCRequestedFile.h"
 #include "Rpackets/RCSay.h"
 #include "Rpackets/RCStatusHP.h"
 #include "Upackets/CURequestLoginMode.h"
@@ -616,9 +613,6 @@ void registerClientPacketHandlers()
 	DE_REGISTER_PACKET_HANDLER(LCVersionCheckError);
 	DE_REGISTER_PACKET_HANDLER(LCVersionCheckOK);
 	DE_REGISTER_PACKET_HANDLER(LCWorldList);
-	DE_REGISTER_PACKET_HANDLER(RCConnectVerify);
-	DE_REGISTER_PACKET_HANDLER(RCRequestVerify);
-	DE_REGISTER_PACKET_HANDLER(RCRequestedFile);
 	DE_REGISTER_PACKET_HANDLER(UCRequestLoginMode);
 
 	//------------------------------------------------------------------

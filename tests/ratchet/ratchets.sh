@@ -153,7 +153,17 @@ check () {
 # compiled out (`0 &&` around every writer of its queue): whispers go
 # to the game server as CGWhisper from UIMessageManager, and the seven
 # WireHost entries that served the path went too. Ninja 485 -> 484.
-R1_BASELINE=487
+#
+# 484: 487 - 3. The eighth slice deleted the rest of the outbound peer
+# side - this client dialling other clients - which upstream had also
+# compiled out: RequestClientPlayer and its manager (packetwire, so not
+# in this count), the three RC handlers that took that player (the
+# three TUs here), the receive half of RequestFileManager, the dialling
+# half of ProfileManager and the requesting half of RequestUserManager.
+# The inbound side (RequestServerPlayer, its manager, the file sender)
+# and the UDP party datagrams stay. Ninja 484 -> 481 by the same
+# arithmetic (no Ninja tree here; the Linux CI reads it).
+R1_BASELINE=484
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -190,7 +200,7 @@ elif [ -n "$BUILD_DIR" ] && [ -f "$BUILD_DIR/build.ninja" ]; then
 	# this branch existed the ratchet SKIPPED on every non-MSVC tree,
 	# which the port assessment listed as fail-open (area A). build.ninja
 	# is rewritten on every configure, so its mtime is the configure time.
-	R1_NINJA_BASELINE=484
+	R1_NINJA_BASELINE=481
 	R1_NINJA="$BUILD_DIR/build.ninja"
 	if [ CMakeLists.txt -nt "$R1_NINJA" ] || [ tests/arch/packetwire_files.txt -nt "$R1_NINJA" ]; then
 		echo "FAIL R1: $BUILD_DIR was configured before CMakeLists.txt or the packetwire membership file last changed - reconfigure that tree first"

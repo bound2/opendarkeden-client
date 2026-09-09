@@ -44,22 +44,16 @@ Client/Packet/Player.cpp
 # now (task 5.1)
 Client/Packet/ClientPlayer.cpp
 
-# The peer-to-peer side: two clients talking to each other directly for
-# a file transfer or a whisper. What kept them out was the clock, the
-# in-game test and six calls of the file-transfer manager, all behind
-# WireHost now; the manager itself stays executable-side because it
-# draws, writes the profile directory and reads the UI (task 5.1)
-Client/Packet/RequestClientPlayer.cpp
+# The peer-to-peer side, inbound only: another client dialling this
+# one to fetch a profile file or deliver a whisper. What kept them out
+# was the clock and three calls of the file-transfer manager, all
+# behind WireHost now; the manager itself stays executable-side because it
+# writes the profile directory and reads the UI (task 5.1). The
+# outbound half - RequestClientPlayer and its manager, this client
+# dialling peers - was compiled out upstream and is deleted (task 5.2,
+# eighth slice)
 Client/Packet/RequestServerPlayer.cpp
 Client/Packet/RequestServerPlayerManager.cpp
-
-# The last holdout. It opens the peer connections and decides what the
-# first packet on each says, which names the character the client is
-# logged in as. The character's name and the profile manager a failed
-# connection is reported to are behind WireHost (task 5.1, fifth slice);
-# the whisper mode it also had was dead upstream and is gone (task 5.2,
-# seventh slice)
-Client/Packet/RequestClientPlayerManager.cpp
 
 # What the wire layer asks of the program around it: three tuning
 # values and somewhere to send a bug report, behind a host the

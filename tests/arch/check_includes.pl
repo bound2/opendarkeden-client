@@ -90,7 +90,7 @@ sub read_list {
 
 my @members  = read_list($members_file);
 my @holdouts = read_list($holdouts_file);
-# 518 today; a truncated list must not pass as "the library".
+# 524 today; a truncated list must not pass as "the library".
 die "$members_file lists only " . scalar(@members) . " files - truncated?" unless @members >= 400;
 
 #----------------------------------------------------------------------

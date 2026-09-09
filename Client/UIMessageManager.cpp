@@ -104,7 +104,6 @@
 #include "Packet/Cpackets/CGGQuestCancel.h"
 #include "Packet/Cpackets/CGUseItemFromGQuestInventory.h"
 
-#include "RequestFunction.h"
 #include "RequestServerPlayerManager.h"
 #include "RequestUserManager.h"
 #include "ClientCommunicationManager.h"
@@ -3078,20 +3077,6 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 											{
 												pInfo->IP = "0.0.0.0";
 											}
-										}
-									}
-									//-------------------------------------------------------
-									// Profile 요청 테스트
-									//-------------------------------------------------------
-									else if (strcmp(pCommand, "profile")==0
-											|| strcmp(pLwrCommand, "profile")==0)
-									{
-										const char* pName = pData;
-
-										if (!g_pProfileManager->HasProfile(pName)
-											&& !g_pProfileManager->HasProfileNULL(pName))
-										{
-											g_pProfileManager->RequestProfile(pName);
 										}
 									}
 									//-------------------------------------------------------

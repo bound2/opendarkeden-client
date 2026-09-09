@@ -302,8 +302,8 @@ add_subdirectory(Client/framelib)
 #
 # Everything under Client/Packet - every .cpp, since task 5.1's fifth
 # slice (2026-09-09): sockets, streams, the encrypter,
-# StringStream/Exception, the wire info classes, the player classes and
-# their connection managers, every packet class in every direction, and
+# StringStream/Exception, the wire info classes, the two player classes
+# and the inbound peer connection manager, every packet class in every direction, and
 # the factory/validator tables (docs/RESTRUCTURING.md tasks 1.1, 2.4 and
 # 5.1). The packet handlers
 # live in Client/PacketHandler and compile into the executable; the

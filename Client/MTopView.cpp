@@ -69,7 +69,6 @@
 #include "MScreenEffectManager.h"
 #include "MEffectSpriteTypeTable.h"
 #include "RequestServerPlayerManager.h"
-#include "RequestClientPlayerManager.h"
 #include "MJusticeAttackManager.h"
 #include "Profiler.h"
 //#include "MFileDef.h"
@@ -9954,10 +9953,9 @@ sprintf(str, "ID = %d / %d명 [Weapon=%s] [align=%d]", g_pPlayer->GetID(), m_pZo
 //
 //
 
-		if (g_pRequestServerPlayerManager!=NULL
-			&& g_pRequestClientPlayerManager!=NULL)
+		if (g_pRequestServerPlayerManager!=NULL)
 		{
-			sprintf(str, "Request Other/My = %d/%d", g_pRequestServerPlayerManager->GetSize(), g_pRequestClientPlayerManager->GetSize());
+			sprintf(str, "Request Other = %d", g_pRequestServerPlayerManager->GetSize());
 			// pSurfaceCast->GDI_Text(10,225, str, RGB(220,220,220));	
 			TextSystem::TextService::RenderText(10, 225, str);	
 		}

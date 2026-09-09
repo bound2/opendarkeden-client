@@ -11211,16 +11211,12 @@ void	C_VS_UI_PARTY_MANAGER::Show()
 					m_v_face_name.push_back(name);
 				}
 
-				if(g_pProfileManager->HasProfileNULL(name.c_str()))
-				{
-					if(temp_spk)
-					{
-						DeleteNew(temp_spk);
-						temp_spk = NULL;
-					}
-					m_vp_face.push_back(temp_spk);
-					m_v_face_name.push_back(name);
-				}
+				// A "no profile" entry used to be cached here too, when a
+				// peer had answered that it had none; that came over the
+				// outbound peer side, which is deleted (docs/RESTRUCTURING.md
+				// task 5.2, eighth slice). A name with no profile file is
+				// looked up again on the next draw, as it was whenever the
+				// peer had not answered yet.
 			}
 
 			point.x = x + 9;

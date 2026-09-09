@@ -8,12 +8,8 @@
 #include "Gpackets/GCPartyJoined.h"
 #include "MParty.h"
 #include "UserInformation.h"
-#include "RequestClientPlayerManager.h"
-#include "ProfileManager.h"
-#include "RequestUserManager.h"
 #include "TempInformation.h"
 
-#include "Cpackets/CGRequestIP.h"
 #include "ClientDef.h"
 #include "UIFunction.h"
 
@@ -38,8 +34,7 @@ void GCPartyJoinedHandler::execute (GCPartyJoined * pPacket , Player * pPlayer)
 		|| g_pParty==NULL
 		|| g_pUserInformation==NULL
 		|| g_pTempInformation==NULL
-		|| g_pZone==NULL
-		|| g_pProfileManager==NULL)
+		|| g_pZone==NULL)
 	{
 		DEBUG_ADD("GCPartyJoinedHandler Failed");
 		return;
@@ -79,23 +74,6 @@ void GCPartyJoinedHandler::execute (GCPartyJoined * pPacket , Player * pPlayer)
 				sa.s_addr = pInfo->ip;
 #endif
 				pNewInfo->IP		= inet_ntoa( sa );
-
-				//---------------------------------------------------------
-				// 얼굴 받아오기
-				//---------------------------------------------------------
-				const char* pName = pInfo->name.c_str();
-
-				if (g_pProfileManager!=NULL 
-					&& g_pRequestUserManager!=NULL
-					&& g_pRequestClientPlayerManager!=NULL)
-					//&& !g_pProfileManager->HasProfile(pName)
-					//&& !g_pProfileManager->HasProfileNULL(pName)
-					//&& !g_pRequestUserManager->HasRequestingUser(pName)
-					//&& !g_pRequestClientPlayerManager->HasConnection(pName)
-					//&& !g_pRequestClientPlayerManager->HasTryingConnection(pName))
-				{
-					g_pProfileManager->RequestProfile(pName);
-				}
 
 				//---------------------------------------------------------
 				// 이전 파티 정보에 있는지 ..
@@ -188,34 +166,6 @@ void GCPartyJoinedHandler::execute (GCPartyJoined * pPacket , Player * pPlayer)
 
 	delete pOldParty;
 
-	//---------------------------------------------------------------
-	// 파티원들에 대한 접속을 체크한다.
-	//---------------------------------------------------------------
-	/*
-	int num = g_pParty->GetSize();
-
-	for (i=0; i<num; i++)
-	{
-		PARTY_INFO*	pInfo = g_pParty->GetMemberInfo(i);
-
-		if (pInfo!=NULL)
-		{
-			// 상대에 대한 접속이 없다면 IP를 요청해야 한다.
-			if (!g_pRequestClientPlayerManager->HasConnection( pInfo->Name.GetString() ))
-			{
-				CGRequestIP _CGRequestIP;
-
-				_CGRequestIP.setName( pInfo->Name.GetString() );
-
-//				pPlayer->sendPacket( &_CGRequestIP );
-				#if defined(_DEBUG) && defined(OUTPUT_DEBUG)
-					if (g_pGameMessage!=NULL)
-						g_pGameMessage->AddFormat("RequestIP for %s", pInfo->Name.GetString());
-				#endif
-			}
-		}
-	}
-	*/
 	
 #endif
 

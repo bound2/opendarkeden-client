@@ -61,7 +61,6 @@
 #include "MathTable.h"
 #include "ModifyStatusManager.h"
 #include "RequestServerPlayerManager.h"
-#include "RequestClientPlayerManager.h"
 #include "ClientCommunicationManager.h"
 #include "KeyAccelerator.h"
 #include "AcceleratorManager.h"
@@ -69,7 +68,6 @@
 #include "MGuildMarkManager.h"
 #include "MEventManager.h"
 #include "RequestFileManager.h"
-#include "Packet/RequestClientPlayer.h"
 #include "Packet/RequestServerPlayer.h"
 #include "RequestUserManager.h"
 #include "MJusticeAttackManager.h"
@@ -2215,21 +2213,11 @@ InitSocket()
 	//----------------------------------------------------------------------
 	// RequestServerPlayerManager
 	//----------------------------------------------------------------------
-	if (g_pProfileManager!=NULL)
-	{
-		g_pProfileManager->ReleaseRequire();
-	}
 
 	if (g_pRequestServerPlayerManager!=NULL)
 	{
 		DEBUG_ADD("[ InitGame ]  delete RequestServerPlayerManager");
 		delete g_pRequestServerPlayerManager;
-	}
-
-	if (g_pRequestClientPlayerManager!=NULL)
-	{
-		DEBUG_ADD("[ InitGame ]  delete RequestClientPlayerManager");
-		delete g_pRequestClientPlayerManager;
 	}
 
 	if (g_pClientCommunicationManager!=NULL)
@@ -2264,9 +2252,6 @@ InitSocket()
 	{
 		DEBUG_ADD("[ InitGame ] new RequestServerPlayerManager");
 		g_pRequestServerPlayerManager = new RequestServerPlayerManager;
-
-		DEBUG_ADD("[ InitGame ] new RequestClientPlayerManager");
-		g_pRequestClientPlayerManager = new RequestClientPlayerManager;
 
 		DEBUG_ADD("[ InitGame ] RequestServerPlayerManager Init");
 		g_pRequestServerPlayerManager->Init();
@@ -2779,23 +2764,11 @@ ReleaseSocket()
 			g_pPacketValidator = NULL;
 		}		
 
-		if (g_pProfileManager!=NULL)
-		{
-			g_pProfileManager->ReleaseRequire();
-		}
-		
 		if (g_pRequestServerPlayerManager!=NULL)
 		{
 			DEBUG_ADD("delete g_pRequestServerPlayerManager");
 			delete g_pRequestServerPlayerManager;
 			g_pRequestServerPlayerManager = NULL;
-		}
-
-		if (g_pRequestClientPlayerManager!=NULL)
-		{
-			DEBUG_ADD("delete g_pRequestClientPlayerManager");
-			delete g_pRequestClientPlayerManager;
-			g_pRequestClientPlayerManager = NULL;
 		}
 
 		if (g_pClientCommunicationManager!=NULL)
@@ -3025,14 +2998,16 @@ static bool	WireEncryptUsesEnglishSeed()
 }
 
 //-----------------------------------------------------------------------------
-// The request-service family's seams (task 5.1's fourth slice).
+// The request-service family's seams (task 5.1's fourth slice) - the
+// inbound side only, since task 5.2's eighth slice deleted the outbound
+// half (this client dialling peers; upstream had compiled it out).
 //-----------------------------------------------------------------------------
-// The peer file-transfer manager stays here: it draws progress, writes
-// into the profile directory and reads the UI's own state. Six calls of
-// it are all the wire layer needs, and each is guarded, because
-// g_pRequestFileManager is built after start-up and the request players
-// outlive it at shutdown - which is what the NULL tests they used to
-// write at the call site were for.
+// The peer file-transfer manager stays here: it writes into the profile
+// directory and reads the UI's own state. Three calls of it are all the
+// wire layer needs, and each is guarded, because g_pRequestFileManager
+// is built after start-up and the request players outlive it at
+// shutdown - which is what the NULL tests they used to write at the
+// call site were for.
 //
 // The guard is not complete, and saying so is better than implying it
 // is. At shutdown the pointer is deleted AND nulled, so the test holds.
@@ -3043,14 +3018,7 @@ static bool	WireEncryptUsesEnglishSeed()
 // here widens the window - but nothing here closes it either.
 //-----------------------------------------------------------------------------
 static DWORD	WireCurrentTime()		{ return g_CurrentTime; }
-static bool	WireInGameMode()		{ return g_Mode == MODE_GAME; }
 
-static bool	WireReceiveMyRequest(const std::string& name, RequestClientPlayer* pPlayer)
-		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->ReceiveMyRequest(name, pPlayer); }
-static bool	WireHasMyRequest(const std::string& name)
-		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->HasMyRequest(name); }
-static bool	WireRemoveMyRequest(const std::string& name)
-		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->RemoveMyRequest(name); }
 static bool	WireSendOtherRequest(const std::string& name, RequestServerPlayer* pPlayer)
 		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->SendOtherRequest(name, pPlayer); }
 static bool	WireHasOtherRequest(const std::string& name)
@@ -3058,46 +3026,12 @@ static bool	WireHasOtherRequest(const std::string& name)
 static bool	WireRemoveOtherRequest(const std::string& name)
 		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->RemoveOtherRequest(name); }
 
-//-----------------------------------------------------------------------------
-// The last holdout's seams (task 5.1's fifth slice): the character the
-// client is logged in as, which RequestClientPlayerManager announces to a
-// peer, and the profile manager it reports a failed connection to.
-//-----------------------------------------------------------------------------
-// The name is read the way ProcessMode read it - the login's CharacterID
-// - but guarded: with no login there is no name, and MString hands back
-// NULL for an empty one, which is what Wire answers with no host too.
-//
-// g_pProfileManager is built in GameInitInfo and never deleted in the
-// shipped build (its only delete was in VS_UI/WinMain.cpp, which no
-// target compiled), so its guard can only ever fire before GameInitInfo
-// runs.
-//
-// The slice first added seven more entries here - the character's world
-// and race, four whisper-queue calls and a request-user notification -
-// for the whisper mode of the peer connection. That whole path was
-// compiled out upstream (`0 &&` guards around every writer of the queue
-// and every whisper-mode Connect), and task 5.2's seventh slice deleted
-// it, WhisperManager included; whispers go to the game server as
-// CGWhisper, from UIMessageManager.
-//-----------------------------------------------------------------------------
-static std::string	WireCharacterName()
-{
-	if (g_pUserInformation==NULL || g_pUserInformation->CharacterID.GetString()==NULL)
-		return std::string();
-
-	return std::string(g_pUserInformation->CharacterID.GetString());
-}
-
-static void	WireRemoveProfileRequire(const std::string& name)
-		{ if (g_pProfileManager!=NULL) g_pProfileManager->RemoveRequire(name.c_str()); }
-
-// Designated, not positional. Nine of the 17 entries share a signature
-// with another (four bool(const std::string&), three int(), two bool())
-// and two more differ only in a pointer type, so a positional
-// initialiser wired to the wrong one
-// compiles and passes the whole suite - which never links this file. A
-// designator out of declaration order, or naming a member that does not
-// exist, is a compile error instead (C++20).
+// Designated, not positional. Five of the 11 entries share a signature
+// with another (two bool(const std::string&), three int()), so a
+// positional initialiser wired to the wrong one compiles and passes the
+// whole suite - which never links this file. A designator out of
+// declaration order, or naming a member that does not exist, is a
+// compile error instead (C++20).
 static const WireHost	s_WireHost = {
 	.MaxProcessPacket		= WireMaxProcessPacket,
 	.MaxRequestService		= WireMaxRequestService,
@@ -3107,15 +3041,9 @@ static const WireHost	s_WireHost = {
 	.EncryptServerID		= WireEncryptServerID,
 	.EncryptUsesEnglishSeed		= WireEncryptUsesEnglishSeed,
 	.CurrentTime			= WireCurrentTime,
-	.InGameMode			= WireInGameMode,
-	.ReceiveMyRequest		= WireReceiveMyRequest,
-	.HasMyRequest			= WireHasMyRequest,
-	.RemoveMyRequest		= WireRemoveMyRequest,
 	.SendOtherRequest		= WireSendOtherRequest,
 	.HasOtherRequest		= WireHasOtherRequest,
 	.RemoveOtherRequest		= WireRemoveOtherRequest,
-	.CharacterName			= WireCharacterName,
-	.RemoveProfileRequire		= WireRemoveProfileRequire,
 };
 
 //-----------------------------------------------------------------------------

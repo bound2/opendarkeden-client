@@ -1255,15 +1255,15 @@ void platform_event_close(platform_event_t event);
 	   thread they applied them to came from platform_thread_create - an
 	   SDL_Thread*. pthread_cancel on an SDL_Thread* is not a thread
 	   cancel. These are honest instead: SDL has no cancel and no
-	   non-blocking exit-code query, so both report failure. Neither
-	   caller checks: RequestClientPlayerManager discards TerminateThread's
-	   result and clears its handle list, so off Windows a connection
-	   thread it meant to kill keeps running, and its GetExitCodeThread
-	   loop never reaps a handle. That is what the service does off
-	   Windows today, and it is inert: the request service is created on
-	   Windows only (GameInit.cpp), and the managers exist off Windows
-	   because they are packetwire members. A real cancel needs a stop
-	   flag the thread functions poll. */
+	   non-blocking exit-code query, so both report failure. The one
+	   caller left, RequestServerPlayerManager, calls TerminateThread
+	   only inside its PLATFORM_WINDOWS branch; the outbound manager
+	   that discarded the result and looped on GetExitCodeThread is
+	   deleted (docs/RESTRUCTURING.md task 5.2, eighth slice). The
+	   request service is created on Windows only (GameInit.cpp), and
+	   the manager exists off Windows because it is a packetwire
+	   member. A real cancel needs a stop flag the thread function
+	   polls. */
 	#define STILL_ACTIVE 259
 	static inline BOOL TerminateThread(HANDLE thread, DWORD exitCode) {
 		(void)thread; (void)exitCode;

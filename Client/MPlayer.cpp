@@ -73,7 +73,6 @@
 
 #include "UIMessageManager.h"
 #include "UIFunction.h"
-#include "RequestClientPlayerManager.h"
 #include "SystemAvailabilities.h"
 
 #include "UserOption.h"
@@ -11244,18 +11243,6 @@ MPlayer::BasicActionToCreature()
 						if(pCreature != NULL)
 						{
 							UI_RunOtherInfo(pCreature);
-
-							if (g_pProfileManager!=NULL 
-								&& g_pRequestUserManager!=NULL
-								&& g_pRequestClientPlayerManager!=NULL)
-								//&& !g_pProfileManager->HasProfile(pName)
-								//&& !g_pProfileManager->HasProfileNULL(pName)
-								//&& !g_pRequestUserManager->HasRequestingUser(pName)
-								//&& !g_pRequestClientPlayerManager->HasConnection(pName)
-								//&& !g_pRequestClientPlayerManager->HasTryingConnection(pName))
-							{
-								g_pProfileManager->RequestProfile(pCreature->GetName());
-							}
 						}
 
 
@@ -11510,17 +11497,6 @@ MPlayer::BasicActionToCreature()
 //						{
 //							UI_RunOtherInfo(pCreature);
 //
-//							if (g_pProfileManager!=NULL 
-//								&& g_pRequestUserManager!=NULL
-//								&& g_pRequestClientPlayerManager!=NULL)
-//								//&& !g_pProfileManager->HasProfile(pName)
-//								//&& !g_pProfileManager->HasProfileNULL(pName)
-//								//&& !g_pRequestUserManager->HasRequestingUser(pName)
-//								//&& !g_pRequestClientPlayerManager->HasConnection(pName)
-//								//&& !g_pRequestClientPlayerManager->HasTryingConnection(pName))
-//							{
-//								g_pProfileManager->RequestProfile(pCreature->GetName());
-//							}
 //						}
 //
 //

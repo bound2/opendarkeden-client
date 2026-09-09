@@ -19,7 +19,6 @@
 
 #include "ClientCommunicationManager.h"
 #include "ClientPlayer.h"
-#include "RequestClientPlayer.h"
 #include "RequestServerPlayer.h"
 #include "RequestServerPlayerManager.h"
 #include "Player.h"
@@ -38,7 +37,6 @@ int		s_EncryptServerID	= 0;
 bool		s_EnglishSeed		= false;
 
 DWORD		s_Now			= 0;
-bool		s_InGame		= false;
 
 // The six file-transfer entries have the same signature in pairs, so a
 // host wired to the wrong one would still answer. Recording the name
@@ -62,28 +60,14 @@ int	HostEncryptServerID()		{ return s_EncryptServerID; }
 bool	HostEnglishSeed()		{ return s_EnglishSeed; }
 
 DWORD	HostCurrentTime()		{ return s_Now; }
-bool	HostInGameMode()		{ return s_InGame; }
 
-bool	HostReceiveMyRequest(const std::string& n, RequestClientPlayer*)	{ Asked("ReceiveMy", n); return true; }
-bool	HostHasMyRequest(const std::string& n)				{ Asked("HasMy", n); return true; }
-bool	HostRemoveMyRequest(const std::string& n)			{ Asked("RemoveMy", n); return true; }
 bool	HostSendOtherRequest(const std::string& n, RequestServerPlayer*)	{ Asked("SendOther", n); return true; }
 bool	HostHasOtherRequest(const std::string& n)			{ Asked("HasOther", n); return true; }
 bool	HostRemoveOtherRequest(const std::string& n)			{ Asked("RemoveOther", n); return true; }
 
-// The last holdout's seams: the logged-in character's name, and the
-// profile manager a failed peer connection is reported to. (The slice
-// first added seven more - the character's world and race and the
-// whisper queue - for a whisper mode upstream had compiled out; task
-// 5.2's seventh slice deleted the path and the entries with it.)
-std::string	s_CharacterName	= "Alice";
-
-std::string	HostCharacterName()	{ return s_CharacterName; }
-
-void	HostRemoveProfileRequire(const std::string& n)		{ Asked("RemoveProfile", n); }
-
-// Designated (C++20), as the executable's own s_WireHost is: nine of
-// the 17 entries share a signature with another, and a positional
+// Designated (C++20), as the executable's own s_WireHost is: five of
+// the 11 entries share a signature with another on Windows (seven off
+// it, where DWORD and uint are the same type), and a positional
 // initialiser wired to the wrong slot compiles. The recorder names
 // below say which entry was reached; the designators say which entry
 // each function was installed in.
@@ -96,15 +80,9 @@ const WireHost	s_Host = {
 	.EncryptServerID		= HostEncryptServerID,
 	.EncryptUsesEnglishSeed		= HostEnglishSeed,
 	.CurrentTime			= HostCurrentTime,
-	.InGameMode			= HostInGameMode,
-	.ReceiveMyRequest		= HostReceiveMyRequest,
-	.HasMyRequest			= HostHasMyRequest,
-	.RemoveMyRequest		= HostRemoveMyRequest,
 	.SendOtherRequest		= HostSendOtherRequest,
 	.HasOtherRequest		= HostHasOtherRequest,
 	.RemoveOtherRequest		= HostRemoveOtherRequest,
-	.CharacterName			= HostCharacterName,
-	.RemoveProfileRequire		= HostRemoveProfileRequire,
 };
 
 // A host that answers nothing, which is not the same as no host. Every
@@ -119,7 +97,7 @@ int	s_Asked = 0;
 Player*	CountingBugReportTarget()	{ s_Asked++; return s_pTarget; }
 
 // s_Host with the counting target in place of the plain one; the
-// other 16 entries are the same functions.
+// other 10 entries are the same functions.
 const WireHost	s_CountingHost = {
 	.MaxProcessPacket		= HostMaxProcessPacket,
 	.MaxRequestService		= HostMaxRequestService,
@@ -129,26 +107,17 @@ const WireHost	s_CountingHost = {
 	.EncryptServerID		= HostEncryptServerID,
 	.EncryptUsesEnglishSeed		= HostEnglishSeed,
 	.CurrentTime			= HostCurrentTime,
-	.InGameMode			= HostInGameMode,
-	.ReceiveMyRequest		= HostReceiveMyRequest,
-	.HasMyRequest			= HostHasMyRequest,
-	.RemoveMyRequest		= HostRemoveMyRequest,
 	.SendOtherRequest		= HostSendOtherRequest,
 	.HasOtherRequest		= HostHasOtherRequest,
 	.RemoveOtherRequest		= HostRemoveOtherRequest,
-	.CharacterName			= HostCharacterName,
-	.RemoveProfileRequire		= HostRemoveProfileRequire,
 };
 
-// Puts the library back the way every other test expects it, and the
-// character mock back to its initial values, so a test appended after
-// one that changed them does not inherit "Bob".
+// Puts the library back the way every other test expects it.
 struct NoHost
 {
 	~NoHost()
 	{
 		Wire::SetHost(NULL);
-		s_CharacterName	= "Alice";
 	}
 };
 
@@ -412,38 +381,26 @@ TEST(WireHostSeam, TheRequestSeamsAnswerConservativelyWithNoHost)
 
 	Wire::SetHost(NULL);
 
-	// A clock of zero, and NOT in the game world. The second is the
-	// conservative answer rather than the convenient one:
-	// RequestClientPlayer throws on a request packet that arrives
-	// outside the game, so a binary with no host refuses them all
-	// rather than accepting them all.
+	// A clock of zero.
 	CHECK_EQ(0, (int)Wire::CurrentTime());
-	CHECK_EQ(false, Wire::InGameMode());
 
 	// And no file transfer is registered, which is what a caller
 	// asking whether it still has one needs to hear so that it cleans
 	// up instead of waiting on a manager that is not there.
-	CHECK_EQ(false, Wire::ReceiveMyRequest("peer", NULL));
-	CHECK_EQ(false, Wire::HasMyRequest("peer"));
-	CHECK_EQ(false, Wire::RemoveMyRequest("peer"));
 	CHECK_EQ(false, Wire::SendOtherRequest("peer", NULL));
 	CHECK_EQ(false, Wire::HasOtherRequest("peer"));
 	CHECK_EQ(false, Wire::RemoveOtherRequest("peer"));
 
 	// A host that answers nothing answers the same way, one entry at a
 	// time - the accessors test the pointer, not just the host. All
-	// eight, because with s_pHost NULL the first half of each guard
+	// four, because with s_pHost NULL the first half of each guard
 	// short-circuits and the member test never runs: a guard written
-	// as `s_pHost->HasMyRequest==NULL` inside Wire::RemoveMyRequest
-	// would pass everything above. The review round of this slice
-	// found four of the eight were only covered the short-circuiting
+	// as `s_pHost->HasOtherRequest==NULL` inside Wire::RemoveOtherRequest
+	// would pass everything above. The review round of the fourth slice
+	// found half of its eight were only covered the short-circuiting
 	// way.
 	Wire::SetHost(&s_EmptyHost);
 	CHECK_EQ(0, (int)Wire::CurrentTime());
-	CHECK_EQ(false, Wire::InGameMode());
-	CHECK_EQ(false, Wire::ReceiveMyRequest("peer", NULL));
-	CHECK_EQ(false, Wire::HasMyRequest("peer"));
-	CHECK_EQ(false, Wire::RemoveMyRequest("peer"));
 	CHECK_EQ(false, Wire::SendOtherRequest("peer", NULL));
 	CHECK_EQ(false, Wire::HasOtherRequest("peer"));
 	CHECK_EQ(false, Wire::RemoveOtherRequest("peer"));
@@ -454,48 +411,40 @@ TEST(WireHostSeam, AHostAnswersTheRequestSeamsAndIsAskedTheRightOne)
 	NoHost	restore;
 
 	s_Now		= 4321;
-	s_InGame	= true;
 	s_RequestAsked.clear();
 
 	Wire::SetHost(&s_Host);
 
 	CHECK_EQ(4321, (int)Wire::CurrentTime());
-	CHECK_EQ(true, Wire::InGameMode());
 
 	// Read each time. The request timeouts are differences against this
 	// clock, so a value copied once would freeze every one of them.
 	s_Now = 9999;
 	CHECK_EQ(9999, (int)Wire::CurrentTime());
 
-	// The six file-transfer calls are near-identical in shape, which is
-	// exactly how one gets wired to the wrong host entry. Each records
-	// its own name, so the test says which was reached rather than only
-	// that something was.
+	// The three file-transfer calls are near-identical in shape (two
+	// share a signature), which is exactly how one gets wired to the
+	// wrong host entry. Each records its own name, so the test says
+	// which was reached rather than only that something was.
 	//
 	// Read what that does and does not cover. It proves WireHost.cpp's
-	// six forwarders each call their matching member. It CANNOT see the
+	// forwarders each call their matching member. It CANNOT see the
 	// initialiser actually at risk - s_WireHost in Client/GameInit.cpp -
-	// because unit_tests never links the executable, so transposing two
-	// of the four identical bool(*)(const std::string&) entries there
-	// would compile and pass this whole suite. The slice that wrote
-	// this test claimed otherwise; both its reviewers said so, and both
-	// then checked all fifteen entries by hand and found them correct.
-	// Since the fifth slice that initialiser is designated (C++20), so
-	// a transposition there is a compile error and the hand check is no
-	// longer what holds it.
-	Wire::ReceiveMyRequest("a", NULL);
-	Wire::HasMyRequest("b");
-	Wire::RemoveMyRequest("c");
+	// because unit_tests never links the executable. Since the fifth
+	// slice that initialiser is designated (C++20), so a transposition
+	// there is a compile error rather than something checked by hand;
+	// the fourth slice's reviewers had checked its fifteen entries by
+	// reading.
 	Wire::SendOtherRequest("d", NULL);
 	Wire::HasOtherRequest("e");
 	Wire::RemoveOtherRequest("f");
 
-	CHECK(s_RequestAsked ==
-		"ReceiveMy(a) HasMy(b) RemoveMy(c) SendOther(d) HasOther(e) RemoveOther(f) ");
+	CHECK(s_RequestAsked == "SendOther(d) HasOther(e) RemoveOther(f) ");
 }
 
 //----------------------------------------------------------------------
-// The three files this slice let into the library
+// The files the fourth slice let into the library - the two the
+// eighth slice left, the inbound peer side
 //----------------------------------------------------------------------
 TEST(WireHostSeam, TheRequestServiceObjectsAreInTheLibrary)
 {
@@ -504,71 +453,11 @@ TEST(WireHostSeam, TheRequestServiceObjectsAreInTheLibrary)
 	// virtual member is a vtable index and need not reference the
 	// defining object, and an inline member in the header is not in the
 	// object at all. Constructing any of these would open a socket.
-	uint (RequestClientPlayer::*pLen)() const = &RequestClientPlayer::getInputStreamLength;
 	uint (RequestServerPlayer::*pSend)(const char*, uint) = &RequestServerPlayer::send;
 	void (RequestServerPlayerManager::*pInit)(int) = &RequestServerPlayerManager::Init;
 	void (RequestServerPlayerManager::*pWait)() = &RequestServerPlayerManager::WaitRequest;
 
-	CHECK(pLen != NULL);
 	CHECK(pSend != NULL);
 	CHECK(pInit != NULL);
 	CHECK(pWait != NULL);
-}
-
-//----------------------------------------------------------------------
-// The last holdout's seams
-//----------------------------------------------------------------------
-TEST(WireHostSeam, WithNoHostThereIsNoCharacter)
-{
-	NoHost	restore;
-
-	Wire::SetHost(NULL);
-
-	// No character: an empty name, which CRConnect::write refuses to
-	// put on the wire.
-	CHECK(Wire::CharacterName().empty());
-
-	// The notification has nobody to notify, and says so by returning
-	// - observably: the recorder that every installed entry writes to
-	// stays empty, because none was reached.
-	s_RequestAsked.clear();
-	Wire::RemoveProfileRequire("peer");
-	CHECK(s_RequestAsked.empty());
-
-	// A host that answers nothing answers the same way, one entry at a
-	// time - see TheRequestSeamsAnswerConservativelyWithNoHost for why
-	// every entry is asked again here. (With the empty host the entry
-	// is NULL, so the second call is a smoke call: nothing observable,
-	// only that the guard holds.)
-	Wire::SetHost(&s_EmptyHost);
-	CHECK(Wire::CharacterName().empty());
-	Wire::RemoveProfileRequire("peer");
-	CHECK(s_RequestAsked.empty());
-}
-
-TEST(WireHostSeam, AHostAnswersForTheCharacterAndIsAskedTheRightNotification)
-{
-	NoHost	restore;
-
-	s_CharacterName	= "Alice";
-	s_RequestAsked.clear();
-
-	Wire::SetHost(&s_Host);
-
-	CHECK(Wire::CharacterName() == "Alice");
-
-	// Read each time: the character changes on every login, and the
-	// connection manager outlives the login.
-	s_CharacterName = "Bob";
-	CHECK(Wire::CharacterName() == "Bob");
-
-	// Which entry the forwarder reached. It shares its signature with
-	// nothing else in the struct now, but the recorder is kept so the
-	// test says which was reached rather than only that something was;
-	// this proves WireHost.cpp, and the installer in GameInit.cpp is
-	// held by its designators.
-	s_RequestAsked.clear();
-	Wire::RemoveProfileRequire("f");
-
-	CHECK(s_RequestAsked == "RemoveProfile(f) ");
 }

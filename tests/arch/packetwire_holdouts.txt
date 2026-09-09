@@ -8,11 +8,11 @@
 # library. Task 5.1 took the holdouts in a slice at a time - the first
 # put the logging header into basic/, the second the three tuning
 # values behind WireHost, the third ClientPlayer.cpp, the fourth the
-# request-service family, and the fifth RequestClientPlayerManager.cpp,
-# whose seams (the logged-in character's name, and the profile manager
-# a failed peer connection is reported to) are two WireHost entries -
-# nine, until the dead whisper path that needed the other seven was
-# deleted the same day.
+# request-service family, and the fifth RequestClientPlayerManager.cpp
+# behind nine WireHost entries - which task 5.2 then deleted the same
+# day, entries and all, with the rest of the outbound peer side that
+# upstream had compiled out. The inbound side (RequestServerPlayer and
+# its manager) is what the family keeps in the library.
 #
 # The file stays because W0 reads it, and so that the next holdout has
 # somewhere to be written down. When one is, list WHAT IT REACHES with

@@ -26,7 +26,6 @@
 #include "MEffectSpriteTypeTable.h"
 #include "MAttachOrbitEffect.h"
 #include "UserInformation.h"
-//#include "RequestClientPlayerManager.h"
 //#include "packet\Rpackets\CRRequest.h"
 #include "VS_UI_Base.h"
 #include "MSkillManager.h"	// [새기술3]

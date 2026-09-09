@@ -218,8 +218,6 @@ void SizeOfObjects()
 	fprintf(fp,"RequestUserInfo : %d\n",sizeof(RequestUserInfo) );
 	fprintf(fp,"RequestFileManager : %d\n",sizeof(RequestFileManager) );
 	fprintf(fp,"RequestSendInfo : %d\n",sizeof(RequestSendInfo) );
-	fprintf(fp,"RequestReceiveInfo : %d\n",sizeof(RequestReceiveInfo) );
-	fprintf(fp,"ReceiveFileInfo : %d\n",sizeof(ReceiveFileInfo) );
 	fprintf(fp,"SendFileInfo : %d\n",sizeof(SendFileInfo) );
 	fprintf(fp,"RankBonusTable : %d\n",sizeof(RankBonusTable) );
 	fprintf(fp,"RankBonusInfo : %d\n",sizeof(RankBonusInfo) );
