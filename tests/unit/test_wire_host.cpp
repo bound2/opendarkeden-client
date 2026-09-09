@@ -93,19 +93,41 @@ void	HostTryToSendWhisperMessage(const std::string& n)	{ Asked("TryToSend", n); 
 void	HostRemoveRequestUserLater(const std::string& n)	{ Asked("RemoveUser", n); }
 void	HostRemoveProfileRequire(const std::string& n)		{ Asked("RemoveProfile", n); }
 
-const WireHost	s_Host = { HostMaxProcessPacket, HostMaxRequestService, HostUDPPort, HostBugReportTarget,
-				HostEncryptZoneID, HostEncryptServerID, HostEnglishSeed,
-				HostCurrentTime, HostInGameMode,
-				HostReceiveMyRequest, HostHasMyRequest, HostRemoveMyRequest,
-				HostSendOtherRequest, HostHasOtherRequest, HostRemoveOtherRequest,
-				HostCharacterName, HostCharacterWorldID, HostCharacterRace,
-				HostHasWhisperMessage, HostGetWhisperMessages, HostRemoveWhisperMessage, HostTryToSendWhisperMessage,
-				HostRemoveRequestUserLater, HostRemoveProfileRequire };
+// Designated (C++20), as the executable's own s_WireHost is: fourteen
+// of the 24 entries share a signature with another, and a positional
+// initialiser wired to the wrong slot compiles. The recorder names
+// below say which entry was reached; the designators say which entry
+// each function was installed in.
+const WireHost	s_Host = {
+	.MaxProcessPacket		= HostMaxProcessPacket,
+	.MaxRequestService		= HostMaxRequestService,
+	.ClientCommunicationUDPPort	= HostUDPPort,
+	.BugReportTarget		= HostBugReportTarget,
+	.EncryptZoneID			= HostEncryptZoneID,
+	.EncryptServerID		= HostEncryptServerID,
+	.EncryptUsesEnglishSeed		= HostEnglishSeed,
+	.CurrentTime			= HostCurrentTime,
+	.InGameMode			= HostInGameMode,
+	.ReceiveMyRequest		= HostReceiveMyRequest,
+	.HasMyRequest			= HostHasMyRequest,
+	.RemoveMyRequest		= HostRemoveMyRequest,
+	.SendOtherRequest		= HostSendOtherRequest,
+	.HasOtherRequest		= HostHasOtherRequest,
+	.RemoveOtherRequest		= HostRemoveOtherRequest,
+	.CharacterName			= HostCharacterName,
+	.CharacterWorldID		= HostCharacterWorldID,
+	.CharacterRace			= HostCharacterRace,
+	.HasWhisperMessage		= HostHasWhisperMessage,
+	.GetWhisperMessages		= HostGetWhisperMessages,
+	.RemoveWhisperMessage		= HostRemoveWhisperMessage,
+	.TryToSendWhisperMessage	= HostTryToSendWhisperMessage,
+	.RemoveRequestUserLater		= HostRemoveRequestUserLater,
+	.RemoveProfileRequire		= HostRemoveProfileRequire,
+};
 
-// A host that answers nothing, which is not the same as no host.
-const WireHost	s_EmptyHost = { NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-				NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-				NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+// A host that answers nothing, which is not the same as no host. Every
+// member value-initialised to NULL.
+const WireHost	s_EmptyHost = {};
 
 // SendBugReport asks for a target only once it has decided the report
 // is worth sending, so the count is the observable half of a function
@@ -114,19 +136,47 @@ int	s_Asked = 0;
 
 Player*	CountingBugReportTarget()	{ s_Asked++; return s_pTarget; }
 
-const WireHost	s_CountingHost = { HostMaxProcessPacket, HostMaxRequestService, HostUDPPort, CountingBugReportTarget,
-					HostEncryptZoneID, HostEncryptServerID, HostEnglishSeed,
-					HostCurrentTime, HostInGameMode,
-					HostReceiveMyRequest, HostHasMyRequest, HostRemoveMyRequest,
-					HostSendOtherRequest, HostHasOtherRequest, HostRemoveOtherRequest,
-					HostCharacterName, HostCharacterWorldID, HostCharacterRace,
-					HostHasWhisperMessage, HostGetWhisperMessages, HostRemoveWhisperMessage, HostTryToSendWhisperMessage,
-					HostRemoveRequestUserLater, HostRemoveProfileRequire };
+// s_Host with the counting target in place of the plain one; the
+// other 23 entries are the same functions.
+const WireHost	s_CountingHost = {
+	.MaxProcessPacket		= HostMaxProcessPacket,
+	.MaxRequestService		= HostMaxRequestService,
+	.ClientCommunicationUDPPort	= HostUDPPort,
+	.BugReportTarget		= CountingBugReportTarget,
+	.EncryptZoneID			= HostEncryptZoneID,
+	.EncryptServerID		= HostEncryptServerID,
+	.EncryptUsesEnglishSeed		= HostEnglishSeed,
+	.CurrentTime			= HostCurrentTime,
+	.InGameMode			= HostInGameMode,
+	.ReceiveMyRequest		= HostReceiveMyRequest,
+	.HasMyRequest			= HostHasMyRequest,
+	.RemoveMyRequest		= HostRemoveMyRequest,
+	.SendOtherRequest		= HostSendOtherRequest,
+	.HasOtherRequest		= HostHasOtherRequest,
+	.RemoveOtherRequest		= HostRemoveOtherRequest,
+	.CharacterName			= HostCharacterName,
+	.CharacterWorldID		= HostCharacterWorldID,
+	.CharacterRace			= HostCharacterRace,
+	.HasWhisperMessage		= HostHasWhisperMessage,
+	.GetWhisperMessages		= HostGetWhisperMessages,
+	.RemoveWhisperMessage		= HostRemoveWhisperMessage,
+	.TryToSendWhisperMessage	= HostTryToSendWhisperMessage,
+	.RemoveRequestUserLater		= HostRemoveRequestUserLater,
+	.RemoveProfileRequire		= HostRemoveProfileRequire,
+};
 
-// Puts the library back the way every other test expects it.
+// Puts the library back the way every other test expects it, and the
+// character mock back to its initial values, so a test appended after
+// one that changed them does not inherit "Bob".
 struct NoHost
 {
-	~NoHost()	{ Wire::SetHost(NULL); }
+	~NoHost()
+	{
+		Wire::SetHost(NULL);
+		s_CharacterName	= "Alice";
+		s_WorldID	= 0;
+		s_Race		= RACE_SLAYER;
+	}
 };
 
 } // namespace
@@ -457,6 +507,9 @@ TEST(WireHostSeam, AHostAnswersTheRequestSeamsAndIsAskedTheRightOne)
 	// would compile and pass this whole suite. The slice that wrote
 	// this test claimed otherwise; both its reviewers said so, and both
 	// then checked all fifteen entries by hand and found them correct.
+	// Since the fifth slice that initialiser is designated (C++20), so
+	// a transposition there is a compile error and the hand check is no
+	// longer what holds it.
 	Wire::ReceiveMyRequest("a", NULL);
 	Wire::HasMyRequest("b");
 	Wire::RemoveMyRequest("c");
@@ -513,10 +566,13 @@ TEST(WireHostSeam, WithNoHostThereIsNoCharacterAndNothingQueued)
 	CHECK_EQ(false, Wire::RemoveWhisperMessage("peer"));
 
 	// The three notifications have nobody to notify, and say so by
-	// returning.
+	// returning - observably: the recorder that every installed entry
+	// writes to stays empty, because none was reached.
+	s_RequestAsked.clear();
 	Wire::TryToSendWhisperMessage("peer");
 	Wire::RemoveRequestUserLater("peer");
 	Wire::RemoveProfileRequire("peer");
+	CHECK(s_RequestAsked.empty());
 
 	// A host that answers nothing answers the same way, one entry at a
 	// time - see TheRequestSeamsAnswerConservativelyWithNoHost for why
@@ -528,9 +584,12 @@ TEST(WireHostSeam, WithNoHostThereIsNoCharacterAndNothingQueued)
 	CHECK_EQ(false, Wire::HasWhisperMessage("peer"));
 	CHECK(Wire::GetWhisperMessages("peer") == NULL);
 	CHECK_EQ(false, Wire::RemoveWhisperMessage("peer"));
+	// (With the empty host the entries are NULL, so these three are
+	// smoke calls: nothing observable, only that the guards hold.)
 	Wire::TryToSendWhisperMessage("peer");
 	Wire::RemoveRequestUserLater("peer");
 	Wire::RemoveProfileRequire("peer");
+	CHECK(s_RequestAsked.empty());
 }
 
 TEST(WireHostSeam, AHostAnswersForTheCharacterAndIsAskedTheRightQueueCall)
@@ -557,10 +616,12 @@ TEST(WireHostSeam, AHostAnswersForTheCharacterAndIsAskedTheRightQueueCall)
 	// the manager reads it and then tells the queue to drop it.
 	CHECK(Wire::GetWhisperMessages("peer") == &s_Whispers);
 
-	// Which entry each forwarder reached. Three of the six share a
-	// signature, and the same caveat as the file-transfer six applies:
-	// this proves WireHost.cpp, not the initialiser in GameInit.cpp,
-	// which a test binary never links.
+	// Which entry each forwarder reached. Five of the six share a
+	// signature with another (two bool, three void, all over a name).
+	// This proves WireHost.cpp's forwarders; the initialiser in
+	// GameInit.cpp, which a test binary never links, is held by its
+	// designators instead - a wrong or out-of-order name there is a
+	// compile error.
 	s_RequestAsked.clear();
 	Wire::HasWhisperMessage("a");
 	Wire::GetWhisperMessages("b");

@@ -117,6 +117,17 @@ per-task status lines no longer restate.
   crash — recorded as a behaviour delta where the old code dereferenced
   unguarded. Host readers are private statics on the class (`MItem::Clock()`),
   guard the function pointer, and are re-read on every call, never cached.
+- **A host installer is designated-initialised.** Fourteen of `WireHost`'s
+  24 entries share a signature with another, and the executable that
+  installs them is never linked into a test, so a positional slip
+  compiled and passed the whole suite; the fourth slice recorded the
+  order as "checked by reading". C++20 designators make an entry in the
+  wrong slot, or one that does not exist, a compile error. What they
+  cannot check is the body an entry points at.
+- **A reference on a live line can still be dead.** The whisper seam was
+  described as live behaviour because the code that reaches it is
+  compiled; every path *to* that code sits behind `0 &&`. Before
+  describing what a seam does, find the caller that runs.
 - **A class split across a library and the executable** costs nothing when
   the class has no virtuals (`MSkillSet`, `TextService`) or when the
   library constructs none of the split classes (`MBomb`, `MHolyWater`), and
@@ -171,11 +182,11 @@ Shrink it when a task extracts a seam, and record the removal here.
 
 | Code | Why exempt |
 |---|---|
-| `GameMain.cpp`, `GameInit.cpp`, `Client.cpp`, `SDLMain.cpp` | process lifecycle, DLL whitelist, render loop; also where the hosts (`MItemHost`, `MPriceHost`, `WireHost`) are installed, which no test can prove |
+| `GameMain.cpp`, `GameInit.cpp`, `Client.cpp`, `SDLMain.cpp` | process lifecycle, DLL whitelist, render loop; also where the hosts (`MItemHost`, `MPriceHost`, `WireHost`) are installed, which no test can prove - `WireHost`'s installer is designated-initialised since 2026-09-09, so a wrong slot there is a compile error, but a wrong *body* still is not |
 | `MZone` rendering / `TileRenderer` draw paths | draws through live surfaces; viewer tools cover some of it |
 | `VS_UI/src/**` widgets and dialogs | deep two-way coupling with game globals; UI verified visually; `unit_tests` does not link `VS_UI` |
 | `Client/PacketHandler/*Handler.cpp` bodies | mutate `g_pZone`/creature state; the *parsers* they consume are in `packetwire` and testable, the mutations are not |
-| `PacketFunction.cpp` connect paths, `RequestClientPlayerManager.cpp` | Winsock + connection state machine; the whisper queue and the logged-in character |
+| `PacketFunction.cpp` connect paths | Winsock + connection state machine. `RequestClientPlayerManager.cpp` was listed here until 2026-09-09; task 5.1's fifth slice put the whisper queue and the logged-in character behind `WireHost` and it is a `packetwire` member |
 | The executable halves of split classes: `MItemUse.cpp`, `MObjectScreen.cpp`, `MSkillAvailable.cpp`, `TextServiceScreen.cpp` | the packet/dialog/drawing side of a class whose core is in a library, by design |
 
 Everything else under `Client/*.cpp` and `Client/Packet/**` is presumed
@@ -636,7 +647,9 @@ rounds settled* for the host rules). Test fixtures share
   > `RequestClientPlayerManager.cpp`, reached the whisper queue and the
   > logged-in character, and the earlier status called that "a bigger
   > seam than a host of function pointers wants to be" — it is nine
-  > entries, three of them one-line accessors, and the alternative (a
+  > entries, eight of them one-expression forwarders in `GameInit.cpp`
+  > (the character's name is the one that guards a NULL `MString`), and
+  > the alternative (a
   > split, with `ProcessMode` executable-side) would have left the
   > first-packet policy where no test reaches it while `Update` still
   > called it, which is the stub pattern 5.3 retired. `WireHost` now
@@ -647,7 +660,21 @@ rounds settled* for the host rules). Test fixtures share
   > `TryToSendWhisperMessage`, which counts a failed attempt; the queue
   > falls back to the game server after the third) and the two failure
   > notifications (`RequestUserManager::RemoveRequestUserLater`,
-  > `ProfileManager::RemoveRequire`). Without a host there is no
+  > `ProfileManager::RemoveRequire`). **The whisper half of that is
+  > dead code, and the slice's first version described it as live.**
+  > The claims audit found that every writer of the whisper queue and
+  > every whisper-mode `Connect()` sits behind `0 &&` in
+  > `WhisperManager.cpp`, so the queue is never fed, no whisper-mode
+  > connection is ever opened, and whispers go to the game server as
+  > `CGWhisper`; the plain-connect mode (`RequestConnect`) is
+  > commented out at both its call sites too. **The one live peer path
+  > is the profile fetch** (`ProfileManager.cpp`, on `bKorean`, which
+  > the constructor sets true). The four whisper entries exist because
+  > the library code references them, and the comments now say so —
+  > the lesson beside "a search that finds nothing is a fact about the
+  > search": a symbol that is *referenced* on a live line can still be
+  > reached only from code that never runs, and a seam description has
+  > to say which. Without a host there is no
   > character: an empty name, world 0 and `RACE_MAX` — not
   > `RACE_SLAYER`, which is what a zero would have read as. **Behaviour
   > delta:** the old code read `CharacterID.GetString()` unguarded, and
@@ -655,17 +682,37 @@ rounds settled* for the host rules). Test fixtures share
   > answers `""` for NULL and for no login, `CRConnect::write` refuses
   > the empty name, and `Update` drops the connection as it drops any
   > other failure — a test pins that nothing nameless reaches the wire.
+  > `CRWhisper::write` now refuses a race that is not one of the three
+  > (`RACE_MAX` is what the host answers with no player), before it
+  > writes a byte; every length in it was checked and the race was not.
+  > In the whisper branch both refusals are fail-*open* rather than
+  > closed: the throw comes before `RemoveWhisperMessage`, so the queue
+  > keeps the messages and re-dials the peer — moot while the path is
+  > compiled out, recorded so it is not rediscovered. The 24-entry
+  > installer in `GameInit.cpp`, and the three hosts in the tests, are
+  > **designated initialisers** (C++20) since the review round: fourteen
+  > of the 24 entries share a signature with another, so a positional
+  > slip compiled and passed the suite, which never links `GameInit`;
+  > a designator out of order or naming a member that does not exist is
+  > a compile error, and the "checked by reading" caveat the fourth
+  > slice recorded is retired.
   > `test_request_client_manager.cpp` drives the map (add, refuse
   > outside the game, find, send, disconnect, drop on a dead socket,
   > refuse at the service limit) and `ProcessMode`'s three first
   > packets over a player whose socket was never opened, reading the
   > `CRConnect`/`CRWhisper`/`CRRequest` back out of the output ring;
   > constructing the manager is the link proof (eleven LNK2019s with
-  > the file taken back out). Deleted rather than moved, because R4
-  > counts a `g_p*` name on a dead line: one `OUTPUT_DEBUG` block, the
-  > commented-out per-user port lookup in `Connect`, the commented-out
-  > peer-disconnect in `Update`'s catch and the commented-out chat line
-  > in the thread's failure path. **Known, not fixed:**
+  > the file taken back out). Deleted rather than moved: the two
+  > `OUTPUT_DEBUG` blocks (the `extern` and the `AddFormat`), which R4
+  > would have counted — it skips `//` lines since 5.3 but these were
+  > code lines behind a macro nothing defines — and, because they were
+  > dead, the commented-out per-user port lookup in `Connect` with its
+  > live empty braces, the commented-out `IsSlayer` race block and the
+  > commented-out peer-disconnect in `Update`'s catch, the commented-out
+  > chat line and `RemoveWhisperMessage` line in the thread's failure
+  > path, and a `//#include` at the top. The slice's first commit
+  > message attributed all of it to R4; that was wrong about what R4
+  > sees. **Known, not fixed:**
   > `RemoveTerminatedThread` runs only after `Update`'s empty-map early
   > return, so the handle of a connection thread that *failed* (the map
   > stays empty) is closed only when some later connection succeeds or
@@ -681,9 +728,17 @@ rounds settled* for the host rules). Test fixtures share
   > `Disconnect(name)` never sets it, so in a Debug build every
   > `Disconnect` of a live peer throws `AssertionError` into the
   > manager's catch and appends to `assertion_failed.log` — the test
-  > ends the session first and says why. The install order of the 24
-  > `s_WireHost` entries in `GameInit.cpp` is, as before, checked by
-  > reading, not by the suite.
+  > ends the session first and says why; `AddRequestClientPlayer`'s
+  > not-in-game branch calls `disconnect` and `delete` between `Lock`
+  > and `Unlock` with no try, so a `Throwable` out of the flush or the
+  > close would leave the critical section held for good (identical on
+  > master; the test now drives that line); the three failure
+  > notifications are reached only from the connection thread's catch,
+  > which no test drives, so a swap of `RemoveRequestUserLater` and
+  > `RemoveProfileRequire` between the two `case` arms would pass the
+  > suite — the designators hold the *installer*, not the call sites.
+  > What a live server can show of this slice is the profile fetch; a
+  > peer whisper cannot be exercised, because the path is compiled out.
   > Done before that (PRs #63, #64, #74, #75): the logging facility
   > (`DebugLog.{h,cpp}`) lives in `basic/`, so every library may log and
   > the one object is no longer compiled into two libraries; `DebugInfo.h`
@@ -695,7 +750,7 @@ rounds settled* for the host rules). Test fixtures share
   > and six calls on the peer file-transfer manager, which stays
   > executable-side because it draws progress and reads the UI — and the
   > executable fills it in beside the other two hosts in `GameInit`; every
-  > accessor answers without a host with the value `ClientConfig`'s own
+  > tuning accessor answers without a host with the value `ClientConfig`'s own
   > constructor sets, and `WIRE_DEFAULT_*` keeps the executable's
   > fallbacks from drifting. `SendBugReport` is `WireHost.cpp`'s second
   > half. `setEncryptCode()` **is live code** (`Encrypter.h` defines

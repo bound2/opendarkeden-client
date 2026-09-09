@@ -506,7 +506,7 @@ RequestClientPlayerManager::ProcessMode(RequestClientPlayer* pRequestClientPlaye
 		break;
 
 		//------------------------------------------------------------
-		// Profile을 요청할 때..
+		// Fetching a profile.
 		//------------------------------------------------------------
 		case REQUEST_CLIENT_MODE_PROFILE :
 		{
@@ -664,10 +664,11 @@ RequestConnectionThreadProc(LPVOID lpParameter)
 
 					SetThreadPriority(hConnectionThread, THREAD_PRIORITY_NORMAL);
 
-					// Forget the peer's address so the next whisper
-					// asks the server for it again, and count the
-					// attempt against the queued messages - the queue
-					// falls back to the game server after the third.
+					// Forget the peer's address, and count the attempt
+					// against the queued messages - the queue falls back
+					// to the game server after the third. Dead in this
+					// build: no whisper-mode connection is ever opened
+					// (WireHost.h says why).
 					Wire::RemoveRequestUserLater( pInfo->name );
 					Wire::TryToSendWhisperMessage( pInfo->name );
 

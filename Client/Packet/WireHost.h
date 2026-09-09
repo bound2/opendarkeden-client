@@ -111,8 +111,10 @@ struct WireHost {
 	// RequestClientPlayerManager, which opens the peer connections and
 	// decides what the first packet on each one says. That first packet
 	// names the character the client is logged in as, and the whisper
-	// variant carries the messages typed at the peer while the
+	// variant would carry the messages typed at the peer while the
 	// connection was still being made - both live in the executable.
+	// (Would: see the note on the queue below. Only the profile fetch
+	// is reachable in this build.)
 	//------------------------------------------------------------------
 
 	// The character the client is logged in as: what a CRConnect and a
@@ -124,14 +126,24 @@ struct WireHost {
 	WorldID_t	(*CharacterWorldID)();
 	Race		(*CharacterRace)();
 
-	// The whisper queue, which stays executable-side: it is fed by the
-	// chat input and drained into the chat history. The manager asks
-	// whether anything waits for a peer, takes the list to put on the
-	// wire, and drops it once sent. The list stays owned by the queue;
-	// NULL means nothing waits. When a connection could not be made,
-	// TryToSendWhisperMessage counts the failed attempt against what
-	// the queue holds for that peer - after the third, the queue sends
-	// it through the game server instead.
+	// The whisper queue, which stays executable-side: the messages
+	// typed at a peer before a direct connection to it exists. The
+	// manager asks whether anything waits for a peer, takes the list to
+	// put on the wire, and drops it once sent. The list stays owned by
+	// the queue; NULL means nothing waits. When a connection could not
+	// be made, TryToSendWhisperMessage counts the failed attempt against
+	// what the queue holds for that peer - after the third, the queue
+	// sends it through the game server instead.
+	//
+	// READ THIS BEFORE TREATING ANY OF THAT AS LIVE. The peer-to-peer
+	// whisper path is compiled out upstream: every writer of the queue
+	// and every whisper-mode Connect() sits behind `0 &&` in
+	// WhisperManager.cpp, so the queue is never fed, HasWhisperMessage
+	// never answers true, and the whisper branch of ProcessMode never
+	// runs. Whispers go to the game server as CGWhisper. These four
+	// entries exist because the library code references them, not
+	// because the client uses them; the one live peer path is the
+	// profile fetch (REQUEST_CLIENT_MODE_PROFILE).
 	bool		(*HasWhisperMessage)(const std::string& name);
 	const std::list<WHISPER_MESSAGE>*	(*GetWhisperMessages)(const std::string& name);
 	bool		(*RemoveWhisperMessage)(const std::string& name);
@@ -214,8 +226,8 @@ public :
 
 	// The logged-in character, and the whisper queue and the two
 	// managers a failed peer connection is reported to (the last
-	// holdout's seams). Nothrow like the six above them is NOT claimed:
-	// the queue and the managers lock and allocate.
+	// holdout's seams). Not noexcept, like every accessor above them
+	// bar SetHost: the queue and the managers lock and allocate.
 	static std::string	CharacterName ();
 	static WorldID_t	CharacterWorldID ();
 	static Race		CharacterRace ();

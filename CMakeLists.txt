@@ -300,10 +300,12 @@ add_subdirectory(Client/framelib)
 # packetwire - the wire library
 # ============================================================
 #
-# Everything under Client/Packet except the receive loops: socket
-# streams, the encrypter, StringStream/Exception, the wire info classes,
-# every packet class in every direction, and the factory/validator
-# tables (docs/RESTRUCTURING.md tasks 1.1 and 2.4). The packet handlers
+# Everything under Client/Packet - every .cpp, since task 5.1's fifth
+# slice (2026-09-09): sockets, streams, the encrypter,
+# StringStream/Exception, the wire info classes, the player classes and
+# their connection managers, every packet class in every direction, and
+# the factory/validator tables (docs/RESTRUCTURING.md tasks 1.1, 2.4 and
+# 5.1). The packet handlers
 # live in Client/PacketHandler and compile into the executable; the
 # packet headers only declare them.
 #
@@ -902,7 +904,8 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# them here too would compile them into the executable a second time
 	# (the existing LNK4217 double-compilation trap). What stays of
 	# Client/Packet/*.cpp after this is exactly
-	# tests/arch/packetwire_holdouts.txt (the receive loops).
+	# tests/arch/packetwire_holdouts.txt - nothing, since task 5.1's
+	# fifth slice; the file is where the next exception would be listed.
 	list(REMOVE_ITEM CLIENT_MAIN_SOURCES ${PACKETWIRE_SOURCES})
 	# EXISTS is case-insensitive on Windows but REMOVE_ITEM is not: a
 	# membership entry whose case differs from the on-disk name would pass

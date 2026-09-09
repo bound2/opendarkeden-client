@@ -3084,9 +3084,24 @@ static bool	WireRemoveOtherRequest(const std::string& name)
 // The character is read the way ProcessMode read it - the login's
 // CharacterID and WorldID, and the race off the player object - but
 // guarded: with no login there is no name, and with no player there is no
-// race, which is what Wire answers with no host too. The three managers
-// are built in GameInitInfo and deleted at shutdown, like the file
-// manager above, and the same re-login window applies to them.
+// race, which is what Wire answers with no host too.
+//
+// The three managers have three different lifetimes, and the guards are
+// worth exactly what each allows. g_pWhisperManager and
+// g_pRequestUserManager are built in InitSocket(), which on the re-login
+// path deletes the previous pair WITHOUT nulling, fifteen-odd lines before
+// it reassigns them - the same window the file manager above has, and
+// the NULL test is a test on a dangling pointer for its duration.
+// ReleaseSocket() deletes and nulls, so at shutdown the guard holds.
+// g_pProfileManager is built in GameInitInfo and never deleted in the
+// shipped build (its only delete is in VS_UI/WinMain.cpp, which is not
+// compiled), so its guard can only ever fire before GameInitInfo runs.
+//
+// Of the four whisper-queue entries, none is reachable today: the
+// peer-to-peer whisper path is compiled out upstream (`0 &&` guards in
+// WhisperManager.cpp), so the queue is never fed and no whisper-mode
+// connection is ever opened. The entries exist because the library code
+// references them; the profile fetch is the one live peer path.
 //-----------------------------------------------------------------------------
 static std::string	WireCharacterName()
 {
@@ -3113,14 +3128,39 @@ static void	WireRemoveRequestUserLater(const std::string& name)
 static void	WireRemoveProfileRequire(const std::string& name)
 		{ if (g_pProfileManager!=NULL) g_pProfileManager->RemoveRequire(name.c_str()); }
 
-static const WireHost	s_WireHost = { WireMaxProcessPacket, WireMaxRequestService, WireUDPPort, WireBugReportTarget,
-					WireEncryptZoneID, WireEncryptServerID, WireEncryptUsesEnglishSeed,
-					WireCurrentTime, WireInGameMode,
-					WireReceiveMyRequest, WireHasMyRequest, WireRemoveMyRequest,
-					WireSendOtherRequest, WireHasOtherRequest, WireRemoveOtherRequest,
-					WireCharacterName, WireCharacterWorldID, WireCharacterRace,
-					WireHasWhisperMessage, WireGetWhisperMessages, WireRemoveWhisperMessage, WireTryToSendWhisperMessage,
-					WireRemoveRequestUserLater, WireRemoveProfileRequire };
+// Designated, not positional. Fourteen of the 24 entries share a signature
+// with another (six bool(const std::string&), three void(const
+// std::string&), three int(), two bool()), so a positional initialiser
+// wired to the wrong one
+// compiles and passes the whole suite - which never links this file. A
+// designator out of declaration order, or naming a member that does not
+// exist, is a compile error instead (C++20).
+static const WireHost	s_WireHost = {
+	.MaxProcessPacket		= WireMaxProcessPacket,
+	.MaxRequestService		= WireMaxRequestService,
+	.ClientCommunicationUDPPort	= WireUDPPort,
+	.BugReportTarget		= WireBugReportTarget,
+	.EncryptZoneID			= WireEncryptZoneID,
+	.EncryptServerID		= WireEncryptServerID,
+	.EncryptUsesEnglishSeed		= WireEncryptUsesEnglishSeed,
+	.CurrentTime			= WireCurrentTime,
+	.InGameMode			= WireInGameMode,
+	.ReceiveMyRequest		= WireReceiveMyRequest,
+	.HasMyRequest			= WireHasMyRequest,
+	.RemoveMyRequest		= WireRemoveMyRequest,
+	.SendOtherRequest		= WireSendOtherRequest,
+	.HasOtherRequest		= WireHasOtherRequest,
+	.RemoveOtherRequest		= WireRemoveOtherRequest,
+	.CharacterName			= WireCharacterName,
+	.CharacterWorldID		= WireCharacterWorldID,
+	.CharacterRace			= WireCharacterRace,
+	.HasWhisperMessage		= WireHasWhisperMessage,
+	.GetWhisperMessages		= WireGetWhisperMessages,
+	.RemoveWhisperMessage		= WireRemoveWhisperMessage,
+	.TryToSendWhisperMessage	= WireTryToSendWhisperMessage,
+	.RemoveRequestUserLater		= WireRemoveRequestUserLater,
+	.RemoveProfileRequire		= WireRemoveProfileRequire,
+};
 
 //-----------------------------------------------------------------------------
 // Init GameObject

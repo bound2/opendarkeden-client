@@ -74,7 +74,7 @@ timed-item loaders it reads, and their string support, membership in
 `docs/RESTRUCTURING.md` tasks 4.1, 4.2, 4.3 and 4.4),
 `framelib`, `TextSystem`, `VS_UI`, and `packetwire` — the whole wire layer: the
 sockets (TCP and datagram), the socket streams, the `Player` base under all three
-player classes, the three player classes and their connection managers, the
+player classes, the three player classes and the two peer connection managers, the
 encrypter, the info classes, every packet class in every direction and
 the factory/validator tables (`docs/RESTRUCTURING.md` tasks 1.1, 2.4 and 5.1;
 membership is `tests/arch/packetwire_files.txt`, read by CMake, the include checker
@@ -164,11 +164,14 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **629 tests, 294,563 checks, 0 failed** in both Windows trees, and
-**629 tests, 294,562 checks, 0 failed** on Linux (GCC, Clang, and GCC with
+baseline: **631 tests, 294,571 checks, 0 failed** in both Windows trees, and
+**631 tests, 294,570 checks, 0 failed** on Linux (GCC, Clang, and GCC with
 `-DUSE_ASAN=ON -DUSE_UBSAN=ON`, where UBSan reports nothing) and on macOS
 (Apple Clang, with and without ASan and UBSan); the one-check
-difference is a platform-conditional test, not a failure. The Linux
+difference is a platform-conditional test, not a failure. (The non-Windows
+figures were last *measured* at 617 / 294,466; the current ones are the
+Windows delta applied to them, which the Linux and macOS CI runs on the
+next merge confirm or correct.) The Linux
 recipe is the `linux`, `linux-clang` and `linux-asan` presets in
 `CMakePresets.json`, the macOS one the `macos` and `macos-asan` presets.
 **Clang's UBSan checks enum loads and GCC's does not**: a wire byte cast to

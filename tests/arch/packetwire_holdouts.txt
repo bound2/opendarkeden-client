@@ -15,8 +15,18 @@
 #
 # The file stays because W0 reads it, and so that the next holdout has
 # somewhere to be written down. When one is, list WHAT IT REACHES with
-# comments and dead #ifdef blocks removed first, not its includes: two
-# entries here were once wrong because they were compiled by grepping
-# for a symbol without asking whether the line was live (every
-# g_pGameMessage use sat behind a macro nothing defines; two unused
-# includes kept RequestServerPlayerManager.cpp out for two slices).
+# comments and dead #ifdef blocks removed first, not its includes. This
+# file was wrong twice, the same way both times - compiled by grepping
+# for a symbol without asking whether the line was live: it said the
+# request-service family needed g_pGameMessage (every use sat behind
+# `#if defined(_DEBUG) && defined(OUTPUT_DEBUG)`, and nothing defines
+# OUTPUT_DEBUG), and that four of the five files branched on g_Mode
+# (two did; RequestServerPlayer.cpp had the test commented out and
+# RequestServerPlayerManager.cpp read `if (1)//g_Mode==MODE_GAME)`).
+# Two unused includes, ClientDef.h and ServerInfo.h, kept
+# RequestServerPlayerManager.cpp listed here for two slices on the same
+# mistake. And the last entry's own description was wrong in the other
+# direction: it described the whisper seam as live behaviour, when the
+# peer-to-peer whisper path is compiled out upstream (`0 &&` in
+# WhisperManager.cpp) - check whether the code that reaches a symbol
+# ever runs, as well as whether the line is live.

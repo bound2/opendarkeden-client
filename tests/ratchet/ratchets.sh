@@ -826,10 +826,11 @@ check "R8 (printf-family calls whose format is not a literal)" "$R8" "$R8_BASELI
 # tests/arch/packetwire_files.txt can give, since it lists .cpp by design
 # - would have counted exactly half of every edit and called it progress.
 #
-# One .cpp under Client/Packet is deliberately outside the set:
-# RequestClientPlayerManager.cpp, the packetwire holdout
-# (tests/arch/packetwire_holdouts.txt), which compiles into the
-# executable. It carries 0, so the choice does not move the number.
+# Every .cpp under Client/Packet is in the set since 2026-09-09, when
+# task 5.1's fifth slice took the last holdout
+# (RequestClientPlayerManager.cpp) into packetwire; until then that one
+# file compiled into the executable and sat outside this count. It
+# carried 0, so the move did not change the number.
 #
 # NOT counted, and they are the rest of the workload: Client/PacketHandler
 # (284), the remaining executable sources (49 - the two request-side
