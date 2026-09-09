@@ -3,7 +3,7 @@ name: macOS build and tests
 # The macOS half of the port assessment's CI ask (area H; the platform
 # work is area G). Two presets - Apple Clang, Ninja, Debug, every target,
 # Homebrew's SDL2, plain and under ASan and UBSan (whose enum check
-# Linux's GCC build does not have) - on GitHub's arm64 runner, through the same script
+# Linux's GCC build does not have) - on GitHub's arm64 and Intel runners, through the same script
 # the Linux workflow runs, so a Mac at a desk and the runner verify the
 # same things: configure, a full build including the DarkEden
 # executable, the required-test inventory, then ctest.
@@ -31,12 +31,18 @@ concurrency:
 
 jobs:
   verify:
-    name: ${{ matrix.preset }}
-    runs-on: macos-15
+    name: ${{ matrix.preset }}-${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
         preset: [macos, macos-asan]
+        arch: [arm64, x64]
+        include:
+          - arch: arm64
+            runner: macos-15
+          - arch: x64
+            runner: macos-15-intel
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -69,11 +75,24 @@ jobs:
       - name: Configure, build and test
         run: tools/ci/verify-linux.sh ${{ matrix.preset }}
 
+      - name: Package the tested macOS executable
+        if: matrix.preset == 'macos'
+        run: bash tools/macos/package-ci.sh
+
+      - name: Upload the macOS client
+        if: matrix.preset == 'macos'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: darkeden-client-macos-${{ matrix.arch }}
+          retention-days: 30
+          if-no-files-found: error
+          path: build/packages/darkeden-client-macos-${{ matrix.arch }}.tar.gz
+
       - name: Upload build and test diagnostics
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: diagnostics-${{ matrix.preset }}
+          name: diagnostics-${{ matrix.preset }}-${{ matrix.arch }}
           retention-days: 7
           path: |
             build/verification/
