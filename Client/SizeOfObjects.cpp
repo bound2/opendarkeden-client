@@ -82,7 +82,7 @@
 #include "RequestServerPlayerManager.h"
 #include "RequestUserManager.h"
 #include "ClientCommunicationManager.h"
-#include "WhisperManager.h"
+#include "Packet/WhisperMessage.h"
 #include "Packet/Rpackets/RCSay.h"
 #include "Packet/Cpackets/CGGuildChat.h"
 #include "CMP3.h"
@@ -198,8 +198,6 @@ void SizeOfObjects()
 {
 	FILE *fp = fopen("SizeOfObjects.txt","wt");
 	fprintf(fp,"FILEINFO_ZONE_HEADER : %d\n",sizeof(FILEINFO_ZONE_HEADER) );
-	fprintf(fp,"WhisperManager : %d\n",sizeof(WhisperManager) );
-	fprintf(fp,"WhisperInfo : %d\n",sizeof(WhisperInfo) );
 	fprintf(fp,"WHISPER_MESSAGE : %d\n",sizeof(WHISPER_MESSAGE) );
 	fprintf(fp,"WavePackFileManager : %d\n",sizeof(WavePackFileManager) );
 	fprintf(fp,"WavePackFileInfo : %d\n",sizeof(WavePackFileInfo) );

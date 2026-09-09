@@ -8,10 +8,14 @@
 #include "DebugLog.h"
 
 // What this file used to reach past the wire layer for - the logged-in
-// character (its name, world and race), the whisper queue, and the two
-// managers a failed connection is reported to - is behind WireHost now
-// (docs/RESTRUCTURING.md task 5.1, fifth slice). The in-game test was
-// already there.
+// character's name, and the two managers a failed connection is
+// reported to - is behind WireHost now (docs/RESTRUCTURING.md task
+// 5.1, fifth slice). The in-game test was already there. The whisper
+// mode - a CRWhisper carrying the messages queued while the peer was
+// being dialled, and the queue told when the dial failed - is gone:
+// upstream had compiled the whole peer-to-peer whisper path out
+// (task 5.2, seventh slice). REQUEST_CLIENT_MODE_WHISPER stays in the
+// enum, because the receiving side still names it.
 
 // Platform-specific threading includes. Off Windows the Win32 thread
 // names this file uses (TerminateThread, GetExitCodeThread,
@@ -27,7 +31,6 @@
 #endif
 
 #include "Rpackets/CRConnect.h"
-#include "Rpackets/CRWhisper.h"
 #include "Rpackets/CRRequest.h"
 
 //--------------------------------------------------------------------------------
@@ -459,53 +462,6 @@ RequestClientPlayerManager::ProcessMode(RequestClientPlayer* pRequestClientPlaye
 		break;
 
 		//------------------------------------------------------------
-		// Sending a whisper.
-		//------------------------------------------------------------
-		case REQUEST_CLIENT_MODE_WHISPER :
-		{
-			if (pRequestClientPlayer->getPlayerStatus()==CPS_REQUEST_CLIENT_BEGIN_SESSION)
-			{
-				const std::string& requestServerName = pRequestClientPlayer->getRequestServerName();
-
-				// Anything waiting for this peer?
-				if (Wire::HasWhisperMessage( requestServerName ))
-				{
-					const std::list<WHISPER_MESSAGE>* pMessageList = Wire::GetWhisperMessages( requestServerName );
-
-					if (pMessageList)
-					{
-						// Build the CRWhisper and send it.
-						CRWhisper _CRWhisper;
-
-						_CRWhisper.setName( Wire::CharacterName() );
-						_CRWhisper.setTargetName( requestServerName );
-
-						_CRWhisper.setRace( Wire::CharacterRace() );
-
-						_CRWhisper.setWorldID( Wire::CharacterWorldID() );
-
-						std::list<WHISPER_MESSAGE>::const_iterator iMessage = pMessageList->begin();
-
-						// Every message
-						while (iMessage != pMessageList->end())
-						{
-							_CRWhisper.addMessage ( *iMessage );
-
-							iMessage ++;
-						}
-
-						pRequestClientPlayer->sendPacket( &_CRWhisper );
-
-						pRequestClientPlayer->setPlayerStatus( CPS_REQUEST_CLIENT_NORMAL );
-					}
-
-					Wire::RemoveWhisperMessage( requestServerName );
-				}
-			}
-		}
-		break;
-
-		//------------------------------------------------------------
 		// Fetching a profile.
 		//------------------------------------------------------------
 		case REQUEST_CLIENT_MODE_PROFILE :
@@ -657,24 +613,6 @@ RequestConnectionThreadProc(LPVOID lpParameter)
 			//------------------------------------------------------
 			switch (pInfo->requestMode)
 			{
-				//------------------------------------------------------
-				// A whisper that could not be delivered directly.
-				//------------------------------------------------------
-				case REQUEST_CLIENT_MODE_WHISPER :
-
-					SetThreadPriority(hConnectionThread, THREAD_PRIORITY_NORMAL);
-
-					// Forget the peer's address, and count the attempt
-					// against the queued messages - the queue falls back
-					// to the game server after the third. Dead in this
-					// build: no whisper-mode connection is ever opened
-					// (WireHost.h says why).
-					Wire::RemoveRequestUserLater( pInfo->name );
-					Wire::TryToSendWhisperMessage( pInfo->name );
-
-					SetThreadPriority(hConnectionThread, THREAD_PRIORITY_LOWEST);
-				break;
-
 				//------------------------------------------------------
 				// A profile that could not be fetched.
 				//------------------------------------------------------

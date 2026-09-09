@@ -6,10 +6,11 @@
 // packetwire: it opens the peer-to-peer connections (a thread per
 // attempt) and decides what the first packet on each one says. That
 // first packet is the seam - it names the character the client is
-// logged in as, and the whisper variant carries the messages typed at
-// the peer while the connection was still being made - and the
-// character and the queue are behind WireHost now, so the manager can
-// be driven here with a host that answers for both.
+// logged in as - and the character is behind WireHost now, so the
+// manager can be driven here with a host that answers for it. (The
+// whisper mode, which would have carried the messages typed at the
+// peer while the connection was being made, was compiled out upstream
+// and is deleted: task 5.2, seventh slice.)
 //
 // What is reachable: the map of open connections (add, find, send,
 // disconnect, drop on a dead socket) and ProcessMode, the first-packet
@@ -48,19 +49,12 @@
 namespace {
 
 //----------------------------------------------------------------------
-// The host: a logged-in character and a whisper queue, plus a record
-// of which notifications the manager sent.
+// The host: a logged-in character, plus a record of which
+// notifications the manager sent.
 //----------------------------------------------------------------------
 bool				s_InGame	= false;
 int				s_MaxService	= 10;
 std::string			s_Character	= "Alice";
-WorldID_t			s_WorldID	= 2;
-Race				s_Race		= RACE_VAMPIRE;
-
-// One peer's queue. The name is the peer the messages wait for, so a
-// manager asking about a different peer is told nothing waits.
-std::string			s_QueuedFor;
-std::list<WHISPER_MESSAGE>	s_Queued;
 
 std::string			s_Notified;
 
@@ -75,31 +69,6 @@ void	Note(const char* pWhich, const std::string& name)
 bool		HostInGame()			{ return s_InGame; }
 int		HostMaxService()		{ return s_MaxService; }
 std::string	HostCharacterName()		{ return s_Character; }
-WorldID_t	HostCharacterWorldID()		{ return s_WorldID; }
-Race		HostCharacterRace()		{ return s_Race; }
-
-bool	HostHasWhisperMessage(const std::string& name)
-{
-	return name == s_QueuedFor && !s_Queued.empty();
-}
-
-const std::list<WHISPER_MESSAGE>*	HostGetWhisperMessages(const std::string& name)
-{
-	return name == s_QueuedFor ? &s_Queued : NULL;
-}
-
-bool	HostRemoveWhisperMessage(const std::string& name)
-{
-	Note("RemoveWhisper", name);
-	if (name != s_QueuedFor)
-		return false;
-	s_Queued.clear();
-	s_QueuedFor.clear();
-	return true;
-}
-
-void	HostTryToSendWhisperMessage(const std::string& name)	{ Note("TryToSend", name); }
-void	HostRemoveRequestUserLater(const std::string& name)	{ Note("RemoveUser", name); }
 void	HostRemoveProfileRequire(const std::string& name)	{ Note("RemoveProfile", name); }
 
 // Designated (C++20), so an entry cannot land in a same-signature
@@ -109,13 +78,6 @@ const WireHost	s_Host = {
 	.MaxRequestService		= HostMaxService,
 	.InGameMode			= HostInGame,
 	.CharacterName			= HostCharacterName,
-	.CharacterWorldID		= HostCharacterWorldID,
-	.CharacterRace			= HostCharacterRace,
-	.HasWhisperMessage		= HostHasWhisperMessage,
-	.GetWhisperMessages		= HostGetWhisperMessages,
-	.RemoveWhisperMessage		= HostRemoveWhisperMessage,
-	.TryToSendWhisperMessage	= HostTryToSendWhisperMessage,
-	.RemoveRequestUserLater		= HostRemoveRequestUserLater,
 	.RemoveProfileRequire		= HostRemoveProfileRequire,
 };
 
@@ -127,25 +89,12 @@ struct HostScope
 		s_InGame	= true;
 		s_MaxService	= 10;
 		s_Character	= "Alice";
-		s_WorldID	= 2;
-		s_Race		= RACE_VAMPIRE;
-		s_QueuedFor.clear();
-		s_Queued.clear();
 		s_Notified.clear();
 		Wire::SetHost(&s_Host);
 	}
 
 	~HostScope()	{ Wire::SetHost(NULL); }
 };
-
-void	Queue(const char* pFor, const char* pMessage, DWORD color)
-{
-	WHISPER_MESSAGE m;
-	m.msg = pMessage;
-	m.color = color;
-	s_QueuedFor = pFor;
-	s_Queued.push_back(m);
-}
 
 //----------------------------------------------------------------------
 // A request player over a socket that was never opened. sendPacket()
@@ -342,7 +291,7 @@ TEST(RequestClientManager, ConnectRefusesOnceTheServiceLimitIsReached)
 	if (Wire::MaxRequestService() != 0)
 		return;
 
-	manager.Connect("127.0.0.1", "bob", REQUEST_CLIENT_MODE_WHISPER);
+	manager.Connect("127.0.0.1", "bob", REQUEST_CLIENT_MODE_PROFILE);
 
 	CHECK_EQ(false, manager.HasTryingConnection("bob"));
 	CHECK_EQ(false, manager.HasConnection("bob"));
@@ -376,74 +325,6 @@ TEST(RequestClientManager, APlainConnectionAnnouncesTheCharacter)
 	CHECK_EQ(sent.size(), bob.p->Sent().size());
 }
 
-TEST(RequestClientManager, AWhisperConnectionCarriesTheQueueThenDropsIt)
-{
-	HostScope	host;
-	RequestClientPlayerManager	manager;
-	OwnedProbe	bob("bob", REQUEST_CLIENT_MODE_WHISPER);
-
-	Queue("bob", "hello", 0x11223344);
-	Queue("bob", "are you there", 0x55667788);
-	s_Character	= "Alice";
-	s_Race		= RACE_OUSTERS;
-	s_WorldID	= 7;
-
-	manager.ProcessMode(bob.p);
-
-	// One CRWhisper: from the character, to the peer, with every queued
-	// message in order and the character's race and world - the
-	// three values this slice put behind the host.
-	std::vector<unsigned char> sent = bob.p->Sent();
-	CHECK_EQ((int)Packet::PACKET_CR_WHISPER, (int)FramedID(sent));
-
-	CRWhisper	whisper;
-	ReadFramed(whisper, sent);
-	CHECK(whisper.getName() == "Alice");
-	CHECK(whisper.getTargetName() == "bob");
-	CHECK_EQ((int)RACE_OUSTERS, (int)whisper.getRace());
-	CHECK_EQ(7, (int)whisper.getWorldID());
-	CHECK_EQ(2, (int)whisper.getMessageSize());
-
-	// popMessage() has no empty guard, so a packet short of messages
-	// would abort the whole run on list::front() rather than fail
-	// this test; the pops are gated on the count just checked.
-	if (whisper.getMessageSize() == 2)
-	{
-		WHISPER_MESSAGE* pFirst = whisper.popMessage();
-		WHISPER_MESSAGE* pSecond = whisper.popMessage();
-		CHECK(pFirst->msg == "hello");
-		CHECK_EQ(0x11223344, (int)pFirst->color);
-		CHECK(pSecond->msg == "are you there");
-		CHECK_EQ(0x55667788, (int)pSecond->color);
-		delete pFirst;
-		delete pSecond;
-	}
-
-	// The session is in its normal state, and the queue was told to
-	// drop what it held for the peer - after the packet was built from
-	// it, since the list is the queue's own.
-	CHECK_EQ((int)CPS_REQUEST_CLIENT_NORMAL, (int)bob.p->getPlayerStatus());
-	CHECK(s_Notified == "RemoveWhisper(bob) ");
-	CHECK(s_Queued.empty());
-}
-
-TEST(RequestClientManager, AWhisperConnectionWithNothingQueuedSendsNothing)
-{
-	HostScope	host;
-	RequestClientPlayerManager	manager;
-	OwnedProbe	bob("bob", REQUEST_CLIENT_MODE_WHISPER);
-
-	// Something waits, but for somebody else.
-	Queue("carol", "not for bob", 1);
-
-	manager.ProcessMode(bob.p);
-
-	CHECK_EQ((size_t)0, bob.p->Sent().size());
-	CHECK_EQ((int)CPS_REQUEST_CLIENT_BEGIN_SESSION, (int)bob.p->getPlayerStatus());
-	CHECK(s_Notified.empty());
-	CHECK_EQ((size_t)1, s_Queued.size());
-}
-
 TEST(RequestClientManager, AProfileConnectionAsksForTheProfile)
 {
 	HostScope	host;
@@ -461,7 +342,7 @@ TEST(RequestClientManager, AProfileConnectionAsksForTheProfile)
 	CHECK(request.getRequestName() == "bob");
 	CHECK_EQ((int)CPS_REQUEST_CLIENT_NORMAL, (int)bob.p->getPlayerStatus());
 
-	// Nothing is asked of the whisper queue for a profile.
+	// A connection that opened is not a failed one: nothing is told.
 	CHECK(s_Notified.empty());
 }
 
@@ -524,10 +405,10 @@ TEST(CRWhisperRace, TheThreePredicatesNameTheThreeRaces)
 
 TEST(CRWhisperRace, TheWriterRefusesARaceThatIsNotOne)
 {
-	// The host answers RACE_MAX for "no player", and write() checked
-	// every length but not the race, so 3 could reach the wire where
-	// only 0..2 ever had. The name checks fail closed; this makes the
-	// race check match them.
+	// write() checked every length but not the race, so a byte outside
+	// 0..2 could reach the wire (the 5.1 slice's wire host answered
+	// RACE_MAX for "no player" while it still carried the race). The
+	// name checks fail closed; this makes the race check match them.
 	EnsureSocketsInitialised();
 	Socket			socket(new SocketImpl());
 	SocketOutputStream	out(&socket, 4096);
@@ -554,31 +435,4 @@ TEST(CRWhisperRace, TheWriterRefusesARaceThatIsNotOne)
 	whisper.setRace(RACE_OUSTERS);
 	whisper.write(out);
 	CHECK_EQ((size_t)whisper.getPacketSize(), SocketOutputStreamTestAccess::Bytes(out).size());
-}
-
-TEST(RequestClientManager, AWhisperConnectionWithNoPlayerSendsNothing)
-{
-	HostScope	host;
-	RequestClientPlayerManager	manager;
-	OwnedProbe	bob("bob", REQUEST_CLIENT_MODE_WHISPER);
-
-	Queue("bob", "hello", 1);
-	s_Race = RACE_MAX;		// what the executable answers with no player
-
-	// The refusal comes out of ProcessMode as the writer's exception,
-	// which Update treats like any other failure on the connection.
-	// The queue is NOT told to drop the messages - the refusal
-	// happens before that line - so this is a fail-open shape once
-	// the connection is re-dialled; recorded in the plan, unreachable
-	// in this build (the whisper path is compiled out upstream).
-	bool	refused = false;
-	try {
-		manager.ProcessMode(bob.p);
-	} catch (Throwable&) {
-		refused = true;
-	}
-
-	CHECK_EQ(true, refused);
-	CHECK_EQ((size_t)0, bob.p->Sent().size());
-	CHECK(s_Notified.empty());
 }

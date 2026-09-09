@@ -14,7 +14,6 @@
 
 #include "RequestClientPlayerManager.h"
 #include "RequestUserManager.h"
-#include "WhisperManager.h"
 #include "ClientDef.h"
 #include "UserInformation.h"
 //////////////////////////////////////////////////////////////////////
@@ -54,20 +53,6 @@ void GCRequestedIPHandler::execute ( GCRequestedIP * pPacket , Player * pPlayer 
 
 		switch (g_pRequestUserManager->GetRequestingFor(pName))
 		{
-			//--------------------------------------------------------
-			// REQUESTING_FOR_WHISPER
-			//--------------------------------------------------------
-			// 귓속말을 보내기 위해 IP를 요청한 경우
-			//--------------------------------------------------------
-			case RequestUserManager::REQUESTING_FOR_WHISPER :
-				if (g_pWhisperManager->HasWhisperMessage( pName ))
-				{
-					g_pRequestClientPlayerManager->Connect( pIP, 
-															pName, 
-															REQUEST_CLIENT_MODE_WHISPER );
-				}
-			break;
-
 			//--------------------------------------------------------
 			// REQUESTING_FOR_PROFILE
 			//--------------------------------------------------------

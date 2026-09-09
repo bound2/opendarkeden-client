@@ -117,13 +117,13 @@ per-task status lines no longer restate.
   crash — recorded as a behaviour delta where the old code dereferenced
   unguarded. Host readers are private statics on the class (`MItem::Clock()`),
   guard the function pointer, and are re-read on every call, never cached.
-- **A host installer is designated-initialised.** Fourteen of `WireHost`'s
-  24 entries share a signature with another, and the executable that
-  installs them is never linked into a test, so a positional slip
-  compiled and passed the whole suite; the fourth slice recorded the
-  order as "checked by reading". C++20 designators make an entry in the
-  wrong slot, or one that does not exist, a compile error. What they
-  cannot check is the body an entry points at.
+- **A host installer is designated-initialised.** When `WireHost` reached
+  24 entries, fourteen shared a signature with another, and the
+  executable that installs them is never linked into a test, so a
+  positional slip compiled and passed the whole suite; the fourth slice
+  recorded the order as "checked by reading". C++20 designators make an
+  entry in the wrong slot, or one that does not exist, a compile error.
+  What they cannot check is the body an entry points at.
 - **A reference on a live line can still be dead.** The whisper seam was
   described as live behaviour because the code that reaches it is
   compiled; every path *to* that code sits behind `0 &&`. Before
@@ -640,79 +640,46 @@ rounds settled* for the host rules). Test fixtures share
   `DatagramSocket.cpp` and `NPCInfo.cpp`; the real list was
   `tests/arch/packetwire_holdouts.txt`, and the task became "take the
   holdouts in".
-  > **Status:** done (2026-09-09, fifth slice). **Every `.cpp` under
-  > `Client/Packet` is a `packetwire` member**; the holdouts file lists
-  > nothing and stays only because W0 reads it and the next holdout
-  > needs somewhere to be written down. The last one,
-  > `RequestClientPlayerManager.cpp`, reached the whisper queue and the
-  > logged-in character, and the earlier status called that "a bigger
-  > seam than a host of function pointers wants to be" — it is nine
-  > entries, eight of them one-expression forwarders in `GameInit.cpp`
-  > (the character's name is the one that guards a NULL `MString`), and
-  > the alternative (a
-  > split, with `ProcessMode` executable-side) would have left the
-  > first-packet policy where no test reaches it while `Update` still
-  > called it, which is the stub pattern 5.3 retired. `WireHost` now
-  > also carries the character's name, world and race (a `CRConnect`
-  > and a `CRWhisper` announce them to the peer), the four whisper-queue
-  > calls (`HasWhisperMessage`, `GetWhisperMessages` — the queue's own
-  > list, read and then dropped — `RemoveWhisperMessage`,
-  > `TryToSendWhisperMessage`, which counts a failed attempt; the queue
-  > falls back to the game server after the third) and the two failure
-  > notifications (`RequestUserManager::RemoveRequestUserLater`,
-  > `ProfileManager::RemoveRequire`). **The whisper half of that is
-  > dead code, and the slice's first version described it as live.**
-  > The claims audit found that every writer of the whisper queue and
-  > every whisper-mode `Connect()` sits behind `0 &&` in
-  > `WhisperManager.cpp`, so the queue is never fed, no whisper-mode
-  > connection is ever opened, and whispers go to the game server as
-  > `CGWhisper`; the plain-connect mode (`RequestConnect`) is
-  > commented out at both its call sites too. **The one live peer path
-  > is the profile fetch** (`ProfileManager.cpp`, on `bKorean`, which
-  > the constructor sets true). The four whisper entries exist because
-  > the library code references them, and the comments now say so —
-  > the lesson beside "a search that finds nothing is a fact about the
-  > search": a symbol that is *referenced* on a live line can still be
-  > reached only from code that never runs, and a seam description has
-  > to say which. Without a host there is no
-  > character: an empty name, world 0 and `RACE_MAX` — not
-  > `RACE_SLAYER`, which is what a zero would have read as. **Behaviour
-  > delta:** the old code read `CharacterID.GetString()` unguarded, and
-  > `MString` gives NULL for an empty string; the executable's accessor
-  > answers `""` for NULL and for no login, `CRConnect::write` refuses
-  > the empty name, and `Update` drops the connection as it drops any
-  > other failure — a test pins that nothing nameless reaches the wire.
-  > `CRWhisper::write` now refuses a race that is not one of the three
-  > (`RACE_MAX` is what the host answers with no player), before it
-  > writes a byte; every length in it was checked and the race was not.
-  > In the whisper branch both refusals are fail-*open* rather than
-  > closed: the throw comes before `RemoveWhisperMessage`, so the queue
-  > keeps the messages and re-dials the peer — moot while the path is
-  > compiled out, recorded so it is not rediscovered. The 24-entry
-  > installer in `GameInit.cpp`, and the three hosts in the tests, are
-  > **designated initialisers** (C++20) since the review round: fourteen
-  > of the 24 entries share a signature with another, so a positional
-  > slip compiled and passed the suite, which never links `GameInit`;
-  > a designator out of order or naming a member that does not exist is
-  > a compile error, and the "checked by reading" caveat the fourth
-  > slice recorded is retired.
+  > **Status:** done (2026-09-09, fifth slice; PR #144). **Every `.cpp`
+  > under `Client/Packet` is a `packetwire` member**; the holdouts file
+  > lists nothing and stays only because W0 reads it and the next
+  > holdout needs somewhere to be written down. The last one,
+  > `RequestClientPlayerManager.cpp`, went behind two more `WireHost`
+  > entries: the logged-in character's name (a `CRConnect` announces it
+  > to the peer) and `ProfileManager::RemoveRequire` (told when the
+  > peer could not be dialled). The earlier status called the seam "a
+  > bigger seam than a host of function pointers wants to be" because
+  > it counted the whisper mode's reaches - the character's world and
+  > race, four whisper-queue calls, a request-user notification - and
+  > the slice first added those seven entries too, describing the path
+  > as live. **It was dead code**: the claims audit found every writer
+  > of the whisper queue and every whisper-mode `Connect()` behind
+  > `0 &&` in `WhisperManager.cpp` (see *A reference on a live line
+  > can still be dead*), and 5.2's seventh slice deleted the path and
+  > the seven entries. **The one live peer path is the profile fetch**
+  > (`ProfileManager.cpp`, on `bKorean`, which the constructor sets
+  > true) - and it is narrower than it looks: `GCRequestedIPHandler`
+  > returns unconditionally (`bKorean == false || 1`), so a peer's
+  > address is learned only when that peer whispers to *us* first
+  > (`CRWhisperHandler` records it). Without a host there is no
+  > character: an empty name. **Behaviour delta:** the old code read
+  > `CharacterID.GetString()` unguarded and `MString` gives NULL for an
+  > empty string; the executable's accessor answers `""` for NULL and
+  > for no login, `CRConnect::write` refuses the empty name, and
+  > `Update` drops the connection as it drops any other failure - a
+  > test pins that nothing nameless reaches the wire. `CRWhisper::write`
+  > refuses a race outside the three before it writes a byte (every
+  > length in it was checked and the race was not). The 17-entry
+  > installer in `GameInit.cpp`, and the hosts in the tests, are
+  > **designated initialisers** (C++20); the "checked by reading"
+  > caveat the fourth slice recorded is retired.
   > `test_request_client_manager.cpp` drives the map (add, refuse
   > outside the game, find, send, disconnect, drop on a dead socket,
-  > refuse at the service limit) and `ProcessMode`'s three first
-  > packets over a player whose socket was never opened, reading the
-  > `CRConnect`/`CRWhisper`/`CRRequest` back out of the output ring;
-  > constructing the manager is the link proof (eleven LNK2019s with
-  > the file taken back out). Deleted rather than moved: the two
-  > `OUTPUT_DEBUG` blocks (the `extern` and the `AddFormat`), which R4
-  > would have counted — it skips `//` lines since 5.3 but these were
-  > code lines behind a macro nothing defines — and, because they were
-  > dead, the commented-out per-user port lookup in `Connect` with its
-  > live empty braces, the commented-out `IsSlayer` race block and the
-  > commented-out peer-disconnect in `Update`'s catch, the commented-out
-  > chat line and `RemoveWhisperMessage` line in the thread's failure
-  > path, and a `//#include` at the top. The slice's first commit
-  > message attributed all of it to R4; that was wrong about what R4
-  > sees. **Known, not fixed:**
+  > refuse at the service limit) and `ProcessMode`'s two first packets
+  > over a player whose socket was never opened, reading the
+  > `CRConnect`/`CRRequest` back out of the output ring; constructing
+  > the manager is the link proof (eleven LNK2019s with the file taken
+  > back out). **Known, not fixed:**
   > `RemoveTerminatedThread` runs only after `Update`'s empty-map early
   > return, so the handle of a connection thread that *failed* (the map
   > stays empty) is closed only when some later connection succeeds or
@@ -727,18 +694,15 @@ rounds settled* for the host rules). Test fixtures share
   > `RequestClientPlayer`'s destructor asserts `CPS_END_SESSION` and
   > `Disconnect(name)` never sets it, so in a Debug build every
   > `Disconnect` of a live peer throws `AssertionError` into the
-  > manager's catch and appends to `assertion_failed.log` — the test
+  > manager's catch and appends to `assertion_failed.log` - the test
   > ends the session first and says why; `AddRequestClientPlayer`'s
   > not-in-game branch calls `disconnect` and `delete` between `Lock`
   > and `Unlock` with no try, so a `Throwable` out of the flush or the
   > close would leave the critical section held for good (identical on
-  > master; the test now drives that line); the three failure
-  > notifications are reached only from the connection thread's catch,
-  > which no test drives, so a swap of `RemoveRequestUserLater` and
-  > `RemoveProfileRequire` between the two `case` arms would pass the
-  > suite — the designators hold the *installer*, not the call sites.
-  > What a live server can show of this slice is the profile fetch; a
-  > peer whisper cannot be exercised, because the path is compiled out.
+  > master; the test drives that line); the failure notification is
+  > reached only from the connection thread's catch, which no test
+  > drives. What a live server can show of this slice is the profile
+  > fetch.
   > Done before that (PRs #63, #64, #74, #75): the logging facility
   > (`DebugLog.{h,cpp}`) lives in `basic/`, so every library may log and
   > the one object is no longer compiled into two libraries; `DebugInfo.h`
@@ -803,6 +767,31 @@ rounds settled* for the host rules). Test fixtures share
   > `Client/Packet` — `RankBonusTable.cpp` (a save path), `MSectorInfo.h`
   > (portal fields), `Updater/Update.cpp` and the two unbuilt
   > `OtherClass/Request*PacketFactoryManager.cpp` files.
+  > **Seventh slice (2026-09-09, on PR #144, at the user's request):**
+  > the peer-to-peer whisper path, which upstream compiled out (`0 &&`
+  > around every writer of `WhisperManager`'s queue and every
+  > whisper-mode `Connect()`) and 5.1's fifth slice found. Deleted:
+  > `WhisperManager.{h,cpp}` whole (its one live member sent a
+  > `CGWhisper`, which `UIMessageManager` now sends itself), its
+  > construction, deletion and `Update` calls, the whisper `case` in
+  > `ProcessMode` and in the connection thread's failure path, the
+  > whisper branches of `GCRequestedIPHandler` and
+  > `GCRequestFailedHandler`, and seven `WireHost` entries (the
+  > character's world and race, the four queue calls, the request-user
+  > notification) with their forwarders, installers and tests. R1
+  > 488 → 487. `REQUEST_CLIENT_MODE_WHISPER` and
+  > `REQUESTING_FOR_WHISPER` stay in their enums (the receiving side
+  > still names the mode; the values are shared vocabulary), as do
+  > `CRWhisper` and its handler (a Korean-build peer can still whisper
+  > *to* this client, and `tests/wire-layout.txt` pins the packet).
+  > **Found on the way:** `GCRequestedIPHandler::execute` begins
+  > `if (bKorean == false || 1) return;`, so the reply to a
+  > `CGRequestIP` is never acted on and a peer's address is learned
+  > only from a `CRWhisper` it sends us - the profile fetch, the one
+  > peer path left, can dial only a peer that has already whispered.
+  > Whether that is worth keeping, or the whole outbound peer side
+  > should follow the whisper path, is a question for the user, not a
+  > slice.
   - Owner: the build (nothing deleted was compiled, so R1 held at each
     step); the wrong-file-edited trap is closed for the files named.
 

@@ -55,10 +55,10 @@ Client/Packet/RequestServerPlayerManager.cpp
 
 # The last holdout. It opens the peer connections and decides what the
 # first packet on each says, which names the character the client is
-# logged in as and, for a whisper, carries the messages queued while the
-# connection was being made. The character, the whisper queue and the
-# two managers a failed connection is reported to are behind WireHost
-# (task 5.1, fifth slice)
+# logged in as. The character's name and the profile manager a failed
+# connection is reported to are behind WireHost (task 5.1, fifth slice);
+# the whisper mode it also had was dead upstream and is gone (task 5.2,
+# seventh slice)
 Client/Packet/RequestClientPlayerManager.cpp
 
 # What the wire layer asks of the program around it: three tuning

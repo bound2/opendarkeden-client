@@ -71,30 +71,19 @@ bool	HostSendOtherRequest(const std::string& n, RequestServerPlayer*)	{ Asked("S
 bool	HostHasOtherRequest(const std::string& n)			{ Asked("HasOther", n); return true; }
 bool	HostRemoveOtherRequest(const std::string& n)			{ Asked("RemoveOther", n); return true; }
 
-// The last holdout's seams: the logged-in character, and the whisper
-// queue and the two managers a failed peer connection is reported to.
-// The five name-taking entries record their names for the same reason
-// the six above do - three of them share a signature.
+// The last holdout's seams: the logged-in character's name, and the
+// profile manager a failed peer connection is reported to. (The slice
+// first added seven more - the character's world and race and the
+// whisper queue - for a whisper mode upstream had compiled out; task
+// 5.2's seventh slice deleted the path and the entries with it.)
 std::string	s_CharacterName	= "Alice";
-WorldID_t	s_WorldID	= 0;
-Race		s_Race		= RACE_SLAYER;
-
-std::list<WHISPER_MESSAGE>	s_Whispers;
 
 std::string	HostCharacterName()	{ return s_CharacterName; }
-WorldID_t	HostCharacterWorldID()	{ return s_WorldID; }
-Race		HostCharacterRace()	{ return s_Race; }
 
-bool	HostHasWhisperMessage(const std::string& n)		{ Asked("HasWhisper", n); return true; }
-const std::list<WHISPER_MESSAGE>*	HostGetWhisperMessages(const std::string& n)
-								{ Asked("GetWhispers", n); return &s_Whispers; }
-bool	HostRemoveWhisperMessage(const std::string& n)		{ Asked("RemoveWhisper", n); return true; }
-void	HostTryToSendWhisperMessage(const std::string& n)	{ Asked("TryToSend", n); }
-void	HostRemoveRequestUserLater(const std::string& n)	{ Asked("RemoveUser", n); }
 void	HostRemoveProfileRequire(const std::string& n)		{ Asked("RemoveProfile", n); }
 
-// Designated (C++20), as the executable's own s_WireHost is: fourteen
-// of the 24 entries share a signature with another, and a positional
+// Designated (C++20), as the executable's own s_WireHost is: nine of
+// the 17 entries share a signature with another, and a positional
 // initialiser wired to the wrong slot compiles. The recorder names
 // below say which entry was reached; the designators say which entry
 // each function was installed in.
@@ -115,13 +104,6 @@ const WireHost	s_Host = {
 	.HasOtherRequest		= HostHasOtherRequest,
 	.RemoveOtherRequest		= HostRemoveOtherRequest,
 	.CharacterName			= HostCharacterName,
-	.CharacterWorldID		= HostCharacterWorldID,
-	.CharacterRace			= HostCharacterRace,
-	.HasWhisperMessage		= HostHasWhisperMessage,
-	.GetWhisperMessages		= HostGetWhisperMessages,
-	.RemoveWhisperMessage		= HostRemoveWhisperMessage,
-	.TryToSendWhisperMessage	= HostTryToSendWhisperMessage,
-	.RemoveRequestUserLater		= HostRemoveRequestUserLater,
 	.RemoveProfileRequire		= HostRemoveProfileRequire,
 };
 
@@ -137,7 +119,7 @@ int	s_Asked = 0;
 Player*	CountingBugReportTarget()	{ s_Asked++; return s_pTarget; }
 
 // s_Host with the counting target in place of the plain one; the
-// other 23 entries are the same functions.
+// other 16 entries are the same functions.
 const WireHost	s_CountingHost = {
 	.MaxProcessPacket		= HostMaxProcessPacket,
 	.MaxRequestService		= HostMaxRequestService,
@@ -155,13 +137,6 @@ const WireHost	s_CountingHost = {
 	.HasOtherRequest		= HostHasOtherRequest,
 	.RemoveOtherRequest		= HostRemoveOtherRequest,
 	.CharacterName			= HostCharacterName,
-	.CharacterWorldID		= HostCharacterWorldID,
-	.CharacterRace			= HostCharacterRace,
-	.HasWhisperMessage		= HostHasWhisperMessage,
-	.GetWhisperMessages		= HostGetWhisperMessages,
-	.RemoveWhisperMessage		= HostRemoveWhisperMessage,
-	.TryToSendWhisperMessage	= HostTryToSendWhisperMessage,
-	.RemoveRequestUserLater		= HostRemoveRequestUserLater,
 	.RemoveProfileRequire		= HostRemoveProfileRequire,
 };
 
@@ -174,8 +149,6 @@ struct NoHost
 	{
 		Wire::SetHost(NULL);
 		s_CharacterName	= "Alice";
-		s_WorldID	= 0;
-		s_Race		= RACE_SLAYER;
 	}
 };
 
@@ -545,91 +518,57 @@ TEST(WireHostSeam, TheRequestServiceObjectsAreInTheLibrary)
 //----------------------------------------------------------------------
 // The last holdout's seams
 //----------------------------------------------------------------------
-TEST(WireHostSeam, WithNoHostThereIsNoCharacterAndNothingQueued)
+TEST(WireHostSeam, WithNoHostThereIsNoCharacter)
 {
 	NoHost	restore;
 
 	Wire::SetHost(NULL);
 
-	// No character: an empty name, world 0 - UserInformation's own
-	// constructor value - and RACE_MAX, "no race". Not RACE_SLAYER,
-	// which is what a zero would have read as; a whisper written with
-	// it would have claimed a race the character does not have.
+	// No character: an empty name, which CRConnect::write refuses to
+	// put on the wire.
 	CHECK(Wire::CharacterName().empty());
-	CHECK_EQ(0, (int)Wire::CharacterWorldID());
-	CHECK_EQ((int)RACE_MAX, (int)Wire::CharacterRace());
 
-	// And an empty queue, answered the way the queue answers for a peer
-	// it holds nothing for.
-	CHECK_EQ(false, Wire::HasWhisperMessage("peer"));
-	CHECK(Wire::GetWhisperMessages("peer") == NULL);
-	CHECK_EQ(false, Wire::RemoveWhisperMessage("peer"));
-
-	// The three notifications have nobody to notify, and say so by
-	// returning - observably: the recorder that every installed entry
-	// writes to stays empty, because none was reached.
+	// The notification has nobody to notify, and says so by returning
+	// - observably: the recorder that every installed entry writes to
+	// stays empty, because none was reached.
 	s_RequestAsked.clear();
-	Wire::TryToSendWhisperMessage("peer");
-	Wire::RemoveRequestUserLater("peer");
 	Wire::RemoveProfileRequire("peer");
 	CHECK(s_RequestAsked.empty());
 
 	// A host that answers nothing answers the same way, one entry at a
 	// time - see TheRequestSeamsAnswerConservativelyWithNoHost for why
-	// every entry is asked again here.
+	// every entry is asked again here. (With the empty host the entry
+	// is NULL, so the second call is a smoke call: nothing observable,
+	// only that the guard holds.)
 	Wire::SetHost(&s_EmptyHost);
 	CHECK(Wire::CharacterName().empty());
-	CHECK_EQ(0, (int)Wire::CharacterWorldID());
-	CHECK_EQ((int)RACE_MAX, (int)Wire::CharacterRace());
-	CHECK_EQ(false, Wire::HasWhisperMessage("peer"));
-	CHECK(Wire::GetWhisperMessages("peer") == NULL);
-	CHECK_EQ(false, Wire::RemoveWhisperMessage("peer"));
-	// (With the empty host the entries are NULL, so these three are
-	// smoke calls: nothing observable, only that the guards hold.)
-	Wire::TryToSendWhisperMessage("peer");
-	Wire::RemoveRequestUserLater("peer");
 	Wire::RemoveProfileRequire("peer");
 	CHECK(s_RequestAsked.empty());
 }
 
-TEST(WireHostSeam, AHostAnswersForTheCharacterAndIsAskedTheRightQueueCall)
+TEST(WireHostSeam, AHostAnswersForTheCharacterAndIsAskedTheRightNotification)
 {
 	NoHost	restore;
 
 	s_CharacterName	= "Alice";
-	s_WorldID	= 3;
-	s_Race		= RACE_OUSTERS;
 	s_RequestAsked.clear();
 
 	Wire::SetHost(&s_Host);
 
 	CHECK(Wire::CharacterName() == "Alice");
-	CHECK_EQ(3, (int)Wire::CharacterWorldID());
-	CHECK_EQ((int)RACE_OUSTERS, (int)Wire::CharacterRace());
 
 	// Read each time: the character changes on every login, and the
 	// connection manager outlives the login.
 	s_CharacterName = "Bob";
 	CHECK(Wire::CharacterName() == "Bob");
 
-	// The list the queue hands over is the queue's own, not a copy -
-	// the manager reads it and then tells the queue to drop it.
-	CHECK(Wire::GetWhisperMessages("peer") == &s_Whispers);
-
-	// Which entry each forwarder reached. Five of the six share a
-	// signature with another (two bool, three void, all over a name).
-	// This proves WireHost.cpp's forwarders; the initialiser in
-	// GameInit.cpp, which a test binary never links, is held by its
-	// designators instead - a wrong or out-of-order name there is a
-	// compile error.
+	// Which entry the forwarder reached. It shares its signature with
+	// nothing else in the struct now, but the recorder is kept so the
+	// test says which was reached rather than only that something was;
+	// this proves WireHost.cpp, and the installer in GameInit.cpp is
+	// held by its designators.
 	s_RequestAsked.clear();
-	Wire::HasWhisperMessage("a");
-	Wire::GetWhisperMessages("b");
-	Wire::RemoveWhisperMessage("c");
-	Wire::TryToSendWhisperMessage("d");
-	Wire::RemoveRequestUserLater("e");
 	Wire::RemoveProfileRequire("f");
 
-	CHECK(s_RequestAsked ==
-		"HasWhisper(a) GetWhispers(b) RemoveWhisper(c) TryToSend(d) RemoveUser(e) RemoveProfile(f) ");
+	CHECK(s_RequestAsked == "RemoveProfile(f) ");
 }

@@ -9,9 +9,10 @@
 # put the logging header into basic/, the second the three tuning
 # values behind WireHost, the third ClientPlayer.cpp, the fourth the
 # request-service family, and the fifth RequestClientPlayerManager.cpp,
-# whose seams (the logged-in character, the whisper queue and the two
-# managers a failed peer connection is reported to) are nine WireHost
-# entries.
+# whose seams (the logged-in character's name, and the profile manager
+# a failed peer connection is reported to) are two WireHost entries -
+# nine, until the dead whisper path that needed the other seven was
+# deleted the same day.
 #
 # The file stays because W0 reads it, and so that the next holdout has
 # somewhere to be written down. When one is, list WHAT IT REACHES with

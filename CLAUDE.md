@@ -82,7 +82,7 @@ and the ratchet script). **Every `.cpp` under `Client/Packet` is a member**
 since 2026-09-09; `tests/arch/packetwire_holdouts.txt` is empty and is where
 the next exception, if one is ever needed, gets written down with what it
 *reaches*, not what it includes. What the wire layer needs from the program
-around it goes through `Client/Packet/WireHost.h`, 24 entries the executable
+around it goes through `Client/Packet/WireHost.h`, 17 entries the executable
 installs in `GameInit.cpp`. The logging facility (`DebugLog.h`) is in
 `basic`, so every library may log; `Client/DebugInfo.h` is the executable's
 front end to it and pulls in `MinTr.h`, which is why the libraries may not
@@ -164,8 +164,8 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **631 tests, 294,571 checks, 0 failed** in both Windows trees, and
-**631 tests, 294,570 checks, 0 failed** on Linux (GCC, Clang, and GCC with
+baseline: **628 tests, 294,534 checks, 0 failed** in both Windows trees, and
+**628 tests, 294,533 checks, 0 failed** on Linux (GCC, Clang, and GCC with
 `-DUSE_ASAN=ON -DUSE_UBSAN=ON`, where UBSan reports nothing) and on macOS
 (Apple Clang, with and without ASan and UBSan); the one-check
 difference is a platform-conditional test, not a failure. (The non-Windows

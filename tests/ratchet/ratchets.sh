@@ -147,7 +147,13 @@ check () {
 # logged-in character's name, world and race, the four whisper-queue
 # calls and the two failure notifications - are nine WireHost entries;
 # the Ninja baseline moves with it (486 -> 485).
-R1_BASELINE=488
+#
+# 487: 488 - 1. Task 5.2's seventh slice deleted Client/WhisperManager.cpp
+# with the rest of the peer-to-peer whisper path, which upstream had
+# compiled out (`0 &&` around every writer of its queue): whispers go
+# to the game server as CGWhisper from UIMessageManager, and the seven
+# WireHost entries that served the path went too. Ninja 485 -> 484.
+R1_BASELINE=487
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -184,7 +190,7 @@ elif [ -n "$BUILD_DIR" ] && [ -f "$BUILD_DIR/build.ninja" ]; then
 	# this branch existed the ratchet SKIPPED on every non-MSVC tree,
 	# which the port assessment listed as fail-open (area A). build.ninja
 	# is rewritten on every configure, so its mtime is the configure time.
-	R1_NINJA_BASELINE=485
+	R1_NINJA_BASELINE=484
 	R1_NINJA="$BUILD_DIR/build.ninja"
 	if [ CMakeLists.txt -nt "$R1_NINJA" ] || [ tests/arch/packetwire_files.txt -nt "$R1_NINJA" ]; then
 		echo "FAIL R1: $BUILD_DIR was configured before CMakeLists.txt or the packetwire membership file last changed - reconfigure that tree first"

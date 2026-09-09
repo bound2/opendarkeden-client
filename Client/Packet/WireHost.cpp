@@ -204,22 +204,16 @@ Wire::RemoveOtherRequest ( const std::string & name )
 }
 
 //----------------------------------------------------------------------
-// The last holdout's seams: the logged-in character, the whisper queue
-// and the two managers a failed peer connection is reported to.
+// The last holdout's seams: the logged-in character's name, and the
+// profile manager a failed peer connection is reported to.
 //----------------------------------------------------------------------
-// No host means no character: an empty name, world 0 - what
-// UserInformation's own constructor sets - and RACE_MAX, "no race",
-// rather than the slayer a zero would read as. The connect packet
-// refuses an empty name when it is written, and the manager's Update
-// treats that refusal as it treats any other failure on the peer
-// connection, so a binary with no host drops the connection instead
-// of announcing a nameless character. That is the behaviour delta
-// this slice records: the old code dereferenced the character
-// unguarded.
-//
-// An empty queue answers the way the queue itself does for a peer it
-// holds nothing for - false, NULL, false - and the three notifications
-// have nobody to notify.
+// No host means no character: an empty name. CRConnect::write refuses
+// an empty name, and the manager's Update treats that refusal as it
+// treats any other failure on the peer connection, so a binary with
+// no host drops the connection instead of announcing a nameless
+// character. That is the behaviour delta this slice records: the old
+// code dereferenced the character unguarded. The notification has
+// nobody to notify.
 //----------------------------------------------------------------------
 std::string
 Wire::CharacterName ()
@@ -230,83 +224,6 @@ Wire::CharacterName ()
 	}
 
 	return s_pHost->CharacterName();
-}
-
-WorldID_t
-Wire::CharacterWorldID ()
-{
-	if (s_pHost==NULL || s_pHost->CharacterWorldID==NULL)
-	{
-		return 0;
-	}
-
-	return s_pHost->CharacterWorldID();
-}
-
-Race
-Wire::CharacterRace ()
-{
-	if (s_pHost==NULL || s_pHost->CharacterRace==NULL)
-	{
-		return RACE_MAX;
-	}
-
-	return s_pHost->CharacterRace();
-}
-
-bool
-Wire::HasWhisperMessage ( const std::string & name )
-{
-	if (s_pHost==NULL || s_pHost->HasWhisperMessage==NULL)
-	{
-		return false;
-	}
-
-	return s_pHost->HasWhisperMessage(name);
-}
-
-const std::list<WHISPER_MESSAGE> *
-Wire::GetWhisperMessages ( const std::string & name )
-{
-	if (s_pHost==NULL || s_pHost->GetWhisperMessages==NULL)
-	{
-		return NULL;
-	}
-
-	return s_pHost->GetWhisperMessages(name);
-}
-
-bool
-Wire::RemoveWhisperMessage ( const std::string & name )
-{
-	if (s_pHost==NULL || s_pHost->RemoveWhisperMessage==NULL)
-	{
-		return false;
-	}
-
-	return s_pHost->RemoveWhisperMessage(name);
-}
-
-void
-Wire::TryToSendWhisperMessage ( const std::string & name )
-{
-	if (s_pHost==NULL || s_pHost->TryToSendWhisperMessage==NULL)
-	{
-		return;
-	}
-
-	s_pHost->TryToSendWhisperMessage(name);
-}
-
-void
-Wire::RemoveRequestUserLater ( const std::string & name )
-{
-	if (s_pHost==NULL || s_pHost->RemoveRequestUserLater==NULL)
-	{
-		return;
-	}
-
-	s_pHost->RemoveRequestUserLater(name);
 }
 
 void

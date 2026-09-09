@@ -67,7 +67,6 @@ extern "C" void spritectl_window_to_game_coords(int* x, int* y);
 #include "RequestClientPlayerManager.h"
 #include "ClientCommunicationManager.h"
 #include "RequestUserManager.h"
-#include "WhisperManager.h"
 #include "RequestFileManager.h"
 #include "MJusticeAttackManager.h"
 #include "WavePackFileManager.h"
@@ -363,19 +362,6 @@ UpdateSocketInput()
 
 			#ifdef OUTPUT_DEBUG_UPDATE_LOOP
 				DEBUG_ADD( "CCMu ok" );
-			#endif
-		}
-
-		if (g_pWhisperManager!=NULL)
-		{
-			#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-				DEBUG_ADD( "WMu" );
-			#endif
-
-			g_pWhisperManager->Update();
-
-			#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-				DEBUG_ADD( "WMu ok" );
 			#endif
 		}
 

@@ -108,7 +108,7 @@
 #include "RequestServerPlayerManager.h"
 #include "RequestUserManager.h"
 #include "ClientCommunicationManager.h"
-#include "WhisperManager.h"
+#include "Packet/Cpackets/CGWhisper.h"
 #include "Packet/Rpackets/RCSay.h"
 #include "Packet/Cpackets/CGGuildChat.h"
 #include "CMP3.h"
@@ -2821,14 +2821,17 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 											sprintf(strWhisperID, "%s ", pName);
 											g_pUserInformation->WhisperID = strWhisperID;
 
-											/*
+											// Whispers go through the game server. The
+											// peer-to-peer whisper (WhisperManager, a queue
+											// and a direct connection to the other client)
+											// was compiled out upstream and is deleted
+											// (docs/RESTRUCTURING.md task 5.2, seventh slice).
 											CGWhisper _CGWhisper;
 											_CGWhisper.setName( pName );
 											_CGWhisper.setMessage( pMessage );
+											_CGWhisper.setColor( right );
 
 											g_pSocket->sendPacket( &_CGWhisper );
-											*/
-											g_pWhisperManager->SendWhisperMessage( pName, pMessage, right );
 
 											
 											char strMessage[CHAT_MESSAGE_MAX_BYTES + 1];

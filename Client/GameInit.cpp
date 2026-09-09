@@ -65,7 +65,6 @@
 #include "ClientCommunicationManager.h"
 #include "KeyAccelerator.h"
 #include "AcceleratorManager.h"
-#include "WhisperManager.h"
 #include "ProfileManager.h"
 #include "MGuildMarkManager.h"
 #include "MEventManager.h"
@@ -2245,12 +2244,6 @@ InitSocket()
 		delete g_pRequestUserManager;		
 	}
 
-	if (g_pWhisperManager!=NULL)
-	{
-		DEBUG_ADD("[ InitGame ]  delete g_pWhisperManager");
-		delete g_pWhisperManager;		
-	}
-
 	if (g_pRequestFileManager!=NULL)
 	{
 		DEBUG_ADD("[ InitGame ]  delete g_pRequestFileManager");
@@ -2287,9 +2280,6 @@ InitSocket()
 
 	DEBUG_ADD("[ InitGame ] new g_pRequestUserManager");
 	g_pRequestUserManager = new RequestUserManager;
-
-	DEBUG_ADD("[ InitGame ] new g_pWhisperManager");
-	g_pWhisperManager = new WhisperManager;
 
 	DEBUG_ADD("[ InitGame ] new g_pRequestFileManager");
 	g_pRequestFileManager = new RequestFileManager;
@@ -2815,13 +2805,6 @@ ReleaseSocket()
 			g_pClientCommunicationManager = NULL;
 		}
 
-		if (g_pWhisperManager!=NULL)
-		{
-			DEBUG_ADD("delete g_pWhisperManager");
-			delete g_pWhisperManager;
-			g_pWhisperManager = NULL;
-		}
-
 		if (g_pRequestFileManager!=NULL)
 		{
 			DEBUG_ADD("delete g_pRequestFileManager");
@@ -3078,30 +3061,24 @@ static bool	WireRemoveOtherRequest(const std::string& name)
 //-----------------------------------------------------------------------------
 // The last holdout's seams (task 5.1's fifth slice): the character the
 // client is logged in as, which RequestClientPlayerManager announces to a
-// peer, and the whisper queue and the two managers it reports a failed
-// connection to.
+// peer, and the profile manager it reports a failed connection to.
 //-----------------------------------------------------------------------------
-// The character is read the way ProcessMode read it - the login's
-// CharacterID and WorldID, and the race off the player object - but
-// guarded: with no login there is no name, and with no player there is no
-// race, which is what Wire answers with no host too.
+// The name is read the way ProcessMode read it - the login's CharacterID
+// - but guarded: with no login there is no name, and MString hands back
+// NULL for an empty one, which is what Wire answers with no host too.
 //
-// The three managers have three different lifetimes, and the guards are
-// worth exactly what each allows. g_pWhisperManager and
-// g_pRequestUserManager are built in InitSocket(), which on the re-login
-// path deletes the previous pair WITHOUT nulling, fifteen-odd lines before
-// it reassigns them - the same window the file manager above has, and
-// the NULL test is a test on a dangling pointer for its duration.
-// ReleaseSocket() deletes and nulls, so at shutdown the guard holds.
 // g_pProfileManager is built in GameInitInfo and never deleted in the
-// shipped build (its only delete is in VS_UI/WinMain.cpp, which is not
-// compiled), so its guard can only ever fire before GameInitInfo runs.
+// shipped build (its only delete was in VS_UI/WinMain.cpp, which no
+// target compiled), so its guard can only ever fire before GameInitInfo
+// runs.
 //
-// Of the four whisper-queue entries, none is reachable today: the
-// peer-to-peer whisper path is compiled out upstream (`0 &&` guards in
-// WhisperManager.cpp), so the queue is never fed and no whisper-mode
-// connection is ever opened. The entries exist because the library code
-// references them; the profile fetch is the one live peer path.
+// The slice first added seven more entries here - the character's world
+// and race, four whisper-queue calls and a request-user notification -
+// for the whisper mode of the peer connection. That whole path was
+// compiled out upstream (`0 &&` guards around every writer of the queue
+// and every whisper-mode Connect), and task 5.2's seventh slice deleted
+// it, WhisperManager included; whispers go to the game server as
+// CGWhisper, from UIMessageManager.
 //-----------------------------------------------------------------------------
 static std::string	WireCharacterName()
 {
@@ -3111,27 +3088,13 @@ static std::string	WireCharacterName()
 	return std::string(g_pUserInformation->CharacterID.GetString());
 }
 
-static WorldID_t	WireCharacterWorldID()	{ return g_pUserInformation!=NULL ? (WorldID_t)g_pUserInformation->WorldID : (WorldID_t)0; }
-static Race		WireCharacterRace()	{ return g_pPlayer!=NULL ? g_pPlayer->GetRace() : RACE_MAX; }
-
-static bool	WireHasWhisperMessage(const std::string& name)
-		{ return g_pWhisperManager!=NULL && g_pWhisperManager->HasWhisperMessage(name.c_str()); }
-static const std::list<WHISPER_MESSAGE>*	WireGetWhisperMessages(const std::string& name)
-		{ return g_pWhisperManager!=NULL ? g_pWhisperManager->GetWhisperMessages(name.c_str()) : NULL; }
-static bool	WireRemoveWhisperMessage(const std::string& name)
-		{ return g_pWhisperManager!=NULL && g_pWhisperManager->RemoveWhisperMessage(name.c_str()); }
-static void	WireTryToSendWhisperMessage(const std::string& name)
-		{ if (g_pWhisperManager!=NULL) g_pWhisperManager->TryToSendWhisperMessage(name.c_str()); }
-
-static void	WireRemoveRequestUserLater(const std::string& name)
-		{ if (g_pRequestUserManager!=NULL) g_pRequestUserManager->RemoveRequestUserLater(name.c_str()); }
 static void	WireRemoveProfileRequire(const std::string& name)
 		{ if (g_pProfileManager!=NULL) g_pProfileManager->RemoveRequire(name.c_str()); }
 
-// Designated, not positional. Fourteen of the 24 entries share a signature
-// with another (six bool(const std::string&), three void(const
-// std::string&), three int(), two bool()), so a positional initialiser
-// wired to the wrong one
+// Designated, not positional. Nine of the 17 entries share a signature
+// with another (four bool(const std::string&), three int(), two bool())
+// and two more differ only in a pointer type, so a positional
+// initialiser wired to the wrong one
 // compiles and passes the whole suite - which never links this file. A
 // designator out of declaration order, or naming a member that does not
 // exist, is a compile error instead (C++20).
@@ -3152,13 +3115,6 @@ static const WireHost	s_WireHost = {
 	.HasOtherRequest		= WireHasOtherRequest,
 	.RemoveOtherRequest		= WireRemoveOtherRequest,
 	.CharacterName			= WireCharacterName,
-	.CharacterWorldID		= WireCharacterWorldID,
-	.CharacterRace			= WireCharacterRace,
-	.HasWhisperMessage		= WireHasWhisperMessage,
-	.GetWhisperMessages		= WireGetWhisperMessages,
-	.RemoveWhisperMessage		= WireRemoveWhisperMessage,
-	.TryToSendWhisperMessage	= WireTryToSendWhisperMessage,
-	.RemoveRequestUserLater		= WireRemoveRequestUserLater,
 	.RemoveProfileRequire		= WireRemoveProfileRequire,
 };
 
