@@ -1,5 +1,15 @@
 # Client Restructuring Plan
 
+**Complete as of 2026-09-09.** Every task below is `done` and has its owner;
+PRs #144 and #145 carry the last slices. What the plan leaves behind is the
+machinery, not a to-do list: the membership files, the include checker, the
+thirteen ratchets and the fix policy (task 3.1) are what keep the end state
+true from here, and *What the review rounds settled* is what a later slice
+of any kind should read first. The one list still open is 5.2's
+*Candidates for a next slice* - dead code the plan found and did not take
+unasked - and the exemption list, which shrinks whenever a task extracts a
+seam.
+
 Living, trackable plan for moving the OpenDarkEden client's game code out of the
 `DarkEden` executable and into testable static libraries, while the outstanding
 findings of `docs/code-health-review-2026-08-29.md` keep getting fixed. The end
@@ -28,7 +38,8 @@ adversarial reviews recorded the traps.
   bugs, what remains. The per-change narrative — what moved, what the
   review round found, the test list, the suite count, the ratchet delta —
   belongs in the PR description and the commit message, not here. PRs #33
-  through #77 and their commits hold that history for everything below.
+  through #77, then #142 to #145, and their commits hold that history for
+  everything below.
 - A task is only `done` when its **Owner** exists — the test or mechanism that
   keeps the rule true from then on. Landing the change without the owner is
   `in progress (owner missing)`.
@@ -203,7 +214,7 @@ every baseline move; the table below is the current reading.
 
 | # | Metric | Now | What it counts, and does not |
 |---|--------|---:|---|
-| R1 | Translation units compiled directly into the `DarkEden` target | **489** | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj`, read from the ctest run's own build dir; SKIP (never PASS) on a generator with no vcxproj, and FAIL on a vcxproj older than the membership files. On the Ninja generator (the Linux and macOS presets) the same count is read from `build.ninja`'s object rules for the target against its own baseline, **486** - the non-Windows source list is three files shorter - so the ratchet no longer skips there (2026-09-08). Baseline 1,044 on 2026-09-01. It counts what still cannot be unit-tested. Recorded growths, each the executable side of a split: `PacketHandlerRegistry.cpp`, `GCExchangeBuyHandler.cpp`, `MItemUse.cpp`, `MObjectScreen.cpp`, `MSkillAvailable.cpp`, `TextServiceScreen.cpp`. |
+| R1 | Translation units compiled directly into the `DarkEden` target | **484** | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj`, read from the ctest run's own build dir; SKIP (never PASS) on a generator with no vcxproj, and FAIL on a vcxproj older than the membership files. On the Ninja generator (the Linux and macOS presets) the same count is read from `build.ninja`'s object rules for the target against its own baseline, **481** - the non-Windows source list is three files shorter - so the ratchet no longer skips there (2026-09-08). Baseline 1,044 on 2026-09-01. 489 → 484 on 2026-09-09: the last holdout moved into `packetwire`, then `WhisperManager.cpp` and three `RC*` handlers went with the outbound peer side (task 5.2's seventh and eighth slices); this row was not moved with the first two of those and the script's own FAIL message is what says to. It counts what still cannot be unit-tested. Recorded growths, each the executable side of a split: `PacketHandlerRegistry.cpp`, `GCExchangeBuyHandler.cpp`, `MItemUse.cpp`, `MObjectScreen.cpp`, `MSkillAvailable.cpp`, `TextServiceScreen.cpp`. |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l`. Baseline 448. Holds the line since `Packet::execute` itself was deleted; the client twin of the server's R4. |
 | R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` and `Client/PacketHandler` | **0** | Line-based; strips `//` tails before matching, so a commented-out call does not count. `\b` rejects the `w` in `wsprintf`, which R7 sees instead. Baseline 61 (a quarter of it commented-out code). Holds the line since the packet-tree copy pass (2026-09-04, PR #76). |
 | R4 | Library-compiled `.cpp` files referencing `g_p*` client globals no library file defines | **21** | Over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files; comment lines excluded; the subtraction is library-wide, so a library file reading a global another library defines is not a seam. **All 21 are `VS_UI` files.** Blind to a library file calling an executable-side *function* (the link proofs cover that) and to a global not named `g_p*`. Baseline 83. |

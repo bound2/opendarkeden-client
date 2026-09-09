@@ -260,7 +260,7 @@ and a `<SDL2/...>` include spelling breaks the Homebrew build - it is
 | `VS_UI/` | UI framework — widgets, dialogs, skinning, Korean IME |
 | `basic/` | memory, exceptions, typedefs, platform abstraction |
 | `tests/` | framework and unit tests |
-| `docs/` | code health review |
+| `docs/` | code health review; `RESTRUCTURING.md`, the extraction plan, complete as of 2026-09-09 - its *What the review rounds settled* section is the standing rulebook for library work |
 | `참고자료/` | upstream asset notes, non-English, not built |
 
 ## Current focus
