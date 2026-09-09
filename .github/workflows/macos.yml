@@ -69,6 +69,19 @@ jobs:
       - name: Configure, build and test
         run: tools/ci/verify-linux.sh ${{ matrix.preset }}
 
+      - name: Package the tested macOS executable
+        if: matrix.preset == 'macos'
+        run: bash tools/macos/package-ci.sh
+
+      - name: Upload the macOS client
+        if: matrix.preset == 'macos'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: darkeden-client-macos-arm64
+          retention-days: 30
+          if-no-files-found: error
+          path: build/packages/darkeden-client-macos-arm64.tar.gz
+
       - name: Upload build and test diagnostics
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
