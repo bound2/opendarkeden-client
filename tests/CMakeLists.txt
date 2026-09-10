@@ -118,6 +118,9 @@ set_source_files_properties(
 	# The second span/typed-scalar slice: the CGSkillTo* family's fields
 	# and its truncated-input contract, over the same stream classes.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_skill_family_wire.cpp
+	# The third: the melee combat packets, the last raw scalar casts in
+	# the packet directories, over the same stream classes.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_combat_family_wire.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_scalar.cpp
 	# The 32-bit width of long/ulong on the wire, pinned on every platform
 	# (the port assessment, area C), over the same streams.

@@ -9,6 +9,12 @@
 #include "SocketEncryptOutputStream.h"
 #include "PacketAssert.h"
 
+#include <cstdint>
+
+// Pin the wire width so a change to ObjectID_t is a compile error here.
+static_assert(sizeof(ObjectID_t) == sizeof(std::uint32_t),
+	"CGAttack stages its ObjectID as a 32-bit wire scalar");
+
 
 CGAttack::CGAttack ()
 {
