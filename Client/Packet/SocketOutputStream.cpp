@@ -168,14 +168,14 @@ void SocketOutputStream::write ( const Packet * pPacket )
 	try {
 
 		// First write the packet id and the packet size to the output buffer.
-		PacketID_t packetID = pPacket->getPacketID();
-		write( (char*)&packetID , szPacketID );
+		const PacketID_t packetID = pPacket->getPacketID();
+		writeWire( packetID );
 
-		PacketSize_t packetSize = pPacket->getPacketSize();
-		write( (char*)&packetSize , szPacketSize );
+		const PacketSize_t packetSize = pPacket->getPacketSize();
+		writeWire( packetSize );
 
 		// then the sequence number
-		write( (char*)&m_Sequence, szSequenceSize);
+		writeWire( m_Sequence );
 		m_Sequence++;
 
 		#ifdef __DEBUG_OUTPUT__

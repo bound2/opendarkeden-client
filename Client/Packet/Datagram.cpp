@@ -51,18 +51,34 @@ Datagram::~Datagram ()
 //////////////////////////////////////////////////////////////////////
 void Datagram::read ( char * buf , uint len )
 {
+	read( std::span<char>( buf , len ) );
+}
+
+//////////////////////////////////////////////////////////////////////
+// read raw bytes into a bounded destination: the one read every other
+// read() reaches, and the one place the bound is checked.
+//////////////////////////////////////////////////////////////////////
+void Datagram::read ( std::span<char> buf )
+{
 	__BEGIN_TRY
+
+	const uint len = (uint)buf.size();
 
 	// boundary check
 	//Assert( m_InputOffset + len <= m_Length );
 	if (m_InputOffset + len > m_Length)
 		throw InsufficientDataException("Datagram read");
 
-	memcpy( buf , &m_Data[m_InputOffset] , len );
+	memcpy( buf.data() , &m_Data[m_InputOffset] , len );
 
 	m_InputOffset += len;
 
 	__END_CATCH
+}
+
+void Datagram::read ( std::span<std::byte> buf )
+{
+	read( std::span<char>( reinterpret_cast<char*>( buf.data() ) , buf.size() ) );
 }
 
 
@@ -113,8 +129,8 @@ void Datagram::read ( DatagramPacket * & pPacket )
 	PacketSize_t packetSize;
 
 	// initialize packet header
-	read( (char*)&packetID , szPacketID );
-	read( (char*)&packetSize , szPacketSize );
+	readWire( packetID );
+	readWire( packetSize );
 
 	cout << "DatagramPacket I  D : " << packetID;
 
@@ -167,16 +183,32 @@ void Datagram::read ( DatagramPacket * & pPacket )
 //////////////////////////////////////////////////////////////////////
 void Datagram::write ( const char * buf , uint len )
 {
+	write( std::span<const char>( buf , len ) );
+}
+
+//////////////////////////////////////////////////////////////////////
+// write raw bytes from a bounded source: the one write every other
+// write() reaches, and the one place the bound is checked.
+//////////////////////////////////////////////////////////////////////
+void Datagram::write ( std::span<const char> buf )
+{
 	__BEGIN_TRY
+
+	const uint len = (uint)buf.size();
 
 	// boundary check
 	Assert( m_OutputOffset + len <= m_Length );
 
-	memcpy( &m_Data[m_OutputOffset] , buf , len );
+	memcpy( &m_Data[m_OutputOffset] , buf.data() , len );
 
 	m_OutputOffset += len;
 
 	__END_CATCH
+}
+
+void Datagram::write ( std::span<const std::byte> buf )
+{
+	write( std::span<const char>( reinterpret_cast<const char*>( buf.data() ) , buf.size() ) );
 }
 
 
@@ -225,9 +257,11 @@ void Datagram::write ( const DatagramPacket * pPacket )
 	// 데이타그램의 버퍼를 적절한 크기로 설정한다.
 	setData( szPacketHeader + packetSize );
 
-	// 패킷 헤더를 설정한다.
-	write( (char*)&packetID , szPacketID );
-	write( (char*)&packetSize , szPacketSize );
+	// Write the packet header. The sequence slot that follows the size
+	// on the stream is not written here; it is the zero pad setData left
+	// behind the body.
+	writeWire( packetID );
+	writeWire( packetSize );
 
 	// 패킷 바디를 설정한다.
 	pPacket->write( *this );

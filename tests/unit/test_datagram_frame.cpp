@@ -30,6 +30,7 @@
 #include "PacketFactoryManager.h"
 #include "Rpackets/RCPositionInfo.h"
 
+#include <cstdint>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -304,4 +305,109 @@ TEST(Datagram, ABufferSizedForWritingStartsZeroed)
 				nonZero++;
 		CHECK_EQ(0, nonZero);
 	}
+}
+
+//----------------------------------------------------------------------
+// The typed scalar layer: every Datagram overload writes its declared
+// width and reads it back, through the same WireScalar rule the
+// socket streams use
+//----------------------------------------------------------------------
+namespace {
+
+enum class PeerFlag : std::uint8_t { NONE = 0, BUSY = 0x9C };
+
+} // namespace
+
+TEST(Datagram, TypedOverloadsWriteTheirDeclaredWidthsAndReadThemBack)
+{
+	Datagram out;
+	out.setData(1 + 1 + 2 + 2 + 4 + 4 + 4 + 4 + 2 + 1);
+	out.write((char)-1);
+	out.write((uchar)0x81);
+	out.write((short)-2);
+	out.write((ushort)0x8283);
+	out.write((int)-3);
+	out.write((uint)0x84858687u);
+	out.write((long)-4);
+	out.write((ulong)0x88898A8Bu);
+	out.writeWire((std::uint16_t)0x8C8D);
+	out.writeWire(PeerFlag::BUSY);
+
+	const unsigned char expected[] = {
+		0xFF,
+		0x81,
+		0xFE, 0xFF,
+		0x83, 0x82,
+		0xFD, 0xFF, 0xFF, 0xFF,
+		0x87, 0x86, 0x85, 0x84,
+		0xFC, 0xFF, 0xFF, 0xFF,
+		0x8B, 0x8A, 0x89, 0x88,
+		0x8D, 0x8C,
+		0x9C
+	};
+	CHECK_EQ(sizeof(expected), out.getLength());
+	CHECK_EQ(0, std::memcmp(out.getData(), expected, sizeof(expected)));
+
+	// The same bytes, arriving: setData(data, len) is the receive path.
+	Datagram in;
+	in.setData(out.getData(), out.getLength());
+	char c = 0; uchar uc = 0; short s = 0; ushort us = 0; int i = 0; uint ui = 0;
+	long l = 0; ulong ul = 0; std::uint16_t u16 = 0; PeerFlag flag = PeerFlag::NONE;
+	in.read(c);
+	in.read(uc);
+	in.read(s);
+	in.read(us);
+	in.read(i);
+	in.read(ui);
+	in.read(l);
+	in.read(ul);
+	in.readWire(u16);
+	in.readWire(flag);
+	CHECK_EQ((char)-1, c);
+	CHECK_EQ((uchar)0x81, uc);
+	CHECK_EQ((short)-2, s);
+	CHECK_EQ((ushort)0x8283, us);
+	CHECK_EQ(-3, i);
+	CHECK_EQ(0x84858687u, ui);
+	CHECK_EQ(-4L, l);
+	CHECK_EQ((ulong)0x88898A8Bu, ul);
+	CHECK_EQ((std::uint16_t)0x8C8D, u16);
+	CHECK(PeerFlag::BUSY == flag);
+
+	// Nothing left: the reads consumed exactly the widths the writes put down.
+	bool bThrew = false;
+	try {
+		char extra = 0;
+		in.read(extra);
+	} catch (InsufficientDataException&) {
+		bThrew = true;
+	}
+	CHECK(bThrew);
+}
+
+// A typed read at the end of the buffer is refused whole: no partial
+// scalar, and the value the caller passed is untouched.
+TEST(Datagram, ATypedReadShortOfItsWidthUnderflowsAndLeavesTheValue)
+{
+	std::vector<unsigned char> bytes;
+	bytes.push_back(0xA1);
+	bytes.push_back(0xB2);
+	bytes.push_back(0xC3);
+	Datagram datagram;
+	Load(datagram, bytes);
+
+	uint value = 0x11223344u;
+	bool bThrew = false;
+	try {
+		datagram.read(value);
+	} catch (InsufficientDataException&) {
+		bThrew = true;
+	}
+	CHECK(bThrew);
+	CHECK_EQ(0x11223344u, value);
+
+	// The three bytes are still there for a read that fits.
+	ushort first = 0;
+	datagram.read(first);
+	CHECK_EQ((ushort)0xB2A1, first);
 }
