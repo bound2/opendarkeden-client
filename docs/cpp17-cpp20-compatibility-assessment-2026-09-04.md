@@ -1252,9 +1252,13 @@ of them the executable sets: the flag war's end, which
 `GCFlagWarStatusHandler` builds from the seconds the server sends and
 passes through three relays to the CTF status window, whose two
 "remaining" displays share a `RemainingMillis()` that reads 0 once the
-end has passed - the `DWORD` subtraction went round to 49.7 days there,
-which a "more than three hours reads as none" guard then caught, and
-the guard stays. Retyping the mission record found a trap worth its own
+end has passed. The `DWORD` subtraction went round to 49.7 days there:
+`Show()` had a "four hours or more reads as none" guard that caught it
+(the comment said three; the arithmetic says four), and the hover
+tooltip had none and printed the wrapped value, about 1,193 hours, once
+a war ended - a small display defect this slice removes, which the
+review found the first version of this record describing as no change.
+Retyping the mission record found a trap worth its own
 sentence: the wire layer's `UI_GMissionInfo` and `UI_GQuestInfo` were
 redeclared field for field inside `C_VS_UI_QUEST_MANAGER`, and the
 handlers passed one to the manager through a `void*` it cast to its own
@@ -1266,10 +1270,15 @@ epoch and the width change, and the width is what removes the wrap. R14
 goes from 138 to 113 (25 calls, the handler's two among them). `VS_UI`
 holds 33: the three minigames' clocks, and the three deadlines the
 executable sets through shared structs - the quest status's
-`quest_time`, the effect status's `delayFrame` and `left_time` - which
-want the same retyping on both sides of the boundary and are the next
-slices. `Client` holds 80. Verified by the build; the client was not
-run.
+`quest_time`, the effect status's `delayFrame`, and the war list's
+`left_time` (`WAR_INFO`, set in `MWarManager`, read in the effect status
+window) - which want the same retyping on both sides of the boundary
+and are the next slices. `Client` holds 80. The review added the one
+test a binary can reach: the mission record is a packetwire header, and
+`tests/unit/test_quest_status_record.cpp` pins its no-limit default and
+that a quest holds its missions by the same type. The rest is verified
+by the build on Windows and, by the review, on Linux GCC; the client
+was not run.
 
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through
