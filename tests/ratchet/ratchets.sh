@@ -1119,9 +1119,11 @@ fi
 # removed by a character-level scanner, because a regex strip of block
 # comments reads "//*pDest" as an opener and swallowed live code - the
 # clocks slices' first counts were low by that. basic/ is outside the
-# count: its hits are the definitions and the clock's own reader.
+# count: its three hits are Platform.h's definitions. Definitions and
+# #if-disabled code count like calls: the 186 includes the non-Windows
+# GetTickCount shim in VS_UI_widget.h.
 #
-# R14 = 186 as of 2026-09-10, from 215 before the widget timers outside
+# R14 = 186 as of 2026-09-10, from 214 before the widget timers outside
 # GameCommon moved; 100 of the 186 are the two VS_UI_GameCommon sources.
 #----------------------------------------------------------------------
 R14_BASELINE=186

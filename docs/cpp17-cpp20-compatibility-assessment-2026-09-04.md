@@ -1118,15 +1118,18 @@ wrap. 655 tests, 297,382 checks, 0 failed in both trees. Left as found:
 width measured is for a line never drawn; upstream's, and not this
 slice's to settle.
 
-What is left of priority 5 after that slice: 215 live tick reads in 32
+What is left of priority 5 after that slice: 214 live tick reads in 34
 files (calls of `GetTickCount`/`timeGetTime` over `Client/` and `VS_UI/`
 with comments and string literals removed; this paragraph first said
-209, counted by a regex strip of block comments that reads `//*pDest`
-as an opener and swallows code - the fourth slice's
+209 in 32, counted by a regex strip of block comments that reads a
+`//*` line comment as an opener and swallows code up to the next `*/` -
+in `VS_UI_Item.cpp` that is lines 228 to 285, `srand(GetTickCount())`
+among them, and `Vs_ui.cpp` has the same idiom - so the fourth slice's
 `tests/tools/count_tick_reads.pl` and ratchet R14 count by a
-character-level scanner instead, and every figure here is theirs).
-**Most of it is not executable-side**: `VS_UI` is a static
-library and holds 132 of them, 100 in the two `VS_UI_GameCommon`
+character-level scanner instead, and every figure here is theirs; the
+count includes one definition, the non-Windows `GetTickCount` shim in
+`VS_UI_widget.h`). **Most of it is not executable-side**: `VS_UI` is a
+static library and holds 132 of them, 100 in the two `VS_UI_GameCommon`
 sources alone (chat-spam
 throttles, help and hide auto-timers, mining progress and double-click
 timing), so those have a test path once `VS_UI` is added to the unit
@@ -1140,12 +1143,17 @@ dead code rather than a clock to move; `gamemodel` is clean.
 
 The fourth priority-5 slice (2026-09-10) is every VS_UI timer outside the
 two `GameCommon` sources, and it gives `basic` the gate they all share.
-Seven widget classes carried a `DWORD` pair and the three-line
+Five live widget classes carried a `DWORD` pair and the three-line
 `prev + interval <= GetTickCount()` over it - the event button's focus
-fade, `C_ANIMATION`'s frame step, the shop's, the briefing's and the
-computer's scroll timers, the mouse pointer's - and two functions kept
-the pair as static locals, the file dialog's long-name delay and the
-party cursor. `MonotonicClock::IntervalTimer` is that gate over a time
+fade, `C_ANIMATION`'s frame step, the shop's and the computer's scroll
+timers, the mouse pointer's - and two functions kept a previous tick as
+a static local against a delay, the file dialog's long-name latch and
+the party cursor's frame step. A sixth class, the tutorial briefing,
+carries the pair too and was converted in the slice's first version;
+the review found its whole implementation inside a comment block and
+its only instantiation commented out with it, so that conversion is
+reverted and the class is a task 5.2 deletion candidate. The title
+screen, converted inline by the first slice, is on the shared gate too. `MonotonicClock::IntervalTimer` is that gate over a time
 point and a 64-bit duration: `Fire()`, `Restart()`, `SetIntervalMillis`,
 and `Elapsed()` for the file dialog's strict comparison. Writing its
 tests corrected what the first slice's title-screen comment said the
@@ -1161,13 +1169,26 @@ off `GetTickCount` owes: on Windows it is kernel32's and steps in about
 and now fires at the interval - the button fade goes from about 15.6 to
 10 ms a step (a 320 ms fade instead of 500), the tutorial scrolls from
 62.5 to 50, the animation frame and the shop from 109 to 100, the party
-cursor from 156 to 150, the pointer from 312 to 300. `C_ANIMATION` never
-initialised its previous tick and compared against heap contents on its
-first gate; the timer constructs as "now". Two `srand(GetTickCount())`
-seeds stay: they are not timers. `VS_UI` goes from 132 live reads to 103,
-the tree from 215 to 186, and R14 holds the line. The timer is tested in
-`basic` (`tests/unit/test_interval_timer.cpp`); the widget conversions
-are verified by the build, and the client was not run.
+cursor from 156 to 150, the pointer from 312 to 300, and the button
+class's own animation, which sets 75 through `SetSpeed`, from 78 to 75.
+Every one of these gates is polled once per frame, so the period in
+play is the larger of the interval and the frame period: at 60 fps the
+button fade is 32 frames either way, and the shorter intervals show
+their change only above the frame rate they are written for.
+`C_ANIMATION` never initialised its previous tick, but never read it
+before a `Play*` call reset it either; the timer constructs as "now".
+Two `srand(GetTickCount())` seeds stay: they are not timers. `VS_UI`
+goes from 132 live reads to 104, the tree from 214 to 186 (28 calls;
+the counted total includes the shim definition), and R14 holds the
+line. The timer is tested in `basic`
+(`tests/unit/test_interval_timer.cpp`), including a fake source that
+advances per read, so a two-read timer fails the single-read test; the
+widget conversions are verified by the build, and the client was not
+run. The review also recorded, for the slice that clears GameCommon:
+the non-Windows `GetTickCount` shim in `VS_UI_widget.h` sits under
+`Platform.h`'s macro of the same name off Windows and so defines a
+second `platform_get_ticks` with `gettimeofday`'s epoch, a pre-existing
+hazard that goes with its last users.
 
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through
