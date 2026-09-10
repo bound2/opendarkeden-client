@@ -66,6 +66,7 @@
 #include "Cpackets/CGAddZoneToMouse.h"
 #include "Cpackets/CGAttack.h"
 #include "Cpackets/CGBloodDrain.h"
+#include "Cpackets/CGConnect.h"
 #include "Cpackets/CGDissectionCorpse.h"
 #include "Cpackets/CGDropMoney.h"
 #include "Cpackets/CGNPCAskAnswer.h"
@@ -528,6 +529,19 @@ void	Fill(CLLogin& p)
 	const BYTE mac[6] = { 0x80, 0x91, 0xA2, 0xB3, 0xC4, 0xD5 };
 	p.setID("reiot");
 	p.setPassword("wirepin");
+	p.setMacAddress(mac);
+}
+
+// CGConnect: the server's fixture from packet_gameserver_handshake_test.cpp
+// (it builds the instance by reading a crafted image, since its copy has
+// no MAC setter; the values are the same), so the golden is a
+// byte-identical copy of its file.
+void	Fill(CGConnect& p)
+{
+	const BYTE mac[6] = { 0x8A, 0x9B, 0xAC, 0xBD, 0xCE, 0xDF };
+	p.setKey(0xB7A69584);
+	p.setPCType(PC_OUSTERS);
+	p.setPCName("GoldConnectPC");
 	p.setMacAddress(mac);
 }
 
@@ -1184,6 +1198,23 @@ TEST(CLLogin, NetmarbleLayoutMatchesGolden)
 	const std::vector<unsigned char> body = WriteBody(packet, 0);
 	CHECK_EQ(packet.getPacketSize(), body.size());
 	ExpectGolden("CLLogin.netmarble", 0, body);
+}
+
+// CGConnect is the game-server handshake: key, PC type, name, then the
+// six MAC bytes as a raw array. Both sides consume the same bytes, so
+// it round-trips here, and the golden is the server's. Pinned ahead of
+// the MAC array's move to a span.
+TEST(CGConnect, RoundTripsAndMatchesTheSharedGolden)
+{
+	CGConnect src, dst;
+	Fill(src);
+	CHECK(EncrypterFree(src));
+	RoundTrip(src, dst, 0);
+	CHECK_EQ(src.getKey(), dst.getKey());
+	CHECK_EQ((int)src.getPCType(), (int)dst.getPCType());
+	CHECK(src.getPCName() == dst.getPCName());
+	CHECK(std::memcmp(src.getMacAddress(), dst.getMacAddress(), 6) == 0);
+	ExpectGolden("CGConnect", 0, WriteBody(src, 0));
 }
 
 //----------------------------------------------------------------------
