@@ -145,12 +145,14 @@ TEST(MPetItem, TheCountdownDoesNotWrapAtTheLegacyTick)
 	MPetItem pet;
 	pet.SetCurrentDurability(100000);	// 69.4 days
 
-	// Ten minutes later the tick has wrapped; the old arithmetic coped.
+	// Ten minutes later the tick has wrapped; the old arithmetic coped,
+	// because both operands were DWORDs and the subtraction went round.
 	SetNow(LEGACY_WRAP + 5 * MINUTE);
 	CHECK_EQ(15, (int)pet.MinutesSinceUpdate().count());
 	CHECK_EQ(100000u - 15u, pet.GetRemainingDurability());
 	{
-		const DWORD oldGap = (DWORD)((LEGACY_WRAP + 5 * MINUTE) - setAt) / 1000 / 60;
+		const DWORD oldTick = (DWORD)(LEGACY_WRAP + 5 * MINUTE);	// 300,000: past the wrap
+		const DWORD oldGap = (DWORD)(oldTick - (DWORD)setAt) / 1000 / 60;
 		CHECK_EQ(15u, oldGap);
 	}
 
@@ -166,7 +168,11 @@ TEST(MPetItem, TheCountdownDoesNotWrapAtTheLegacyTick)
 	}
 
 	// And an elapsed count past the durability's own 32-bit range is
-	// simply dead, not wrapped back to life.
-	SetNow(setAt + 5000ull * 24 * 60 * MINUTE);
+	// simply dead, not wrapped back to life: 2^32 + 100 minutes, which is
+	// past INT_MAX minutes too (std::chrono::minutes counts in an int on
+	// MSVC, which is why the item counts in its own 64-bit Minutes).
+	const unsigned long long farMinutes = 0x100000000ull + 100;
+	SetNow(setAt + farMinutes * MINUTE);
+	CHECK_EQ((long long)farMinutes, pet.MinutesSinceUpdate().count());
 	CHECK_EQ(0u, pet.GetRemainingDurability());
 }

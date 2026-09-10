@@ -3747,7 +3747,9 @@ void	UI_RunOtherInfo(MCreature *pCreature)
 			if(pPetItem != NULL)
 			{
 				PETINFO petInfo;
-				petInfo.HP = pPetItem->GetCurrentDurability();
+				// The pet window's "food remaining" is the countdown, the same
+				// figure the item's description panel shows.
+				petInfo.HP = pPetItem->GetRemainingDurability();
 				petInfo.ATTR = pPetItem->GetEnchantLevel();
 				petInfo.ATTR_VALUE = pPetItem->GetSilver();
 				petInfo.LEVEL = pPetItem->GetNumber();

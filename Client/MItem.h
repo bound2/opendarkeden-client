@@ -2387,8 +2387,11 @@ public :
 	void					SetCurrentDurability(TYPE_ITEM_DURATION d)	{ MItem::SetCurrentDurability(d); m_UpdateTime = MonotonicClock::Now(); }
 
 	// Whole minutes elapsed since the durability was last set; a clock that
-	// has not moved a full minute reads 0.
-	std::chrono::minutes	MinutesSinceUpdate() const;
+	// has not moved a full minute reads 0. The representation is 64-bit by
+	// name: std::chrono::minutes is an int on MSVC, which would wrap after
+	// 4,084 years where libstdc++'s int64_t would not.
+	typedef std::chrono::duration<long long, std::ratio<60> >	Minutes;
+	Minutes					MinutesSinceUpdate() const;
 
 	// The durability minus the minutes elapsed, floored at zero: the pet is
 	// dead at exactly 0. This is the one place the countdown is worked out,

@@ -2025,8 +2025,10 @@ void	UsePetFromInventory(MItem* pPet)
 {
 #ifdef __GAME_CLIENT__
 	// Upstream once refused the call while a pet was already out, then
-	// commented that out because the same item dismisses the pet; the
-	// guard is kept here as it was left.
+	// commented that out because the same item dismisses the pet, and
+	// noted that marking the item that summoned the pet was not done
+	// either (the motorcycle does not do it); the guard is kept as it
+	// was left.
 //	if(g_pPlayer->GetPetID() == OBJECTID_NULL)
 //	{
 	if(pPet->GetCurrentDurability() > 0)

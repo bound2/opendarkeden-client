@@ -1707,7 +1707,7 @@ MPetItem::MPetItem()
 	m_bCanAttack = false;
 }
 
-std::chrono::minutes
+MPetItem::Minutes
 MPetItem::MinutesSinceUpdate() const
 {
 	// One read of the clock decides the value; a clock that reads before
@@ -1715,17 +1715,17 @@ MPetItem::MinutesSinceUpdate() const
 	// can) counts as no time elapsed rather than a negative gap.
 	const MonotonicClock::TimePoint now = MonotonicClock::Now();
 	if (now <= m_UpdateTime)
-		return std::chrono::minutes(0);
-	return std::chrono::duration_cast<std::chrono::minutes>(now - m_UpdateTime);
+		return Minutes(0);
+	return std::chrono::duration_cast<Minutes>(now - m_UpdateTime);
 }
 
 TYPE_ITEM_DURATION
 MPetItem::GetRemainingDurability() const
 {
 	const TYPE_ITEM_DURATION durability = GetCurrentDurability();
-	// The elapsed count is 64-bit; the durability is 32. Compare in the
-	// wider type so an elapsed count past the durability's range floors
-	// at zero instead of wrapping.
+	// The elapsed count is 64-bit (Minutes, not std::chrono::minutes); the
+	// durability is 32. Compare in the wider type so an elapsed count past
+	// the durability's range floors at zero instead of wrapping.
 	const long long elapsed = MinutesSinceUpdate().count();
 	if (elapsed >= static_cast<long long>(durability))
 		return 0;
