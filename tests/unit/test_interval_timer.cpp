@@ -198,6 +198,34 @@ TEST(IntervalTimer, FireClampsABackwardsClockLikeElapsed)
 	CHECK(timer.Fire());
 }
 
+// Expire marks the last firing as the interval ago, so a gate that is
+// polled next opens; ExpireBy takes any distance. The chat window's
+// help and hide timers and the mine board's double-click guard used
+// "prev = GetTickCount() - X" for this.
+TEST(IntervalTimer, ExpireOpensTheGateAtTheNextPoll)
+{
+	MonotonicClock::ScopedTestSource clock(FakeNow);
+	SetNow(10000);
+	MonotonicClock::IntervalTimer timer(MonotonicClock::Millis(60000));
+	CHECK(!timer.Fire());
+	timer.Expire();
+	CHECK_EQ(60000, (int)timer.Elapsed().count());
+	CHECK(timer.Fire());		// and that firing restarts it
+	CHECK(!timer.Fire());
+
+	// A strict gate (prev + X < now) over an expired timer opens one
+	// millisecond later, exactly as it did over the DWORD idiom.
+	timer.Expire();
+	CHECK(!(timer.Elapsed() > timer.GetInterval()));
+	SetNow(10001);
+	CHECK(timer.Elapsed() > timer.GetInterval());
+
+	// ExpireBy with a distance of its own, past the interval.
+	timer.ExpireBy(MonotonicClock::Millis(5000));
+	CHECK_EQ(5000, (int)timer.Elapsed().count());
+	CHECK(!(timer.Elapsed() < MonotonicClock::Millis(500)));
+}
+
 // A test source that runs backwards is the one way Elapsed() could go
 // negative; it reads as zero instead.
 TEST(IntervalTimer, ElapsedIsNeverNegative)

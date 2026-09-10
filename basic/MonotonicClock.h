@@ -148,6 +148,13 @@ public:
 	// Marks now as the last firing.
 	void		Restart()							{ m_tp_prev = Now(); }
 
+	// Marks the last firing as d_ago in the past, so the next Elapsed()
+	// reads at least that and a gate over it is open: the widgets'
+	// "prev = GetTickCount() - X" idiom. Expire() uses the interval, so
+	// the next Fire() is due at once.
+	void		ExpireBy(Duration d_ago)			{ m_tp_prev = Now() - d_ago; }
+	void		Expire()							{ ExpireBy(m_d_interval); }
+
 	// Time since the last firing; never negative, whatever a test source does.
 	Duration	Elapsed() const
 	{
