@@ -248,8 +248,8 @@ TEST(PlayerBase, SettingASocketKeepsIt)
 TEST(PlayerBase, ASocketBuiltPlayerHasNoKeyToGiveBack)
 {
 	//------------------------------------------------------------------
-	// The constructor RequestClientPlayer and RequestServerPlayer both
-	// forward to. It set every member but pHashTable, which delKey
+	// The constructor RequestServerPlayer forwards to (as did the
+	// deleted RequestClientPlayer). It set every member but pHashTable, which delKey
 	// then delete[]s - and delKey has two live callers, the reconnect
 	// handlers. They are safe only because ClientPlayer, the class
 	// they cast to, leaves its base default-constructed; a base

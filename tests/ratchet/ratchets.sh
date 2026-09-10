@@ -140,7 +140,30 @@ check () {
 # g_pGameMessage use in all four files is inside
 # `#if defined(_DEBUG) && defined(OUTPUT_DEBUG)`, and nothing defines
 # OUTPUT_DEBUG.
-R1_BASELINE=489
+#
+# 488: 489 - 1. Task 5.1's fifth slice took the last holdout,
+# RequestClientPlayerManager.cpp, and Client/Packet is wire-only
+# (tests/arch/packetwire_holdouts.txt lists nothing). Its seams - the
+# logged-in character's name, world and race, the four whisper-queue
+# calls and the two failure notifications - are nine WireHost entries;
+# the Ninja baseline moves with it (486 -> 485).
+#
+# 487: 488 - 1. Task 5.2's seventh slice deleted Client/WhisperManager.cpp
+# with the rest of the peer-to-peer whisper path, which upstream had
+# compiled out (`0 &&` around every writer of its queue): whispers go
+# to the game server as CGWhisper from UIMessageManager, and the seven
+# WireHost entries that served the path went too. Ninja 485 -> 484.
+#
+# 484: 487 - 3. The eighth slice deleted the rest of the outbound peer
+# side - this client dialling other clients - which upstream had also
+# compiled out: RequestClientPlayer and its manager (packetwire, so not
+# in this count), the three RC handlers that took that player (the
+# three TUs here), the receive half of RequestFileManager, the dialling
+# half of ProfileManager and the requesting half of RequestUserManager.
+# The inbound side (RequestServerPlayer, its manager, the file sender)
+# and the UDP party datagrams stay. Ninja 484 -> 481 by the same
+# arithmetic (no Ninja tree here; the Linux CI reads it).
+R1_BASELINE=484
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -177,7 +200,7 @@ elif [ -n "$BUILD_DIR" ] && [ -f "$BUILD_DIR/build.ninja" ]; then
 	# this branch existed the ratchet SKIPPED on every non-MSVC tree,
 	# which the port assessment listed as fail-open (area A). build.ninja
 	# is rewritten on every configure, so its mtime is the configure time.
-	R1_NINJA_BASELINE=486
+	R1_NINJA_BASELINE=481
 	R1_NINJA="$BUILD_DIR/build.ninja"
 	if [ CMakeLists.txt -nt "$R1_NINJA" ] || [ tests/arch/packetwire_files.txt -nt "$R1_NINJA" ]; then
 		echo "FAIL R1: $BUILD_DIR was configured before CMakeLists.txt or the packetwire membership file last changed - reconfigure that tree first"
@@ -347,12 +370,15 @@ R4_BASELINE=21
 
 lib_members () {
 	# The directory trees minus the files CMake excludes from the
-	# library builds (VS_UI/WinMain.cpp under WIN32; the hangul Ci/FL2
-	# pair under USE_SDL_BACKEND, which is forced ON) - the original
-	# raw find counted two never-compiled g_p-referencing files (WinMain, Ci) as library debt; FL2 is excluded for consistency though it references none.
+	# library builds (the hangul Ci/FL2 pair under USE_SDL_BACKEND,
+	# which is forced ON) - the original raw find counted two
+	# never-compiled g_p-referencing files (WinMain, Ci) as library
+	# debt; FL2 is excluded for consistency though it references none.
+	# VS_UI/WinMain.cpp was excluded here by name until task 5.2's sixth
+	# slice deleted it (2026-09-09); the number did not move.
 	find basic Client/SpriteLib Client/DXLib Client/framelib Client/TextSystem VS_UI \
 		-name '*.cpp' 2>/dev/null \
-		| grep -vE 'VS_UI/WinMain\.cpp$|VS_UI/src/hangul/(Ci|FL2)\.cpp$'
+		| grep -vE 'VS_UI/src/hangul/(Ci|FL2)\.cpp$'
 	sed -e 's/#.*//' tests/arch/packetwire_files.txt \
 		| grep -oE 'Client/Packet/[A-Za-z0-9_/]+\.cpp'
 	sed -e 's/#.*//' tests/arch/gamemodel_files.txt \
@@ -819,10 +845,11 @@ check "R8 (printf-family calls whose format is not a literal)" "$R8" "$R8_BASELI
 # tests/arch/packetwire_files.txt can give, since it lists .cpp by design
 # - would have counted exactly half of every edit and called it progress.
 #
-# One .cpp under Client/Packet is deliberately outside the set:
-# RequestClientPlayerManager.cpp, the packetwire holdout
-# (tests/arch/packetwire_holdouts.txt), which compiles into the
-# executable. It carries 0, so the choice does not move the number.
+# Every .cpp under Client/Packet is in the set since 2026-09-09, when
+# task 5.1's fifth slice took the last holdout
+# (RequestClientPlayerManager.cpp) into packetwire; until then that one
+# file compiled into the executable and sat outside this count. It
+# carried 0, so the move did not change the number.
 #
 # NOT counted, and they are the rest of the workload: Client/PacketHandler
 # (284), the remaining executable sources (49 - the two request-side

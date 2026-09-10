@@ -174,6 +174,10 @@ set_source_files_properties(
 	# narrowed with nothing to refuse them. Same needs: the packet classes
 	# and the socket streams.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_uncapped_string_writes.cpp
+	# CRWhisper, the peer whisper this client still receives (task 5.2's
+	# seventh and eighth slices took the sending side out). Constructs the
+	# packet and drives write() over the socket stream.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_crwhisper.cpp
 	PROPERTIES
 		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS};WIRE_GOLDEN_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/golden\""
 )

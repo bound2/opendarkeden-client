@@ -105,15 +105,10 @@ Wire::EncryptUsesEnglishSeed ()
 //----------------------------------------------------------------------
 // The request-service family's seams.
 //----------------------------------------------------------------------
-// A clock of 0 and "not in the game world" with no host. The second is
-// the conservative answer rather than the convenient one:
-// RequestClientPlayer throws on a request packet that arrives outside
-// the game, so a binary with no host refuses them all rather than
-// accepting them all.
-//
-// The six file-transfer calls answer false, which is what an
-// unregistered transfer looks like - a caller asking whether it still
-// has one cleans up instead of waiting on a manager that is not there.
+// A clock of 0 with no host, and no file transfer registered - the
+// three calls answer false, which is what a caller asking whether it
+// still has one needs to hear so that it cleans up instead of waiting
+// on a manager that is not there.
 //----------------------------------------------------------------------
 DWORD
 Wire::CurrentTime ()
@@ -126,49 +121,9 @@ Wire::CurrentTime ()
 	return s_pHost->CurrentTime();
 }
 
-bool
-Wire::InGameMode ()
-{
-	if (s_pHost==NULL || s_pHost->InGameMode==NULL)
-	{
-		return false;
-	}
 
-	return s_pHost->InGameMode();
-}
 
-bool
-Wire::ReceiveMyRequest ( const std::string & name , RequestClientPlayer * pPlayer )
-{
-	if (s_pHost==NULL || s_pHost->ReceiveMyRequest==NULL)
-	{
-		return false;
-	}
 
-	return s_pHost->ReceiveMyRequest(name, pPlayer);
-}
-
-bool
-Wire::HasMyRequest ( const std::string & name )
-{
-	if (s_pHost==NULL || s_pHost->HasMyRequest==NULL)
-	{
-		return false;
-	}
-
-	return s_pHost->HasMyRequest(name);
-}
-
-bool
-Wire::RemoveMyRequest ( const std::string & name )
-{
-	if (s_pHost==NULL || s_pHost->RemoveMyRequest==NULL)
-	{
-		return false;
-	}
-
-	return s_pHost->RemoveMyRequest(name);
-}
 
 bool
 Wire::SendOtherRequest ( const std::string & name , RequestServerPlayer * pPlayer )

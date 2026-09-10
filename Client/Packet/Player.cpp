@@ -45,8 +45,8 @@ Player::Player ()
 
 	// pHashTable is in the initialiser list now, so both constructors
 	// set it. This one used to be the only place it was written, and
-	// the socket constructor - which RequestClientPlayer and
-	// RequestServerPlayer both forward to - left it holding whatever
+	// the socket constructor - which RequestServerPlayer forwards to,
+	// as the deleted RequestClientPlayer did - left it holding whatever
 	// the memory did, for delKey to delete[].
 
 	__END_CATCH

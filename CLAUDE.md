@@ -73,14 +73,17 @@ timed-item loaders it reads, and their string support, membership in
 `tests/arch/gamemodel_files.txt` —
 `docs/RESTRUCTURING.md` tasks 4.1, 4.2, 4.3 and 4.4),
 `framelib`, `TextSystem`, `VS_UI`, and `packetwire` — the whole wire layer: the
-sockets (TCP and datagram), the socket streams, the `Player` base under all three
-player classes, the
+sockets (TCP and datagram), the socket streams, the `Player` base under both
+player classes, the game-server player and the inbound peer player with its manager, the
 encrypter, the info classes, every packet class in every direction and
 the factory/validator tables (`docs/RESTRUCTURING.md` tasks 1.1, 2.4 and 5.1;
 membership is `tests/arch/packetwire_files.txt`, read by CMake, the include checker
-and the ratchet script, and `tests/arch/packetwire_holdouts.txt` says what keeps
-the last one out — `RequestClientPlayerManager.cpp`, which reaches the
-whisper queue and the logged-in character). The logging facility (`DebugLog.h`) is in
+and the ratchet script). **Every `.cpp` under `Client/Packet` is a member**
+since 2026-09-09; `tests/arch/packetwire_holdouts.txt` is empty and is where
+the next exception, if one is ever needed, gets written down with what it
+*reaches*, not what it includes. What the wire layer needs from the program
+around it goes through `Client/Packet/WireHost.h`, 11 entries the executable
+installs in `GameInit.cpp`. The logging facility (`DebugLog.h`) is in
 `basic`, so every library may log; `Client/DebugInfo.h` is the executable's
 front end to it and pulls in `MinTr.h`, which is why the libraries may not
 include it. The checked formatter (`SafeFormat.h`, `docs/RESTRUCTURING.md`
@@ -161,11 +164,14 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **617 tests, 294,467 checks, 0 failed** in both Windows trees, and
-**617 tests, 294,466 checks, 0 failed** on Linux (GCC, Clang, and GCC with
+baseline: **619 tests, 294,468 checks, 0 failed** in both Windows trees, and
+**619 tests, 294,467 checks, 0 failed** on Linux (GCC, Clang, and GCC with
 `-DUSE_ASAN=ON -DUSE_UBSAN=ON`, where UBSan reports nothing) and on macOS
 (Apple Clang, with and without ASan and UBSan); the one-check
-difference is a platform-conditional test, not a failure. The Linux
+difference is a platform-conditional test, not a failure. (The non-Windows
+figures were last *measured* at 617 / 294,466; the current ones are the
+Windows delta applied to them, which the Linux and macOS CI runs on the
+next merge confirm or correct.) The Linux
 recipe is the `linux`, `linux-clang` and `linux-asan` presets in
 `CMakePresets.json`, the macOS one the `macos` and `macos-asan` presets.
 **Clang's UBSan checks enum loads and GCC's does not**: a wire byte cast to
@@ -254,7 +260,7 @@ and a `<SDL2/...>` include spelling breaks the Homebrew build - it is
 | `VS_UI/` | UI framework — widgets, dialogs, skinning, Korean IME |
 | `basic/` | memory, exceptions, typedefs, platform abstraction |
 | `tests/` | framework and unit tests |
-| `docs/` | code health review |
+| `docs/` | code health review; `RESTRUCTURING.md`, the extraction plan, complete as of 2026-09-09 - its *What the review rounds settled* section is the standing rulebook for library work |
 | `참고자료/` | upstream asset notes, non-English, not built |
 
 ## Current focus

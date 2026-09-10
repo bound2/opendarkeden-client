@@ -32,14 +32,6 @@
 #include <string>
 #include <vector>
 
-#ifdef __GAME_CLIENT__
-	#include "RequestUserManager.h"
-
-	#include "Packet/Cpackets/CGRequestIP.h"
-
-	#include "ServerInfo.h"
-	#include "RequestClientPlayerManager.h"
-#endif
 
 #include "DebugInfo.h"
 
@@ -47,8 +39,6 @@
 // Global
 //----------------------------------------------------------------------
 ProfileManager*		g_pProfileManager = NULL;
-
-#define	PROFILE_NULL	"NULL"
 
 //----------------------------------------------------------------------
 //
@@ -74,28 +64,6 @@ void
 ProfileManager::Release()
 {
 	m_Profiles.clear();
-
-	ReleaseRequire();
-}
-
-//----------------------------------------------------------------------
-// Release Require
-//----------------------------------------------------------------------
-void
-ProfileManager::ReleaseRequire()
-{
-	// Debug output before locking
-	DEBUG_ADD("[ProfileManager] ReleaseRequire: attempting to lock...\n");
-
-	Lock();
-
-	DEBUG_ADD("[ProfileManager] ReleaseRequire: lock acquired, clearing...\n");
-
-	m_Requires.clear();
-
-	DEBUG_ADD("[ProfileManager] ReleaseRequire: done, releasing lock...\n");
-
-	Unlock();
 }
 
 //----------------------------------------------------------------------
@@ -104,19 +72,7 @@ ProfileManager::ReleaseRequire()
 bool
 ProfileManager::HasProfile(const char* pName) const
 {
-	PROFILE_MAP::const_iterator iProfile = m_Profiles.find( std::string(pName) );
-
-	if (iProfile!=m_Profiles.end())
-	{
-		if (iProfile->second==PROFILE_NULL)
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	return false;
+	return m_Profiles.find( std::string(pName) ) != m_Profiles.end();
 }
 
 //----------------------------------------------------------------------
@@ -128,38 +84,6 @@ void
 ProfileManager::AddProfile(const char* pName, const char* pFilename)
 {
 	m_Profiles[std::string(pName)] = std::string(pFilename);
-}
-
-//----------------------------------------------------------------------
-// Add ProfileNULL
-//----------------------------------------------------------------------
-// 상대방이 아예 Profile이 없는 경우
-//----------------------------------------------------------------------
-void
-ProfileManager::AddProfileNULL(const char* pName)
-{
-	m_Profiles[std::string(pName)] = PROFILE_NULL;
-}
-
-//----------------------------------------------------------------------
-// Has ProfileNULL
-//----------------------------------------------------------------------
-// 상대방이 아예 Profile이 없는가?
-//----------------------------------------------------------------------
-bool			
-ProfileManager::HasProfileNULL(const char* pName) const
-{
-	PROFILE_MAP::const_iterator iProfile = m_Profiles.find( std::string(pName) );
-
-	if (iProfile!=m_Profiles.end())
-	{
-		if (iProfile->second==PROFILE_NULL)
-		{
-			return true;
-		}
-	}
-
-	return false;	
 }
 
 //----------------------------------------------------------------------
@@ -190,231 +114,11 @@ ProfileManager::GetFilename(const char* pName) const
 
 	if (iProfile!=m_Profiles.end())
 	{
-		// NULL로 설정된 거는 아예 Profile이 없는 경우이다.
-		if (iProfile->second==PROFILE_NULL)
-		{
-			return NULL;
-		}
-
 		return iProfile->second.c_str();
 	}
 
 	return NULL;
 }
-
-//----------------------------------------------------------------------
-// RequestProfile
-//----------------------------------------------------------------------
-void			
-ProfileManager::RequestProfile(const char* pName)
-{
-	if(pName == NULL)
-		return;
-
-	if (!HasRequire(pName))
-	{
-		AddRequire( pName );
-	}
-
-	/*
-	// Update에서 처리한다.
-#ifdef __GAME_CLIENT__
-	//-------------------------------------------------------
-	// 접속중이거나 접속 시도 중인 경우..
-	//-------------------------------------------------------
-	if (g_pRequestClientPlayerManager->HasConnection(pName)
-		|| g_pRequestClientPlayerManager->HasTryingConnection(pName))
-	{
-	}
-	//-------------------------------------------------------
-	// 접속중이 아닌 경우
-	//-------------------------------------------------------
-	else
-	{
-		RequestUserInfo* pUserInfo = g_pRequestUserManager->GetUserInfo(pName);
-
-		//-------------------------------------------------------
-		// 사용자 정보가 있다면 접속 시도를 한다.
-		//-------------------------------------------------------
-		if (pUserInfo!=NULL)
-		{
-			g_pRequestClientPlayerManager->Connect(pUserInfo->IP.c_str(), 
-													pName, 
-													REQUEST_CLIENT_MODE_PROFILE);
-		}
-		//-------------------------------------------------------
-		// 사용자 정보가 없다면 ... 서버에 IP를 요청한다.
-		//-------------------------------------------------------
-		else
-		{
-			if (!g_pRequestUserManager->HasRequestingUser( pName ))
-			{
-				#ifdef CONNECT_SERVER
-					// 서버에 IP를 요청한다.
-					CGRequestIP _CGRequestIP;
-					_CGRequestIP.setName( pName );
-
-					g_pSocket->sendPacket( &_CGRequestIP );			
-				#endif
-	
-				// 요청해두면 IP를 받을 때, ProfileManager를 체크하게 된다.
-				g_pRequestUserManager->AddRequestingUser( pName, RequestUserManager::REQUESTING_FOR_PROFILE );
-			}
-		}
-	}	
-#endif
-	*/
-}
-
-//----------------------------------------------------------------------
-// Add Require
-//----------------------------------------------------------------------
-void			
-ProfileManager::AddRequire(const char* pName)
-{
-	Lock();
-
-	if (!HasProfile(pName)
-		&& !HasProfileNULL(pName))
-	{
-		m_Requires[std::string(pName)] = 0;
-	}
-
-	Unlock();
-}
-
-//----------------------------------------------------------------------
-// Has Require
-//----------------------------------------------------------------------
-bool			
-ProfileManager::HasRequire(const char* pName) const
-{
-	if (m_Requires.find( std::string(pName) )==m_Requires.end())
-	{
-		return false;
-	}
-
-	return true;
-}
-
-//----------------------------------------------------------------------
-// Remove Require
-//----------------------------------------------------------------------
-bool			
-ProfileManager::RemoveRequire(const char* pName)
-{
-	Lock();
-
-	REQUIRE_MAP::iterator iRequire = m_Requires.find( std::string(pName) );
-
-	if (iRequire==m_Requires.end())
-	{
-		Unlock();
-		return false;
-	}
-
-	m_Requires.erase( iRequire );
-
-	Unlock();
-	return true;
-}
-
-//----------------------------------------------------------------------
-// Update
-//----------------------------------------------------------------------
-void			
-ProfileManager::Update()
-{
-#ifdef __GAME_CLIENT__
-	if (g_pRequestClientPlayerManager==NULL 
-		|| g_pRequestUserManager==NULL)
-	{				
-		m_Requires.clear();
-		return;
-	}
-#endif
-
-	Lock();
-
-	//--------------------------------------------------------------
-	// request
-	//--------------------------------------------------------------
-	REQUIRE_MAP::iterator iRequire = m_Requires.begin();
-
-	while (iRequire != m_Requires.end())
-	{
-		const char* pName = iRequire->first.c_str();
-
-		//-------------------------------------------------------
-		// profile을 받은 경우
-		//-------------------------------------------------------
-		if (HasProfile(pName)
-			|| HasProfileNULL(pName))
-		{
-			REQUIRE_MAP::iterator iTemp = iRequire;
-			iRequire ++;
-			m_Requires.erase( iTemp );
-			
-			continue;
-		}
-
-		#ifdef __GAME_CLIENT__
-			//-------------------------------------------------------
-			// 접속중이거나 접속 시도 중인 경우..
-			//-------------------------------------------------------
-			if (g_pRequestClientPlayerManager->HasConnection(pName)
-				|| g_pRequestClientPlayerManager->HasTryingConnection(pName)
-				|| g_pRequestUserManager->HasRequestingUser( pName ))
-			{				
-			}
-			//-------------------------------------------------------
-			// 접속중이 아닌 경우
-			//-------------------------------------------------------
-			else
-			{
-				RequestUserInfo* pUserInfo = g_pRequestUserManager->GetUserInfo(pName);
-
-				//-------------------------------------------------------
-				// 사용자 정보가 있다면 접속 시도를 한다.
-				//-------------------------------------------------------
-				if (pUserInfo!=NULL)
-				{
-					if( g_pUserInformation->bKorean == true )	// 한국 버전만 p2p
-					{
-						g_pRequestClientPlayerManager->Connect(pUserInfo->IP.c_str(), 
-																pName, 
-																REQUEST_CLIENT_MODE_PROFILE);				
-					}
-				}
-				//-------------------------------------------------------
-				// 사용자 정보가 없다면 ... 서버에 IP를 요청한다.
-				//-------------------------------------------------------
-				else
-				{
-					if (!g_pRequestUserManager->HasRequestingUser( pName ))
-					{
-						if( g_pUserInformation->bKorean == true )
-						{
-							// 서버에 IP를 요청한다.
-							CGRequestIP _CGRequestIP;
-							_CGRequestIP.setName( pName );
-
-							g_pSocket->sendPacket( &_CGRequestIP );			
-			
-						// 요청해두면 IP를 받을 때, ProfileManager를 체크하게 된다.
-						g_pRequestUserManager->AddRequestingUser( pName, RequestUserManager::REQUESTING_FOR_PROFILE );
-						}
-					}
-				}
-			}	
-		#endif
-
-		iRequire ++;
-	}
-
-	Unlock();
-}
-
 
 //----------------------------------------------------------------------
 // Init Profiles

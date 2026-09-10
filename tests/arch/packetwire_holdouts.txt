@@ -1,48 +1,33 @@
 # Client/Packet sources compiled into the DarkEden executable, not the
-# packetwire library: the receive loops and connection state machines.
-# Rule W0 in tests/arch/check_includes.pl requires every .cpp under
-# Client/Packet to be in exactly one of this file and
-# tests/arch/packetwire_files.txt.
+# packetwire library. Rule W0 in tests/arch/check_includes.pl requires
+# every .cpp under Client/Packet to be in exactly one of this file and
+# tests/arch/packetwire_files.txt, so a new packet source is a library
+# member unless a line here says why not.
 #
-# One file left, as of 2026-09-04. Task 5.1 took the rest a slice at a
-# time: the first put the logging header into basic/, the second the
-# three tuning values behind WireHost, the third ClientPlayer.cpp, and
-# the fourth the request-service family bar this one.
+# EMPTY since 2026-09-09: every .cpp under Client/Packet is in the
+# library. Task 5.1 took the holdouts in a slice at a time - the first
+# put the logging header into basic/, the second the three tuning
+# values behind WireHost, the third ClientPlayer.cpp, the fourth the
+# request-service family, and the fifth RequestClientPlayerManager.cpp
+# behind nine WireHost entries - which task 5.2 then deleted the same
+# day, entries and all, with the rest of the outbound peer side that
+# upstream had compiled out. The inbound side (RequestServerPlayer and
+# its manager) is what the family keeps in the library.
 #
-#   RequestClientPlayerManager.cpp  ClientDef.h, MPlayer.h,
-#                                   MGameStringTable.h, ProfileManager.h,
-#                                   RequestUserManager.h, ServerInfo.h,
-#                                   UserInformation.h, WhisperManager.h
-#
-# What it really reaches, with comments and dead #ifdef blocks removed
-# first: g_pWhisperManager (4), g_pUserInformation (3), g_pPlayer,
-# g_pProfileManager, g_pRequestUserManager, g_Mode, and the
-# WHISPER_MESSAGE type. The clock and the in-game test are already
-# behind WireHost; what is left is the whisper queue and the character
-# the client is logged in as, which is a bigger seam than a host of
-# function pointers wants to be.
-#
-# READ THAT LIST RATHER THAN THE INCLUDES. This file used to say the
-# family needed g_pGameMessage "for the messages the request path shows
-# the player", and that four of the five branch on g_Mode. Both were
-# wrong, and wrong the same way: compiled by grepping for a symbol
-# without asking whether the line was live.
-#
-#   - EVERY g_pGameMessage use in all four files sits inside
-#     `#if defined(_DEBUG) && defined(OUTPUT_DEBUG)`, and nothing in
-#     this build defines OUTPUT_DEBUG. Not one was a dependency.
-#   - Only TWO branched on g_Mode. RequestServerPlayer.cpp has the test
-#     commented out, and RequestServerPlayerManager.cpp reads
-#     `if (1)//g_Mode==MODE_GAME)`.
-#   - RequestServerPlayerManager.cpp reached NOTHING executable-side.
-#     Both ClientDef.h and ServerInfo.h were unused includes, and it had
-#     sat here for two slices because of them.
-#
-# The four managers the family reaches - RequestFileManager,
-# WhisperManager, RequestUserManager, ProfileManager - are not all alike.
-# RequestUserManager.cpp includes nothing but Client_PCH.h and its own
-# header, and UserInformation.cpp the same, so both could move ahead of
-# the last holdout; ProfileManager.cpp pulls CDirectDraw.h,
-# CSpritePack.h and UIFunction.h and is staying where it is.
-
-Client/Packet/RequestClientPlayerManager.cpp
+# The file stays because W0 reads it, and so that the next holdout has
+# somewhere to be written down. When one is, list WHAT IT REACHES with
+# comments and dead #ifdef blocks removed first, not its includes. This
+# file was wrong twice, the same way both times - compiled by grepping
+# for a symbol without asking whether the line was live: it said the
+# request-service family needed g_pGameMessage (every use sat behind
+# `#if defined(_DEBUG) && defined(OUTPUT_DEBUG)`, and nothing defines
+# OUTPUT_DEBUG), and that four of the five files branched on g_Mode
+# (two did; RequestServerPlayer.cpp had the test commented out and
+# RequestServerPlayerManager.cpp read `if (1)//g_Mode==MODE_GAME)`).
+# Two unused includes, ClientDef.h and ServerInfo.h, kept
+# RequestServerPlayerManager.cpp listed here for two slices on the same
+# mistake. And the last entry's own description was wrong in the other
+# direction: it described the whisper seam as live behaviour, when the
+# peer-to-peer whisper path is compiled out upstream (`0 &&` in
+# WhisperManager.cpp) - check whether the code that reaches a symbol
+# ever runs, as well as whether the line is live.

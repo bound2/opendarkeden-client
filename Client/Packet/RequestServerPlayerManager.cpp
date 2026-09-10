@@ -3,7 +3,6 @@
 //--------------------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "RequestServerPlayerManager.h"
-//#include "RequestClientPlayerManager.h"
 #include "WireHost.h"
 #include "DebugLog.h"
 
@@ -264,11 +263,6 @@ RequestServerPlayerManager::Update()
 
 				DEBUG_ADD_ERR( t.toString().c_str() );
 
-				// 내가 요청하고 있는것도 짜른다.
-				//if (g_pRequestClientPlayerManager!=NULL)
-				{
-				//	g_pRequestClientPlayerManager->Disconnect( pPlayer->getName().c_str() );
-				}
 
 				// exception이 나면 무조건 잘라버린다. --;
 				pPlayer->disconnect(UNDISCONNECTED);

@@ -69,7 +69,7 @@ public :
 
 	// race
 	bool isVampire () const noexcept { return m_eRace == RACE_VAMPIRE; }
-	bool isSlayer () const noexcept { return m_eRace == RACE_VAMPIRE; }
+	bool isSlayer () const noexcept { return m_eRace == RACE_SLAYER; }
 	bool isOusters () const noexcept { return m_eRace == RACE_OUSTERS; }
 	Race_t getRace() const noexcept { return m_eRace; }
 	void setRace (Race eRace) noexcept { m_eRace = eRace; }

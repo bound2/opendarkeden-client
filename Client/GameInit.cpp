@@ -61,16 +61,13 @@
 #include "MathTable.h"
 #include "ModifyStatusManager.h"
 #include "RequestServerPlayerManager.h"
-#include "RequestClientPlayerManager.h"
 #include "ClientCommunicationManager.h"
 #include "KeyAccelerator.h"
 #include "AcceleratorManager.h"
-#include "WhisperManager.h"
 #include "ProfileManager.h"
 #include "MGuildMarkManager.h"
 #include "MEventManager.h"
 #include "RequestFileManager.h"
-#include "Packet/RequestClientPlayer.h"
 #include "Packet/RequestServerPlayer.h"
 #include "RequestUserManager.h"
 #include "MJusticeAttackManager.h"
@@ -767,8 +764,9 @@ InitSurface()
 	// Get_ColorkeyColor()) already has no live callers in the current
 	// build (rectangle() has a local SDL-era replacement in
 	// RenderingFunctions.cpp; Convert24RGBto16()'s only
-	// caller, VS_UI/WinMain.cpp, is excluded on Windows), so this call is
-	// safe to drop rather than needing a stub function to keep around.
+	// caller was VS_UI/WinMain.cpp, which no target compiled and which is
+	// deleted), so this call is safe to drop rather than needing a stub
+	// function to keep around.
 
 	DEBUG_ADD("[ InitGame ]  Surface - Initialize Font");
 	DEBUG_ADD("[ InitGame ]  Surface - UI");
@@ -2216,21 +2214,11 @@ InitSocket()
 	//----------------------------------------------------------------------
 	// RequestServerPlayerManager
 	//----------------------------------------------------------------------
-	if (g_pProfileManager!=NULL)
-	{
-		g_pProfileManager->ReleaseRequire();
-	}
 
 	if (g_pRequestServerPlayerManager!=NULL)
 	{
 		DEBUG_ADD("[ InitGame ]  delete RequestServerPlayerManager");
 		delete g_pRequestServerPlayerManager;
-	}
-
-	if (g_pRequestClientPlayerManager!=NULL)
-	{
-		DEBUG_ADD("[ InitGame ]  delete RequestClientPlayerManager");
-		delete g_pRequestClientPlayerManager;
 	}
 
 	if (g_pClientCommunicationManager!=NULL)
@@ -2243,12 +2231,6 @@ InitSocket()
 	{
 		DEBUG_ADD("[ InitGame ]  delete g_pRequestUserManager");
 		delete g_pRequestUserManager;		
-	}
-
-	if (g_pWhisperManager!=NULL)
-	{
-		DEBUG_ADD("[ InitGame ]  delete g_pWhisperManager");
-		delete g_pWhisperManager;		
 	}
 
 	if (g_pRequestFileManager!=NULL)
@@ -2272,9 +2254,6 @@ InitSocket()
 		DEBUG_ADD("[ InitGame ] new RequestServerPlayerManager");
 		g_pRequestServerPlayerManager = new RequestServerPlayerManager;
 
-		DEBUG_ADD("[ InitGame ] new RequestClientPlayerManager");
-		g_pRequestClientPlayerManager = new RequestClientPlayerManager;
-
 		DEBUG_ADD("[ InitGame ] RequestServerPlayerManager Init");
 		g_pRequestServerPlayerManager->Init();
 	}
@@ -2287,9 +2266,6 @@ InitSocket()
 
 	DEBUG_ADD("[ InitGame ] new g_pRequestUserManager");
 	g_pRequestUserManager = new RequestUserManager;
-
-	DEBUG_ADD("[ InitGame ] new g_pWhisperManager");
-	g_pWhisperManager = new WhisperManager;
 
 	DEBUG_ADD("[ InitGame ] new g_pRequestFileManager");
 	g_pRequestFileManager = new RequestFileManager;
@@ -2789,11 +2765,6 @@ ReleaseSocket()
 			g_pPacketValidator = NULL;
 		}		
 
-		if (g_pProfileManager!=NULL)
-		{
-			g_pProfileManager->ReleaseRequire();
-		}
-		
 		if (g_pRequestServerPlayerManager!=NULL)
 		{
 			DEBUG_ADD("delete g_pRequestServerPlayerManager");
@@ -2801,25 +2772,11 @@ ReleaseSocket()
 			g_pRequestServerPlayerManager = NULL;
 		}
 
-		if (g_pRequestClientPlayerManager!=NULL)
-		{
-			DEBUG_ADD("delete g_pRequestClientPlayerManager");
-			delete g_pRequestClientPlayerManager;
-			g_pRequestClientPlayerManager = NULL;
-		}
-
 		if (g_pClientCommunicationManager!=NULL)
 		{
 			DEBUG_ADD("delete g_pClientCommunicationManager");
 			delete g_pClientCommunicationManager;
 			g_pClientCommunicationManager = NULL;
-		}
-
-		if (g_pWhisperManager!=NULL)
-		{
-			DEBUG_ADD("delete g_pWhisperManager");
-			delete g_pWhisperManager;
-			g_pWhisperManager = NULL;
 		}
 
 		if (g_pRequestFileManager!=NULL)
@@ -3042,14 +2999,16 @@ static bool	WireEncryptUsesEnglishSeed()
 }
 
 //-----------------------------------------------------------------------------
-// The request-service family's seams (task 5.1's fourth slice).
+// The request-service family's seams (task 5.1's fourth slice) - the
+// inbound side only, since task 5.2's eighth slice deleted the outbound
+// half (this client dialling peers; upstream had compiled it out).
 //-----------------------------------------------------------------------------
-// The peer file-transfer manager stays here: it draws progress, writes
-// into the profile directory and reads the UI's own state. Six calls of
-// it are all the wire layer needs, and each is guarded, because
-// g_pRequestFileManager is built after start-up and the request players
-// outlive it at shutdown - which is what the NULL tests they used to
-// write at the call site were for.
+// The peer file-transfer manager stays here: it writes into the profile
+// directory and reads the UI's own state. Three calls of it are all the
+// wire layer needs, and each is guarded, because g_pRequestFileManager
+// is built after start-up and the request players outlive it at
+// shutdown - which is what the NULL tests they used to write at the
+// call site were for.
 //
 // The guard is not complete, and saying so is better than implying it
 // is. At shutdown the pointer is deleted AND nulled, so the test holds.
@@ -3060,14 +3019,7 @@ static bool	WireEncryptUsesEnglishSeed()
 // here widens the window - but nothing here closes it either.
 //-----------------------------------------------------------------------------
 static DWORD	WireCurrentTime()		{ return g_CurrentTime; }
-static bool	WireInGameMode()		{ return g_Mode == MODE_GAME; }
 
-static bool	WireReceiveMyRequest(const std::string& name, RequestClientPlayer* pPlayer)
-		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->ReceiveMyRequest(name, pPlayer); }
-static bool	WireHasMyRequest(const std::string& name)
-		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->HasMyRequest(name); }
-static bool	WireRemoveMyRequest(const std::string& name)
-		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->RemoveMyRequest(name); }
 static bool	WireSendOtherRequest(const std::string& name, RequestServerPlayer* pPlayer)
 		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->SendOtherRequest(name, pPlayer); }
 static bool	WireHasOtherRequest(const std::string& name)
@@ -3075,11 +3027,25 @@ static bool	WireHasOtherRequest(const std::string& name)
 static bool	WireRemoveOtherRequest(const std::string& name)
 		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->RemoveOtherRequest(name); }
 
-static const WireHost	s_WireHost = { WireMaxProcessPacket, WireMaxRequestService, WireUDPPort, WireBugReportTarget,
-					WireEncryptZoneID, WireEncryptServerID, WireEncryptUsesEnglishSeed,
-					WireCurrentTime, WireInGameMode,
-					WireReceiveMyRequest, WireHasMyRequest, WireRemoveMyRequest,
-					WireSendOtherRequest, WireHasOtherRequest, WireRemoveOtherRequest };
+// Designated, not positional. Five of the 11 entries share a signature
+// with another (two bool(const std::string&), three int()), so a
+// positional initialiser wired to the wrong one compiles and passes the
+// whole suite - which never links this file. A designator out of
+// declaration order, or naming a member that does not exist, is a
+// compile error instead (C++20).
+static const WireHost	s_WireHost = {
+	.MaxProcessPacket		= WireMaxProcessPacket,
+	.MaxRequestService		= WireMaxRequestService,
+	.ClientCommunicationUDPPort	= WireUDPPort,
+	.BugReportTarget		= WireBugReportTarget,
+	.EncryptZoneID			= WireEncryptZoneID,
+	.EncryptServerID		= WireEncryptServerID,
+	.EncryptUsesEnglishSeed		= WireEncryptUsesEnglishSeed,
+	.CurrentTime			= WireCurrentTime,
+	.SendOtherRequest		= WireSendOtherRequest,
+	.HasOtherRequest		= WireHasOtherRequest,
+	.RemoveOtherRequest		= WireRemoveOtherRequest,
+};
 
 //-----------------------------------------------------------------------------
 // Init GameObject

@@ -1,5 +1,15 @@
 # Client Restructuring Plan
 
+**Complete as of 2026-09-09.** Every task below is `done` and has its owner;
+PRs #144 and #145 carry the last slices. What the plan leaves behind is the
+machinery, not a to-do list: the membership files, the include checker, the
+thirteen ratchets and the fix policy (task 3.1) are what keep the end state
+true from here, and *What the review rounds settled* is what a later slice
+of any kind should read first. The one list still open is 5.2's
+*Candidates for a next slice* - dead code the plan found and did not take
+unasked - and the exemption list, which shrinks whenever a task extracts a
+seam.
+
 Living, trackable plan for moving the OpenDarkEden client's game code out of the
 `DarkEden` executable and into testable static libraries, while the outstanding
 findings of `docs/code-health-review-2026-08-29.md` keep getting fixed. The end
@@ -28,7 +38,8 @@ adversarial reviews recorded the traps.
   bugs, what remains. The per-change narrative — what moved, what the
   review round found, the test list, the suite count, the ratchet delta —
   belongs in the PR description and the commit message, not here. PRs #33
-  through #77 and their commits hold that history for everything below.
+  through #77, then #142 to #145, and their commits hold that history for
+  everything below.
 - A task is only `done` when its **Owner** exists — the test or mechanism that
   keeps the rule true from then on. Landing the change without the owner is
   `in progress (owner missing)`.
@@ -117,6 +128,17 @@ per-task status lines no longer restate.
   crash — recorded as a behaviour delta where the old code dereferenced
   unguarded. Host readers are private statics on the class (`MItem::Clock()`),
   guard the function pointer, and are re-read on every call, never cached.
+- **A host installer is designated-initialised.** When `WireHost` reached
+  24 entries, fourteen shared a signature with another, and the
+  executable that installs them is never linked into a test, so a
+  positional slip compiled and passed the whole suite; the fourth slice
+  recorded the order as "checked by reading". C++20 designators make an
+  entry in the wrong slot, or one that does not exist, a compile error.
+  What they cannot check is the body an entry points at.
+- **A reference on a live line can still be dead.** The whisper seam was
+  described as live behaviour because the code that reaches it is
+  compiled; every path *to* that code sits behind `0 &&`. Before
+  describing what a seam does, find the caller that runs.
 - **A class split across a library and the executable** costs nothing when
   the class has no virtuals (`MSkillSet`, `TextService`) or when the
   library constructs none of the split classes (`MBomb`, `MHolyWater`), and
@@ -171,11 +193,11 @@ Shrink it when a task extracts a seam, and record the removal here.
 
 | Code | Why exempt |
 |---|---|
-| `GameMain.cpp`, `GameInit.cpp`, `Client.cpp`, `SDLMain.cpp` | process lifecycle, DLL whitelist, render loop; also where the hosts (`MItemHost`, `MPriceHost`, `WireHost`) are installed, which no test can prove |
+| `GameMain.cpp`, `GameInit.cpp`, `Client.cpp`, `SDLMain.cpp` | process lifecycle, DLL whitelist, render loop; also where the hosts (`MItemHost`, `MPriceHost`, `WireHost`) are installed, which no test can prove - `WireHost`'s installer is designated-initialised since 2026-09-09, so a wrong slot there is a compile error, but a wrong *body* still is not |
 | `MZone` rendering / `TileRenderer` draw paths | draws through live surfaces; viewer tools cover some of it |
 | `VS_UI/src/**` widgets and dialogs | deep two-way coupling with game globals; UI verified visually; `unit_tests` does not link `VS_UI` |
 | `Client/PacketHandler/*Handler.cpp` bodies | mutate `g_pZone`/creature state; the *parsers* they consume are in `packetwire` and testable, the mutations are not |
-| `PacketFunction.cpp` connect paths, `RequestClientPlayerManager.cpp` | Winsock + connection state machine; the whisper queue and the logged-in character |
+| `PacketFunction.cpp` connect paths | Winsock + connection state machine. `RequestClientPlayerManager.cpp` was listed here until 2026-09-09; task 5.1's fifth slice put its seams behind `WireHost`, and task 5.2's eighth slice deleted it with the rest of the outbound peer side |
 | The executable halves of split classes: `MItemUse.cpp`, `MObjectScreen.cpp`, `MSkillAvailable.cpp`, `TextServiceScreen.cpp` | the packet/dialog/drawing side of a class whose core is in a library, by design |
 
 Everything else under `Client/*.cpp` and `Client/Packet/**` is presumed
@@ -192,7 +214,7 @@ every baseline move; the table below is the current reading.
 
 | # | Metric | Now | What it counts, and does not |
 |---|--------|---:|---|
-| R1 | Translation units compiled directly into the `DarkEden` target | **489** | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj`, read from the ctest run's own build dir; SKIP (never PASS) on a generator with no vcxproj, and FAIL on a vcxproj older than the membership files. On the Ninja generator (the Linux and macOS presets) the same count is read from `build.ninja`'s object rules for the target against its own baseline, **486** - the non-Windows source list is three files shorter - so the ratchet no longer skips there (2026-09-08). Baseline 1,044 on 2026-09-01. It counts what still cannot be unit-tested. Recorded growths, each the executable side of a split: `PacketHandlerRegistry.cpp`, `GCExchangeBuyHandler.cpp`, `MItemUse.cpp`, `MObjectScreen.cpp`, `MSkillAvailable.cpp`, `TextServiceScreen.cpp`. |
+| R1 | Translation units compiled directly into the `DarkEden` target | **484** | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj`, read from the ctest run's own build dir; SKIP (never PASS) on a generator with no vcxproj, and FAIL on a vcxproj older than the membership files. On the Ninja generator (the Linux and macOS presets) the same count is read from `build.ninja`'s object rules for the target against its own baseline, **481** - the non-Windows source list is three files shorter - so the ratchet no longer skips there (2026-09-08). Baseline 1,044 on 2026-09-01. 489 → 484 on 2026-09-09: the last holdout moved into `packetwire`, then `WhisperManager.cpp` and three `RC*` handlers went with the outbound peer side (task 5.2's seventh and eighth slices); this row was not moved with the first two of those and the script's own FAIL message is what says to. It counts what still cannot be unit-tested. Recorded growths, each the executable side of a split: `PacketHandlerRegistry.cpp`, `GCExchangeBuyHandler.cpp`, `MItemUse.cpp`, `MObjectScreen.cpp`, `MSkillAvailable.cpp`, `TextServiceScreen.cpp`. |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l`. Baseline 448. Holds the line since `Packet::execute` itself was deleted; the client twin of the server's R4. |
 | R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` and `Client/PacketHandler` | **0** | Line-based; strips `//` tails before matching, so a commented-out call does not count. `\b` rejects the `w` in `wsprintf`, which R7 sees instead. Baseline 61 (a quarter of it commented-out code). Holds the line since the packet-tree copy pass (2026-09-04, PR #76). |
 | R4 | Library-compiled `.cpp` files referencing `g_p*` client globals no library file defines | **21** | Over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files; comment lines excluded; the subtraction is library-wide, so a library file reading a global another library defines is not a seam. **All 21 are `VS_UI` files.** Blind to a library file calling an executable-side *function* (the link proofs cover that) and to a global not named `g_p*`. Baseline 83. |
@@ -339,9 +361,10 @@ review) directly unit-testable.
   > **Status:** done (2026-09-01, PR #37). Fixed `PACKET_MAX` table,
   > unconditional throws on double registration and out-of-range ids,
   > `InvalidProtocolException` from `dispatch` on an unregistered id.
-  > All five receive loops (`ClientPlayer`, `Player`,
-  > `RequestClientPlayer`, `RequestServerPlayer`,
-  > `ClientCommunicationManager` with a NULL player) call
+  > All four receive loops (`ClientPlayer`, `Player`,
+  > `RequestServerPlayer` - `RequestClientPlayer` was a fifth until task
+  > 5.2's eighth slice - and `ClientCommunicationManager` with a NULL
+  > player) call
   > `PacketDispatcher::dispatch` unconditionally; the transitional
   > `tryDispatch` fallback was deleted with `Packet::execute` itself in
   > 2.4, so the base class carries no handler entry point, as on the
@@ -624,31 +647,51 @@ rounds settled* for the host rules). Test fixtures share
 
 ## Phase 5 — Long tail
 
-- [ ] **5.1 Split the debug facilities** so `DebugInfo.h`/`MinTr.h` stop
+- [x] **5.1 Split the debug facilities** so `DebugInfo.h`/`MinTr.h` stop
   gating `packetwire` membership. The task named `SocketAPI.cpp`,
   `DatagramSocket.cpp` and `NPCInfo.cpp`; the real list was
   `tests/arch/packetwire_holdouts.txt`, and the task became "take the
   holdouts in".
-  > **Status:** in progress — one holdout left,
-  > `RequestClientPlayerManager.cpp`, which reaches the whisper queue and
-  > the logged-in character (`g_pWhisperManager`, `g_pUserInformation`,
-  > `g_pPlayer`, `g_pProfileManager`, `g_pRequestUserManager`, `g_Mode`,
-  > `WHISPER_MESSAGE`), a bigger seam than a host of function pointers
-  > wants to be. The holdouts file lists what it reaches *with comments
-  > and dead `#ifdef` blocks removed first* — read that list, not the
-  > includes; two earlier entries were wrong because they were grepped.
-  > Done so far (PRs #63, #64, #74, #75): the logging facility
+  > **Status:** done (2026-09-09, fifth slice; PR #144). **Every `.cpp`
+  > under `Client/Packet` is a `packetwire` member**; the holdouts file
+  > lists nothing and stays only because W0 reads it and the next
+  > holdout needs somewhere to be written down. The last one,
+  > `RequestClientPlayerManager.cpp`, went behind nine `WireHost`
+  > entries and was deleted four hours later: the review
+  > of the move found that the whisper mode it served was compiled out
+  > upstream (`0 &&` around every writer of the queue and every
+  > whisper-mode `Connect()` - see *A reference on a live line can
+  > still be dead*), and reading on from there showed the whole
+  > outbound peer side - this client dialling other clients for a
+  > profile or a whisper - was dead with it: `GCRequestedIPHandler`
+  > began `if (bKorean == false || 1) return;`, so no peer address ever
+  > arrived from the server. 5.2's seventh and eighth slices deleted the
+  > lot (same PR); what the request-service family keeps in the library
+  > is the **inbound** side - `RequestServerPlayer` and its manager,
+  > peers dialling this client - and `WireHost` is down to **11
+  > entries**, the fourth slice's clock and three file-sender calls
+  > among them. The move itself is in the PR's first commit for anyone
+  > who needs the seam again. **Kept from the work, both test-first:**
+  > `CRWhisper::isSlayer()` compared against `RACE_VAMPIRE`;
+  > `CRWhisper::write` checked every length and not the race and now
+  > refuses one outside the three before writing a byte (the packet is
+  > still received; `test_crwhisper.cpp`). The host installers in
+  > `GameInit.cpp` and the tests are **designated initialisers**
+  > (C++20); the "checked by reading" caveat the fourth slice recorded
+  > is retired.
+  > Done before that (PRs #63, #64, #74, #75): the logging facility
   > (`DebugLog.{h,cpp}`) lives in `basic/`, so every library may log and
   > the one object is no longer compiled into two libraries; `DebugInfo.h`
   > is one `#include "MinTr.h"` above two no-op macros and nothing in the
   > wire layer includes it. **`Client/Packet/WireHost.h`** declares what
   > the wire layer asks of the program around it — the three
-  > `ClientConfig` tuning values, the millisecond clock, the in-game
-  > test, the encrypt-seed inputs (zone id, server number, region flags),
-  > and six calls on the peer file-transfer manager, which stays
-  > executable-side because it draws progress and reads the UI — and the
+  > `ClientConfig` tuning values, the millisecond clock, the encrypt-seed
+  > inputs (zone id, server number, region flags), and three calls on the
+  > peer file-transfer manager (six, and an in-game test, until the
+  > eighth slice), which stays executable-side because it writes the
+  > profile directory and reads the UI — and the
   > executable fills it in beside the other two hosts in `GameInit`; every
-  > accessor answers without a host with the value `ClientConfig`'s own
+  > tuning accessor answers without a host with the value `ClientConfig`'s own
   > constructor sets, and `WIRE_DEFAULT_*` keeps the executable's
   > fallbacks from drifting. `SendBugReport` is `WireHost.cpp`'s second
   > half. `setEncryptCode()` **is live code** (`Encrypter.h` defines
@@ -663,18 +706,20 @@ rounds settled* for the host rules). Test fixtures share
   > that throws by design. Seven `OUTPUT_DEBUG` blocks and `ProcessMode`'s
   > commented-out body were deleted rather than moved, because R4 counts
   > a `g_p*` name on a dead line as readily as on a live one.
-  > **Untested by construction:** the host installation in `GameInit.cpp`
-  > — transposing two of the four identical `bool(*)(const std::string&)`
-  > entries in `s_WireHost` would compile and pass the whole suite. The
-  > forwarder test proves only that each `WireHost.cpp` forwarder calls
-  > its matching member. **Known, not fixed:** `SocketImpl`'s default
+  > **Was untested by construction** until the fifth slice's review: the
+  > host installation in `GameInit.cpp` was positional, so transposing
+  > two same-signature entries in `s_WireHost` compiled and passed the
+  > whole suite; it is designated now, and the forwarder test proves
+  > that each `WireHost.cpp` forwarder calls its matching member. **Known, not fixed:** `SocketImpl`'s default
   > constructor is the only one of its four that leaves `m_key` unset;
   > `Player::processCommand`, `processInput`, `processOutput`,
   > `sendPacket`, `disconnect` and `toString` dereference the socket or a
   > stream the default constructor leaves NULL.
-  - Owner: W0 over the holdouts file; `test_wire_host.cpp`,
-    `test_player_base.cpp`, and their address-taking link proofs
-    (non-virtual members — see *What the review rounds settled*).
+  - Owner: W0 over the (empty) holdouts file, so a new `Client/Packet`
+    source is a library member unless a line there says why not;
+    `test_wire_host.cpp`, `test_player_base.cpp` and their
+    address-taking link proofs (non-virtual members — see *What the
+    review rounds settled*).
 
 - [x] **5.2 Dead/duplicate source removal** (code-health priority 3).
   > **Status:** done for what the task named (PRs #49, #50, #52, #62).
@@ -689,15 +734,103 @@ rounds settled* for the host rules). Test fixtures share
   > its 171 function definitions was the only one. The client has always
   > loaded `Item.inf` and `SkillInfo.inf`; git history keeps the data.
   > Closes the review's Medium dead-code finding.
-  > **Candidates for a next slice:** `VS_UI/WinMain.cpp` is in no target
-  > at all; `CMakeLists.txt` has two `list(FILTER ...)` patterns anchored
-  > `^Client/` that the glob's absolute paths can never match (documented
-  > in place as dead); `MSkillDomain::SaveToFile`/`LoadFromFile` have no
-  > caller; the ~186 `__GAME_SERVER__`/`__GAME_CLIENT__` conditionals in
-  > the packet sources (2.4); `#ifndef __GAME_CLIENT__` residue outside
-  > `Client/Packet` — `RankBonusTable.cpp` (a save path), `MSectorInfo.h`
-  > (portal fields), `Updater/Update.cpp` and the two unbuilt
-  > `OtherClass/Request*PacketFactoryManager.cpp` files.
+  > **Sixth slice (2026-09-09):** deleted `VS_UI/WinMain.cpp` (3,799
+  > lines; a second `WinMain` that drove the widget system without ever
+  > calling `InitGame()`, excluded from every configuration by two
+  > `list(FILTER)` rules that went with it, and named by the ratchet
+  > script's R4 member list, which no longer needs to) and the four
+  > files of `Client/OtherClass/` (two request-side packet factory
+  > managers, 1,700 lines, in no glob and referenced by nothing; the
+  > R12 conformance slice had cleaned 32 exception specifications in
+  > files that were never compiled). R1 and R4 unchanged, because
+  > neither was ever built - the build is the owner, as before. The two
+  > `^Client/`-anchored filters the earlier list named were already
+  > gone.
+  > **Candidates for a next slice:** the ~186 `__GAME_SERVER__`/
+  > `__GAME_CLIENT__` conditionals in the packet sources (2.4), which
+  > the include checker evaluates as dead; `#ifndef __GAME_CLIENT__`
+  > residue outside `Client/Packet` — `RankBonusTable.cpp` (a save
+  > path), `MSectorInfo.h` (portal fields), `Updater/Update.cpp`;
+  > `MSkillDomain::SaveToFile`/`LoadFromFile`, which have no caller but
+  > are reached through `CTypeTable`'s file I/O template, so deleting
+  > them is a template question first. (The peer-to-peer whisper path
+  > this list once named is the seventh slice below.)
+  > **Seventh slice (2026-09-09, on PR #144, at the user's request):**
+  > the peer-to-peer whisper path, which upstream compiled out (`0 &&`
+  > around every writer of `WhisperManager`'s queue and every
+  > whisper-mode `Connect()`) and 5.1's fifth slice found. Deleted:
+  > `WhisperManager.{h,cpp}` whole (its one live member sent a
+  > `CGWhisper`, which `UIMessageManager` now sends itself), its
+  > construction, deletion and `Update` calls, the whisper `case` in
+  > `ProcessMode` and in the connection thread's failure path, the
+  > whisper branches of `GCRequestedIPHandler` and
+  > `GCRequestFailedHandler`, and seven `WireHost` entries (the
+  > character's world and race, the four queue calls, the request-user
+  > notification) with their forwarders, installers and tests. R1
+  > 488 → 487. `REQUEST_CLIENT_MODE_WHISPER` stays in its enum (the
+  > receiving side still names the mode; the values are shared
+  > vocabulary - `REQUESTING_FOR_WHISPER` went with its enum in the
+  > eighth slice), as do
+  > `CRWhisper` and its handler (a Korean-build peer can still whisper
+  > *to* this client, and `tests/wire-layout.txt` pins the packet).
+  > **Found on the way:** `GCRequestedIPHandler::execute` begins
+  > `if (bKorean == false || 1) return;`, so the reply to a
+  > `CGRequestIP` is never acted on and a peer's address is learned
+  > only from a `CRWhisper` it sends us - the profile fetch, the one
+  > peer path left, can dial only a peer that has already whispered.
+  > Whether that is worth keeping, or the whole outbound peer side
+  > should follow the whisper path, was put to the user, who said
+  > remove it.
+  > **Eighth slice (2026-09-09, on PR #144):** the rest of the
+  > outbound peer side. Deleted: `RequestClientPlayer.{h,cpp}` and
+  > `RequestClientPlayerManager.{h,cpp}` from `packetwire` (526 → 524
+  > members); the three handlers that took that player
+  > (`RCConnectVerify`, `RCRequestVerify`, `RCRequestedFile`) and their
+  > registry lines (R1 487 → 484; their handler classes stay declared
+  > in the packet headers like every other handler-less packet's); the
+  > receive half of `RequestFileManager` (`ReceiveFileInfo`,
+  > `RequestReceiveInfo`, the "my request" map and its four calls, the
+  > empty `Update`); the dialling half of `ProfileManager`
+  > (`RequestProfile`, the require map, `Update`, `CGRequestIP`) and its
+  > three callers in `MPlayer`, `GCPartyJoinedHandler` and the
+  > `/profile` chat command - the map now holds what `InitProfiles`
+  > finds in the profile directory, which is what the three UI readers
+  > and the inbound file sender read; the requesting half of
+  > `RequestUserManager` (the second map, `REQUESTING_FOR`,
+  > `RemoveRequestUser`, `RemoveRequestUserLater`, `Update`) and the
+  > `Status`/`TCPPort` fields nothing read - what stays is the address
+  > book `CRWhisperHandler` and the three UDP party handlers write and
+  > the party datagrams read for their port, inert in a fleet built from
+  > this source (nothing here creates an entry); the "no profile"
+  > marker (`AddProfileNULL`/`HasProfileNULL`), whose only writer was a
+  > deleted handler, and the `VS_UI_GameCommon.cpp` branch that cached
+  > it; `RequestConnect`; six `WireHost` entries (`InGameMode`, the
+  > three "my request" calls, and the fifth slice's two) with
+  > forwarders, installers and tests; the per-frame `Update` calls of
+  > all four managers in `GameMain` (`RequestFileManager`'s was empty).
+  > **The commit's first message said nothing this deletes could run.
+  > That was wrong**, and the review said so: `ProfileManager::Update`
+  > ran every ~330 ms and, for a requested name with no known address,
+  > sent `CGRequestIP` to the game server on every turn - `bKorean` is
+  > true by default - and against a server answering `GCRequestFailed`
+  > that was a 3 Hz re-request loop per name, since only a profile
+  > arriving cleared the request; and a peer that had whispered to this
+  > client first (an original Korean client) could be dialled for its
+  > profile. What changes on the wire: **this client no longer sends
+  > `CGRequestIP`**, and no longer dials anyone.
+  > `GCRequestedIPHandler` and `GCRequestFailedHandler` are explicit
+  > no-ops rather than deregistered, because an unregistered id throws
+  > `InvalidProtocolException` on the *game server* connection.
+  > `RequestDisconnect` stays (a peer's `CRDisconnect` reaches it) and
+  > its log line printed the name with `%d`. Kept on purpose: the enum
+  > values, `CRWhisper`/`CRConnect`/`CRRequest` and the `RC*` packet
+  > classes (wire layout pinned), the four `RC*` handlers the UDP party
+  > channel receives (`RCPositionInfo`, `RCCharacterInfo`, `RCStatusHP`,
+  > `RCSay`), and the inbound side whole. Owner: the build, W0 over the
+  > membership file, and the profile UI in `VS_UI_GameCommon.cpp`
+  > reading only what `InitProfiles` provides - which a live server
+  > shows as one's own profile image still displaying, and a packet
+  > capture as no `CGRequestIP` leaving the client.
   - Owner: the build (nothing deleted was compiled, so R1 held at each
     step); the wrong-file-edited trap is closed for the files named.
 

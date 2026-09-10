@@ -1,19 +1,16 @@
 //--------------------------------------------------------------------------------
 // RequestFunction.h
 //--------------------------------------------------------------------------------
-// RequestServer와 RequestClient와 관련된 함수들이다.
+// Functions on the peer connections.
 //--------------------------------------------------------------------------------
 
 #ifndef __REQUESTFUNCTION_H__
 #define __REQUESTFUNCTION_H__
 
 //--------------------------------------------------------------------------------
-// IP의 컴퓨터에 Name이란 캐릭터에게 접속한다.
-//--------------------------------------------------------------------------------
-void	RequestConnect(const char* pIP, const char* pName);
-
-//--------------------------------------------------------------------------------
-// Name이란 캐릭터로부터의 접속을 해제한다.
+// Drop the connection the character called Name has to this client.
+// (RequestConnect, which dialled a peer, went with the outbound peer
+// side - docs/RESTRUCTURING.md task 5.2, eighth slice.)
 //--------------------------------------------------------------------------------
 void	RequestDisconnect(const char* pName);
 

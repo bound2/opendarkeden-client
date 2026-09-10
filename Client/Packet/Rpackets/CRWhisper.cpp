@@ -126,6 +126,13 @@ void CRWhisper::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
+	// Race - checked first, before a byte is written, so a refused
+	// packet leaves nothing behind. Every length below was checked and
+	// the race was not, and RACE_MAX is what the wire host answers for
+	// "no player" (WireHost.h).
+	if ( m_eRace >= RACE_MAX )
+		throw InvalidProtocolException("invalid race");
+
 	// Name
 	BYTE szName = m_Name.size();
 

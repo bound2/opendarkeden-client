@@ -44,8 +44,6 @@ RequestUserManager::Release()
 	}
 
 	m_RequestUsers.clear();
-
-	m_RequestingUsers.clear();
 }
 
 //----------------------------------------------------------------------
@@ -93,39 +91,8 @@ RequestUserManager::AddRequestUser(const char* pName, const char* pIP, int UDPPo
 		{
 			pUser->IP = pIP;
 			pUser->UDPPort = UDPPort;
-
-			// 연결되어 있는 상태라면..
-			// IP가 바꼈으므로 연결을 끊어준다.
-			/*
-			if (pUser->Connected)
-			{
-				g_pRequestClientPlayerManager->Disconnnect( name.c_str() );
-			}
-			*/
 		}
 	}	
-}
-
-//----------------------------------------------------------------------
-// Remove RequestUser
-//----------------------------------------------------------------------
-bool
-RequestUserManager::RemoveRequestUser(const char* pName)
-{
-	REQUEST_USER_MAP::iterator iUser = m_RequestUsers.find( std::string(pName) );
-
-	if (iUser!=m_RequestUsers.end())
-	{
-		RequestUserInfo* pUser = iUser->second;
-
-		delete pUser;
-
-		m_RequestUsers.erase( iUser );
-
-		return true;
-	}
-
-	return false;
 }
 
 //----------------------------------------------------------------------
@@ -142,105 +109,4 @@ RequestUserManager::GetUserInfo(const char* pName) const
 	}
 
 	return NULL;
-}
-
-
-//----------------------------------------------------------------------
-// Has RequestingUser
-//----------------------------------------------------------------------
-bool
-RequestUserManager::HasRequestingUser(const char* pName) const
-{
-	REQUESTING_USER_MAP::const_iterator iUser = m_RequestingUsers.find( std::string(pName) );
-
-	if (iUser!=m_RequestingUsers.end())
-	{
-		return true;
-	}
-
-	return false;
-}
-
-//----------------------------------------------------------------------
-// Add RequestingUser
-//----------------------------------------------------------------------
-void
-RequestUserManager::AddRequestingUser(const char* pName, REQUESTING_FOR rf)
-{
-	std::string name = pName;
-
-	m_RequestingUsers[name] = rf;	
-}
-
-//----------------------------------------------------------------------
-// Remove RequestUser
-//----------------------------------------------------------------------
-bool
-RequestUserManager::RemoveRequestingUser(const char* pName)
-{
-	REQUESTING_USER_MAP::iterator iUser = m_RequestingUsers.find( std::string(pName) );
-
-	if (iUser!=m_RequestingUsers.end())
-	{
-		m_RequestingUsers.erase( iUser );
-
-		return true;
-	}
-
-	return false;
-}
-
-//----------------------------------------------------------------------
-// Get RequestingFor
-//----------------------------------------------------------------------
-RequestUserManager::REQUESTING_FOR			
-RequestUserManager::GetRequestingFor(const char* pName) const
-{
-	REQUESTING_USER_MAP::const_iterator iUser = m_RequestingUsers.find( std::string(pName) );
-
-	if (iUser!=m_RequestingUsers.end())
-	{
-		return iUser->second;
-	}
-
-	return REQUESTING_FOR_NULL;
-}
-
-//----------------------------------------------------------------------
-// RemoveRequestUserLater 
-//----------------------------------------------------------------------
-void				
-RequestUserManager::RemoveRequestUserLater(const char* pName)
-{
-	Lock();
-
-	m_RemoveUsers.push_back( std::string(pName) );
-
-	Unlock();
-}
-
-//----------------------------------------------------------------------
-// Update
-//----------------------------------------------------------------------
-void
-RequestUserManager::Update()
-{
-	Lock();
-
-	if (m_RemoveUsers.empty())
-	{
-		Unlock();
-		return;
-	}
-
-	while (!m_RemoveUsers.empty())
-	{
-		const std::string& name = m_RemoveUsers.front();
-
-		RemoveRequestUser( name.c_str() );
-
-		m_RemoveUsers.pop_front();
-	}
-
-	Unlock();
 }

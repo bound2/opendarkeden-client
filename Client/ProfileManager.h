@@ -51,7 +51,6 @@ class ProfileManager {
 	public :
 		typedef std::map<std::string, std::string>		PROFILE_MAP;
 
-		typedef std::map<std::string, int>				REQUIRE_MAP;
 		
 	public :
 		ProfileManager();
@@ -72,15 +71,9 @@ class ProfileManager {
 		// Add / Remove Profile
 		//-------------------------------------------------------------
 		bool			HasProfile(const char* pName) const;
-		void			RequestProfile(const char* pName);
 		void			AddProfile(const char* pName, const char* pFilename);		
 		bool			RemoveProfile(const char* pName);
 
-		//-------------------------------------------------------------
-		// 상대방이 아예 Profile이 없는 경우
-		//-------------------------------------------------------------
-		bool			HasProfileNULL(const char* pName) const;
-		void			AddProfileNULL(const char* pName);
 
 		//-------------------------------------------------------------
 		// Get
@@ -88,16 +81,14 @@ class ProfileManager {
 		const char*		GetFilename(const char* pName) const;
 
 
-		//-------------------------------------------------------------
-		// Require
-		//-------------------------------------------------------------
-		void			AddRequire(const char* pName);
-		bool			HasRequire(const char* pName) const;
-		bool			RemoveRequire(const char* pName);
-		void			ReleaseRequire();
+		// The map used to be filled by peers too: RequestProfile queued a
+		// name, Update dialled the peer for its profile file, and the file
+		// manager added the result, or a "no profile" marker when the peer
+		// had none. That outbound peer side was compiled out upstream and
+		// is deleted (docs/RESTRUCTURING.md task 5.2, eighth slice), the
+		// marker with it; the map now holds what InitProfiles found in the
+		// profile directory.
 
-		void			Update();
-		
 	protected :
 		//----------------------------------------------------------------------
 		// Lock / Unlock
@@ -108,7 +99,6 @@ class ProfileManager {
 	private :
 		PROFILE_MAP		m_Profiles;
 
-		REQUIRE_MAP		m_Requires;
 
 		CRITICAL_SECTION		m_Lock;
 };
