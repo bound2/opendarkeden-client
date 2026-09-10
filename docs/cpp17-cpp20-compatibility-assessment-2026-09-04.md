@@ -869,15 +869,18 @@ symmetric swap of two same-width fields in both `read()` and `write()`
 round-trips cleanly and only the golden sees it, which the review
 demonstrated by mutation.
 
-What stays raw under `Client/Packet` after this slice is 27 live casts,
-none of them a packet field. Seven are the framing itself - the packet id,
+What stays raw under `Client/Packet` after this slice is 31 live casts
+of the pointer-and-size shape, none of them a packet field (this
+paragraph first said 27: it had grepped `(char*)&` and missed the four
+the output streams spell `(const char*)&`, the measure-the-spelling
+mistake CLAUDE.md warns about). Seven are the framing itself - the packet id,
 size and sequence byte that `SocketOutputStream::write(const Packet*)` and
 `Datagram::read`/`write(Packet*)` put in front of every body;
 `GCMoveOK.framed.code0.hex` pins the three in the stream and **nothing
 pins the four in `Datagram`**, which no test frames a packet through.
-Sixteen are `Datagram.h`'s own typed scalar overloads, and four are the
-`bool` and `char` overloads of the two input streams, which do not route
-through `readWire`. In the packet directories themselves, `CLLogin` and
+Sixteen are `Datagram.h`'s own typed scalar overloads, and eight are the
+`bool` and `char` overloads of the four socket streams, which do not
+route through `readWire`. In the packet directories themselves, `CLLogin` and
 `CGConnect` keep four `(char*)m_MacAddress, 6` writes and reads of a
 `char` array, the shape a span overload fits and the second slice's commit named as
 remaining. Moving the framing belongs to a slice that reads it on its own
@@ -922,18 +925,45 @@ pointer/length pair as adapters, `std::byte` spans beside them, and
 fourteen fixed-width overloads routed through those and `char` read as a
 one-byte span with no cast at all. `Datagram.h` was stored with mixed line
 endings, the eighteen lines a previous edit had added being LF, and is
-CRLF throughout now. Every golden and the wire inventory unchanged; 641
-tests, 294,967 checks, 0 failed in both trees; `DarkEden` builds with 0
+CRLF throughout now. Every golden and the wire inventory unchanged; 643
+tests, 294,975 checks, 0 failed in both trees after the review's repairs;
+`DarkEden` builds with 0
 errors, which is the check that every `RC*` packet and `CGPortCheck` still
 resolve their `Datagram` calls.
 
-What stays raw under `Client/Packet` after this slice is eight live
-casts: the `bool` and `char` overloads of `SocketInputStream` and
-`SocketEncryptInputStream` (four - `bool` is deliberately unchanged since
+What stays raw under `Client/Packet` after this slice is twelve live
+casts of the pointer-and-size shape: the `bool` and `char` overloads of
+the four socket streams (eight - `bool` is deliberately unchanged since
 the first slice, and `char` could take the one-byte span `Datagram` now
-uses), and the four `(char*)m_MacAddress, 6` reads and writes in
-`CLLogin` and `CGConnect`, which a `std::span<char, 6>` of the array fits.
+uses; the output pair spells them `(const char*)&`, which is why a grep
+for `(char*)&` reports eight in total and not twelve), and the four
+`(char*)m_MacAddress, 6` reads and writes in `CLLogin` and `CGConnect`,
+which a `std::span<BYTE, 6>` of the array fits. `SocketAPI.cpp` holds six
+more at the OS socket calls, which are not wire scalars, and
 `CGBloodDrain`'s six sit in comments.
+
+The adversarial review of this slice (two fresh-context readers, one on
+the code and one on the claims) found no wire-byte defect and four
+things worth recording. The wrap-proof bound as first written, `len >
+m_Length - offset`, depended on an offset-never-past-length invariant
+that nothing enforces and would *admit* a read if it were broken, where
+the old form refused; it is now the review's own recommended form, `len >
+m_Length || offset > m_Length - len`, safe whatever the offsets hold, and
+it runs before the adapter builds its span, so a hostile length never
+becomes an invalid range. The write bound alone still let a body one byte
+over its declaration eat the pad slot and go out looking honest, the
+peer dropping the last field; `Datagram::write(const DatagramPacket*)`
+now holds the body to the size its header declared and refuses either
+direction of drift, where the server measures the body and back-fills
+the size - the client refuses, the server corrects, and both keep the
+byte off the wire. `GLIncomingConnectionError::getPacketSize` declared
+one of the two strings its `write` emits, stale against the server's
+copy, and now declares both (the client neither sends nor receives it).
+And the claims audit found the record overstating in three places: the
+write test's wrapping lengths slipped past the old `Assert` too, so it
+is a second reproduction rather than a test that "passed only because
+the Assert fired"; the Release half of "live in every build" is shown by
+no test, the suite being a Debug build; and the residue count above.
 
 **Clock status (2026-09-05):** the first priority-5 slice is implemented.
 `basic/MonotonicClock.{h,cpp}` is the central adapter: `Now()` is
