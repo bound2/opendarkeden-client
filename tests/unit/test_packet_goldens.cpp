@@ -1385,3 +1385,55 @@ TEST(GCSkillInfo, OustersLoginFrameIncludesSkillLevelsAndPreservesNextPacket)
         CHECK_EQ(pass == 0 ? expected.size() : 0, input.m_Stream.length());
     }
 }
+
+//----------------------------------------------------------------------
+// The datagram frame: Datagram::write(const DatagramPacket*) puts the
+// packet id and the declared size in front of the body, at their
+// szPacketID and szPacketSize widths, and sizes the datagram at
+// szPacketHeader + body - one byte more than it writes, the slot the
+// stream's sequence byte occupies. That byte is not written by this
+// code, so the goldens pin the id, the size and the body and the test
+// pins the length separately; the pad byte's value is the fix that
+// follows this pin. CGPortCheck is what the client sends the login
+// server; RCPositionInfo is what it sends and receives from a peer.
+//----------------------------------------------------------------------
+#include "Datagram.h"
+#include "Cpackets/CGPortCheck.h"
+#include "Rpackets/RCPositionInfo.h"
+
+void	Fill(CGPortCheck& p)		{ p.setPCName("WirePin"); }
+void	Fill(RCPositionInfo& p)
+{
+	p.setName("Nosferatu");
+	p.setZoneID(0x8A9B);
+	p.setZoneX(0xC5);
+	p.setZoneY(0xD6);
+}
+
+// The bytes Datagram::write put down: the header it writes and the
+// body, without the unwritten pad slot.
+template <class PacketT>
+std::vector<unsigned char>	DatagramWritten(const PacketT& packet, Datagram& datagram)
+{
+	datagram.write(&packet);
+	const unsigned char* data = (const unsigned char*)datagram.getData();
+	const size_t written = szPacketID + szPacketSize + packet.getPacketSize();
+	CHECK_EQ(szPacketHeader + packet.getPacketSize(), datagram.getLength());
+	return std::vector<unsigned char>(data, data + written);
+}
+
+TEST(Datagram, CGPortCheckFrameMatchesGolden)
+{
+	CGPortCheck packet;
+	Fill(packet);
+	Datagram datagram;
+	ExpectGolden("CGPortCheck.datagram", 0, DatagramWritten(packet, datagram));
+}
+
+TEST(Datagram, RCPositionInfoFrameMatchesGolden)
+{
+	RCPositionInfo packet;
+	Fill(packet);
+	Datagram datagram;
+	ExpectGolden("RCPositionInfo.datagram", 0, DatagramWritten(packet, datagram));
+}
