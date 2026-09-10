@@ -208,6 +208,7 @@ TEST(WireBoolChar, ReadingFromAnEmptyStreamUnderflows)
 		bThrew = true;
 	}
 	CHECK(bThrew);
+	CHECK_EQ(true, b);
 
 	bThrew = false;
 	try {
@@ -216,6 +217,7 @@ TEST(WireBoolChar, ReadingFromAnEmptyStreamUnderflows)
 		bThrew = true;
 	}
 	CHECK(bThrew);
+	CHECK_EQ('x', c);
 }
 
 //----------------------------------------------------------------------
@@ -243,11 +245,13 @@ TEST(WireBoolChar, ANonZeroWireByteReadsAsTrueOnBothReads)
 		bool a = false, b = true;
 		f.m_Input.read(a);
 		f.m_Input.read(b);
-		// Compared as a byte, so an invalid representation cannot pass
-		// by being "truthy" in one test and not the next.
+		// Compared as the storage byte, never loaded as a bool: an
+		// invalid representation cannot pass by being "truthy", and the
+		// test does not itself perform the load it exists to prevent (a
+		// red run under Clang's -fsanitize=bool would abort on that
+		// load rather than fail).
 		CHECK_EQ(1, (int)*reinterpret_cast<const unsigned char*>(&a));
 		CHECK_EQ(0, (int)*reinterpret_cast<const unsigned char*>(&b));
-		CHECK_EQ(true, a == true);
 	}
 
 	// The encrypting read, under a flipping and a non-flipping code: a
@@ -265,6 +269,6 @@ TEST(WireBoolChar, ANonZeroWireByteReadsAsTrueOnBothReads)
 		f.m_Input.readEncrypt(a);
 		f.m_Input.readEncrypt(b);
 		CHECK_EQ(flips ? 0 : 1, (int)*reinterpret_cast<const unsigned char*>(&a));
-		CHECK_EQ(a == true, b == true);
+		CHECK_EQ(flips ? 0 : 1, (int)*reinterpret_cast<const unsigned char*>(&b));
 	}
 }
