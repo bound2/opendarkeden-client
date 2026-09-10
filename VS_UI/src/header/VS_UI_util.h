@@ -16,6 +16,7 @@
 #include "framelib/FR.h"
 //#include "rbt.h"
 #include "Basics.h"
+#include "MonotonicClock.h"
 #include "SpriteLib/CSpritePack.h"
 #include "SpriteLib/CIndexSpritePack.h"
 
@@ -192,8 +193,7 @@ private:
 	// 하나의 Animation object는 play되기 위해 하나의 timer를 갖는다. 내부에 timer가
 	// 구현된다. Timer library는 전역 함수를 설정해줘야하기 때문에 사용할 수 없다.
 	//
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_millisec;
+	MonotonicClock::IntervalTimer	m_interval_timer;
 
 	UINT						m_current_frame;
 	int						m_x, m_y;

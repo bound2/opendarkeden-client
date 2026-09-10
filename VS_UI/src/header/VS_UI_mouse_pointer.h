@@ -39,8 +39,7 @@ private:
 	bool						m_bl_coin;
 
 	//timer
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_millisec;
+	MonotonicClock::IntervalTimer	m_interval_timer;
 
 	bool						Timer();
 

@@ -17,6 +17,7 @@
 #include "CImm.h"
 #endif
 #include "VS_UI_mouse_pointer.h"
+#include "MonotonicClock.h"
 #include "../widget/u_button.h"  // For EventButton, Exec, Button classes
 
 // Stub definitions for non-Windows platforms (without Immersion library)
@@ -84,8 +85,9 @@ public:
 class C_VS_UI_EVENT_BUTTON : public EventButton
 {
 private:
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_millisec;
+	// The fade's frame gate (basic/MonotonicClock.h), in place of the
+	// DWORD tick pair every widget timer used to carry.
+	MonotonicClock::IntervalTimer	m_interval_timer;
 	bool						m_bl_start;
 
 public:
@@ -99,7 +101,7 @@ public:
 									EventButton(_x, _y, _w, _h, id, pC_exec_handler)
 	{
 		Init();
-		m_dw_millisec = millisec;
+		m_interval_timer.SetIntervalMillis(millisec);
 
 		if (m_image_index == -1) // default
 			m_image_index = id;
@@ -117,7 +119,7 @@ public:
 	{
 		if (m_bl_start)
 		{
-			if (m_dw_prev_tickcount+m_dw_millisec <= GetTickCount())
+			if (m_interval_timer.Fire())
 			{
 				// next frame!
 
@@ -143,15 +145,13 @@ public:
 					m_alpha = MAX_ALPHA;
 					m_bl_start = false;
 				}
-
-				m_dw_prev_tickcount = GetTickCount();
 			}
 		}
 	}
 
 	void	EventFocusOn()
 	{
-		m_dw_prev_tickcount = GetTickCount();
+		m_interval_timer.Restart();
 		m_bl_start = true;
 		if(gpC_Imm)
 			gpC_Imm->ForceUI(CImm::FORCE_UI_BUTTON);
@@ -159,7 +159,7 @@ public:
 
 	void	EventFocusOff()
 	{
-		m_dw_prev_tickcount = GetTickCount();
+		m_interval_timer.Restart();
 		m_bl_start = true;
 		m_bl_prev_focus = false;
 	}

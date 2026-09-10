@@ -1073,19 +1073,13 @@ void C_VS_UI_SHOP::Start()
 	m_focused_slot = NOT_SELECTED;
 	m_select_item_slot = NOT_SELECTED;
 
-	m_dw_prev_tickcount = GetTickCount();
-	m_dw_millisec = 100;
+	m_interval_timer.Restart();
+	m_interval_timer.SetIntervalMillis(100);
 }
 
 bool C_VS_UI_SHOP::Timer()
 {
-	if(m_dw_prev_tickcount+m_dw_millisec <= GetTickCount())
-	{
-		m_dw_prev_tickcount = GetTickCount();
-		return true;
-	}
-
-	return false;
+	return m_interval_timer.Fire();
 }
 
 //-----------------------------------------------------------------------------

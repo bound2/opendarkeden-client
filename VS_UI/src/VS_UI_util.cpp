@@ -300,11 +300,9 @@ void C_ANIMATION::Timer()
 	if (m_play_order == STOP)
 		return;
 
-	if (m_dw_prev_tickcount+m_dw_millisec <= GetTickCount())
+	if (m_interval_timer.Fire())
 	{
 		// next frame!
-
-		m_dw_prev_tickcount = GetTickCount();
 
 		switch (m_play_order)
 		{
@@ -375,7 +373,7 @@ C_ANIMATION::C_ANIMATION(C_ANI_OBJECT *p_object)
 	m_play_order_next = STOP;
 	m_play_order = STOP;
 	m_current_frame = 0;
-	m_dw_millisec = 100;
+	m_interval_timer.SetIntervalMillis(100);
 	m_x = 0;
 	m_y = 0;
 }
@@ -425,7 +423,7 @@ void C_ANIMATION::RunNextPlayOrder()
 -----------------------------------------------------------------------------*/
 void C_ANIMATION::SetSpeed(DWORD millisec)
 {
-	m_dw_millisec = millisec;
+	m_interval_timer.SetIntervalMillis(millisec);
 }
 
 /*-----------------------------------------------------------------------------
@@ -445,7 +443,7 @@ void C_ANIMATION::SetPlayPosition(int x, int y)
 void C_ANIMATION::PlayLoop()
 {
 	// refresh timer
-	m_dw_prev_tickcount = GetTickCount();
+	m_interval_timer.Restart();
 
 	m_play_order = PLAY_LOOP;
 	m_current_frame = 0;
@@ -459,7 +457,7 @@ void C_ANIMATION::PlayLoop()
 void C_ANIMATION::PlayLoopBack()
 {
 	// refresh timer
-	m_dw_prev_tickcount = GetTickCount();
+	m_interval_timer.Restart();
 
 	m_play_order = PLAY_LOOPBACK;
 	m_current_frame = 0;
@@ -473,7 +471,7 @@ void C_ANIMATION::PlayLoopBack()
 void C_ANIMATION::Play()
 {
 	// refresh timer
-	m_dw_prev_tickcount = GetTickCount();
+	m_interval_timer.Restart();
 	
 	m_current_frame = 0;
 	m_play_order = PLAY;
@@ -487,7 +485,7 @@ void C_ANIMATION::Play()
 void C_ANIMATION::Stop()
 {
 	// refresh timer
-	m_dw_prev_tickcount = GetTickCount();
+	m_interval_timer.Restart();
 
 	m_play_order = STOP;
 }
@@ -531,7 +529,7 @@ void C_ANIMATION::Refresh()
 void C_ANIMATION::PlayBack()
 {
 	// refresh timer
-	m_dw_prev_tickcount = GetTickCount();
+	m_interval_timer.Restart();
 
 	m_play_order = PLAY_BACK;
 	m_current_frame = m_pC_ani_object->FrrSize()-1;

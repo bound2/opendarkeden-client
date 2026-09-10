@@ -821,8 +821,8 @@ C_VS_UI_BRIEFING::C_VS_UI_BRIEFING()
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(x + close_button_x, y+close_button_y, m_pC_screen_spk->GetWidth(CLOSE_BUTTON), m_pC_screen_spk->GetHeight(CLOSE_BUTTON), SCREEN_CLOSE_ID, this, CLOSE_BUTTON));
 
 	// TIMER
-	m_dw_prev_tickcount = GetTickCount();
-	m_dw_millisec = 50;
+	m_interval_timer.Restart();
+	m_interval_timer.SetIntervalMillis(50);
 	m_scroll_max = 0;
 
 	m_char_x = 30;
@@ -1018,9 +1018,8 @@ void	C_VS_UI_BRIEFING::Run(id_t id)
 //-----------------------------------------------------------------------------
 bool	C_VS_UI_BRIEFING::Timer()
 {
-	if(m_dw_prev_tickcount+m_dw_millisec <= GetTickCount())
+	if(m_interval_timer.Fire())
 	{
-		m_dw_prev_tickcount = GetTickCount();
 		m_scroll_detail++;
 		if(m_scroll_detail == 20)
 		{
@@ -1148,14 +1147,8 @@ C_VS_UI_COMPUTER::C_VS_UI_COMPUTER():C_VS_UI_DESC()
 	if(LoadTree(TXT_TUTORIAL_COMPUTER) == false)return;
 
 	// TIMER
-
-	DWORD currentTime = GetTickCount();
-
-	m_dw_prev_tickcount = currentTime;
-	
-	m_dw_millisec = 50;
-
-
+	m_interval_timer.Restart();
+	m_interval_timer.SetIntervalMillis(50);
 }
 
 //-----------------------------------------------------------------------------
@@ -1776,14 +1769,10 @@ void	C_VS_UI_COMPUTER::Timer(bool reset)
 	if(reset)
 	{
 		m_timer = false;
-		m_dw_prev_tickcount = GetTickCount();
+		m_interval_timer.Restart();
 	}
-	else if(m_dw_prev_tickcount+m_dw_millisec <= GetTickCount())
-	{
-		m_timer = true;
-		m_dw_prev_tickcount = GetTickCount();
-	}
-	else m_timer = false;
+	else
+		m_timer = m_interval_timer.Fire();
 
 }
 /*

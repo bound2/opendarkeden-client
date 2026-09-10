@@ -5268,13 +5268,16 @@ void C_VS_UI_TITLE::Show()
 // That is pre-existing and deliberately left alone here.
 //
 // This was "m_dw_prev_tickcount + m_dw_millisec <= GetTickCount()", the
-// shape that stops working when that sum carries past 2^32 and lands
-// behind the current tick: from then on it is true on every frame and
-// the scroll runs at the frame rate instead of at 30 ms. It is the
-// subtraction of two time points over a 64-bit millisecond rep now, which
-// has no 2^32 to carry past (basic/MonotonicClock.h). The current time is
-// also read once instead
-// of twice, so the interval no longer drifts by the few microseconds
+// shape whose two DWORDs wrap independently at 2^32: when the sum wraps
+// before the tick the gate is open on every frame until the tick
+// follows, and when the tick wraps first the gate stays shut for 49.7
+// days (the fourth clocks slice measured both; an earlier version of
+// this comment said "from then on it is true on every frame", which is
+// the first case overstated). It is the subtraction of two time points
+// over a 64-bit millisecond rep now, which has no 2^32 to carry past
+// (basic/MonotonicClock.h); the same gate is MonotonicClock::IntervalTimer
+// for the other widgets. The current time is also read once instead of
+// twice, so the interval no longer drifts by the few microseconds
 // between the two reads.
 //-----------------------------------------------------------------------------
 bool	C_VS_UI_TITLE::Timer()

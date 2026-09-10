@@ -91,8 +91,7 @@ private:
 	MItem * GetSlotItem(int slot) const;
 
 //timer
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_millisec;
+	MonotonicClock::IntervalTimer	m_interval_timer;
 
 	bool	Timer();
 

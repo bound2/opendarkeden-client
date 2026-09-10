@@ -2805,14 +2805,16 @@ bool C_VS_UI_FILE_DIALOG::MouseControl(UINT message, int _x, int _y)
 
 bool	C_VS_UI_FILE_DIALOG::Timer(bool reset)
 {
-	static DWORD prev_time = GetTickCount();
-	
+	// The long-name delay: strictly more than m_show_long_name since the
+	// last reset, as the "prev + delay < now" it replaces was.
+	static MonotonicClock::IntervalTimer s_long_name_timer;
+
 	if(reset)
 	{
-		prev_time = GetTickCount();
+		s_long_name_timer.Restart();
 	} else
 	{
-		if(prev_time + m_show_long_name < GetTickCount())
+		if(s_long_name_timer.Elapsed() > MonotonicClock::Millis(m_show_long_name))
 			return true;
 	}
 	return false;
@@ -2850,7 +2852,6 @@ void	C_VS_UI_FILE_DIALOG::Show()
 {
 	std::string title;
 	char name[300],*p_name;
-	DWORD dwNow;
 	RECT rect;
 	int i,j;
 	// 600,133
@@ -2978,9 +2979,7 @@ void	C_VS_UI_FILE_DIALOG::Show()
 	}
 	
 	//----------------------------------------------------------------------------------------
-	// 긴이름 적어주기
-	dwNow=GetTickCount();
-	//if((dwNow-m_stay_openfolder)>=1000)			// 1초 이상 지체시
+	// Write the long name out once the folder has been open a while.
 	if(Timer(false))
 	{
 		std::string title;

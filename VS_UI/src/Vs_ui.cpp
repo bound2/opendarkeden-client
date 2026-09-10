@@ -1735,7 +1735,7 @@ if(gbl_info_show)
 	if(!IsRunningProgress() && g_pParty != NULL && g_pParty->GetSize() > 0)
 	{
 		static C_SPRITE_PACK cursor(SPK_PARTY_CURSOR);
-		static DWORD dw_prev_tickcount = GetTickCount();
+		static MonotonicClock::IntervalTimer s_frame_timer(MonotonicClock::Millis(150));
 		static int frame = 0;
 		static const POINT point_table[8] = { {-cursor.GetWidth(0)/2, 0}, 
 												{-cursor.GetWidth(10), -cursor.GetHeight(10)/2},
@@ -1747,9 +1747,8 @@ if(gbl_info_show)
 												{0, -cursor.GetHeight(70) },
 											};
 
-		if(dw_prev_tickcount+150 <= GetTickCount())
+		if(s_frame_timer.Fire())
 		{
-			dw_prev_tickcount = GetTickCount();
 			frame = (frame +1)%10;
 		}
 

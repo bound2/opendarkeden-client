@@ -388,8 +388,8 @@ C_VS_UI_MOUSE_POINTER::C_VS_UI_MOUSE_POINTER()
 	m_color = RGB_WHITE;
 
 	// TIMER
-	m_dw_prev_tickcount = GetTickCount();
-	m_dw_millisec = 300;
+	m_interval_timer.Restart();
+	m_interval_timer.SetIntervalMillis(300);
 
 	m_pC_mouse_pointer_spk = new C_SPRITE_PACK(SPK_MOUSE_POINTER);
 
@@ -447,10 +447,8 @@ void	C_VS_UI_MOUSE_POINTER::Set(UINT message, int x, int y)
 //-----------------------------------------------------------------------------
 bool	C_VS_UI_MOUSE_POINTER::Timer()
 {
-	if(m_dw_prev_tickcount+m_dw_millisec <= GetTickCount())
+	if(m_interval_timer.Fire())
 	{
-		m_dw_prev_tickcount = GetTickCount();
-		
 		return true;
 	}
 

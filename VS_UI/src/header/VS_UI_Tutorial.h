@@ -182,8 +182,7 @@ private:
 	CRarFile					m_briefing_file;
 
 	//timer
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_millisec;
+	MonotonicClock::IntervalTimer	m_interval_timer;
 
 	bool	Timer();
 
@@ -255,8 +254,7 @@ private:
 
 // TIMER
 	bool						m_timer;
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_millisec;
+	MonotonicClock::IntervalTimer	m_interval_timer;
 
 	void	Timer(bool reset = false);
 /////////
