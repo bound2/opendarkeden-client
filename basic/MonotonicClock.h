@@ -108,6 +108,71 @@ FromMillis(unsigned long long ull_millisec)
 	return TimePoint(Duration(static_cast<Duration::rep>(ull_millisec)));
 }
 
+//----------------------------------------------------------------------
+// IntervalTimer - the widgets' periodic gate.
+//
+// Every animation, scroll and cursor timer in VS_UI was three lines:
+// "if (m_dw_prev_tickcount + m_dw_millisec <= GetTickCount()) { ...;
+// m_dw_prev_tickcount = GetTickCount(); }" over a pair of DWORDs that
+// wrap independently at 2^32: when the sum wraps before the tick does
+// the gate is open on every frame until the tick follows, and when the
+// tick wraps first the gate stays shut for 49.7 days. This is the same
+// gate over a time point and a duration with a 64-bit rep: Fire() is
+// true, and restarts the interval, once the interval has passed since
+// the last Restart() or Fire(); Elapsed() is the time since then for a
+// caller that wants its own comparison. One clock read per call, so
+// the interval does not drift by the time the caller's work takes
+// between two reads.
+//
+// Constructed as "restarted now" with a zero interval, which fires on
+// the first call - what a DWORD member left at zero did too, before
+// the widget's constructor set it.
+//----------------------------------------------------------------------
+class IntervalTimer
+{
+public:
+	IntervalTimer()
+		: m_tp_prev(Now()), m_d_interval(0)
+	{
+	}
+
+	explicit IntervalTimer(Duration d_interval)
+		: m_tp_prev(Now()), m_d_interval(d_interval)
+	{
+	}
+
+	void		SetInterval(Duration d_interval)	{ m_d_interval = d_interval; }
+	void		SetIntervalMillis(DWORD dw_millisec)	{ m_d_interval = Millis(dw_millisec); }
+	Duration	GetInterval() const					{ return m_d_interval; }
+
+	// Marks now as the last firing.
+	void		Restart()							{ m_tp_prev = Now(); }
+
+	// Time since the last firing; never negative, whatever a test source does.
+	Duration	Elapsed() const
+	{
+		const TimePoint tp_now = Now();
+		return tp_now > m_tp_prev ? tp_now - m_tp_prev : Duration(0);
+	}
+
+	// True once the interval has passed since the last firing, and then
+	// this is the firing.
+	bool		Fire()
+	{
+		const TimePoint tp_now = Now();
+		if (tp_now - m_tp_prev >= m_d_interval)
+		{
+			m_tp_prev = tp_now;
+			return true;
+		}
+		return false;
+	}
+
+private:
+	TimePoint	m_tp_prev;
+	Duration	m_d_interval;
+};
+
 } // namespace MonotonicClock
 
 #endif // __MONOTONIC_CLOCK_H__
