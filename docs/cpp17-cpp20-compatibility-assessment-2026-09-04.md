@@ -1118,13 +1118,15 @@ wrap. 655 tests, 297,382 checks, 0 failed in both trees. Left as found:
 width measured is for a line never drawn; upstream's, and not this
 slice's to settle.
 
-What is left of priority 5: 209 live tick reads in 32 files (calls of
-`GetTickCount`/`timeGetTime` over `Client/` and `VS_UI/` with `/* */` and
-`//` comments stripped; the raw spelling count over the tree is about
-278 in 50 files, and two reviewers' counts differed from this one by a
-few percent on where a comment ends, so treat every figure here as its
-method). **Most of it is not executable-side**: `VS_UI` is a static
-library and holds 128 of them, 100 in the two `VS_UI_GameCommon`
+What is left of priority 5 after that slice: 215 live tick reads in 32
+files (calls of `GetTickCount`/`timeGetTime` over `Client/` and `VS_UI/`
+with comments and string literals removed; this paragraph first said
+209, counted by a regex strip of block comments that reads `//*pDest`
+as an opener and swallows code - the fourth slice's
+`tests/tools/count_tick_reads.pl` and ratchet R14 count by a
+character-level scanner instead, and every figure here is theirs).
+**Most of it is not executable-side**: `VS_UI` is a static
+library and holds 132 of them, 100 in the two `VS_UI_GameCommon`
 sources alone (chat-spam
 throttles, help and hide auto-timers, mining progress and double-click
 timing), so those have a test path once `VS_UI` is added to the unit
@@ -1135,6 +1137,37 @@ only by running the client. The one `packetwire` site, a byte-rate
 probe in `SocketInputStream::fill`, sits under
 `__TEST_PACKET_RECEIVED_SIZE_PER_SECOND__`, which nothing defines, and is
 dead code rather than a clock to move; `gamemodel` is clean.
+
+The fourth priority-5 slice (2026-09-10) is every VS_UI timer outside the
+two `GameCommon` sources, and it gives `basic` the gate they all share.
+Seven widget classes carried a `DWORD` pair and the three-line
+`prev + interval <= GetTickCount()` over it - the event button's focus
+fade, `C_ANIMATION`'s frame step, the shop's, the briefing's and the
+computer's scroll timers, the mouse pointer's - and two functions kept
+the pair as static locals, the file dialog's long-name delay and the
+party cursor. `MonotonicClock::IntervalTimer` is that gate over a time
+point and a 64-bit duration: `Fire()`, `Restart()`, `SetIntervalMillis`,
+and `Elapsed()` for the file dialog's strict comparison. Writing its
+tests corrected what the first slice's title-screen comment said the
+wrap did: the two `DWORD`s wrap independently, so when the sum wraps
+before the tick the gate is open on every frame until the tick follows
+(an early firing, up to one interval), and when the tick wraps first the
+gate stays shut for 49.7 days for a widget not polled in the window - not
+"open from then on". Both cases are pinned with the old gate worked out
+beside them, along with the single clock read that keeps a caller's work
+out of the interval. The quantisation statement is the one every move
+off `GetTickCount` owes: on Windows it is kernel32's and steps in about
+15.6 ms, so each timer fired on the first step at or past its interval
+and now fires at the interval - the button fade goes from about 15.6 to
+10 ms a step (a 320 ms fade instead of 500), the tutorial scrolls from
+62.5 to 50, the animation frame and the shop from 109 to 100, the party
+cursor from 156 to 150, the pointer from 312 to 300. `C_ANIMATION` never
+initialised its previous tick and compared against heap contents on its
+first gate; the timer constructs as "now". Two `srand(GetTickCount())`
+seeds stay: they are not timers. `VS_UI` goes from 132 live reads to 103,
+the tree from 215 to 186, and R14 holds the line. The timer is tested in
+`basic` (`tests/unit/test_interval_timer.cpp`); the widget conversions
+are verified by the build, and the client was not run.
 
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through
