@@ -83,7 +83,7 @@ public :
 	}
 
 	uint read ( bool   & buf ) { return read( (char*)&buf, szbool   ); }
-	uint read ( char   & buf ) { return read( (char*)&buf, szchar   ); }
+	uint read ( char   & buf ) { return read( std::span<char>( &buf, 1 ) ); }
 	uint read ( uchar  & buf ) { return readWire(buf); }
 	uint read ( short  & buf ) { return readWire(buf); }
 	uint read ( ushort & buf ) { return readWire(buf); }

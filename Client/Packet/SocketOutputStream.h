@@ -72,8 +72,10 @@ public :
 		return write(std::as_bytes(std::span(&storage, 1)));
 	}
 
-    uint write ( bool   buf ) { return write( (const char*)&buf, szbool   ); }
-    uint write ( char   buf ) { return write( (const char*)&buf, szchar   ); }
+    // A bool goes out as the one byte 0 or 1 it holds; a char is not a
+    // fixed-width integer type and goes out as a one-byte span.
+    uint write ( bool   buf ) { return writeWire( static_cast<BYTE>( buf ? 1 : 0 ) ); }
+    uint write ( char   buf ) { return write( std::span<const char>( &buf, 1 ) ); }
     uint write ( uchar  buf ) { return writeWire(buf); }
     uint write ( short  buf ) { return writeWire(buf); }
     uint write ( ushort buf ) { return writeWire(buf); }

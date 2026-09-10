@@ -10,6 +10,8 @@
 #include "Client_PCH.h"
 #include "CLLogin.h"
 
+#include <span>
+
 
 //////////////////////////////////////////////////////////////////////
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
@@ -42,7 +44,8 @@ void CLLogin::read ( SocketInputStream & iStream )
 
 	iStream.read( m_Password , szPassword );
 
-	iStream.read( (char*)m_MacAddress , 6 );
+	// The whole array, its extent from its declaration.
+	iStream.read( std::as_writable_bytes( std::span( m_MacAddress ) ) );
 
 	__END_CATCH
 }
@@ -83,7 +86,7 @@ void CLLogin::write ( SocketOutputStream & oStream ) const
 
 		oStream.write( std::span<const char>(m_Password.data(), szPassword) );
 
-		oStream.write( (char*)m_MacAddress, 6*sizeof(BYTE) );
+		oStream.write( std::as_bytes( std::span( m_MacAddress ) ) );
 		
 		BYTE loginMode = 0;
 		// add by Coffee 2006.11.7 藤속貢籃되쩍친駕
