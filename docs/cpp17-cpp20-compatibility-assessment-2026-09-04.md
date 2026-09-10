@@ -884,6 +884,57 @@ remaining. Moving the framing belongs to a slice that reads it on its own
 terms rather than as one more packet, and that slice should pin the
 datagram header first.
 
+**Fourth span/typed-scalar slice (2026-09-10): the framing header, and
+with it the whole of `Datagram`.** The slice went as the paragraph above
+asked: pin the datagram first, then move. The UDP transport is live -
+`CGPortCheck` reaches the login server through it and the `RC*` packets
+travel between peers - and nothing had pinned either side of
+`Datagram::read`/`write(DatagramPacket*)`. Two goldens now do
+(`CGPortCheck.datagram`, `RCPositionInfo.datagram`: the id, the size and
+the body), `tests/unit/test_datagram_frame.cpp` builds the frame by hand
+and pins the read side through a real `PacketFactoryManager` with its
+three refusals (an id at or past `PACKET_MAX`, a size over the factory's
+maximum, a length that disagrees with `szPacketHeader + size` either
+way), and the two bounded primitives every datagram packet parses through
+are pinned at the end of the buffer.
+
+Pinning found two defects, each fixed in a `fix:` commit of its own
+between the pin and the move, and both recorded in the code-health
+review. `Datagram::write` sizes its buffer at `szPacketHeader + body` and
+writes one byte less - the slot the stream's sequence byte occupies, which
+both peers count in the length and neither reads - from a buffer a bare
+`new char[]` returned, so **every UDP packet the client sent carried one
+byte of heap memory**; the server's `Datagram` zero-fills for exactly this
+reason and documents the pad as travelling as zero, and the client now
+matches it (the test read the pad back as `0xCD` on the unfixed code).
+The review's open Medium on the bounds checks - `m_InputOffset + len >
+m_Length` wraps, and the write bound was an `Assert` that Release compiles
+away - is closed the same way; its read test did not fail on the unfixed
+code, it crashed the test process at the first wrapping length.
+
+The move itself: `SocketOutputStream::write(const Packet*)` writes the
+id, the size and the sequence byte through `writeWire` (all three are
+exact-width types on every platform, so no staging), and `Datagram` gains
+what the streams have had since the first slice - `read(std::span<char>)`
+and `write(std::span<const char>)` as the one bounded core each way, the
+pointer/length pair as adapters, `std::byte` spans beside them, and
+`readWire`/`writeWire` under the same `WireScalar` concept, with the
+fourteen fixed-width overloads routed through those and `char` read as a
+one-byte span with no cast at all. `Datagram.h` was stored with mixed line
+endings, the eighteen lines a previous edit had added being LF, and is
+CRLF throughout now. Every golden and the wire inventory unchanged; 641
+tests, 294,967 checks, 0 failed in both trees; `DarkEden` builds with 0
+errors, which is the check that every `RC*` packet and `CGPortCheck` still
+resolve their `Datagram` calls.
+
+What stays raw under `Client/Packet` after this slice is eight live
+casts: the `bool` and `char` overloads of `SocketInputStream` and
+`SocketEncryptInputStream` (four - `bool` is deliberately unchanged since
+the first slice, and `char` could take the one-byte span `Datagram` now
+uses), and the four `(char*)m_MacAddress, 6` reads and writes in
+`CLLogin` and `CGConnect`, which a `std::span<char, 6>` of the array fits.
+`CGBloodDrain`'s six sit in comments.
+
 **Clock status (2026-09-05):** the first priority-5 slice is implemented.
 `basic/MonotonicClock.{h,cpp}` is the central adapter: `Now()` is
 `std::chrono::steady_clock` truncated to milliseconds, `Duration` is

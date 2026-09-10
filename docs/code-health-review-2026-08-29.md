@@ -60,6 +60,8 @@ A subsystem-by-subsystem review surfaced **197 findings**. Every area graded **D
 
 ## Remediation Status
 
+**Updated 2026-09-10:** the Medium *Networking & Protocol* finding below — `Datagram`'s bounds checks wrapping in unsigned arithmetic, with the write bound an `Assert` that Release compiles away — is fixed on `feature/cpp20-framing-header`, taking the total to 87 fixed and Medium to 18 fixed / 63 open. Its test is a reproduction rather than a guard: on the unfixed code the wrapping read did not fail the test, it crashed the test process. The same branch found and fixed a defect this review had not seen, recorded under *Found by reading*: the datagram sent one byte of uninitialised heap memory behind every UDP packet, in the pad slot both peers count and neither reads.
+
 **Updated 2026-09-06:** the Medium *Networking & Protocol* finding below — `flush()` discarding the unsent remainder of a partial send — is fixed on `fix/flush-partial-send`, taking the total to 86 fixed and Medium to 17 fixed / 64 open. It is the same defect the adversarial review of the header-rollback fix had reported the same day as a new one, so it is recorded twice, under *Found by reading* as well as in its own entry; both now point at the same commit. It is also the first *Networking & Protocol* fix that a test binary could reach at the socket, which took one keyword: `SocketImpl::send` is virtual so a test can script a partial send, since a real one needs a congested peer.
 
 **Updated 2026-09-04, later:** two Medium findings in *Rendering & Sprites* — `BltAlphaSpritePal` refusing partially visible sprites, and the SDL effect function tables never populated — are fixed in `6fd3f34`, taking the total to 85 fixed and Medium to 16 fixed / 65 open. They turned out to be two of the three defects behind a runtime symptom rather than cosmetic ones: every screen-blend skill effect drew nothing. That symptom and the third defect are recorded under *Runtime defects* and *Found by reading* below.
@@ -163,6 +165,7 @@ A seventh phase (2026-09-03, branch `harden/checked-format`) returned to C19, th
 | `BltAlphaSpritePal` refusing partially visible sprites | 🟡 Medium | `6fd3f34` |
 | SDL effect function tables never populated (the `EFFECT_SCREEN` entry; the rest deliberately left, see its entry) | 🟡 Medium | `6fd3f34` |
 | `flush()` discarding the unsent remainder of a partial send | 🟡 Medium | `fix/flush-partial-send` |
+| `Datagram` bounds checks that wrap, and a write bound that was an `Assert` | 🟡 Medium | `fix:` commit on `feature/cpp20-framing-header` |
 
 ### Fixed, not in this review: the `SendMessage` pointer-truncation family
 
@@ -292,6 +295,7 @@ Defects of the same weight as the ten above, kept out of that table because they
 | `MShopShelf::NewShelf` and the three `RemoveItem(GEAR_*)` bounds checks ran after an undefined enum conversion | the shop-list and remove-from-gear handlers cast the wire byte to the enum and then called the function that range-checks it; converting an out-of-range value to an enum with no fixed underlying type is undefined before the check can run, and Clang's `-fsanitize=enum` (on in Apple Clang's and Linux Clang's `-fsanitize=undefined`, not GCC's) aborts on the load. The four functions take `int` now and the handlers pass the raw byte. Found by the `macos-asan` preset on its first run, 2026-09-08 | fixed on `port/macos` |
 | `C_VS_UI_BRING_FEE::Show` evaluates `money_buf[100]` as a statement | a leftover declaration turned into an expression statement that reads one past a `char[100]`; harmless in practice, undefined by the letter. Same finder, same commit | fixed on `port/macos` |
 | `VS_UI_ExtraDialog.cpp` ~1520 reads `CIndexSprite::ColorSet[set+13][31]` from rows of `MAX_COLORGRADATION` (30) | the quest- and unique-item title colours read past their row into the next colour set's second entry, and past the whole table for the last row. The intended entry is not knowable from the code (upstream's gradation count differed), and the visible colour of every unique item's title would change with any guess, so it is **left open** for someone who can compare against the original client. Same finder | open |
+| `Datagram::write(const DatagramPacket*)` sends one byte of heap memory behind every UDP packet | the datagram is sized at `szPacketHeader + body` - the id, the size, the body and the one-byte slot the stream\x27s sequence byte occupies - and the code writes every byte but that one, from a buffer a bare `new char[]` returned. Both peers count the byte in the length and neither reads it, but `DatagramSocket::send` puts the whole buffer on the wire, so every `CGPortCheck` to the login server and every `RC*` packet to a peer carried whatever the heap held there: `0xCD` under the debug heap, a byte of freed client memory in Release. The server\x27s `Datagram` zero-fills its buffer and documents the pad as travelling as zero; the client now matches it. Found while comparing the two `Datagram::write`s for the framing-header slice; reproduced in the test binary, where the pad read back as `0xCD` on the unfixed code | `fix/` commit on `feature/cpp20-framing-header`, 2026-09-10 |
 
 ### Open, found during the packet-index pass and not fixed
 
@@ -1406,6 +1410,8 @@ Line 79: `int dot = m_FilenameTemp.rfind(".");`. `std::string::rfind` returns `s
 **Failure scenario:** Any current or future datagram packet that reads a 32-bit length prefix and passes it to Datagram::read gets an unchecked out-of-bounds heap read of up to 4 GB, crashing or leaking adjacent heap memory into a string.
 
 **Recommendation:** Rewrite as `if (len > m_Length || m_InputOffset > m_Length - len)`, and replace the Assert-based bounds checks in write() with real runtime checks that survive NDEBUG.
+
+> ✅ **Fixed** on branch `feature/cpp20-framing-header` (2026-09-10), in the `fix:` commit after the slice that gave `Datagram` the span and typed-scalar layer the streams have. The two read checks are `len > m_Length - m_InputOffset`, which cannot wrap because the offset only advances past the check; the write check is the same expression on `m_OutputOffset`, a runtime `Error` in every build where the `Assert` threw only in Debug, and `write(const std::string&)` dropped its own `Assert` and goes through the checked core. Test path: lib + test, `tests/unit/test_datagram_frame.cpp`. **The read test was a reproduction, not a guard:** on the unfixed code it did not fail, it took `unit_tests` down with a segmentation fault at the first wrapping length, which is the crash the finding predicted. The write test passed on the unfixed Debug binary only because the `Assert` fired.
 
 #### 🟡 Medium -- Packets read raw wire bytes directly into bool members, producing invalid bool representations.
 
