@@ -90,6 +90,7 @@ struct MItemHost {
 	void			(*RepairHint)();						// the help event for a piece of gear that started to break
 	MMagazine*		(*EmptyMagazineFor)(MItem* pGun);		// a fresh, empty magazine of the type the gun takes, or NULL
 	void			(*UsePotionFromInventory)(MItem* pPotion);	// MUsePotionItem::UseInventory's body: send the use packet, arm the player's check buffer. The other use bodies are executable-side overrides; this one is inherited by MSerum and its kin, whose vtables GCC emits in the library (their key function is in MItem.cpp), so the slot has to resolve here. NULL in a test binary: the use is a no-op.
+	void			(*UsePetFromInventory)(MItem* pPet);		// MPetItem::UseInventory's body, for the same reason: MPetItem's constructor and its life countdown are in MItem.cpp (the clocks work), so its vtable is emitted in the library and the use it names has to resolve here. NULL in a test binary: the use is a no-op.
 };
 
 

@@ -1688,3 +1688,37 @@ MOustersArmsBand::FindSlotToAddItem(MItem* pItem, int &slot) const
 	// 들어갈 곳이 없다.
 	return false;
 }
+
+//----------------------------------------------------------------------
+// MPetItem
+//----------------------------------------------------------------------
+// The constructor lives here, in the library, so a test can construct a
+// pet; the pet's names, which read the creature table, stay in
+// MItemUse.cpp.
+//----------------------------------------------------------------------
+MPetItem::MPetItem()
+{
+	m_UpdateTime = timeGetTime();
+	m_PetKeepedDay = 0;
+	m_PetExpRemain = 0;
+	m_PetFoodType = 0;
+	m_bCanGamble = false;
+	m_bCutHead = false;
+	m_bCanAttack = false;
+}
+
+//----------------------------------------------------------------------
+// MPetItem - UseInventory
+//
+// As MUsePotionItem's above: the body is the executable's, installed
+// through the host, because this library now emits MPetItem's vtable.
+//----------------------------------------------------------------------
+#ifdef __TEST_SUB_INVENTORY__
+void	MPetItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
+#else
+void	MPetItem::UseInventory()
+#endif
+{
+	if (s_pHost != NULL && s_pHost->UsePetFromInventory != NULL)
+		s_pHost->UsePetFromInventory( this );
+}
