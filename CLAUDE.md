@@ -52,7 +52,10 @@ the specification rather than gain `noexcept` when finding 3 of the C++20
 assessment is worked (ratchets R9/R10 count the specifications, since the
 build cannot). LNK4217/LNK4286 used to join the noise while 36 `Client/*.cpp`
 files compiled into both `DarkEden` and `VS_UI.lib`; `docs/RESTRUCTURING.md`
-task 4.0 ended that. Judge a build by `error C####`, `error LNK`, `error MSB`
+task 4.0 ended that, but **15 remain** (measured 2026-09-10): `MStatusManager`
+symbols marked `dllimport` where `GameUI.obj` and `MPlayer.obj` use them, though
+they are defined in the same image. Pre-existing and harmless; not a sign of a
+double-compiled source. Judge a build by `error C####`, `error LNK`, `error MSB`
 or `fatal error` — never by grepping `"error"`, which matches ~2,700 identifiers such
 as `GCMoveErrorHandler`. Redirect builds to a log file; piping through `tail` buffers
 the output and hides all progress.
@@ -97,10 +100,12 @@ how work gets verified here.
 `unit_tests` links `basic`, `SpriteLib`, `TextSystem`, `packetwire` and `gamemodel`. Covering
 something in `dxlib` or `VS_UI` means adding it to `target_link_libraries` in
 `tests/CMakeLists.txt` first. Packet tests construct real packets through the real
-factories and pin their bytes against `tests/golden/*.hex` — 136 of those files are
-also pinned by the server repo and 134 are byte-identical copies of its goldens
-(measured 2026-09-10; `CLLogin.code0.hex` and `GCGuildChat.code0.hex` differ, and
-have since before this measurement), so `diff -r` of the two golden directories
+factories and pin their bytes against `tests/golden/*.hex` — 138 of those files are
+also pinned by the server repo and 135 are byte-identical copies of its goldens
+(measured 2026-09-10; `CLLogin.code0.hex`, `GCGuildChat.code0.hex` and
+`GCAddItemToItemVerify.threeenchant.code0.hex` differ - the last one the server
+re-recorded with other fixture values on 2026-09-10 - and a slice that adds a
+shared golden moves these counts), so `diff -r` of the two golden directories
 is the cross-repo wire check (`tests/unit/test_packet_goldens.cpp` has
 the recipe and the `UPDATE_GOLDENS=1` re-record rule).
 
@@ -166,8 +171,8 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **651 tests, 297,360 checks, 0 failed** in both Windows trees, and
-**651 tests, 297,359 checks, 0 failed** on Linux (GCC, Clang, and GCC with
+baseline: **651 tests, 297,358 checks, 0 failed** in both Windows trees, and
+**651 tests, 297,357 checks, 0 failed** on Linux (GCC, Clang, and GCC with
 `-DUSE_ASAN=ON -DUSE_UBSAN=ON`, where UBSan reports nothing) and on macOS
 (Apple Clang, with and without ASan and UBSan); the one-check
 difference is a platform-conditional test, not a failure. (The non-Windows

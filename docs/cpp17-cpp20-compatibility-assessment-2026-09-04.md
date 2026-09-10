@@ -985,19 +985,35 @@ The two `bool` *reads* were left for a `fix:` commit of their own,
 because respelling them was not enough: they copied the wire byte into
 the bool's storage, the code-health review's open Medium on invalid bool
 representations. They now take the byte as a `BYTE` and store `b != 0`,
-and the test written first showed the finding had understated itself -
-MSVC compared the bool holding 0x02, 0x7F, 0x80 or 0xFF unequal to `true`,
-so a server's non-canonical byte inverted the branch rather than merely
-tripping a sanitizer. Every packet that reads a bool is covered by the
-one change and no packet file moved.
+and the test written first (red on the unfixed code, 25 of its 32
+checks) showed what an invalid bool does under MSVC: one holding 0x02,
+0x7F, 0x80 or 0xFF takes the true branch of `if (a)` and is unequal to
+`true` at the same time. No consumer in the tree compares a wire bool
+with `== true`, so in play the finding was the sanitizer trap it names
+plus an invalid value propagating into UI structs, not an inverted
+branch. Every packet that reads a bool is covered by the one change and
+no packet file moved; the encrypting bool read has no production caller
+at all. What no test guards is the write side's normalisation
+(`buf ? 1 : 0`), because nothing in the tree can hand `write(bool)` an
+invalid bool - the one bool the client sends, `CLRegisterPlayer`'s
+public flag, is set from a literal - and a `static_assert` in
+`SystemTypes.h` now ties `szbool` to the one byte the overloads move.
 
 What remains under `Client/Packet` is not wire: `SocketAPI.cpp`'s six
-casts at the OS socket calls, one debug hex dump in
-`SocketInputStream.cpp`, and `CGBloodDrain`'s six in comments. Priority
-3's boundary work in the wire library is complete; the executable side
-(`Client/PacketHandler` and the game code) reads packets through
-accessors and was never in this count. 651 tests, 297,360 checks, 0
-failed in both trees; `DarkEden` builds with 0 errors.
+casts at the OS socket calls, and seven in comments - `CGBloodDrain`'s
+six and a debug hex dump in `SocketInputStream.cpp` inside a commented
+block. Priority 3's boundary work in the wire library is complete; the
+executable side (`Client/PacketHandler` and the game code) reads packets
+through accessors and was never in this count. The adversarial review
+(two fresh-context readers, code and claims) found no wire-byte defect;
+what it found is in the record above, and in the repair commit: the
+stream header's four new comment lines were LF in a CRLF file, the same
+slip the fourth slice had repaired in `Datagram.h`; two test lines
+loaded the invalid bool the test exists to prevent and would have
+aborted a red run under Clang's `-fsanitize=bool`; and the empty-stream
+test asserted the untouched value for the plain reads only. 651 tests,
+297,358 checks, 0 failed in both trees after the repairs; `DarkEden` builds with 0
+errors.
 
 **Clock status (2026-09-05):** the first priority-5 slice is implemented.
 `basic/MonotonicClock.{h,cpp}` is the central adapter: `Now()` is
