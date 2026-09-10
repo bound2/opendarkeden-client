@@ -217,3 +217,54 @@ TEST(WireBoolChar, ReadingFromAnEmptyStreamUnderflows)
 	}
 	CHECK(bThrew);
 }
+
+//----------------------------------------------------------------------
+// A wire byte that is neither 0 nor 1 becomes a well-formed bool
+// (code-health review, Medium: "Packets read raw wire bytes directly
+// into bool members, producing invalid bool representations")
+//----------------------------------------------------------------------
+
+// The old read(bool&) copied the byte into the bool's storage, so 0x02
+// or 0xFF made a bool that was neither true nor false - undefined to
+// branch on, and a trap under Clang's -fsanitize=bool. Every non-zero
+// byte is true now, on the plain and the encrypting read, and the
+// bytes 0 and 1 mean what they always meant.
+TEST(WireBoolChar, ANonZeroWireByteReadsAsTrueOnBothReads)
+{
+	const unsigned char values[] = { 0x02, 0x7F, 0x80, 0xFF };
+
+	for (size_t i = 0; i < sizeof(values) / sizeof(values[0]); i++)
+	{
+		BoolCharFixture f(0);
+		std::vector<unsigned char> bytes;
+		bytes.push_back(values[i]);
+		bytes.push_back(0x00);
+		f.Preload(bytes);
+		bool a = false, b = true;
+		f.m_Input.read(a);
+		f.m_Input.read(b);
+		// Compared as a byte, so an invalid representation cannot pass
+		// by being "truthy" in one test and not the next.
+		CHECK_EQ(1, (int)*reinterpret_cast<const unsigned char*>(&a));
+		CHECK_EQ(0, (int)*reinterpret_cast<const unsigned char*>(&b));
+		CHECK_EQ(true, a == true);
+	}
+
+	// The encrypting read, under a flipping and a non-flipping code: a
+	// non-zero byte is true before the flip, so it flips to false
+	// above 128, exactly as the byte 1 does.
+	for (size_t i = 0; i < kCodeCount; i++)
+	{
+		const bool flips = kCodes[i] > 128;
+		BoolCharFixture f(kCodes[i]);
+		std::vector<unsigned char> bytes;
+		bytes.push_back(0xFF);
+		bytes.push_back(0x01);
+		f.Preload(bytes);
+		bool a = false, b = false;
+		f.m_Input.readEncrypt(a);
+		f.m_Input.readEncrypt(b);
+		CHECK_EQ(flips ? 0 : 1, (int)*reinterpret_cast<const unsigned char*>(&a));
+		CHECK_EQ(a == true, b == true);
+	}
+}
