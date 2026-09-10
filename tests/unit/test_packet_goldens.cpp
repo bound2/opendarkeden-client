@@ -65,6 +65,7 @@
 #include "Cpackets/CGAddZoneToInventory.h"
 #include "Cpackets/CGAddZoneToMouse.h"
 #include "Cpackets/CGAttack.h"
+#include "Cpackets/CGBloodDrain.h"
 #include "Cpackets/CGDissectionCorpse.h"
 #include "Cpackets/CGDropMoney.h"
 #include "Cpackets/CGNPCAskAnswer.h"
@@ -79,7 +80,9 @@
 #include "Cpackets/CGUsePotionFromInventory.h"
 #include "Gpackets/GCAddInstalledMineToZone.h"
 #include "Gpackets/GCAddNewItemToZone.h"
+#include "Gpackets/GCAttack.h"
 #include "Gpackets/GCDropItemToZone.h"
+#include "Gpackets/GCGetDamage.h"
 #include "Gpackets/GCGuildChat.h"
 #include "Gpackets/GCMoveError.h"
 #include "Gpackets/GCAddItemToItemVerify.h"
@@ -466,6 +469,17 @@ void	Fill(CGSkillToNamed& p)
 	p.setCEffectID(0x9F7A);
 	p.setTargetName("Reiot");
 }
+
+// The combat broadcasts the server pins at code 0 in
+// packet_combat_test.cpp: neither reaches the encrypter. Values are
+// the server's, so the goldens are byte-identical copies of its files.
+void	Fill(GCAttack& p)		{ p.setObjectID(0x81A2B3C4); p.setX(0x85); p.setY(0x96); p.setDir(0xA7); }
+void	Fill(GCGetDamage& p)		{ p.setObjectID(0x82A3B4C5); p.setDamage(0x86D7); }
+
+// CGBloodDrain: the client's half of the same combat exchange, not
+// pinned by the server. Encrypter-free; only the ObjectID is on the
+// wire (X/Y/Dir are commented out of read()/write() upstream).
+void	Fill(CGBloodDrain& p)		{ p.setObjectID(0x84A5B6C7); }
 
 //----------------------------------------------------------------------
 // Client-authored fixtures: the chat/guild/system-message family the
@@ -958,6 +972,45 @@ TEST(CGSkillToNamed, RoundTripsAndMatchesGolden)
 	CHECK_EQ(src.getCEffectID(), dst.getCEffectID());
 	CHECK(src.getTargetName() == dst.getTargetName());
 	ExpectGolden("CGSkillToNamed", 0, WriteBody(src, 0));
+}
+
+//----------------------------------------------------------------------
+// The melee combat exchange: CGBloodDrain up, GCAttack and GCGetDamage
+// down. The GC pair's goldens are the server's; the CG one is
+// client-authored. Pinned ahead of their typed-wire migration.
+//----------------------------------------------------------------------
+TEST(GCAttack, RoundTripsAndMatchesTheSharedGolden)
+{
+	GCAttack src, dst;
+	Fill(src);
+	CHECK(EncrypterFree(src));
+	RoundTrip(src, dst, 0);
+	CHECK_EQ(src.getObjectID(), dst.getObjectID());
+	CHECK_EQ(src.getX(), dst.getX());
+	CHECK_EQ(src.getY(), dst.getY());
+	CHECK_EQ(src.getDir(), dst.getDir());
+	ExpectGolden("GCAttack", 0, WriteBody(src, 0));
+}
+
+TEST(GCGetDamage, RoundTripsAndMatchesTheSharedGolden)
+{
+	GCGetDamage src, dst;
+	Fill(src);
+	CHECK(EncrypterFree(src));
+	RoundTrip(src, dst, 0);
+	CHECK_EQ(src.getObjectID(), dst.getObjectID());
+	CHECK_EQ(src.getDamage(), dst.getDamage());
+	ExpectGolden("GCGetDamage", 0, WriteBody(src, 0));
+}
+
+TEST(CGBloodDrain, RoundTripsAndMatchesGolden)
+{
+	CGBloodDrain src, dst;
+	Fill(src);
+	CHECK(EncrypterFree(src));
+	RoundTrip(src, dst, 0);
+	CHECK_EQ(src.getObjectID(), dst.getObjectID());
+	ExpectGolden("CGBloodDrain", 0, WriteBody(src, 0));
 }
 
 //----------------------------------------------------------------------
