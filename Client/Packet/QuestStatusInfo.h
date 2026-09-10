@@ -12,13 +12,14 @@
 #include <vector>
 #define MAX_MISSION_NUM	100
 
-// ui에서 사용될 구조체 - string이 추가되어 있다.
+// The record the UI keeps per mission - the wire's MissionInfo plus its
+// strings. The quest manager (VS_UI) reads it under the name _GMissionInfo.
 struct UI_GMissionInfo{
 	std::string		szMissionTitle;
 	std::string		m_StrArg;
 	DWORD			m_NumArg;
 	BYTE			bStatus;
-	BYTE			bCondition;	// 어느 조건에 있는가 0 : Happen, 1 : Complete, 2 : Fail, 3 : Reward
+	BYTE			bCondition;	// which condition: 0 Happen, 1 Complete, 2 Fail, 3 Reward
 	WORD			bIndex;		// which element of that condition
 	// A timed mission: m_NumArg minutes, counted from tpTimeLimitStart on
 	// MonotonicClock's clock. The handlers create these with no limit;

@@ -2011,8 +2011,10 @@ void C_VS_UI_REQUEST_RESURRECT::Process()
 {
 	for(int i = 0; i < RESURRECT_MODE_MAX; i++ )
 	{
-		if( m_ResurrectButton[i].m_Enable )
+		if( m_ResurrectButton[i].m_Enable && m_ResurrectButton[i].m_Delay > 0 )
 		{
+			// The same guard Show() has: a negative delay would land the end
+			// 49.7 days ahead through Millis(DWORD) and never clear.
 			const MonotonicClock::TimePoint endTime = m_ResurrectButton[i].m_Time + MonotonicClock::Millis(m_ResurrectButton[i].m_Delay);
 
 			if( endTime <= MonotonicClock::Now() )
@@ -9359,7 +9361,7 @@ void	C_VS_UI_STATUS_CTF::Show()
 		if( m_num_flag[0] == m_num_flag[1] && m_num_flag[1] == m_num_flag[2] )
 			topscore = -1;
 		
-		// 남은시간 출력
+		// The remaining time.
 		char szBuffer[64],min[5],sec[5];
 		DWORD RemainTime = RemainingMillis();
 		if( (RemainTime/1000)/60/60 > 3 )
@@ -9464,9 +9466,11 @@ void	C_VS_UI_STATUS_CTF::SetStatus(const MonotonicClock::TimePoint &endtime, int
 }
 
 //-----------------------------------------------------------------------------
-// Milliseconds until the war ends, 0 once it has: the old
-// "m_finish_time - timeGetTime()" went round to 49.7 days there, which
-// the callers' "more than three hours reads as none" guard then caught.
+// Milliseconds until the war ends, 0 once it has. The old
+// "m_finish_time - timeGetTime()" went round to 49.7 days once the end
+// had passed; Show()'s "four hours or more reads as none" guard caught
+// that, and the hover tooltip in MouseControl(), which had no guard,
+// printed it.
 //-----------------------------------------------------------------------------
 DWORD	C_VS_UI_STATUS_CTF::RemainingMillis() const
 {
@@ -14234,7 +14238,7 @@ bool	C_VS_UI_QUEST_MANAGER::SetQuestManagerInfo(void* pVoid)
 					if(NULL != pChildElement2)
 					{
 						TempMission->szMissionTitle =  (char*)pChildElement2->GetText().c_str();
-						if(0 == stricmp(pChildElement2->GetName().c_str(),"Time")) // 시간 제한이 있는 미션이면
+						if(0 == stricmp(pChildElement2->GetName().c_str(),"Time")) // a mission with a time limit
 						{
 							TempMission->bTimeLimited = true;
 							TempMission->tpTimeLimitStart = MonotonicClock::Now();
@@ -14343,7 +14347,7 @@ bool	C_VS_UI_QUEST_MANAGER::UpdateQuestInfo(_GQuestInfo *QInfo, int nType)
 							if(NULL != pChildElement2)
 							{
 								TempMission->szMissionTitle =  (char*)pChildElement2->GetText().c_str();
-								if(0 == stricmp(pChildElement2->GetName().c_str(),"Time")) // 시간 제한이 있는 미션이면
+								if(0 == stricmp(pChildElement2->GetName().c_str(),"Time")) // a mission with a time limit
 								{
 									TempMission->bTimeLimited = true;
 									TempMission->tpTimeLimitStart = MonotonicClock::Now();
@@ -16052,8 +16056,9 @@ void	C_VS_UI_QUEST_MISSION::Show()
 				if(TempInfo->bTimeLimited)
 				{
 					// Minutes left: the limit less the whole minutes since the
-					// mission started. Started at or after now reads as none, as
-					// the old strict "start < now" did.
+					// mission started, a DWORD that wraps once the limit has run
+					// out, as it always did. Started at or after now reads as
+					// none, as the old strict "start < now" did.
 					const MonotonicClock::TimePoint CurrentTime = MonotonicClock::Now();
 					if(TempInfo->tpTimeLimitStart < CurrentTime)
 						TempValue = TempInfo->m_NumArg - (DWORD)((CurrentTime - TempInfo->tpTimeLimitStart).count() / 60000);

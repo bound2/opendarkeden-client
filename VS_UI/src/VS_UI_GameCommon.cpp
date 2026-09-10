@@ -34641,7 +34641,7 @@ void	C_VS_UI_LOTTERY_CARD::SetResult(bool	bSuccess)
 		} 
 		else
 		{
-			// 이미지 실패 세팅
+			// The images of a failed draw.
 			srand(MonotonicClock::LegacyTicks());	// a tick-sized seed
 			m_backimage[0] = m_GiftList[m_radio_select-1]->image;
 			m_backimage[1] = m_GiftList[m_radio_select-1]->image;

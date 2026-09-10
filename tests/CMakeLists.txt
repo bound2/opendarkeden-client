@@ -127,6 +127,9 @@ set_source_files_properties(
 	# The bool and char overloads of the four socket streams, byte for
 	# byte under every encrypt code.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_bool_char.cpp
+	# The per-mission UI record the wire layer declares: its time-limit
+	# default, which the handlers and the quest manager rest on.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_quest_status_record.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_scalar.cpp
 	# The 32-bit width of long/ulong on the wire, pinned on every platform
 	# (the port assessment, area C), over the same streams.

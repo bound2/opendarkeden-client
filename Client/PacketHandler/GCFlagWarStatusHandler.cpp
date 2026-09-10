@@ -29,7 +29,8 @@ void GCFlagWarStatusHandler::execute ( GCFlagWarStatus * pGCFlagWarStatus , Play
 	int		flag_v = (int)pGCFlagWarStatus->getFlagCount( RACE_VAMPIRE );
 	int		flag_o = (int)pGCFlagWarStatus->getFlagCount( RACE_OUSTERS );
 
-	// More than three hours is ignored outright.
+	// Four hours or more is ignored outright (integer hours; upstream's
+	// comment said three, and its arithmetic said this).
 	if( timeRemain/60/60 > 3 )
 		return;
 
