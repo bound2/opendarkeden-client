@@ -1238,6 +1238,39 @@ differs from its pre-image, including the chat lockout's restructured
 `else`, whose dropped clear on the reset path every caller overwrites
 on the next line.
 
+The sixth priority-5 slice (2026-09-10) is the deadlines in the same two
+sources: `timeGetTime()` ticks held as "when this ends" or "when this
+started" and compared against a fresh read. Each is a
+`MonotonicClock::TimePoint` now, compared or subtracted on the 64-bit
+rep: the quest status window's two countdowns (a deadline set as now
+plus the delay, the milliseconds left returned, `-1` once past), the
+blood bible's timer, the image notice's close delay, the resurrect
+request's per-button delay and its percent bar, the timed missions'
+start (with a `bool` for "no limit" where 0 meant that), the gamble
+spin's two strict gates (`IntervalTimer`), and four `srand` seeds. One
+of them the executable sets: the flag war's end, which
+`GCFlagWarStatusHandler` builds from the seconds the server sends and
+passes through three relays to the CTF status window, whose two
+"remaining" displays share a `RemainingMillis()` that reads 0 once the
+end has passed - the `DWORD` subtraction went round to 49.7 days there,
+which a "more than three hours reads as none" guard then caught, and
+the guard stays. Retyping the mission record found a trap worth its own
+sentence: the wire layer's `UI_GMissionInfo` and `UI_GQuestInfo` were
+redeclared field for field inside `C_VS_UI_QUEST_MANAGER`, and the
+handlers passed one to the manager through a `void*` it cast to its own
+copy - two layouts that had to agree with nothing to say so, and the
+first field retyped on one side would have read garbage from the other.
+The manager's names are typedefs of the wire structs now. No
+quantisation change: `timeGetTime()` was already the 1 ms tick; the
+epoch and the width change, and the width is what removes the wrap. R14
+goes from 138 to 113 (25 calls, the handler's two among them). `VS_UI`
+holds 33: the three minigames' clocks, and the three deadlines the
+executable sets through shared structs - the quest status's
+`quest_time`, the effect status's `delayFrame` and `left_time` - which
+want the same retyping on both sides of the boundary and are the next
+slices. `Client` holds 80. Verified by the build; the client was not
+run.
+
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through
 `std::filesystem::directory_iterator` against a DOS-style wildcard and returns
