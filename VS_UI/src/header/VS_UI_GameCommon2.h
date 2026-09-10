@@ -28,6 +28,7 @@
 
 #include "SXml.h"
 #include "MInventory.h"
+#include "MonotonicClock.h"
 //-----------------------------------------------------------------------------
 // class C_VS_UI_HORN
 //
@@ -412,7 +413,8 @@ private:
 	WORD			m_topScore;
 	WORD						m_MyBestScore;
 	
-	int			m_OIdMouseX, m_OldMouseY, m_LatestClickTime;
+	int			m_OIdMouseX, m_OldMouseY;
+	MonotonicClock::IntervalTimer	m_click_timer;	// since the last click, against GetDoubleClickTime()
 	
 	
 	ButtonGroup					*m_pC_button_group;	
@@ -618,8 +620,7 @@ private:
 	int							m_selected;
 
 // TIMER
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_timer_tickcount;
+	MonotonicClock::IntervalTimer	m_window_timer;	// as C_VS_UI_REQUEST_PARTY's
 
 public:
 	C_VS_UI_REGEN_TOWER_MINIMAP(DWORD timer);

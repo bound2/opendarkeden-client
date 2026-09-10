@@ -18,6 +18,7 @@
 
 #include "VS_UI_Base.h"
 #include "VS_UI_util.h"
+#include "MonotonicClock.h"
 #include "VS_UI_Description.h"
 #include "VS_UI_ExtraDialog.h"
 #include "VS_UI_title.h" // for S_SLOT
@@ -112,8 +113,9 @@ private:
 	std::string					m_name;
 
 // TIMER
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_timer_tickcount;
+	// Timer(false) is true while the request's window is still open:
+	// less than the interval since Timer(true) (basic/MonotonicClock.h).
+	MonotonicClock::IntervalTimer	m_window_timer;
 
 	bool	Timer(bool reset = false);
 
@@ -169,8 +171,7 @@ private:
 	bool							m_bl_focused;
 
 // TIMER
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_timer_tickcount;
+	MonotonicClock::IntervalTimer	m_window_timer;	// as C_VS_UI_REQUEST_PARTY's
 
 public:
 	C_VS_UI_REQUEST_DIE(DWORD timer);
@@ -502,7 +503,7 @@ class PAPERING_HISTORY
 {
 	public:
 	std::string			m_string;
-	std::vector<DWORD>	m_timer;
+	std::vector<MonotonicClock::TimePoint>	m_timer;	// when each send of this line happened, newest last
 };
 
 //-----------------------------------------------------------------------------
@@ -714,16 +715,19 @@ private:
 	};
 
 // TIMER
-	std::vector<DWORD>			m_dw_rep_tickcount;
-	std::vector<DWORD>			m_dw_papering_tickcount;
-	DWORD						m_dw_prev_tickcount;
+	// The moments of the last five sends, oldest first: five within
+	// m_dw_rep_timer is the repeat throttle.
+	std::vector<MonotonicClock::TimePoint>	m_rep_send_times;
+	// The lockout: Timer(true) starts it, and Timer() is true while the
+	// window for the mode in m_timer is still open.
+	MonotonicClock::IntervalTimer	m_lockout_timer;
 	DWORD						m_dw_zonechat_timer;
 	DWORD						m_dw_rep_timer;
 	DWORD						m_dw_papering_timer;
 	DWORD						m_dw_help_timer;
-	DWORD						m_dw_help_prev_tickcount;
+	MonotonicClock::IntervalTimer	m_help_timer;	// interval m_dw_help_timer
 	DWORD						m_dw_hide_timer;
-	DWORD						m_dw_hide_prev_tickcount;
+	MonotonicClock::IntervalTimer	m_hide_timer;	// interval m_dw_hide_timer
 	int							m_timer;
 
 	bool	Timer(bool reset = false);
@@ -1073,8 +1077,10 @@ protected:
 
 public:
 // TIMER
+	// The mining progress, shared with the skill window: one global
+	// IntervalTimer in VS_UI_GameCommon.cpp holds the moment mining started
+	// and how long it takes.
 	static bool		Timer(bool reset = false);
-	static DWORD						m_dw_millisec;
 
 	static C_SPRITE_PACK *			m_pC_mine_progress_spk;
 	enum MINE_PROGRESS_SPK_INDEX
@@ -1299,8 +1305,7 @@ protected:
 	bool	findSkillAvailable(ACTIONINFO id);
 
 // TIMER
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_millisec;
+	MonotonicClock::IntervalTimer	m_window_timer;	// Timer() is true while the 2 s window since Timer(true) is open
 
 	bool	Timer(bool reset = false);
 
@@ -1584,8 +1589,7 @@ private:
 	int									m_board_x, m_board_y;
 
 	//timer
-	DWORD						m_dw_minimap_prev_tickcount;
-	DWORD						m_dw_minimap_millisec;
+	MonotonicClock::IntervalTimer	m_minimap_timer;
 
 	bool	TimerMinimap();
 
@@ -1677,8 +1681,7 @@ private:
 	int									m_board_x, m_board_y;
 
 	//timer
-	DWORD						m_dw_minimap_prev_tickcount;
-	DWORD						m_dw_minimap_millisec;
+	MonotonicClock::IntervalTimer	m_minimap_timer;
 
 	bool	TimerMinimap();
 
@@ -2060,8 +2063,7 @@ protected:
 //	bool						m_bl_help, m_bl_party;
 
 	//timer
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_millisec;
+	MonotonicClock::IntervalTimer	m_interval_timer;
 
 	bool	Timer();
 

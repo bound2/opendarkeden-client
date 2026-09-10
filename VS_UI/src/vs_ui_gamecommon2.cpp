@@ -8088,7 +8088,8 @@ C_VS_UI_CRAZY_MINE::C_VS_UI_CRAZY_MINE()
 	m_bCanStart = false;
 	m_OIdMouseX = -1;
 	m_OldMouseY = -1;
-	m_LatestClickTime = 0;
+	// No click yet: a first click must not read as a double click.
+	m_click_timer.ExpireBy(MonotonicClock::Millis(5000));
 }
 
 C_VS_UI_CRAZY_MINE::~C_VS_UI_CRAZY_MINE()
@@ -8247,7 +8248,7 @@ bool	C_VS_UI_CRAZY_MINE::MouseControl(UINT message, int _x, int _y)
 		break;
 
 	case M_LEFTBUTTON_DOWN:
-		if( m_OIdMouseX == _x && m_OldMouseY == _y && (GetTickCount() - m_LatestClickTime) < GetDoubleClickTime() )
+		if( m_OIdMouseX == _x && m_OldMouseY == _y && m_click_timer.Elapsed() < MonotonicClock::Millis(GetDoubleClickTime()) )
 		{
 			if( _x > 30 && _y > 60 )
 			{
@@ -8262,7 +8263,7 @@ bool	C_VS_UI_CRAZY_MINE::MouseControl(UINT message, int _x, int _y)
 		}
 		m_OIdMouseX = _x;
 		m_OldMouseY = _y;
-		m_LatestClickTime = GetTickCount();
+		m_click_timer.Restart();
 		break;
 //	case M_LB_DOUBLECLICK:
 //		break;
@@ -8676,7 +8677,8 @@ void C_VS_UI_CRAZY_MINE::ActionDoubleClick(int x, int y)
 		}
 	}
 
-	m_LatestClickTime = GetTickCount() - 5000;				// -_- 5초전으로 해놓는당~
+	// Five seconds ago, so the next click cannot read as a double click.
+	m_click_timer.ExpireBy(MonotonicClock::Millis(5000));
 
 	CheckSuccess();
 }
@@ -9474,9 +9476,9 @@ C_VS_UI_REGEN_TOWER_MINIMAP::C_VS_UI_REGEN_TOWER_MINIMAP(DWORD timer)
 	Set( (g_GameRect.right-m_image_spk.GetWidth(MINIMAP))/2, (g_GameRect.bottom - m_image_spk.GetHeight() ) /2, m_image_spk.GetWidth(MINIMAP), m_image_spk.GetHeight(MINIMAP));
 	
 	//timer
-	m_dw_timer_tickcount = timer;
+	m_window_timer.SetIntervalMillis(timer);
 	m_selected = -1;
-	Timer(true);	
+	Timer(true);
 }
 
 //-----------------------------------------------------------------------------
@@ -9651,13 +9653,13 @@ bool	C_VS_UI_REGEN_TOWER_MINIMAP::Timer(bool reset)
 {
 	if(reset)
 	{
-		m_dw_prev_tickcount = GetTickCount();
+		m_window_timer.Restart();
 	}
-	else if(m_dw_prev_tickcount+m_dw_timer_tickcount >= GetTickCount())
+	else if(m_window_timer.Elapsed() <= m_window_timer.GetInterval())
 	{
 		return true;
 	}
-	
+
 	return false;
 }
 

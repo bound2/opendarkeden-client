@@ -1124,9 +1124,13 @@ fi
 # GetTickCount shim in VS_UI_widget.h.
 #
 # R14 = 186 as of 2026-09-10, from 214 before the widget timers outside
-# GameCommon moved; 100 of the 186 are the two VS_UI_GameCommon sources.
+# GameCommon moved; 100 of the 186 were the two VS_UI_GameCommon sources.
+# 138 later that day: the interval and window gates in those two sources
+# moved (48 calls), the last GetTickCount in VS_UI with them; what is
+# left there is 56 timeGetTime() sites of the deadline and elapsed-time
+# shapes, and the tree's other 82 are Client's.
 #----------------------------------------------------------------------
-R14_BASELINE=186
+R14_BASELINE=138
 
 if [ ! -f tests/tools/count_tick_reads.pl ]; then
 	echo "FAIL R14: tests/tools/count_tick_reads.pl is missing"

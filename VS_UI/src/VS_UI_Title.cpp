@@ -1513,7 +1513,7 @@ void C_VS_UI_NEWCHAR::SetCharacterToThisSlot(int slot, S_SLOT * p_slot)
 	// default
 	m_p_slot->bl_female = false;
 	m_p_slot->Race = RACE_SLAYER;
-	srand(GetTickCount());
+	srand(MonotonicClock::LegacyTicks());	// a tick-sized seed, off the Win32 name
 
 	//m_p_slot->man_info.coat = M_UP_BODY;
 	m_p_slot->man_info.coat = M_OLD_COAT;

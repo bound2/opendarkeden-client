@@ -62,7 +62,9 @@
 extern BOOL g_bLButtonDown;
 
 bool					gbl_mine_progress = false;
-DWORD					gi_mine_progress;
+// The mining progress: when mining started and how long it takes, read
+// by the inventory's and the skill window's progress bars.
+MonotonicClock::IntervalTimer	g_mine_progress_timer;
 
 extern CSDLInput*			g_pSDLInput;
 extern MStorage*				g_pStorageTemp;
@@ -762,9 +764,9 @@ C_VS_UI_TRIBE::C_VS_UI_TRIBE()
 	m_pC_level_up = NULL;
 	
 	// TIMER
-	m_dw_prev_tickcount = GetTickCount();
-	m_dw_millisec = 100;
-	
+	m_interval_timer.Restart();
+	m_interval_timer.SetIntervalMillis(100);
+
 	m_selected_tab = TAB_MENU_ID;
 	
 	//	m_bl_help = false;
@@ -2194,13 +2196,7 @@ void	C_VS_UI_TRIBE::DoCommonActionBeforeEventOccured()
 //-----------------------------------------------------------------------------
 bool C_VS_UI_TRIBE::Timer()
 {
-	if(m_dw_prev_tickcount+m_dw_millisec <= GetTickCount())
-	{
-		m_dw_prev_tickcount = GetTickCount();
-		return true;
-	}
-	
-	return false;
+	return m_interval_timer.Fire();
 }
 
 bool C_VS_UI_TRIBE::MouseControl(UINT message, int _x, int _y)
@@ -4466,7 +4462,7 @@ void C_VS_UI_CHATTING::KeyboardControl(UINT message, UINT key, long extra)
 					PAPERING_HISTORY temp_history;
 					
 					temp_history.m_string = sz_chat_str;
-					temp_history.m_timer.push_back(GetTickCount());
+					temp_history.m_timer.push_back(MonotonicClock::Now());
 					m_history.push_back(temp_history);
 					m_history_line = m_history.size();
 				}
@@ -4475,7 +4471,8 @@ void C_VS_UI_CHATTING::KeyboardControl(UINT message, UINT key, long extra)
 					PAPERING_HISTORY temp_history = m_history[m_history_line];
 					if(temp_history.m_timer.size() == 5)
 					{
-						if(strstr(sz_chat_str, "*command") == NULL && temp_history.m_timer[0] + 20000 > GetTickCount() /*&& sz_chat_str[0] != '*'*/ && strstr(g_char_slot_ingame.sz_name.c_str(), (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetString()) == NULL
+						// The same line five times within 20 s is papering.
+						if(strstr(sz_chat_str, "*command") == NULL && temp_history.m_timer[0] + MonotonicClock::Millis(20000) > MonotonicClock::Now() /*&& sz_chat_str[0] != '*'*/ && strstr(g_char_slot_ingame.sz_name.c_str(), (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetString()) == NULL
 							&& strncmp(sz_chat_str, (*g_pGameStringTable)[UI_STRING_MESSAGE_PLAYER_SAY].GetString(),(*g_pGameStringTable)[UI_STRING_MESSAGE_PLAYER_SAY].GetLength()) != NULL)
 						{
 							Timer(true);
@@ -4493,7 +4490,7 @@ void C_VS_UI_CHATTING::KeyboardControl(UINT message, UINT key, long extra)
 					
 					m_history.erase(m_history.begin() + m_history_line);
 					temp_history.m_string = sz_chat_str;
-					temp_history.m_timer.push_back(GetTickCount());
+					temp_history.m_timer.push_back(MonotonicClock::Now());
 					m_history.push_back(temp_history);
 					m_history_line = m_history.size();
 				}
@@ -4520,7 +4517,7 @@ void C_VS_UI_CHATTING::KeyboardControl(UINT message, UINT key, long extra)
 
 				// 2초동안 5문장 말하면 막기
 
-				if(strstr(sz_chat_str, "*command") == NULL && m_dw_rep_tickcount.size()==5 && m_dw_rep_tickcount[0] + 2000 > GetTickCount() && strstr(g_char_slot_ingame.sz_name.c_str(), (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetString()) == NULL
+				if(strstr(sz_chat_str, "*command") == NULL && m_rep_send_times.size()==5 && m_rep_send_times[0] + MonotonicClock::Millis(2000) > MonotonicClock::Now() && strstr(g_char_slot_ingame.sz_name.c_str(), (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetString()) == NULL
 					&& strncmp(sz_chat_str, (*g_pGameStringTable)[UI_STRING_MESSAGE_PLAYER_SAY].GetString(),(*g_pGameStringTable)[UI_STRING_MESSAGE_PLAYER_SAY].GetLength()) != NULL)
 				{
 					Timer(true);
@@ -4529,11 +4526,11 @@ void C_VS_UI_CHATTING::KeyboardControl(UINT message, UINT key, long extra)
 					break;
 				}
 				
-				if(m_dw_rep_tickcount.size() == 5)
+				if(m_rep_send_times.size() == 5)
 				{
-					m_dw_rep_tickcount.erase(m_dw_rep_tickcount.begin());
+					m_rep_send_times.erase(m_rep_send_times.begin());
 				}
-				m_dw_rep_tickcount.push_back(GetTickCount());
+				m_rep_send_times.push_back(MonotonicClock::Now());
 				
 				char *pTempstr;
 				
@@ -6185,8 +6182,10 @@ C_VS_UI_CHATTING::C_VS_UI_CHATTING()
 	m_dw_hide_timer = 5000;
 	
 	m_timer = TIMER_NONE;
-	
-	m_dw_help_prev_tickcount = GetTickCount()-m_dw_help_timer;
+
+	// The help line is due at once.
+	m_help_timer.SetIntervalMillis(m_dw_help_timer);
+	m_help_timer.Expire();
 	
 	m_resize = RESIZE_NOT;
 	
@@ -6428,7 +6427,9 @@ void C_VS_UI_CHATTING::Start()
 	SlayerWhisperMode(false);
 	
 	m_bl_spreadID = false;
-	m_dw_hide_prev_tickcount = GetTickCount() - m_dw_hide_timer;
+	// The chat is due to hide at once.
+	m_hide_timer.SetIntervalMillis(m_dw_hide_timer);
+	m_hide_timer.Expire();
 	
 	AttrAlpha(gpC_vs_ui_window_manager->IsAlpha(C_VS_UI_WINDOW_MANAGER::CHATTING));
 	AttrAutoHide(gpC_vs_ui_window_manager->GetAutoHide(C_VS_UI_WINDOW_MANAGER::CHATTING));
@@ -6581,18 +6582,23 @@ bool	C_VS_UI_CHATTING::Timer(bool reset)
 {
 	if(reset)
 	{
-		m_dw_prev_tickcount = GetTickCount();
+		m_lockout_timer.Restart();
 	}
-	else 
-	if(m_dw_prev_tickcount+m_dw_zonechat_timer >= GetTickCount() && m_timer == TIMER_ZONECHAT && m_chat_mode == CLD_ZONECHAT && !m_bl_whisper_mode ||
-		m_dw_prev_tickcount+m_dw_rep_timer >= GetTickCount() && m_timer == TIMER_REP  ||
-		m_dw_prev_tickcount+m_dw_papering_timer >= GetTickCount() && m_timer == TIMER_PAPERING)
+	else
 	{
-		return true;
+		// Still inside the window for the current mode: the old
+		// "prev + window >= now", read once.
+		const MonotonicClock::Duration d_elapsed = m_lockout_timer.Elapsed();
+		if(d_elapsed <= MonotonicClock::Millis(m_dw_zonechat_timer) && m_timer == TIMER_ZONECHAT && m_chat_mode == CLD_ZONECHAT && !m_bl_whisper_mode ||
+			d_elapsed <= MonotonicClock::Millis(m_dw_rep_timer) && m_timer == TIMER_REP  ||
+			d_elapsed <= MonotonicClock::Millis(m_dw_papering_timer) && m_timer == TIMER_PAPERING)
+		{
+			return true;
+		}
+
+		if(!(d_elapsed <= MonotonicClock::Millis(m_dw_zonechat_timer) && m_timer == TIMER_ZONECHAT))
+			m_timer = TIMER_NONE;
 	}
-	
-	if(!(m_dw_prev_tickcount+m_dw_zonechat_timer >= GetTickCount() && m_timer == TIMER_ZONECHAT))
-		m_timer = TIMER_NONE;
 	return false;
 }
 
@@ -6602,12 +6608,14 @@ bool	C_VS_UI_CHATTING::Timer(bool reset)
 //-----------------------------------------------------------------------------
 bool	C_VS_UI_CHATTING::TimerHelp()
 {
-	if(m_dw_help_prev_tickcount+m_dw_help_timer < GetTickCount())
+	// Strictly more than the interval since the last help line, as the
+	// old "prev + timer < now" was; then this is the next one.
+	if(m_help_timer.Elapsed() > m_help_timer.GetInterval())
 	{
-		m_dw_help_prev_tickcount = GetTickCount();
+		m_help_timer.Restart();
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -6619,14 +6627,15 @@ bool	C_VS_UI_CHATTING::TimerHide(bool reset)
 {
 	if(reset)
 	{
-		m_dw_hide_prev_tickcount = GetTickCount();
+		m_hide_timer.Restart();
 	}
 	else
-	if(m_dw_hide_prev_tickcount+m_dw_hide_timer < GetTickCount())
+	if(m_hide_timer.Elapsed() > m_hide_timer.GetInterval())
 	{
-		//		m_dw_hide_prev_tickcount = GetTickCount();
+		// Past the hide delay: the chat may hide. Strict, as the old
+		// "prev + timer < now" was.
 		return false;
-	}		
+	}
 	return true;
 }
 
@@ -6634,7 +6643,6 @@ bool	C_VS_UI_CHATTING::TimerHide(bool reset)
 
 int	C_VS_UI_INVENTORY::m_mine_grid_x = -1, C_VS_UI_INVENTORY::m_mine_grid_y = -1;
 C_SPRITE_PACK *	C_VS_UI_INVENTORY::m_pC_mine_progress_spk = NULL;
-DWORD	C_VS_UI_INVENTORY::m_dw_millisec;
 
 //-----------------------------------------------------------------------------
 // C_VS_UI_INVENTORY::C_VS_UI_INVENTORY
@@ -8039,7 +8047,7 @@ void C_VS_UI_INVENTORY::Show()
 					m_pC_mine_progress_spk->BltLocked(item_x, item_y, INVENTORY_BAR_BACK);
 					
 					Rect rect;
-					rect.Set(0, 0, m_pC_mine_progress_spk->GetWidth(INVENTORY_BAR)*(GetTickCount() - gi_mine_progress)/m_dw_millisec, m_pC_mine_progress_spk->GetHeight(INVENTORY_BAR));
+					rect.Set(0, 0, (int)((long long)m_pC_mine_progress_spk->GetWidth(INVENTORY_BAR)*g_mine_progress_timer.Elapsed().count()/g_mine_progress_timer.GetInterval().count()), m_pC_mine_progress_spk->GetHeight(INVENTORY_BAR));
 					m_pC_mine_progress_spk->BltLockedClip(item_x, item_y, rect, INVENTORY_BAR);
 					
 				}
@@ -8594,7 +8602,7 @@ bool C_VS_UI_INVENTORY::StartInstallMineProgress(int focus_grid_x, int focus_gri
 	{
 		int mine_level = (*g_pSkillInfoTable)[SKILL_INSTALL_MINE].GetExpLevel();
 //		m_dw_millisec = min(30, max(20, 30-mine_level/10))*100;
-		m_dw_millisec = ( 10 - ( mine_level /25 ) ) * 1000;
+		g_mine_progress_timer.SetIntervalMillis( ( 10 - ( mine_level /25 ) ) * 1000 );
 		Timer(true);
 		gbl_mine_progress = true;
 		m_mine_grid_x = focus_grid_x;
@@ -8623,7 +8631,7 @@ bool C_VS_UI_INVENTORY::StartCreateMineProgress(int focus_grid_x, int focus_grid
 		)	// 지뢰인경우 지뢰 progress바 보여줌
 	{
 		int mine_level = (*g_pSkillInfoTable)[SKILL_MAKE_MINE].GetExpLevel();
-		m_dw_millisec = min(30, max(20, 30-mine_level/10))*100;
+		g_mine_progress_timer.SetIntervalMillis( min(30, max(20, 30-mine_level/10))*100 );
 
 //		m_dw_millisec = ( 10 - ( mine_level /25 ) ) * 1000;
 		Timer(true);
@@ -8654,7 +8662,7 @@ bool C_VS_UI_INVENTORY::StartCreateBombProgress(int focus_grid_x, int focus_grid
 		)	// 지뢰인경우 지뢰 progress바 보여줌
 	{
 		int mine_level = (*g_pSkillInfoTable)[SKILL_MAKE_BOMB].GetExpLevel();
-		m_dw_millisec = min(30, max(20, 30-mine_level/10))*100;
+		g_mine_progress_timer.SetIntervalMillis( min(30, max(20, 30-mine_level/10))*100 );
 		Timer(true);
 		gbl_mine_progress = true;
 		m_mine_grid_x = focus_grid_x;
@@ -9050,14 +9058,13 @@ bool	C_VS_UI_INVENTORY::Timer(bool reset)
 {
 	if(reset)
 	{
-		gi_mine_progress = GetTickCount();
+		g_mine_progress_timer.Restart();
 	}
-	else if(gi_mine_progress+m_dw_millisec <= GetTickCount())
+	else if(g_mine_progress_timer.Fire())
 	{
-		gi_mine_progress = GetTickCount();
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -9144,8 +9151,8 @@ C_VS_UI_SKILL::C_VS_UI_SKILL()
 	}
 	
 	// TIMER
-	m_dw_prev_tickcount = GetTickCount();
-	m_dw_millisec = 2000;
+	m_window_timer.Restart();
+	m_window_timer.SetIntervalMillis(2000);
 	
 	
 #ifndef _LIB
@@ -10180,7 +10187,7 @@ void C_VS_UI_SKILL::Show2()
 							  C_VS_UI_INVENTORY::m_pC_mine_progress_spk->BltLocked(item_x, item_y, C_VS_UI_INVENTORY::INVENTORY_BAR_BACK);
 							  
 							  Rect rect;
-							  rect.Set(0, 0, C_VS_UI_INVENTORY::m_pC_mine_progress_spk->GetWidth(C_VS_UI_INVENTORY::INVENTORY_BAR)*(GetTickCount() - gi_mine_progress)/C_VS_UI_INVENTORY::m_dw_millisec, C_VS_UI_INVENTORY::m_pC_mine_progress_spk->GetHeight(C_VS_UI_INVENTORY::INVENTORY_BAR));
+							  rect.Set(0, 0, (int)((long long)C_VS_UI_INVENTORY::m_pC_mine_progress_spk->GetWidth(C_VS_UI_INVENTORY::INVENTORY_BAR)*g_mine_progress_timer.Elapsed().count()/g_mine_progress_timer.GetInterval().count()), C_VS_UI_INVENTORY::m_pC_mine_progress_spk->GetHeight(C_VS_UI_INVENTORY::INVENTORY_BAR));
 							  C_VS_UI_INVENTORY::m_pC_mine_progress_spk->BltLockedClip(item_x, item_y, rect, C_VS_UI_INVENTORY::INVENTORY_BAR);
 							  gpC_base->m_p_DDSurface_back->Unlock();
 						  }
@@ -10227,9 +10234,9 @@ bool	C_VS_UI_SKILL::Timer(bool reset)
 	if(reset)
 	{
 		//		m_timer = false;
-		m_dw_prev_tickcount = GetTickCount();
+		m_window_timer.Restart();
 	}
-	else if(m_dw_prev_tickcount+m_dw_millisec >= GetTickCount())
+	else if(m_window_timer.Elapsed() <= m_window_timer.GetInterval())
 	{
 		return true;
 		//		m_timer = true;
@@ -10479,7 +10486,7 @@ C_VS_UI_REQUEST_PARTY::C_VS_UI_REQUEST_PARTY(const char *name, DWORD timer)
 		m_type = REQUEST;
 	
 	//timer
-	m_dw_timer_tickcount = timer;
+	m_window_timer.SetIntervalMillis(timer);
 	Timer(true);
 	
 }
@@ -10627,13 +10634,13 @@ bool	C_VS_UI_REQUEST_PARTY::Timer(bool reset)
 {
 	if(reset)
 	{
-		m_dw_prev_tickcount = GetTickCount();
+		m_window_timer.Restart();
 	}
-	else if(m_dw_prev_tickcount+m_dw_timer_tickcount >= GetTickCount())
+	else if(m_window_timer.Elapsed() <= m_window_timer.GetInterval())
 	{
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -10669,7 +10676,7 @@ C_VS_UI_REQUEST_DIE::C_VS_UI_REQUEST_DIE(DWORD timer)
 	Set(2, _y, m_image_spk.GetWidth(RESURRECT_GUARD_SLAYER), m_image_spk.GetHeight(RESURRECT_GUARD_SLAYER));
 	
 	//timer
-	m_dw_timer_tickcount = timer;
+	m_window_timer.SetIntervalMillis(timer);
 	Timer(true);
 	
 }
@@ -10849,13 +10856,13 @@ bool	C_VS_UI_REQUEST_DIE::Timer(bool reset)
 {
 	if(reset)
 	{
-		m_dw_prev_tickcount = GetTickCount();
+		m_window_timer.Restart();
 	}
-	else if(m_dw_prev_tickcount+m_dw_timer_tickcount >= GetTickCount())
+	else if(m_window_timer.Elapsed() <= m_window_timer.GetInterval())
 	{
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -10989,15 +10996,17 @@ C_VS_UI_PARTY_MANAGER::~C_VS_UI_PARTY_MANAGER()
 //-----------------------------------------------------------------------------
 bool	C_VS_UI_PARTY_MANAGER::Timer(bool reset)
 {
-	static DWORD prev_time = GetTickCount();
+	// Strictly more than m_dw_show_face_large_time since the last reset,
+	// as the "prev + delay < now" it replaces was.
+	static MonotonicClock::IntervalTimer s_face_large_timer;
 
 	if(reset)
 	{
-		prev_time = GetTickCount();
+		s_face_large_timer.Restart();
 	}
 	else
 	{
-		if(prev_time + m_dw_show_face_large_time < GetTickCount())
+		if(s_face_large_timer.Elapsed() > MonotonicClock::Millis(m_dw_show_face_large_time))
 			return true;
 	}
 	return false;
@@ -22245,8 +22254,8 @@ C_VS_UI_MINIMAP::C_VS_UI_MINIMAP()
 	m_bl_refresh = false;
 	
 	// TIMER
-	m_dw_minimap_prev_tickcount = GetTickCount();
-	m_dw_minimap_millisec = 100;
+	m_minimap_timer.Restart();
+	m_minimap_timer.SetIntervalMillis(100);
 	
 	m_p_minimap_surface = new CSpriteSurface;
 	
@@ -23353,13 +23362,7 @@ void C_VS_UI_MINIMAP::SetPortal(RECT rect, int id)
 //-----------------------------------------------------------------------------
 bool C_VS_UI_MINIMAP::TimerMinimap()
 {
-	if(m_dw_minimap_prev_tickcount+m_dw_minimap_millisec <= GetTickCount())
-	{
-		m_dw_minimap_prev_tickcount = GetTickCount();
-		return true;
-	}
-	
-	return false;
+	return m_minimap_timer.Fire();
 }
 
 C_VS_UI_WINDOW_MANAGER *gpC_vs_ui_window_manager;
@@ -34710,8 +34713,8 @@ C_VS_UI_WORLDMAP::C_VS_UI_WORLDMAP()
 	m_bl_refresh = false;
 	
 	// TIMER
-	m_dw_minimap_prev_tickcount = GetTickCount();
-	m_dw_minimap_millisec = 100;
+	m_minimap_timer.Restart();
+	m_minimap_timer.SetIntervalMillis(100);
 	
 	m_p_minimap_surface = new CSpriteSurface;
 	
@@ -35817,11 +35820,5 @@ void C_VS_UI_WORLDMAP::SetPortal(RECT rect, int id)
 //-----------------------------------------------------------------------------
 bool C_VS_UI_WORLDMAP::TimerMinimap()
 {
-	if(m_dw_minimap_prev_tickcount+m_dw_minimap_millisec <= GetTickCount())
-	{
-		m_dw_minimap_prev_tickcount = GetTickCount();
-		return true;
-	}
-	
-	return false;
+	return m_minimap_timer.Fire();
 }

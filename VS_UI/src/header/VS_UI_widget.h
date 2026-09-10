@@ -22,8 +22,6 @@
 
 // Stub definitions for non-Windows platforms (without Immersion library)
 #ifndef PLATFORM_WINDOWS
-#include <sys/time.h>
-
 // Stub for CImm class (from Immersion library)
 class CImm {
 public:
@@ -45,12 +43,10 @@ public:
 static CImm gpC_Imm_instance;
 #define gpC_Imm (&gpC_Imm_instance)
 
-// GetTickCount stub
-inline DWORD GetTickCount() {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (DWORD)(tv.tv_sec * 1000 + tv.tv_usec / 1000);
-}
+// The GetTickCount stub that stood here - gettimeofday, its own epoch -
+// went with VS_UI's last GetTickCount call (the fifth clocks slice): off
+// Windows Platform.h already defines the name as platform_get_ticks(),
+// so the stub was a second definition of that with a different epoch.
 
 #endif // !PLATFORM_WINDOWS
 /*
