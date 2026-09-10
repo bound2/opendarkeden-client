@@ -411,3 +411,95 @@ TEST(Datagram, ATypedReadShortOfItsWidthUnderflowsAndLeavesTheValue)
 	datagram.read(first);
 	CHECK_EQ((ushort)0xB2A1, first);
 }
+
+//----------------------------------------------------------------------
+// The bounds checks survive a length that wraps and a Release build
+// (code-health review, Medium: "Datagram bounds checks compute
+// m_InputOffset + len in unsigned arithmetic that can wrap")
+//----------------------------------------------------------------------
+
+// A length that pushes m_InputOffset + len past UINT_MAX used to pass
+// the check and hand memcpy a read of most of the address space. Both
+// primitives refuse it, and refuse it before touching memory - under
+// the unfixed code this test does not fail, it takes the process down.
+TEST(Datagram, AReadLengthThatWrapsTheOffsetIsRefused)
+{
+	std::vector<unsigned char> bytes;
+	bytes.push_back(0xA1);
+	bytes.push_back(0xB2);
+	bytes.push_back(0xC3);
+
+	const uint lengths[] = { 0xFFFFFFFFu, 0xFFFFFFFEu, 0xFFFFFFFDu, 0x80000000u };
+
+	for (size_t i = 0; i < sizeof(lengths) / sizeof(lengths[0]); i++)
+	{
+		Datagram datagram;
+		Load(datagram, bytes);
+		char first = 0;
+		datagram.read(first);	// offset 1, so 1 + 0xFFFFFFFF wraps to 0
+		CHECK_EQ((char)0xA1, first);
+
+		char sink[4] = { 0, 0, 0, 0 };
+		bool bThrew = false;
+		try {
+			datagram.read(sink, lengths[i]);
+		} catch (InsufficientDataException&) {
+			bThrew = true;
+		}
+		CHECK(bThrew);
+
+		std::string text("untouched");
+		bThrew = false;
+		try {
+			datagram.read(text, lengths[i]);
+		} catch (InsufficientDataException&) {
+			bThrew = true;
+		}
+		CHECK(bThrew);
+		CHECK(std::string("untouched") == text);
+
+		// The datagram is still readable from where it was.
+		ushort rest = 0;
+		datagram.read(rest);
+		CHECK_EQ((ushort)0xC3B2, rest);
+	}
+}
+
+// The write bound was an Assert, which NDEBUG compiles away: a body
+// that outgrows the buffer its declared size bought wrote past the
+// heap block in Release. It is a runtime check now, in every build,
+// and refuses a wrapping length the same way.
+TEST(Datagram, AWritePastTheBufferIsRefusedInEveryBuild)
+{
+	Datagram datagram;
+	datagram.setData(4);
+	datagram.write((ushort)0x8182);
+
+	const uint lengths[] = { 3, 5, 0xFFFFFFFFu, 0xFFFFFFFEu };
+	const char source[8] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+
+	for (size_t i = 0; i < sizeof(lengths) / sizeof(lengths[0]); i++)
+	{
+		bool bThrew = false;
+		try {
+			datagram.write(source, lengths[i]);
+		} catch (Error&) {
+			bThrew = true;
+		}
+		CHECK(bThrew);
+	}
+
+	// What fits still goes in, and nothing before it moved.
+	datagram.write((ushort)0x8384);
+	const unsigned char expected[] = { 0x82, 0x81, 0x84, 0x83 };
+	CHECK_EQ(0, std::memcmp(datagram.getData(), expected, sizeof(expected)));
+
+	// Full: one more byte is refused too.
+	bool bThrew = false;
+	try {
+		datagram.write((char)1);
+	} catch (Error&) {
+		bThrew = true;
+	}
+	CHECK(bThrew);
+}

@@ -64,9 +64,10 @@ void Datagram::read ( std::span<char> buf )
 
 	const uint len = (uint)buf.size();
 
-	// boundary check
-	//Assert( m_InputOffset + len <= m_Length );
-	if (m_InputOffset + len > m_Length)
+	// boundary check, written so that a len near UINT_MAX cannot wrap the
+	// sum past m_Length and pass. m_InputOffset never exceeds m_Length,
+	// because it only advances past this check.
+	if (len > m_Length - m_InputOffset)
 		throw InsufficientDataException("Datagram read");
 
 	memcpy( buf.data() , &m_Data[m_InputOffset] , len );
@@ -89,9 +90,8 @@ void Datagram::read ( std::string & str , uint len )
 {
 	__BEGIN_TRY
 
-	// boundary check
-	//Assert( m_InputOffset + len <= m_Length );
-	if (m_InputOffset + len > m_Length )
+	// boundary check, wrap-proof as in read(std::span<char>)
+	if (len > m_Length - m_InputOffset)
 		throw InsufficientDataException("Datagram read");
 
 	str.reserve(len);
@@ -196,8 +196,12 @@ void Datagram::write ( std::span<const char> buf )
 
 	const uint len = (uint)buf.size();
 
-	// boundary check
-	Assert( m_OutputOffset + len <= m_Length );
+	// boundary check: a runtime check in every build, where an Assert
+	// vanished under NDEBUG and let a body outgrow its buffer on the
+	// heap. Wrap-proof as the read side is; m_OutputOffset never exceeds
+	// m_Length.
+	if (len > m_Length - m_OutputOffset)
+		throw Error("Datagram write past the end of the buffer");
 
 	memcpy( &m_Data[m_OutputOffset] , buf.data() , len );
 
@@ -217,19 +221,16 @@ void Datagram::write ( std::span<const std::byte> buf )
 //
 // *CAUTION*
 //
-// 모든 write()들이 write(const char*,uint)를 사용하므로, m_OutputOffset
-// 을 변경해줄 필요는 없다.
+// Every write() goes through write(std::span<const char>), which
+// advances m_OutputOffset and checks the bound, so neither is done here.
 //
 //////////////////////////////////////////////////////////////////////
 void Datagram::write ( const std::string & str )
 {
 	__BEGIN_TRY
 
-	// boundary check
-	Assert( m_OutputOffset + str.size() <= m_Length );
-
 	// write std::string body
-	write( str.c_str() , str.size() );
+	write( std::span<const char>( str.data() , str.size() ) );
 
 	__END_CATCH
 }
