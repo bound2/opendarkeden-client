@@ -1077,6 +1077,43 @@ clock, works the old `DWORD` arithmetic out on the same numbers beside each
 assertion, and pins the countdown, the boundary one millisecond before expiry,
 the preserved second-floor rounding and the un-narrowed remainder.
 
+The third priority-5 slice (2026-09-10) is the pet item's life, and it is
+the first clock in game code rather than in a manager. A pet's durability
+is the number of minutes it has left, counted from the moment the
+durability was set; `MPetItem` stamped that moment as a `DWORD` from
+`timeGetTime()` and handed the tick out, and the affect check in
+`MCreature` and the description panel in `VS_UI_Description.cpp` each
+worked the countdown out for themselves. The stamp is a
+`MonotonicClock::TimePoint` now, `MinutesSinceUpdate()` and
+`GetRemainingDurability()` are the item's own, both readers ask them, and
+the tick accessors are gone. The quantisation statement is the second
+slice's again: `timeGetTime()` was already the 1 ms counter, so only the
+epoch and the width change, and the width change is what removes the
+defect - after 49.7 days the `DWORD` subtraction came round and a pet
+set with a long durability read as hours old, alive and lending its
+status; the elapsed count is 64-bit now and is compared with the 32-bit
+durability in the wider type. What made this slice possible is a
+restructuring commit ahead of the fix, in the shape task 4.4 used for
+the potion: `MPetItem`'s constructor was in the executable's
+`MItemUse.cpp`, so no test could construct a pet, and constructing one
+in the library emits its vtable there, which names a `UseInventory` whose
+body sends a packet - so the member is defined in `MItem.cpp` and
+delegates to a new `MItemHost` slot the executable installs (with
+designated initialisers, now that the host has eleven entries).
+`tests/unit/test_pet_item_countdown.cpp` drives the injected clock
+through the countdown, the restart, a never-set pet and the legacy wrap,
+with the old arithmetic worked out beside each assertion. 655 tests,
+297,381 checks, 0 failed in both trees.
+
+What is left of priority 5 is executable-side: about 270 tick reads in
+some fifty files, the largest cluster the two `VS_UI_GameCommon` sources
+(104, the UI's double-click and animation timers), then `MTopView` (21)
+and `CGameUpdate` (10). None has a test path, each move needs its
+quantisation statement, and each is verified by running the client. The
+one library site left, a byte-rate probe in `SocketInputStream::fill`,
+sits under `__TEST_PACKET_RECEIVED_SIZE_PER_SECOND__`, which nothing
+defines, and is dead code rather than a clock to move.
+
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through
 `std::filesystem::directory_iterator` against a DOS-style wildcard and returns
