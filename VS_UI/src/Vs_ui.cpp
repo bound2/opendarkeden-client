@@ -4943,7 +4943,7 @@ bool	C_VS_UI::IsRunningCTFStatusWindow()
 	return false;
 }
 
-void	C_VS_UI::SetCTFStatus(DWORD &endtime, int &flag_s, int &flag_v, int &flag_o)
+void	C_VS_UI::SetCTFStatus(const MonotonicClock::TimePoint &endtime, int &flag_s, int &flag_v, int &flag_o)
 {
 	if( m_pC_game )
 		m_pC_game->SetCTFStatus( endtime, flag_s, flag_v, flag_o );

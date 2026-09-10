@@ -4547,7 +4547,7 @@ void		UI_MiniGameScores(GCMiniGameScores* pPacket)
 	}	
 }
 
-void		UI_SetCTFStatus( DWORD endTime, int flag_s, int flag_v, int flag_o )
+void		UI_SetCTFStatus( const MonotonicClock::TimePoint &endTime, int flag_s, int flag_v, int flag_o )
 {
 	gC_vs_ui.SetCTFStatus( endTime, flag_s, flag_v, flag_o );
 }

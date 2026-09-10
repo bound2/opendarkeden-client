@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------------
 
 #include "RaceType.h"
+#include "MonotonicClock.h"
 
 #ifndef	__UIFUNCTION_H__
 #define	__UIFUNCTION_H__
@@ -359,7 +360,7 @@ extern void		UI_PopupMessage(int gamestringID);
 extern void		UI_DownSkill();
 extern void		UI_RunMinigame(int game);
 extern void		UI_MiniGameScores(GCMiniGameScores* pPacket);
-extern void		UI_SetCTFStatus( DWORD endTime, int flag_s, int flag_v, int flag_o );
+extern void		UI_SetCTFStatus( const MonotonicClock::TimePoint &endTime, int flag_s, int flag_v, int flag_o );
 extern void		UI_CloseCTFStatusWindow();
 extern void		UI_SetDelayEternity();
 extern void		UI_CloseRequestResurrectWindow();

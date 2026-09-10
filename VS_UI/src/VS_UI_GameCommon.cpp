@@ -31456,7 +31456,7 @@ void	C_VS_UI_WAR_LIST::Run(id_t id)
 C_VS_UI_BLOOD_BIBLE_STATUS::C_VS_UI_BLOOD_BIBLE_STATUS()
 {
 	m_sec = 0;
-	m_tickCount = 0;
+	m_tp_start = MonotonicClock::TimePoint();
 
 	g_RegisterWindow(this);	
 	AttrPin(true);	
@@ -31780,7 +31780,7 @@ void	C_VS_UI_BLOOD_BIBLE_STATUS::Show()
 {
 	if(m_sec != 0)
 	{
-		if(m_sec < (timeGetTime() - m_tickCount)/1000)
+		if(std::chrono::seconds(m_sec) < std::chrono::duration_cast<std::chrono::seconds>(MonotonicClock::Now() - m_tp_start))
 		{
 			gpC_base->SendMessage(UI_CLOSE_BLOOD_BIBLE_STATUS);
 			m_sec = 0;
@@ -32804,7 +32804,7 @@ C_VS_UI_QUEST_STATUS::C_VS_UI_QUEST_STATUS()
 	m_bl_active = false;
 	m_bl_focus = false;
 	m_bl_timeover  = false;
-	m_timer = 0;	
+	m_tp_deadline = MonotonicClock::TimePoint();
 	SetQuestStatusInit();
 	
 	std::string str;
@@ -33908,22 +33908,23 @@ void	C_VS_UI_QUEST_STATUS::ToggleWindow()
 
 int		C_VS_UI_QUEST_STATUS::Timer( int timer )
 {
-	DWORD current_time = timeGetTime();
+	const MonotonicClock::TimePoint current_time = MonotonicClock::Now();
 
 	if( timer > 0 )
 	{
-		// 타이머를 세팅해준다.
-		m_timer = current_time + timer;
+		// Set the deadline.
+		m_tp_deadline = current_time + MonotonicClock::Millis(timer);
 	}
 
+	// Milliseconds left, or -1 once the deadline has passed.
 	int result = 0;
-	
-	if( m_timer < current_time )
+
+	if( m_tp_deadline < current_time )
 	{
 		result = -1;
 	} else
 	{
-		result = m_timer - current_time;
+		result = (int)(m_tp_deadline - current_time).count();
 	}
 
 	return result;
@@ -33931,31 +33932,32 @@ int		C_VS_UI_QUEST_STATUS::Timer( int timer )
 
 int		C_VS_UI_QUEST_STATUS::Timer2( int timer )
 {
-	DWORD current_time = timeGetTime();
+	const MonotonicClock::TimePoint current_time = MonotonicClock::Now();
 
 	if( timer > 0 && m_bl_timeover == false)
 	{
-		// 타이머를 세팅해준다.
+		// Set the deadline.
 		Timer(4000);
-		m_timer2 =  current_time + timer;
+		m_tp_deadline2 = current_time + MonotonicClock::Millis(timer);
 		m_bl_timeover = true;
 	}
 
 	int result = 0;
-	
-	if( m_timer2 < current_time )
+
+	if( m_tp_deadline2 < current_time )
 	{
 		result = -1;
 	} else
 	{
-		result = m_timer2 - current_time;
+		result = (int)(m_tp_deadline2 - current_time).count();
 	}
 
 	if(m_bl_timeover)
 	{
-		if( current_time > m_timer2)
+		// Ten seconds past the deadline the status resets.
+		if( current_time > m_tp_deadline2)
 		{
-			if( current_time - m_timer2 > 10000)
+			if( current_time - m_tp_deadline2 > MonotonicClock::Millis(10000))
 				SetQuestStatusInit();
 		}
 	}
@@ -34640,7 +34642,7 @@ void	C_VS_UI_LOTTERY_CARD::SetResult(bool	bSuccess)
 		else
 		{
 			// 이미지 실패 세팅
-			srand(timeGetTime());
+			srand(MonotonicClock::LegacyTicks());	// a tick-sized seed
 			m_backimage[0] = m_GiftList[m_radio_select-1]->image;
 			m_backimage[1] = m_GiftList[m_radio_select-1]->image;
 			m_backimage[2] = m_GiftList[m_radio_select-1]->image;

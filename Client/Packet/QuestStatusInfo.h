@@ -2,6 +2,7 @@
 #define __QUEST_STATUS_INFO_H__
 
 #include "Types.h"
+#include "MonotonicClock.h"
 
 #include "Packet.h"
 #include "SocketInputStream.h"
@@ -18,8 +19,12 @@ struct UI_GMissionInfo{
 	DWORD			m_NumArg;
 	BYTE			bStatus;
 	BYTE			bCondition;	// 어느 조건에 있는가 0 : Happen, 1 : Complete, 2 : Fail, 3 : Reward
-	WORD			bIndex;		// 해당 조건의 몇번째 element인가
-	DWORD			dwTimeLimit;// 시간 제한 퀘스트일 경우 처음 남음 시간 세팅 
+	WORD			bIndex;		// which element of that condition
+	// A timed mission: m_NumArg minutes, counted from tpTimeLimitStart on
+	// MonotonicClock's clock. The handlers create these with no limit;
+	// the quest manager's XML pass starts the count for a "Time" mission.
+	bool			bTimeLimited = false;
+	MonotonicClock::TimePoint	tpTimeLimitStart;
 };
 struct UI_GQuestInfo{
 	DWORD			dwQuestID;

@@ -1131,8 +1131,14 @@ fi
 # what is left there is 56 timeGetTime() sites in three files (the
 # header's SetTimer is the third), four of them srand seeds, the rest of
 # the deadline and elapsed-time shapes; the tree's other 82 are Client's.
+# 113 later still: the deadlines set and read within VS_UI moved to
+# TimePoint - the quest status countdowns, the blood bible timer, the
+# image notice, the resurrect delays, the flag-war end (with its
+# handler in Client), the timed missions, the gamble spin, and four
+# srand seeds (25 calls); VS_UI holds 33, the minigames' clocks and
+# the three deadlines the executable sets, and Client 80.
 #----------------------------------------------------------------------
-R14_BASELINE=138
+R14_BASELINE=113
 
 if [ ! -f tests/tools/count_tick_reads.pl ]; then
 	echo "FAIL R14: tests/tools/count_tick_reads.pl is missing"

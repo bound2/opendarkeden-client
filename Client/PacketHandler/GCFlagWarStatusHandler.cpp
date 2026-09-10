@@ -11,6 +11,9 @@
 #include "Gpackets/GCFlagWarStatus.h"
 #include "ClientDef.h"
 #include "UIFunction.h"
+#include "MonotonicClock.h"
+
+#include <chrono>
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
@@ -18,13 +21,16 @@ void GCFlagWarStatusHandler::execute ( GCFlagWarStatus * pGCFlagWarStatus , Play
 
 {
 #ifdef __GAME_CLIENT__
-	DWORD endTime = pGCFlagWarStatus->getTimeRemain() * 1000 + timeGetTime();
+	// The war's end as a point on the monotonic clock: the server sends
+	// the seconds remaining.
+	const WORD timeRemain = pGCFlagWarStatus->getTimeRemain();
+	const MonotonicClock::TimePoint endTime = MonotonicClock::Now() + std::chrono::seconds(timeRemain);
 	int		flag_s = (int)pGCFlagWarStatus->getFlagCount( RACE_SLAYER );
 	int		flag_v = (int)pGCFlagWarStatus->getFlagCount( RACE_VAMPIRE );
 	int		flag_o = (int)pGCFlagWarStatus->getFlagCount( RACE_OUSTERS );
-	
-	// 시간이 3시간 이상이면 무조건 무시!
-	if( ((endTime-timeGetTime())/1000)/60/60 > 3 )
+
+	// More than three hours is ignored outright.
+	if( timeRemain/60/60 > 3 )
 		return;
 
 	UI_SetCTFStatus( endTime, flag_s, flag_v, flag_o );

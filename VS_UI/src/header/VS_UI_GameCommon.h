@@ -1773,8 +1773,11 @@ public :
 	bool				m_bl_timeover;
 	bool				m_bl_focus;
 	
-	DWORD				m_timer;
-	DWORD				m_timer2;
+	// Timer()'s and Timer2()'s deadlines: absolute points on
+	// MonotonicClock's clock, so the countdowns they return have no
+	// 32-bit tick to wrap on (basic/MonotonicClock.h).
+	MonotonicClock::TimePoint	m_tp_deadline;
+	MonotonicClock::TimePoint	m_tp_deadline2;
 	CSpriteSurface *	m_p_back_surface;
 	std::vector<std::string>					m_hard_cording;		// 날 막아줘!!!
 
@@ -3847,7 +3850,7 @@ public :
 
 	BLOOD_BIBLE_STATUS		m_BloodBibleStatus[12];
 
-	DWORD					m_tickCount;
+	MonotonicClock::TimePoint	m_tp_start;	// when SetTimer() started the m_sec countdown
 	DWORD					m_sec;
 
 public :
@@ -3855,7 +3858,7 @@ public :
 	C_VS_UI_BLOOD_BIBLE_STATUS();
 	~C_VS_UI_BLOOD_BIBLE_STATUS();
 
-	void	SetTimer(DWORD sec) { m_sec = sec; m_tickCount = timeGetTime(); }
+	void	SetTimer(DWORD sec) { m_sec = sec; m_tp_start = MonotonicClock::Now(); }
 
 	void	ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button);
 	void	ShowButtonDescription(C_VS_UI_EVENT_BUTTON *p_button);
@@ -4271,7 +4274,7 @@ class C_VS_UI_IMAGE_NOTICE : public Window, public Exec, public ButtonVisual
 public :	
 	struct SNotice
 	{
-		DWORD				m_Time;
+		MonotonicClock::TimePoint	m_Time;	// when the notice was added
 		std::string			m_Name;
 		std::string			m_GiftName;
 		char				m_Alpha;
@@ -4423,14 +4426,14 @@ public :
 	class CResurrect
 	{
 	public :
-		CResurrect() : m_Delay(0), m_Time(0) { memset(&m_ButtonRect, 0, sizeof(RECT) ); m_Enable = false; m_Image = -1; }
+		CResurrect() : m_Delay(0) { memset(&m_ButtonRect, 0, sizeof(RECT) ); m_Enable = false; m_Image = -1; }
 		void		SetRect( int x,int y,int w,int h ) { m_ButtonRect.left = x; m_ButtonRect.right = x+w; m_ButtonRect.top = y; m_ButtonRect.bottom = y+h;}
 
 		RECT		m_ButtonRect;
 		bool		m_Enable;
 		int			m_Image;
 		int			m_Delay;
-		DWORD		m_Time;
+		MonotonicClock::TimePoint	m_Time;	// when SetDelay() started the m_Delay ms
 	};
 
 	C_SPRITE_PACK				m_image_spk;

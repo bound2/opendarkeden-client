@@ -6021,7 +6021,7 @@ bool	C_VS_UI_GAME::IsRunningHelpDesc()
 	return false;
 }
 
-void	C_VS_UI_GAME::SetCTFStatus(DWORD &endtime, int &flag_s, int &flag_v, int &flag_o)
+void	C_VS_UI_GAME::SetCTFStatus(const MonotonicClock::TimePoint &endtime, int &flag_s, int &flag_v, int &flag_o)
 {
 	if( m_pC_status_ctf == NULL )
 		RunCTFStatusWindow();
