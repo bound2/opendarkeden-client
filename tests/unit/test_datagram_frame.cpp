@@ -259,3 +259,49 @@ TEST(Datagram, ReadingPastTheEndUnderflows)
 		CHECK(std::string("\xA1\xB2") == text);
 	}
 }
+
+//----------------------------------------------------------------------
+// The pad byte goes on the wire, so it must be a value and not what
+// the allocator left behind
+//----------------------------------------------------------------------
+#include "Cpackets/CGPortCheck.h"
+
+// Every byte the datagram sends is written: the header, the body, and
+// the one-byte pad in the sequence slot, which both peers count in the
+// length and neither reads. The server writes it as zero (its
+// Datagram zero-fills the buffer for exactly this reason); a datagram
+// buffer that came from a bare new char[] carries a heap byte there
+// instead - 0xCD under the MSVC debug heap, anything in Release.
+TEST(Datagram, ThePadByteBehindTheBodyIsZero)
+{
+	CGPortCheck packet;
+	packet.setPCName("WirePin");
+
+	// Several datagrams, so a zero that happens to be lying in freshly
+	// allocated memory does not pass the test by luck.
+	for (int i = 0; i < 8; i++)
+	{
+		Datagram datagram;
+		datagram.write(&packet);
+		const unsigned char* data = (const unsigned char*)datagram.getData();
+		CHECK_EQ(szPacketHeader + packet.getPacketSize(), datagram.getLength());
+		CHECK_EQ(0, data[datagram.getLength() - 1]);
+	}
+}
+
+// A datagram sized for a body but never fully written by it must not
+// leak either: setData(len) hands back zeroed bytes.
+TEST(Datagram, ABufferSizedForWritingStartsZeroed)
+{
+	for (int i = 0; i < 8; i++)
+	{
+		Datagram datagram;
+		datagram.setData(64);
+		const unsigned char* data = (const unsigned char*)datagram.getData();
+		int nonZero = 0;
+		for (uint j = 0; j < datagram.getLength(); j++)
+			if (data[j] != 0)
+				nonZero++;
+		CHECK_EQ(0, nonZero);
+	}
+}

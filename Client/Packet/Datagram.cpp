@@ -265,8 +265,11 @@ void Datagram::setData ( uint len )
 
 	Assert( m_Data == NULL );
 
+	// Zero-filled: write(const DatagramPacket*) sizes the buffer at
+	// szPacketHeader + body but writes one byte less, and that pad goes
+	// on the wire. The server writes it as zero for the same reason.
 	m_Length = len;
-	m_Data = new char[ m_Length ];
+	m_Data = new char[ m_Length ]();
 
 	__END_CATCH
 }
