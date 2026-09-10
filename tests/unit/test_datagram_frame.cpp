@@ -21,13 +21,14 @@
 //----------------------------------------------------------------------
 
 #include "test_framework.h"
-#include "packet_stream_access.h"
 
+#include "Cpackets/CGPortCheck.h"
 #include "Datagram.h"
 #include "DatagramPacket.h"
 #include "Exception.h"
 #include "Packet.h"
 #include "PacketFactoryManager.h"
+#include "Gpackets/GLIncomingConnectionError.h"
 #include "Rpackets/RCPositionInfo.h"
 
 #include <cstdint>
@@ -265,7 +266,6 @@ TEST(Datagram, ReadingPastTheEndUnderflows)
 // The pad byte goes on the wire, so it must be a value and not what
 // the allocator left behind
 //----------------------------------------------------------------------
-#include "Cpackets/CGPortCheck.h"
 
 // Every byte the datagram sends is written: the header, the body, and
 // the one-byte pad in the sequence slot, which both peers count in the
@@ -278,8 +278,10 @@ TEST(Datagram, ThePadByteBehindTheBodyIsZero)
 	CGPortCheck packet;
 	packet.setPCName("WirePin");
 
-	// Several datagrams, so a zero that happens to be lying in freshly
-	// allocated memory does not pass the test by luck.
+	// Several datagrams. Under the MSVC debug heap and under ASan a bare
+	// new char[] hands back a fill pattern, so the unfixed code fails
+	// every iteration (0xCD); an allocator that returns zeroed pages
+	// would let it pass, and the loop cannot buy more than that.
 	for (int i = 0; i < 8; i++)
 	{
 		Datagram datagram;
@@ -422,6 +424,9 @@ TEST(Datagram, ATypedReadShortOfItsWidthUnderflowsAndLeavesTheValue)
 // the check and hand memcpy a read of most of the address space. Both
 // primitives refuse it, and refuse it before touching memory - under
 // the unfixed code this test does not fail, it takes the process down.
+// Of the four lengths only the first wraps at offset 1 (1 + 0xFFFFFFFF
+// is 0); the other three are merely too long, and the old check refused
+// them too. They are here so the wrapping one is not the only path.
 TEST(Datagram, AReadLengthThatWrapsTheOffsetIsRefused)
 {
 	std::vector<unsigned char> bytes;
@@ -468,7 +473,12 @@ TEST(Datagram, AReadLengthThatWrapsTheOffsetIsRefused)
 // The write bound was an Assert, which NDEBUG compiles away: a body
 // that outgrows the buffer its declared size bought wrote past the
 // heap block in Release. It is a runtime check now, in every build,
-// and refuses a wrapping length the same way.
+// and refuses a wrapping length the same way. Two of the four lengths
+// wrap (2 + 0xFFFFFFFF is 1, 2 + 0xFFFFFFFE is 0), and those passed
+// the Assert as well, so on the unfixed code this test is a second
+// reproduction: it does not fail, it takes the process down. What this
+// test cannot show is the Release half - the suite is a Debug build,
+// where the Assert threw too.
 TEST(Datagram, AWritePastTheBufferIsRefusedInEveryBuild)
 {
 	Datagram datagram;
@@ -502,4 +512,95 @@ TEST(Datagram, AWritePastTheBufferIsRefusedInEveryBuild)
 		bThrew = true;
 	}
 	CHECK(bThrew);
+}
+
+//----------------------------------------------------------------------
+// A packet body is held to the size its header declares
+//----------------------------------------------------------------------
+namespace {
+
+// A datagram packet whose write() emits `bodySize` bytes while its
+// getPacketSize() declares `bodySize + drift` - the datagram twin of
+// the stream tests' drifting packet, and the server's
+// DriftingDatagramPacket.
+class DriftingDatagramPacket : public DatagramPacket
+{
+public:
+	DriftingDatagramPacket(uint bodySize, int drift)
+	: m_BodySize(bodySize), m_Drift(drift)
+	{
+	}
+
+	void read(Datagram&) { throw UnsupportedError(); }
+	void write(Datagram& oDatagram) const
+	{
+		for (uint i = 0; i < m_BodySize; i++)
+			oDatagram.write((uchar)(0xA0 + i));
+	}
+	PacketID_t getPacketID() const noexcept { return 0x4321; }
+	PacketSize_t getPacketSize() const { return (PacketSize_t)((int)m_BodySize + m_Drift); }
+#ifdef __DEBUG_OUTPUT__
+	std::string getPacketName() const { return "DriftingDatagramPacket"; }
+	std::string toString() const { return "DriftingDatagramPacket"; }
+#endif
+
+private:
+	uint m_BodySize;
+	int m_Drift;
+};
+
+bool	WriteIsRefused(const DatagramPacket& packet)
+{
+	Datagram datagram;
+	try {
+		datagram.write(&packet);
+	} catch (Error&) {
+		return true;
+	}
+	return false;
+}
+
+} // namespace
+
+// The buffer holds one byte more than the body - the pad - so the bound
+// alone would let a body one byte over its declaration eat the pad and
+// go out looking honest, with the peer dropping the last field. A body
+// under its declaration would send zeros the peer parses as fields.
+// Both are refused; an honest packet frames as before.
+TEST(Datagram, ABodyThatDisagreesWithItsDeclaredSizeIsRefused)
+{
+	CHECK(WriteIsRefused(DriftingDatagramPacket(6, +1)));
+	CHECK(WriteIsRefused(DriftingDatagramPacket(6, -1)));
+	CHECK(WriteIsRefused(DriftingDatagramPacket(6, +5)));
+	CHECK(WriteIsRefused(DriftingDatagramPacket(6, -6)));
+
+	DriftingDatagramPacket honest(6, 0);
+	Datagram datagram;
+	datagram.write(&honest);
+	const unsigned char expected[] = {
+		0x21, 0x43,
+		0x06, 0x00, 0x00, 0x00,
+		0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5,
+		0x00
+	};
+	CHECK_EQ(sizeof(expected), datagram.getLength());
+	CHECK_EQ(0, std::memcmp(datagram.getData(), expected, sizeof(expected)));
+}
+
+// GLIncomingConnectionError declared only its first string while its
+// write() emits two; the server's copy declares both. Under the old
+// Assert-only bound that was a silent heap overrun in Release, and
+// under the declared-size check it would be a refusal. The client
+// never sends or receives this packet (its factory is registered only
+// off __GAME_CLIENT__), so this pins the cross-repo agreement.
+TEST(GLIncomingConnectionError, DeclaresBothStrings)
+{
+	GLIncomingConnectionError packet;
+	packet.setMessage("no room");
+	packet.setPlayerID("Reiot");
+	CHECK_EQ((PacketSize_t)(1 + 7 + 1 + 5), packet.getPacketSize());
+
+	Datagram datagram;
+	datagram.write(&packet);
+	CHECK_EQ(szPacketHeader + packet.getPacketSize(), datagram.getLength());
 }

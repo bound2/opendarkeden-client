@@ -69,6 +69,7 @@
 #include "Cpackets/CGDissectionCorpse.h"
 #include "Cpackets/CGDropMoney.h"
 #include "Cpackets/CGNPCAskAnswer.h"
+#include "Cpackets/CGPortCheck.h"
 #include "Cpackets/CGPickupMoney.h"
 #include "Cpackets/CGSkillToInventory.h"
 #include "Cpackets/CGSkillToNamed.h"
@@ -91,6 +92,9 @@
 #include "Gpackets/GCSystemMessage.h"
 #include "Gpackets/GCExchangeBuy.h"
 #include "Gpackets/GCExchangeList.h"
+#include "Rpackets/RCPositionInfo.h"
+
+#include "Datagram.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -1397,10 +1401,6 @@ TEST(GCSkillInfo, OustersLoginFrameIncludesSkillLevelsAndPreservesNextPacket)
 // follows this pin. CGPortCheck is what the client sends the login
 // server; RCPositionInfo is what it sends and receives from a peer.
 //----------------------------------------------------------------------
-#include "Datagram.h"
-#include "Cpackets/CGPortCheck.h"
-#include "Rpackets/RCPositionInfo.h"
-
 void	Fill(CGPortCheck& p)		{ p.setPCName("WirePin"); }
 void	Fill(RCPositionInfo& p)
 {

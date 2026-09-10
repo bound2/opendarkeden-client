@@ -152,6 +152,10 @@ public :
 
 private :
 
+	// The bounds every read and write is held to (Datagram.cpp).
+	void ensureReadable ( uint len ) const;
+	void ensureWritable ( uint len ) const;
+
 	// buffer length
 	uint m_Length;
 
