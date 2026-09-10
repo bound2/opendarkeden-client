@@ -1692,19 +1692,44 @@ MOustersArmsBand::FindSlotToAddItem(MItem* pItem, int &slot) const
 //----------------------------------------------------------------------
 // MPetItem
 //----------------------------------------------------------------------
-// The constructor lives here, in the library, so a test can construct a
-// pet; the pet's names, which read the creature table, stay in
-// MItemUse.cpp.
+// The constructor and the durability countdown live here, in the library,
+// so a test can drive them through an injected MonotonicClock source; the
+// pet's names, which read the creature table, stay in MItemUse.cpp.
 //----------------------------------------------------------------------
 MPetItem::MPetItem()
+	: m_UpdateTime(MonotonicClock::Now())
 {
-	m_UpdateTime = timeGetTime();
 	m_PetKeepedDay = 0;
 	m_PetExpRemain = 0;
 	m_PetFoodType = 0;
 	m_bCanGamble = false;
 	m_bCutHead = false;
 	m_bCanAttack = false;
+}
+
+std::chrono::minutes
+MPetItem::MinutesSinceUpdate() const
+{
+	// One read of the clock decides the value; a clock that reads before
+	// the update point (it cannot, on a monotonic clock, but a test source
+	// can) counts as no time elapsed rather than a negative gap.
+	const MonotonicClock::TimePoint now = MonotonicClock::Now();
+	if (now <= m_UpdateTime)
+		return std::chrono::minutes(0);
+	return std::chrono::duration_cast<std::chrono::minutes>(now - m_UpdateTime);
+}
+
+TYPE_ITEM_DURATION
+MPetItem::GetRemainingDurability() const
+{
+	const TYPE_ITEM_DURATION durability = GetCurrentDurability();
+	// The elapsed count is 64-bit; the durability is 32. Compare in the
+	// wider type so an elapsed count past the durability's range floors
+	// at zero instead of wrapping.
+	const long long elapsed = MinutesSinceUpdate().count();
+	if (elapsed >= static_cast<long long>(durability))
+		return 0;
+	return durability - static_cast<TYPE_ITEM_DURATION>(elapsed);
 }
 
 //----------------------------------------------------------------------

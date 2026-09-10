@@ -64,6 +64,7 @@
 #include "MGridItemManager.h"
 #include "MSlotItemManager.h"
 #include "ItemClassDef.h"
+#include "MonotonicClock.h"
 //#include "SkillDef.h"
 //#include "AddonDef.h"
 #include "CAnimationFrame.h"
@@ -2351,7 +2352,11 @@ public :
 
 class MPetItem : public MItem {
 private:
-	DWORD	m_UpdateTime;
+	// When the durability was last set: the pet's durability is a count of
+	// minutes it has left to live, and it counts down from this point on
+	// MonotonicClock's clock (constructed as "now", so a pet whose
+	// durability is never set counts from its creation).
+	MonotonicClock::TimePoint	m_UpdateTime;
 	DWORD	m_PetExpRemain;
 	//2004, 5, 11 sobeit add start
 	DWORD	m_PetKeepedDay;//보관날짜
@@ -2377,9 +2382,18 @@ public :
 	const bool				IsCanCutHead() const			{ return m_bCutHead; }
 	void					SetPetAttack(bool bAttack)	{ m_bCanAttack = bAttack; }
 	const bool				IsCanAttack() const			{ return m_bCanAttack; }
-	const DWORD				GetUpdateTime() const			{ return m_UpdateTime; }
-	void					SetUpdateTime(DWORD updateTime)	{ m_UpdateTime = updateTime; }
-	void					SetCurrentDurability(TYPE_ITEM_DURATION d)	{ MItem::SetCurrentDurability(d); SetUpdateTime(timeGetTime()); }
+
+	// Setting the durability restarts the countdown.
+	void					SetCurrentDurability(TYPE_ITEM_DURATION d)	{ MItem::SetCurrentDurability(d); m_UpdateTime = MonotonicClock::Now(); }
+
+	// Whole minutes elapsed since the durability was last set; a clock that
+	// has not moved a full minute reads 0.
+	std::chrono::minutes	MinutesSinceUpdate() const;
+
+	// The durability minus the minutes elapsed, floored at zero: the pet is
+	// dead at exactly 0. This is the one place the countdown is worked out,
+	// so the affect check and the description panel cannot disagree.
+	TYPE_ITEM_DURATION		GetRemainingDurability() const;
 
 	//2004, 5, 11 sobeit add start
 	void					SetPetKeepedDay(DWORD day)			{ m_PetKeepedDay = day; }
