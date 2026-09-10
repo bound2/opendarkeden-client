@@ -23,6 +23,7 @@
 #include "MHelpDef.h"
 #include "../../basic/timer2.h"
 #include "CDirectInput.h"
+#include "MonotonicClock.h"
 
 #ifdef PLATFORM_WINDOWS
 // VS_UI_widget.h's gpC_Imm-as-macro stub (expanding to &gpC_Imm_instance)

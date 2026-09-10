@@ -13,6 +13,7 @@
 
 #include "unicorn.h"
 #include "VS_UI_widget.h"
+#include "MonotonicClock.h"
 #include "VS_UI_ExtraDialog.h"
 
 #include "MGameDef.h"

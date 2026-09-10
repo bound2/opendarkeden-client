@@ -28,6 +28,7 @@ extern RECT g_GameRect;
 #include <algorithm>
 #include <filesystem>
 #include <vector>
+#include "MonotonicClock.h"
 
 //-----------------------------------------------------------------------------
 // AskString

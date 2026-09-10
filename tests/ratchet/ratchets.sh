@@ -1129,6 +1129,9 @@ R14_BASELINE=186
 if [ ! -f tests/tools/count_tick_reads.pl ]; then
 	echo "FAIL R14: tests/tools/count_tick_reads.pl is missing"
 	FAIL=1
+elif [ "$(find Client VS_UI \( -name '*.cpp' -o -name '*.h' \) 2>/dev/null | wc -l)" -eq 0 ]; then
+	echo "FAIL R14: no C++ sources enumerated - a zero here would measure nothing"
+	FAIL=1
 else
 	R14=$(perl tests/tools/count_tick_reads.pl Client VS_UI | tail -1 | awk '{print $1}')
 	check "R14 (live GetTickCount/timeGetTime calls under Client and VS_UI)" "$R14" "$R14_BASELINE"

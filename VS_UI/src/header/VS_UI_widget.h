@@ -132,8 +132,8 @@ public:
 					m_alpha--;
 				}
 
-				// !m_alpha = 0인 상태에서 또 m_alpha--가 될 수 있다. 이것은 시간차에 의해서
-				// EventFocuxX가 두번이상 실행되기 때문이다.
+				// m_alpha can be decremented again while already 0: the focus
+				// events can run more than once with a time gap between them.
 				if (m_alpha <= 0)
 				{
 					m_alpha = 0;

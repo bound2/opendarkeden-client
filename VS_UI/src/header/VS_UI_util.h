@@ -189,9 +189,10 @@ private:
 
 	//
 	// Timer
-	// 
-	// 하나의 Animation object는 play되기 위해 하나의 timer를 갖는다. 내부에 timer가
-	// 구현된다. Timer library는 전역 함수를 설정해줘야하기 때문에 사용할 수 없다.
+	//
+	// Each animation object plays on a timer of its own, kept inside the
+	// object: the timer library needs a global callback, so it cannot be
+	// used here.
 	//
 	MonotonicClock::IntervalTimer	m_interval_timer;
 

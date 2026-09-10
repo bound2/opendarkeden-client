@@ -20,10 +20,18 @@ namespace {
 
 unsigned long long	g_ull_fake_millisec = 0;
 
+// Milliseconds the fake clock moves on EVERY read. Zero for most tests;
+// the single-read test sets it, so an implementation that read the
+// clock twice would mark its firing later than the read that opened
+// the gate, and the test can see the difference.
+unsigned long long	g_ull_step_per_read = 0;
+
 MonotonicClock::TimePoint
 FakeNow()
 {
-	return MonotonicClock::FromMillis(g_ull_fake_millisec);
+	const MonotonicClock::TimePoint tp = MonotonicClock::FromMillis(g_ull_fake_millisec);
+	g_ull_fake_millisec += g_ull_step_per_read;
+	return tp;
 }
 
 void
@@ -162,15 +170,31 @@ TEST(IntervalTimer, MarksTheFiringAtTheTimeThatOpenedTheGate)
 	MonotonicClock::ScopedTestSource clock(FakeNow);
 	SetNow(0);
 	MonotonicClock::IntervalTimer timer(MonotonicClock::Millis(100));
+
+	// From here every read of the clock moves it 3 ms, standing in for
+	// the work between two reads. Fire() reads once: the firing is marked
+	// at 100, the read that opened the gate. A two-read implementation
+	// would mark it at 103 and fire next at 203.
 	SetNow(100);
+	g_ull_step_per_read = 3;
 	CHECK(timer.Fire());
-	// Had the firing been marked by a second read after 3 ms of work, the
-	// next firing would be at 203; it is at 200.
-	SetNow(103);
-	CHECK_EQ(3, (int)timer.Elapsed().count());
-	SetNow(199);
-	CHECK(!timer.Fire());
+	g_ull_step_per_read = 0;
 	SetNow(200);
+	CHECK(timer.Fire());
+	SetNow(300);
+	CHECK(timer.Fire());
+	CHECK_EQ(0, (int)timer.Elapsed().count());
+}
+
+// A backwards test source with a zero interval: Fire() clamps the
+// elapsed time as Elapsed() does, so the fresh timer's promise to fire
+// at once holds even then.
+TEST(IntervalTimer, FireClampsABackwardsClockLikeElapsed)
+{
+	MonotonicClock::ScopedTestSource clock(FakeNow);
+	SetNow(500);
+	MonotonicClock::IntervalTimer timer;
+	SetNow(400);
 	CHECK(timer.Fire());
 }
 

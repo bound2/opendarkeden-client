@@ -17,6 +17,7 @@
 #include "../../RarFile.h"
 #include <vector>
 #include <string>
+#include "MonotonicClock.h"
 //using namespace std;
 
 #define CTREE std::vector<C_TREE_BASE>
@@ -182,7 +183,8 @@ private:
 	CRarFile					m_briefing_file;
 
 	//timer
-	MonotonicClock::IntervalTimer	m_interval_timer;
+	DWORD						m_dw_prev_tickcount;
+	DWORD						m_dw_millisec;
 
 	bool	Timer();
 

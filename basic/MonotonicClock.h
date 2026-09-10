@@ -156,11 +156,14 @@ public:
 	}
 
 	// True once the interval has passed since the last firing, and then
-	// this is the firing.
+	// this is the firing. The elapsed time is clamped at zero as
+	// Elapsed() clamps it, so a backwards test source and a zero interval
+	// still fire, as the class comment promises.
 	bool		Fire()
 	{
 		const TimePoint tp_now = Now();
-		if (tp_now - m_tp_prev >= m_d_interval)
+		const Duration d_elapsed = tp_now > m_tp_prev ? tp_now - m_tp_prev : Duration(0);
+		if (d_elapsed >= m_d_interval)
 		{
 			m_tp_prev = tp_now;
 			return true;

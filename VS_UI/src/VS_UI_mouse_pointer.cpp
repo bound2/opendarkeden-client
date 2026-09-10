@@ -442,17 +442,12 @@ void	C_VS_UI_MOUSE_POINTER::Set(UINT message, int x, int y)
 }
 
 //-----------------------------------------------------------------------------
-// C_VS_UI_BRIEFING::Timer
+// C_VS_UI_MOUSE_POINTER::Timer
 //
 //-----------------------------------------------------------------------------
 bool	C_VS_UI_MOUSE_POINTER::Timer()
 {
-	if(m_interval_timer.Fire())
-	{
-		return true;
-	}
-
-	return false;
+	return m_interval_timer.Fire();
 }
 
 void	C_VS_UI_MOUSE_POINTER::SetCursorPortal(int zone_id, int x, int y, char *owner_name)

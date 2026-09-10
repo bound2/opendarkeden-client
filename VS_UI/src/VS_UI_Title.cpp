@@ -4861,8 +4861,8 @@ C_VS_UI_TITLE::C_VS_UI_TITLE()
 
 	m_pC_credit = NULL;
 
-	m_tp_prev = MonotonicClock::Now();
-	m_d_scroll_interval = MonotonicClock::Millis(30);
+	m_scroll_timer.Restart();
+	m_scroll_timer.SetIntervalMillis(30);
 	m_credit_scroll = 0;
 
 }
@@ -5275,18 +5275,16 @@ void C_VS_UI_TITLE::Show()
 // this comment said "from then on it is true on every frame", which is
 // the first case overstated). It is the subtraction of two time points
 // over a 64-bit millisecond rep now, which has no 2^32 to carry past
-// (basic/MonotonicClock.h); the same gate is MonotonicClock::IntervalTimer
-// for the other widgets. The current time is also read once instead of
-// twice, so the interval no longer drifts by the few microseconds
-// between the two reads.
+// (basic/MonotonicClock.h): MonotonicClock::IntervalTimer, the gate every
+// widget timer runs on since the fourth slice (this one was hand-rolled
+// on the same two members until then). The current time is read once
+// instead of twice, so the interval no longer drifts by the few
+// microseconds between the two reads.
 //-----------------------------------------------------------------------------
 bool	C_VS_UI_TITLE::Timer()
 {
-	const MonotonicClock::TimePoint tp_now = MonotonicClock::Now();
-
-	if(tp_now - m_tp_prev >= m_d_scroll_interval)
+	if(m_scroll_timer.Fire())
 	{
-		m_tp_prev = tp_now;
 		m_credit_scroll++;
 		return true;
 	}
