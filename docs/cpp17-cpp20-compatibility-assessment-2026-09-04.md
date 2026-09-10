@@ -1191,17 +1191,20 @@ second `platform_get_ticks` with `gettimeofday`'s epoch, a pre-existing
 hazard that goes with its last users.
 
 The fifth priority-5 slice (2026-09-10) is every `GetTickCount` site in
-the two `GameCommon` sources - the last `GetTickCount` calls in `VS_UI` -
-and they were two shapes over the same `DWORD` pair. Interval gates, as
+the two `GameCommon` sources (45), and with them the last three
+`GetTickCount` spellings in `VS_UI` - two `srand` seeds and the
+`VS_UI_widget.h` stub. The 45 were two shapes over the same `DWORD`
+pair. Interval gates, as
 the fourth slice's: the tribe window's timer, the minimap and world map
 refresh, and the mining progress, which was a global previous tick and a
 static interval set per mine level that two progress bars divided; that
 is one global `IntervalTimer` now, and the bars draw `Elapsed()` over
 `GetInterval()`. Windows, `prev + interval >= now` true while the window
-is open: the party and death requests, the regen-tower minimap, the skill
-window's 2 s, and the chat window's lockout, one previous tick shared by
-three windows chosen by mode; those are `Elapsed() <= interval`, read
-once per call where the old condition read the tick up to five times.
+is open: the party and death requests and the regen-tower minimap (their
+interval a constructor argument), the skill window's 2 s, and the chat
+window's lockout, one previous tick shared by three windows chosen by
+mode; those are `Elapsed() <= interval`, read once per call where the old
+chat condition read the tick three times and the call four.
 The chat window's help and auto-hide timers were `prev = GetTickCount()
 - X` at start so the first poll fires, which is `IntervalTimer::Expire()`
 (added with `ExpireBy(d)`, and tested); its two spam throttles kept
@@ -1214,17 +1217,26 @@ double click, five seconds ago" being `ExpireBy(5 s)`. With no
 `GetTickCount` call left in `VS_UI`, the non-Windows stub in
 `VS_UI_widget.h` - the second `platform_get_ticks` the fourth slice's
 review found - is deleted, and the two `srand(GetTickCount())` seeds take
-`MonotonicClock::LegacyTicks()`. The quantisation statement: the 100 ms
+`MonotonicClock::LegacyTicks()`, which on Windows is SDL's tick rather
+than kernel32's, a different epoch for a value that only has to vary
+(one of the two, in `VS_UI_Item.cpp`, sits under `#ifndef _LIB` and is
+compiled out of the library build). The quantisation statement: the 100 ms
 timers go from about 109 to 100 ms; the second-scale windows and delays
 close within a 15.6 ms step of where they did; the mining bar draws its
 fraction from a 1 ms clock instead of a stepped one; and all of it is
 bounded by the frame rate the gates are polled at. R14 goes from 186 to
-138 (48 calls). What `VS_UI` holds now is 56 `timeGetTime()` sites in the
-same two files, all of the deadline and elapsed-time shapes - quest and
-mission deadlines from server data, effect status, notices, the
-minigames' clocks - which want a `TimePoint` deadline rather than a gate
+138 (48: the 45 gates, the two seeds and the stub's definition). What
+`VS_UI` holds now is 56 `timeGetTime()` sites in three files - the two
+sources and the header's `C_VS_UI_BLOOD_BIBLE_STATUS::SetTimer` - four of
+them `srand` seeds and the rest the deadline and elapsed-time shapes:
+quest and mission deadlines from server data, effect status, notices, the
+minigames' clocks, which want a `TimePoint` deadline rather than a gate
 and are the next slice; `Client` holds 82. The conversions are verified
-by the build, and the client was not run.
+by the build on Windows and, by the review, on Linux GCC in the port
+image; the client was not run. The review found no gate whose truth
+differs from its pre-image, including the chat lockout's restructured
+`else`, whose dropped clear on the reset path every caller overwrites
+on the next line.
 
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through

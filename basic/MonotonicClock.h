@@ -149,9 +149,10 @@ public:
 	void		Restart()							{ m_tp_prev = Now(); }
 
 	// Marks the last firing as d_ago in the past, so the next Elapsed()
-	// reads at least that and a gate over it is open: the widgets'
-	// "prev = GetTickCount() - X" idiom. Expire() uses the interval, so
-	// the next Fire() is due at once.
+	// reads at least that: the widgets' "prev = GetTickCount() - X"
+	// idiom. Expire() uses the interval, so the next Fire() is due at
+	// once; a strict "Elapsed() > interval" gate opens one millisecond
+	// later, exactly as it did over the idiom.
 	void		ExpireBy(Duration d_ago)			{ m_tp_prev = Now() - d_ago; }
 	void		Expire()							{ ExpireBy(m_d_interval); }
 

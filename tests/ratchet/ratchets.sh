@@ -1126,9 +1126,11 @@ fi
 # R14 = 186 as of 2026-09-10, from 214 before the widget timers outside
 # GameCommon moved; 100 of the 186 were the two VS_UI_GameCommon sources.
 # 138 later that day: the interval and window gates in those two sources
-# moved (48 calls), the last GetTickCount in VS_UI with them; what is
-# left there is 56 timeGetTime() sites of the deadline and elapsed-time
-# shapes, and the tree's other 82 are Client's.
+# moved (45 calls), the last GetTickCount in VS_UI with them - two srand
+# seeds reseeded and the VS_UI_widget.h stub definition deleted make 48;
+# what is left there is 56 timeGetTime() sites in three files (the
+# header's SetTimer is the third), four of them srand seeds, the rest of
+# the deadline and elapsed-time shapes; the tree's other 82 are Client's.
 #----------------------------------------------------------------------
 R14_BASELINE=138
 

@@ -715,8 +715,9 @@ private:
 	};
 
 // TIMER
-	// The moments of the last five sends, oldest first: five within
-	// m_dw_rep_timer is the repeat throttle.
+	// The moments of the last five sends, oldest first: five within two
+	// seconds trips the repeat throttle (the 2 s is a literal at the
+	// check; m_dw_rep_timer is the lockout that follows).
 	std::vector<MonotonicClock::TimePoint>	m_rep_send_times;
 	// The lockout: Timer(true) starts it, and Timer() is true while the
 	// window for the mode in m_timer is still open.
