@@ -822,6 +822,68 @@ found it instead of leaving a header the peer would fill from the next packet;
 the encrypt stream, and the frame on the non-throwing path is byte for byte
 what it was.
 
+**Third span/typed-scalar slice (2026-09-10): the packet directories are
+free of raw scalar casts.** A count of `(char*)&field, size` reads and
+writes over `Client/Packet` found the shape the first two slices were
+chosen for almost gone already. `Cpackets` and `Gpackets` hold 1,315 stream
+reads and 1,315 stream writes (`iStream.read*(` and `oStream.write*(` with
+comments stripped), and every scalar among them but 20 already went through
+the typed integer `read(m_Field)`/`write(m_Field)` overloads, which route
+through `readWire`/`writeWire` since the first slice. The 20 (26 textually;
+six sit in two blocks upstream commented out) were in four packets -
+`CGAddZoneToMouse`, `CGBloodDrain`, `GCAttack` and `GCGetDamage`, the
+melee combat exchange and the drag-to-cursor pickup - and this slice
+migrates them the way `CGSkillToObject` was:
+`Coord_t`, `Dir_t` and `WORD` fields go straight to `readWire`/`writeWire`,
+and the `ObjectID_t` (a `DWORD`, `unsigned long` on MSVC and so not an
+exact-width type there, `uint32_t` off Windows) is staged through a
+`std::uint32_t` under a `static_assert` tying the two widths.
+`CGAttack`, the first slice's exemplar, staged the same way but without
+the assertion; it gains one here, so the six staging sites are uniform.
+Only the plain branch of `CGAddZoneToMouse` changes; its
+`SHUFFLE_STATEMENT_3` encrypter branch is untouched, and the other three
+never reach the encrypter. `Lpackets`, `Upackets` and `Rpackets` had none.
+The 132 other two-argument pointer-plus-length calls in the two directories
+are a different shape - `char` buffers, `std::string` and `c_str()` reads
+such as `m_Name, szName` - already bounded by the span and string overloads
+underneath, and not a scalar cast.
+
+The goldens came first, in a commit of their own, so the bytes they pin are
+the old code's. `CGAddZoneToMouse` was already under the shared encrypter
+set at all six codes. `GCAttack` and `GCGetDamage` are pinned by the server's
+`packet_combat_test.cpp` at code 0, so their goldens are byte-identical
+copies of its files, with its fixture values, and add nothing to the
+cross-repo golden diff (which is not clean: of the 136 files both repos
+pin, 134 agree and `CLLogin.code0.hex` and `GCGuildChat.code0.hex` differ,
+a pre-existing state this slice does not touch); `CGBloodDrain` has no
+server pin and its golden is client-authored. All three are
+encrypter-free, and `EncrypterFree()` holds both their write and their
+parse code-insensitive.
+`tests/unit/test_packet_combat_family_wire.cpp` adds what a golden cannot
+see: per-field round-trips under every code, the full 32-bit `ObjectID`
+through the staging in both directions (so the cast neither sign-extends nor
+narrows), and every truncation of every body, from one byte short down to
+empty, refused with the same `InsufficientDataException` the pointer/length
+read raised. The field *order* is pinned by the goldens alone - a
+symmetric swap of two same-width fields in both `read()` and `write()`
+round-trips cleanly and only the golden sees it, which the review
+demonstrated by mutation.
+
+What stays raw under `Client/Packet` after this slice is 27 live casts,
+none of them a packet field. Seven are the framing itself - the packet id,
+size and sequence byte that `SocketOutputStream::write(const Packet*)` and
+`Datagram::read`/`write(Packet*)` put in front of every body;
+`GCMoveOK.framed.code0.hex` pins the three in the stream and **nothing
+pins the four in `Datagram`**, which no test frames a packet through.
+Sixteen are `Datagram.h`'s own typed scalar overloads, and four are the
+`bool` and `char` overloads of the two input streams, which do not route
+through `readWire`. In the packet directories themselves, `CLLogin` and
+`CGConnect` keep four `(char*)m_MacAddress, 6` writes and reads of a
+`char` array, the shape a span overload fits and the second slice's commit named as
+remaining. Moving the framing belongs to a slice that reads it on its own
+terms rather than as one more packet, and that slice should pin the
+datagram header first.
+
 **Clock status (2026-09-05):** the first priority-5 slice is implemented.
 `basic/MonotonicClock.{h,cpp}` is the central adapter: `Now()` is
 `std::chrono::steady_clock` truncated to milliseconds, `Duration` is

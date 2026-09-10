@@ -97,9 +97,11 @@ how work gets verified here.
 `unit_tests` links `basic`, `SpriteLib`, `TextSystem`, `packetwire` and `gamemodel`. Covering
 something in `dxlib` or `VS_UI` means adding it to `target_link_libraries` in
 `tests/CMakeLists.txt` first. Packet tests construct real packets through the real
-factories and pin their bytes against `tests/golden/*.hex` — 54 of those files are
-byte-identical copies of the server repo's goldens, so `diff -r` of the two golden
-directories is the cross-repo wire check (`tests/unit/test_packet_goldens.cpp` has
+factories and pin their bytes against `tests/golden/*.hex` — 136 of those files are
+also pinned by the server repo and 134 are byte-identical copies of its goldens
+(measured 2026-09-10; `CLLogin.code0.hex` and `GCGuildChat.code0.hex` differ, and
+have since before this measurement), so `diff -r` of the two golden directories
+is the cross-repo wire check (`tests/unit/test_packet_goldens.cpp` has
 the recipe and the `UPDATE_GOLDENS=1` re-record rule).
 
 The **wire-layout inventory** (`tests/unit/test_wire_layout.cpp`,
@@ -164,8 +166,8 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **619 tests, 294,468 checks, 0 failed** in both Windows trees, and
-**619 tests, 294,467 checks, 0 failed** on Linux (GCC, Clang, and GCC with
+baseline: **628 tests, 294,872 checks, 0 failed** in both Windows trees, and
+**628 tests, 294,871 checks, 0 failed** on Linux (GCC, Clang, and GCC with
 `-DUSE_ASAN=ON -DUSE_UBSAN=ON`, where UBSan reports nothing) and on macOS
 (Apple Clang, with and without ASan and UBSan); the one-check
 difference is a platform-conditional test, not a failure. (The non-Windows
