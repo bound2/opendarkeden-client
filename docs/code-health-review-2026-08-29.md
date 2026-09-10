@@ -60,6 +60,8 @@ A subsystem-by-subsystem review surfaced **197 findings**. Every area graded **D
 
 ## Remediation Status
 
+**Updated 2026-09-10, later:** the Medium *Networking & Protocol* finding below — wire bytes copied raw into `bool` members — is fixed on `feature/cpp20-macaddress-span`, centrally in the two stream reads, taking the total to 88 fixed and Medium to 19 fixed / 62 open. Its red run showed the finding understated itself: beyond the sanitizer trap, MSVC compared a bool holding 0x02 unequal to `true`, so a server's non-canonical byte inverted the branch.
+
 **Updated 2026-09-10:** the Medium *Networking & Protocol* finding below — `Datagram`'s bounds checks wrapping in unsigned arithmetic, with the write bound an `Assert` that Release compiles away — is fixed on `feature/cpp20-framing-header`, taking the total to 87 fixed and Medium to 18 fixed / 63 open. Its test is a reproduction rather than a guard: on the unfixed code the wrapping read did not fail the test, it crashed the test process. The same branch found and fixed a defect this review had not seen, recorded under *Found by reading*: the datagram sent one byte of uninitialised heap memory behind every UDP packet, in the pad slot both peers count and neither reads.
 
 **Updated 2026-09-06:** the Medium *Networking & Protocol* finding below — `flush()` discarding the unsent remainder of a partial send — is fixed on `fix/flush-partial-send`, taking the total to 86 fixed and Medium to 17 fixed / 64 open. It is the same defect the adversarial review of the header-rollback fix had reported the same day as a new one, so it is recorded twice, under *Found by reading* as well as in its own entry; both now point at the same commit. It is also the first *Networking & Protocol* fix that a test binary could reach at the socket, which took one keyword: `SocketImpl::send` is virtual so a test can script a partial send, since a real one needs a congested peer.
@@ -166,6 +168,7 @@ A seventh phase (2026-09-03, branch `harden/checked-format`) returned to C19, th
 | SDL effect function tables never populated (the `EFFECT_SCREEN` entry; the rest deliberately left, see its entry) | 🟡 Medium | `6fd3f34` |
 | `flush()` discarding the unsent remainder of a partial send | 🟡 Medium | `fix/flush-partial-send` |
 | `Datagram` bounds checks that wrap, and a write bound that was an `Assert` | 🟡 Medium | `fix:` commit on `feature/cpp20-framing-header` |
+| Wire bytes copied raw into `bool` members | 🟡 Medium | `fix:` commit on `feature/cpp20-macaddress-span` |
 
 ### Fixed, not in this review: the `SendMessage` pointer-truncation family
 
@@ -1422,6 +1425,8 @@ SocketInputStream.h:65 implements `read(bool& buf)` as `read((char*)&buf, szbool
 **Failure scenario:** Server sends a monster-corpse packet with the hasHead byte set to 0xFF. The debug-asan build the project README recommends (`make debug-asan`) aborts with 'load of value 255, which is not a valid value for type bool'; optimised builds may take both branches of subsequent tests inconsistently.
 
 **Recommendation:** Read these fields as BYTE and normalise with `!= 0` before assigning to a bool, or make SocketInputStream::read(bool&) do that normalisation centrally.
+
+> ✅ **Fixed** on branch `feature/cpp20-macaddress-span` (2026-09-10), the second way: `SocketInputStream::read(bool&)` takes the byte through `readWire` as a `BYTE` and stores `b != 0`, and `SocketEncryptInputStream::readEncrypt(bool&)` reads through it and then applies the encrypter's flip, so every packet that reads a bool is covered at once and no packet file changed. Test path: lib + test, `tests/unit/test_wire_bool_char.cpp`: written first, and red on the unfixed code in a way that shows the practical half of the finding - MSVC compared the bool holding 0x02, 0x7F, 0x80 or 0xFF **unequal to `true`**, so a server's non-canonical byte did not merely trap a sanitizer, it inverted the branch. The bytes 0 and 1 are pinned unchanged under ten encrypt codes on both sides of the flip.
 
 #### 🟡 Medium -- The exchange feature's server-to-client packet has no registered factory and its read/write/size are mutually inconsistent, so any server response kills the connection.
 

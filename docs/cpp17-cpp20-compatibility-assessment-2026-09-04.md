@@ -965,6 +965,40 @@ is a second reproduction rather than a test that "passed only because
 the Assert fired"; the Release half of "live in every build" is shown by
 no test, the suite being a Debug build; and the residue count above.
 
+**Fifth span/typed-scalar slice (2026-09-10): `Client/Packet` holds no
+pointer-and-size cast of a wire scalar or array.** The twelve the fourth
+slice counted are gone. `CLLogin` and `CGConnect` read and write their
+six MAC bytes through `std::as_writable_bytes(std::span(m_MacAddress))`
+and `std::as_bytes(...)`, a `std::span<BYTE, 6>` deduced from the array's
+declaration, so the count on the wire is the array's own and not a
+literal restated beside it. `CGConnect` was pinned first, byte-identical
+to the server's golden with its fixture; `CLLogin` already was, in both
+layouts. Of the streams' eight `bool` and `char` overloads, `char` goes
+through a one-byte `std::span<char>` as `Datagram`'s does, a `bool` goes
+out as the `BYTE` 0 or 1 it holds through `writeWire`, and the encrypt
+pair keep their transform and delegate to the plain overloads.
+`tests/unit/test_wire_bool_char.cpp` pinned all eight before the move,
+byte for byte under ten codes on both sides of the encrypter's bool flip
+at 128.
+
+The two `bool` *reads* were left for a `fix:` commit of their own,
+because respelling them was not enough: they copied the wire byte into
+the bool's storage, the code-health review's open Medium on invalid bool
+representations. They now take the byte as a `BYTE` and store `b != 0`,
+and the test written first showed the finding had understated itself -
+MSVC compared the bool holding 0x02, 0x7F, 0x80 or 0xFF unequal to `true`,
+so a server's non-canonical byte inverted the branch rather than merely
+tripping a sanitizer. Every packet that reads a bool is covered by the
+one change and no packet file moved.
+
+What remains under `Client/Packet` is not wire: `SocketAPI.cpp`'s six
+casts at the OS socket calls, one debug hex dump in
+`SocketInputStream.cpp`, and `CGBloodDrain`'s six in comments. Priority
+3's boundary work in the wire library is complete; the executable side
+(`Client/PacketHandler` and the game code) reads packets through
+accessors and was never in this count. 651 tests, 297,360 checks, 0
+failed in both trees; `DarkEden` builds with 0 errors.
+
 **Clock status (2026-09-05):** the first priority-5 slice is implemented.
 `basic/MonotonicClock.{h,cpp}` is the central adapter: `Now()` is
 `std::chrono::steady_clock` truncated to milliseconds, `Duration` is

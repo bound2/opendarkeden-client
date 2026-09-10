@@ -166,8 +166,8 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **643 tests, 294,975 checks, 0 failed** in both Windows trees, and
-**643 tests, 294,974 checks, 0 failed** on Linux (GCC, Clang, and GCC with
+baseline: **651 tests, 297,360 checks, 0 failed** in both Windows trees, and
+**651 tests, 297,359 checks, 0 failed** on Linux (GCC, Clang, and GCC with
 `-DUSE_ASAN=ON -DUSE_UBSAN=ON`, where UBSan reports nothing) and on macOS
 (Apple Clang, with and without ASan and UBSan); the one-check
 difference is a platform-conditional test, not a failure. (The non-Windows
@@ -267,7 +267,7 @@ and a `<SDL2/...>` include spelling breaks the Homebrew build - it is
 
 ## Current focus
 
-`docs/code-health-review-2026-08-29.md` holds 197 findings, 87 fixed — every
+`docs/code-health-review-2026-08-29.md` holds 197 findings, 88 fixed — every
 Critical among them. In priority order:
 
 1. **Unvalidated network input is the top open risk**, and the two halves of it
