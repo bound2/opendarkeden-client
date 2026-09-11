@@ -65,9 +65,12 @@
 #include "Cpackets/CGAddZoneToInventory.h"
 #include "Cpackets/CGAddZoneToMouse.h"
 #include "Cpackets/CGAttack.h"
+#include "Cpackets/CGBloodDrain.h"
+#include "Cpackets/CGConnect.h"
 #include "Cpackets/CGDissectionCorpse.h"
 #include "Cpackets/CGDropMoney.h"
 #include "Cpackets/CGNPCAskAnswer.h"
+#include "Cpackets/CGPortCheck.h"
 #include "Cpackets/CGPickupMoney.h"
 #include "Cpackets/CGSkillToInventory.h"
 #include "Cpackets/CGSkillToNamed.h"
@@ -79,7 +82,9 @@
 #include "Cpackets/CGUsePotionFromInventory.h"
 #include "Gpackets/GCAddInstalledMineToZone.h"
 #include "Gpackets/GCAddNewItemToZone.h"
+#include "Gpackets/GCAttack.h"
 #include "Gpackets/GCDropItemToZone.h"
+#include "Gpackets/GCGetDamage.h"
 #include "Gpackets/GCGuildChat.h"
 #include "Gpackets/GCMoveError.h"
 #include "Gpackets/GCAddItemToItemVerify.h"
@@ -88,6 +93,9 @@
 #include "Gpackets/GCSystemMessage.h"
 #include "Gpackets/GCExchangeBuy.h"
 #include "Gpackets/GCExchangeList.h"
+#include "Rpackets/RCPositionInfo.h"
+
+#include "Datagram.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -467,6 +475,17 @@ void	Fill(CGSkillToNamed& p)
 	p.setTargetName("Reiot");
 }
 
+// The combat broadcasts the server pins at code 0 in
+// packet_combat_test.cpp: neither reaches the encrypter. Values are
+// the server's, so the goldens are byte-identical copies of its files.
+void	Fill(GCAttack& p)		{ p.setObjectID(0x81A2B3C4); p.setX(0x85); p.setY(0x96); p.setDir(0xA7); }
+void	Fill(GCGetDamage& p)		{ p.setObjectID(0x82A3B4C5); p.setDamage(0x86D7); }
+
+// CGBloodDrain: the client's half of the same combat exchange, not
+// pinned by the server. Encrypter-free; only the ObjectID is on the
+// wire (X/Y/Dir are commented out of read()/write() upstream).
+void	Fill(CGBloodDrain& p)		{ p.setObjectID(0x84A5B6C7); }
+
 //----------------------------------------------------------------------
 // Client-authored fixtures: the chat/guild/system-message family the
 // code-health review named among the highest-risk parsers (the layout
@@ -510,6 +529,19 @@ void	Fill(CLLogin& p)
 	const BYTE mac[6] = { 0x80, 0x91, 0xA2, 0xB3, 0xC4, 0xD5 };
 	p.setID("reiot");
 	p.setPassword("wirepin");
+	p.setMacAddress(mac);
+}
+
+// CGConnect: the server's fixture from packet_gameserver_handshake_test.cpp
+// (it builds the instance by reading a crafted image, since its copy has
+// no MAC setter; the values are the same), so the golden is a
+// byte-identical copy of its file.
+void	Fill(CGConnect& p)
+{
+	const BYTE mac[6] = { 0x8A, 0x9B, 0xAC, 0xBD, 0xCE, 0xDF };
+	p.setKey(0xB7A69584);
+	p.setPCType(PC_OUSTERS);
+	p.setPCName("GoldConnectPC");
 	p.setMacAddress(mac);
 }
 
@@ -961,6 +993,45 @@ TEST(CGSkillToNamed, RoundTripsAndMatchesGolden)
 }
 
 //----------------------------------------------------------------------
+// The melee combat exchange: CGBloodDrain up, GCAttack and GCGetDamage
+// down. The GC pair's goldens are the server's; the CG one is
+// client-authored. Pinned ahead of their typed-wire migration.
+//----------------------------------------------------------------------
+TEST(GCAttack, RoundTripsAndMatchesTheSharedGolden)
+{
+	GCAttack src, dst;
+	Fill(src);
+	CHECK(EncrypterFree(src));
+	RoundTrip(src, dst, 0);
+	CHECK_EQ(src.getObjectID(), dst.getObjectID());
+	CHECK_EQ(src.getX(), dst.getX());
+	CHECK_EQ(src.getY(), dst.getY());
+	CHECK_EQ(src.getDir(), dst.getDir());
+	ExpectGolden("GCAttack", 0, WriteBody(src, 0));
+}
+
+TEST(GCGetDamage, RoundTripsAndMatchesTheSharedGolden)
+{
+	GCGetDamage src, dst;
+	Fill(src);
+	CHECK(EncrypterFree(src));
+	RoundTrip(src, dst, 0);
+	CHECK_EQ(src.getObjectID(), dst.getObjectID());
+	CHECK_EQ(src.getDamage(), dst.getDamage());
+	ExpectGolden("GCGetDamage", 0, WriteBody(src, 0));
+}
+
+TEST(CGBloodDrain, RoundTripsAndMatchesGolden)
+{
+	CGBloodDrain src, dst;
+	Fill(src);
+	CHECK(EncrypterFree(src));
+	RoundTrip(src, dst, 0);
+	CHECK_EQ(src.getObjectID(), dst.getObjectID());
+	ExpectGolden("CGBloodDrain", 0, WriteBody(src, 0));
+}
+
+//----------------------------------------------------------------------
 // Client-authored pins: chat, guild chat, system message, login
 //----------------------------------------------------------------------
 TEST(GCSay, RoundTripsAndMatchesGolden)
@@ -1127,6 +1198,23 @@ TEST(CLLogin, NetmarbleLayoutMatchesGolden)
 	const std::vector<unsigned char> body = WriteBody(packet, 0);
 	CHECK_EQ(packet.getPacketSize(), body.size());
 	ExpectGolden("CLLogin.netmarble", 0, body);
+}
+
+// CGConnect is the game-server handshake: key, PC type, name, then the
+// six MAC bytes as a raw array. Both sides consume the same bytes, so
+// it round-trips here, and the golden is the server's. Pinned ahead of
+// the MAC array's move to a span.
+TEST(CGConnect, RoundTripsAndMatchesTheSharedGolden)
+{
+	CGConnect src, dst;
+	Fill(src);
+	CHECK(EncrypterFree(src));
+	RoundTrip(src, dst, 0);
+	CHECK_EQ(src.getKey(), dst.getKey());
+	CHECK_EQ((int)src.getPCType(), (int)dst.getPCType());
+	CHECK(src.getPCName() == dst.getPCName());
+	CHECK(std::memcmp(src.getMacAddress(), dst.getMacAddress(), 6) == 0);
+	ExpectGolden("CGConnect", 0, WriteBody(src, 0));
 }
 
 //----------------------------------------------------------------------
@@ -1331,4 +1419,52 @@ TEST(GCSkillInfo, OustersLoginFrameIncludesSkillLevelsAndPreservesNextPacket)
         CHECK(WriteBody(decoded, 0) == std::vector<unsigned char>(expected.begin() + 7, expected.end()));
         CHECK_EQ(pass == 0 ? expected.size() : 0, input.m_Stream.length());
     }
+}
+
+//----------------------------------------------------------------------
+// The datagram frame: Datagram::write(const DatagramPacket*) puts the
+// packet id and the declared size in front of the body, at their
+// szPacketID and szPacketSize widths, and sizes the datagram at
+// szPacketHeader + body - one byte more than it writes, the slot the
+// stream's sequence byte occupies. That byte is not written by this
+// code, so the goldens pin the id, the size and the body and the test
+// pins the length separately; the pad byte's value is the fix that
+// follows this pin. CGPortCheck is what the client sends the login
+// server; RCPositionInfo is what it sends and receives from a peer.
+//----------------------------------------------------------------------
+void	Fill(CGPortCheck& p)		{ p.setPCName("WirePin"); }
+void	Fill(RCPositionInfo& p)
+{
+	p.setName("Nosferatu");
+	p.setZoneID(0x8A9B);
+	p.setZoneX(0xC5);
+	p.setZoneY(0xD6);
+}
+
+// The bytes Datagram::write put down: the header it writes and the
+// body, without the unwritten pad slot.
+template <class PacketT>
+std::vector<unsigned char>	DatagramWritten(const PacketT& packet, Datagram& datagram)
+{
+	datagram.write(&packet);
+	const unsigned char* data = (const unsigned char*)datagram.getData();
+	const size_t written = szPacketID + szPacketSize + packet.getPacketSize();
+	CHECK_EQ(szPacketHeader + packet.getPacketSize(), datagram.getLength());
+	return std::vector<unsigned char>(data, data + written);
+}
+
+TEST(Datagram, CGPortCheckFrameMatchesGolden)
+{
+	CGPortCheck packet;
+	Fill(packet);
+	Datagram datagram;
+	ExpectGolden("CGPortCheck.datagram", 0, DatagramWritten(packet, datagram));
+}
+
+TEST(Datagram, RCPositionInfoFrameMatchesGolden)
+{
+	RCPositionInfo packet;
+	Fill(packet);
+	Datagram datagram;
+	ExpectGolden("RCPositionInfo.datagram", 0, DatagramWritten(packet, datagram));
 }

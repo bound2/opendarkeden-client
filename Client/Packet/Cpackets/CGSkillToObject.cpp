@@ -50,8 +50,9 @@ void CGSkillToObject::read (SocketInputStream & iStream)
 		iStream.readWire(m_SkillType);
 		iStream.readWire(m_CEffectID);
 
-		// ObjectID_t is DWORD, not one of the exact-width types readWire
-		// accepts, so it is staged in the equivalent.
+		// ObjectID_t is DWORD: uint32_t off Windows, but unsigned long on
+		// MSVC, which readWire does not accept. Stage it through the
+		// 32-bit scalar the wire carries so one spelling builds everywhere.
 		std::uint32_t targetObjectID = 0;
 		iStream.readWire(targetObjectID);
 		m_TargetObjectID = static_cast<ObjectID_t>(targetObjectID);

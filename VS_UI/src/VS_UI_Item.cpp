@@ -3,6 +3,7 @@
 #include "Client_PCH.h"
 #include "VS_UI_item.h"
 #include "VS_UI_filepath.h"
+#include "MonotonicClock.h"
 
 #ifndef _LIB
 #include "MItemManager.h"
@@ -247,7 +248,7 @@ C_VS_UI_ITEM::C_VS_UI_ITEM()
 	for (i=0; i<MAX_ITEM_CLASS; i++)
 	// edit end by Coffee 2007-6-15 13:42
 	{
-		srand(GetTickCount());
+		srand(MonotonicClock::LegacyTicks());	// a tick-sized seed, off the Win32 name
 
 		int classSize = (*g_pItemTable)[i].GetSize();
 		for (int t=0; t<classSize; t++)

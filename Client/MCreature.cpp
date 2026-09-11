@@ -5434,9 +5434,9 @@ MCreature::CheckAffectStatus(MItem* pItem)
 {
 	if(pItem->GetItemClass() == ITEM_CLASS_PET_ITEM)
 	{
-		int timeGap = (timeGetTime() - ((MPetItem *)pItem)->GetUpdateTime())/1000/60;
-		
-		if(pItem->GetCurrentDurability() <= timeGap )
+		// The pet's durability is minutes of life, counted down from the
+		// moment it was set; at zero the pet is dead and lends no status.
+		if(((MPetItem *)pItem)->GetRemainingDurability() == 0)
 		{
 			pItem->UnSetAffectStatus();
 			return;

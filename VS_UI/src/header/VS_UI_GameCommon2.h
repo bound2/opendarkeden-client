@@ -28,6 +28,8 @@
 
 #include "SXml.h"
 #include "MInventory.h"
+#include "MonotonicClock.h"
+#include "../Client/Packet/QuestStatusInfo.h"
 //-----------------------------------------------------------------------------
 // class C_VS_UI_HORN
 //
@@ -412,7 +414,8 @@ private:
 	WORD			m_topScore;
 	WORD						m_MyBestScore;
 	
-	int			m_OIdMouseX, m_OldMouseY, m_LatestClickTime;
+	int			m_OIdMouseX, m_OldMouseY;
+	MonotonicClock::IntervalTimer	m_click_timer;	// since the last click, against GetDoubleClickTime()
 	
 	
 	ButtonGroup					*m_pC_button_group;	
@@ -527,7 +530,7 @@ private:
 	C_SPRITE_PACK			m_pC_spk;
 	ButtonGroup				*m_pC_button_group;
 
-	DWORD					m_finish_time;
+	MonotonicClock::TimePoint	m_finish_time;	// when the flag war ends, from the server's remaining time
 	int						m_num_flag[3];
 	
 	enum EXEC_ID
@@ -574,7 +577,8 @@ public :
 	void	Finish();
 	bool	IsPixel(int _x, int _y);
 
-	void	SetStatus(DWORD &endtime, int &flag_s, int &flag_v, int &flag_o);
+	void	SetStatus(const MonotonicClock::TimePoint &endtime, int &flag_s, int &flag_v, int &flag_o);
+	DWORD	RemainingMillis() const;
 };
 
 //-----------------------------------------------------------------------------
@@ -618,8 +622,7 @@ private:
 	int							m_selected;
 
 // TIMER
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_timer_tickcount;
+	MonotonicClock::IntervalTimer	m_window_timer;	// as C_VS_UI_REQUEST_PARTY's
 
 public:
 	C_VS_UI_REGEN_TOWER_MINIMAP(DWORD timer);
@@ -1396,22 +1399,14 @@ public :
 class C_VS_UI_QUEST_MANAGER 
 {
 public:
-	struct _GMissionInfo{
-		std::string		szMissionTitle;
-		std::string		m_StrArg;
-		DWORD			m_NumArg;
-		BYTE			bStatus;
-		BYTE			bCondition;	// 어느 조건에 있는가 0 : Happen, 1 : Complete, 2 : Fail, 3 : Reward
-		WORD			bIndex;		// 해당 조건의 몇번째 element인가
-		DWORD			dwTimeLimit;// 시간 제한 퀘스트일 경우 처음 남음 시간 세팅 
-	};
-	struct _GQuestInfo{
-		DWORD			dwQuestID;
-		BYTE			bStatus;
-		std::string		szQuestTitle;
-		std::string		szQuestDescription;
-		std::vector<_GMissionInfo*> vMissionList;
-	};
+	// The quest and mission records are the wire layer's UI_GQuestInfo and
+	// UI_GMissionInfo (Client/Packet/QuestStatusInfo.h). They used to be
+	// redeclared here field for field, and the handlers handed one to
+	// SetQuestManagerInfo through a void* that this class cast to its own
+	// copy - two definitions that had to agree in layout with nothing to
+	// say so. They are one definition now.
+	typedef UI_GMissionInfo	_GMissionInfo;
+	typedef UI_GQuestInfo	_GQuestInfo;
 
 	struct _GQuestExcuteElement{
 		DWORD qID;
@@ -1903,8 +1898,10 @@ private :
 
 	int					m_GambleMode;
 	DWORD				m_dwSpeed;
-	DWORD				m_dwCurrentTime;
-	DWORD				m_dwOutCurrentTime;
+	// The gamble spin: a step every m_dwSpeed ms (growing), the outline
+	// every 200 ms; both strict "prev + X < now" gates.
+	MonotonicClock::IntervalTimer	m_spin_timer;
+	MonotonicClock::IntervalTimer	m_outline_timer;
 	BYTE				m_OutLinePositon;
 public :
 	C_VS_UI_POWER_JJANG();

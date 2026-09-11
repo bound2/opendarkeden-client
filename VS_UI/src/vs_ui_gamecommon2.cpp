@@ -1157,7 +1157,7 @@ void	C_VS_UI_IMAGE_NOTICE::AddNotice(const char* name, DWORD id)
 	SNotice *notice = new SNotice;
 
 	notice->m_Name = name;
-	notice->m_Time = timeGetTime();
+	notice->m_Time = MonotonicClock::Now();
 	notice->m_GiftName = LoadInfo( id );
 	notice->m_Alpha	=	32;
 
@@ -1320,7 +1320,7 @@ void	C_VS_UI_IMAGE_NOTICE::Process()
 	if(!m_NoticeList.empty())
 	{
 		SNotice *pNotice = m_NoticeList[0];
-		if ( timeGetTime() - pNotice->m_Time > m_CloseTime )
+		if ( MonotonicClock::Now() - pNotice->m_Time > MonotonicClock::Millis(m_CloseTime) )
 		{
 			pNotice->m_Alpha--;			
 		}
@@ -1883,12 +1883,14 @@ void	C_VS_UI_REQUEST_RESURRECT::Show()
 				
 				if( m_ResurrectButton[i].m_Delay > 0 )
 				{
-					DWORD endTime = m_ResurrectButton[i].m_Delay + m_ResurrectButton[i].m_Time;
-					
-					if( endTime > timeGetTime() )
+					const MonotonicClock::TimePoint tp_now = MonotonicClock::Now();
+					const MonotonicClock::TimePoint endTime = m_ResurrectButton[i].m_Time + MonotonicClock::Millis(m_ResurrectButton[i].m_Delay);
+
+					if( endTime > tp_now )
 					{
-						int percent = min(100, 
-							(endTime - timeGetTime())*100/m_ResurrectButton[i].m_Delay );
+						// The fraction of the delay still to run, in whole percent.
+						int percent = min(100,
+							(int)((endTime - tp_now).count()*100/m_ResurrectButton[i].m_Delay) );
 
 						if(percent)
 						{
@@ -1949,7 +1951,7 @@ void	C_VS_UI_REQUEST_RESURRECT::Show()
 void	C_VS_UI_REQUEST_RESURRECT::SetDelay( RESURRECT_MODE mode, int delay )
 {
 	m_ResurrectButton[ mode ].m_Delay = delay;
-	m_ResurrectButton[ mode ].m_Time = timeGetTime();
+	m_ResurrectButton[ mode ].m_Time = MonotonicClock::Now();
 }
 
 //-----------------------------------------------------------------------------
@@ -2009,12 +2011,14 @@ void C_VS_UI_REQUEST_RESURRECT::Process()
 {
 	for(int i = 0; i < RESURRECT_MODE_MAX; i++ )
 	{
-		if( m_ResurrectButton[i].m_Enable )
+		if( m_ResurrectButton[i].m_Enable && m_ResurrectButton[i].m_Delay > 0 )
 		{
-			DWORD endTime = m_ResurrectButton[i].m_Delay + m_ResurrectButton[i].m_Time;
-			
-			if( endTime <= timeGetTime() )
-				m_ResurrectButton[i].m_Delay = 0;		
+			// The same guard Show() has: a negative delay would land the end
+			// 49.7 days ahead through Millis(DWORD) and never clear.
+			const MonotonicClock::TimePoint endTime = m_ResurrectButton[i].m_Time + MonotonicClock::Millis(m_ResurrectButton[i].m_Delay);
+
+			if( endTime <= MonotonicClock::Now() )
+				m_ResurrectButton[i].m_Delay = 0;
 		}
 	}
 }
@@ -6048,7 +6052,7 @@ void	C_VS_UI_FINDING_MINE::NewGame(GAMELEVEL level)
 	Button *pButton = m_pC_button_group->GetButton(START_ID);
 	pButton->x = w/2-pButton->w/2;
 
-	srand(timeGetTime());
+	srand(MonotonicClock::LegacyTicks());	// a tick-sized seed
 	
 	int i, j, k;
 
@@ -7907,7 +7911,7 @@ void	C_VS_UI_ARROW_TILE::InitGame()
 	else
 		m_Tile.clear();
 
-	srand(timeGetTime() );
+	srand(MonotonicClock::LegacyTicks());	// a tick-sized seed
 	m_GameCode = rand() % 50000;
 	
 	srand(m_GameCode);
@@ -8088,7 +8092,8 @@ C_VS_UI_CRAZY_MINE::C_VS_UI_CRAZY_MINE()
 	m_bCanStart = false;
 	m_OIdMouseX = -1;
 	m_OldMouseY = -1;
-	m_LatestClickTime = 0;
+	// No click yet: a first click must not read as a double click.
+	m_click_timer.ExpireBy(MonotonicClock::Millis(5000));
 }
 
 C_VS_UI_CRAZY_MINE::~C_VS_UI_CRAZY_MINE()
@@ -8247,7 +8252,7 @@ bool	C_VS_UI_CRAZY_MINE::MouseControl(UINT message, int _x, int _y)
 		break;
 
 	case M_LEFTBUTTON_DOWN:
-		if( m_OIdMouseX == _x && m_OldMouseY == _y && (GetTickCount() - m_LatestClickTime) < GetDoubleClickTime() )
+		if( m_OIdMouseX == _x && m_OldMouseY == _y && m_click_timer.Elapsed() < MonotonicClock::Millis(GetDoubleClickTime()) )
 		{
 			if( _x > 30 && _y > 60 )
 			{
@@ -8262,7 +8267,7 @@ bool	C_VS_UI_CRAZY_MINE::MouseControl(UINT message, int _x, int _y)
 		}
 		m_OIdMouseX = _x;
 		m_OldMouseY = _y;
-		m_LatestClickTime = GetTickCount();
+		m_click_timer.Restart();
 		break;
 //	case M_LB_DOUBLECLICK:
 //		break;
@@ -8501,7 +8506,7 @@ void C_VS_UI_CRAZY_MINE::InitMineBoard(int size, int mine)
 	m_topScore = 0;
 	m_MyBestScore = 0;
 	m_topName ="";
-	srand(timeGetTime());
+	srand(MonotonicClock::LegacyTicks());	// a tick-sized seed
 
 	m_MineBoardSize = size;
 	if ( mine == -1 )
@@ -8676,7 +8681,8 @@ void C_VS_UI_CRAZY_MINE::ActionDoubleClick(int x, int y)
 		}
 	}
 
-	m_LatestClickTime = GetTickCount() - 5000;				// -_- 5초전으로 해놓는당~
+	// Five seconds ago, so the next click cannot read as a double click.
+	m_click_timer.ExpireBy(MonotonicClock::Millis(5000));
 
 	CheckSuccess();
 }
@@ -9107,11 +9113,11 @@ C_VS_UI_STATUS_CTF::C_VS_UI_STATUS_CTF()
 		gpC_global_resource->m_pC_assemble_box_button_spk->GetHeight(C_GLOBAL_RESOURCE::AB_BUTTON_PUSHPIN), 
 		PUSHPIN_ID, this, C_GLOBAL_RESOURCE::AB_BUTTON_PUSHPIN));
 
-	m_finish_time = 0;
+	m_finish_time = MonotonicClock::TimePoint();
 	for(int i =0;i<3;i++)
-		m_num_flag[i] = 0;	
+		m_num_flag[i] = 0;
 #ifndef _LIB
-	m_finish_time = timeGetTime() + 2*20*60*1000;
+	m_finish_time = MonotonicClock::Now() + MonotonicClock::Millis(2*20*60*1000);
 
 	m_num_flag[0] = rand()%100;
 	m_num_flag[1] = rand()%100;
@@ -9261,7 +9267,7 @@ bool	C_VS_UI_STATUS_CTF::MouseControl(UINT message, int _x, int _y)
 		{
 			if( _x > rectRemainTime.left && _x < rectRemainTime.right && _y > rectRemainTime.top && _y < rectRemainTime.bottom )
 			{
-				DWORD RemainTime = m_finish_time - timeGetTime();
+				const DWORD RemainTime = RemainingMillis();
 				wsprintf( szBuffer,"%s : %d:%d:%d",(*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_LEFT_TIME].GetString() ,
 					((RemainTime/1000)/60)/60, ((RemainTime/1000)/60)%60,(RemainTime/1000)%60);
 
@@ -9355,9 +9361,9 @@ void	C_VS_UI_STATUS_CTF::Show()
 		if( m_num_flag[0] == m_num_flag[1] && m_num_flag[1] == m_num_flag[2] )
 			topscore = -1;
 		
-		// 남은시간 출력
+		// The remaining time.
 		char szBuffer[64],min[5],sec[5];
-		DWORD RemainTime = m_finish_time - timeGetTime();
+		DWORD RemainTime = RemainingMillis();
 		if( (RemainTime/1000)/60/60 > 3 )
 			RemainTime = 0;
 		
@@ -9450,13 +9456,28 @@ bool	C_VS_UI_STATUS_CTF::IsPixel(int _x, int _y)
 	return m_pC_spk.IsPixel(SCR2WIN_X(_x),SCR2WIN_Y(_y),MAIN_WINDOW) | (m_pC_button_group->IsInRect(_x - x, _y -y)!=NULL);
 }
 
-void	C_VS_UI_STATUS_CTF::SetStatus(DWORD &endtime, int &flag_s, int &flag_v, int &flag_o)
+void	C_VS_UI_STATUS_CTF::SetStatus(const MonotonicClock::TimePoint &endtime, int &flag_s, int &flag_v, int &flag_o)
 {
 	m_num_flag[0] = flag_s;
 	m_num_flag[1] = flag_v;
 	m_num_flag[2] = flag_o;
 
 	m_finish_time = endtime;
+}
+
+//-----------------------------------------------------------------------------
+// Milliseconds until the war ends, 0 once it has. The old
+// "m_finish_time - timeGetTime()" went round to 49.7 days once the end
+// had passed; Show()'s "four hours or more reads as none" guard caught
+// that, and the hover tooltip in MouseControl(), which had no guard,
+// printed it.
+//-----------------------------------------------------------------------------
+DWORD	C_VS_UI_STATUS_CTF::RemainingMillis() const
+{
+	const MonotonicClock::TimePoint tp_now = MonotonicClock::Now();
+	if( m_finish_time <= tp_now )
+		return 0;
+	return (DWORD)(m_finish_time - tp_now).count();
 }
 
 //-----------------------------------------------------------------------------
@@ -9474,9 +9495,9 @@ C_VS_UI_REGEN_TOWER_MINIMAP::C_VS_UI_REGEN_TOWER_MINIMAP(DWORD timer)
 	Set( (g_GameRect.right-m_image_spk.GetWidth(MINIMAP))/2, (g_GameRect.bottom - m_image_spk.GetHeight() ) /2, m_image_spk.GetWidth(MINIMAP), m_image_spk.GetHeight(MINIMAP));
 	
 	//timer
-	m_dw_timer_tickcount = timer;
+	m_window_timer.SetIntervalMillis(timer);
 	m_selected = -1;
-	Timer(true);	
+	Timer(true);
 }
 
 //-----------------------------------------------------------------------------
@@ -9651,13 +9672,13 @@ bool	C_VS_UI_REGEN_TOWER_MINIMAP::Timer(bool reset)
 {
 	if(reset)
 	{
-		m_dw_prev_tickcount = GetTickCount();
+		m_window_timer.Restart();
 	}
-	else if(m_dw_prev_tickcount+m_dw_timer_tickcount >= GetTickCount())
+	else if(m_window_timer.Elapsed() <= m_window_timer.GetInterval())
 	{
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -13963,7 +13984,7 @@ C_VS_UI_QUEST_MANAGER::C_VS_UI_QUEST_MANAGER()
 	Temp1_sub1->bCondition = 2;
 	Temp1_sub1->bIndex = 1;
 	Temp1_sub1->m_NumArg = 2;
-	Temp1_sub1->dwTimeLimit = 0;
+	Temp1_sub1->bTimeLimited = false;
 	Temp1->vMissionList.push_back(Temp1_sub1);
 	SetQuestManagerInfo((void*)Temp1);
 
@@ -14217,9 +14238,10 @@ bool	C_VS_UI_QUEST_MANAGER::SetQuestManagerInfo(void* pVoid)
 					if(NULL != pChildElement2)
 					{
 						TempMission->szMissionTitle =  (char*)pChildElement2->GetText().c_str();
-						if(0 == stricmp(pChildElement2->GetName().c_str(),"Time")) // 시간 제한이 있는 미션이면
+						if(0 == stricmp(pChildElement2->GetName().c_str(),"Time")) // a mission with a time limit
 						{
-							TempMission->dwTimeLimit = timeGetTime();
+							TempMission->bTimeLimited = true;
+							TempMission->tpTimeLimitStart = MonotonicClock::Now();
 						}
 
 					}
@@ -14325,9 +14347,10 @@ bool	C_VS_UI_QUEST_MANAGER::UpdateQuestInfo(_GQuestInfo *QInfo, int nType)
 							if(NULL != pChildElement2)
 							{
 								TempMission->szMissionTitle =  (char*)pChildElement2->GetText().c_str();
-								if(0 == stricmp(pChildElement2->GetName().c_str(),"Time")) // 시간 제한이 있는 미션이면
+								if(0 == stricmp(pChildElement2->GetName().c_str(),"Time")) // a mission with a time limit
 								{
-									TempMission->dwTimeLimit = timeGetTime();
+									TempMission->bTimeLimited = true;
+									TempMission->tpTimeLimitStart = MonotonicClock::Now();
 								}
 
 							}
@@ -15869,7 +15892,8 @@ C_VS_UI_QUEST_MISSION::C_VS_UI_QUEST_MISSION(C_SPRITE_PACK* spr)
 	C_VS_UI_QUEST_MANAGER::_GMissionInfo *TempInfo = new C_VS_UI_QUEST_MANAGER::_GMissionInfo ;
 	TempInfo->szMissionTitle = "일이삼사오육칠팔%s:%d";
 	TempInfo->bStatus = CURRENT;
-	TempInfo->dwTimeLimit = timeGetTime() + (60000);
+	TempInfo->bTimeLimited = true;
+	TempInfo->tpTimeLimitStart = MonotonicClock::Now() + MonotonicClock::Millis(60000);
 	m_QuestMissionInfo.push_back(TempInfo);
 	C_VS_UI_QUEST_MANAGER::_GMissionInfo *TempInfo2 = new C_VS_UI_QUEST_MANAGER::_GMissionInfo ;
 	TempInfo2->szMissionTitle = "바보를 구하라";
@@ -16029,19 +16053,23 @@ void	C_VS_UI_QUEST_MISSION::Show()
 			if(TempInfo != NULL)
 			{
 				DWORD TempValue = TempInfo->m_NumArg;
-				if(TempInfo->dwTimeLimit)
+				if(TempInfo->bTimeLimited)
 				{
-					DWORD CurrentTime = timeGetTime() ;
-					if(TempInfo->dwTimeLimit < CurrentTime)
-						TempValue = TempInfo->m_NumArg - ((CurrentTime - TempInfo->dwTimeLimit) / 60000);
+					// Minutes left: the limit less the whole minutes since the
+					// mission started, a DWORD that wraps once the limit has run
+					// out, as it always did. Started at or after now reads as
+					// none, as the old strict "start < now" did.
+					const MonotonicClock::TimePoint CurrentTime = MonotonicClock::Now();
+					if(TempInfo->tpTimeLimitStart < CurrentTime)
+						TempValue = TempInfo->m_NumArg - (DWORD)((CurrentTime - TempInfo->tpTimeLimitStart).count() / 60000);
 					else
 					{
 						TempValue = 0;
 					}
 
-					if(TempInfo->bStatus == SUCCESS || TempInfo->bStatus == FAIL) // 성공 혹은 실패 일때
+					if(TempInfo->bStatus == SUCCESS || TempInfo->bStatus == FAIL) // success or failure
 					{
-						TempInfo->dwTimeLimit = 0;
+						TempInfo->bTimeLimited = false;
 						TempInfo->m_NumArg = 0;
 					}
 				}
@@ -17808,16 +17836,15 @@ void	C_VS_UI_POWER_JJANG::Show()
 
 	if(m_GambleMode)
 	{
-		DWORD TempTime = timeGetTime();
-		if(m_dwCurrentTime + m_dwSpeed < TempTime)
+		if(m_spin_timer.Elapsed() > MonotonicClock::Millis(m_dwSpeed))
 		{
 			m_GambleMode --;
-			m_dwCurrentTime = TempTime;
+			m_spin_timer.Restart();
 			m_dwSpeed += 2;
 		}
-		if(m_dwOutCurrentTime + 200 < TempTime)
+		if(m_outline_timer.Elapsed() > MonotonicClock::Millis(200))
 		{
-			m_dwOutCurrentTime = TempTime;
+			m_outline_timer.Restart();
 			if(0 == m_OutLinePositon) m_OutLinePositon = 0xff;
 			m_OutLinePositon--;
 		}
@@ -18075,7 +18102,8 @@ void	C_VS_UI_POWER_JJANG::Run(id_t id)
 
 			m_GambleMode = 40;
 			m_dwSpeed = 20;
-			m_dwOutCurrentTime = m_dwCurrentTime = timeGetTime();
+			m_spin_timer.Restart();
+			m_outline_timer.Restart();
 			m_OutLinePositon = 0xff;
 		}
 		else

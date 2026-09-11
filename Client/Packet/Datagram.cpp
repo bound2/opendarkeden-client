@@ -51,18 +51,55 @@ Datagram::~Datagram ()
 //////////////////////////////////////////////////////////////////////
 void Datagram::read ( char * buf , uint len )
 {
+	// The bound is checked before the span exists: a span over [buf,
+	// buf + len) with a len the buffer cannot hold is not a valid range.
+	ensureReadable( len );
+	read( std::span<char>( buf , len ) );
+}
+
+//////////////////////////////////////////////////////////////////////
+// The two bounds, in the one form that is safe whatever the offsets
+// hold: neither half can wrap, and an offset past the length - which
+// nothing produces, but nothing enforces either - refuses rather than
+// admits. The old `offset + len > length` wrapped for a len near
+// UINT_MAX and passed (code-health review, Medium).
+//////////////////////////////////////////////////////////////////////
+void Datagram::ensureReadable ( uint len ) const
+{
+	if ( len > m_Length || m_InputOffset > m_Length - len )
+		throw InsufficientDataException("Datagram read");
+}
+
+void Datagram::ensureWritable ( uint len ) const
+{
+	// A runtime check in every build, where an Assert vanished under
+	// NDEBUG and let a body outgrow its buffer on the heap.
+	if ( len > m_Length || m_OutputOffset > m_Length - len )
+		throw Error("Datagram write past the end of the buffer");
+}
+
+//////////////////////////////////////////////////////////////////////
+// read raw bytes into a bounded destination: the one read every other
+// read() reaches, and the one place the bound is checked.
+//////////////////////////////////////////////////////////////////////
+void Datagram::read ( std::span<char> buf )
+{
 	__BEGIN_TRY
 
-	// boundary check
-	//Assert( m_InputOffset + len <= m_Length );
-	if (m_InputOffset + len > m_Length)
-		throw InsufficientDataException("Datagram read");
+	const uint len = (uint)buf.size();
 
-	memcpy( buf , &m_Data[m_InputOffset] , len );
+	ensureReadable( len );
+
+	memcpy( buf.data() , &m_Data[m_InputOffset] , len );
 
 	m_InputOffset += len;
 
 	__END_CATCH
+}
+
+void Datagram::read ( std::span<std::byte> buf )
+{
+	read( std::span<char>( reinterpret_cast<char*>( buf.data() ) , buf.size() ) );
 }
 
 
@@ -73,10 +110,7 @@ void Datagram::read ( std::string & str , uint len )
 {
 	__BEGIN_TRY
 
-	// boundary check
-	//Assert( m_InputOffset + len <= m_Length );
-	if (m_InputOffset + len > m_Length )
-		throw InsufficientDataException("Datagram read");
+	ensureReadable( len );
 
 	str.reserve(len);
 	str.assign( &m_Data[m_InputOffset] , len );
@@ -113,8 +147,8 @@ void Datagram::read ( DatagramPacket * & pPacket )
 	PacketSize_t packetSize;
 
 	// initialize packet header
-	read( (char*)&packetID , szPacketID );
-	read( (char*)&packetSize , szPacketSize );
+	readWire( packetID );
+	readWire( packetSize );
 
 	cout << "DatagramPacket I  D : " << packetID;
 
@@ -140,11 +174,11 @@ void Datagram::read ( DatagramPacket * & pPacket )
 
 	// 데이터그램의 크기가 패킷의 크기보다 작을 경우
 	if ( m_Length < szPacketHeader + packetSize )
-		throw Error("데이터그램 패킷이 한번에 읽혀지지 않았습니다.");
+		throw Error("datagram shorter than the packet it declares: not read whole");
 
 	// 데이터그램의 크기가 패킷의 크기보다 클 경우
 	if ( m_Length > szPacketHeader + packetSize )
-		throw Error("여러 개의 데이터그램 패킷이 한꺼번에 읽혀졌습니다.");
+		throw Error("datagram longer than the packet it declares: several read at once");
 
 	// 패킷을 생성한다.
 	pPacket = (DatagramPacket*)g_pPacketFactoryManager->createPacket( packetID );
@@ -167,16 +201,33 @@ void Datagram::read ( DatagramPacket * & pPacket )
 //////////////////////////////////////////////////////////////////////
 void Datagram::write ( const char * buf , uint len )
 {
+	// See read(char*, uint): the bound comes before the span.
+	ensureWritable( len );
+	write( std::span<const char>( buf , len ) );
+}
+
+//////////////////////////////////////////////////////////////////////
+// write raw bytes from a bounded source: the one write every other
+// write() reaches, and the one place the bound is checked.
+//////////////////////////////////////////////////////////////////////
+void Datagram::write ( std::span<const char> buf )
+{
 	__BEGIN_TRY
 
-	// boundary check
-	Assert( m_OutputOffset + len <= m_Length );
+	const uint len = (uint)buf.size();
 
-	memcpy( &m_Data[m_OutputOffset] , buf , len );
+	ensureWritable( len );
+
+	memcpy( &m_Data[m_OutputOffset] , buf.data() , len );
 
 	m_OutputOffset += len;
 
 	__END_CATCH
+}
+
+void Datagram::write ( std::span<const std::byte> buf )
+{
+	write( std::span<const char>( reinterpret_cast<const char*>( buf.data() ) , buf.size() ) );
 }
 
 
@@ -185,19 +236,16 @@ void Datagram::write ( const char * buf , uint len )
 //
 // *CAUTION*
 //
-// 모든 write()들이 write(const char*,uint)를 사용하므로, m_OutputOffset
-// 을 변경해줄 필요는 없다.
+// Every write() goes through write(std::span<const char>), which
+// advances m_OutputOffset and checks the bound, so neither is done here.
 //
 //////////////////////////////////////////////////////////////////////
 void Datagram::write ( const std::string & str )
 {
 	__BEGIN_TRY
 
-	// boundary check
-	Assert( m_OutputOffset + str.size() <= m_Length );
-
 	// write std::string body
-	write( str.c_str() , str.size() );
+	write( std::span<const char>( str.data() , str.size() ) );
 
 	__END_CATCH
 }
@@ -222,15 +270,25 @@ void Datagram::write ( const DatagramPacket * pPacket )
 	PacketID_t packetID = pPacket->getPacketID();
 	PacketSize_t packetSize = pPacket->getPacketSize();
 
-	// 데이타그램의 버퍼를 적절한 크기로 설정한다.
+	// Size the buffer for the declared body and the pad behind it.
 	setData( szPacketHeader + packetSize );
 
-	// 패킷 헤더를 설정한다.
-	write( (char*)&packetID , szPacketID );
-	write( (char*)&packetSize , szPacketSize );
+	// Write the packet header. The sequence slot that follows the size
+	// on the stream is not written here; it is the zero pad setData left
+	// behind the body.
+	writeWire( packetID );
+	writeWire( packetSize );
 
-	// 패킷 바디를 설정한다.
+	// Write the packet body, and hold it to the size the header declared.
+	// The buffer has one byte more than the body - the pad - so the
+	// bound alone would let a body one byte over its declaration eat the
+	// pad and go out looking honest; a body that writes less would send
+	// zeros the peer parses as fields. Either is the packet class
+	// disagreeing with itself, and neither goes on the wire.
+	const uint bodyStart = m_OutputOffset;
 	pPacket->write( *this );
+	if ( m_OutputOffset - bodyStart != packetSize )
+		throw Error("datagram body disagrees with the size its packet declares");
 
 	__END_CATCH
 }
@@ -265,8 +323,11 @@ void Datagram::setData ( uint len )
 
 	Assert( m_Data == NULL );
 
+	// Zero-filled: write(const DatagramPacket*) sizes the buffer at
+	// szPacketHeader + body but writes one byte less, and that pad goes
+	// on the wire. The server writes it as zero for the same reason.
 	m_Length = len;
-	m_Data = new char[ m_Length ];
+	m_Data = new char[ m_Length ]();
 
 	__END_CATCH
 }

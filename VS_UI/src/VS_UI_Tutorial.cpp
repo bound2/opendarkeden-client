@@ -1148,14 +1148,8 @@ C_VS_UI_COMPUTER::C_VS_UI_COMPUTER():C_VS_UI_DESC()
 	if(LoadTree(TXT_TUTORIAL_COMPUTER) == false)return;
 
 	// TIMER
-
-	DWORD currentTime = GetTickCount();
-
-	m_dw_prev_tickcount = currentTime;
-	
-	m_dw_millisec = 50;
-
-
+	m_interval_timer.Restart();
+	m_interval_timer.SetIntervalMillis(50);
 }
 
 //-----------------------------------------------------------------------------
@@ -1776,14 +1770,10 @@ void	C_VS_UI_COMPUTER::Timer(bool reset)
 	if(reset)
 	{
 		m_timer = false;
-		m_dw_prev_tickcount = GetTickCount();
+		m_interval_timer.Restart();
 	}
-	else if(m_dw_prev_tickcount+m_dw_millisec <= GetTickCount())
-	{
-		m_timer = true;
-		m_dw_prev_tickcount = GetTickCount();
-	}
-	else m_timer = false;
+	else
+		m_timer = m_interval_timer.Fire();
 
 }
 /*

@@ -3747,7 +3747,9 @@ void	UI_RunOtherInfo(MCreature *pCreature)
 			if(pPetItem != NULL)
 			{
 				PETINFO petInfo;
-				petInfo.HP = pPetItem->GetCurrentDurability();
+				// The pet window's "food remaining" is the countdown, the same
+				// figure the item's description panel shows.
+				petInfo.HP = pPetItem->GetRemainingDurability();
 				petInfo.ATTR = pPetItem->GetEnchantLevel();
 				petInfo.ATTR_VALUE = pPetItem->GetSilver();
 				petInfo.LEVEL = pPetItem->GetNumber();
@@ -4545,7 +4547,7 @@ void		UI_MiniGameScores(GCMiniGameScores* pPacket)
 	}	
 }
 
-void		UI_SetCTFStatus( DWORD endTime, int flag_s, int flag_v, int flag_o )
+void		UI_SetCTFStatus( const MonotonicClock::TimePoint &endTime, int flag_s, int flag_v, int flag_o )
 {
 	gC_vs_ui.SetCTFStatus( endTime, flag_s, flag_v, flag_o );
 }

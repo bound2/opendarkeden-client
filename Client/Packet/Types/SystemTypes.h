@@ -63,6 +63,10 @@ typedef unsigned long ulong;
 // built-in type size
 //////////////////////////////////////////////////////////////////////////////
 const unsigned int szbool   = sizeof(bool);
+// A bool crosses the wire as exactly one byte (SocketInputStream::read(bool&)
+// and SocketOutputStream::write(bool) move a BYTE), and the packet size
+// functions still count it as szbool; the two agree only while this holds.
+static_assert(sizeof(bool) == 1, "a wire bool is one byte");
 const unsigned int szchar   = sizeof(char);
 const unsigned int szshort  = sizeof(short);
 const unsigned int szint    = sizeof(int);

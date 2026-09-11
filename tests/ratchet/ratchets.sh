@@ -1107,6 +1107,51 @@ else
 fi
 
 #----------------------------------------------------------------------
+# R14 - live GetTickCount()/timeGetTime() calls under Client and VS_UI.
+#
+# The 32-bit millisecond tick the client is written against wraps every
+# 49.7 days, and every "previous + delay <= now" over it fires early or
+# stalls across the wrap (basic/MonotonicClock.h says how). The clocks
+# work of the assessment (priority 5) moves the readers onto
+# MonotonicClock one subsystem at a time, and this holds what is left:
+# calls of the two functions in code, counted by
+# tests/tools/count_tick_reads.pl with comments and string literals
+# removed by a character-level scanner, because a regex strip of block
+# comments reads "//*pDest" as an opener and swallowed live code - the
+# clocks slices' first counts were low by that. basic/ is outside the
+# count: its three hits are Platform.h's definitions. Definitions and
+# #if-disabled code count like calls: the 186 includes the non-Windows
+# GetTickCount shim in VS_UI_widget.h.
+#
+# R14 = 186 as of 2026-09-10, from 214 before the widget timers outside
+# GameCommon moved; 100 of the 186 were the two VS_UI_GameCommon sources.
+# 138 later that day: the interval and window gates in those two sources
+# moved (45 calls), the last GetTickCount in VS_UI with them - two srand
+# seeds reseeded and the VS_UI_widget.h stub definition deleted make 48;
+# what is left there is 56 timeGetTime() sites in three files (the
+# header's SetTimer is the third), four of them srand seeds, the rest of
+# the deadline and elapsed-time shapes; the tree's other 82 are Client's.
+# 113 later still: the deadlines set and read within VS_UI moved to
+# TimePoint - the quest status countdowns, the blood bible timer, the
+# image notice, the resurrect delays, the flag-war end (with its
+# handler in Client), the timed missions, the gamble spin, and four
+# srand seeds (25 calls); VS_UI holds 33, the minigames' clocks and
+# the three deadlines the executable sets, and Client 80.
+#----------------------------------------------------------------------
+R14_BASELINE=113
+
+if [ ! -f tests/tools/count_tick_reads.pl ]; then
+	echo "FAIL R14: tests/tools/count_tick_reads.pl is missing"
+	FAIL=1
+elif [ "$(find Client VS_UI \( -name '*.cpp' -o -name '*.h' \) 2>/dev/null | wc -l)" -eq 0 ]; then
+	echo "FAIL R14: no C++ sources enumerated - a zero here would measure nothing"
+	FAIL=1
+else
+	R14=$(perl tests/tools/count_tick_reads.pl Client VS_UI | tail -1 | awk '{print $1}')
+	check "R14 (live GetTickCount/timeGetTime calls under Client and VS_UI)" "$R14" "$R14_BASELINE"
+fi
+
+#----------------------------------------------------------------------
 # R6 was here for exactly one slice, and retired by doing its job.
 #
 # Task 5.1 stubbed SendBugReport in tests/stubs/client_globals.cpp so

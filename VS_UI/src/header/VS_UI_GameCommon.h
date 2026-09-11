@@ -18,6 +18,7 @@
 
 #include "VS_UI_Base.h"
 #include "VS_UI_util.h"
+#include "MonotonicClock.h"
 #include "VS_UI_Description.h"
 #include "VS_UI_ExtraDialog.h"
 #include "VS_UI_title.h" // for S_SLOT
@@ -112,8 +113,9 @@ private:
 	std::string					m_name;
 
 // TIMER
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_timer_tickcount;
+	// Timer(false) is true while the request's window is still open:
+	// less than the interval since Timer(true) (basic/MonotonicClock.h).
+	MonotonicClock::IntervalTimer	m_window_timer;
 
 	bool	Timer(bool reset = false);
 
@@ -169,8 +171,7 @@ private:
 	bool							m_bl_focused;
 
 // TIMER
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_timer_tickcount;
+	MonotonicClock::IntervalTimer	m_window_timer;	// as C_VS_UI_REQUEST_PARTY's
 
 public:
 	C_VS_UI_REQUEST_DIE(DWORD timer);
@@ -502,7 +503,7 @@ class PAPERING_HISTORY
 {
 	public:
 	std::string			m_string;
-	std::vector<DWORD>	m_timer;
+	std::vector<MonotonicClock::TimePoint>	m_timer;	// when each send of this line happened, newest last
 };
 
 //-----------------------------------------------------------------------------
@@ -714,16 +715,20 @@ private:
 	};
 
 // TIMER
-	std::vector<DWORD>			m_dw_rep_tickcount;
-	std::vector<DWORD>			m_dw_papering_tickcount;
-	DWORD						m_dw_prev_tickcount;
+	// The moments of the last five sends, oldest first: five within two
+	// seconds trips the repeat throttle (the 2 s is a literal at the
+	// check; m_dw_rep_timer is the lockout that follows).
+	std::vector<MonotonicClock::TimePoint>	m_rep_send_times;
+	// The lockout: Timer(true) starts it, and Timer() is true while the
+	// window for the mode in m_timer is still open.
+	MonotonicClock::IntervalTimer	m_lockout_timer;
 	DWORD						m_dw_zonechat_timer;
 	DWORD						m_dw_rep_timer;
 	DWORD						m_dw_papering_timer;
 	DWORD						m_dw_help_timer;
-	DWORD						m_dw_help_prev_tickcount;
+	MonotonicClock::IntervalTimer	m_help_timer;	// interval m_dw_help_timer
 	DWORD						m_dw_hide_timer;
-	DWORD						m_dw_hide_prev_tickcount;
+	MonotonicClock::IntervalTimer	m_hide_timer;	// interval m_dw_hide_timer
 	int							m_timer;
 
 	bool	Timer(bool reset = false);
@@ -1073,8 +1078,10 @@ protected:
 
 public:
 // TIMER
+	// The mining progress, shared with the skill window: one global
+	// IntervalTimer in VS_UI_GameCommon.cpp holds the moment mining started
+	// and how long it takes.
 	static bool		Timer(bool reset = false);
-	static DWORD						m_dw_millisec;
 
 	static C_SPRITE_PACK *			m_pC_mine_progress_spk;
 	enum MINE_PROGRESS_SPK_INDEX
@@ -1299,8 +1306,7 @@ protected:
 	bool	findSkillAvailable(ACTIONINFO id);
 
 // TIMER
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_millisec;
+	MonotonicClock::IntervalTimer	m_window_timer;	// Timer() is true while the 2 s window since Timer(true) is open
 
 	bool	Timer(bool reset = false);
 
@@ -1584,8 +1590,7 @@ private:
 	int									m_board_x, m_board_y;
 
 	//timer
-	DWORD						m_dw_minimap_prev_tickcount;
-	DWORD						m_dw_minimap_millisec;
+	MonotonicClock::IntervalTimer	m_minimap_timer;
 
 	bool	TimerMinimap();
 
@@ -1677,8 +1682,7 @@ private:
 	int									m_board_x, m_board_y;
 
 	//timer
-	DWORD						m_dw_minimap_prev_tickcount;
-	DWORD						m_dw_minimap_millisec;
+	MonotonicClock::IntervalTimer	m_minimap_timer;
 
 	bool	TimerMinimap();
 
@@ -1769,8 +1773,11 @@ public :
 	bool				m_bl_timeover;
 	bool				m_bl_focus;
 	
-	DWORD				m_timer;
-	DWORD				m_timer2;
+	// Timer()'s and Timer2()'s deadlines: absolute points on
+	// MonotonicClock's clock, so the countdowns they return have no
+	// 32-bit tick to wrap on (basic/MonotonicClock.h).
+	MonotonicClock::TimePoint	m_tp_deadline;
+	MonotonicClock::TimePoint	m_tp_deadline2;
 	CSpriteSurface *	m_p_back_surface;
 	std::vector<std::string>					m_hard_cording;		// 날 막아줘!!!
 
@@ -2060,8 +2067,7 @@ protected:
 //	bool						m_bl_help, m_bl_party;
 
 	//timer
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_millisec;
+	MonotonicClock::IntervalTimer	m_interval_timer;
 
 	bool	Timer();
 
@@ -3844,7 +3850,7 @@ public :
 
 	BLOOD_BIBLE_STATUS		m_BloodBibleStatus[12];
 
-	DWORD					m_tickCount;
+	MonotonicClock::TimePoint	m_tp_start;	// when SetTimer() started the m_sec countdown
 	DWORD					m_sec;
 
 public :
@@ -3852,7 +3858,7 @@ public :
 	C_VS_UI_BLOOD_BIBLE_STATUS();
 	~C_VS_UI_BLOOD_BIBLE_STATUS();
 
-	void	SetTimer(DWORD sec) { m_sec = sec; m_tickCount = timeGetTime(); }
+	void	SetTimer(DWORD sec) { m_sec = sec; m_tp_start = MonotonicClock::Now(); }
 
 	void	ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button);
 	void	ShowButtonDescription(C_VS_UI_EVENT_BUTTON *p_button);
@@ -4268,7 +4274,7 @@ class C_VS_UI_IMAGE_NOTICE : public Window, public Exec, public ButtonVisual
 public :	
 	struct SNotice
 	{
-		DWORD				m_Time;
+		MonotonicClock::TimePoint	m_Time;	// when the notice was added
 		std::string			m_Name;
 		std::string			m_GiftName;
 		char				m_Alpha;
@@ -4420,14 +4426,14 @@ public :
 	class CResurrect
 	{
 	public :
-		CResurrect() : m_Delay(0), m_Time(0) { memset(&m_ButtonRect, 0, sizeof(RECT) ); m_Enable = false; m_Image = -1; }
+		CResurrect() : m_Delay(0) { memset(&m_ButtonRect, 0, sizeof(RECT) ); m_Enable = false; m_Image = -1; }
 		void		SetRect( int x,int y,int w,int h ) { m_ButtonRect.left = x; m_ButtonRect.right = x+w; m_ButtonRect.top = y; m_ButtonRect.bottom = y+h;}
 
 		RECT		m_ButtonRect;
 		bool		m_Enable;
 		int			m_Image;
 		int			m_Delay;
-		DWORD		m_Time;
+		MonotonicClock::TimePoint	m_Time;	// when SetDelay() started the m_Delay ms
 	};
 
 	C_SPRITE_PACK				m_image_spk;

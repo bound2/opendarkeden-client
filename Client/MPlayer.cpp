@@ -3003,7 +3003,8 @@ MPlayer::TraceCreatureToBasicAction(TYPE_OBJECTID id, bool bForceAttack, bool bC
 				if(pPetItem != NULL)
 				{
 					PETINFO petInfo;
-					petInfo.HP = pPetItem->GetCurrentDurability();
+					// The countdown, as the pet window and the description panel show it.
+					petInfo.HP = pPetItem->GetRemainingDurability();
 					petInfo.ATTR = pPetItem->GetEnchantLevel();
 					petInfo.ATTR_VALUE = pPetItem->GetSilver();
 					petInfo.LEVEL = pPetItem->GetNumber();

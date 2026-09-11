@@ -822,6 +822,199 @@ found it instead of leaving a header the peer would fill from the next packet;
 the encrypt stream, and the frame on the non-throwing path is byte for byte
 what it was.
 
+**Third span/typed-scalar slice (2026-09-10): the packet directories are
+free of raw scalar casts.** A count of `(char*)&field, size` reads and
+writes over `Client/Packet` found the shape the first two slices were
+chosen for almost gone already. `Cpackets` and `Gpackets` hold 1,315 stream
+reads and 1,315 stream writes (`iStream.read*(` and `oStream.write*(` with
+comments stripped), and every scalar among them but 20 already went through
+the typed integer `read(m_Field)`/`write(m_Field)` overloads, which route
+through `readWire`/`writeWire` since the first slice. The 20 (26 textually;
+six sit in two blocks upstream commented out) were in four packets -
+`CGAddZoneToMouse`, `CGBloodDrain`, `GCAttack` and `GCGetDamage`, the
+melee combat exchange and the drag-to-cursor pickup - and this slice
+migrates them the way `CGSkillToObject` was:
+`Coord_t`, `Dir_t` and `WORD` fields go straight to `readWire`/`writeWire`,
+and the `ObjectID_t` (a `DWORD`, `unsigned long` on MSVC and so not an
+exact-width type there, `uint32_t` off Windows) is staged through a
+`std::uint32_t` under a `static_assert` tying the two widths.
+`CGAttack`, the first slice's exemplar, staged the same way but without
+the assertion; it gains one here, so the six staging sites are uniform.
+Only the plain branch of `CGAddZoneToMouse` changes; its
+`SHUFFLE_STATEMENT_3` encrypter branch is untouched, and the other three
+never reach the encrypter. `Lpackets`, `Upackets` and `Rpackets` had none.
+The 132 other two-argument pointer-plus-length calls in the two directories
+are a different shape - `char` buffers, `std::string` and `c_str()` reads
+such as `m_Name, szName` - already bounded by the span and string overloads
+underneath, and not a scalar cast.
+
+The goldens came first, in a commit of their own, so the bytes they pin are
+the old code's. `CGAddZoneToMouse` was already under the shared encrypter
+set at all six codes. `GCAttack` and `GCGetDamage` are pinned by the server's
+`packet_combat_test.cpp` at code 0, so their goldens are byte-identical
+copies of its files, with its fixture values, and add nothing to the
+cross-repo golden diff (which is not clean: of the 136 files both repos
+pin, 134 agree and `CLLogin.code0.hex` and `GCGuildChat.code0.hex` differ,
+a pre-existing state this slice does not touch); `CGBloodDrain` has no
+server pin and its golden is client-authored. All three are
+encrypter-free, and `EncrypterFree()` holds both their write and their
+parse code-insensitive.
+`tests/unit/test_packet_combat_family_wire.cpp` adds what a golden cannot
+see: per-field round-trips under every code, the full 32-bit `ObjectID`
+through the staging in both directions (so the cast neither sign-extends nor
+narrows), and every truncation of every body, from one byte short down to
+empty, refused with the same `InsufficientDataException` the pointer/length
+read raised. The field *order* is pinned by the goldens alone - a
+symmetric swap of two same-width fields in both `read()` and `write()`
+round-trips cleanly and only the golden sees it, which the review
+demonstrated by mutation.
+
+What stays raw under `Client/Packet` after this slice is 31 live casts
+of the pointer-and-size shape, none of them a packet field (this
+paragraph first said 27: it had grepped `(char*)&` and missed the four
+the output streams spell `(const char*)&`, the measure-the-spelling
+mistake CLAUDE.md warns about). Seven are the framing itself - the packet id,
+size and sequence byte that `SocketOutputStream::write(const Packet*)` and
+`Datagram::read`/`write(Packet*)` put in front of every body;
+`GCMoveOK.framed.code0.hex` pins the three in the stream and **nothing
+pins the four in `Datagram`**, which no test frames a packet through.
+Sixteen are `Datagram.h`'s own typed scalar overloads, and eight are the
+`bool` and `char` overloads of the four socket streams, which do not
+route through `readWire`. In the packet directories themselves, `CLLogin` and
+`CGConnect` keep four `(char*)m_MacAddress, 6` writes and reads of a
+`char` array, the shape a span overload fits and the second slice's commit named as
+remaining. Moving the framing belongs to a slice that reads it on its own
+terms rather than as one more packet, and that slice should pin the
+datagram header first.
+
+**Fourth span/typed-scalar slice (2026-09-10): the framing header, and
+with it the whole of `Datagram`.** The slice went as the paragraph above
+asked: pin the datagram first, then move. The UDP transport is live -
+`CGPortCheck` reaches the login server through it and the `RC*` packets
+travel between peers - and nothing had pinned either side of
+`Datagram::read`/`write(DatagramPacket*)`. Two goldens now do
+(`CGPortCheck.datagram`, `RCPositionInfo.datagram`: the id, the size and
+the body), `tests/unit/test_datagram_frame.cpp` builds the frame by hand
+and pins the read side through a real `PacketFactoryManager` with its
+three refusals (an id at or past `PACKET_MAX`, a size over the factory's
+maximum, a length that disagrees with `szPacketHeader + size` either
+way), and the two bounded primitives every datagram packet parses through
+are pinned at the end of the buffer.
+
+Pinning found two defects, each fixed in a `fix:` commit of its own
+between the pin and the move, and both recorded in the code-health
+review. `Datagram::write` sizes its buffer at `szPacketHeader + body` and
+writes one byte less - the slot the stream's sequence byte occupies, which
+both peers count in the length and neither reads - from a buffer a bare
+`new char[]` returned, so **every UDP packet the client sent carried one
+byte of heap memory**; the server's `Datagram` zero-fills for exactly this
+reason and documents the pad as travelling as zero, and the client now
+matches it (the test read the pad back as `0xCD` on the unfixed code).
+The review's open Medium on the bounds checks - `m_InputOffset + len >
+m_Length` wraps, and the write bound was an `Assert` that Release compiles
+away - is closed the same way; its read test did not fail on the unfixed
+code, it crashed the test process at the first wrapping length.
+
+The move itself: `SocketOutputStream::write(const Packet*)` writes the
+id, the size and the sequence byte through `writeWire` (all three are
+exact-width types on every platform, so no staging), and `Datagram` gains
+what the streams have had since the first slice - `read(std::span<char>)`
+and `write(std::span<const char>)` as the one bounded core each way, the
+pointer/length pair as adapters, `std::byte` spans beside them, and
+`readWire`/`writeWire` under the same `WireScalar` concept, with the
+fourteen fixed-width overloads routed through those and `char` read as a
+one-byte span with no cast at all. `Datagram.h` was stored with mixed line
+endings, the eighteen lines a previous edit had added being LF, and is
+CRLF throughout now. Every golden and the wire inventory unchanged; 643
+tests, 294,975 checks, 0 failed in both trees after the review's repairs;
+`DarkEden` builds with 0
+errors, which is the check that every `RC*` packet and `CGPortCheck` still
+resolve their `Datagram` calls.
+
+What stays raw under `Client/Packet` after this slice is twelve live
+casts of the pointer-and-size shape: the `bool` and `char` overloads of
+the four socket streams (eight - `bool` is deliberately unchanged since
+the first slice, and `char` could take the one-byte span `Datagram` now
+uses; the output pair spells them `(const char*)&`, which is why a grep
+for `(char*)&` reports eight in total and not twelve), and the four
+`(char*)m_MacAddress, 6` reads and writes in `CLLogin` and `CGConnect`,
+which a `std::span<BYTE, 6>` of the array fits. `SocketAPI.cpp` holds six
+more at the OS socket calls, which are not wire scalars, and
+`CGBloodDrain`'s six sit in comments.
+
+The adversarial review of this slice (two fresh-context readers, one on
+the code and one on the claims) found no wire-byte defect and four
+things worth recording. The wrap-proof bound as first written, `len >
+m_Length - offset`, depended on an offset-never-past-length invariant
+that nothing enforces and would *admit* a read if it were broken, where
+the old form refused; it is now the review's own recommended form, `len >
+m_Length || offset > m_Length - len`, safe whatever the offsets hold, and
+it runs before the adapter builds its span, so a hostile length never
+becomes an invalid range. The write bound alone still let a body one byte
+over its declaration eat the pad slot and go out looking honest, the
+peer dropping the last field; `Datagram::write(const DatagramPacket*)`
+now holds the body to the size its header declared and refuses either
+direction of drift, where the server measures the body and back-fills
+the size - the client refuses, the server corrects, and both keep the
+byte off the wire. `GLIncomingConnectionError::getPacketSize` declared
+one of the two strings its `write` emits, stale against the server's
+copy, and now declares both (the client neither sends nor receives it).
+And the claims audit found the record overstating in three places: the
+write test's wrapping lengths slipped past the old `Assert` too, so it
+is a second reproduction rather than a test that "passed only because
+the Assert fired"; the Release half of "live in every build" is shown by
+no test, the suite being a Debug build; and the residue count above.
+
+**Fifth span/typed-scalar slice (2026-09-10): `Client/Packet` holds no
+pointer-and-size cast of a wire scalar or array.** The twelve the fourth
+slice counted are gone. `CLLogin` and `CGConnect` read and write their
+six MAC bytes through `std::as_writable_bytes(std::span(m_MacAddress))`
+and `std::as_bytes(...)`, a `std::span<BYTE, 6>` deduced from the array's
+declaration, so the count on the wire is the array's own and not a
+literal restated beside it. `CGConnect` was pinned first, byte-identical
+to the server's golden with its fixture; `CLLogin` already was, in both
+layouts. Of the streams' eight `bool` and `char` overloads, `char` goes
+through a one-byte `std::span<char>` as `Datagram`'s does, a `bool` goes
+out as the `BYTE` 0 or 1 it holds through `writeWire`, and the encrypt
+pair keep their transform and delegate to the plain overloads.
+`tests/unit/test_wire_bool_char.cpp` pinned all eight before the move,
+byte for byte under ten codes on both sides of the encrypter's bool flip
+at 128.
+
+The two `bool` *reads* were left for a `fix:` commit of their own,
+because respelling them was not enough: they copied the wire byte into
+the bool's storage, the code-health review's open Medium on invalid bool
+representations. They now take the byte as a `BYTE` and store `b != 0`,
+and the test written first (red on the unfixed code, 25 of its 32
+checks) showed what an invalid bool does under MSVC: one holding 0x02,
+0x7F, 0x80 or 0xFF takes the true branch of `if (a)` and is unequal to
+`true` at the same time. No consumer in the tree compares a wire bool
+with `== true`, so in play the finding was the sanitizer trap it names
+plus an invalid value propagating into UI structs, not an inverted
+branch. Every packet that reads a bool is covered by the one change and
+no packet file moved; the encrypting bool read has no production caller
+at all. What no test guards is the write side's normalisation
+(`buf ? 1 : 0`), because nothing in the tree can hand `write(bool)` an
+invalid bool - the one bool the client sends, `CLRegisterPlayer`'s
+public flag, is set from a literal - and a `static_assert` in
+`SystemTypes.h` now ties `szbool` to the one byte the overloads move.
+
+What remains under `Client/Packet` is not wire: `SocketAPI.cpp`'s six
+casts at the OS socket calls, and seven in comments - `CGBloodDrain`'s
+six and a debug hex dump in `SocketInputStream.cpp` inside a commented
+block. Priority 3's boundary work in the wire library is complete; the
+executable side (`Client/PacketHandler` and the game code) reads packets
+through accessors and was never in this count. The adversarial review
+(two fresh-context readers, code and claims) found no wire-byte defect;
+what it found is in the record above, and in the repair commit: the
+stream header's four new comment lines were LF in a CRLF file, the same
+slip the fourth slice had repaired in `Datagram.h`; two test lines
+loaded the invalid bool the test exists to prevent and would have
+aborted a red run under Clang's `-fsanitize=bool`; and the empty-stream
+test asserted the untouched value for the plain reads only. 651 tests,
+297,358 checks, 0 failed in both trees after the repairs; `DarkEden` builds with 0
+errors.
+
 **Clock status (2026-09-05):** the first priority-5 slice is implemented.
 `basic/MonotonicClock.{h,cpp}` is the central adapter: `Now()` is
 `std::chrono::steady_clock` truncated to milliseconds, `Duration` is
@@ -883,6 +1076,209 @@ way to the accessors rather than narrowing to a `DWORD`.
 clock, works the old `DWORD` arithmetic out on the same numbers beside each
 assertion, and pins the countdown, the boundary one millisecond before expiry,
 the preserved second-floor rounding and the un-narrowed remainder.
+
+The third priority-5 slice (2026-09-10) is the pet item's life, the first
+clock in an item class (the first slice took a `basic` timer and a title
+screen, the second a manager). A pet's durability
+is the number of minutes it has left, counted from the moment the
+durability was set; `MPetItem` stamped that moment as a `DWORD` from
+`timeGetTime()` and handed the tick out, and the affect check in
+`MCreature` and the description panel in `VS_UI_Description.cpp` each
+worked the countdown out for themselves. The stamp is a
+`MonotonicClock::TimePoint` now, `MinutesSinceUpdate()` and
+`GetRemainingDurability()` are the item's own, both readers ask them, and
+the tick accessors are gone. The quantisation statement is the second
+slice's again: `timeGetTime()` was already the 1 ms counter, so only the
+epoch and the width change, and the width change is what removes the
+defect - after 49.7 days the `DWORD` subtraction came round and a pet
+set with a long durability read as hours old, alive and lending its
+status; the elapsed count is 64-bit now and is compared with the 32-bit
+durability in the wider type. It is 64-bit by the item's own `Minutes`
+typedef, not by `std::chrono::minutes`, whose representation is an `int`
+on MSVC - the slice's first version used the latter and claimed a width
+it did not have on the live platform, and the review's reader caught it
+by reading the two STLs. The pet window's "food remaining", which two
+executable sites filled from the raw durability and so disagreed with
+the tooltip by the elapsed minutes, is filled from the countdown too.
+What made this slice possible is a restructuring commit ahead of the fix,
+in the shape the Linux port used for the potion (`82f809b6`): `MPetItem`'s
+constructor was in the executable's `MItemUse.cpp`, so no test could
+construct a pet, and constructing one in the library makes its vtable
+the library's to emit, which names a `UseInventory` whose body sends a
+packet - so the member is defined in `MItem.cpp` and delegates to a new
+`MItemHost` slot the executable installs (with designated initialisers,
+now that the host has eleven entries; `s_PriceHost` beside it is still
+positional). `tests/unit/test_pet_item_countdown.cpp` drives the injected
+clock through the countdown, the restart, a never-set pet and the legacy
+wrap - the old arithmetic worked out beside the wrap assertions - and an
+elapsed count past 2^32 minutes, which an `int` representation would
+wrap. 655 tests, 297,382 checks, 0 failed in both trees. Left as found:
+`_Item_Description_Calculator` sizes the pet's duration line under
+`GetGrade() != -1` while the drawing pass prints it under `== -1`, so the
+width measured is for a line never drawn; upstream's, and not this
+slice's to settle.
+
+What is left of priority 5 after that slice: 214 live tick reads in 34
+files (calls of `GetTickCount`/`timeGetTime` over `Client/` and `VS_UI/`
+with comments and string literals removed; this paragraph first said
+209 in 32, counted by a regex strip of block comments that reads a
+`//*` line comment as an opener and swallows code up to the next `*/` -
+in `VS_UI_Item.cpp` that is lines 228 to 285, `srand(GetTickCount())`
+among them, and `Vs_ui.cpp` has the same idiom - so the fourth slice's
+`tests/tools/count_tick_reads.pl` and ratchet R14 count by a
+character-level scanner instead, and every figure here is theirs; the
+count includes one definition, the non-Windows `GetTickCount` shim in
+`VS_UI_widget.h`). **Most of it is not executable-side**: `VS_UI` is a
+static library and holds 132 of them, 100 in the two `VS_UI_GameCommon`
+sources alone (chat-spam
+throttles, help and hide auto-timers, mining progress and double-click
+timing), so those have a test path once `VS_UI` is added to the unit
+binary's link line, as CLAUDE.md says. The executable's largest clusters
+are `MTopView` (21) and `CGameUpdate` (3 live of 12 spellings). Each move
+needs its quantisation statement, and the executable ones are verified
+only by running the client. The one `packetwire` site, a byte-rate
+probe in `SocketInputStream::fill`, sits under
+`__TEST_PACKET_RECEIVED_SIZE_PER_SECOND__`, which nothing defines, and is
+dead code rather than a clock to move; `gamemodel` is clean.
+
+The fourth priority-5 slice (2026-09-10) is every VS_UI timer outside the
+two `GameCommon` sources, and it gives `basic` the gate they all share.
+Five live widget classes carried a `DWORD` pair and the three-line
+`prev + interval <= GetTickCount()` over it - the event button's focus
+fade, `C_ANIMATION`'s frame step, the shop's and the computer's scroll
+timers, the mouse pointer's - and two functions kept a previous tick as
+a static local against a delay, the file dialog's long-name latch and
+the party cursor's frame step. A sixth class, the tutorial briefing,
+carries the pair too and was converted in the slice's first version;
+the review found its whole implementation inside a comment block and
+its only instantiation commented out with it, so that conversion is
+reverted and the class is a task 5.2 deletion candidate. The title
+screen, converted inline by the first slice, is on the shared gate too. `MonotonicClock::IntervalTimer` is that gate over a time
+point and a 64-bit duration: `Fire()`, `Restart()`, `SetIntervalMillis`,
+and `Elapsed()` for the file dialog's strict comparison. Writing its
+tests corrected what the first slice's title-screen comment said the
+wrap did: the two `DWORD`s wrap independently, so when the sum wraps
+before the tick the gate is open on every frame until the tick follows
+(an early firing, up to one interval), and when the tick wraps first the
+gate stays shut for 49.7 days for a widget not polled in the window - not
+"open from then on". Both cases are pinned with the old gate worked out
+beside them, along with the single clock read that keeps a caller's work
+out of the interval. The quantisation statement is the one every move
+off `GetTickCount` owes: on Windows it is kernel32's and steps in about
+15.6 ms, so each timer fired on the first step at or past its interval
+and now fires at the interval - the button fade goes from about 15.6 to
+10 ms a step (a 320 ms fade instead of 500), the tutorial scrolls from
+62.5 to 50, the animation frame and the shop from 109 to 100, the party
+cursor from 156 to 150, the pointer from 312 to 300, and the button
+class's own animation, which sets 75 through `SetSpeed`, from 78 to 75.
+Every one of these gates is polled once per frame, so the period in
+play is the larger of the interval and the frame period: at 60 fps the
+button fade is 32 frames either way, and the shorter intervals show
+their change only above the frame rate they are written for.
+`C_ANIMATION` never initialised its previous tick, but never read it
+before a `Play*` call reset it either; the timer constructs as "now".
+Two `srand(GetTickCount())` seeds stay: they are not timers. `VS_UI`
+goes from 132 live reads to 104, the tree from 214 to 186 (28 calls;
+the counted total includes the shim definition), and R14 holds the
+line. The timer is tested in `basic`
+(`tests/unit/test_interval_timer.cpp`), including a fake source that
+advances per read, so a two-read timer fails the single-read test; the
+widget conversions are verified by the build, and the client was not
+run. The review also recorded, for the slice that clears GameCommon:
+the non-Windows `GetTickCount` shim in `VS_UI_widget.h` sits under
+`Platform.h`'s macro of the same name off Windows and so defines a
+second `platform_get_ticks` with `gettimeofday`'s epoch, a pre-existing
+hazard that goes with its last users.
+
+The fifth priority-5 slice (2026-09-10) is every `GetTickCount` site in
+the two `GameCommon` sources (45), and with them the last three
+`GetTickCount` spellings in `VS_UI` - two `srand` seeds and the
+`VS_UI_widget.h` stub. The 45 were two shapes over the same `DWORD`
+pair. Interval gates, as
+the fourth slice's: the tribe window's timer, the minimap and world map
+refresh, and the mining progress, which was a global previous tick and a
+static interval set per mine level that two progress bars divided; that
+is one global `IntervalTimer` now, and the bars draw `Elapsed()` over
+`GetInterval()`. Windows, `prev + interval >= now` true while the window
+is open: the party and death requests and the regen-tower minimap (their
+interval a constructor argument), the skill window's 2 s, and the chat
+window's lockout, one previous tick shared by three windows chosen by
+mode; those are `Elapsed() <= interval`, read once per call where the old
+chat condition read the tick three times and the call four.
+The chat window's help and auto-hide timers were `prev = GetTickCount()
+- X` at start so the first poll fires, which is `IntervalTimer::Expire()`
+(added with `ExpireBy(d)`, and tested); its two spam throttles kept
+vectors of ticks and keep vectors of `TimePoint`; the party manager's
+face-large delay was a static local, converted as the file dialog's was;
+and the crazy-mine board's double-click guard, an `int` last-click tick
+against `GetDoubleClickTime()`, is a timer whose `Elapsed()` is compared
+with that, its "first click is never a double click" and "after a
+double click, five seconds ago" being `ExpireBy(5 s)`. With no
+`GetTickCount` call left in `VS_UI`, the non-Windows stub in
+`VS_UI_widget.h` - the second `platform_get_ticks` the fourth slice's
+review found - is deleted, and the two `srand(GetTickCount())` seeds take
+`MonotonicClock::LegacyTicks()`, which on Windows is SDL's tick rather
+than kernel32's, a different epoch for a value that only has to vary
+(one of the two, in `VS_UI_Item.cpp`, sits under `#ifndef _LIB` and is
+compiled out of the library build). The quantisation statement: the 100 ms
+timers go from about 109 to 100 ms; the second-scale windows and delays
+close within a 15.6 ms step of where they did; the mining bar draws its
+fraction from a 1 ms clock instead of a stepped one; and all of it is
+bounded by the frame rate the gates are polled at. R14 goes from 186 to
+138 (48: the 45 gates, the two seeds and the stub's definition). What
+`VS_UI` holds now is 56 `timeGetTime()` sites in three files - the two
+sources and the header's `C_VS_UI_BLOOD_BIBLE_STATUS::SetTimer` - four of
+them `srand` seeds and the rest the deadline and elapsed-time shapes:
+quest and mission deadlines from server data, effect status, notices, the
+minigames' clocks, which want a `TimePoint` deadline rather than a gate
+and are the next slice; `Client` holds 82. The conversions are verified
+by the build on Windows and, by the review, on Linux GCC in the port
+image; the client was not run. The review found no gate whose truth
+differs from its pre-image, including the chat lockout's restructured
+`else`, whose dropped clear on the reset path every caller overwrites
+on the next line.
+
+The sixth priority-5 slice (2026-09-10) is the deadlines in the same two
+sources: `timeGetTime()` ticks held as "when this ends" or "when this
+started" and compared against a fresh read. Each is a
+`MonotonicClock::TimePoint` now, compared or subtracted on the 64-bit
+rep: the quest status window's two countdowns (a deadline set as now
+plus the delay, the milliseconds left returned, `-1` once past), the
+blood bible's timer, the image notice's close delay, the resurrect
+request's per-button delay and its percent bar, the timed missions'
+start (with a `bool` for "no limit" where 0 meant that), the gamble
+spin's two strict gates (`IntervalTimer`), and four `srand` seeds. One
+of them the executable sets: the flag war's end, which
+`GCFlagWarStatusHandler` builds from the seconds the server sends and
+passes through three relays to the CTF status window, whose two
+"remaining" displays share a `RemainingMillis()` that reads 0 once the
+end has passed. The `DWORD` subtraction went round to 49.7 days there:
+`Show()` had a "four hours or more reads as none" guard that caught it
+(the comment said three; the arithmetic says four), and the hover
+tooltip had none and printed the wrapped value, about 1,193 hours, once
+a war ended - a small display defect this slice removes, which the
+review found the first version of this record describing as no change.
+Retyping the mission record found a trap worth its own
+sentence: the wire layer's `UI_GMissionInfo` and `UI_GQuestInfo` were
+redeclared field for field inside `C_VS_UI_QUEST_MANAGER`, and the
+handlers passed one to the manager through a `void*` it cast to its own
+copy - two layouts that had to agree with nothing to say so, and the
+first field retyped on one side would have read garbage from the other.
+The manager's names are typedefs of the wire structs now. No
+quantisation change: `timeGetTime()` was already the 1 ms tick; the
+epoch and the width change, and the width is what removes the wrap. R14
+goes from 138 to 113 (25 calls, the handler's two among them). `VS_UI`
+holds 33: the three minigames' clocks, and the three deadlines the
+executable sets through shared structs - the quest status's
+`quest_time`, the effect status's `delayFrame`, and the war list's
+`left_time` (`WAR_INFO`, set in `MWarManager`, read in the effect status
+window) - which want the same retyping on both sides of the boundary
+and are the next slices. `Client` holds 80. The review added the one
+test a binary can reach: the mission record is a packetwire header, and
+`tests/unit/test_quest_status_record.cpp` pins its no-limit default and
+that a quest holds its missions by the same type. The rest is verified
+by the build on Windows and, by the review, on Linux GCC; the client
+was not run.
 
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through

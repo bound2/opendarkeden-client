@@ -818,7 +818,7 @@ public:
 	void	RunCTFStatusWindow();
 	void	CloseCTFStatusWindow();
 	bool	IsRunningCTFStatusWindow();
-	void	SetCTFStatus(DWORD &endtime, int &flag_s, int &flag_v, int &flag_o);
+	void	SetCTFStatus(const MonotonicClock::TimePoint &endtime, int &flag_s, int &flag_v, int &flag_o);
 	
 	void	RunPetInfo(struct PETINFO *petInfo);
 	void	ClosePetInfo();

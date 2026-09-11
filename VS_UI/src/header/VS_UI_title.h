@@ -1393,13 +1393,12 @@ private:
 	ButtonGroup *				m_pC_button_group;
 	bool							m_bl_credit;
 	//
-	// The credit scroll's timer. A time point and a duration over a
-	// 64-bit millisecond rep rather than a pair of DWORD tick counts, so
-	// the "previous + delay <= now" test in Timer() has no 32-bit wrap
-	// to carry past (basic/MonotonicClock.h).
+	// The credit scroll's timer: the same periodic gate every widget
+	// timer runs on (basic/MonotonicClock.h), over a 64-bit millisecond
+	// rep rather than a pair of DWORD tick counts, so it has no 32-bit
+	// wrap to carry past.
 	//
-	MonotonicClock::TimePoint	m_tp_prev;
-	MonotonicClock::Duration	m_d_scroll_interval;
+	MonotonicClock::IntervalTimer	m_scroll_timer;
 	bool	Timer();
 	int							m_credit_scroll;
 

@@ -413,16 +413,9 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				{
 
 					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_DESC_DURABILITY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					TYPE_ITEM_DURATION leftTime = p_item->GetCurrentDurability();
-					int timeGap = ((timeGetTime() - ((MPetItem *)p_item)->GetUpdateTime())/1000/60);
-					if(timeGap > leftTime)
-					{
-						leftTime = 0;
-					}
-					else
-					{
-						leftTime = leftTime - timeGap;
-					}
+					// Minutes of life left, the countdown worked out by the pet
+					// item itself and floored at zero.
+					TYPE_ITEM_DURATION leftTime = ((MPetItem *)p_item)->GetRemainingDurability();
 					int day,hour,minute;
 					
 					day = leftTime / 60 / 24;

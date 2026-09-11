@@ -2019,38 +2019,28 @@ void	MVampireCoupleRing::UseGear()
 	g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_GEAR );
 #endif
 }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
-void	MPetItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
-	#else
-void	MPetItem::UseInventory()
-	#endif
+// MPetItem::UseInventory's body (GameInit.cpp installs it through the
+// host); the member is the library's, beside the pet's life countdown.
+void	UsePetFromInventory(MItem* pPet)
 {
 #ifdef __GAME_CLIENT__
-// 현재 펫이 있으면 펫을 호출하지 못하도록 했으나 펫을 없앨때도 같이 사용하므로 주석처리했음
-// 어떤 아이템으로 펫을 호출했는지 아이템에 표시해주는것도....오토바이도 안하니까 쌩
-
+	// Upstream once refused the call while a pet was already out, then
+	// commented that out because the same item dismisses the pet, and
+	// noted that marking the item that summoned the pet was not done
+	// either (the motorcycle does not do it); the guard is kept as it
+	// was left.
 //	if(g_pPlayer->GetPetID() == OBJECTID_NULL)
 //	{
-	if(GetCurrentDurability() > 0)
+	if(pPet->GetCurrentDurability() > 0)
 	{
 		CGUseItemFromInventory _CGUseItemFromInventory;
-		_CGUseItemFromInventory.setObjectID( GetID() );
-		_CGUseItemFromInventory.setX( GetGridX() );
-		_CGUseItemFromInventory.setY( GetGridY() );
-
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
-		if(0 != SubInventoryItemID)
-			_CGUseItemFromInventory.setInventoryItemObjectID( SubInventoryItemID );
-	#endif
+		_CGUseItemFromInventory.setObjectID( pPet->GetID() );
+		_CGUseItemFromInventory.setX( pPet->GetGridX() );
+		_CGUseItemFromInventory.setY( pPet->GetGridY() );
 
 		g_pSocket->sendPacket( &_CGUseItemFromInventory );
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
-		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY, SubInventoryItemID);
-	#else
-		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
-	#endif
-		
+		g_pPlayer->SetItemCheckBuffer( pPet, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
 	}
 //	}
 #endif
@@ -2152,17 +2142,6 @@ void	MPetEnchantItem::UseInventory()
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_PICKUP_SOME_FROM_INVENTORY);
 	}
 #endif
-}
-
-MPetItem::MPetItem()
-{
-	m_UpdateTime = timeGetTime();
-	m_PetKeepedDay = 0;
-	m_PetExpRemain = 0;
-	m_PetFoodType = 0;
-	m_bCanGamble = false;
-	m_bCutHead = false;
-	m_bCanAttack = false;
 }
 
 std::string MPetItem::GetPetOptionName()

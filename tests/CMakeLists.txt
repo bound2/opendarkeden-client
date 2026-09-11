@@ -118,6 +118,18 @@ set_source_files_properties(
 	# The second span/typed-scalar slice: the CGSkillTo* family's fields
 	# and its truncated-input contract, over the same stream classes.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_skill_family_wire.cpp
+	# The third: the melee combat packets, the last raw scalar casts in
+	# the packet directories, over the same stream classes.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_combat_family_wire.cpp
+	# The UDP framing contract: Datagram::read through the real factory
+	# manager, its refusals, and the bounded primitives underneath.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_datagram_frame.cpp
+	# The bool and char overloads of the four socket streams, byte for
+	# byte under every encrypt code.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_bool_char.cpp
+	# The per-mission UI record the wire layer declares: its time-limit
+	# default, which the handlers and the quest manager rest on.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_quest_status_record.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_scalar.cpp
 	# The 32-bit width of long/ulong on the wire, pinned on every platform
 	# (the port assessment, area C), over the same streams.
@@ -135,6 +147,7 @@ set_source_files_properties(
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_gamemodel_tables.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_item_table.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_item_core.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_pet_item_countdown.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_item_containers.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_inventory_storage_shop.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_trade_manager.cpp

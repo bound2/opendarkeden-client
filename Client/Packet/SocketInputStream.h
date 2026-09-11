@@ -82,8 +82,12 @@ public :
 		return count;
 	}
 
-	uint read ( bool   & buf ) { return read( (char*)&buf, szbool   ); }
-	uint read ( char   & buf ) { return read( (char*)&buf, szchar   ); }
+	// A bool arrives as one byte and is normalised: every non-zero byte is
+	// true. Copying the byte into the bool's storage made a value that was
+	// neither true nor false for anything but 0 and 1, undefined to branch
+	// on (code-health review, Medium).
+	uint read ( bool   & buf ) { BYTE b = 0; const uint n = readWire( b ); buf = ( b != 0 ); return n; }
+	uint read ( char   & buf ) { return read( std::span<char>( &buf, 1 ) ); }
 	uint read ( uchar  & buf ) { return readWire(buf); }
 	uint read ( short  & buf ) { return readWire(buf); }
 	uint read ( ushort & buf ) { return readWire(buf); }

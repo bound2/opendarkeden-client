@@ -9,6 +9,12 @@
 #include "SocketEncryptOutputStream.h"
 #include "PacketAssert.h"
 
+#include <cstdint>
+
+// Pin the wire width so a change to ObjectID_t is a compile error here.
+static_assert(sizeof(ObjectID_t) == sizeof(std::uint32_t),
+	"CGAddZoneToMouse stages its ObjectID as a 32-bit wire scalar");
+
 
 CGAddZoneToMouse::CGAddZoneToMouse ()
 {
@@ -40,9 +46,14 @@ void CGAddZoneToMouse::read (SocketInputStream & iStream)
 	else
 #endif
 	{
-		iStream.read((char*)&m_ObjectID , szObjectID);
-		iStream.read((char*)&m_ZoneX , szCoord);
-		iStream.read((char*)&m_ZoneY , szCoord);
+		// ObjectID_t is DWORD: uint32_t off Windows, but unsigned long on
+		// MSVC, which readWire does not accept. Stage it through the
+		// 32-bit scalar the wire carries so one spelling builds everywhere.
+		std::uint32_t objectID = 0;
+		iStream.readWire(objectID);
+		m_ObjectID = static_cast<ObjectID_t>(objectID);
+		iStream.readWire(m_ZoneX);
+		iStream.readWire(m_ZoneY);
 	}
 
 	__END_CATCH
@@ -66,9 +77,9 @@ void CGAddZoneToMouse::write (SocketOutputStream & oStream) const
 	else
 #endif
 	{
-		oStream.write((char*)&m_ObjectID , szObjectID);
-		oStream.write((char*)&m_ZoneX , szCoord);
-		oStream.write((char*)&m_ZoneY , szCoord);
+		oStream.writeWire(static_cast<std::uint32_t>(m_ObjectID));
+		oStream.writeWire(m_ZoneX);
+		oStream.writeWire(m_ZoneY);
 	}
 
 	__END_CATCH

@@ -10,6 +10,8 @@
 #include "Client_PCH.h"
 #include "CGConnect.h"
 
+#include <span>
+
 //----------------------------------------------------------------------
 // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
 //----------------------------------------------------------------------
@@ -43,7 +45,8 @@ void CGConnect::read ( SocketInputStream & iStream )
 
 	iStream.read( m_PCName , szPCName );
 
-	iStream.read( (char*)m_MacAddress , 6 );
+	// The whole array, its extent from its declaration.
+	iStream.read( std::as_writable_bytes( std::span( m_MacAddress ) ) );
 
 	__END_CATCH
 }
@@ -82,7 +85,7 @@ void CGConnect::write ( SocketOutputStream & oStream ) const
 
 	oStream.write( std::span<const char>(m_PCName.data(), szPCName) );
 
-	oStream.write( (char*)m_MacAddress, 6 );
+	oStream.write( std::as_bytes( std::span( m_MacAddress ) ) );
 
 	__END_CATCH
 }

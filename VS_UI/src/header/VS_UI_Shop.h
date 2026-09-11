@@ -13,6 +13,7 @@
 
 #include "unicorn.h"
 #include "VS_UI_widget.h"
+#include "MonotonicClock.h"
 #include "VS_UI_ExtraDialog.h"
 
 #include "MGameDef.h"
@@ -91,8 +92,7 @@ private:
 	MItem * GetSlotItem(int slot) const;
 
 //timer
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_millisec;
+	MonotonicClock::IntervalTimer	m_interval_timer;
 
 	bool	Timer();
 

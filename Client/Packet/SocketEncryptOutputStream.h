@@ -45,8 +45,8 @@ public :
 	// 그러나, std::string 의 크기를 BYTE/WORD 중 어느 것으로 할 건지는 의문이다.
 	// 패킷의 크기는 작을 수록 좋다는 정책하에서 필요에 따라서 std::string size 값을
 	// BYTE 또는 WORD 를 수동으로 사용하도록 한다.
-    uint writeEncrypt (bool   buf) { buf = m_Encrypter.convert(buf); return write((const char*)&buf, szbool  ); }
-    uint writeEncrypt (char   buf) { buf = m_Encrypter.convert(buf); return write((const char*)&buf, szchar  ); }
+    uint writeEncrypt (bool   buf) { return write(m_Encrypter.convert(buf)); }
+    uint writeEncrypt (char   buf) { return write(static_cast<char>(m_Encrypter.convert(buf))); }
     uint writeEncrypt (uchar  buf) { buf = m_Encrypter.convert(buf); return writeWire(buf); }
     uint writeEncrypt (short  buf) { buf = m_Encrypter.convert(buf); return writeWire(buf); }
     uint writeEncrypt (ushort buf) { buf = m_Encrypter.convert(buf); return writeWire(buf); }

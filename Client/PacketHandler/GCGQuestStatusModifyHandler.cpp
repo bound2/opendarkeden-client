@@ -51,7 +51,7 @@ void GCGQuestStatusModifyHandler::execute ( GCGQuestStatusModify * pGCGQuestStat
 			UI_Mission->bIndex = TempMission.m_Index;
 			UI_Mission->m_StrArg = TempMission.m_StrArg;
 			UI_Mission->m_NumArg = TempMission.m_NumArg;
-			UI_Mission->dwTimeLimit = 0;
+			UI_Mission->bTimeLimited = false;
 
 			UI_Info->vMissionList.push_back(UI_Mission);
 

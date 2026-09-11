@@ -15,6 +15,7 @@
 #include "VS_UI_Base.h"
 #include "MItem.h"
 #include <limits.h>
+#include "MonotonicClock.h"
 
 // Forward declaration for Window class (defined in u_window.h)
 class Window;
@@ -39,8 +40,7 @@ private:
 	bool						m_bl_coin;
 
 	//timer
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_millisec;
+	MonotonicClock::IntervalTimer	m_interval_timer;
 
 	bool						Timer();
 

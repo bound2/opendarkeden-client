@@ -2921,10 +2921,24 @@ static MMagazine*	EmptyMagazineFor(MItem* pGun)
 	return pMagazine;
 }
 
-// MUsePotionItem::UseInventory's body (MItemUse.cpp); the member is the library's.
+// MUsePotionItem::UseInventory's and MPetItem::UseInventory's bodies
+// (MItemUse.cpp); the members are the library's.
 void	UsePotionFromInventory(MItem* pPotion);
+void	UsePetFromInventory(MItem* pPet);
 
-static const MItemHost	s_ItemHost = { &g_CurrentFrame, ItemDropFrameCount, RefreshAffect, PlayItemSound, &g_CurrentTime, RecalculateStatus, ResetQuickItemSlot, RepairHint, EmptyMagazineFor, UsePotionFromInventory };
+static const MItemHost	s_ItemHost = {
+	.pCurrentFrame			= &g_CurrentFrame,
+	.DropFrameCount			= ItemDropFrameCount,
+	.RefreshAffect			= RefreshAffect,
+	.PlayItemSound			= PlayItemSound,
+	.pCurrentTime			= &g_CurrentTime,
+	.RecalculateStatus		= RecalculateStatus,
+	.ResetQuickItemSlot		= ResetQuickItemSlot,
+	.RepairHint				= RepairHint,
+	.EmptyMagazineFor		= EmptyMagazineFor,
+	.UsePotionFromInventory	= UsePotionFromInventory,
+	.UsePetFromInventory	= UsePetFromInventory,
+};
 
 //-----------------------------------------------------------------------------
 // The price manager's host (docs/RESTRUCTURING.md task 4.2): the player's

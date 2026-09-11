@@ -17,12 +17,11 @@
 #include "CImm.h"
 #endif
 #include "VS_UI_mouse_pointer.h"
+#include "MonotonicClock.h"
 #include "../widget/u_button.h"  // For EventButton, Exec, Button classes
 
 // Stub definitions for non-Windows platforms (without Immersion library)
 #ifndef PLATFORM_WINDOWS
-#include <sys/time.h>
-
 // Stub for CImm class (from Immersion library)
 class CImm {
 public:
@@ -44,12 +43,10 @@ public:
 static CImm gpC_Imm_instance;
 #define gpC_Imm (&gpC_Imm_instance)
 
-// GetTickCount stub
-inline DWORD GetTickCount() {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (DWORD)(tv.tv_sec * 1000 + tv.tv_usec / 1000);
-}
+// The GetTickCount stub that stood here - gettimeofday, its own epoch -
+// went with VS_UI's last GetTickCount call (the fifth clocks slice): off
+// Windows Platform.h already defines the name as platform_get_ticks(),
+// so the stub was a second definition of that with a different epoch.
 
 #endif // !PLATFORM_WINDOWS
 /*
@@ -84,8 +81,9 @@ public:
 class C_VS_UI_EVENT_BUTTON : public EventButton
 {
 private:
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_millisec;
+	// The fade's frame gate (basic/MonotonicClock.h), in place of the
+	// DWORD tick pair every widget timer used to carry.
+	MonotonicClock::IntervalTimer	m_interval_timer;
 	bool						m_bl_start;
 
 public:
@@ -99,7 +97,7 @@ public:
 									EventButton(_x, _y, _w, _h, id, pC_exec_handler)
 	{
 		Init();
-		m_dw_millisec = millisec;
+		m_interval_timer.SetIntervalMillis(millisec);
 
 		if (m_image_index == -1) // default
 			m_image_index = id;
@@ -117,7 +115,7 @@ public:
 	{
 		if (m_bl_start)
 		{
-			if (m_dw_prev_tickcount+m_dw_millisec <= GetTickCount())
+			if (m_interval_timer.Fire())
 			{
 				// next frame!
 
@@ -130,8 +128,8 @@ public:
 					m_alpha--;
 				}
 
-				// !m_alpha = 0인 상태에서 또 m_alpha--가 될 수 있다. 이것은 시간차에 의해서
-				// EventFocuxX가 두번이상 실행되기 때문이다.
+				// m_alpha can be decremented again while already 0: the focus
+				// events can run more than once with a time gap between them.
 				if (m_alpha <= 0)
 				{
 					m_alpha = 0;
@@ -143,15 +141,13 @@ public:
 					m_alpha = MAX_ALPHA;
 					m_bl_start = false;
 				}
-
-				m_dw_prev_tickcount = GetTickCount();
 			}
 		}
 	}
 
 	void	EventFocusOn()
 	{
-		m_dw_prev_tickcount = GetTickCount();
+		m_interval_timer.Restart();
 		m_bl_start = true;
 		if(gpC_Imm)
 			gpC_Imm->ForceUI(CImm::FORCE_UI_BUTTON);
@@ -159,7 +155,7 @@ public:
 
 	void	EventFocusOff()
 	{
-		m_dw_prev_tickcount = GetTickCount();
+		m_interval_timer.Restart();
 		m_bl_start = true;
 		m_bl_prev_focus = false;
 	}

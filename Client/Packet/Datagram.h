@@ -12,6 +12,12 @@
 #include "Types.h"
 #include "Exception.h"
 #include "SocketAPI.h"
+#include "WireScalar.h"
+
+#include <cstddef>
+#include <cstdint>
+#include <span>
+#include <type_traits>
 
 #if defined(PLATFORM_POSIX)
 	#include <sys/socket.h>
@@ -45,45 +51,74 @@ public :
 
 	// read DatagramPacket from datagram's internal buffer
 	void read ( char * buf , uint len );
+	void read ( std::span<char> buf );
+	void read ( std::span<std::byte> buf );
 	void read ( std::string & str , uint len );
 	void read ( DatagramPacket * & pPacket );
 
-	void read ( char   & buf ) { read( (char*)&buf , szchar   ); }
-    void read ( uchar  & buf ) { read( (char*)&buf , szuchar  ); }
-    void read ( short  & buf ) { read( (char*)&buf , szshort  ); }
-    void read ( ushort & buf ) { read( (char*)&buf , szushort ); }
-    void read ( int    & buf ) { read( (char*)&buf , szint    ); }
-    void read ( uint   & buf ) { read( (char*)&buf , szuint   ); }
-    void read ( long   & buf ) {
-        int32_t tmp = 0;
-        read( (char*)&tmp , szlong );
-        buf = static_cast<long>(tmp);
-    }
-    void read ( ulong  & buf ) {
-        uint32_t tmp = 0;
-        read( (char*)&tmp , szulong );
-        buf = static_cast<ulong>(tmp);
-    }
+	// Typed scalar read: the same WireScalar set the socket streams
+	// accept, at the same widths, so a datagram body and a stream body
+	// are written by one rule. The scalar overloads below route through
+	// it; `char` alone stays a one-byte span, as it is not a fixed-width
+	// integer type.
+	template <packetwire::WritableWireScalar T>
+	void readWire ( T & value )
+	{
+		using Storage = packetwire::WireStorageT<T>;
+		Storage storage = 0;
+		read(std::as_writable_bytes(std::span(&storage, 1)));
+		if constexpr (std::is_enum_v<std::remove_cv_t<T>>)
+			value = static_cast<T>(storage);
+		else
+			value = storage;
+	}
+
+	void read ( char   & buf ) { read( std::span<char>(&buf, 1) ); }
+	void read ( uchar  & buf ) { readWire(buf); }
+	void read ( short  & buf ) { readWire(buf); }
+	void read ( ushort & buf ) { readWire(buf); }
+	void read ( int    & buf ) { readWire(buf); }
+	void read ( uint   & buf ) { readWire(buf); }
+	void read ( long   & buf ) {
+		int32_t tmp = 0;
+		readWire(tmp);
+		buf = static_cast<long>(tmp);
+	}
+	void read ( ulong  & buf ) {
+		uint32_t tmp = 0;
+		readWire(tmp);
+		buf = static_cast<ulong>(tmp);
+	}
 
 	// write DatagramPacket into datagram's internal buffer
 	void write ( const char * buf , uint len );
+	void write ( std::span<const char> buf );
+	void write ( std::span<const std::byte> buf );
 	void write ( const std::string & buf );
 	void write ( const DatagramPacket * pPacket );
 
-	void write ( char   buf ) { write( (char*)&buf , szchar   ); }
-    void write ( uchar  buf ) { write( (char*)&buf , szuchar  ); }
-    void write ( short  buf ) { write( (char*)&buf , szshort  ); }
-    void write ( ushort buf ) { write( (char*)&buf , szushort ); }
-    void write ( int    buf ) { write( (char*)&buf , szint    ); }
-    void write ( uint   buf ) { write( (char*)&buf , szuint   ); }
-    void write ( long   buf ) {
-        int32_t tmp = static_cast<int32_t>(buf);
-        write( (char*)&tmp , szlong );
-    }
-    void write ( ulong  buf ) {
-        uint32_t tmp = static_cast<uint32_t>(buf);
-        write( (char*)&tmp , szulong );
-    }
+	template <packetwire::WireScalar T>
+	void writeWire ( T value )
+	{
+		using Storage = packetwire::WireStorageT<T>;
+		const Storage storage = static_cast<Storage>(value);
+		write(std::as_bytes(std::span(&storage, 1)));
+	}
+
+	void write ( char   buf ) { write( std::span<const char>(&buf, 1) ); }
+	void write ( uchar  buf ) { writeWire(buf); }
+	void write ( short  buf ) { writeWire(buf); }
+	void write ( ushort buf ) { writeWire(buf); }
+	void write ( int    buf ) { writeWire(buf); }
+	void write ( uint   buf ) { writeWire(buf); }
+	void write ( long   buf ) {
+		int32_t tmp = static_cast<int32_t>(buf);
+		writeWire(tmp);
+	}
+	void write ( ulong  buf ) {
+		uint32_t tmp = static_cast<uint32_t>(buf);
+		writeWire(tmp);
+	}
 
 	// get data
 	char * getData () noexcept { return m_Data; }
@@ -116,6 +151,10 @@ public :
 	std::string toString () const;
 
 private :
+
+	// The bounds every read and write is held to (Datagram.cpp).
+	void ensureReadable ( uint len ) const;
+	void ensureWritable ( uint len ) const;
 
 	// buffer length
 	uint m_Length;
