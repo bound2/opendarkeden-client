@@ -361,8 +361,8 @@ target_include_directories(packetwire PUBLIC
 # DarkEden target: mirror its compile definitions exactly (see the
 # DarkEden target below for why each exists). __GAME_CLIENT__=1 was in
 # this list until task 5.2's tenth slice (2026-09-13) retired the macro
-# from the whole build; ratchet R15 keeps the sources at zero mentions
-# of it, so nothing here or in Client_PCH.h defines it any more.
+# from the whole build; ratchet R15 keeps the sources at zero live
+# tokens of it, so nothing here or in Client_PCH.h defines it any more.
 target_compile_definitions(packetwire PRIVATE
 	USE_SDL_BACKEND
 	SPRITELIB_BACKEND_SDL

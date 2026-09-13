@@ -327,7 +327,7 @@ DrawAlphaBox(RECT* pRect, BYTE r, BYTE g, BYTE b, BYTE alpha)
 			gpC_base->m_p_DDSurface_back->Unlock();
 		}
 #else
-		// SDL backend implementation for __GAME_CLIENT__
+		// SDL backend implementation (every platform but Windows)
 		// Need to use spritectl API directly since Lock() is a stub in SDL backend
 
 		// Get the SDL surface

@@ -228,7 +228,7 @@ every baseline move; the table below is the current reading.
 | R12 | Dynamic exception specifications anywhere: every `.h`, `.cpp` and `.inl` under `Client`, `VS_UI`, `basic`, `tools`, `third_party` and `tests` | **0** | R9 and R10 cover the libraries; this holds the executable side too, with the same pattern and blind spots. The last 319 outside the library set - 284 in `Client/PacketHandler` (one per handler `execute` definition), 32 in the two request-side packet factory managers, three in `RequestFileManager` and `Updater/UpdateManager.h` - went 2026-09-07, all type lists or `throw()` deleted, none promoted. Finding 3 of the assessment is closed on the source side. Added 2026-09-07. |
 | R13 | Platform macros spelled outside `basic/Platform.h`: `__LINUX__`/`_LINUX` anywhere in the C++ tree, `PLATFORM_MACOS` outside `basic/`, and `PLATFORM_MACOS` in any CMake file | **1** | The port's build-contract slice (`docs/linux-macos-port-assessment-2026-09-07.md`, area A). Before it, four spellings of Linux coexisted and the build defined none - `__LINUX__` at 63 sites, so the socket and file APIs compiled neither their Windows nor their POSIX branch off Windows - while CMake handed every non-Windows target `PLATFORM_MACOS` in six places. `Platform.h` now detects the platform alone and adds `PLATFORM_POSIX`; the POSIX branches test that, and CMake passes no platform macro off Windows. `basic/` is exempt from the macOS count because `PlatformSDL.cpp`'s mach-o code is genuinely Darwin-only. The one counted use is the macOS font list in `TextBackendSDL.cpp`, a real Darwin branch; a second is a deliberate baseline change. Blind to the compiler builtins (`_WIN32`, `__APPLE__`, `__linux__`). Counted by `tests/tools/count_identifier.pl`, the register tokenizer generalised. Added 2026-09-08. |
 | R14 | Live `GetTickCount()`/`timeGetTime()` calls under `Client` and `VS_UI` | **113** | The clocks work of the C++20 assessment (priority 5): the 32-bit tick wraps every 49.7 days, and every `previous + delay <= now` over it fires early or stalls across the wrap. Counted by `tests/tools/count_tick_reads.pl`, a character-level scanner over comments and string literals, because the regex strip the clocks slices first counted with reads a `//*` line comment as a block opener and swallows live code up to the next `*/` - the failure R11's tool was written for - and so missed the `srand(GetTickCount())` in `VS_UI_Item.cpp` outright (209 in 32 files where this reads 214 in 34). `basic/` is outside the count: its three hits are `Platform.h`'s definitions. Counts calls and definitions alike, so the 186 includes the non-Windows `GetTickCount` shim in `VS_UI_widget.h`, and counts `#if`-disabled code. 214 before the widget timers outside `GameCommon` moved to `MonotonicClock::IntervalTimer`; 100 of the 186 were the two `VS_UI_GameCommon` sources. Added 2026-09-10. **138 later that day:** the interval and window gates in those two sources moved (45 calls), the last `GetTickCount` in `VS_UI` with them - two `srand` seeds reseeded and the `VS_UI_widget.h` stub definition deleted make the 48; `VS_UI` holds 56 `timeGetTime()` sites in three files (the header's `SetTimer` is the third), four of them `srand` seeds and the rest deadline and elapsed-time shapes; `Client` 82. **113 later still:** the deadlines set and read within `VS_UI` and the flag-war end its handler sets moved to `TimePoint` (19 of the 25 calls; the gamble spin's two went to `IntervalTimer` and four are `srand` seeds reseeded from the same tick under another name); the two mission structs `VS_UI` had redeclared from the wire layer became typedefs of it; `VS_UI` holds 33 (the minigames' clocks and the three deadlines the executable sets through shared structs), `Client` 80. |
-| R15 | The five side macros the once-shared sources switched on (`__GAME_CLIENT__`, `__GAME_SERVER__`, `__LOGIN_SERVER__`, `__SHARED_SERVER__`, `__UPDATE_SERVER__`): live tokens under `Client/Packet`, live tokens in the rest of the C++ tree, and definitions in any CMake file, three counts checked separately | **0**, **0**, **0** | `__GAME_CLIENT__` was defined for every translation unit that read it (from CMake on three targets and the listed test sources, from `Client_PCH.h` everywhere else) and the other four never were, so a conditional on any of them had one value in every translation unit. Task 5.2's ninth slice evaluated the 190 under `Client/Packet` out (2026-09-13), the tenth the 361 in the rest of the tree and then the definition itself, from `CMakeLists.txt`, `tests/CMakeLists.txt` and `Client_PCH.h` in one commit. The first count keeps a server half behind one of the five from coming back through a copy from the server repo unnoticed (one behind another spelling is the include checker's both-branch walk to catch); the second makes a `#ifdef __GAME_CLIENT__` written from habit fail the suite, since nothing defines it and the guarded code would be dead; the third keeps the definition out of CMake, where putting it back would make every such guard live again. Both token counts pin their file counts (a baseline of 0 cannot notice a shrunken scan). Counted by `tests/tools/count_identifier.pl`, so a comment or a string does not count - "zero live tokens", never "zero mentions". Blind to a spelling assembled by the preprocessor; a `#define` of the macro in a source file is one token and fails the count. Added 2026-09-13; both source counts at 0 and the CMake count added later that day. |
+| R15 | The five side macros the once-shared sources switched on (`__GAME_CLIENT__`, `__GAME_SERVER__`, `__LOGIN_SERVER__`, `__SHARED_SERVER__`, `__UPDATE_SERVER__`): live tokens under `Client/Packet`, live tokens in the rest of the C++ tree, and the names anywhere in a `CMakeLists.txt` or `.cmake` file, three counts checked separately | **0**, **0**, **0** | `__GAME_CLIENT__` was defined for every translation unit that read it (from CMake on three targets and the listed test sources, from `Client_PCH.h` everywhere else) and the other four never were, so a conditional on any of them had one value in every translation unit. Task 5.2's ninth slice evaluated the 190 under `Client/Packet` out (2026-09-13), the tenth the 361 in the rest of the tree and then the definition itself, from `CMakeLists.txt`, `tests/CMakeLists.txt` and `Client_PCH.h` in one commit. The first count keeps a server half behind one of the five from coming back through a copy from the server repo unnoticed (one behind another spelling is the include checker's both-branch walk to catch); the second makes a `#ifdef __GAME_CLIENT__` written from habit fail the suite, since nothing defines it and the guarded code would be dead; the third keeps the name out of the CMake files, where a definition put back would make every such guard live again - matched without word boundaries, because `-D__GAME_CLIENT__` has a word character on each side of the name (the same hole was in R13's CMake count and is closed there too). All three counts pin their file counts (a baseline of 0 cannot notice a shrunken scan); the CMake count does not see `CMakePresets.json`, the workflows or the Makefile, none of which passes a macro today. Counted by `tests/tools/count_identifier.pl`, so a comment or a string does not count - "zero live tokens", never "zero mentions". Blind to a spelling assembled by the preprocessor; a `#define` of the macro in a source file is one token and fails the count. Added 2026-09-13; both source counts at 0 and the CMake count added later that day. |
 
 R7 and R8 exist as a pair on purpose: R7 is precise and blind to
 indirection, R8 is coarse and cannot be evaded by spelling. Finding C19's
@@ -289,7 +289,8 @@ subscript has to be read before the number moves.
   > ones (the library's include path carries `Client/`); the search order
   > mirrors `target_include_directories(packetwire)`; `#if`/`#ifdef` on
   > the one-meaning macros (`__GAME_CLIENT__` defined, server macros
-  > never) are evaluated so dead server headers are skipped as the
+  > never - all five undefined since task 5.2's tenth slice retired
+  > the client one) are evaluated so dead server headers are skipped as the
   > compiler skips them; an unresolvable include is a violation; the walk
   > dies on an empty file list. `tests/arch/baseline.txt` is empty by
   > design.
@@ -310,7 +311,8 @@ info classes the GC packets delegate their parsing to.
   > layer bar one file now — see 2.4 and 5.1). Membership is
   > `tests/arch/packetwire_files.txt`, read by CMake, the include checker
   > and the ratchet script; the executable's list drops members by
-  > absolute path. Build wiring: `__GAME_CLIENT__` from `Client_PCH.h`,
+  > absolute path. Build wiring: `__GAME_CLIENT__` from `Client_PCH.h`
+  > (until task 5.2's tenth slice retired it),
   > `__WIN32__`/`__WINDOWS__` on WIN32, include dirs `Client/Packet`,
   > `Client`, `basic`; `DarkEden` and `VS_UI` link it.
   - Owner: the membership file + W0/W1/W2 in the include checker + R1.
@@ -320,9 +322,11 @@ info classes the GC packets delegate their parsing to.
   `friend class SocketInputStreamTestAccess;` in the stream header
   (access-only, declared unconditionally so the class definition is
   identical in every TU); the helper is `tests/support/packet_stream_access.h`.
-  Test TUs compile with the library's own defines (`__GAME_CLIENT__=1`,
-  Windows wire macros): `Packet`'s virtual set changes under them, so a
-  mismatch is a real vtable/ODR break.
+  Test TUs compile with the library's own defines (the Windows wire
+  macros; `__GAME_CLIENT__=1` as well until task 5.2's tenth slice
+  retired it): `Packet`'s virtual set changed under that one and the
+  packet headers still switch on the others, so a mismatch is a real
+  vtable/ODR break.
   > **Status:** done (2026-09-01, PR #34). Pinned: stream bounds
   > (zero-length rejected, over-read throws `InsufficientDataException`
   > and consumes nothing, wrap-around reassembly), the `read(std::string&,
@@ -428,7 +432,8 @@ review) directly unit-testable.
   > `write()`. `test_packet_factories.cpp` proves the link for the
   > received directions and pins that the manager refuses CG and
   > out-of-range ids.
-  > **Deliberately not done:** the ~186 `__GAME_SERVER__`/`__GAME_CLIENT__`
+  > **Deliberately not done then** (task 5.2's ninth and tenth slices
+  > took them on 2026-09-13): the ~186 `__GAME_SERVER__`/`__GAME_CLIENT__`
   > conditionals in 157 packet sources (they have one meaning in every
   > target, so the checker evaluates them; sweeping the dead server
   > halves is 5.2 work), and goldens for the ~500 unpinned packets.
@@ -752,10 +757,9 @@ rounds settled* for the host rules). Test fixtures share
   > `LoadFromFile`, which have no caller but are reached through
   > `CTypeTable`'s file I/O template, so deleting them is a template
   > question first; the two spellings outside R15's five that guard
-  > dead code the same way, `__UPDATE_CLIENT__`
-  > (`UCRequestLoginModeHandler.cpp`) and `__GUILD_MANAGER_TOOL__`
-  > (`MGuildMarkManager.cpp`), and `__EXPO_CLIENT__`, which nothing
-  > defines either, at eleven sites. (The packet-source conditionals
+  > dead code the same way, `__UPDATE_CLIENT__` (one site,
+  > `UCRequestLoginModeHandler.cpp`) and `__EXPO_CLIENT__` (ten live
+  > sites), which nothing defines either. (The packet-source conditionals
   > and the residue files this list once named are the ninth slice
   > below, the remaining conditionals and the macro itself the tenth;
   > the peer-to-peer whisper path is the seventh.)
@@ -881,7 +885,8 @@ rounds settled* for the host rules). Test fixtures share
   > it. The same script, restricted this time to expressions that
   > mention one of the five macros (its first version would also have
   > resolved `#if 0`, which the packet tree happened not to contain),
-  > evaluated the 361 conditionals in 255 files outside `Client/Packet`:
+  > evaluated the 363 conditionals in 256 files outside `Client/Packet`
+  > (two of them reduced rather than deleted, below):
   > the always-true wrappers around the handler bodies and the
   > `Client/` sources, the editor `#else` halves under them (the
   > sound path, the stubs and the alpha arithmetic in
@@ -897,15 +902,24 @@ rounds settled* for the host rules). Test fixtures share
   > both file counts pinned, and a third count over the CMake files
   > holds the definition out. The include checker evaluates the five
   > as undefined, which they are. What is left of the family is
-  > comments (`LCReconnectHandler.cpp` and `UIMessageManager.cpp` hold
-  > a `#ifdef` inside a `/* */` block each, historical notes in the
-  > precompiled headers and this file), `__UPDATE_CLIENT__` in one
-  > handler and `__GUILD_MANAGER_TOOL__` in one manager - spellings
-  > outside the five, dead the same way, not measured. `PlaySound`,
-  > `GetWhisperID`, `IsPlayerInSafePosition` and `IsPlayerInSafeZone`
-  > had editor-side definitions behind `!defined(__GAME_CLIENT__)`;
-  > the client's own (`PlaySound` in `GameMain.cpp`, the other three in
-  > the same file's client half) are what it always compiled.
+  > comments - a `#ifdef` inside a `/* */` block in
+  > `LCReconnectHandler.cpp` and in `UIMessageManager.cpp`,
+  > commented-out functions in `ClientFunction.cpp` and `MItemUse.cpp`,
+  > historical notes in `MSkillInfoTable.cpp`, `PacketHandlerRegistry.cpp`,
+  > the two precompiled headers and this file - and, outside the five,
+  > `__UPDATE_CLIENT__` in one handler and `__EXPO_CLIENT__` at ten
+  > sites, dead the same way, not measured (`__GUILD_MANAGER_TOOL__`
+  > went with this slice: its three sites were `defined(__GAME_CLIENT__)
+  > || defined(__GUILD_MANAGER_TOOL__)`). `PlaySound`, `GetWhisperID`,
+  > `IsPlayerInSafePosition` and `IsPlayerInSafeZone` had editor-side
+  > definitions in `ClientFunction.cpp` behind
+  > `!defined(__GAME_CLIENT__)`; the client's own - `PlaySound` in
+  > `GameMain.cpp`, the other three in `ClientFunction.cpp`'s client
+  > half - are what it always compiled. The script collapses one blank
+  > on each side of a hole it made (nine files lost a blank line beyond
+  > the directives for that reason) and leaves runs it did not create,
+  > so about a hundred handler files now hold three or more blank lines
+  > where a wrapper stood between two; deletions only, either way.
   - Owner: the build (nothing deleted was compiled, so R1 held at each
     step); the wrong-file-edited trap is closed for the files named;
     **R15** for the ninth and tenth slices - the five macros as live

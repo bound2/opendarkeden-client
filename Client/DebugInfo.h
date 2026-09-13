@@ -12,7 +12,6 @@
 #ifndef	__DEBUGINFO_H__
 #define	__DEBUGINFO_H__
 
-
 	#ifdef	OUTPUT_DEBUG
 		
 		//------------------------------------------

@@ -42,7 +42,6 @@ void GCExecuteElementHandler::execute ( GCExecuteElement * pGCExecuteElement , P
 
 	}
 	
-//#elif __WINDOWS__
 
 
 //	__END_DEBUG_EX 

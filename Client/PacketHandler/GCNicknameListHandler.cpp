@@ -23,7 +23,6 @@ void GCNicknameListHandler::execute ( GCNicknameList * pGCNicknameList , Player 
 //	std::vector<NICKNAMEINFO*> g_NickNameList;
 	//cout << pGCNicknameList->toString() << endl;
 	
-//#elif __WINDOWS__
 
 
 //	__END_DEBUG_EX 

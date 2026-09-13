@@ -56,7 +56,6 @@ void GCGQuestInventoryHandler::execute ( GCGQuestInventory * pGCGQuestInventory 
 
 
 	}
-//#elif __WINDOWS__
 
 
 //	__END_DEBUG_EX

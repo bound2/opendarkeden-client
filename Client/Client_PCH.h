@@ -14,8 +14,9 @@
 	translation unit got was decided by include-path order. The macro
 	itself is gone since task 5.2's tenth slice (2026-09-13): every
 	conditional on it had one value in every translation unit, and
-	ratchet R15 keeps the tree at zero mentions of it and of the four
-	server macros the shared sources once switched on.
+	ratchet R15 keeps the tree at zero live tokens of it and of the
+	four server macros the shared sources once switched on (comments
+	such as this one are not counted).
 
 	2025.01.14, merged 2026-09-08
 
