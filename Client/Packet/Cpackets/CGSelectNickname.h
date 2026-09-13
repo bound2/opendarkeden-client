@@ -47,7 +47,6 @@ private :
 // Factory for CGSelectNickname
 //
 //////////////////////////////////////////////////////////////////////
-//#ifdef __DEBUG_OUTPUT__
 class CGSelectNicknameFactory : public PacketFactory {
 
 public:

@@ -1021,7 +1021,7 @@ PacketSize_t PacketFactoryManager::getPacketMaxSize (PacketID_t packetID)
 //
 //////////////////////////////////////////////////////////////////////
 #ifdef __DEBUG_OUTPUT__
-string PacketFactoryManager::getPacketName (PacketID_t packetID)
+string PacketFactoryManager::getPacketName (PacketID_t packetID) 
 {
 	__BEGIN_TRY
 

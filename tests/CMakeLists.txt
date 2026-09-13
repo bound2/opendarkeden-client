@@ -69,12 +69,16 @@ target_include_directories(unit_tests PRIVATE
 #----------------------------------------------------------------------
 # Every TU that shares class definitions with the packetwire library
 # (which compiles with __GAME_CLIENT__=1 and the Windows wire macros)
-# must see the identical definitions - Exception.h's inline bodies
-# switch on the Windows wire macros, so a mismatch would be a real
-# ODR break, not a style issue. (Packet's virtual set used to change
-# under __GAME_CLIENT__ too; nothing under Client/Packet reads that
-# macro since task 5.2's ninth slice, ratchet R15, but the library is
-# still compiled with it and one list is the point.) One list, used by
+# must see the identical definitions - the packet headers still switch
+# on the Windows wire macros in places (Types/SystemTypes.h, Datagram.h),
+# and a class definition preprocessed two ways is a real ODR break, not
+# a style issue. Packet's virtual set changed under __GAME_CLIENT__
+# until task 5.2's ninth slice (2026-09-13): two TUs that were not on
+# this list, test_player_base.cpp and test_wire_host.cpp, compiled a
+# Packet with two more pure virtuals than the library's and an empty
+# PlayerStatus enum for as long as that conditional existed. Nothing
+# under Client/Packet reads the macro now (ratchet R15), the library is
+# still compiled with it, and one list is the point. One list, used by
 # every such TU below, so the two
 # blocks cannot drift apart; its platform half is the top-level
 # DARKEDEN_PLATFORM_DEFINITIONS, the list packetwire itself compiles
@@ -113,7 +117,7 @@ set_source_files_properties(
 	# The framing entry point, SocketOutputStream::write(const Packet*):
 	# what the ring and the sequence counter hold after a body write
 	# throws. Defines its own Packet subclass, so it needs the same
-	# definitions - Packet's virtual set changes under them.
+	# definitions the library's Packet was preprocessed with.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_output_stream_rollback.cpp
 	# The other end of the same stream: what flush() leaves in the ring
 	# when the socket takes only part of it. Derives from SocketImpl to
@@ -192,6 +196,13 @@ set_source_files_properties(
 	# seventh and eighth slices took the sending side out). Constructs the
 	# packet and drives write() over the socket stream.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_crwhisper.cpp
+	# The Player base's receive loop and the WireHost forwarders. Both
+	# define a Packet subclass and reach PlayerStatus.h, and both were
+	# missing from this list until the ninth dead-code slice's review
+	# (2026-09-13) found them compiling a different Packet than the
+	# library's; see the block comment above.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_player_base.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_host.cpp
 	PROPERTIES
 		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS};WIRE_GOLDEN_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/golden\""
 )

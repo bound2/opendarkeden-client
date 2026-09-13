@@ -51,6 +51,4 @@ public:
 	PacketSize_t getPacketMaxSize() const noexcept { return szSkillType; }
 };
 
-
-
 #endif

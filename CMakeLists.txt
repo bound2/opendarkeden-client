@@ -363,7 +363,7 @@ target_include_directories(packetwire PUBLIC
 # comes from Client_PCH.h, but the exe passes =1 on the command line
 # too, and identical preprocessing is the point of the move. Nothing
 # under Client/Packet has read __GAME_CLIENT__ since task 5.2's ninth
-# slice (ratchet R15 holds the tree at zero mentions); it stays here
+# slice (ratchet R15 holds the tree at zero live tokens); it stays here
 # because the executable side still reads it and one list is the point.
 target_compile_definitions(packetwire PRIVATE
 	USE_SDL_BACKEND

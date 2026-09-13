@@ -38,13 +38,14 @@
 # the server halves behind #ifdef __GAME_SERVER__ /
 # #ifndef __GAME_CLIENT__, halves that included server headers which
 # do not exist in this repo; task 5.2's ninth slice (2026-09-13)
-# evaluated them out, and ratchet R15 holds Client/Packet at zero
-# mentions of those macros. The walk still evaluates conditionals on
-# them - they have exactly one meaning in every target of this build
-# (__GAME_CLIENT__ defined, the server macros never) - so a half that
-# came back through a copy from the server repo is skipped here and
-# caught by R15 rather than reported as a live include; every other
-# macro is unknown and BOTH branches are checked. Nothing else is
+# evaluated them out, and ratchet R15 holds Client/Packet at zero live
+# tokens of those macros. The walk still evaluates conditionals on
+# them - they have exactly one meaning in every translation unit of
+# this build (__GAME_CLIENT__ defined, the server macros never) - so a
+# half behind one of them that came back through a copy from the
+# server repo is skipped here and caught by R15 rather than reported
+# as a live include; a half behind any other macro is unknown here,
+# and BOTH branches are checked, which is what catches it. Nothing else is
 # evaluated - an include that is dead only under some other macro is
 # still a violation.
 #

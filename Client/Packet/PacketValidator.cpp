@@ -52,7 +52,6 @@ void PacketValidator::init ()
 
 	__BEGIN_DEBUG
 
-
 		//----------------------------------------------------------------------
 		// CPS_NONE
 		//----------------------------------------------------------------------
@@ -237,8 +236,6 @@ void PacketValidator::init ()
 		pPacketIDSet->addPacketID( Packet::PACKET_RC_STATUS_HP );
 		pPacketIDSet->addPacketID( Packet::PACKET_RC_CHARACTER_INFO );
 		addPacketIDSet( pPacketIDSet->getPlayerStatus(), pPacketIDSet );
-
-
 
 	__END_DEBUG
 

@@ -43,10 +43,6 @@ class RankBonusInfo {
 		RankBonusInfo();
 		void		LoadFromFile(std::ifstream& file);		
 
-#ifndef __GAME_CLIEMT__
-		void		SaveToFile(std::ofstream& file);
-#endif
-
 	private:
 		unsigned short m_type;
 		MString m_Name;

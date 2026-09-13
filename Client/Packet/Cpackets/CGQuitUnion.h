@@ -76,7 +76,6 @@ private :
 // Factory for CGQuitUnion
 //
 //////////////////////////////////////////////////////////////////////
-//#ifdef __DEBUG_OUTPUT__
 class CGQuitUnionFactory : public PacketFactory {
 
 public:
