@@ -18,7 +18,6 @@ void GCPartyErrorHandler::execute (GCPartyError * pPacket , Player * pPlayer)
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	if (g_pUIDialog==NULL
 		|| g_pPlayer==NULL
@@ -151,7 +150,6 @@ void GCPartyErrorHandler::execute (GCPartyError * pPacket , Player * pPlayer)
 		break;
 	}
 
-#endif
 
 	 __END_CATCH
 }

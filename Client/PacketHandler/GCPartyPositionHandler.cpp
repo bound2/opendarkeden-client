@@ -27,7 +27,6 @@ void GCPartyPositionHandler::execute ( GCPartyPosition * pPacket , Player * pPla
 {
 	__BEGIN_TRY 
 		
-#ifdef __GAME_CLIENT__
 	if ((g_Mode==MODE_GAME
 			|| g_Mode==MODE_WAIT_UPDATEINFO			// 로딩 중이 아니거나..
 			|| g_Mode==MODE_WAIT_SETPOSITION		// 좌표 기다리는 경우
@@ -87,7 +86,6 @@ void GCPartyPositionHandler::execute ( GCPartyPosition * pPacket , Player * pPla
 			#endif
 		}
 	}
-#endif
 
 	__END_CATCH
 }

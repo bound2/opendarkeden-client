@@ -17,7 +17,6 @@ void GCMorphVampire2Handler::execute ( GCMorphVampire2 * pPacket , Player * pPla
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------
@@ -161,7 +160,6 @@ void GCMorphVampire2Handler::execute ( GCMorphVampire2 * pPacket , Player * pPla
 		}
 	}
 
-#endif
 
 	__END_CATCH
 }

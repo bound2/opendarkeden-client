@@ -20,7 +20,6 @@ void GCSMSAddressListHandler::execute ( GCSMSAddressList * pGCSMSAddressList , P
 {
 	__BEGIN_TRY /*__BEGIN_DEBUG_EX*/
 		
-#ifdef __GAME_CLIENT__
 
 		std::vector<AddressUnit*> TempList = pGCSMSAddressList->getAddresses();
 		if(TempList.size())
@@ -28,9 +27,6 @@ void GCSMSAddressListHandler::execute ( GCSMSAddressList * pGCSMSAddressList , P
 			UI_SetSMSList((void*)&TempList);
 		}
 	
-#elif __WINDOWS__
-
-#endif
 
 	//__END_DEBUG_EX 
 	__END_CATCH

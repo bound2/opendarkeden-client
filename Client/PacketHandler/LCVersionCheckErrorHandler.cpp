@@ -25,7 +25,6 @@ void LCVersionCheckErrorHandler::execute ( LCVersionCheckError * pPacket , Playe
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 
 	
 	// client를 update해야한다.
@@ -37,7 +36,6 @@ void LCVersionCheckErrorHandler::execute ( LCVersionCheckError * pPacket , Playe
 	g_pUIDialog->PopupFreeMessageDlg((*g_pGameStringTable)[UI_STRING_MESSAGE_CHECK_VERSION_ERROR].GetString(), -1,-1,UI_DIALOG_OK, true);
 	// end
 
-#endif
 		
 	__END_CATCH
 }

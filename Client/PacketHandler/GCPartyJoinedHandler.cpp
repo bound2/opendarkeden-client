@@ -28,7 +28,6 @@ void GCPartyJoinedHandler::execute (GCPartyJoined * pPacket , Player * pPlayer)
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	if (g_pPlayer==NULL
 		|| g_pParty==NULL
@@ -167,7 +166,6 @@ void GCPartyJoinedHandler::execute (GCPartyJoined * pPacket , Player * pPlayer)
 	delete pOldParty;
 
 	
-#endif
 
 	__END_CATCH
 }

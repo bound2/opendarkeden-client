@@ -3090,7 +3090,6 @@ InitGameObject()
 		g_pUserInformation = new UserInformation;
 	}
 	int nStartV = 73*25;
-#ifdef __GAME_CLIENT__
 	int version;
 	std::ifstream versionFile;//(g_pFileDef->getProperty("FILE_INFO_ACTION").c_str(), ios::binary);
 	if (!FileOpenBinary(g_pFileDef->getProperty("FILE_INFO_VERSION").c_str(), versionFile))
@@ -3115,7 +3114,6 @@ InitGameObject()
 		g_pUserInformation->GameVersion = g_nGameVersion;
 #endif
 
-#endif
 	
 	if (g_pTempInformation==NULL)
 	{

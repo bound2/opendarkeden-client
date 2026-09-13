@@ -19,7 +19,6 @@ void GCUnburrowOKHandler::execute ( GCUnburrowOK * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	/*
 	ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
@@ -76,7 +75,6 @@ void GCUnburrowOKHandler::execute ( GCUnburrowOK * pPacket , Player * pPlayer )
 		
 		false);			// 기술 첨부터 시작한다.
 
-#endif
 
 	__END_CATCH
 }

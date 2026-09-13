@@ -24,7 +24,6 @@ void LCWorldListHandler::execute ( LCWorldList * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 
 	//-----------------------------------------------------------
 	// Server Information 초기화
@@ -132,7 +131,6 @@ void LCWorldListHandler::execute ( LCWorldList * pPacket , Player * pPlayer )
 
 	SetMode( MODE_WAIT_SELECT_WORLD );
 
-#endif
 		
 	__END_CATCH
 }

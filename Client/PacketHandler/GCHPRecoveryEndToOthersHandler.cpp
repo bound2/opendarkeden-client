@@ -16,7 +16,6 @@ void GCHPRecoveryEndToOthersHandler::execute ( GCHPRecoveryEndToOthers * pPacket
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	if (g_pZone!=NULL)
@@ -32,7 +31,6 @@ void GCHPRecoveryEndToOthersHandler::execute ( GCHPRecoveryEndToOthers * pPacket
 	}
 
 
-#endif
 
 	__END_CATCH
 }

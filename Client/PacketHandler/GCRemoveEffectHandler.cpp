@@ -22,7 +22,6 @@ void GCRemoveEffectHandler::execute ( GCRemoveEffect * pPacket , Player * pPlaye
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------
@@ -131,7 +130,6 @@ void GCRemoveEffectHandler::execute ( GCRemoveEffect * pPacket , Player * pPlaye
 		}
 	}
 
-#endif
 
 	__END_CATCH
 }

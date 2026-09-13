@@ -20,7 +20,6 @@ void GCRideMotorCycleOKHandler::execute ( GCRideMotorCycleOK * pPacket , Player 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------
@@ -86,7 +85,6 @@ void GCRideMotorCycleOKHandler::execute ( GCRideMotorCycleOK * pPacket , Player 
 ////		ExecuteHelpEvent( HE_ITEM_RIDE_MOTORCYCLE );
 //	__END_HELP_EVENT
 
-#endif
 
 	__END_CATCH
 }

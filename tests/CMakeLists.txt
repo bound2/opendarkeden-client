@@ -68,24 +68,22 @@ target_include_directories(unit_tests PRIVATE
 
 #----------------------------------------------------------------------
 # Every TU that shares class definitions with the packetwire library
-# (which compiles with __GAME_CLIENT__=1 and the Windows wire macros)
-# must see the identical definitions - the packet headers still switch
-# on the Windows wire macros in places (Types/SystemTypes.h, Datagram.h),
-# and a class definition preprocessed two ways is a real ODR break, not
-# a style issue. Packet's virtual set changed under __GAME_CLIENT__
-# until task 5.2's ninth slice (2026-09-13): two TUs that were not on
+# (which compiles with the Windows wire macros) must see the identical
+# definitions - the packet headers still switch on those macros in
+# places (Types/SystemTypes.h, Datagram.h), and a class definition
+# preprocessed two ways is a real ODR break, not a style issue. The
+# list carried __GAME_CLIENT__=1 as well until task 5.2's tenth slice
+# (2026-09-13) retired that macro from the build; while it existed,
+# Packet's virtual set changed under it, and two TUs that were not on
 # this list, test_player_base.cpp and test_wire_host.cpp, compiled a
 # Packet with two more pure virtuals than the library's and an empty
-# PlayerStatus enum for as long as that conditional existed. Nothing
-# under Client/Packet reads the macro now (ratchet R15), the library is
-# still compiled with it, and one list is the point. One list, used by
-# every such TU below, so the two
-# blocks cannot drift apart; its platform half is the top-level
+# PlayerStatus enum. One list, used by every such TU below, so the two
+# blocks cannot drift apart; it is the top-level
 # DARKEDEN_PLATFORM_DEFINITIONS, the list packetwire itself compiles
 # with, so it cannot drift from the library either (off Windows that
 # list is empty on both sides - basic/Platform.h does the detecting).
 #----------------------------------------------------------------------
-set(PACKETWIRE_TEST_DEFINITIONS "__GAME_CLIENT__=1" ${DARKEDEN_PLATFORM_DEFINITIONS})
+set(PACKETWIRE_TEST_DEFINITIONS ${DARKEDEN_PLATFORM_DEFINITIONS})
 
 #----------------------------------------------------------------------
 # Wire-layout inventory (unit/test_wire_layout.cpp).

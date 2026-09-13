@@ -22,7 +22,6 @@ void GCRealWearingInfoHandler::execute ( GCRealWearingInfo * pPacket , Player * 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	DWORD flag = pPacket->getInfo();
@@ -213,7 +212,6 @@ void GCRealWearingInfoHandler::execute ( GCRealWearingInfo * pPacket , Player * 
 	
 	g_pPlayer->CalculateStatus();
 
-#endif
 
 	__END_CATCH
 }

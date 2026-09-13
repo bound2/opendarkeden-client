@@ -26,7 +26,6 @@ void GCSkillToObjectOK1Handler::execute ( GCSkillToObjectOK1 * pPacket , Player 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 		
 	//------------------------------------------------------------------
 	// Player가 기다리던 skill의 성공유무를 검증받았다.
@@ -229,7 +228,6 @@ void GCSkillToObjectOK1Handler::execute ( GCSkillToObjectOK1 * pPacket , Player 
 	}
 	
 
-#endif
 
 	__END_CATCH
 }

@@ -21,7 +21,6 @@ void GCSkillToTileOK2Handler::execute ( GCSkillToTileOK2 * pPacket , Player * pP
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------------------
 	// 상태값을 바꾼다.
@@ -345,7 +344,6 @@ void GCSkillToTileOK2Handler::execute ( GCSkillToTileOK2 * pPacket , Player * pP
 	
 	DEBUG_ADD("TileOK2End");
 
-#endif
 
 	__END_CATCH
 }

@@ -11,10 +11,8 @@
 #include "Player.h"
 #include "ClientDef.h"
 
-#ifdef __GAME_CLIENT__
 	#include "Cpackets/CGMove.h"
 	#include "ClientPlayer.h"
-#endif
 
 
 //--------------------------------------------------------------------------------
@@ -24,7 +22,6 @@ void GCMoveHandler::execute ( GCMove * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 		// ID가 getObjectID()인 Creature를 움직여준다.
 		// 없으면 Zone에 새로 추가
@@ -86,7 +83,6 @@ void GCMoveHandler::execute ( GCMove * pPacket , Player * pPlayer )
 
 //	#endif
 
-#endif
 
 	__END_CATCH
 }

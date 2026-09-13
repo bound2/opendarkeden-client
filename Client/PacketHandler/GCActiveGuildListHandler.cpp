@@ -18,7 +18,6 @@ void GCActiveGuildListHandler::execute ( GCActiveGuildList * pPacket , Player * 
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 	//cout << pPacket->toString() << endl; 
 	//------------------------------------------------------
 	// 검증
@@ -32,7 +31,6 @@ void GCActiveGuildListHandler::execute ( GCActiveGuildList * pPacket , Player * 
 
 
 	UI_ShowActiveGuildList(pPacket);
-#endif
 
 	__END_CATCH
 }

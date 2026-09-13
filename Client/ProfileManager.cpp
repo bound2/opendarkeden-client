@@ -15,11 +15,7 @@
 #include "UserInformation.h"
 //#include "MFileDef.h"
 
-#ifdef __GAME_CLIENT__
 	#include "Properties.h"
-#else
-	#include "../Client/Packet/Properties.h"
-#endif
 
 #include "UtilityFunction.h"
 #include "ProfileManager.h"

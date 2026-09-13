@@ -30,7 +30,6 @@ void CRWhisperHandler::execute ( CRWhisper * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 	
 	RequestServerPlayer* pRequestServerPlayer = dynamic_cast<RequestServerPlayer*>( pPlayer );
 		
@@ -191,7 +190,6 @@ void CRWhisperHandler::execute ( CRWhisper * pPacket , Player * pPlayer )
 	}
 	*/
 
-#endif
 
 	__END_CATCH
 }

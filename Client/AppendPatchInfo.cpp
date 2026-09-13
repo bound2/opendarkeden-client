@@ -4,10 +4,8 @@
 #include "Client_PCH.h"
 #include "AppendPatchInfo.h"
 
-#ifdef __GAME_CLIENT__
 	extern void		UpdateProgressBar();
 	extern void		SetProgressBarText(const char* title);
-#endif
 
 //-----------------------------------------------------------------------------
 //s
@@ -26,18 +24,14 @@ APPEND_PATCH_NODE::Append(const char* orgFilename) const
 	char buffer[4096];
 
 	// 우훗.. - -;;
-	#ifdef __GAME_CLIENT__
 		UpdateProgressBar();
-	#endif
 
 	//-------------------------------------------------------------
 	// 패치 화일이 있으면 걍 패치..
 	//-------------------------------------------------------------
 	if (appendFile.is_open())
 	{
-		#ifdef __GAME_CLIENT__
 			SetProgressBarText("패치 화일을 적용시키고 있습니다.");
-		#endif
 
 		std::fstream orgFile(orgFilename, std::ios::binary | std::ios::ate | std::ios::in | std::ios::out);
 		

@@ -18,7 +18,6 @@ void GCAddMonsterFromBurrowingHandler::execute ( GCAddMonsterFromBurrowing * pPa
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------
 	// Zone이 아직 생성되지 않은 경우
@@ -215,7 +214,6 @@ void GCAddMonsterFromBurrowingHandler::execute ( GCAddMonsterFromBurrowing * pPa
 ////		ExecuteHelpEvent( HE_CREATURE_APPEAR_MONSTER );
 //	__END_HELP_EVENT
 
-#endif
 
 	__END_CATCH
 }

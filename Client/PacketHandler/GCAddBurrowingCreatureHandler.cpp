@@ -17,7 +17,6 @@ void GCAddBurrowingCreatureHandler::execute ( GCAddBurrowingCreature * pPacket ,
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------
@@ -92,7 +91,6 @@ void GCAddBurrowingCreatureHandler::execute ( GCAddBurrowingCreature * pPacket ,
 		}
 	}
 
-#endif
 
 	__END_CATCH
 }

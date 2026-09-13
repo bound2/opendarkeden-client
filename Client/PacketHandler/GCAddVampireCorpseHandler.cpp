@@ -18,7 +18,6 @@ void GCAddVampireCorpseHandler::execute ( GCAddVampireCorpse * pPacket , Player 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	// Creature를 생성해서 MCorpse에 추가해서 Zone에 넣는다.
@@ -274,7 +273,6 @@ void GCAddVampireCorpseHandler::execute ( GCAddVampireCorpse * pPacket , Player 
 		}
 	}
 
-#endif
 
 	__END_CATCH
 }

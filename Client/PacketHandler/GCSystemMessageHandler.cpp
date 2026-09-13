@@ -23,7 +23,6 @@ void GCSystemMessageHandler::execute ( GCSystemMessage * pPacket , Player * pPla
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 	// The message can be up to 255 bytes; a fixed char[128] here overflowed.
 	static std::string previous1;
 	switch(pPacket->getType())
@@ -182,7 +181,6 @@ void GCSystemMessageHandler::execute ( GCSystemMessage * pPacket , Player * pPla
 		previous = messageStr;
 	}
 
-#endif
 
 	__END_CATCH
 }

@@ -22,7 +22,6 @@ void GCPhoneSayHandler::execute ( GCPhoneSay * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 	
 
 	int slot = pPacket->getSlotID();
@@ -53,7 +52,6 @@ void GCPhoneSayHandler::execute ( GCPhoneSay * pPacket , Player * pPlayer )
 	//UI_AddChatToHistory( message );
 
 
-#endif
 
 	__END_CATCH
 }

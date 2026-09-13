@@ -19,7 +19,6 @@ void GCStashListHandler::execute ( GCStashList * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	int stashNum = pPacket->getStashNum();
 
@@ -261,7 +260,6 @@ void GCStashListHandler::execute ( GCStashList * pPacket , Player * pPlayer )
 		g_pUIDialog->PopupFreeMessageDlg((*g_pGameStringTable)[STRING_MESSAGE_NO_STORAGE].GetString());
 	}
 		
-#endif
 
 	__END_CATCH
 }

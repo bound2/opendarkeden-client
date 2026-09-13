@@ -19,7 +19,6 @@ void GCModifyNicknameHandler::execute ( GCModifyNickname * pPacket , Player * pP
 {
 	__BEGIN_TRY /*__BEGIN_DEBUG_EX*/
 	
-#ifdef __GAME_CLIENT__
 
 		int CreatureID = pPacket->getObjectID();
 		
@@ -64,7 +63,6 @@ void GCModifyNicknameHandler::execute ( GCModifyNickname * pPacket , Player * pP
 
 		}
 
-#endif
 
 	/*__END_DEBUG_EX */__END_CATCH
 }

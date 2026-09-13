@@ -18,7 +18,6 @@ void GCWaitGuildListHandler::execute ( GCWaitGuildList * pPacket , Player * pPla
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 	//------------------------------------------------------
 	// 검증
 	//------------------------------------------------------
@@ -30,7 +29,6 @@ void GCWaitGuildListHandler::execute ( GCWaitGuildList * pPacket , Player * pPla
 	}
 
 	UI_ShowWaitGuildList(pPacket);
-#endif
 
 	__END_CATCH
 }

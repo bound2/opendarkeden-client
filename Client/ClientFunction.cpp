@@ -9,7 +9,6 @@
 // Forward declarations (common to all builds)
 extern RECT g_GameRect;
 
-#ifdef __GAME_CLIENT__
 	#include "MTopView.h"
 	#include "MInventory.h"
 	#include "MEffectGeneratorTable.h"
@@ -28,137 +27,7 @@ extern RECT g_GameRect;
 	extern bool   g_bZoneSafe;
 	extern BOOL g_MyFull;
 	extern RECT g_GameRect;
-#else
-	#include "VS_UI_Base.h"
-	#include "CSoundPartManager.h"
-	#include "MSoundTable.h"
 
-	CSoundPartManager*		g_pSoundManager = NULL;
-
-	extern HWND	g_hWnd;
-#endif
-
-#if !defined(_LIB) && !defined(__GAME_CLIENT__)
-	
-//-----------------------------------------------------------------------------
-// 초기화 할 때,
-//-----------------------------------------------------------------------------
-void
-InitSound()
-{
-	if (g_pSoundTable==NULL)
-	{
-		g_pSoundTable = new SOUND_TABLE;
-	}
-
-	//------------------------------------------------
-	// Load SoundTable
-	//------------------------------------------------
-	std::ifstream soundTable("Data/Info/Sound.inf", std::ios::binary);
-	g_pSoundTable->LoadFromFile(soundTable);
-	soundTable.close();
-
-
-	//------------------------------------------------
-	// DXSound & SoundManager 초기화
-	//------------------------------------------------
-	if (g_SDLAudio.Init(g_hWnd))
-	{
-		g_pSoundManager = new CSoundPartManager;
-		g_pSoundManager->Init( g_pSoundTable->GetSize(), 50 );	// 50개의 wav만 loading한다는 의미
-	}
-}
-
-//-----------------------------------------------------------------------------
-// UnInit Sound
-//-----------------------------------------------------------------------------
-void
-UnInitSound()
-{
-	//-------------------------------------
-	// UnInit DirectSound
-	//-------------------------------------
-	g_pSoundManager->Release();	
-
-	g_SDLAudio.Release();
-}
-
-	//---------------------------------------------------------------------------
-	// PlaySound
-	//---------------------------------------------------------------------------
-	// Client가 아닌 경우에 사용..
-	//---------------------------------------------------------------------------	
-	void		
-	PlaySound(TYPE_SOUNDID soundID)
-	{
-		//-----------------------------------------------------------
-		// 정의되지 않는 sound ID일 경우..
-		//-----------------------------------------------------------
-		if (!g_SDLAudio.IsInit() || soundID >= g_pSoundTable->GetSize())
-			return;
-
-		//-----------------------------------------------------------
-		// 없으면 --> Load & Play
-		//-----------------------------------------------------------
-		if (g_pSoundManager->IsDataNULL(soundID))
-		{
-			// 다시 load						
-			const char* filename = (*g_pSoundTable)[soundID].Filename.GetString();
- 			LPDIRECTSOUNDBUFFER pBuffer = g_SDLAudio.LoadWav( (char*)filename );
-
-			//-----------------------------------------------------------
-			// Loading 실패
-			//-----------------------------------------------------------
-			if (pBuffer==NULL)
-			{
-			}
-			//-----------------------------------------------------------
-			// Load에 성공 했으면...
-			//-----------------------------------------------------------
-			else		
-			{
-				// Replace됐으면 원래것을 메모리에서 지운다.
-				LPDIRECTSOUNDBUFFER pOld;
-				if (g_pSoundManager->SetData( soundID, pBuffer, pOld )!=0xFFFF)
-				{
-					g_SDLAudio.Release(pOld);
-				}
-
-				// Play
-				g_SDLAudio.Play( pBuffer, false );				
-			}
-		}
-		//-----------------------------------------------------------
-		// 있는 경우 --> Play
-		//-----------------------------------------------------------
-		else
-		{
-			LPDIRECTSOUNDBUFFER pBuffer;
-			if (g_pSoundManager->GetData(soundID, pBuffer))
-			{			
-				g_SDLAudio.Play( pBuffer, false );
-			}
-		}
-	}
-
-	const char*
-	GetWhisperID()
-	{
-		return NULL;
-	}
-
-	BOOL
-	IsPlayerInSafePosition()
-	{
-		return FALSE;
-	}
-
-	bool
-	IsPlayerInSafeZone()
-	{
-		return false;
-	}
-#else
 	//---------------------------------------------------------------------------
 	// Get Whisper ID
 	//---------------------------------------------------------------------------
@@ -184,7 +53,6 @@ UnInitSound()
 	{
 		return g_bZoneSafe;
 	}
-#endif
 
 //---------------------------------------------------------------------------
 // DrawInventoryEffect
@@ -194,26 +62,22 @@ UnInitSound()
 void
 DrawInventoryEffect()
 {
-	#ifdef __GAME_CLIENT__
 		// 현재 inventory의 첫 좌표			
 		POINT point = UI_GetInventoryPosition();
 		
 		// TODO: [SDL_BACKEND] DrawInventoryEffect not implemented for SDL backend
 		// g_pTopView->DrawInventoryEffect(&point);
 
-	#endif
 }
 
 void 
 DrawTitleEffect()
 {
-	#ifdef __GAME_CLIENT__
 		// 현재 inventory의 첫 좌표			
 		POINT point = 	{400,528};
 
 		g_pTopView->DrawTitleEffect(&point);
 
-	#endif
 }
 
 // 2004, 11, 22, sobeit add start
@@ -224,13 +88,11 @@ DrawTitleEffect()
 void 
 DrawBloodBibleEffect_InGear(int X, int Y)
 {
-	#ifdef __GAME_CLIENT__
 		// 현재 inventory의 첫 좌표			
 		POINT point = 	{X,Y};
 
 		g_pTopView->DrawBloodBibleEffect_InGear(&point);
 
-	#endif
 }
 // 2004, 11, 22, sobeit add end
 //---------------------------------------------------------------------------
@@ -241,7 +103,6 @@ DrawBloodBibleEffect_InGear(int X, int Y)
 void
 AddNewInventoryEffect(TYPE_OBJECTID id, TYPE_ACTIONINFO ai, DWORD delayFrame, DWORD value)
 {
-	#ifdef __GAME_CLIENT__
 	
 		DEBUG_ADD("AddNewInventoryEffect");
 
@@ -384,7 +245,6 @@ AddNewInventoryEffect(TYPE_OBJECTID id, TYPE_ACTIONINFO ai, DWORD delayFrame, DW
 			//------------------------------------------------------------				
 			// 음.. 결과는 어딨지.. - -;;
 		}
-	#endif
 }
 
 
@@ -418,7 +278,6 @@ DrawAlphaBox(RECT* pRect, BYTE r, BYTE g, BYTE b, BYTE alpha)
 	// end
 	if(pRect->left >= pRect->right || pRect->top >= pRect->bottom)return;
 
-	#ifdef __GAME_CLIENT__
 		int reverseAlpha = 31-alpha;
 
 		if (alpha<0) alpha = 0;
@@ -572,11 +431,6 @@ DrawAlphaBox(RECT* pRect, BYTE r, BYTE g, BYTE b, BYTE alpha)
 		// Unlock the surface
 		spritectl_unlock_surface(sdl_surface);
 #endif
-	#else
-		// Non-GAME_CLIENT build (editor/tools)
-		int reverseAlpha = 31-alpha;
-		// No-op for non-game builds
-	#endif
 }
 
 

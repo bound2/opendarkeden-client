@@ -4,9 +4,7 @@
 #include "Client_PCH.h"
 #include "ShowTimeChecker.h"
 #include "Client_PCH.h"
-#ifdef __GAME_CLIENT__
 	#include "MGameTime.h"
-#endif
 
 extern DWORD	g_CurrentTime;
 

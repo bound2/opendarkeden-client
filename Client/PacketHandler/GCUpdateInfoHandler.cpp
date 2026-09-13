@@ -36,7 +36,6 @@
 #include "MGuildInfoMapper.h"
 #include "CSystemInfo.h"
 
-#ifdef __GAME_CLIENT__
 
 	#include "ClientPlayer.h"
 	#include "PCSlayerInfo2.h"
@@ -45,7 +44,6 @@
 	#include "Cpackets/CGReady.h"
 	#include "VS_UI_GameCommon2.h"
 	#include "MGameStringTable.h"
-#endif
 
 
 
@@ -79,7 +77,6 @@ void GCUpdateInfoHandler::execute ( GCUpdateInfo * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 
 	#ifndef __DEBUG_OUTPUT__ 
 		DEBUG_ADD("Execute UpdateInfo");
@@ -973,7 +970,6 @@ void GCUpdateInfoHandler::execute ( GCUpdateInfo * pPacket , Player * pPlayer )
 */
 //	ExecuteHelpEvent( HELP_EVENT_INTERFACE );
 
-#endif
 
 	__END_CATCH
 }

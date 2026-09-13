@@ -9,9 +9,7 @@
 #include "Client_PCH.h"
 #include "Gpackets/GCChangeWeather.h"
 
-#ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
-#endif
 
 #include "ClientDef.h"
 
@@ -22,7 +20,6 @@ void GCChangeWeatherHandler::execute ( GCChangeWeather * pPacket , Player * pPla
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	#ifdef __EXPO_CLIENT__
 		return;
@@ -31,7 +28,6 @@ void GCChangeWeatherHandler::execute ( GCChangeWeather * pPacket , Player * pPla
 	
 	SetWeather( pPacket->getWeather(), pPacket->getWeatherLevel() );	
 
-#endif
 
 	__END_CATCH
 }

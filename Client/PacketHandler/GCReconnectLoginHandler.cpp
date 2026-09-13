@@ -12,14 +12,12 @@
 #include "Gpackets/GCReconnectLogin.h"
 #include "ClientDef.h"
 
-#ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
 	#include "Cpackets/CLReconnectLogin.h"
 	#include "UserInformation.h"
 	//add by viva
 	#include "Cpackets/CGConnectSetKey.h"
 	//end
-#endif
 //add by viva
 bool UpdateSocketOutput();
 //end
@@ -32,7 +30,6 @@ void GCReconnectLoginHandler::execute ( GCReconnectLogin * pPacket , Player * pP
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 
  
 	ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
@@ -88,6 +85,5 @@ void GCReconnectLoginHandler::execute ( GCReconnectLogin * pPacket , Player * pP
 	// pc std::list를 기다린다.
 	SetMode( MODE_WAIT_PCLIST  );
 
-#endif
 	__END_CATCH
 }

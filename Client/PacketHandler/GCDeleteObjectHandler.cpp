@@ -13,9 +13,6 @@
 #include "UIFunction.h"
 
 
-#ifdef __GAME_CLIENT__
-#endif
-
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
 void GCDeleteObjectHandler::execute ( GCDeleteObject * pPacket , Player * pPlayer )
@@ -23,7 +20,6 @@ void GCDeleteObjectHandler::execute ( GCDeleteObject * pPacket , Player * pPlaye
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 
 	//cout << "Object[" << pPacket->getObjectID() << "] deleted from zone." << endl;
 
@@ -79,7 +75,6 @@ void GCDeleteObjectHandler::execute ( GCDeleteObject * pPacket , Player * pPlaye
 		}
 	}
 
-#endif
 
 	__END_CATCH
 }

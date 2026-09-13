@@ -19,7 +19,6 @@ void GCFakeMoveHandler::execute ( GCFakeMove * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	MCreature *pCreature = g_pZone->GetCreature(pPacket->getObjectID());
 	
@@ -41,7 +40,6 @@ void GCFakeMoveHandler::execute ( GCFakeMove * pPacket , Player * pPlayer )
 		delete pFakeCreature;
 	}
 
-#endif
 
 	__END_CATCH
 }

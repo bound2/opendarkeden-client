@@ -11,9 +11,6 @@
 #include "Gpackets/GCRemoveCorpseHead.h"
 #include "ClientDef.h"
 
-#ifdef __GAME_CLIENT__
-#endif
-
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
 void GCRemoveCorpseHeadHandler::execute ( GCRemoveCorpseHead * pPacket , Player * pPlayer )

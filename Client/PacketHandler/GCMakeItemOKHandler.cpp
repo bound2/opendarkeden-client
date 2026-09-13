@@ -21,7 +21,6 @@ void GCMakeItemOKHandler::execute ( GCMakeItemOK * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------------------
@@ -102,7 +101,6 @@ void GCMakeItemOKHandler::execute ( GCMakeItemOK * pPacket , Player * pPlayer )
 	//------------------------------------------------------------------
 	AffectModifyInfo(g_pPlayer, pPacket);
 
-#endif
 
 	__END_CATCH
 }

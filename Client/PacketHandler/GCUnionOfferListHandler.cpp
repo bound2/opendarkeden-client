@@ -20,7 +20,6 @@ void GCUnionOfferListHandler::execute ( GCUnionOfferList * pPacket , Player * pP
 {
 	__BEGIN_TRY// __BEGIN_DEBUG_EX
 	
-#ifdef __GAME_CLIENT__
 
 		
 	std::list<SingleGuildUnionOffer*>::const_iterator itr = pPacket->getUnionOfferList().begin();
@@ -51,7 +50,6 @@ void GCUnionOfferListHandler::execute ( GCUnionOfferList * pPacket , Player * pP
 
 		itr++;
 	}
-#endif
 
 //	__END_DEBUG_EX
  __END_CATCH

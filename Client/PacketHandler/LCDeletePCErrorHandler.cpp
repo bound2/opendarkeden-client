@@ -22,7 +22,6 @@ void LCDeletePCErrorHandler::execute ( LCDeletePCError * pPacket , Player * pPla
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 	//#ifdef __DEBUG_OUTPUT__
 	//cout << "Fail to delete PC... (" << pPacket->toString() << ")" << endl;
 	//throw ProtocolException("DeletePC Failed!");
@@ -33,7 +32,6 @@ void LCDeletePCErrorHandler::execute ( LCDeletePCError * pPacket , Player * pPla
 
 	g_ModeNext = MODE_WAIT_SELECTPC;
 
-#endif
 		
 	__END_CATCH
 }

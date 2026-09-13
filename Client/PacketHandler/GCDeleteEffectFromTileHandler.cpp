@@ -20,7 +20,6 @@ void GCDeleteEffectFromTileHandler::execute ( GCDeleteEffectFromTile * pPacket ,
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	
 		// -_- 패배
@@ -61,7 +60,6 @@ void GCDeleteEffectFromTileHandler::execute ( GCDeleteEffectFromTile * pPacket ,
 		DEBUG_ADD("[Error] g_pZone is NULL");
 	}
 	
-#endif
 
 	__END_CATCH
 }

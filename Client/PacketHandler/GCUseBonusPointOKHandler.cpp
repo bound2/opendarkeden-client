@@ -20,7 +20,6 @@ void GCUseBonusPointOKHandler::execute ( GCUseBonusPointOK * pPacket , Player * 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------------------
@@ -75,7 +74,6 @@ void GCUseBonusPointOKHandler::execute ( GCUseBonusPointOK * pPacket , Player * 
 		}
 	}
 
-#endif
 
 	__END_CATCH
 }

@@ -13,11 +13,9 @@
 #include "UIDialog.h"
 #include "UIFunction.h"
 
-#ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
 	#include "Cpackets/CLQueryPlayerID.h"
 	#include "Cpackets/CLRegisterPlayer.h"
-#endif
 
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
@@ -26,7 +24,6 @@ void LCQueryResultPlayerIDHandler::execute ( LCQueryResultPlayerID * pPacket , P
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	/*
 	ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
@@ -146,7 +143,6 @@ void LCQueryResultPlayerIDHandler::execute ( LCQueryResultPlayerID * pPacket , P
 		UI_NoAlreadyExistIDMessage();
 	}
 
-#endif
 		
 	__END_CATCH
 }

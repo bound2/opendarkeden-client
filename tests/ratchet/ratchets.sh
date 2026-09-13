@@ -1154,58 +1154,51 @@ fi
 #----------------------------------------------------------------------
 # R15 - the build-wide side macros spelled in the sources.
 #
-# __GAME_CLIENT__ reaches every translation unit that reads it: CMake
-# passes =1 to the executable, packetwire, gamemodel and the test
-# sources that share their definitions, and every other reader
-# includes Client_PCH.h, which defines it (it is not a target-wide
-# definition on VS_UI or the other libraries - they get it per file,
-# through that header). __GAME_SERVER__, __LOGIN_SERVER__,
-# __SHARED_SERVER__ and __UPDATE_SERVER__ are defined nowhere. A
-# conditional on any of the five therefore has one value in every
-# translation unit, and the once-shared packet sources carried 190 of
-# them - server halves that included headers this repo does not have,
-# client halves whose guard was always true. Task 5.2's ninth slice
-# (2026-09-13) evaluated every one of them out of Client/Packet, and
-# out of the four files outside it the task had named (RankBonusTable
-# .h/.cpp, MSectorInfo.h, Updater/Update.cpp). Two counts, checked
-# separately:
+# The once-shared client/server sources switched on five macros:
+# __GAME_CLIENT__, which every translation unit that read it had
+# defined (CMake passed =1 to the executable, packetwire, gamemodel and
+# the listed test sources; every other reader got it from
+# Client_PCH.h), and __GAME_SERVER__, __LOGIN_SERVER__,
+# __SHARED_SERVER__ and __UPDATE_SERVER__, which nothing ever defined.
+# A conditional on any of the five therefore had one value in every
+# translation unit. Task 5.2's ninth slice (2026-09-13) evaluated the
+# 190 under Client/Packet out - server halves that included headers
+# this repo does not have, client halves whose guard was always true -
+# and the tenth slice, the same day, the 361 in the rest of the tree
+# (always-true #ifdef __GAME_CLIENT__ wrappers in 237 handler files and
+# 19 files directly under Client/, ten always-false server guards in
+# five handlers) and then the definition itself, from CMakeLists.txt,
+# tests/CMakeLists.txt and Client_PCH.h in the same commit. Two
+# counts, both 0, checked separately because they are what a returning
+# half would land in:
 #
-#   the five macros as tokens in any .h/.cpp/.inl under Client/Packet,
-#   which must stay 0 - a server half behind one of the five cannot
-#   come back through a copy from the server repo without this
-#   noticing (one behind another spelling, __UPDATE_CLIENT__ or
-#   __GUILD_MANAGER_TOOL__ say, is the include checker's both-branch
-#   walk to catch, not this count's);
+#   the five macros as tokens in any .h/.cpp/.inl under Client/Packet -
+#   a server half behind one of the five cannot come back through a
+#   copy from the server repo without this noticing (one behind another
+#   spelling, __UPDATE_CLIENT__ or __GUILD_MANAGER_TOOL__ say, is the
+#   include checker's both-branch walk to catch, not this count's);
 #
 #   the same tokens in the rest of Client, VS_UI, basic, tools,
-#   third_party and tests, 364 as of 2026-09-13: always-true
-#   #ifdef __GAME_CLIENT__ wrappers in 237 of the 280 files under
-#   Client/PacketHandler and in 19 files directly under Client/, ten
-#   always-false server guards in five of those handlers
-#   (GCReconnect, LGIncomingConnection, the two GLIncomingConnection
-#   handlers, CURequestLoginMode), and Client_PCH.h's own #ifndef /
-#   #define pair, which is two of the 364. That count is the next
-#   slice's workload; when those two are all that is left, the
-#   definition there and the ones in CMakeLists.txt and
-#   tests/CMakeLists.txt go together, in one commit, and this count
-#   reaches 0 with them.
+#   third_party and tests - a #ifdef __GAME_CLIENT__ written from habit
+#   is dead code now, since nothing defines the macro, and this is what
+#   says so.
 #
 # Counted by tests/tools/count_identifier.pl, so a mention in a comment
 # or a string does not count (//#ifdef __GAME_CLIENT__ in
-# Client/PacketHandler/GCSayHandler.cpp is one): the packet count is
-# "no live token", not "no mention". Blind to a spelling assembled by
-# the preprocessor and to the CMake definitions themselves, which are
-# the point while the second count is above 0. The packet half pins
-# its denominator (a baseline of 0 cannot notice a shrunken scan, the
-# way R13's font-list 1 does), the rest half is pinned by its own
-# non-zero baseline. The include checker (tests/arch/check_includes.pl)
-# still evaluates the same five macros while walking library includes;
-# with the packet tree at 0 that evaluation decides nothing, and this
-# ratchet is what keeps it that way.
+# Client/DebugInfo.h is one): "no live token", not "no mention". Blind
+# to a spelling assembled by the preprocessor and to a definition put
+# back into a CMake file - which would make every such #ifdef live
+# again, so the CMake files are grepped for the name here as well.
+# Both halves pin their denominators (a baseline of 0 cannot notice a
+# shrunken scan, the way R13's font-list 1 does). The include checker
+# (tests/arch/check_includes.pl) still evaluates the same five macros,
+# all as undefined, while walking library includes.
 #----------------------------------------------------------------------
 R15_PACKET_BASELINE=0
-R15_REST_BASELINE=364
+R15_REST_BASELINE=0
+R15_CMAKE_BASELINE=0
 R15_PACKET_FILES_FLOOR=1000
+R15_REST_FILES_FLOOR=1000
 R15_PATTERN='__GAME_CLIENT__|__GAME_SERVER__|__LOGIN_SERVER__|__SHARED_SERVER__|__UPDATE_SERVER__'
 
 r15_packet_members () {
@@ -1221,14 +1214,20 @@ if [ ! -f tests/tools/count_identifier.pl ]; then
 elif [ "$(r15_packet_members | wc -l)" -lt "$R15_PACKET_FILES_FLOOR" ]; then
 	echo "FAIL R15: only $(r15_packet_members | wc -l) files enumerated under Client/Packet (floor $R15_PACKET_FILES_FLOOR) - a zero over a shrunken scan would measure nothing"
 	FAIL=1
-elif [ "$(r15_rest_members | wc -l)" -eq 0 ]; then
-	echo "FAIL R15: no sources enumerated outside Client/Packet - a zero here would measure nothing"
+elif [ "$(r15_rest_members | wc -l)" -lt "$R15_REST_FILES_FLOOR" ]; then
+	echo "FAIL R15: only $(r15_rest_members | wc -l) files enumerated outside Client/Packet (floor $R15_REST_FILES_FLOOR) - a zero over a shrunken scan would measure nothing"
+	FAIL=1
+elif [ "$(r13_cmake_members | wc -l)" -eq 0 ]; then
+	echo "FAIL R15: no CMake files enumerated - a zero here would measure nothing"
 	FAIL=1
 else
 	R15_PACKET=$(r15_packet_members | sort -u | perl tests/tools/count_identifier.pl "$R15_PATTERN")
 	R15_REST=$(r15_rest_members | sort -u | perl tests/tools/count_identifier.pl "$R15_PATTERN")
+	R15_CMAKE=$(r13_cmake_members | sort -u | tr '\n' '\0' | xargs -0 cat 2>/dev/null \
+		| sed -e 's/#.*//' | grep -aoE "\b($R15_PATTERN)\b" | wc -l)
 	check "R15 (side macros spelled under Client/Packet)" "$R15_PACKET" "$R15_PACKET_BASELINE"
 	check "R15 (side macros spelled outside Client/Packet)" "$R15_REST" "$R15_REST_BASELINE"
+	check "R15 (side macros defined in a CMake file)" "$R15_CMAKE" "$R15_CMAKE_BASELINE"
 fi
 
 #----------------------------------------------------------------------

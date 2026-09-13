@@ -19,7 +19,6 @@ void GCCrossCounterOK1Handler::execute ( GCCrossCounterOK1 * pPacket , Player * 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------------------
@@ -67,7 +66,6 @@ void GCCrossCounterOK1Handler::execute ( GCCrossCounterOK1 * pPacket , Player * 
 		SkillCrossCounter( g_pPlayer, pTargetCreature, pPacket->getSkillType() );
 	}	
 
-#endif
 
 	__END_CATCH
 }

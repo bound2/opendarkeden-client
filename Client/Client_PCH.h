@@ -8,10 +8,14 @@
 	replaces the second copy that lived in VS_UI/ (that file is a
 	wrapper around this one now, keeping only VS_UI's warning pragmas).
 	The two had drifted: only this one defined __GAME_CLIENT__, which
-	changes Packet's virtual set, so the two VS_UI translation units
-	that include packet classes saw a different vtable layout from the
-	library that defines them. Which copy a translation unit got was
-	decided by include-path order.
+	changed Packet's virtual set at the time, so the two VS_UI
+	translation units that include packet classes saw a different
+	vtable layout from the library that defines them. Which copy a
+	translation unit got was decided by include-path order. The macro
+	itself is gone since task 5.2's tenth slice (2026-09-13): every
+	conditional on it had one value in every translation unit, and
+	ratchet R15 keeps the tree at zero mentions of it and of the four
+	server macros the shared sources once switched on.
 
 	2025.01.14, merged 2026-09-08
 
@@ -19,13 +23,6 @@
 
 #ifndef __CLIENT_PCH_H__
 #define __CLIENT_PCH_H__
-
-/* Define this as a game client build. The executable and the wire
-   libraries also pass __GAME_CLIENT__=1 on the command line; the two
-   spellings are compatible. */
-#ifndef __GAME_CLIENT__
-#define __GAME_CLIENT__
-#endif
 
 /* Standard C and C++ library, ahead of Platform.h. On Windows Platform.h
    brings <windows.h>, whose min and max macros are then live while any

@@ -12,9 +12,7 @@
 #include "UIFunction.h"
 #include "MGameStringTable.h"
 
-#ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
-#endif
 
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
@@ -24,7 +22,6 @@ void GCGuildResponseHandler::execute ( GCGuildResponse * pPacket , Player * pPla
 	__BEGIN_TRY
 	__BEGIN_DEBUG
 		
-#ifdef __GAME_CLIENT__
 	switch(pPacket->getCode())
 	{
 	case OK:
@@ -66,7 +63,6 @@ void GCGuildResponseHandler::execute ( GCGuildResponse * pPacket , Player * pPla
 	}
 	
 
-#endif
 
 	__END_DEBUG
 	 __END_CATCH

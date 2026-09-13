@@ -19,7 +19,6 @@ void GCThrowBombOK3Handler::execute ( GCThrowBombOK3 * pPacket , Player * pPlaye
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------
 	// Zone이 아직 생성되지 않은 경우
@@ -172,7 +171,6 @@ void GCThrowBombOK3Handler::execute ( GCThrowBombOK3 * pPacket , Player * pPlaye
 	}
 
 
-#endif
 
 	__END_CATCH
 }

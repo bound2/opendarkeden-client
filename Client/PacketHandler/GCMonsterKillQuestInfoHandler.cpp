@@ -24,7 +24,6 @@ void GCMonsterKillQuestInfoHandler::execute ( GCMonsterKillQuestInfo * pPacket ,
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 		
 	while(! pPacket->empty() )
 	{
@@ -37,7 +36,6 @@ void GCMonsterKillQuestInfoHandler::execute ( GCMonsterKillQuestInfo * pPacket ,
 //		delete pInfo;
 	}
 	
-#endif
 
 	__END_CATCH
 }

@@ -18,7 +18,6 @@ void GCKnockBackHandler::execute ( GCKnockBack * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 	
 
 	int objectID = pPacket->getObjectID();
@@ -49,7 +48,6 @@ void GCKnockBackHandler::execute ( GCKnockBack * pPacket , Player * pPlayer )
 		DEBUG_ADD_FORMAT("There's no such creature : ID=%d", pPacket->getObjectID());
 	}
 
-#endif
 
 	__END_CATCH
 }

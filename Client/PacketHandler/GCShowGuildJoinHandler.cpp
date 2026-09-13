@@ -19,9 +19,7 @@ void GCShowGuildJoinHandler::execute ( GCShowGuildJoin * pPacket , Player * pPla
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 		UI_ShowGuildJoin(pPacket->getJoinFee(), pPacket->getGuildMemberRank(), NULL, pPacket->getGuildName().c_str(), pPacket->getGuildID());
-#endif
 
 	__END_CATCH
 }

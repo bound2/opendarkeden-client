@@ -24,7 +24,6 @@ void LCLoginErrorHandler::execute ( LCLoginError * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 
 	//cout << "Access Denied... (" << pPacket->toString() << ")" << endl;
 	//throw ProtocolException("Login Failed!");
@@ -52,7 +51,6 @@ void LCLoginErrorHandler::execute ( LCLoginError * pPacket , Player * pPlayer )
 		}
 	}
 
-#endif
 		
 	__END_CATCH
 }

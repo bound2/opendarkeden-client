@@ -19,9 +19,7 @@ void GCShowWaitGuildInfoHandler::execute ( GCShowWaitGuildInfo * pPacket , Playe
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 		UI_ShowWaitGuildInfo(pPacket);
-#endif
 
 	__END_CATCH
 }

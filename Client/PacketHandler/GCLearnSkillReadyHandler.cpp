@@ -21,7 +21,6 @@ void GCLearnSkillReadyHandler::execute ( GCLearnSkillReady * pPacket , Player * 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	// 임시로 skill관련 정보를 저장한다.
@@ -83,7 +82,6 @@ void GCLearnSkillReadyHandler::execute ( GCLearnSkillReady * pPacket , Player * 
 //		}
 //	__END_HELP_EVENT
 	
-#endif
 
 	__END_CATCH
 }

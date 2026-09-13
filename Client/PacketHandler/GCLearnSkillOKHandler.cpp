@@ -21,7 +21,6 @@ void GCLearnSkillOKHandler::execute ( GCLearnSkillOK * pPacket , Player * pPlaye
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 		
 	// mode 제거
 	// 제거안하면 계속 배울 수 있다.- -;
@@ -79,7 +78,6 @@ void GCLearnSkillOKHandler::execute ( GCLearnSkillOK * pPacket , Player * pPlaye
 ////		ExecuteHelpEvent( HE_SKILL_LEARNED );
 //	__END_HELP_EVENT
 
-#endif
 
 	__END_CATCH
 }

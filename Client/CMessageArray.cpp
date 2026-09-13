@@ -45,7 +45,7 @@
 	#define _O_TRUNC     O_TRUNC
 #endif
 
-#if defined(OUTPUT_DEBUG) && defined(__GAME_CLIENT__)
+#ifdef OUTPUT_DEBUG
 	CRITICAL_SECTION			g_Lock;
 
 	#define __BEGIN_LOCK	EnterCriticalSection(&g_Lock);

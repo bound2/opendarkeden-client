@@ -19,7 +19,6 @@ void GCSkillToTileOK4Handler::execute ( GCSkillToTileOK4 * pPacket , Player * pP
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------
@@ -165,7 +164,6 @@ void GCSkillToTileOK4Handler::execute ( GCSkillToTileOK4 * pPacket , Player * pP
 						pResult);
 	}
 
-#endif
 
 	__END_CATCH
 }

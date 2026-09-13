@@ -19,7 +19,6 @@ void GCCannotAddHandler::execute ( GCCannotAdd * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//-----------------------------------------------------------------
@@ -103,7 +102,6 @@ void GCCannotAddHandler::execute ( GCCannotAdd * pPacket , Player * pPlayer )
 	}
 
 
-#endif
 
 	__END_CATCH
 }

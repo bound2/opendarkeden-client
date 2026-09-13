@@ -24,7 +24,6 @@ void GCReloadOKHandler::execute ( GCReloadOK * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 	// message
 
 	//------------------------------------------------------------------
@@ -289,7 +288,6 @@ void GCReloadOKHandler::execute ( GCReloadOK * pPacket , Player * pPlayer )
 	}
 
 
-#endif
 
 	__END_CATCH
 }

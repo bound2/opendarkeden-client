@@ -22,7 +22,6 @@ void GCTimeLimitItemInfoHandler::execute ( GCTimeLimitItemInfo * pPacket , Playe
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 		
 	if( g_pTimeItemManager != NULL && !pPacket->m_TimeLimitItemInfos.empty())
 	{
@@ -49,7 +48,6 @@ void GCTimeLimitItemInfoHandler::execute ( GCTimeLimitItemInfo * pPacket , Playe
 		pPacket->m_TimeLimitItemInfos.clear();
 	}
 		
-#endif
 
 	__END_CATCH
 }

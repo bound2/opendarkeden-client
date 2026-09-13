@@ -20,7 +20,6 @@ void GCExecuteElementHandler::execute ( GCExecuteElement * pGCExecuteElement , P
 	__BEGIN_TRY 
 //		__BEGIN_DEBUG_EX
 		
-#ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------
 	// Zone이 아직 생성되지 않은 경우
@@ -45,7 +44,6 @@ void GCExecuteElementHandler::execute ( GCExecuteElement * pGCExecuteElement , P
 	
 //#elif __WINDOWS__
 
-#endif
 
 //	__END_DEBUG_EX 
 	__END_CATCH

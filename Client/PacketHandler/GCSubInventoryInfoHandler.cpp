@@ -24,7 +24,6 @@ void GCSubInventoryInfoHandler::execute ( GCSubInventoryInfo * pPacket , Player 
 {
 
 	
-#ifdef __GAME_CLIENT__
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
 		if(NULL == g_pZone || NULL == g_pPlayer)
 			return ;
@@ -37,6 +36,5 @@ void GCSubInventoryInfoHandler::execute ( GCSubInventoryInfo * pPacket , Player 
 		
 		SetSubInventoryInfo(pPacket->getInventoryInfo());
 	#endif
-#endif
 
 }

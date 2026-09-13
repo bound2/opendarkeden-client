@@ -18,10 +18,8 @@ void GCShowGuildInfoHandler::execute ( GCShowGuildInfo * pPacket , Player * pPla
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 	//cout << pPacket->toString() << endl;
 	UI_ShowGuildInfo(pPacket);
-#endif
 
 	__END_CATCH
 }

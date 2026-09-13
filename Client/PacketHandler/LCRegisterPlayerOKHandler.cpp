@@ -13,12 +13,10 @@
 #include "ClientDef.h"
 #include "UIFunction.h"
 
-#ifdef __GAME_CLIENT__
 
 	#include "ClientPlayer.h"
 	#include "Cpackets/CLGetWorldList.h"
 
-#endif
 
 extern BOOL g_bNeedUpdate;
 
@@ -34,7 +32,6 @@ void LCRegisterPlayerOKHandler::execute ( LCRegisterPlayerOK * pPacket , Player 
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 
 	// Remember the ID the way a successful login does.
 	if( g_pUserInformation->UserID.GetLength() >= 15 )
@@ -73,7 +70,6 @@ void LCRegisterPlayerOKHandler::execute ( LCRegisterPlayerOK * pPacket , Player 
 		SetGoreLevel( bGoreLevel );
 	}
 
-#endif
 
 	__END_CATCH
 }

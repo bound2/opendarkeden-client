@@ -10,7 +10,6 @@
 #include "Client_PCH.h"
 #include "Gpackets/GCNicknameVerify.h"
 
-#ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
 #include "ClientDef.h"
 #include "MGameStringTable.h"
@@ -18,7 +17,6 @@
 #include "TempInformation.h"
 #include "VS_UI.h"
 
-#endif
 
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
@@ -29,7 +27,6 @@ void GCNicknameVerifyHandler::execute ( GCNicknameVerify * pPacket , Player * pP
 //	__BEGIN_DEBUG_EX
 //	__BEGIN_DEBUG
 		
-#ifdef __GAME_CLIENT__
 	switch(pPacket->getCode())
 	{
 		case NICKNAME_MODIFY_FAIL_NO_ITEM:
@@ -80,7 +77,6 @@ void GCNicknameVerifyHandler::execute ( GCNicknameVerify * pPacket , Player * pP
 	}
 
 	g_pTempInformation->SetMode(TempInformation::MODE_NULL);
-#endif
 
 //	__END_DEBUG
 //	__END_DEBUG_EX 

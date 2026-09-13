@@ -20,7 +20,6 @@ void GCAttackMeleeOK1Handler::execute ( GCAttackMeleeOK1 * pPacket , Player * pP
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 	
 	// message
 
@@ -91,7 +90,6 @@ void GCAttackMeleeOK1Handler::execute ( GCAttackMeleeOK1 * pPacket , Player * pP
 	}	
 		
 
-#endif
 
 	__END_CATCH
 }

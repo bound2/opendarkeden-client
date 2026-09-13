@@ -18,9 +18,7 @@
 #include "MinTr.h"
 #include "UIFunction.h"
 
-#ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
-#endif
 
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
@@ -30,7 +28,6 @@ void GCAddItemToItemVerifyHandler::execute ( GCAddItemToItemVerify * pPacket , P
 	__BEGIN_TRY 
 	__BEGIN_DEBUG
 		
-#ifdef __GAME_CLIENT__
 	MItem *pInventoryItem = NULL;
 
 	MItem *pItem[2] = { NULL, NULL };
@@ -285,7 +282,6 @@ void GCAddItemToItemVerifyHandler::execute ( GCAddItemToItemVerify * pPacket , P
 
 	}
 
-#endif
 
 	__END_DEBUG
 	__END_CATCH

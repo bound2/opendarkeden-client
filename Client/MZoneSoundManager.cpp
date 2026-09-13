@@ -10,7 +10,6 @@
 #include "MTestDef.h"
 
 
-#ifdef __GAME_CLIENT__
 	#include "CSoundPartManager.h"
 	#include "MZone.h"
 	#include "MPlayer.h"
@@ -18,7 +17,6 @@
 	#ifdef __METROTECH_TEST__
 		#define OUTPUT_DEBUG_ZONESOUND_PROCESS
 	#endif
-#endif
 
 //-----------------------------------------------------------------------------
 // global
@@ -27,11 +25,9 @@ MZoneSoundTable*	g_pZoneSoundTable = NULL;
 
 MZoneSoundManager*	g_pZoneSoundManager = NULL;
 
-#ifdef __GAME_CLIENT__
 	extern DWORD	g_CurrentTime;
 
 	extern CSoundPartManager*	g_pSoundManager;
-#endif
 
 //-----------------------------------------------------------------------------
 //
@@ -82,7 +78,6 @@ ZONESOUND_NODE::LoadFromFile(std::ifstream& file)
 void
 ZONESOUND_NODE::Play(int x, int y, bool bLoop)
 {	
-#ifdef __GAME_CLIENT__
 	//-----------------------------------------------------------
 	// 소리 출력해도 되는지 체크..
 	//-----------------------------------------------------------
@@ -254,7 +249,6 @@ ZONESOUND_NODE::Play(int x, int y, bool bLoop)
 			}
 		}
 	}
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -334,7 +328,6 @@ MZoneSoundManager::~MZoneSoundManager()
 void			
 MZoneSoundManager::UpdateSound()
 {
-#ifdef __GAME_CLIENT__
 	if (g_pZone==NULL 
 		|| g_pPlayer==NULL)
 	{
@@ -519,5 +512,4 @@ MZoneSoundManager::UpdateSound()
 		m_LastY = g_pPlayer->GetY();
 		m_LastUpdateTime = g_CurrentTime;
 	}
-#endif
 }

@@ -18,7 +18,6 @@ void GCRideMotorCycleFailedHandler::execute ( GCRideMotorCycleFailed * pPacket ,
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	
 	//------------------------------------------
@@ -26,7 +25,6 @@ void GCRideMotorCycleFailedHandler::execute ( GCRideMotorCycleFailed * pPacket ,
 	//------------------------------------------
 	g_pPlayer->SetWaitVerifyNULL();
 
-#endif
 
 	__END_CATCH
 }

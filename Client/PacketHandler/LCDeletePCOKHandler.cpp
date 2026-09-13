@@ -10,10 +10,8 @@
 #include "Client_PCH.h"
 #include "Lpackets/LCDeletePCOK.h"
 
-#ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
 	#include "Cpackets/CLGetPCList.h"
-#endif
 
 #include "ClientDef.h"
 #include "UIFunction.h"
@@ -30,7 +28,6 @@ void LCDeletePCOKHandler::execute ( LCDeletePCOK * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 
 	ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
 
@@ -46,7 +43,6 @@ void LCDeletePCOKHandler::execute ( LCDeletePCOK * pPacket , Player * pPlayer )
 	// Wait for the PC list.
 	g_ModeNext = MODE_WAIT_PCLIST;
 
-#endif
 
 	__END_CATCH
 }

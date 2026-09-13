@@ -4,13 +4,11 @@
 #include "Client_PCH.h"
 #include "MParty.h"
 
-#ifdef __GAME_CLIENT__
 	#include "MZone.h"
 	#include "MCreature.h"
 	#include "ClientConfig.h"
 
 	extern DWORD	g_CurrentTime;
-#endif
 
 #define	MAX_PARTY_MEMBER	6
 
@@ -62,7 +60,6 @@ MParty::~MParty()
 void
 MParty::Release()
 {
-#ifdef __GAME_CLIENT__
 	PARTY_VECTOR::iterator iInfo = m_pInfo.begin();
 
 	while (iInfo != m_pInfo.end())
@@ -80,7 +77,6 @@ MParty::Release()
 	m_pInfo.clear();
 
 	//m_JoinTime = 0xFFFFFFFF;
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -89,7 +85,6 @@ MParty::Release()
 void
 MParty::UnSetPlayerParty() const
 {
-#ifdef __GAME_CLIENT__
 	PARTY_VECTOR::const_iterator iInfo = m_pInfo.begin();
 
 	while (iInfo != m_pInfo.end())
@@ -112,7 +107,6 @@ MParty::UnSetPlayerParty() const
 
 		iInfo ++;
 	}
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -134,7 +128,6 @@ MParty::AddMember(PARTY_INFO* pInfo)
 		return false;
 	}
 
-	#ifdef __GAME_CLIENT__
 		
 		// 이름이나 ID가 값이 설정 안된 경우.. 값 넣어주기
 		if (pInfo->Name.GetString()==NULL)
@@ -161,7 +154,6 @@ MParty::AddMember(PARTY_INFO* pInfo)
 			}			
 		}
 		
-	#endif
 
 	m_pInfo.push_back( pInfo );
 
@@ -174,7 +166,6 @@ MParty::AddMember(PARTY_INFO* pInfo)
 bool		
 MParty::RemoveMember(const char* pName)
 {
-#ifdef __GAME_CLIENT__
 	PARTY_VECTOR::iterator iInfo = m_pInfo.begin();
 
 	while (iInfo != m_pInfo.end())
@@ -201,7 +192,6 @@ MParty::RemoveMember(const char* pName)
 		
 		iInfo ++;
 	}
-#endif
 	return false;
 }
 
@@ -211,7 +201,6 @@ MParty::RemoveMember(const char* pName)
 bool		
 MParty::RemoveMember(int creatureID)
 {
-#ifdef __GAME_CLIENT__
 	PARTY_VECTOR::iterator iInfo = m_pInfo.begin();
 
 	while (iInfo != m_pInfo.end())
@@ -238,7 +227,6 @@ MParty::RemoveMember(int creatureID)
 
 		iInfo ++;
 	}
-#endif
 	return false;
 }
 
@@ -346,9 +334,7 @@ MParty::HasMember(const char* pName) const
 void		
 MParty::SetJoinTime()
 {
-#ifdef __GAME_CLIENT__
 	m_JoinTime = g_CurrentTime;
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -357,9 +343,5 @@ MParty::SetJoinTime()
 bool		
 MParty::IsKickAvailableTime() const
 {
-#ifdef __GAME_CLIENT__
 	return m_JoinTime + g_pClientConfig->AFTER_PARTY_KICK_DELAY < g_CurrentTime;
-#else
-	return true;
-#endif
 }

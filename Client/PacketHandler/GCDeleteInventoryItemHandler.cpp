@@ -13,9 +13,6 @@
 #include "MInventory.h"
 #include "UIFunction.h"
 
-#ifdef __GAME_CLIENT__
-#endif
-
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
 void GCDeleteInventoryItemHandler::execute ( GCDeleteInventoryItem * pPacket , Player * pPlayer )
@@ -23,7 +20,6 @@ void GCDeleteInventoryItemHandler::execute ( GCDeleteInventoryItem * pPacket , P
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 
 	MItem* pItem = UI_GetMouseItem();
 
@@ -68,7 +64,6 @@ void GCDeleteInventoryItemHandler::execute ( GCDeleteInventoryItem * pPacket , P
 		delete pItem;
 	}
 
-#endif
 
 	__END_CATCH
 }

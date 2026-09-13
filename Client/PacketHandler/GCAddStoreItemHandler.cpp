@@ -29,7 +29,6 @@ void GCAddStoreItemHandler::execute ( GCAddStoreItem * pPacket , Player * pPlaye
 	__BEGIN_TRY 
 		//__BEGIN_DEBUG_EX
 		
-#ifdef __GAME_CLIENT__
 		
 		if(g_pStorage2 != NULL && g_pStorage2->GetCuropenid() !=NULL)
 		{
@@ -238,7 +237,6 @@ void GCAddStoreItemHandler::execute ( GCAddStoreItem * pPacket , Player * pPlaye
 		
 }	
 
-#endif
 
 //__END_DEBUG_EX 
 __END_CATCH

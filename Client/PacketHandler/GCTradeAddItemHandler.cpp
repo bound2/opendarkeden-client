@@ -19,7 +19,6 @@ void GCTradeAddItemHandler::execute ( GCTradeAddItem * pPacket , Player * pPlaye
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 	//------------------------------------------------------------------------
 	// TradeManager가 생성되지 않은 경우 --> -_-;;
 	//------------------------------------------------------------------------
@@ -222,7 +221,6 @@ void GCTradeAddItemHandler::execute ( GCTradeAddItem * pPacket , Player * pPlaye
 	g_pTradeManager->RefuseOtherTrade();
 	g_pTradeManager->RefuseMyTrade();
 
-#endif
 
 	__END_CATCH
 }

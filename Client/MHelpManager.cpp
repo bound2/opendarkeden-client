@@ -4,12 +4,10 @@
 #include "Client_PCH.h"
 #include "MHelpManager.h"
 
-#ifdef __GAME_CLIENT__
 	#include "ClientDef.h"
 	#include "MCompareManager.h"
 	#include "MHelpDisplayer.h"
 #include "VS_UI.h"
-#endif
 
 
 //---------------------------------------------------------------------------
@@ -23,13 +21,11 @@ MHelpManager*		g_pHelpManager = NULL;
 void		
 ExecuteHelpEvent(HELP_EVENT he)
 {
-	#if defined(__GAME_CLIENT__)// && defined(OUTPUT_DEBUG) && defined(_DEBUG)
 		if (g_Mode==MODE_GAME)
 		{
 			gC_vs_ui.AddHelpMail(he);//, g_pPlayer->IsInSafeSector());
 		//	g_pHelpManager->ExecuteEvent( he );
 		}
-	#endif
 }
 
 //---------------------------------------------------------------------------
@@ -79,13 +75,11 @@ MCompareHelpNode::GetNext() const
 	// 현재의 조건을 비교해서
 	// m_pTrue나 m_pFalse를 넘겨준다.
 
-#ifdef __GAME_CLIENT__
 	if (g_pCompareManager!=NULL 
 		&& g_pCompareManager->Compare( m_pCompareType ))
 	{
 		return m_pTrue;
 	}
-#endif	
 	
 	return m_pFalse;	
 }
@@ -483,9 +477,7 @@ MHelpManager::ExecuteEvent(HELP_EVENT he)
 				{
 					HELP_OUTPUT ho = ((MOutputHelpNode*)pHelpNode)->GetOutputType();
 
-					#ifdef __GAME_CLIENT__
 						g_pHelpDisplayer->OutputHelp( ho );					
-					#endif
 
 					pHelpNode = NULL;	// while loop를 빠지기 위해서.
 				}

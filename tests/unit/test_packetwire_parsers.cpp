@@ -19,9 +19,8 @@
 // out of a destructor.
 //
 // This file compiles with the same defines as the packetwire library
-// (__GAME_CLIENT__=1, and __WIN32__/__WINDOWS__ on Windows - set in
-// tests/CMakeLists.txt) so every shared class definition is identical
-// to the library's.
+// (__WIN32__/__WINDOWS__ on Windows - set in tests/CMakeLists.txt) so
+// every shared class definition is identical to the library's.
 //
 //----------------------------------------------------------------------
 

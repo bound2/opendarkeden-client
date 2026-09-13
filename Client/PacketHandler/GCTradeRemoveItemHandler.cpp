@@ -18,7 +18,6 @@ void GCTradeRemoveItemHandler::execute ( GCTradeRemoveItem * pPacket , Player * 
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------------------------
 	// TradeManager가 생성되지 않은 경우 --> -_-;;
@@ -59,7 +58,6 @@ void GCTradeRemoveItemHandler::execute ( GCTradeRemoveItem * pPacket , Player * 
 
 	g_pTradeManager->SetNextAcceptTime();
 
-#endif
 
 	__END_CATCH
 }

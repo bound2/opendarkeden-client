@@ -2,9 +2,7 @@
 #include "Client_PCH.h"
 #include "ShrineInfoManager.h"
 #include "RarFile.h"
-#ifdef __GAME_CLIENT__
 #include "Properties.h"
-#endif
 
 RegenTowerInfoManager *g_pRegenTowerInfoManager = NULL;
 

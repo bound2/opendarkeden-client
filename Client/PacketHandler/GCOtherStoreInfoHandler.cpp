@@ -29,7 +29,6 @@ void GCOtherStoreInfoHandler::execute ( GCOtherStoreInfo * pPacket , Player * pP
 	__BEGIN_TRY
 	//__BEGIN_DEBUG_EX
 	
-#ifdef __GAME_CLIENT__
 
 
 
@@ -280,7 +279,6 @@ void GCOtherStoreInfoHandler::execute ( GCOtherStoreInfo * pPacket , Player * pP
 		gC_vs_ui.SetPersnalShop( g_pStorage2 ); 		
 			 
 
-#endif
 
 	//__END_DEBUG_EX 
 	__END_CATCH

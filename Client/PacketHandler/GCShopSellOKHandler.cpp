@@ -25,7 +25,6 @@ void GCShopSellOKHandler::execute ( GCShopSellOK * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	//--------------------------------------------------------------
 	//
@@ -199,7 +198,6 @@ void GCShopSellOKHandler::execute ( GCShopSellOK * pPacket , Player * pPlayer )
 	{
 		DEBUG_ADD("[Error] Sell? -_-; No Temp Information!");
 	}
-#endif
 
 	__END_CATCH
 }

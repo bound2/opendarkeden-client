@@ -19,7 +19,6 @@ void GCSearchMotorcycleFailHandler::execute ( GCSearchMotorcycleFail * pPacket ,
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 
 	if (rand()%2)
@@ -31,7 +30,6 @@ void GCSearchMotorcycleFailHandler::execute ( GCSearchMotorcycleFail * pPacket ,
 		g_pUIDialog->PopupFreeMessageDlg((*g_pGameStringTable)[STRING_MESSAGE_FIND_MOTOR_NO_KEY].GetString());
 	}
 	
-#endif
 
 	__END_CATCH
 }

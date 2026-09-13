@@ -20,7 +20,6 @@ void GCRideMotorCycleHandler::execute ( GCRideMotorCycle * pPacket , Player * pP
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	
 
@@ -117,7 +116,6 @@ void GCRideMotorCycleHandler::execute ( GCRideMotorCycle * pPacket , Player * pP
 		}
 	}
 	
-#endif
 
 	__END_CATCH
 }

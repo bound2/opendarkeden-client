@@ -29,7 +29,6 @@ void GCBloodBibleListHandler::execute ( GCBloodBibleList * pPacket , Player * pP
 {
 	__BEGIN_TRY 
 	
-#ifdef __GAME_CLIENT__
 	if (g_pPlayer==NULL
 		|| g_pZone==NULL
 		|| g_pUIDialog==NULL
@@ -83,7 +82,6 @@ void GCBloodBibleListHandler::execute ( GCBloodBibleList * pPacket , Player * pP
 	g_pUIDialog->PopupPCTalkDlg();
 	g_pTempInformation->SetMode(TempInformation::MODE_SKILL_LEARN);
 
-#endif
 
 	__END_CATCH
 }

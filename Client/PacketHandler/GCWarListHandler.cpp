@@ -12,12 +12,10 @@
 #include "MZone.h"
 #include "MEventManager.h"
 
-#ifdef __GAME_CLIENT__
 
 void PlayMusicCurrentZone();
 extern bool g_bZoneSafe;
 
-#endif
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -27,7 +25,6 @@ void GCWarListHandler::execute ( GCWarList * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY 
 	
-#ifdef __GAME_CLIENT__
 	if(g_pWarManager == NULL || g_pZone == NULL)
 		return;
 
@@ -54,7 +51,6 @@ void GCWarListHandler::execute ( GCWarList * pPacket , Player * pPlayer )
 	g_pEventManager->RemoveEvent( EVENTID_WAR_EFFECT );
 
 
-#endif
 
 	__END_CATCH
 }

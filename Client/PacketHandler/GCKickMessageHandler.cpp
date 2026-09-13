@@ -9,12 +9,10 @@
 #include "Client_PCH.h"
 #include "Gpackets/GCKickMessage.h"
 
-#ifdef __GAME_CLIENT__
 	#include "MGameStringTable.h"
 	#include "MEventManager.h"
 	#include "ClientDef.h"
 
-#endif 
 
 //////////////////////////////////////////////////////////////////////
 //

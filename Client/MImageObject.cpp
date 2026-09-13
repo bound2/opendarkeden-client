@@ -5,9 +5,7 @@
 #include "MObject.h"
 #include "MImageObject.h"
 
-#ifdef __GAME_CLIENT__
 	#include "MTopView.h"
-#endif
 
 
 //----------------------------------------------------------------------
@@ -177,7 +175,6 @@ MImageObject::GetWallDirection() const
 bool
 MImageObject::IsWallTransPosition(int sX, int sY) const
 {
-	#ifdef __GAME_CLIENT__			
 		switch (m_X)
 		{
 			//-------------------------------------------------------------
@@ -220,7 +217,6 @@ MImageObject::IsWallTransPosition(int sX, int sY) const
 			}
 			break;
 		}
-	#endif
 
 	return true;
 }

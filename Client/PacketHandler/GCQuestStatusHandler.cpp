@@ -22,7 +22,6 @@ void GCQuestStatusHandler::execute ( GCQuestStatus * pGCMonsterKillQuestStatus ,
 {
 	__BEGIN_TRY 
 		
-#ifdef __GAME_CLIENT__
 
 	DEBUG_ADD("[GCQuestStatusHandler] execute");
 
@@ -66,7 +65,6 @@ void GCQuestStatusHandler::execute ( GCQuestStatus * pGCMonsterKillQuestStatus ,
 //		g_pEventManager->AddEvent( event );
 //	}
 
-#endif
 
 	__END_CATCH
 }

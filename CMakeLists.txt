@@ -359,16 +359,13 @@ target_include_directories(packetwire PUBLIC
 
 # Byte-identical compilation to how these files compiled inside the
 # DarkEden target: mirror its compile definitions exactly (see the
-# DarkEden target below for why each exists). __GAME_CLIENT__ also
-# comes from Client_PCH.h, but the exe passes =1 on the command line
-# too, and identical preprocessing is the point of the move. Nothing
-# under Client/Packet has read __GAME_CLIENT__ since task 5.2's ninth
-# slice (ratchet R15 holds the tree at zero live tokens); it stays here
-# because the executable side still reads it and one list is the point.
+# DarkEden target below for why each exists). __GAME_CLIENT__=1 was in
+# this list until task 5.2's tenth slice (2026-09-13) retired the macro
+# from the whole build; ratchet R15 keeps the sources at zero mentions
+# of it, so nothing here or in Client_PCH.h defines it any more.
 target_compile_definitions(packetwire PRIVATE
 	USE_SDL_BACKEND
 	SPRITELIB_BACKEND_SDL
-	__GAME_CLIENT__=1
 )
 target_compile_definitions(packetwire PRIVATE ${DARKEDEN_PLATFORM_DEFINITIONS})
 
@@ -427,7 +424,6 @@ target_include_directories(gamemodel PUBLIC
 target_compile_definitions(gamemodel PRIVATE
 	USE_SDL_BACKEND
 	SPRITELIB_BACKEND_SDL
-	__GAME_CLIENT__=1
 )
 target_compile_definitions(gamemodel PRIVATE ${DARKEDEN_PLATFORM_DEFINITIONS})
 
@@ -1134,7 +1130,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	target_compile_definitions(DarkEden PRIVATE
 		USE_SDL_BACKEND
 		SPRITELIB_BACKEND_SDL
-		__GAME_CLIENT__=1
 	)
 
 	# Platform-specific definitions: the one list from the top of this

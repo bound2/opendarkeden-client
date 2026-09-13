@@ -18,7 +18,6 @@ void GCNicknameListHandler::execute ( GCNicknameList * pGCNicknameList , Player 
 	__BEGIN_TRY 
 //		__BEGIN_DEBUG_EX
 		
-#ifdef __GAME_CLIENT__
 
 	gC_vs_ui.SetNickNameList((void*)&pGCNicknameList->getAddresses());
 //	std::vector<NICKNAMEINFO*> g_NickNameList;
@@ -26,7 +25,6 @@ void GCNicknameListHandler::execute ( GCNicknameList * pGCNicknameList , Player 
 	
 //#elif __WINDOWS__
 
-#endif
 
 //	__END_DEBUG_EX 
 	__END_CATCH

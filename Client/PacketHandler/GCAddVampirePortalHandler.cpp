@@ -16,7 +16,6 @@ void GCAddVampirePortalHandler::execute ( GCAddVampirePortal * pPacket , Player 
 {
 	__BEGIN_TRY 
 		
-#ifdef __GAME_CLIENT__
 
 
 	int serverID = pPacket->getObjectID();
@@ -44,7 +43,6 @@ void GCAddVampirePortalHandler::execute ( GCAddVampirePortal * pPacket , Player 
 						zoneID,	zoneX, zoneY,
 						bStartFromMainNode );
 
-#endif
 
 	__END_CATCH
 }

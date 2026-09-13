@@ -25,7 +25,6 @@ void GCRemoveStoreItemHandler::execute ( GCRemoveStoreItem * pPacket , Player * 
 	__BEGIN_TRY 
 	//__BEGIN_DEBUG_EX
 	
-#ifdef __GAME_CLIENT__
  
 	if(gC_vs_ui.inventory_mode == 1 || gC_vs_ui.inventory_mode == 2)
 	{
@@ -46,7 +45,6 @@ void GCRemoveStoreItemHandler::execute ( GCRemoveStoreItem * pPacket , Player * 
 		
 	}
 	
-#endif
 
 	//__END_DEBUG_EX 
 	__END_CATCH

@@ -18,7 +18,6 @@ void GCMorphSlayer2Handler::execute ( GCMorphSlayer2 * pPacket , Player * pPlaye
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------
@@ -137,7 +136,6 @@ void GCMorphSlayer2Handler::execute ( GCMorphSlayer2 * pPacket , Player * pPlaye
 
 	}
 
-#endif
 
 	__END_CATCH
 }

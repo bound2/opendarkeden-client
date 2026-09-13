@@ -19,7 +19,6 @@ void GCGQuestStatusModifyHandler::execute ( GCGQuestStatusModify * pGCGQuestStat
 	__BEGIN_TRY 
 //	__BEGIN_DEBUG_EX
 		
-#ifdef __GAME_CLIENT__
 	QuestStatusInfo* QuestInfo = pGCGQuestStatusModify->getInfo();
 
 	if(NULL != QuestInfo)
@@ -71,7 +70,6 @@ void GCGQuestStatusModifyHandler::execute ( GCGQuestStatusModify * pGCGQuestStat
 			SAFE_DELETE(UI_Info);
 		}
 	}
-#endif
 
 //	__END_DEBUG_EX
 	__END_CATCH

@@ -15,13 +15,11 @@
 #include "TempInformation.h"
 #include "MTradeManager.h"
 
-#ifdef __GAME_CLIENT__
 
 	#include "ClientPlayer.h"
 	#include "Cpackets/CGTradePrepare.h"
 	#include "UIFunction.h"
 
-#endif
 
 
 void GCTradePrepareHandler::execute ( GCTradePrepare * pPacket , Player * pPlayer )
@@ -31,7 +29,6 @@ void GCTradePrepareHandler::execute ( GCTradePrepare * pPacket , Player * pPlaye
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	ObjectID_t targetID = pPacket->getTargetObjectID();
 
@@ -238,7 +235,6 @@ void GCTradePrepareHandler::execute ( GCTradePrepare * pPacket , Player * pPlaye
 
 	}
 
-#endif
 
 	__END_CATCH
 }
