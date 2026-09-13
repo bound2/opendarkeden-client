@@ -65,19 +65,4 @@ public :
 
 };
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// class CGMouseToStashHandler;
-//
-////////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGMouseToStashHandler 
-	{
-	public :
-		static void execute(CGMouseToStash * pPacket, Player * player);
-		static void executeSlayer(CGMouseToStash * pPacket, Player * player);
-		static void executeVampire(CGMouseToStash * pPacket, Player * player);
-	};
-#endif
-
 #endif

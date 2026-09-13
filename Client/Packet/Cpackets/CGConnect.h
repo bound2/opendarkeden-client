@@ -122,20 +122,4 @@ public :
 
 };
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGConnectHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGConnectHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CGConnect * pPacket , Player * pPlayer );
-
-	};
-#endif
-
 #endif

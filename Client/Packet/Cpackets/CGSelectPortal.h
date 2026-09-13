@@ -102,20 +102,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGSelectPortalHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGSelectPortalHandler {
-
-public :
-
-	// execute packet's handler
-	static void execute ( CGSelectPortal * pCGSelectPortal , Player * pPlayer );
-
-};
-#endif
-
 #endif

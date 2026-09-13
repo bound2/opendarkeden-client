@@ -102,20 +102,4 @@ public:
 
 };
 
-#ifndef __GAME_CLIENT__
-//////////////////////////////////////////////////////////////////////
-//
-// class CGCrashReportHandler;
-//
-//////////////////////////////////////////////////////////////////////
-
-class CGCrashReportHandler {
-	
-public:
-
-	// execute packet's handler
-	static void execute(CGCrashReport* pPacket, Player* player);
-};
-#endif
-
 #endif

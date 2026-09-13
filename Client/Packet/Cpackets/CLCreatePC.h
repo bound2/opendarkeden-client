@@ -190,20 +190,4 @@ public:
 
 };
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CLCreatePCHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CLCreatePCHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CLCreatePC* pPacket, Player* pPlayer);
-
-};
-#endif
-
 #endif

@@ -98,19 +98,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGPhoneDisconnectHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGPhoneDisconnectHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGPhoneDisconnect * pPacket , Player * player );
-	};
-#endif
-
 #endif

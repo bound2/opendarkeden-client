@@ -91,7 +91,7 @@ public :
 	PacketSize_t getPacketSize () const { return m_Claimed; }
 
 	// The same single condition Packet.h declares these under.
-	#if !defined(__GAME_CLIENT__) || defined(__DEBUG_OUTPUT__)
+	#ifdef __DEBUG_OUTPUT__
 		std::string getPacketName () const { return "TestBodyPacket"; }
 		std::string toString () const { return "TestBodyPacket"; }
 	#endif

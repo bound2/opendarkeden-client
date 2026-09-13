@@ -69,9 +69,13 @@ target_include_directories(unit_tests PRIVATE
 #----------------------------------------------------------------------
 # Every TU that shares class definitions with the packetwire library
 # (which compiles with __GAME_CLIENT__=1 and the Windows wire macros)
-# must see the identical definitions - Packet's virtual set changes
-# under these macros, so a mismatch would be a real ODR/vtable break,
-# not a style issue. One list, used by every such TU below, so the two
+# must see the identical definitions - Exception.h's inline bodies
+# switch on the Windows wire macros, so a mismatch would be a real
+# ODR break, not a style issue. (Packet's virtual set used to change
+# under __GAME_CLIENT__ too; nothing under Client/Packet reads that
+# macro since task 5.2's ninth slice, ratchet R15, but the library is
+# still compiled with it and one list is the point.) One list, used by
+# every such TU below, so the two
 # blocks cannot drift apart; its platform half is the top-level
 # DARKEDEN_PLATFORM_DEFINITIONS, the list packetwire itself compiles
 # with, so it cannot drift from the library either (off Windows that
@@ -140,10 +144,8 @@ set_source_files_properties(
 	# and PacketAssert.h as well.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_stringstream_chars.cpp
 	# gamemodel compiles with the same definitions: its headers reach
-	# Client/Packet/Exception.h, whose inline bodies switch on __WIN32__,
-	# and Client/Packet/Types/CreatureTypes.h, which switches on
-	# __GAME_CLIENT__. Every test that includes a Client/ header needs an
-	# entry here.
+	# Client/Packet/Exception.h, whose inline bodies switch on __WIN32__.
+	# Every test that includes a Client/ header needs an entry here.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_gamemodel_tables.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_item_table.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_item_core.cpp
@@ -170,10 +172,9 @@ set_source_files_properties(
 	# switch on __WIN32__. (__END_CATCH, which it also expands, is
 	# conditioned on NDEBUG alone.)
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_source_location.cpp
-	# PacketIDSet::deletePacketID. It names CPS_NONE, which PlayerStatus.h
-	# declares only under __GAME_CLIENT__, and Packet.h conditions a member
-	# on the same macro, so the TU must see the definitions packetwire was
-	# built with.
+	# PacketIDSet::deletePacketID. It names CPS_NONE from PlayerStatus.h
+	# and shares Packet's class definition, so the TU must see the
+	# definitions packetwire was built with.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_id_set.cpp
 	# What SendBugReport actually sends. It builds a CGSay and hands it
 	# to a Player subclass, so the Packet vtable and the CGSay class

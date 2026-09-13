@@ -111,20 +111,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGUseBonusPointHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGUseBonusPointHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CGUseBonusPoint * pCGUseBonusPoint , Player * pPlayer );
-
-	};
-#endif
-
 #endif

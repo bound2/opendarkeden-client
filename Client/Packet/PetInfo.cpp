@@ -83,9 +83,6 @@ void PetInfo::write(SocketOutputStream& oStream) const
 	if ( szSTR != 0 ) oStream.write( m_Nickname );
 
 	ObjectID_t ItemObjectID = 0;
-#ifdef __GAME_SERVER__
-	ItemObjectID = getItemObjectID();
-#endif
 	oStream.write( ItemObjectID );
 
 	__END_CATCH

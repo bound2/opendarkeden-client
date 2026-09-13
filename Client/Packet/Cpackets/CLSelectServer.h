@@ -91,15 +91,4 @@ public:
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifndef __GAME_CLIENT__
-	class CLSelectServerHandler {
-
-	public:
-
-		// execute packet's handler
-		static void execute(CLSelectServer* pPacket, Player* player);
-
-	};
-#endif
-
 #endif

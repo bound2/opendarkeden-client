@@ -79,20 +79,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGLogoutHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGLogoutHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CGLogout * pPacket , Player * player );
-
-	};
-#endif
-
 #endif

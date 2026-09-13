@@ -52,14 +52,6 @@ public :
 	ObjectID_t getObjectID() const noexcept  { return m_ObjectID; }
 	void setObjectID( ObjectID_t ObjectID ) noexcept { m_ObjectID = ObjectID; }
 
-	#ifndef __GAME_CLIENT__
-		// get packet name (required when not GAME_CLIENT)
-		std::string getPacketName () const { return "CGGetOffMotorCycle"; }
-
-		// get packet's debug string (required when not GAME_CLIENT)
-		std::string toString () const { return "CGGetOffMotorCycle"; }
-	#endif
-
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
 		std::string getPacketName () const { return "CGGetOffMotorCycle"; }
@@ -111,21 +103,5 @@ public :
 
 };
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// class CGGetOffMotorCycleHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGGetOffMotorCycleHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CGGetOffMotorCycle * pCGGetOffMotorCycle , Player * pPlayer );
-
-	};
-#endif
 
 #endif

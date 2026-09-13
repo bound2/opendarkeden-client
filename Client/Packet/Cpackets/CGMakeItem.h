@@ -98,20 +98,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGMakeItemHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGMakeItemHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGMakeItem * pPacket , Player * player );
-	};
-
-#endif
-
 #endif

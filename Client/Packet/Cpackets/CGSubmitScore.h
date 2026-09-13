@@ -109,20 +109,4 @@ public:
 
 };
 
-#ifndef __GAME_CLIENT__
-//////////////////////////////////////////////////////////////////////
-//
-// class CGSubmitScoreHandler;
-//
-//////////////////////////////////////////////////////////////////////
-
-class CGSubmitScoreHandler {
-	
-public:
-
-	// execute packet's handler
-	static void execute(CGSubmitScore* pCGSubmitScore, Player* player);
-};
-#endif
-
 #endif

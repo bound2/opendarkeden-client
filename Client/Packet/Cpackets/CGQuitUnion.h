@@ -103,20 +103,4 @@ public:
 	PacketSize_t getPacketMaxSize() const noexcept { return szGuildID + szBYTE; }
 };
 
-//#endif
-//////////////////////////////////////////////////////////////////////
-//
-// class CGQuitUnionHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGQuitUnionHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGQuitUnion* pCGQuitUnion, Player* pPlayer);
-
-};
-#endif
 #endif

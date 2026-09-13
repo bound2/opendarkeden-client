@@ -58,11 +58,4 @@ public:
 
 class GQuestInventory;
 class Item;
-#ifndef __GAME_CLIENT__
-class CGUseItemFromGQuestInventoryHandler 
-{
-public:
-	static void execute(CGUseItemFromGQuestInventory* pPacket, Player* pPlayer);
-};
-#endif
 #endif

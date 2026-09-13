@@ -121,19 +121,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGDissectionCorpseHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGDissectionCorpseHandler {
-
-public :
-
-	// execute packet's handler
-	static void execute ( CGDissectionCorpse * pCGDissectionCorpse , Player * pPlayer );
-
-};
-#endif
 #endif

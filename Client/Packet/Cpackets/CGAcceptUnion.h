@@ -92,19 +92,4 @@ public:
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGAcceptUnionHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGAcceptUnionHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGAcceptUnion* pCGAcceptUnion, Player* pPlayer);
-
-};
-#endif
 #endif

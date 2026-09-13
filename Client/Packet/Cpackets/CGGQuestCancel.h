@@ -51,14 +51,4 @@ public:
 };
 
 
-//////////////////////////////////////////////////////////////////////
-// class CGGQuestCancelHandler;
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGGQuestCancelHandler 
-{
-public:
-	static void execute(CGGQuestCancel* pCGGQuestCancel, Player* pPlayer);
-};
-#endif
 #endif

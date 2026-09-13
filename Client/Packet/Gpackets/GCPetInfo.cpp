@@ -11,10 +11,6 @@
 #include "GuildWarInfo.h"
 #include "PacketAssert.h"
 
-#ifdef __GAME_SERVER__
-#include "PetItem.h"
-#endif
-
 //////////////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////////////
@@ -93,13 +89,4 @@ string GCPetInfo::toString () const
 		
 	__END_CATCH
 }
-
-#ifdef __GAME_SERVER__
-ObjectID_t PetInfo::getItemObjectID() const
-{
-	if ( m_pPetItem == NULL ) return 0;
-		return m_pPetItem->getObjectID();
-	return 0;
-}
-#endif
 

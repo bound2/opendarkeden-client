@@ -106,19 +106,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGReloadFromQuickSlotHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGReloadFromQuickSlotHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGReloadFromQuickSlot * pPacket , Player * player );
-	};
-
-#endif
 #endif

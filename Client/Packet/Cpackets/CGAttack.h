@@ -119,19 +119,4 @@ public :
 
 };
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGAttackHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGAttackHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGAttack * pCGAttack , Player * player );
-	};
-
-#endif
 #endif

@@ -34,15 +34,19 @@
 #       test binary without game stubs.
 #
 # W1/W2 look at the lines the library's compile actually sees. The
-# packet sources are the once-shared client/server copies and still
-# carry the server halves behind #ifdef __GAME_SERVER__ /
-# #ifndef __GAME_CLIENT__, and those halves include server headers
-# that do not exist in this repo. Those macros have exactly one meaning
-# in every target of this build (__GAME_CLIENT__ defined, the server
-# macros never), so the walk evaluates conditionals on them and skips
-# the dead branches; every other macro is unknown and BOTH branches are
-# checked. Nothing else is evaluated - an include that is dead only
-# under some other macro is still a violation.
+# packet sources were the once-shared client/server copies and carried
+# the server halves behind #ifdef __GAME_SERVER__ /
+# #ifndef __GAME_CLIENT__, halves that included server headers which
+# do not exist in this repo; task 5.2's ninth slice (2026-09-13)
+# evaluated them out, and ratchet R15 holds Client/Packet at zero
+# mentions of those macros. The walk still evaluates conditionals on
+# them - they have exactly one meaning in every target of this build
+# (__GAME_CLIENT__ defined, the server macros never) - so a half that
+# came back through a copy from the server repo is skipped here and
+# caught by R15 rather than reported as a live include; every other
+# macro is unknown and BOTH branches are checked. Nothing else is
+# evaluated - an include that is dead only under some other macro is
+# still a violation.
 #
 # An include that cannot be resolved against the search path at all is
 # reported as a violation too - a silent skip is how a rule rots.

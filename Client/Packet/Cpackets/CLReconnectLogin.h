@@ -99,20 +99,4 @@ public :
 
 };
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CLReconnectLoginHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CLReconnectLoginHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CLReconnectLogin * pPacket , Player * pPlayer );
-
-	};
-#endif
-
 #endif

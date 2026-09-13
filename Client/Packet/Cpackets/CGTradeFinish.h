@@ -81,20 +81,4 @@ public:
 	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID + szBYTE; }
 };
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// class CGTradeFinishHandler;
-//
-////////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGTradeFinishHandler 
-	{
-	public:
-		static void execute ( CGTradeFinish * pPacket , Player * player );
-		static void executeSlayer ( CGTradeFinish * pPacket , Player * player );
-		static void executeVampire ( CGTradeFinish * pPacket , Player * player );
-		static void executeError ( CGTradeFinish * pPacket , Player * player, BYTE ErrorCode );
-	};
-#endif
-
 #endif

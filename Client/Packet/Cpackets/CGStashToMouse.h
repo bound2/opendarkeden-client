@@ -67,21 +67,4 @@ public :
 
 };
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// class CGStashToMouseHandler;
-//
-////////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGStashToMouseHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGStashToMouse * pPacket , Player * player );
-		static void executeSlayer ( CGStashToMouse * pPacket , Player * player );
-		static void executeVampire ( CGStashToMouse * pPacket , Player * player );
-	};
-#endif
-
 #endif

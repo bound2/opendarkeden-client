@@ -101,20 +101,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGCastingSkillHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGCastingSkillHandler {
-
-public :
-
-	// execute packet's handler
-	static void execute ( CGCastingSkill * pCGCastingSkill , Player * pPlayer );
-
-};
-#endif
-
 #endif

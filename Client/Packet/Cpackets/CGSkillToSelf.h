@@ -56,14 +56,6 @@ public :
 	CEffectID_t getCEffectID() const noexcept { return m_CEffectID; }
 	void setCEffectID( CEffectID_t CEffectID ) noexcept { m_CEffectID = CEffectID; }
 
-	#ifndef __GAME_CLIENT__
-		// get packet name (required when not GAME_CLIENT)
-		std::string getPacketName () const { return "CGSkillToSelf"; }
-
-		// get packet's debug string (required when not GAME_CLIENT)
-		std::string toString () const { return "CGSkillToSelf"; }
-	#endif
-
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
 		std::string getPacketName () const { return "CGSkillToSelf"; }
@@ -119,21 +111,5 @@ public :
 
 };
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// class CGSkillToSelfHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGSkillToSelfHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CGSkillToSelf * pCGSkillToSelf , Player * pPlayer );
-
-	};
-#endif
 
 #endif

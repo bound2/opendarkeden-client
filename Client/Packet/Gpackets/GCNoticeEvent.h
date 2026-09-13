@@ -10,10 +10,6 @@
 #include "Packet.h"
 #include "PacketFactory.h"
 
-#ifndef __GAME_CLIENT__
-	#include "Utility.h"
-#endif
-
 enum 
 {
 	NOTICE_EVENT_KICK_OUT_FROM_ZONE,			// 존에서 추방하는 시간(초)
@@ -126,10 +122,6 @@ public:
 
 	uint getParameter(void) const noexcept { return m_Parameter; }
 	void setParameter(uint parameter) noexcept { m_Parameter = parameter; }
-
-#ifndef __GAME_CLIENT__
-	void setParameter(WORD hiWord, WORD loWord) { m_Code = makeDWORD(hiWord, loWord); }
-#endif
 
 private: 
 	WORD m_Code;

@@ -208,20 +208,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CLRegisterPlayerHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CLRegisterPlayerHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CLRegisterPlayer * pPacket , Player * pPlayer );
-
-	};
-#endif
-
 #endif

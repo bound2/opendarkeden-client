@@ -77,20 +77,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGReadyHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGReadyHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CGReady * pPacket , Player * pPlayer );
-
-	};
-#endif
-
 #endif

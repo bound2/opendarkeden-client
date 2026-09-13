@@ -9,9 +9,6 @@
 #include "LevelWarInfo.h"
 #include "GuildWarInfo.h"
 #include "PacketAssert.h"
-#ifdef __GAME_SERVER__
-#include "PetItem.h"
-#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // constructor

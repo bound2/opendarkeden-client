@@ -60,10 +60,6 @@ public:
 	
 	SHOPLISTITEM_MYSTERIOUS getShopItem(BYTE index) const;
 
-#ifndef __GAME_CLIENT__
-	void setShopItem(BYTE index, const Item* pItem);
-#endif
-
 	MarketCond_t getMarketCondBuy(void) const noexcept { return m_MarketCondBuy;}
 	MarketCond_t getMarketCondSell(void) const noexcept { return m_MarketCondSell;}
 	void setMarketCondBuy(MarketCond_t cond) noexcept { m_MarketCondBuy = cond;}

@@ -92,19 +92,4 @@ public:
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGQuitUnionDenyHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGQuitUnionDenyHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGQuitUnionDeny* pCGQuitUnionDeny, Player* pPlayer);
-
-};
-#endif
 #endif

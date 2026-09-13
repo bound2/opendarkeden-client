@@ -111,19 +111,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGReloadFromInventoryHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGReloadFromInventoryHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGReloadFromInventory * pPacket , Player * player );
-	};
-
-#endif
 #endif

@@ -80,20 +80,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGUntransformHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGUntransformHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGUntransform * pPacket , Player * player );
-	};
-
-#endif
-
 #endif

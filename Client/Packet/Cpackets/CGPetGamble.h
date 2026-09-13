@@ -48,15 +48,4 @@ public:
 	PacketSize_t getPacketMaxSize() const noexcept { return 0; }
 };
 
-//////////////////////////////////////////////////////////////////////////////
-// class CGPetGambleHandler;
-//////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGPetGambleHandler 
-{
-public:
-	static void execute(CGPetGamble* pPacket, Player* player);
-};
-#endif
-
 #endif

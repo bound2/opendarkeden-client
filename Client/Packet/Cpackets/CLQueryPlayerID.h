@@ -93,20 +93,4 @@ public :
 };
 
 
-//--------------------------------------------------------------------------------
-//
-// class CLQueryPlayerIDHandler;
-//
-//--------------------------------------------------------------------------------
-#ifndef __GAME_CLIENT__
-	class CLQueryPlayerIDHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CLQueryPlayerID * pPacket , Player * pPlayer );
-
-	};
-#endif
-
 #endif

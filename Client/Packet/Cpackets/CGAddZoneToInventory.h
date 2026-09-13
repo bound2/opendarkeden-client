@@ -122,19 +122,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGAddZoneToInventoryHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGAddZoneToInventoryHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGAddZoneToInventory * pPacket , Player * player );
-	};
-
-#endif
 #endif

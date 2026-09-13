@@ -120,19 +120,4 @@ public :
 
 };
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGBloodDrainHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGBloodDrainHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGBloodDrain * pCGBloodDrain , Player * player );
-	};
-#endif
-
 #endif

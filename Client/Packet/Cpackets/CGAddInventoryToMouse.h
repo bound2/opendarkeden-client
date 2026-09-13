@@ -120,19 +120,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGAddInventoryToMouseHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGAddInventoryToMouseHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGAddInventoryToMouse * pPacket , Player * player );
-	};
-
-#endif
 #endif

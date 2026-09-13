@@ -89,20 +89,4 @@ public :
 };
 
 
-//--------------------------------------------------------------------------------
-//
-// class CLVersionCheckHandler;
-//
-//--------------------------------------------------------------------------------
-#ifndef __GAME_CLIENT__
-	class CLVersionCheckHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CLVersionCheck * pPacket , Player * pPlayer );
-
-	};
-#endif
-
 #endif

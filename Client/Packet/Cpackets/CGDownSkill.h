@@ -52,17 +52,5 @@ public:
 };
 
 
-#ifndef __GAME_CLIENT__
-//////////////////////////////////////////////////////////////////////
-// class CGDownSkillHandler;
-//////////////////////////////////////////////////////////////////////
-
-class CGDownSkillHandler 
-{
-public:
-	static void execute(CGDownSkill* pCGDownSkill, Player* pPlayer);
-};
-#endif
-
 
 #endif

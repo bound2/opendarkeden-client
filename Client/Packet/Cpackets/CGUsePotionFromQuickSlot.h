@@ -106,19 +106,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGUsePotionFromQuickSlotHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGUsePotionFromQuickSlotHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGUsePotionFromQuickSlot * pPacket , Player * player );
-	};
-
-#endif
 #endif

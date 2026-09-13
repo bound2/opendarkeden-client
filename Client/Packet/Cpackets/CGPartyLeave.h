@@ -52,15 +52,4 @@ public:
 	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE + 10; }
 };
 
-//////////////////////////////////////////////////////////////////////////////
-// class CGPartyLeaveHandler
-//////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGPartyLeaveHandler 
-	{
-	public:
-		static void execute(CGPartyLeave* pPacket, Player* player);
-	};
-#endif
-
 #endif

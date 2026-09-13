@@ -52,7 +52,6 @@ void PacketValidator::init ()
 
 	__BEGIN_DEBUG
 
-#if defined(__GAME_CLIENT__)
 
 		//----------------------------------------------------------------------
 		// CPS_NONE
@@ -240,112 +239,6 @@ void PacketValidator::init ()
 		addPacketIDSet( pPacketIDSet->getPlayerStatus(), pPacketIDSet );
 
 
-#elif defined(__LOGIN_SERVER__)
-
-		//----------------------------------------------------------------------
-		// LPS_NONE
-		//----------------------------------------------------------------------
-		pPacketIDSet = new PacketIDSet( LPS_NONE , PacketIDSet::PIST_NONE );
-		addPacketIDSet( pPacketIDSet->getPlayerStatus(), pPacketIDSet );
-
-		//----------------------------------------------------------------------
-		// LPS_BEGIN_SESSION ( 로그인 서버에 연결한 직후 )
-		//----------------------------------------------------------------------
-		pPacketIDSet = new PacketIDSet( LPS_BEGIN_SESSION );
-//		pPacketIDSet->addPacketID( Packet::PACKET_CL_QUERY_PLAYER_ID );
-//		pPacketIDSet->addPacketID( Packet::PACKET_CL_REGISTER_PLAYER );
-		pPacketIDSet->addPacketID( Packet::PACKET_CL_LOGIN );
-		pPacketIDSet->addPacketID( Packet::PACKET_CL_RECONNECT_LOGIN );
-		pPacketIDSet->addPacketID( Packet::PACKET_CL_VERSION_CHECK );
-		addPacketIDSet( pPacketIDSet->getPlayerStatus(), pPacketIDSet );
-
-		//----------------------------------------------------------------------
-		// LPS_WAITING_FOR_CL_GET_PC_LIST ( 사용자 인증을 받은 직후 )
-		//----------------------------------------------------------------------
-		pPacketIDSet = new PacketIDSet( LPS_WAITING_FOR_CL_GET_PC_LIST );
-		pPacketIDSet->addPacketID( Packet::PACKET_CL_GET_PC_LIST );
-		addPacketIDSet( pPacketIDSet->getPlayerStatus(), pPacketIDSet );
-	
-		//----------------------------------------------------------------------
-		// LPS_WAITING_FOR_CL_REGISTER_PLAYER
-		//----------------------------------------------------------------------
-		pPacketIDSet = new PacketIDSet( LPS_WAITING_FOR_CL_REGISTER_PLAYER );
-		pPacketIDSet->addPacketID( Packet::PACKET_CL_REGISTER_PLAYER );
-		pPacketIDSet->addPacketID( Packet::PACKET_CL_QUERY_PLAYER_ID );
-		addPacketIDSet( pPacketIDSet->getPlayerStatus(), pPacketIDSet );
-	
-		//----------------------------------------------------------------------
-		// LPS_PC_MANAGEMENT
-		//----------------------------------------------------------------------
-		pPacketIDSet = new PacketIDSet( LPS_PC_MANAGEMENT );
-		pPacketIDSet->addPacketID( Packet::PACKET_CL_CREATE_PC );
-		pPacketIDSet->addPacketID( Packet::PACKET_CL_DELETE_PC );
-		pPacketIDSet->addPacketID( Packet::PACKET_CL_SELECT_PC );
-		pPacketIDSet->addPacketID( Packet::PACKET_CL_LOGOUT );
-		pPacketIDSet->addPacketID( Packet::PACKET_CL_CHANGE_SERVER );
-		pPacketIDSet->addPacketID( Packet::PACKET_CL_GET_SERVER_LIST );
-		addPacketIDSet( pPacketIDSet->getPlayerStatus(), pPacketIDSet );
-	
-		//----------------------------------------------------------------------
-		// LPS_AFTER_SENDING_LG_INCOMING_CONNECTION
-		//----------------------------------------------------------------------
-		pPacketIDSet = new PacketIDSet( LPS_AFTER_SENDING_LG_INCOMING_CONNECTION , PacketIDSet::PIST_IGNORE_EXCEPT );
-		addPacketIDSet( pPacketIDSet->getPlayerStatus(), pPacketIDSet );
-
-		//----------------------------------------------------------------------
-		// LPS_END_SESSION
-		//----------------------------------------------------------------------
-		pPacketIDSet = new PacketIDSet( LPS_END_SESSION , PacketIDSet::PIST_NONE );
-		addPacketIDSet( pPacketIDSet->getPlayerStatus(), pPacketIDSet );
-
-#elif defined(__GAME_SERVER__)
-
-		//----------------------------------------------------------------------
-		// GPS_NONE
-		//----------------------------------------------------------------------
-		pPacketIDSet = new PacketIDSet( GPS_NONE , PacketIDSet::PIST_NONE );
-		addPacketIDSet( pPacketIDSet->getPlayerStatus(), pPacketIDSet );
-
-		//----------------------------------------------------------------------
-		// GPS_BEGIN_SESSION
-		//----------------------------------------------------------------------
-		pPacketIDSet = new PacketIDSet( GPS_BEGIN_SESSION );
-		pPacketIDSet->addPacketID( Packet::PACKET_CG_CONNECT );
-		addPacketIDSet( pPacketIDSet->getPlayerStatus(), pPacketIDSet );
-
-		//----------------------------------------------------------------------
-		// GPS_WAITING_FOR_CG_READY
-		//----------------------------------------------------------------------
-		pPacketIDSet = new PacketIDSet( GPS_WAITING_FOR_CG_READY , PacketIDSet::PIST_IGNORE_EXCEPT );
-		pPacketIDSet->addPacketID( Packet::PACKET_CG_READY );
-		pPacketIDSet->addPacketID( Packet::PACKET_CG_SET_HOT_KEY );
-		addPacketIDSet( pPacketIDSet->getPlayerStatus(), pPacketIDSet );
-
-		//----------------------------------------------------------------------
-		// GPS_NORMAL ( 로딩을 마치고 게임에 들어가기 바로전 )
-		//----------------------------------------------------------------------
-		pPacketIDSet = new PacketIDSet( GPS_NORMAL , PacketIDSet::PIST_ANY );
-		addPacketIDSet( pPacketIDSet->getPlayerStatus(), pPacketIDSet );
-
-		//----------------------------------------------------------------------
-		// GPS_IGNORE_ALL ( 아무 패킷도 받지 않고 다 무시하는 상태다.. fucksuck)
-		//----------------------------------------------------------------------
-		pPacketIDSet = new PacketIDSet( GPS_IGNORE_ALL , PacketIDSet::PIST_IGNORE_EXCEPT );
-		addPacketIDSet( pPacketIDSet->getPlayerStatus(), pPacketIDSet );
-
-		//----------------------------------------------------------------------
-		// GPS_AFTER_SENDING_GL_INCOMING_CONNECTION
-		//----------------------------------------------------------------------
-		pPacketIDSet = new PacketIDSet( GPS_AFTER_SENDING_GL_INCOMING_CONNECTION , PacketIDSet::PIST_IGNORE_EXCEPT );
-		addPacketIDSet( pPacketIDSet->getPlayerStatus(), pPacketIDSet );
-	
-		//----------------------------------------------------------------------
-		// GPS_END_SESSION
-		//----------------------------------------------------------------------
-		pPacketIDSet = new PacketIDSet( GPS_END_SESSION , PacketIDSet::PIST_NONE );
-		addPacketIDSet( pPacketIDSet->getPlayerStatus(), pPacketIDSet );
-
-#endif
 
 	__END_DEBUG
 

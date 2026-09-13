@@ -84,15 +84,4 @@ public:
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifndef __GAME_CLIENT__
-	class CLGetWorldListHandler {
-
-	public:
-
-		// execute packet's handler
-		static void execute(CLGetWorldList* pPacket, Player* player);
-
-	};
-#endif
-
 #endif

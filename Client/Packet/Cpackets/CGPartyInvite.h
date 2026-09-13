@@ -71,16 +71,4 @@ public:
 	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szBYTE; }
 };
 
-//////////////////////////////////////////////////////////////////////////////
-// class CGPartyInviteHandler
-//////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGPartyInviteHandler 
-	{
-	public:
-		static void execute(CGPartyInvite* pPacket, Player* player);
-		static void executeError(CGPartyInvite* pPacket, Player* player, BYTE ErrorCode);
-	};
-#endif
-
 #endif

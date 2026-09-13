@@ -92,19 +92,4 @@ public:
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGDenyUnionHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGDenyUnionHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGDenyUnion* pCGDenyUnion, Player* pPlayer);
-
-};
-#endif
 #endif

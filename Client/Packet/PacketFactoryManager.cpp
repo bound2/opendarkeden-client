@@ -242,14 +242,6 @@
 #include "Gpackets/GCWarList.h"
 #include "Gpackets/GCShowUnionInfo.h"
 
-#ifndef __GAME_CLIENT__
-	#include "Gpackets/GMServerInfo.h"
-	#include "Gpackets/GLIncomingConnection.h"
-	#include "Gpackets/GLIncomingConnectionError.h"
-	#include "Gpackets/GLIncomingConnectionOK.h"
-	#include "Gpackets/GLKickVerify.h"
-#endif
-
 #include "Lpackets/LCCreatePCError.h"
 #include "Lpackets/LCCreatePCOK.h"
 #include "Lpackets/LCDeletePCError.h"
@@ -263,13 +255,6 @@
 #include "Lpackets/LCRegisterPlayerError.h"
 #include "Lpackets/LCRegisterPlayerOK.h"
 #include "Lpackets/LCSelectPCError.h"
-
-#ifndef __GAME_CLIENT__
-	#include "Lpackets/LGIncomingConnection.h"
-	#include "Lpackets/LGIncomingConnectionOK.h"
-	#include "Lpackets/LGIncomingConnectionError.h"
-	#include "Lpackets/LGKickCharacter.h"
-#endif
 
 #include "Lpackets/LCVersionCheckOK.h"
 #include "Lpackets/LCVersionCheckError.h"
@@ -362,12 +347,7 @@
 
 #include "Gpackets/GCOtherModifyInfo.h"
 
-#ifndef __GAME_CLIENT__
-	#include "Gpackets/GGCommand.h"
-#endif
 
-
-#ifdef __GAME_CLIENT__
 	#include "Rpackets/CRConnect.h"
 	#include "Rpackets/RCConnectVerify.h"
 	#include "Rpackets/CRRequest.h"
@@ -379,7 +359,6 @@
 	#include "Rpackets/RCRequestVerify.h"
 	#include "Rpackets/RCRequestedFile.h"
 	#include "Rpackets/RCCharacterInfo.h"
-#endif
 
 // 길드관련 2002. 05. 31. bezz
 //#include "Gpackets/GCShowGuildRegist.h"
@@ -403,33 +382,12 @@
 #include "Gpackets/GCGuildMemberList.h"
 #include "Gpackets/GCModifyGuildMemberInfo.h"
 
-#ifndef __GAME_CLIENT__
-	#include "Gpackets/GSAddGuild.h"
-	#include "Gpackets/GSAddGuildMember.h"
-	#include "Gpackets/GSQuitGuild.h"
-	#include "Gpackets/GSExpelGuildMember.h"
-	#include "Gpackets/GSModifyGuildMember.h"
-	#include "Spackets/SGAddGuildOK.h"
-	#include "Spackets/SGAddGuildMemberOK.h"
-	#include "Spackets/SGQuitGuildOK.h"
-	#include "Spackets/SGExpelGuildMemberOK.h"
-	#include "Spackets/SGModifyGuildMemberOK.h"
-	#include "Spackets/SGDeleteGuildOK.h"
-	#include "Spackets/SGModifyGuildOK.h"
-#endif
-
 #include "Cpackets/CGRelicToObject.h"
 
 #include "Cpackets/CGPortCheck.h"
 
 #include "Cpackets/CGGuildChat.h"
 #include "Gpackets/GCGuildChat.h"
-
-#ifndef __GAME_CLIENT__
-	#include "Gpackets/GGGuildChat.h"
-	#include "Gpackets/GSRequestGuildInfo.h"
-	#include "Spackets/SGGuildInfo.h"
-#endif
 
 #include "Cpackets/CGAddItemToItem.h"
 #include "Gpackets/GCAddItemToItemVerify.h"
@@ -439,14 +397,6 @@
 
 #include "Cpackets/CGModifyGuildIntro.h"
 #include "Cpackets/CGModifyGuildMemberIntro.h"
-
-#ifndef __GAME_CLIENT__
-	#include "Gpackets/GSModifyGuildIntro.h"
-	#include "Spackets/SGModifyGuildIntroOK.h"
-
-	#include "Gpackets/GSGuildMemberLogOn.h"
-	#include "Spackets/SGGuildMemberLogOnOK.h"
-#endif
 
 #include "Cpackets/CGSelectRankBonus.h"
 #include "Gpackets/GCSelectRankBonusOK.h"
@@ -609,27 +559,19 @@ PacketFactoryManager::~PacketFactoryManager ()
 	// 각각의 패킷팩토리들을 삭제한다.
 	for (int i = 0 ; i < m_Size ; i ++) 
 	{
-#ifdef __GAME_CLIENT__
 		if (m_Factories[i] != NULL)
 		{
 			delete m_Factories[i];
 			m_Factories[i] = NULL;
 		}
-#else
-		SAFE_DELETE(m_Factories[i]);
-#endif
 	}
 	
 	// 패킷팩토리배열을 삭제한다.
-#ifdef __GAME_CLIENT__
 	if (m_Factories != NULL)
 	{
 		delete [] m_Factories;
 		m_Factories = NULL;
 	}
-#else
-	SAFE_DELETE_ARRAY(m_Factories);
-#endif
 			
 	__END_CATCH
 }
@@ -644,164 +586,6 @@ void PacketFactoryManager::init ()
 {
 	__BEGIN_TRY
 		
-#if defined(__GAME_SERVER__) || defined(__LOGIN_SERVER__) || defined(__UPDATE_SERVER__)
-	addFactory(new CGAttackFactory());
-	addFactory(new CGAddGearToMouseFactory());
-	addFactory(new CGAddInventoryToMouseFactory());
-	addFactory(new CGAddMouseToGearFactory());
-	addFactory(new CGAddMouseToInventoryFactory());
-	addFactory(new CGAddMouseToQuickSlotFactory());
-	addFactory(new CGAddMouseToZoneFactory());
-	addFactory(new CGAddQuickSlotToMouseFactory());
-	addFactory(new CGAddZoneToInventoryFactory());
-	addFactory(new CGAddZoneToMouseFactory());
-	addFactory(new CGBloodDrainFactory());
-	addFactory(new CGCastingSkillFactory());
-	addFactory(new CGConnectFactory());
-	addFactory(new CGDissectionCorpseFactory());
-	addFactory(new CGDropMoneyFactory());
-	addFactory(new CGGetOffMotorCycleFactory());
-	addFactory(new CGGlobalChatFactory());
-	addFactory(new CGLearnSkillFactory());
-	addFactory(new CGLogoutFactory());
-	addFactory(new CGMakeItemFactory());
-	addFactory(new CGMoveFactory());
-	addFactory(new CGNPCAskAnswerFactory());
-	addFactory(new CGNPCTalkFactory());
-	addFactory(new CGPickupMoneyFactory());
-	addFactory(new CGReadyFactory());
-	addFactory(new CGReloadFromInventoryFactory());
-	addFactory(new CGReloadFromQuickSlotFactory());
-	addFactory(new CGRideMotorCycleFactory());
-	addFactory(new CGSayFactory());
-	addFactory(new CGSetSlayerHotKeyFactory());
-	addFactory(new CGSetVampireHotKeyFactory());
-	addFactory(new CGSelectPortalFactory());
-	addFactory(new CGShopRequestBuyFactory());
-	addFactory(new CGShopRequestListFactory());
-	addFactory(new CGShopRequestSellFactory());
-	addFactory(new CGSkillToInventoryFactory());
-	addFactory(new CGThrowBombFactory());
-	addFactory(new CGThrowItemFactory());
-	addFactory(new CGUnburrowFactory());
-	addFactory(new CGUntransformFactory());
-	addFactory(new CGUseBonusPointFactory());
-	addFactory(new CGUsePotionFromInventoryFactory());
-	addFactory(new CGUsePotionFromQuickSlotFactory());
-	addFactory(new CGRequestRepairFactory());
-	addFactory(new CGVisibleFactory());
-	addFactory(new CGVerifyTimeFactory());
-
-	addFactory(new CLCreatePCFactory());
-	addFactory(new CLDeletePCFactory());
-	addFactory(new CLGetPCListFactory());
-	addFactory(new CLLoginFactory());
-	addFactory(new CLLogoutFactory());
-	addFactory(new CLQueryPlayerIDFactory());
-	addFactory(new CLQueryCharacterNameFactory());
-	addFactory(new CLRegisterPlayerFactory);
-	addFactory(new CLSelectPCFactory());
-	addFactory(new CLVersionCheckFactory());
-	addFactory(new CLGetServerListFactory());
-	addFactory(new CLGetWorldListFactory());
-	addFactory(new CLChangeServerFactory());
-	addFactory(new CLReconnectLoginFactory());
-	addFactory(new CLSelectWorldFactory());
-	addFactory(new CLSelectServerFactory());
-
-	// 2002.6.28
-	addFactory( new CGPortCheckFactory() );
-
-	// added by elcastle 2000-11-29
-	/*
-	addFactory(new CGDialUpFactory());
-	addFactory(new CGPhoneDisconnectFactory());
-	addFactory(new CGPhoneSayFactory());
-	*/
-	addFactory(new CGWhisperFactory());
-
-	addFactory(new CGMouseToStashFactory());
-	addFactory(new CGStashToMouseFactory());
-	addFactory(new CGStashListFactory());
-	addFactory(new CGStashDepositFactory());
-	addFactory(new CGStashWithdrawFactory());
-
-	addFactory(new CGStashRequestBuyFactory());
-
-	addFactory(new CGTradePrepareFactory());
-	addFactory(new CGTradeAddItemFactory());
-	addFactory(new CGTradeRemoveItemFactory());
-	addFactory(new CGTradeMoneyFactory());
-	addFactory(new CGTradeFinishFactory());
-
-	addFactory(new CGSkillToObjectFactory());
-	addFactory(new CGSkillToSelfFactory());
-	addFactory(new CGSkillToTileFactory());
-
-	addFactory(new CGSilverCoatingFactory());
-	addFactory(new CGRequestNewbieItemFactory());
-	addFactory(new CGUseItemFromInventoryFactory());
-	addFactory(new CGSelectWayPointFactory());
-	addFactory(new CGSelectTileEffectFactory());
-
-	addFactory(new CGPartyInviteFactory());
-	addFactory(new CGPartyLeaveFactory());
-
-	addFactory(new CGResurrectFactory());
-
-	addFactory(new CGRequestIPFactory());
-
-	// 전쟁 시스템
-	addFactory( new CGRelicToObjectFactory() );
-
-	addFactory( new CGRegistGuildFactory() );
-	addFactory( new CGSelectGuildFactory() );
-	addFactory( new CGTryJoinGuildFactory() );
-	addFactory( new CGJoinGuildFactory() );
-//	addFactory( new CGQuitGuildFactory() );
-	addFactory( new CGRequestGuildMemberListFactory() );
-	addFactory( new CGSelectGuildMemberFactory() );
-//	addFactory( new CGExpelGuildMemberFactory() );
-	addFactory( new CGModifyGuildMemberFactory() );
-	addFactory( new CGGuildChatFactory() );
-
-	// 인챈트 아이템 : 별 --> 아이템 넣기
-	addFactory( new CGAddItemToItemFactory() );
-
-	// 정보 요청. 2002.9.2
-	addFactory( new CGRequestInfoFactory() );
-
-	addFactory( new CGModifyGuildIntroFactory() );
-	addFactory( new CGModifyGuildMemberIntroFactory() );
-
-	addFactory( new CGUseMessageItemFromInventoryFactory() );
-
-	// 2003. 1. 21
-	addFactory( new CGWithdrawTaxFactory() );
-
-	addFactory( new CGTypeStringListFactory() );
-
-	addFactory( new CGUseItemFromGearFactory() );
-
-	addFactory( new CGSkillToNamedFactory() );
-
-	addFactory( new CGSelectRankBonusFactory() );
-	addFactory( new CGSelectQuestFactory() );
-	addFactory( new CGLotterySelectFactory() );
-	addFactory( new CGTakeOutGoodFactory() );
-	addFactory( new CGMixItemFactory() );
-	addFactory( new CGAbsorbSoulFactory() );
-	addFactory( new CGDownSkillFactory() );
-	addFactory( new CGSubmitScoreFactory() );
-	addFactory( new CGFailQuestFactory() );
-	addFactory( new CGAddItemToCodeSheetFactory() );
-	addFactory( new CGSelectRegenZoneFactory() );
-	addFactory( new CGTameMonsterFactory() );
-	addFactory( new CGPetGambleFactory() );
-	addFactory( new CGCrashReportFactory() );
-
-#endif
-	
 	addFactory(new GCAddBatFactory());
 	addFactory(new GCAddBurrowingCreatureFactory());
 	addFactory(new GCAddEffectFactory());
@@ -998,15 +782,6 @@ void PacketFactoryManager::init ()
 	addFactory(new GCThrowBombOK2Factory());
 	addFactory(new GCThrowBombOK3Factory());
 	
-	#ifndef __GAME_CLIENT__
-		addFactory(new GGCommandFactory());
-		addFactory(new GMServerInfoFactory());
-		addFactory(new GLIncomingConnectionFactory());
-		addFactory(new GLIncomingConnectionErrorFactory());
-		addFactory(new GLIncomingConnectionOKFactory());
-		addFactory(new GLKickVerifyFactory());
-	#endif
-
 	addFactory(new LCCreatePCErrorFactory());
 	addFactory(new LCCreatePCOKFactory());
 	addFactory(new LCDeletePCErrorFactory());
@@ -1025,14 +800,6 @@ void PacketFactoryManager::init ()
 	addFactory(new LCServerListFactory());
 	addFactory(new LCWorldListFactory());
 
-	#ifndef __GAME_CLIENT__
-		addFactory(new LGIncomingConnectionFactory());
-		addFactory(new LGIncomingConnectionOKFactory());
-		addFactory(new LGIncomingConnectionErrorFactory());
-		addFactory(new LGKickCharacterFactory());
-	#endif
-
-	#ifdef __GAME_CLIENT__
 		addFactory(new CRConnectFactory());
 		addFactory(new RCConnectVerifyFactory());
 		addFactory(new CRRequestFactory());
@@ -1044,22 +811,7 @@ void PacketFactoryManager::init ()
 		addFactory(new RCRequestVerifyFactory());
 		addFactory(new RCRequestedFileFactory());
 		addFactory(new RCCharacterInfoFactory());
-	#endif
 
-	#ifndef __GAME_CLIENT__
-		addFactory( new SGQuitGuildOKFactory() );
-		addFactory( new SGExpelGuildMemberOKFactory() );
-		addFactory( new SGModifyGuildMemberOKFactory() );
-		addFactory( new SGDeleteGuildOKFactory() );
-		addFactory( new SGModifyGuildOKFactory() );
-		addFactory( new GSExpelGuildMemberFactory() );
-		addFactory( new GSModifyGuildMemberFactory() );
-		addFactory( new SGAddGuildMemberOKFactory() );
-		addFactory(new SGAddGuildOKFactory() );
-		addFactory(new GSAddGuildFactory() );
-		addFactory(new GSAddGuildMemberFactory() );
-	#endif
-	
 //	addFactory( new GCShowGuildRegistFactory() );
 	addFactory( new GCWaitGuildListFactory() );
 	addFactory( new GCShowGuildInfoFactory() );
@@ -1068,10 +820,6 @@ void PacketFactoryManager::init ()
 //	addFactory( new GCModifyMoneyFactory() );
 	addFactory( new GCShowWaitGuildInfoFactory() );
 	addFactory( new GCActiveGuildListFactory() );
-
-	#ifndef __GAME_CLIENT__
-		addFactory( new GSQuitGuildFactory());
-	#endif
 
 	addFactory( new GCShowGuildMemberInfoFactory() );
 	addFactory( new GCGuildChatFactory() );
@@ -1082,20 +830,6 @@ void PacketFactoryManager::init ()
 
 	// 2002.9.2
 	addFactory( new GCNoticeEventFactory() );
-
-	#ifndef __GAME_CLIENT__
-		addFactory( new GGGuildChatFactory() );
-		addFactory( new GSRequestGuildInfoFactory() );
-		addFactory( new SGGuildInfoFactory() );
-	#endif
-
-	#ifndef __GAME_CLIENT__
-		addFactory( new GSModifyGuildIntroFactory() );
-		addFactory( new SGModifyGuildIntroOKFactory() );
-
-		addFactory( new GSGuildMemberLogOnFactory() );
-		addFactory( new SGGuildMemberLogOnOKFactory() );
-	#endif
 
 	addFactory( new GCSelectRankBonusOKFactory() );
 	addFactory( new GCSelectRankBonusFailedFactory() );
@@ -1220,15 +954,11 @@ void PacketFactoryManager::addFactory (PacketFactory * pFactory)
 		
 	if (m_Factories[ pFactory->getPacketID() ] != NULL) {
 		StringStream msg;
-#ifdef __GAME_CLIENT__
 	#ifdef __DEBUG_OUTPUT__
 		msg << "duplicate packet factories, " << pFactory->getPacketName() ;
 	#else	
 		msg << "duplicate packet factories ";
 	#endif
-#else
-		msg << "duplicate packet factories, " << pFactory->getPacketName() ;
-#endif
 		throw Error(msg.toString());
 	}
 	
@@ -1290,8 +1020,8 @@ PacketSize_t PacketFactoryManager::getPacketMaxSize (PacketID_t packetID)
 // 패킷아이디로 특정 패킷의 이름을 리턴한다.
 //
 //////////////////////////////////////////////////////////////////////
-#if !defined(__GAME_CLIENT__) || defined(__GAME_CLIENT__) && defined(__DEBUG_OUTPUT__)
-string PacketFactoryManager::getPacketName (PacketID_t packetID) 
+#ifdef __DEBUG_OUTPUT__
+string PacketFactoryManager::getPacketName (PacketID_t packetID)
 {
 	__BEGIN_TRY
 

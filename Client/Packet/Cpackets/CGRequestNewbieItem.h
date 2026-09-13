@@ -53,15 +53,4 @@ public:
 };
 
 
-//////////////////////////////////////////////////////////////////////////////
-// class CGRequestNewbieItemHandler;
-//////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGRequestNewbieItemHandler 
-	{
-	public:
-		static void execute ( CGRequestNewbieItem * pPacket , Player * player );
-	};
-#endif
-
 #endif

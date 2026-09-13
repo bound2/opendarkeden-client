@@ -99,19 +99,4 @@ public:
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGAppointSubmasterHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGAppointSubmasterHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGAppointSubmaster* pCGAppointSubmaster, Player* pPlayer);
-
-};
-#endif
 #endif

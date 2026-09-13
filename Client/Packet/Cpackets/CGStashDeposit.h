@@ -56,18 +56,4 @@ public :
 
 };
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// class CGStashDepositHandler;
-//
-////////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGStashDepositHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGStashDeposit * pPacket , Player * player );
-	};
-#endif
 #endif

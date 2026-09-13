@@ -1152,6 +1152,67 @@ else
 fi
 
 #----------------------------------------------------------------------
+# R15 - the build-wide side macros spelled in the sources.
+#
+# __GAME_CLIENT__ is defined in every target of this build (CMake
+# passes =1 to the executable, the wire and model libraries and the
+# tests, and Client_PCH.h defines it besides); __GAME_SERVER__,
+# __LOGIN_SERVER__, __SHARED_SERVER__ and __UPDATE_SERVER__ never are.
+# A conditional on any of them has one value everywhere, and the
+# once-shared packet sources carried 190 of them - server halves that
+# included headers this repo does not have, client halves whose guard
+# was always true. Task 5.2's ninth slice (2026-09-13) evaluated every
+# one of them out of Client/Packet, and out of the three files outside
+# it the task had named (RankBonusTable, MSectorInfo.h,
+# Updater/Update.cpp). Two counts, checked separately:
+#
+#   the five macros as tokens in any .h/.cpp/.inl under Client/Packet,
+#   which must stay 0 - a server half cannot come back through a copy
+#   from the server repo without this noticing;
+#
+#   the same tokens in the rest of Client, VS_UI, basic, tools,
+#   third_party and tests, 364 as of 2026-09-13: 237 of the 280 files
+#   under Client/PacketHandler wrap their handler in
+#   #ifdef __GAME_CLIENT__ and 19 files directly under Client/ do the
+#   same, every one always true. That count is the next slice's
+#   workload, and the macro's own definitions (CMakeLists.txt,
+#   tests/CMakeLists.txt, Client_PCH.h) can go when it reaches 0.
+#
+# Counted by tests/tools/count_identifier.pl, so a mention in a comment
+# or a string does not count (//#ifdef __GAME_CLIENT__ in
+# Client/PacketHandler/GCSayHandler.cpp is one). Blind to a spelling
+# assembled by the preprocessor and to the CMake definitions
+# themselves, which are the point while the second count is above 0.
+# The include checker (tests/arch/check_includes.pl) still evaluates
+# the same five macros while walking library includes; with the packet
+# tree at 0 that evaluation decides nothing, and this ratchet is what
+# keeps it that way.
+#----------------------------------------------------------------------
+R15_PACKET_BASELINE=0
+R15_REST_BASELINE=364
+R15_PATTERN='__GAME_CLIENT__|__GAME_SERVER__|__LOGIN_SERVER__|__SHARED_SERVER__|__UPDATE_SERVER__'
+
+r15_packet_members () {
+	find Client/Packet \( -name '*.cpp' -o -name '*.h' -o -name '*.inl' \) 2>/dev/null
+}
+r15_rest_members () {
+	find Client VS_UI basic tools third_party tests \( -name '*.cpp' -o -name '*.h' -o -name '*.inl' \) 2>/dev/null | grep -v '^Client/Packet/'
+}
+
+if [ ! -f tests/tools/count_identifier.pl ]; then
+	echo "FAIL R15: tests/tools/count_identifier.pl is missing"
+	FAIL=1
+elif [ "$(r15_packet_members | wc -l)" -eq 0 ] || [ "$(r15_rest_members | wc -l)" -eq 0 ]; then
+	echo "FAIL R15: no sources enumerated - a zero here would measure nothing"
+	FAIL=1
+else
+	R15_PACKET=$(r15_packet_members | sort -u | perl tests/tools/count_identifier.pl "$R15_PATTERN")
+	R15_REST=$(r15_rest_members | sort -u | perl tests/tools/count_identifier.pl "$R15_PATTERN")
+	check "R15 (side macros spelled under Client/Packet)" "$R15_PACKET" "$R15_PACKET_BASELINE"
+	check "R15 (side macros spelled outside Client/Packet)" "$R15_REST" "$R15_REST_BASELINE"
+fi
+
+#----------------------------------------------------------------------
 # R6 was here for exactly one slice, and retired by doing its job.
 #
 # Task 5.1 stubbed SendBugReport in tests/stubs/client_globals.cpp so

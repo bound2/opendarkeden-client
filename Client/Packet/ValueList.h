@@ -11,9 +11,7 @@
 #include "Exception.h"
 #include "Packet.h"
 
-#ifdef __GAME_CLIENT__
 #include "PacketAssert.h"
-#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // class ValueList
@@ -28,13 +26,11 @@ public:
 	PacketSize_t 	getPacketSize () const noexcept		{ return szBYTE + sizeof(T) * m_Values.size(); }
 	static uint 	getPacketMaxSize() noexcept 	{ return szBYTE + sizeof(T) * 255; }
 
-#ifdef __GAME_CLIENT__
 	std::string toString () const;
 	std::list<T>&					GetList() { return m_Values; }
 	typename std::list<T>::const_iterator		Begin() { return m_Values.begin(); }
 	typename std::list<T>::const_iterator		End() { return m_Values.end(); }
 	bool						IsEmpty() { return m_Values.empty(); }
-#endif
 
 public:
 	int getSize() const noexcept 			{ return m_Values.size(); }

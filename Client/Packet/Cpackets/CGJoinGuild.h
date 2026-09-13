@@ -106,21 +106,4 @@ public:
 	PacketSize_t getPacketMaxSize() const noexcept { return szGuildID + szGuildMemberRank + szBYTE + 256; }
 };
 
-#ifndef __GAME_CLIENT__
-//////////////////////////////////////////////////////////////////////
-//
-// class CGJoinGuildHandler;
-//
-//////////////////////////////////////////////////////////////////////
-
-class CGJoinGuildHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGJoinGuild* pCGJoinGuild, Player* pPlayer);
-
-};
-#endif
-
 #endif

@@ -90,19 +90,4 @@ public:
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGModifyTaxRatioHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGModifyTaxRatioHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGModifyTaxRatio* pCGModifyTaxRatio, Player* pPlayer);
-
-};
-#endif
 #endif

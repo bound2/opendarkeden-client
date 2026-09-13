@@ -104,19 +104,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGAddGearToMouseHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGAddGearToMouseHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGAddGearToMouse * pPacket , Player * player );
-	};
-
-#endif
 #endif
