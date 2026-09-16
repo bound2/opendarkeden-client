@@ -41,8 +41,9 @@
 # evaluated them out of Client/Packet, the tenth evaluated the client
 # halves out of the rest of the tree and retired __GAME_CLIENT__ from
 # the build, and ratchet R15 holds the sources at zero live tokens of
-# all five macros and of the four undefined spellings the eleventh
-# slice took out. The walk still evaluates conditionals on them, all
+# all five macros and of the four spellings the eleventh slice added to
+# the count (three taken out there, __GUILD_MANAGER_TOOL__ with the
+# tenth). The walk still evaluates conditionals on them, all
 # as undefined now, which is what the build makes them - so a half
 # behind one of them that came back through a copy from the server
 # repo is skipped here and reported by R15 rather than as a live
