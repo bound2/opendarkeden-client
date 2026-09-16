@@ -4814,7 +4814,8 @@ private:
 		bool		bl_focused;
 	};
 
-	DWORD	m_startTime;
+	MonotonicClock::TimePoint	m_startTime;
+	MonotonicClock::Duration	m_elapsed;
 	int		m_leftMineCount;
 	SIZE	m_boardSize;
 	GAME_STATUS	m_status;
