@@ -5993,7 +5993,8 @@ C_VS_UI_FINDING_MINE::C_VS_UI_FINDING_MINE()
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(BLOCK_START_X+52, BLOCK_START_X, 42, 26, LEVEL1_ID, this, 0));
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(BLOCK_START_X+52*2, BLOCK_START_X, 42, 26, LEVEL2_ID, this, 0));
 //	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(close_x, close_y, m_SPK.GetWidth(CLOSE_BUTTON), m_SPK.GetHeight(CLOSE_BUTTON), CLOSE_ID, this,CLOSE_BUTTON));
-	m_startTime = 0;
+	m_startTime = MonotonicClock::TimePoint();
+	m_elapsed = MonotonicClock::Duration(0);
 	m_Blocks = NULL;
 	bLButton = false;
 	bRButton = false;
@@ -6137,11 +6138,11 @@ void	C_VS_UI_FINDING_MINE::Show()
 
 	if(m_status == GAMESTATUS_GAME)
 	{
-		DrawNumbers(rect.left+1, rect.top+1, (timeGetTime()-m_startTime)/1000);
+		DrawNumbers(rect.left+1, rect.top+1, (int)((MonotonicClock::Now() - m_startTime).count() / 1000));
 	}
 	else if(m_status == GAMESTATUS_DIE || m_status == GAMESTATUS_CLEAR)
 	{
-		DrawNumbers(rect.left+1, rect.top+1, m_startTime/1000);
+		DrawNumbers(rect.left+1, rect.top+1, (int)(m_elapsed.count() / 1000));
 	}
 	else
 	{
@@ -6239,7 +6240,7 @@ bool	C_VS_UI_FINDING_MINE::MouseControl(UINT message, int _x, int _y)
 			if(CheckClear() == true)
 			{
 				m_status = GAMESTATUS_CLEAR;
-				m_startTime = timeGetTime()-m_startTime;
+				m_elapsed = MonotonicClock::Now() - m_startTime;
 				for(int i = 0; i < m_boardSize.cy; i++)
 				{
 					for(int j = 0; j < m_boardSize.cx; j++)
@@ -6632,7 +6633,7 @@ void	C_VS_UI_FINDING_MINE::OpenBlock(int x, int y, bool bCenter)
 		if(m_status == GAMESTATUS_READY)
 		{
 			m_status = GAMESTATUS_GAME;
-			m_startTime = timeGetTime();
+			m_startTime = MonotonicClock::Now();
 		}
 
 		// 연다
@@ -6642,7 +6643,7 @@ void	C_VS_UI_FINDING_MINE::OpenBlock(int x, int y, bool bCenter)
 		if(m_Blocks[y*m_boardSize.cx+x].num == -1)
 		{
 			m_status = GAMESTATUS_DIE;
-			m_startTime = timeGetTime()-m_startTime;
+			m_elapsed = MonotonicClock::Now() - m_startTime;
 		}
 		else if(m_Blocks[y*m_boardSize.cx+x].num == 0)	// 숫자가 없으면 주위 블록들을 연다
 		{
@@ -7270,13 +7271,15 @@ void	C_VS_UI_ARROW_TILE::Show()
 		{
 			if( m_Player.Status == PLAYER_STATUS_DIE || m_Player.Status == PLAYER_STATUS_FINISH )
 			{
-				wsprintf(szTemp,"%5d.%2d",(m_Player.EndTime - m_Player.StartTime)/1000,
-					((m_Player.EndTime - m_Player.StartTime)%1000 )/10);
+				const long long ll_millisec = (m_Player.EndTime - m_Player.StartTime).count();
+				wsprintf(szTemp,"%5d.%2d",(int)(ll_millisec/1000),
+					(int)((ll_millisec%1000)/10));
 				g_PrintColorStrOut(x+80,y+53,szTemp, gpC_base->m_item_name_pi, RGB_WHITE, RGB_BLACK);
 			} else
 			{
-				wsprintf(szTemp,"%5d.%2d",(timeGetTime() - m_Player.StartTime)/1000,
-					((timeGetTime() - m_Player.StartTime)%1000)/10);
+				const long long ll_millisec = (MonotonicClock::Now() - m_Player.StartTime).count();
+				wsprintf(szTemp,"%5d.%2d",(int)(ll_millisec/1000),
+					(int)((ll_millisec%1000)/10));
 				g_PrintColorStrOut(x+80,y+53,szTemp, gpC_base->m_item_name_pi, RGB_WHITE, RGB_BLACK);
 			}
 		}
@@ -7445,7 +7448,7 @@ void	C_VS_UI_ARROW_TILE::ProcessGameMain()
 
 	if(m_Player.Status == PLAYER_STATUS_FINISH )
 	{
-		gpC_base->SendMessage(UI_CLEAR_STAGE,MAKELONG(WORD(m_Stage-STAGE_5X5),0), m_Player.EndTime-m_Player.StartTime);
+		gpC_base->SendMessage(UI_CLEAR_STAGE,MAKELONG(WORD(m_Stage-STAGE_5X5),0), (intptr_t)(m_Player.EndTime - m_Player.StartTime).count());
 		m_Stage = GAME_STAGE(m_Stage+1);
 		if(m_Stage == STAGE_END )
 		{
@@ -7513,9 +7516,9 @@ void	C_VS_UI_ARROW_TILE::ProcessCharacter()
 	switch( m_Player.Status )
 	{
 	case PLAYER_STATUS_TRAP :
-		if( m_Player.DelayTime <= timeGetTime() )
+		if( m_Player.DelayTime <= MonotonicClock::Now() )
 		{
-			m_Player.DelayTime = 0;
+			m_Player.DelayTime = MonotonicClock::TimePoint();
 			m_Player.Status = PLAYER_STATUS_NORMAL;
 		}
 		break;
@@ -7567,13 +7570,13 @@ void	C_VS_UI_ARROW_TILE::ActionMove()					// Move 버튼 클릭시
 		m_Player.X = 0;
 		m_Player.Y = 0;
 		m_Player.bCanRotation = true;
-		m_Player.StartTime = timeGetTime();
+		m_Player.StartTime = MonotonicClock::Now();
 		m_Player.Status = PLAYER_STATUS_NORMAL;
 	} 
 	else if( m_Player.X == GetMapSize() -1 && m_Player.Y == GetMapSize() -1 && GetDirection(&m_Player) == DIRECTION_RIGHT ) 
 	{
 		// 끝지점이면
-		m_Player.EndTime = timeGetTime();
+		m_Player.EndTime = MonotonicClock::Now();
 		m_Player.X ++;
 	} 
 	else if( m_Player.X >= 0 && m_Player.Y < GetMapSize() && m_Player.X < GetMapSize() && m_Player.Y >= 0 )
@@ -7653,7 +7656,7 @@ void	C_VS_UI_ARROW_TILE::ActionMove()					// Move 버튼 클릭시
 
 			m_Player.bCanRotation = true;		
 			m_Player.MoveCount++;				
-			m_Player.MoveTime = timeGetTime();
+			m_Player.MoveTime = MonotonicClock::Now();
 			MoveMonster();
 		}
 	}
@@ -7717,7 +7720,7 @@ void	C_VS_UI_ARROW_TILE::ActionRotation(BYTE Direction)					// 0은 왼쪽 1은 
 void	C_VS_UI_ARROW_TILE::MoveMonster()
 {
 	// 몬스터가 움직인 시간 -_- 사실 필요 없는데 ㅋ
-	m_TimeMoveMonster = timeGetTime();
+	m_TimeMoveMonster = MonotonicClock::Now();
 	
 	std::list<S_CHARACTER*>::const_iterator itr = m_MonsterList.begin();
 	std::list<S_CHARACTER*>::const_iterator enditr = m_MonsterList.end();
@@ -7760,7 +7763,7 @@ bool	C_VS_UI_ARROW_TILE::MoveRIGHT(S_CHARACTER *Character)
 		if(Character->Y == GetMapSize() - 1 && Character->X == GetMapSize() && Character->PlayerType == PLAYER_USER )
 		{
 			m_Player.Status = PLAYER_STATUS_FINISH;
-			m_Player.EndTime = timeGetTime();
+			m_Player.EndTime = MonotonicClock::Now();
 			return true;
 		} else
 		if(Character->X >= GetMapSize() || IsExistMonster( Character->ID, Character->X, Character->Y ) )
@@ -7888,13 +7891,13 @@ void	C_VS_UI_ARROW_TILE::AddMonster()
 		S_CHARACTER *Character = new S_CHARACTER;
 		Character->bActive = true;
 		Character->bCanRotation = false;
-		Character->DelayTime = 0;
+		Character->DelayTime = MonotonicClock::TimePoint();
 		Character->ID = ID++;
 		Character->MoveCount = 0;
-		Character->MoveTime = 0;
+		Character->MoveTime = MonotonicClock::TimePoint();
 		Character->PlayerType = PLAYER_MONSTER;
 		Character->RotationCount = 0;
-		Character->StartTime = timeGetTime();
+		Character->StartTime = MonotonicClock::Now();
 		Character->Status =	PLAYER_STATUS_NORMAL;
 		Character->X = Pos[i].x;
 		Character->Y = Pos[i].y;
@@ -7933,9 +7936,9 @@ void	C_VS_UI_ARROW_TILE::InitGame()
 	m_Player.bCanRotation = false;
 	m_Player.MoveCount = 0;
 	m_Player.RotationCount = 0;
-	m_Player.StartTime = 0;
-	m_Player.MoveTime = 0;
-	m_Player.DelayTime = 0;
+	m_Player.StartTime = MonotonicClock::TimePoint();
+	m_Player.MoveTime = MonotonicClock::TimePoint();
+	m_Player.DelayTime = MonotonicClock::TimePoint();
 	m_Player.bActive = true;
 	m_Player.PlayerType = PLAYER_USER;
 	m_topScore = 0;
@@ -8025,7 +8028,7 @@ BYTE	C_VS_UI_ARROW_TILE::GetMapSize()
 
 bool	C_VS_UI_ARROW_TILE::TimerMonsterMove(DWORD len)
 {
-	if(timeGetTime() - m_TimeMoveMonster > len )
+	if(MonotonicClock::Now() - m_TimeMoveMonster > MonotonicClock::Millis(len) )
 		return true;
 	return false;
 }
@@ -8062,7 +8065,7 @@ void	C_VS_UI_ARROW_TILE::SetDie()
 		return;
 	
 	m_Player.Status = PLAYER_STATUS_DIE;
-	m_Player.EndTime = timeGetTime();
+	m_Player.EndTime = MonotonicClock::Now();
 
 	g_StartGameOverMessage(-1,-1);
 
@@ -8185,7 +8188,8 @@ void	C_VS_UI_CRAZY_MINE::Show()
 		
 		if( m_bStart )
 		{
-			wsprintf(szTemp,"%5d.%2d",(timeGetTime()-m_StartTime)/1000,((timeGetTime()-m_StartTime)%1000)/10);
+			const long long ll_millisec = (MonotonicClock::Now() - m_StartTime).count();
+			wsprintf(szTemp,"%5d.%2d",(int)(ll_millisec/1000),(int)((ll_millisec%1000)/10));
 			g_PrintColorStr(x+49,y+34,szTemp, gpC_base->m_item_desc_pi, RGB_WHITE);
 		}
 		
@@ -8478,7 +8482,7 @@ void C_VS_UI_CRAZY_MINE::ActionClick(int x, int y)
 		if( m_bStart == false )
 		{
 			m_bStart = true;
-			m_StartTime = timeGetTime();
+			m_StartTime = MonotonicClock::Now();
 		}
 		m_MineBoard[x][y].isSelected = !m_MineBoard[x][y].isSelected;
 		updateMembers();
@@ -8639,14 +8643,14 @@ void C_VS_UI_CRAZY_MINE::CheckSuccess()
 		{
 			m_bStart = false;
 			m_bCanStart = false;
-			gpC_base->SendMessage(UI_CLEAR_STAGE,MAKELONG(WORD(m_MineBoardSize-2),1), timeGetTime() - m_StartTime);
+			gpC_base->SendMessage(UI_CLEAR_STAGE,MAKELONG(WORD(m_MineBoardSize-2),1), (intptr_t)(MonotonicClock::Now() - m_StartTime).count());
 			g_StartAllStageClearMessage(-1, -1);
 //			gpC_base->SendMessage(UI_CLEAR_ALL_STAGE,1);
 		} else
 		{
 			m_bStart = false;
 			m_bCanStart = false;
-			gpC_base->SendMessage(UI_CLEAR_STAGE,MAKELONG(WORD(m_MineBoardSize-2),1), timeGetTime() - m_StartTime);
+			gpC_base->SendMessage(UI_CLEAR_STAGE,MAKELONG(WORD(m_MineBoardSize-2),1), (intptr_t)(MonotonicClock::Now() - m_StartTime).count());
 			InitMineBoard( m_MineBoardSize + 1 ); 
 		}
 	}

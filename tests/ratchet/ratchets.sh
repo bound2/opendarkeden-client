@@ -1141,8 +1141,15 @@ fi
 # handler in Client), the timed missions, the gamble spin, and four
 # srand seeds (25 calls); VS_UI holds 33, the minigames' clocks and
 # the three deadlines the executable sets, and Client 80.
+# 93 on 2026-09-16: the three minigames' clocks moved (20 calls) - the
+# minesweeper's start point and the elapsed time it keeps once the game
+# ends, the arrow tile's per-character start, end, move and trap-delay
+# points and its monster-move gate, the crazy mine's start point; the
+# elapsed millisecond counts still reach the score message as before.
+# VS_UI holds 13, the three deadlines the executable sets through
+# shared structs; Client 80.
 #----------------------------------------------------------------------
-R14_BASELINE=113
+R14_BASELINE=93
 
 if [ ! -f tests/tools/count_tick_reads.pl ]; then
 	echo "FAIL R14: tests/tools/count_tick_reads.pl is missing"

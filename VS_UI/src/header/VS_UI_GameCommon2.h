@@ -74,10 +74,10 @@ private:
 		bool				bCanRotation;
 		int					MoveCount;
 		int					RotationCount;
-		DWORD				StartTime;
-		DWORD				MoveTime;
-		DWORD				DelayTime;
-		DWORD				EndTime;
+		MonotonicClock::TimePoint	StartTime;
+		MonotonicClock::TimePoint	MoveTime;
+		MonotonicClock::TimePoint	DelayTime;
+		MonotonicClock::TimePoint	EndTime;
 		bool				bActive;
 		PLAYER_TYPE			PlayerType;		
 	};	
@@ -202,7 +202,7 @@ private:
 	std::vector<S_TILE>			m_Tile;
 	S_CHARACTER					m_Player;
 	int							m_RemainCountMoveMonster;
-	DWORD						m_TimeMoveMonster;
+	MonotonicClock::TimePoint	m_TimeMoveMonster;
 	C_SPRITE_PACK				m_SPK;
 	int							m_GameCode;
 	bool						m_bCanStart;
@@ -408,7 +408,7 @@ private:
 	bool		m_bDead;
 	bool		m_bStart;
 	bool		m_bCanStart;
-	DWORD		m_StartTime;
+	MonotonicClock::TimePoint	m_StartTime;
 	C_SPRITE_PACK	m_SPK;
 	std::string		m_topName;
 	WORD			m_topScore;
