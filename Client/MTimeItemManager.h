@@ -17,8 +17,7 @@
 
 // A deadline: an absolute point on MonotonicClock's clock, at the whole
 // second this register counts in.
-typedef std::chrono::time_point<MonotonicClock::Clock, std::chrono::seconds>
-												TIMEITEM_DEADLINE;
+typedef MonotonicClock::SecondPoint				TIMEITEM_DEADLINE;
 
 class MTimeItemManager : public std::map<TYPE_OBJECTID, TIMEITEM_DEADLINE>
 {

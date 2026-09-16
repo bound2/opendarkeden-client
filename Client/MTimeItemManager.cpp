@@ -3,13 +3,6 @@
 
 MTimeItemManager		*g_pTimeItemManager = NULL;
 
-// The current time, floored to the whole second this class counts in.
-static TIMEITEM_DEADLINE
-NowInSeconds()
-{
-	return std::chrono::floor<std::chrono::seconds>( MonotonicClock::Now() );
-}
-
 MTimeItemManager::MTimeItemManager()
 {
 	clear();
@@ -32,7 +25,7 @@ bool	MTimeItemManager::AddTimeItem(TYPE_OBJECTID objectID, DWORD time)
 	// time is a lifetime, not a point in time.
 	const std::chrono::seconds d_lifetime( (std::chrono::seconds::rep)time );
 
-	insert( TIMEITEM_MAP::value_type( objectID, NowInSeconds() + d_lifetime ) );
+	insert( TIMEITEM_MAP::value_type( objectID, MonotonicClock::NowInSeconds() + d_lifetime ) );
 
 	return true;
 }
@@ -58,7 +51,7 @@ std::chrono::seconds	MTimeItemManager::GetRemainingSeconds( TYPE_OBJECTID object
 		return std::chrono::seconds( 0 );
 
 	// One clock read decides both the sign and the value.
-	const std::chrono::seconds d_left = (*c_itr).second - NowInSeconds();
+	const std::chrono::seconds d_left = (*c_itr).second - MonotonicClock::NowInSeconds();
 
 	if( d_left.count() <= 0 )
 		return std::chrono::seconds( 0 );
