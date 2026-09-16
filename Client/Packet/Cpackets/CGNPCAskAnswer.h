@@ -97,19 +97,4 @@ public :
 };
 
 
-//--------------------------------------------------------------------------------
-//
-// class CGNPCAskAnswerHandler;
-//
-//--------------------------------------------------------------------------------
-#ifndef __GAME_CLIENT__
-	class CGNPCAskAnswerHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGNPCAskAnswer * pPacket , Player * player );
-	};
-#endif
-
 #endif

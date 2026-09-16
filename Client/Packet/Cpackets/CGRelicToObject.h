@@ -115,21 +115,4 @@ public:
 	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szObjectID + szCoord + szCoord; }
 };
 
-#ifndef __GAME_CLIENT__
-//////////////////////////////////////////////////////////////////////
-//
-// class CGRelicToObjectHandler;
-//
-//////////////////////////////////////////////////////////////////////
-
-class CGRelicToObjectHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGRelicToObject* pCGRelicToObject, Player* pPlayer);
-
-};
-#endif
-
 #endif

@@ -21,7 +21,6 @@ void LCCreatePCErrorHandler::execute ( LCCreatePCError * pPacket , Player * pPla
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 
 	//cout << "Fail to create PC... (" << pPacket->toString() << ")" << endl;
 	//throw ProtocolException("CreatePC Failed!");
@@ -33,7 +32,6 @@ void LCCreatePCErrorHandler::execute ( LCCreatePCError * pPacket , Player * pPla
 
 	g_ModeNext = MODE_WAIT_SELECTPC;
 
-#endif
 		
 	__END_CATCH
 }

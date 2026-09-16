@@ -116,23 +116,4 @@ public:
 
 };
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// class CGSkillToNamedHandler;
-//
-//////////////////////////////////////////////////////////////////////
-
-#ifndef __GAME_CLIENT__
-class CGSkillToNamedHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGSkillToNamed* pCGSkillToNamed, Player* pPlayer);
-
-};
-#endif
-
-
 #endif

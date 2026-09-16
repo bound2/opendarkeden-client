@@ -22,7 +22,6 @@ void GCPartyLeaveHandler::execute (GCPartyLeave * pPacket , Player * pPlayer)
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	if (g_pZone==NULL
 		|| g_pPlayer==NULL
@@ -152,7 +151,6 @@ void GCPartyLeaveHandler::execute (GCPartyLeave * pPacket , Player * pPlayer)
 		g_pGameMessage->Add( (*g_pGameStringTable)[STRING_MESSAGE_REMOVE_PARTY].GetString() );
 	}
 
-#endif
 
 	__END_CATCH
 }

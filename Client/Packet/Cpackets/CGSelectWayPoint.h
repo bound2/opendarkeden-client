@@ -62,15 +62,4 @@ class CGSelectWayPointFactory : public PacketFactory
 	PacketSize_t getPacketMaxSize() const noexcept { return szZoneID + szCoord*2; }
 };
 
-//////////////////////////////////////////////////////////////////////////////
-// class CGSelectWayPointHandler;
-//////////////////////////////////////////////////////////////////////////////
-	#ifndef __GAME_CLIENT__
-		class CGSelectWayPointHandler 
-		{
-		public:
-			static void execute(CGSelectWayPoint* pCGSelectWayPoint, Player* pPlayer);
-		};
-	#endif
-
 #endif

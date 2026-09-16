@@ -19,7 +19,6 @@ void GCThrowItemOK3Handler::execute ( GCThrowItemOK3 * pPacket , Player * pPlaye
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	int skillType = MAGIC_THROW_HOLY_WATER;
@@ -76,7 +75,6 @@ void GCThrowItemOK3Handler::execute ( GCThrowItemOK3 * pPacket , Player * pPlaye
 		}
 	}		
 
-#endif
 
 	__END_CATCH
 }

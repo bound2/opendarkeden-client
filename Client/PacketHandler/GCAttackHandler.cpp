@@ -18,7 +18,6 @@ void GCAttackHandler::execute ( GCAttack * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	// message
 
@@ -48,7 +47,6 @@ void GCAttackHandler::execute ( GCAttack * pPacket , Player * pPlayer )
 		}
 	}	
 
-#endif
 
 	__END_CATCH
 }

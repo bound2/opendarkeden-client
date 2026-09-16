@@ -20,7 +20,6 @@ void GCSkillToTileOK5Handler::execute ( GCSkillToTileOK5 * pPacket , Player * pP
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------
 	// Zone이 아직 생성되지 않은 경우
@@ -219,7 +218,6 @@ void GCSkillToTileOK5Handler::execute ( GCSkillToTileOK5 * pPacket , Player * pP
 		}
 	}
 
-#endif
 
 	__END_CATCH
 }

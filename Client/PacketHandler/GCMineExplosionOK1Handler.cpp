@@ -19,7 +19,6 @@ void GCMineExplosionOK1Handler::execute ( GCMineExplosionOK1 * pPacket , Player 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 
@@ -148,7 +147,6 @@ void GCMineExplosionOK1Handler::execute ( GCMineExplosionOK1 * pPacket , Player 
 		AffectModifyInfo(g_pPlayer, pPacket);
 	}
 
-#endif
 
 	__END_CATCH
 }

@@ -21,7 +21,6 @@ void GCCreatureDiedHandler::execute ( GCCreatureDied * pPacket , Player * pPlaye
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	// message
 
@@ -70,7 +69,6 @@ void GCCreatureDiedHandler::execute ( GCCreatureDied * pPacket , Player * pPlaye
 		}
 	}
 
-#endif
 
 	__END_CATCH
 }

@@ -124,20 +124,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGThrowItemHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGThrowItemHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CGThrowItem * pCGThrowItem , Player * pPlayer );
-
-	};
-#endif
-
 #endif

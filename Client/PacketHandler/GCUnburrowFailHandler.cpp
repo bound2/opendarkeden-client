@@ -17,7 +17,6 @@ void GCUnburrowFailHandler::execute ( GCUnburrowFail* pPacket , Player * pPlayer
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	
 	//------------------------------------------------------------------
@@ -33,7 +32,6 @@ void GCUnburrowFailHandler::execute ( GCUnburrowFail* pPacket , Player * pPlayer
 	}
 
 
-#endif
 
 	__END_CATCH
 }

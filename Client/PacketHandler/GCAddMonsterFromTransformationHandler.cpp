@@ -18,7 +18,6 @@ void GCAddMonsterFromTransformationHandler::execute ( GCAddMonsterFromTransforma
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 	
 
 	//------------------------------------------------------
@@ -187,7 +186,6 @@ void GCAddMonsterFromTransformationHandler::execute ( GCAddMonsterFromTransforma
 //	__BEGIN_HELP_EVENT
 ////		ExecuteHelpEvent( HE_CREATURE_APPEAR_MONSTER );
 //	__END_HELP_EVENT
-#endif
 
 	__END_CATCH
 }

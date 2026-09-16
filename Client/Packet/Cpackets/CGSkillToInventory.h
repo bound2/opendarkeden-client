@@ -87,15 +87,4 @@ public:
 	//end
 };
 
-//////////////////////////////////////////////////////////////////////////////
-// class CGSkillToInventoryHandler;
-//////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGSkillToInventoryHandler 
-	{
-	public:
-		static void execute(CGSkillToInventory* pCGSkillToInventory, Player* pPlayer);
-	};
-#endif
-
 #endif

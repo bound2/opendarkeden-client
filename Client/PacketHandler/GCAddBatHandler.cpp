@@ -18,7 +18,6 @@ void GCAddBatHandler::execute ( GCAddBat * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	int batCreatureType = 185;
@@ -148,7 +147,6 @@ void GCAddBatHandler::execute ( GCAddBat * pPacket , Player * pPlayer )
 //		//ExecuteHelpEvent( HE_CREATURE_APPEAR_VAMPIRE );
 //	__END_HELP_EVENT
 
-#endif
 
 	__END_CATCH
 }

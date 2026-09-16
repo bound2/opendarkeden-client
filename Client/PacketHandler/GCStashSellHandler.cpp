@@ -24,7 +24,6 @@ void GCStashSellHandler::execute ( GCStashSell * pPacket , Player * pPlayer )
 	__BEGIN_TRY
 	__BEGIN_DEBUG
 	
-#ifdef __GAME_CLIENT__
 
 
 	if ( g_pPlayer->GetWaitVerify()==MPlayer::WAIT_VERIFY_NPC_ASK )
@@ -61,7 +60,6 @@ void GCStashSellHandler::execute ( GCStashSell * pPacket , Player * pPlayer )
 		}
 	}
 
-#endif
 
 	__END_DEBUG
 	__END_CATCH

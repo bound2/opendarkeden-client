@@ -20,7 +20,6 @@ void GCDropItemToZoneHandler::execute ( GCDropItemToZone * pPacket , Player * pP
 {
 	__BEGIN_TRY
 		
-	#ifdef __GAME_CLIENT__
 
 		DEBUG_ADD_FORMAT("[Drop Item] class=%d, type=%d, optSize=%d, id=%d, xy=(%d,%d)",
 											(int)pPacket->getItemClass(), 
@@ -81,6 +80,5 @@ void GCDropItemToZoneHandler::execute ( GCDropItemToZone * pPacket , Player * pP
 			}
 		}
 
-	#endif
 	__END_CATCH
 }

@@ -21,7 +21,6 @@ void GCShopSellFailHandler::execute ( GCShopSellFail * pPacket , Player * pPlaye
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	// mode를 없앤다.
 	g_pTempInformation->SetMode(TempInformation::MODE_NULL);
@@ -36,7 +35,6 @@ void GCShopSellFailHandler::execute ( GCShopSellFail * pPacket , Player * pPlaye
 	// 2005, 1, 3, sobeit add end
 		g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_MESSAGE_CANNOT_SELL].GetString() );
 
-#endif
 
 	__END_CATCH
 }

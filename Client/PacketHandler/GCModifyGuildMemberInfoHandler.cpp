@@ -22,13 +22,11 @@ void GCModifyGuildMemberInfoHandler::execute ( GCModifyGuildMemberInfo * pPacket
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 	g_pUserInformation->GuildName = pPacket->getGuildName().c_str();
 	g_pUserInformation->GuildGrade = pPacket->getGuildMemberRank();
 	g_pPlayer->SetGuildNumber(pPacket->getGuildID());
 
 	UI_SetGuild(pPacket->getGuildID(), pPacket->getGuildMemberRank(), pPacket->getGuildName());
-#endif
 
 	__END_CATCH
 }

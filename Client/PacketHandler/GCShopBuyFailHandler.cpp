@@ -21,7 +21,6 @@ void GCShopBuyFailHandler::execute ( GCShopBuyFail * pPacket , Player * pPlayer 
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	// mode를 없앤다.
 	g_pTempInformation->SetMode(TempInformation::MODE_NULL);
@@ -42,7 +41,6 @@ void GCShopBuyFailHandler::execute ( GCShopBuyFail * pPacket , Player * pPlayer 
 			g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_MESSAGE_CANNOT_BUY_NO_ITEM].GetString() );
 	}
 
-#endif
 
 	__END_CATCH
 }

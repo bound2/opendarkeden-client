@@ -29,17 +29,12 @@ GCNPCInfo::GCNPCInfo ()
 //--------------------------------------------------------------------------------
 GCNPCInfo::~GCNPCInfo ()
 {
-#ifdef __GAME_CLIENT__
 	std::list<NPCInfo*>::iterator itr = m_NPCInfos.begin();
 	for (; itr != m_NPCInfos.end(); itr++)
 	{
 		NPCInfo* pInfo = *itr;
 		SAFE_DELETE(pInfo);
 	}
-#else
-
-	m_NPCInfos.clear();
-#endif
 }
 
 //--------------------------------------------------------------------------------
@@ -96,20 +91,6 @@ std::string GCNPCInfo::toString () const
 {
 	__BEGIN_TRY
 	StringStream msg;
-#ifndef __GAME_CLIENT__		
-	
-	msg << "GCNPCInfo("
-		<< "NPCInfos:";
-
-	std::list<NPCInfo*>::const_iterator itr = m_NPCInfos.begin();
-	for (; itr != m_NPCInfos.end(); itr++)
-	{
-		NPCInfo* pInfo = *itr;
-		msg << pInfo->toString();
-	}
-
-	msg << ")";
-#endif
 	return msg.toString();
 
 	__END_CATCH

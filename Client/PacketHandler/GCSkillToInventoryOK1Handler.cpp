@@ -35,7 +35,6 @@ void GCSkillToInventoryOK1Handler::execute ( GCSkillToInventoryOK1 * pPacket, Pl
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------------------
@@ -363,7 +362,6 @@ void GCSkillToInventoryOK1Handler::execute ( GCSkillToInventoryOK1 * pPacket, Pl
 		}
 	}
 
-#endif
 
 	__END_CATCH
 }

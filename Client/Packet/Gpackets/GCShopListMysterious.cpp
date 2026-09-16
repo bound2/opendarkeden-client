@@ -11,10 +11,6 @@
 #include "GCShopListMysterious.h"
 #include "PacketAssert.h"
 
-#ifndef __GAME_CLIENT__
-	#include "Item.h"
-#endif
-
 //////////////////////////////////////////////////////////////////////////////
 // constructor
 //////////////////////////////////////////////////////////////////////////////
@@ -189,20 +185,3 @@ SHOPLISTITEM_MYSTERIOUS GCShopListMysterious::getShopItem(BYTE index) const
 	return m_pBuffer[index];
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-void GCShopListMysterious::setShopItem(BYTE index, const Item* pItem)
-{
-	// check bound
-	if (index >= SHOP_RACK_INDEX_MAX) throw ("GCShopListMysterious::setShopItem() : Out of Bound!");
-
-	// check pointer 
-	Assert(pItem != NULL);
-
-	// set shop item info
-	m_pBuffer[index].bExist     = true;
-	m_pBuffer[index].itemClass  = pItem->getItemClass();
-	m_pBuffer[index].itemType   = pItem->getItemType();
-}
-#endif

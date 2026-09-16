@@ -11,10 +11,6 @@
 
 // include files
 
-//#ifdef __GAME_SERVER__
-//#include "GamePlayer.h"
-//#endif
-
 #include "Packet.h"
 #include "PacketFactory.h"
 
@@ -106,99 +102,5 @@ public:
 
 };
 
-
-#ifndef __GAME_CLIENT__
-//////////////////////////////////////////////////////////////////////
-//
-// class CGSayHandler;
-//
-//////////////////////////////////////////////////////////////////////
-
-class CGSayHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGSay* pPacket, Player* pPlayer);
-
-#ifdef __GAME_SERVER__
-
-	static void opExecute( Creature* pCreature, GamePlayer* pPlayer, std::string msg, int i );
-
-	// for guild test
-	static void opzone( std::string msg, int i );
-	static void opguild( std::string msg, int i );
-
-	// 전쟁 시스템 관련 
-	static void opcombat( GamePlayer* pPlayer, std::string msg, int i );
-
-	// set 이벤트 아이템 확률
-	static void opset( GamePlayer* pPlayer, std::string msg, int i );
-
-	static void opview( GamePlayer* pPlayer, std::string msg, int i );
-
-	// save
-	static void opsave(GamePlayer* pPlayer, std::string msg, int i);
-
-	// wall
-	static void opwall(GamePlayer* pPlayer, std::string msg, int i);
-
-	// Shutdown
-	static void opshutdown(GamePlayer* pPlayer, std::string msg, int i);
-
-	// kick
-	static void opkick(GamePlayer* pPlayer, std::string msg, int i);
-
-	// mute
-	static void opmute(GamePlayer* pPlayer, std::string msg, int i);
-
-	// freezing
-	static void opfreezing(GamePlayer* pPlayer, std::string msg, int i);
-
-	// deny
-	static void opdeny(GamePlayer* pPlayer, std::string msg, int i);
-
-	// info
-	static void opinfo(GamePlayer* pPlayer, std::string msg, int i);
-
-	// trace
-	static void optrace(GamePlayer* pPlayer, std::string msg, int i);
-
-	// warp
-	static void opwarp(GamePlayer* pPlayer, std::string msg, int i);
-
-	// create
-	static void opcreate(GamePlayer* pPlayer, std::string msg, int i);
-
-	// grant
-	static void opgrant(GamePlayer* pPlayer, std::string msg, int i);
-
-	// recall
-	static void oprecall(GamePlayer* pPlayer, std::string msg, int i);
-
-	// mrecall
-	static void opmrecall(GamePlayer* pPlayer, std::string msg, int i);
-
-	// user
-	static void opuser(GamePlayer* pPlayer, std::string msg, int i);
-
-	// summon
-	static void opsummon(GamePlayer* pPlayer, std::string msg, int i);
-
-	// notice 
-	static void opnotice(GamePlayer* pPlayer, std::string msg, int i);
-
-	// pay 
-	static void oppay(GamePlayer* pPlayer, std::string msg, int i);
-
-	// world 
-	static void opworld(GamePlayer* pPlayer, std::string msg, int i, bool bSameWorldOnly);
-
-	// command 
-	static void opcommand(GamePlayer* pPlayer, std::string msg, int i);
-#endif
-
-};
-#endif
 
 #endif

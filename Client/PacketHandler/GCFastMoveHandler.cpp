@@ -19,7 +19,6 @@ void GCFastMoveHandler::execute ( GCFastMove * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	int objectID = pPacket->getObjectID();
@@ -197,7 +196,6 @@ void GCFastMoveHandler::execute ( GCFastMove * pPacket , Player * pPlayer )
 	}
 
 
-#endif
 
 	__END_CATCH
 }

@@ -17,13 +17,11 @@
 #include "UserInformation.h"
 #include "MPlayer.h"
 
-#ifdef __GAME_CLIENT__
 #include "ClientPlayer.h"
 #include "MZoneTable.h"
 #include "MZone.h"
 #include "UIFunction.h"
 #include "PacketFunction.h"
-#endif
 
 #include "DebugInfo.h"
 #include "UIDialog.h"
@@ -52,7 +50,6 @@ void GCNoticeEventHandler::execute ( GCNoticeEvent * pPacket , Player * pPlayer 
 //	wsprintf(szBuffer,"%d : 0x%x",pPacket->getCode(), pPacket->getParameter() );
 //	_MinTrace( szBuffer );
 		
-#ifdef __GAME_CLIENT__
 
 	MEvent event;
 
@@ -409,7 +406,6 @@ void GCNoticeEventHandler::execute ( GCNoticeEvent * pPacket , Player * pPlayer 
 		break;
 
 	}
-#endif
 	
 	__END_DEBUG
 		__END_CATCH

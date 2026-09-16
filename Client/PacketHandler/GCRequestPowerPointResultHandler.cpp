@@ -10,13 +10,11 @@
 #include "Client_PCH.h"
 #include "Gpackets/GCRequestPowerPointResult.h"
 
-#ifdef __GAME_CLIENT__
 #include "VS_UI_GameCommon.h"
 #include "UIFunction.h"
 #include "MGameStringTable.h"
 #include "SafeFormat.h"
 #include "UIDialog.h"
-#endif
 
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
@@ -25,7 +23,6 @@ void GCRequestPowerPointResultHandler::execute ( GCRequestPowerPointResult * pPa
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 
 	switch(pPacket->getErrorCode())
 	{
@@ -60,7 +57,6 @@ void GCRequestPowerPointResultHandler::execute ( GCRequestPowerPointResult * pPa
 		break;
 	}
 		
-#endif
 
 	__END_CATCH
 }

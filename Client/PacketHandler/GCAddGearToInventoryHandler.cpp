@@ -20,7 +20,6 @@ void GCAddGearToInventoryHandler::execute ( GCAddGearToInventory * pPacket , Pla
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 
@@ -118,7 +117,6 @@ void GCAddGearToInventoryHandler::execute ( GCAddGearToInventory * pPacket , Pla
 
 
 
-#endif
 
 	__END_CATCH
 }

@@ -19,7 +19,6 @@ void GCGetOffMotorCycleHandler::execute ( GCGetOffMotorCycle * pPacket , Player 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	
 	//------------------------------------------------------
@@ -75,7 +74,6 @@ void GCGetOffMotorCycleHandler::execute ( GCGetOffMotorCycle * pPacket , Player 
 		}
 	}
 
-#endif
 
 	__END_CATCH
 }

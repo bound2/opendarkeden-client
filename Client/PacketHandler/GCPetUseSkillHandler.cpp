@@ -22,7 +22,6 @@ void GCPetUseSkillHandler::execute ( GCPetUseSkill * pGCPetUseSkill , Player * p
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 	TYPE_OBJECTID attackerID = pGCPetUseSkill->getAttacker();
 	TYPE_OBJECTID targetID = pGCPetUseSkill->getTarget();
 
@@ -203,9 +202,6 @@ void GCPetUseSkillHandler::execute ( GCPetUseSkill * pGCPetUseSkill , Player * p
 
 	//cout << pGCPetUseSkill->toString() << endl;
 	
-#elif __WINDOWS__
-
-#endif
 
 	__END_CATCH
 }

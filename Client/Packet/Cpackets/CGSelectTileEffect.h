@@ -58,13 +58,4 @@ class CGSelectTileEffectFactory : public PacketFactory {
 
 class Effect;
 
-#ifndef __GAME_CLIENT__
-	class CGSelectTileEffectHandler 
-	{
-	public:
-		static void execute(CGSelectTileEffect* pCGSelectTileEffect, Player* pPlayer);
-		static void executeVampirePortal(CGSelectTileEffect* pCGSelectTileEffect, Player* pPlayer, Effect* pEffect);
-	};
-#endif
-
 #endif

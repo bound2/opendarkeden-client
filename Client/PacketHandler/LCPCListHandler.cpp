@@ -13,13 +13,11 @@
 #include "UIFunction.h"
 #include "MStorage.h"
 
-#ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
 	#include "UserInformation.h"
 	#include "Cpackets/CLCreatePC.h"
 	#include "Cpackets/CLDeletePC.h"
 	#include "Cpackets/CLSelectPC.h"
-#endif
 
 //----------------------------------------------------------------------
 // 서버로부터 캐릭터 리스트를 받았다. 
@@ -31,7 +29,6 @@ void LCPCListHandler::execute ( LCPCList * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 
 		/*
 	#if __LINUX__ || __WIN_CONSOLE__
@@ -371,7 +368,6 @@ void LCPCListHandler::execute ( LCPCList * pPacket , Player * pPlayer )
 	SetMode( MODE_WAIT_SELECTPC );
 	
 
-#endif
 		
 	__END_CATCH
 }

@@ -51,15 +51,4 @@ public:
 	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID; }
 };
 
-//////////////////////////////////////////////////////////////////////////////
-// class CGTakeOutGoodHandler;
-//////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGTakeOutGoodHandler 
-{
-public:
-	static void execute(CGTakeOutGood* pPacket, Player* player);
-};
-#endif
-
 #endif

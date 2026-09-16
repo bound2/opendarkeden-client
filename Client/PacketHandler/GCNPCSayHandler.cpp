@@ -23,7 +23,6 @@ void GCNPCSayHandler::execute ( GCNPCSay * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 		// Debug Message
 
 	//------------------------------------------------------
@@ -79,7 +78,6 @@ void GCNPCSayHandler::execute ( GCNPCSay * pPacket , Player * pPlayer )
 			//UI_AddChatToHistory( temp );
 		}
 	}
-#endif
 
 	__END_CATCH
 }

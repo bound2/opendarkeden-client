@@ -18,7 +18,6 @@ void GCHolyLandBonusInfoHandler::execute ( GCHolyLandBonusInfo * pPacket , Playe
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 	if(g_pPlayer == NULL || g_pSkillAvailable == NULL)
 		return;
 
@@ -52,7 +51,6 @@ void GCHolyLandBonusInfoHandler::execute ( GCHolyLandBonusInfo * pPacket , Playe
 	//--------------------------------------------------
 	g_pSkillAvailable->SetAvailableSkills();
 
-#endif
 
 	__END_CATCH
 }

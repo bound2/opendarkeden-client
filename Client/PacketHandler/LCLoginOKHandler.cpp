@@ -10,7 +10,6 @@
 #include "Client_PCH.h"
 #include "Lpackets/LCLoginOK.h"
 
-#ifdef __GAME_CLIENT__
 
 	#include "ClientPlayer.h"
 	//#include "Cpackets/CLGetPCList.h"
@@ -18,7 +17,6 @@
 	#include "UserInformation.h"
 	#include "MGameStringTable.h"
 	#include "UIDialog.h"
-#endif
 
 #include "ClientDef.h"
 #include "UIFunction.h"
@@ -42,7 +40,6 @@ void LCLoginOKHandler::execute ( LCLoginOK * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 
 	if( g_pUserInformation->UserID.GetLength() >= 15 )
 	{
@@ -131,7 +128,6 @@ void LCLoginOKHandler::execute ( LCLoginOK * pPacket , Player * pPlayer )
 		SetGoreLevel( bGoreLevel );			
 	}
 
-#endif
 
 //#if !defined(OUTPUT_DEBUG) && !defined(_DEBUG) && !defined(__DEBUG_OUTPUT__)
 //	if( g_nProtectInstance == NULL )

@@ -13,9 +13,7 @@
 #include "ClientDef.h"
 #include "UIFunction.h"
 
-#ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"	
-#endif
 
 //----------------------------------------------------------------------
 // 서버로부터 캐릭터 리스트를 받았다. 
@@ -27,7 +25,6 @@ void LCServerListHandler::execute ( LCServerList * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 
 
 	//-----------------------------------------------------------
@@ -113,7 +110,6 @@ void LCServerListHandler::execute ( LCServerList * pPacket , Player * pPlayer )
 		DEBUG_ADD_FORMAT("[Error] ServerGroup(%d) is NULL", groupID);
 	}
 
-#endif
 		
 	__END_CATCH
 }

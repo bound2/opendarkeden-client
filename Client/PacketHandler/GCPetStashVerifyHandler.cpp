@@ -11,7 +11,6 @@
 // include files
 #include "Gpackets/GCPetStashVerify.h"
 
-#ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
 	#include "ClientDef.h"
 	#include "UIFunction.h"
@@ -20,7 +19,6 @@
 	#include "MGameStringTable.h"
 	#include "MStorage.h"
 	#include "MInventory.h"
-#endif
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
 void GCPetStashVerifyHandler::execute ( GCPetStashVerify * pPacket , Player * pPlayer )
@@ -30,7 +28,6 @@ void GCPetStashVerifyHandler::execute ( GCPetStashVerify * pPacket , Player * pP
 //		__BEGIN_DEBUG_EX
 	__BEGIN_DEBUG
 		
-#ifdef __GAME_CLIENT__
 	switch(pPacket->getCode())
 	{ 
 		case GCPetStashVerify::PET_STASH_OK:
@@ -101,7 +98,6 @@ void GCPetStashVerifyHandler::execute ( GCPetStashVerify * pPacket , Player * pP
 	}
 	g_pTempInformation->SetMode(TempInformation::MODE_NULL);
 	UI_UnlockItem();
-#endif
 
 	__END_DEBUG
 //	__END_DEBUG_EX 

@@ -78,20 +78,4 @@ public:
 	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID+szShopRackType+szBYTE+szItemNum+szCoord*2; }
 };
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// class CGShopRequestBuyHandler;
-//
-////////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGShopRequestBuyHandler 
-{
-public:
-	static void execute ( CGShopRequestBuy * pPacket , Player * player );
-	static void executeNormal ( CGShopRequestBuy * pPacket , Player * player );
-	static void executeMotorcycle ( CGShopRequestBuy * pPacket , Player * player );
-	static void sendFailPacket ( CGShopRequestBuy * pPacket , Player * player );
-};
-#endif
-
 #endif

@@ -19,7 +19,6 @@ void GCMineExplosionOK2Handler::execute ( GCMineExplosionOK2 * pPacket , Player 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------
@@ -140,7 +139,6 @@ void GCMineExplosionOK2Handler::execute ( GCMineExplosionOK2 * pPacket , Player 
 		}
 	}
 
-#endif
 
 	__END_CATCH
 }

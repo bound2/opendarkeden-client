@@ -24,7 +24,6 @@ void CRRequestHandler::execute ( CRRequest * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	DEBUG_ADD("CRRequestHandler");
 
@@ -173,7 +172,6 @@ void CRRequestHandler::execute ( CRRequest * pPacket , Player * pPlayer )
 
 	DEBUG_ADD("CRRequestHandler End");
 
-#endif
 
 	__END_CATCH
 }

@@ -84,19 +84,4 @@ public:
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGRequestUnionInfoHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGRequestUnionInfoHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGRequestUnionInfo* pCGRequestUnionInfo, Player* pPlayer);
-
-};
-#endif
 #endif

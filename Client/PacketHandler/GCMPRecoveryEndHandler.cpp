@@ -17,7 +17,6 @@ void GCMPRecoveryEndHandler::execute ( GCMPRecoveryEnd * pPacket , Player * pPla
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 
@@ -25,7 +24,6 @@ void GCMPRecoveryEndHandler::execute ( GCMPRecoveryEnd * pPacket , Player * pPla
 
 	g_pPlayer->SetStatus( MODIFY_CURRENT_MP, pPacket->getCurrentMP() );
 
-#endif
 
 	__END_CATCH
 }

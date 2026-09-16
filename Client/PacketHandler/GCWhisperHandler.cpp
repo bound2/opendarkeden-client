@@ -27,7 +27,6 @@ void GCWhisperHandler::execute ( GCWhisper * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 
 	
@@ -111,7 +110,6 @@ void GCWhisperHandler::execute ( GCWhisper * pPacket , Player * pPlayer )
 	}
 
 
-#endif
 
 	__END_CATCH
 }

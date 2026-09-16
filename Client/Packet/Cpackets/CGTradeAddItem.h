@@ -67,19 +67,4 @@ public:
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef __GAME_CLIENT__
-	class GCTradeAddItem;
-	class Item;
-
-	class CGTradeAddItemHandler 
-	{
-	public:
-		static void execute ( CGTradeAddItem * pPacket , Player * player );
-		static void executeSlayer ( CGTradeAddItem * pPacket , Player * player );
-		static void executeVampire ( CGTradeAddItem * pPacket , Player * player );
-		static void makeGCTradeAddItemPacket ( GCTradeAddItem* pPacket, ObjectID_t Sender, Item* pItem, CoordInven_t X, CoordInven_t Y );
-		static void executeError ( CGTradeAddItem * pPacket , Player * player, BYTE ErrorCode );
-	};
-#endif
-
 #endif

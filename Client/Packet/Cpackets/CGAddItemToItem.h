@@ -55,16 +55,4 @@ public:
 	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szCoordInven + szCoordInven; }
 };
 
-#ifndef __GAME_CLIENT__
-//////////////////////////////////////////////////////////////////////////////
-// class CGAddItemToItemHandler;
-//////////////////////////////////////////////////////////////////////////////
-
-class CGAddItemToItemHandler 
-{
-public:
-	static void execute(CGAddItemToItem* pCGAddItemToItem, Player* pPlayer);
-};
-#endif
-
 #endif

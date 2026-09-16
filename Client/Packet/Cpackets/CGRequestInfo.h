@@ -100,19 +100,4 @@ public:
 
 };
 
-//--------------------------------------------------------------------------------
-//
-// class CGRequestInfoHandler;
-//
-//--------------------------------------------------------------------------------
-#ifndef __GAME_CLIENT__
-class CGRequestInfoHandler {
-	
-public:
-
-	// execute packet's handler
-	static void execute(CGRequestInfo* pPacket, Player* player);
-};
-#endif
-
 #endif

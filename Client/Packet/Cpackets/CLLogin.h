@@ -122,20 +122,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CLLoginHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CLLoginHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CLLogin * pPacket , Player * pPlayer );
-
-	};
-#endif
-
 #endif

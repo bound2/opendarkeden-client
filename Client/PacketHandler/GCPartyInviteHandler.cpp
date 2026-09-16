@@ -23,7 +23,6 @@ void GCPartyInviteHandler::execute (GCPartyInvite * pPacket , Player * pPlayer)
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	if (g_pZone==NULL
 		|| g_pTempInformation==NULL
@@ -267,7 +266,6 @@ void GCPartyInviteHandler::execute (GCPartyInvite * pPacket , Player * pPlayer)
 		}
 	}
 
-#endif
 
 	__END_CATCH
 }

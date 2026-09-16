@@ -20,7 +20,6 @@ void GCMakeItemFailHandler::execute ( GCMakeItemFail * pPacket , Player * pPlaye
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------------------
@@ -40,7 +39,6 @@ void GCMakeItemFailHandler::execute ( GCMakeItemFail * pPacket , Player * pPlaye
 		DEBUG_ADD( "[Error] Temp Mode is Not MODE_SKILL_MAKE_ITEM" );
 	}
 
-#endif
 
 	__END_CATCH
 }

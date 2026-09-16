@@ -119,20 +119,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGRideMotorCycleHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGRideMotorCycleHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CGRideMotorCycle * pCGRideMotorCycle , Player * pPlayer );
-
-	};
-#endif
-
 #endif

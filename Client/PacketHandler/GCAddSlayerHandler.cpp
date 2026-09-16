@@ -24,7 +24,6 @@ void GCAddSlayerHandler::execute ( GCAddSlayer * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	
 	//------------------------------------------------------
@@ -199,7 +198,6 @@ void GCAddSlayerHandler::execute ( GCAddSlayer * pPacket , Player * pPlayer )
 ////		ExecuteHelpEvent( HE_CREATURE_APPEAR_SLAYER );
 //	__END_HELP_EVENT
 
-#endif
 
 	__END_CATCH
 }

@@ -100,19 +100,4 @@ public:
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGRequestGuildListHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGRequestGuildListHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGRequestGuildList* pCGRequestGuildList, Player* pPlayer);
-
-};
-#endif
 #endif

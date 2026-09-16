@@ -11,9 +11,7 @@
 #include "Gpackets/GCSetPosition.h"
 #include "ClientDef.h"
 
-#ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
-#endif
 
 //----------------------------------------------------------------------
 // 
@@ -25,7 +23,6 @@ void GCSetPositionHandler::execute ( GCSetPosition * pPacket , Player * pPlayer 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
 
@@ -48,7 +45,6 @@ void GCSetPositionHandler::execute ( GCSetPosition * pPacket , Player * pPlayer 
 	//--------------------------------------------------------
 	SetMode( MODE_GAME );
 
-#endif
 	
 	__END_CATCH
 }

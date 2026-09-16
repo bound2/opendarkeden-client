@@ -21,7 +21,6 @@ void GCSkillToTileOK1Handler::execute ( GCSkillToTileOK1 * pPacket, Player * pPl
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 		
 	//------------------------------------------------------------------
 	// Player가 기다리던 skill의 성공유무를 검증받았다.
@@ -236,7 +235,6 @@ void GCSkillToTileOK1Handler::execute ( GCSkillToTileOK1 * pPacket, Player * pPl
 
 	}
 
-#endif
 
 	__END_CATCH
 }

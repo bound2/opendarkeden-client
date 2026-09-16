@@ -6,10 +6,6 @@
 #include "Client_PCH.h"
 #include "CGSay.h"
 
-#ifdef __GAME_SERVER__
-	#include "GamePlayer.h"
-#endif
-
 void CGSay::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY

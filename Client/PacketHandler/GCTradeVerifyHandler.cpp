@@ -15,14 +15,12 @@
 #include "MMoneyManager.h"
 #include "UIFunction.h"
 
-#ifdef __GAME_CLIENT__
 
 	#include "ClientPlayer.h"
 	#include "Cpackets/CGTradeAddItem.h"
 	#include "Cpackets/CGTradeFinish.h"
 	#include "Cpackets/CGTradeRemoveItem.h"
 
-#endif
 
 void GCTradeVerifyHandler::execute ( GCTradeVerify * pPacket , Player * pPlayer )
 	 
@@ -30,7 +28,6 @@ void GCTradeVerifyHandler::execute ( GCTradeVerify * pPacket , Player * pPlayer 
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------------------------
 	// TradeManager가 생성되지 않은 경우 --> -_-;;
@@ -519,7 +516,6 @@ void GCTradeVerifyHandler::execute ( GCTradeVerify * pPacket , Player * pPlayer 
 	}
 
 
-#endif
 
 	__END_CATCH
 }

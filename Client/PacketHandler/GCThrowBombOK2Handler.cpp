@@ -20,7 +20,6 @@ void GCThrowBombOK2Handler::execute ( GCThrowBombOK2 * pPacket , Player * pPlaye
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 		
 	//------------------------------------------------------------------
@@ -299,7 +298,6 @@ void GCThrowBombOK2Handler::execute ( GCThrowBombOK2 * pPacket , Player * pPlaye
 	
 	DEBUG_ADD("BombOK2End");
 
-#endif
 
 	__END_CATCH
 }

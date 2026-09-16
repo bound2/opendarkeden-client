@@ -20,12 +20,10 @@ void LCVersionCheckOKHandler::execute ( LCVersionCheckOK * pPacket , Player * pP
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 
 
 	// 정상적인 경우.. 아무것도 할게 없다.
 
-#endif
 		
 	__END_CATCH
 }

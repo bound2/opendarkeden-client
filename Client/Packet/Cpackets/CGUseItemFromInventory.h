@@ -83,19 +83,4 @@ public:
 class Inventory;
 class Item;
 
-#ifndef __GAME_CLIENT__
-	class CGUseItemFromInventoryHandler 
-	{
-	public:
-		static void execute(CGUseItemFromInventory* pPacket, Player* player);
-
-	protected:
-		static void executePotion(CGUseItemFromInventory* pPacket, Player* player);
-		static void executeMagazine(CGUseItemFromInventory* pPacket, Player* player);
-		static void executeETC(CGUseItemFromInventory* pPacket, Player* player);
-		static void executeSerum(CGUseItemFromInventory* pPacket, Player* player);
-		static void executeVampireETC(CGUseItemFromInventory* pPacket, Player* player);
-	};
-#endif
-
 #endif

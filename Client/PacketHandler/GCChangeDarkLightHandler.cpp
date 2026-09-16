@@ -11,9 +11,7 @@
 #include "Gpackets/GCChangeDarkLight.h"
 #include "UserInformation.h"
 
-#ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
-#endif
 
 #include "ClientDef.h"
 
@@ -24,7 +22,6 @@ void GCChangeDarkLightHandler::execute ( GCChangeDarkLight * pPacket , Player * 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	#ifdef __EXPO_CLIENT__
 		return;
@@ -50,7 +47,6 @@ void GCChangeDarkLightHandler::execute ( GCChangeDarkLight * pPacket , Player * 
 
 	
 
-#endif
 
 	__END_CATCH
 }

@@ -5,11 +5,9 @@
 #include "MEventManager.h"
 #include "CJpeg.h"
 
-#if defined(__GAME_CLIENT__)
 	#include "MPlayer.h"
 	#include "UtilityFunction.h"
 	#include "AppendPatchInfo.h"
-#endif
 #include "DebugInfo.h"
 #include "PacketFunction.h"
 //----------------------------------------------------------------------
@@ -241,18 +239,15 @@ void	MEventManager::ProcessEvent()
 				EVENT_ID delete_id = itr->second.eventID;
 				itr++;
 				RemoveEvent(delete_id);
-#ifdef __GAME_CLIENT__				
 				// 2004, 6, 21, sobeit add start - 질드레 연출 - 5초간 흔들렸으면 10초간 어두워짐
 				if(delete_id == EVENTID_GDR_PRESENT)
 					SetFadeStart(31, -1, 1, 0,0,0, 4);
 				// 2004, 6, 21, sobeit add end
-#endif
 				continue;
 			}
 		}
 		if(itr->second.eventType == EVENTTYPE_EFFECT)
 		{
-#ifdef __GAME_CLIENT__
 			if(!g_pPlayer->HasEffectStatus((EFFECTSTATUS)itr->second.parameter1))
 			{
 				EVENT_ID delete_id = itr->second.eventID;
@@ -260,7 +255,6 @@ void	MEventManager::ProcessEvent()
 				RemoveEvent(delete_id);
 				continue;
 			}
-#endif
 				
 		}
 		itr++;

@@ -96,19 +96,4 @@ public :
 
 };
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGAddMouseToZoneHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGAddMouseToZoneHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGAddMouseToZone * pPacket , Player * player );
-	};
-
-#endif
 #endif

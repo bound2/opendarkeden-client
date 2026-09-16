@@ -92,19 +92,4 @@ public:
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGExpelGuildHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGExpelGuildHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGExpelGuild* pCGExpelGuild, Player* pPlayer);
-
-};
-#endif
 #endif

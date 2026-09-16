@@ -17,7 +17,6 @@ void GCAddInstalledMineToZoneHandler::execute ( GCAddInstalledMineToZone * pPack
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	/*
 		DEBUG_ADD_FORMAT("[Add NewItem] class=%d, type=%d, opt=%d, id=%d, xy=(%d,%d)",
@@ -46,7 +45,6 @@ void GCAddInstalledMineToZoneHandler::execute ( GCAddInstalledMineToZone * pPack
 		DEBUG_ADD("[Error] This is not Mine(-_-;)");
 	}
 
-#endif
 
 	__END_CATCH
 }

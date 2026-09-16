@@ -8,6 +8,8 @@
 //	classes saw a different Packet vtable from the library defining
 //	them - chosen over the other by include-path order. Only VS_UI's
 //	warning pragmas stay here; everything else is the shared header.
+//	(The macro itself is gone since task 5.2's tenth slice, 2026-09-13;
+//	the shared header no longer defines anything of the kind.)
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma once

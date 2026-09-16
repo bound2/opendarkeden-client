@@ -90,19 +90,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGSetVampireHotKeyHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGSetVampireHotKeyHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGSetVampireHotKey * pPacket , Player * player );
-	};
-#endif
-
 #endif

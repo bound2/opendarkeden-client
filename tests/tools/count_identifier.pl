@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #----------------------------------------------------------------------
-# count_identifier.pl - ratchet R13's counter
+# count_identifier.pl - the counter behind ratchets R13 and R15
 #----------------------------------------------------------------------
 #
 # Prints how many times an identifier matching the regular expression

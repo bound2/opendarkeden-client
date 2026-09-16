@@ -76,7 +76,6 @@ private :
 // Factory for CGQuitUnion
 //
 //////////////////////////////////////////////////////////////////////
-//#ifdef __DEBUG_OUTPUT__
 class CGQuitUnionFactory : public PacketFactory {
 
 public:
@@ -103,20 +102,4 @@ public:
 	PacketSize_t getPacketMaxSize() const noexcept { return szGuildID + szBYTE; }
 };
 
-//#endif
-//////////////////////////////////////////////////////////////////////
-//
-// class CGQuitUnionHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGQuitUnionHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGQuitUnion* pCGQuitUnion, Player* pPlayer);
-
-};
-#endif
 #endif

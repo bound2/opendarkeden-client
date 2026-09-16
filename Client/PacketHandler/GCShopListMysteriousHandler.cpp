@@ -21,7 +21,6 @@ void GCShopListMysteriousHandler::execute ( GCShopListMysterious * pPacket , Pla
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------
 	// Zone이 아직 생성되지 않은 경우
@@ -149,7 +148,6 @@ void GCShopListMysteriousHandler::execute ( GCShopListMysterious * pPacket , Pla
 	}
 
 
-#endif
 
 	__END_CATCH
 }

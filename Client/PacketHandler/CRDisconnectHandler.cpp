@@ -19,7 +19,6 @@ void CRDisconnectHandler::execute ( CRDisconnect * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	RequestServerPlayer* pRequestServerPlayer = dynamic_cast<RequestServerPlayer*>( pPlayer );
 
@@ -29,7 +28,6 @@ void CRDisconnectHandler::execute ( CRDisconnect * pPacket , Player * pPlayer )
 		RequestDisconnect( pRequestServerPlayer->getName().c_str() );
 	}
 
-#endif
 
 	__END_CATCH
 }

@@ -18,7 +18,6 @@ void GCKnocksTargetBackOK4Handler::execute ( GCKnocksTargetBackOK4 * pPacket , P
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------
@@ -61,7 +60,6 @@ void GCKnocksTargetBackOK4Handler::execute ( GCKnocksTargetBackOK4 * pPacket , P
 		}
 	}
 
-#endif
 
 	__END_CATCH
 }

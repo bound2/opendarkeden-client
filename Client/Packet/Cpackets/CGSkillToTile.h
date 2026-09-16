@@ -127,22 +127,4 @@ public :
 
 };
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// class CGSkillToTileHandler;
-//
-//////////////////////////////////////////////////////////////////////
-
-#ifndef __GAME_CLIENT__
-class CGSkillToTileHandler {
-
-public :
-
-	// execute packet's handler
-	static void execute ( CGSkillToTile * pCGSkillToTile , Player * pPlayer );
-
-};
-#endif
-
 #endif

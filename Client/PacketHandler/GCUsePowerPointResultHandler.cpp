@@ -10,12 +10,10 @@
 #include "Client_PCH.h"
 #include "Gpackets/GCUsePowerPointResult.h"
 
-#ifdef __GAME_CLIENT__
 #include "VS_UI_GameCommon.h"
 #include "UIFunction.h"
 #include "MGameStringTable.h"
 #include "VS_UI.h"
-#endif
 
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
@@ -24,7 +22,6 @@ void GCUsePowerPointResultHandler::execute ( GCUsePowerPointResult * pPacket , P
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 
 	switch(pPacket->getErrorCode())
 	{
@@ -44,7 +41,6 @@ void GCUsePowerPointResultHandler::execute ( GCUsePowerPointResult * pPacket , P
 		UI_PopupMessage( STRING_ERROR_ETC_ERROR );
 		break;
 	}
-#endif
 
 	__END_CATCH
 }

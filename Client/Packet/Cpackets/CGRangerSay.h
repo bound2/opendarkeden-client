@@ -82,20 +82,5 @@ public:
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGRangerSayHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGRangerSayHandler
-{
-public:
-
-	// execute packet's handler
-	static void execute(CGRangerSay* pPacket, Player* pPlayer);
-
-};
-#endif
 #endif
 

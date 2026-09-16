@@ -18,11 +18,9 @@ void GCCastingSkillHandler::execute ( GCCastingSkill * pPacket , Player * pPlaye
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	
 
-#endif
 
 	__END_CATCH
 }

@@ -85,23 +85,4 @@ public:
 
 };
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// class CGShopRequestSellHandler;
-//
-////////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGShopRequestSellHandler 
-{
-public:
-	static void execute ( CGShopRequestSell * pPacket , Player * player );
-
-	static void executeNormal ( CGShopRequestSell * pPacket , Player * player );
-	static void executeMotorcycle ( CGShopRequestSell * pPacket , Player * player );
-
-	static void executeOpAllSkull ( CGShopRequestSell * pPacket , Player * player );
-
-	static void sendFailPacket ( CGShopRequestSell * pPacket , Player * player );
-};
-#endif
 #endif

@@ -5,10 +5,8 @@
 #include "MChatManager.h"
 
 
-#ifdef __GAME_CLIENT__
 	#include "MGameStringTable.h"
 	#include "UserOption.h"
-#endif
 
 
 //----------------------------------------------------------------------
@@ -184,17 +182,10 @@ MChatManager::LoadFromFileCurse(const char* filename)
 bool				
 MChatManager::RemoveCurse(char* str, bool bForce) const
 {
-	#ifdef __GAME_CLIENT__
 		if (!g_pUserOption->FilteringCurse && bForce == false || str==NULL)
 		{
 			return false;
 		}
-	#else
-		if (str==NULL)
-		{
-			return false;
-		}
-	#endif
 
 
 	bool existCurseEng = false;
@@ -453,7 +444,6 @@ MChatManager::RemoveCurse(char* str, bool bForce) const
 			{
 				// 2004, 10, 26, sobeit modify start - 욕필터 수정
 				
-#ifdef __GAME_CLIENT__
 				int j = 0;
 				switch(isCurse[i])
 				{
@@ -505,10 +495,6 @@ MChatManager::RemoveCurse(char* str, bool bForce) const
 					str[ indexFiltered[i] ] = s_MaskString[ i ];
 					break;
 				}
-#else
-				// 욕이면.. 원래 string 위치에 mask를 씌운다.
-				str[ indexFiltered[i] ] = s_MaskString[ i ];
-#endif
 
 				// 2004, 10, 26, sobeit modify end - 욕필터 수정
 			}

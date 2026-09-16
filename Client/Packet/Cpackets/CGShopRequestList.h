@@ -94,19 +94,4 @@ public :
 };
 
 
-//--------------------------------------------------------------------------------
-//
-// class CGShopRequestListHandler;
-//
-//--------------------------------------------------------------------------------
-#ifndef __GAME_CLIENT__
-	class CGShopRequestListHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGShopRequestList * pPacket , Player * player );
-	};
-#endif
-
 #endif

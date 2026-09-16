@@ -19,9 +19,7 @@ void GCShowGuildMemberInfoHandler::execute ( GCShowGuildMemberInfo * pPacket , P
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 		UI_ShowGuildMemberInfo(pPacket);
-#endif
 
 	__END_CATCH
 }

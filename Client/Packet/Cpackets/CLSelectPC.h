@@ -102,20 +102,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CLSelectPCHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CLSelectPCHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CLSelectPC * pPacket , Player * pPlayer );
-
-	};
-#endif
-
 #endif

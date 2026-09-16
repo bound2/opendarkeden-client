@@ -41,7 +41,6 @@ MItemManager::Release()
 		MItem* pItem = (*iItem).second;
 
 		delete pItem;
-#ifdef __GAME_CLIENT__
 		if(pItem == g_pArmsBand1)
 		{
 			g_pArmsBand1 = NULL;
@@ -54,7 +53,6 @@ MItemManager::Release()
 		{
 			g_pQuickSlot = NULL;
 		}
-#endif
 		iItem++;
 	}
 

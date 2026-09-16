@@ -39,22 +39,9 @@ class RankBonusInfo {
 		void					SetStatus(RANK_BONUS_STATUS status)	{ m_status = status; }
 		const int				GetPoint() const		{ return m_point; }
 
-#ifndef __GAME_CLIENT__
-		void		SetType(unsigned short type)			{ m_type = type; }
-		void		SetName(const char *name)				{ m_Name = name; }
-		void		SetLevel(char level)					{ m_level = level; }
-		void		SetRace(Race eRace)						{ m_race = eRace; }
-		void		SetSkillIconID(unsigned short id)		{ m_skillIconID = id; }
-		void		SetPoint(int point)						{ m_point = point; }
-#endif
-
 	public :
 		RankBonusInfo();
 		void		LoadFromFile(std::ifstream& file);		
-
-#ifndef __GAME_CLIEMT__
-		void		SaveToFile(std::ofstream& file);
-#endif
 
 	private:
 		unsigned short m_type;
@@ -72,10 +59,6 @@ class RankBonusInfo {
 //---------------------------------------------------------------------------------
 class RankBonusTable:public CTypeTable<RankBonusInfo>
 {
-#ifndef __GAME_CLIENT__
-public:
-	RankBonusTable();
-#endif
 };
 
 extern RankBonusTable *g_pRankBonusTable;

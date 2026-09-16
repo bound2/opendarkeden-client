@@ -102,20 +102,4 @@ public:
 	PacketSize_t getPacketMaxSize() const noexcept { return szGuildID + szBYTE + 255; }
 };
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGModifyGuildIntroHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGModifyGuildIntroHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGModifyGuildIntro* pCGModifyGuildIntro, Player* pPlayer);
-
-};
-#endif
-
 #endif

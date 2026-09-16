@@ -14,7 +14,6 @@ void GCAddHelicopterHandler::execute ( GCAddHelicopter * pPacket , Player * pPla
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	if (g_pZone!=NULL)
@@ -31,7 +30,6 @@ void GCAddHelicopterHandler::execute ( GCAddHelicopter * pPacket , Player * pPla
 		}
 	}
 
-#endif
 
 	__END_CATCH
 }

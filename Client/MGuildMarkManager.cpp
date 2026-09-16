@@ -10,11 +10,9 @@
 #include "basic/ColorDraw.h"
 #include "DXLib/CDirectDrawSurface.h"
 
-#if defined(__GAME_CLIENT__) || defined(__GUILD_MANAGER_TOOL__)
 	#include "UtilityFunction.h"
 	#include "AppendPatchInfo.h"
 	#include "DebugInfo.h"
-#endif
 
 //----------------------------------------------------------------------
 // global
@@ -100,7 +98,6 @@ MGuildMarkManager::Release()
 bool
 MGuildMarkManager::CreateGuildMark(WORD guildID, const char* pFilename)
 {
-#if defined(__GAME_CLIENT__) || defined(__GUILD_MANAGER_TOOL__)
 #ifdef PLATFORM_WINDOWS
 	if (pFilename==NULL)
 	{
@@ -172,7 +169,6 @@ MGuildMarkManager::CreateGuildMark(WORD guildID, const char* pFilename)
 	//-----------------------------------------------------
 	AddGuildMark(guildID, pSprite, pSpriteSmall);
 #endif // PLATFORM_WINDOWS
-#endif
 	return true;
 }
 
@@ -515,7 +511,6 @@ MGuildMarkManager::MergeGuildMark(const char* pSPKFilenameOrg,
 									const char* pSPKFilenameApp, 
 									const char* pIDMapperFilenameApp)
 {
-	#if defined(__GAME_CLIENT__) || defined(__GUILD_MANAGER_TOOL__)
 		if (pSPKFilenameOrg==NULL
 			|| pIDMapperFilenameOrg==NULL
 			|| pSPKFilenameApp==NULL
@@ -716,7 +711,6 @@ MGuildMarkManager::MergeGuildMark(const char* pSPKFilenameOrg,
 		//remove(pSPKFilenameApp);		// append하면서 지워진다.
 		remove(pSPKIFilenameApp);
 		remove(pIDMapperFilenameApp);
-	#endif
 
 	return true;
 }

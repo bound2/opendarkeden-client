@@ -19,7 +19,6 @@ void GCChangeShapeHandler::execute ( GCChangeShape * pPacket , Player * pPlayer 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//--------------------------------------------------------
@@ -112,7 +111,6 @@ void GCChangeShapeHandler::execute ( GCChangeShape * pPacket , Player * pPlayer 
 
 	delete pItem;
 
-#endif
 
 	__END_CATCH
 }

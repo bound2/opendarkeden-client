@@ -30,7 +30,6 @@ void GCShopBuyOKHandler::execute ( GCShopBuyOK * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	//--------------------------------------------------------------
 	// Item 사는 packet을 받는게 맞나?
@@ -260,7 +259,6 @@ void GCShopBuyOKHandler::execute ( GCShopBuyOK * pPacket , Player * pPlayer )
 		DEBUG_ADD("[Error] Buy? -_-; No Temp Information!");
 	}
 
-#endif
 
 	__END_CATCH
 }

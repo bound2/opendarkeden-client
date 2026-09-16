@@ -90,19 +90,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGSetSlayerHotKeyHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGSetSlayerHotKeyHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGSetSlayerHotKey * pPacket , Player * player );
-	};
-#endif
-
 #endif

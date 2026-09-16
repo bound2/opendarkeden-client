@@ -86,20 +86,4 @@ public:
 };
 
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// class CGTradePrepareHandler;
-//
-////////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGTradePrepareHandler 
-	{
-	public:
-		static void execute ( CGTradePrepare * pPacket , Player * player );
-		static void executeSlayer ( CGTradePrepare * pPacket , Player * player );
-		static void executeVampire ( CGTradePrepare * pPacket , Player * player );
-		static void executeError ( CGTradePrepare * pPacket , Player * player, BYTE ErrorCode );
-	};
-#endif
-
 #endif

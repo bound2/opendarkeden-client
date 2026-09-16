@@ -96,20 +96,4 @@ public:
 };
 
 
-//--------------------------------------------------------------------------------
-//
-// class CLQueryCharacterNameHandler;
-//
-//--------------------------------------------------------------------------------
-#ifndef __GAME_CLIENT__
-	class CLQueryCharacterNameHandler {
-
-	public:
-
-		// execute packet's handler
-		static void execute(CLQueryCharacterName* pPacket, Player* pPlayer);
-
-	};
-#endif
-
 #endif

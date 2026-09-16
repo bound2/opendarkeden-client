@@ -109,19 +109,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGUsePotionFromInventoryHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGUsePotionFromInventoryHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGUsePotionFromInventory * pPacket , Player * player );
-	};
-
-#endif
 #endif

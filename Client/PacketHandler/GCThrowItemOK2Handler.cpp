@@ -19,7 +19,6 @@ void GCThrowItemOK2Handler::execute ( GCThrowItemOK2 * pPacket , Player * pPlaye
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	int skillType = MAGIC_THROW_HOLY_WATER;
 
@@ -106,7 +105,6 @@ void GCThrowItemOK2Handler::execute ( GCThrowItemOK2 * pPacket , Player * pPlaye
 	//UI_SetHP( g_pPlayer->GetHP(), g_pPlayer->GetMAX_HP() );
 	//UI_SetMP( g_pPlayer->GetMP(), g_pPlayer->GetMAX_MP() );
 
-#endif
 
 	__END_CATCH
 }

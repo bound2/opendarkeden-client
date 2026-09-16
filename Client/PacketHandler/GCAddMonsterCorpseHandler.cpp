@@ -18,7 +18,6 @@ void GCAddMonsterCorpseHandler::execute ( GCAddMonsterCorpse * pPacket , Player 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 	
 
 	// Creature를 생성해서 MCorpse에 추가해서 Zone에 넣는다.
@@ -258,7 +257,6 @@ void GCAddMonsterCorpseHandler::execute ( GCAddMonsterCorpse * pPacket , Player 
 ////		ExecuteHelpEvent( HE_ITEM_APPEAR_CORPSE );	
 //	__END_HELP_EVENT
 
-#endif
 
 	__END_CATCH
 }

@@ -69,19 +69,4 @@ public:
 	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID; }
 };
 
-#ifndef __GAME_CLIENT__
-//////////////////////////////////////////////////////////////////////
-//
-// class CGTameMonsterHandler;
-//
-//////////////////////////////////////////////////////////////////////
-
-class CGTameMonsterHandler {
-	
-public:
-	static void execute(CGTameMonster* pCGTameMonster, Player* player);
-};
-
-#endif
-
 #endif

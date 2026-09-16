@@ -22,7 +22,6 @@ void GCShopMarketConditionHandler::execute ( GCShopMarketCondition * pPacket , P
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------
 	// Zone이 아직 생성되지 않은 경우
@@ -91,7 +90,6 @@ void GCShopMarketConditionHandler::execute ( GCShopMarketCondition * pPacket , P
 			DEBUG_ADD_FORMAT("[Error] The Creature is Not NPC. id=%d", pPacket->getObjectID());
 		}
 	}
-#endif
 
 	__END_CATCH
 }

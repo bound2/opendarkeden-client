@@ -12,14 +12,6 @@
 #ifndef	__DEBUGINFO_H__
 #define	__DEBUGINFO_H__
 
-//#ifdef __GAME_CLIENT__
-//	#ifdef _DEBUG
-//		#define	OUTPUT_DEBUG
-//	#else
-//		#define	OUTPUT_DEBUG
-//	#endif
-//#endif
-
 	#ifdef	OUTPUT_DEBUG
 		
 		//------------------------------------------

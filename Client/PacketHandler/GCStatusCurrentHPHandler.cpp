@@ -17,7 +17,6 @@ void GCStatusCurrentHPHandler::execute ( GCStatusCurrentHP * pPacket , Player * 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------
@@ -49,7 +48,6 @@ void GCStatusCurrentHPHandler::execute ( GCStatusCurrentHP * pPacket , Player * 
 		}
 	}
 
-#endif
 
 	__END_CATCH
 }

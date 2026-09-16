@@ -11,20 +11,12 @@
 #include "Gpackets/GCReconnect.h"
 #include "PacketAssert.h"
 
-#ifdef __GAME_SERVER__
-#endif
-
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 void GCReconnectHandler::execute ( GCReconnect * pPacket , Player * pPlayer )
 
 {
 	__BEGIN_TRY
-		
-#ifdef __GAME_SERVER__
-
-
-#endif
 		
 	__END_CATCH
 }

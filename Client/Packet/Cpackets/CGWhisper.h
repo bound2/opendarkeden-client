@@ -100,23 +100,4 @@ public:
 
 };
 
-
-#ifndef __GAME_CLIENT__
-//////////////////////////////////////////////////////////////////////
-//
-// class CGWhisperHandler;
-//
-//////////////////////////////////////////////////////////////////////
-
-class CGWhisperHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGWhisper* pPacket, Player* pPlayer);
-
-};
-#endif
-
-
 #endif

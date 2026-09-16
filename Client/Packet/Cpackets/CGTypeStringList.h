@@ -85,20 +85,4 @@ public:
 	PacketSize_t getPacketMaxSize() const { return szBYTE+szBYTE + ( szBYTE + MAX_STRING_LENGTH ) * MAX_STRING_NUM + szDWORD; }
 };
 
-#ifndef __GAME_CLIENT__
-//////////////////////////////////////////////////////////////////////////////
-// class CGTypeStringListHandler;
-//////////////////////////////////////////////////////////////////////////////
-
-class CGTypeStringListHandler 
-{
-public:
-	static void execute(CGTypeStringList* pPacket, Player* player);
-
-private:
-	static void executeWaitForMeet(CGTypeStringList* pPacket, Player* player);
-	static void executeWaitForApart(CGTypeStringList* pPacket, Player* player);
-};
-#endif
-
 #endif

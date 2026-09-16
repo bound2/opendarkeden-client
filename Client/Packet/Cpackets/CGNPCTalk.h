@@ -89,19 +89,4 @@ public :
 };
 
 
-//--------------------------------------------------------------------------------
-//
-// class CGNPCTalkHandler;
-//
-//--------------------------------------------------------------------------------
-#ifndef __GAME_CLIENT__
-class CGNPCTalkHandler {
-	
-public :
-
-	// execute packet's handler
-	static void execute ( CGNPCTalk * pPacket , Player * player );
-};
-#endif
-
 #endif

@@ -94,19 +94,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGDropMoneyHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGDropMoneyHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGDropMoney * pPacket , Player * player );
-	};
-#endif
-
 #endif

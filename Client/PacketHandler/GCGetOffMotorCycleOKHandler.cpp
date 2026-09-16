@@ -19,7 +19,6 @@ void GCGetOffMotorCycleOKHandler::execute ( GCGetOffMotorCycleOK * pPacket, Play
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	
 	//------------------------------------------
@@ -42,7 +41,6 @@ void GCGetOffMotorCycleOKHandler::execute ( GCGetOffMotorCycleOK * pPacket, Play
 	//------------------------------------------
 	PlaySound( SOUND_WORLD_BIKE_STOP );
 
-#endif
 
 	__END_CATCH
 }

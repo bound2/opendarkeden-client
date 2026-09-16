@@ -98,20 +98,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CLDeletePCHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CLDeletePCHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CLDeletePC * pPacket , Player * pPlayer );
-
-	};
-#endif
-
 #endif

@@ -26,7 +26,6 @@ void GCAddNPCHandler::execute ( GCAddNPC * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	// message
 
@@ -195,7 +194,6 @@ void GCAddNPCHandler::execute ( GCAddNPC * pPacket , Player * pPlayer )
 ////		ExecuteHelpEvent( HE_CREATURE_APPEAR_NPC );
 //	__END_HELP_EVENT
 
-#endif
 
 	__END_CATCH
 }

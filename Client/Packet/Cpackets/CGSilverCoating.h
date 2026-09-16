@@ -54,15 +54,4 @@ public:
 	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID; }
 };
 
-//////////////////////////////////////////////////////////////////////////////
-// class CGSilverCoatingHandler;
-//////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGSilverCoatingHandler 
-	{
-	public:
-		static void execute ( CGSilverCoating * pPacket , Player * player );
-	};
-#endif
-
 #endif

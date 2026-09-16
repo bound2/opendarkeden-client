@@ -95,21 +95,4 @@ public:
 };
 
 
-#ifndef __GAME_CLIENT__
-//////////////////////////////////////////////////////////////////////
-//
-// class CGGlobalChatHandler;
-//
-//////////////////////////////////////////////////////////////////////
-
-class CGGlobalChatHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGGlobalChat* pPacket, Player* pPlayer);
-
-};
-#endif
-
 #endif

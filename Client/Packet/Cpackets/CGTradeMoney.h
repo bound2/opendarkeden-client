@@ -83,15 +83,4 @@ public:
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef __GAME_CLIENT__
-	class CGTradeMoneyHandler 
-	{
-	public:
-		static void execute ( CGTradeMoney * pPacket , Player * player );
-		static void executeSlayer ( CGTradeMoney * pPacket , Player * player );
-		static void executeVampire ( CGTradeMoney * pPacket , Player * player );
-		static void executeError ( CGTradeMoney * pPacket , Player * player, BYTE ErrorCode );
-	};
-#endif
-
 #endif

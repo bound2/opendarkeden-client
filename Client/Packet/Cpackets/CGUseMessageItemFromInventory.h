@@ -62,17 +62,4 @@ public:
 	}
 };
 
-//////////////////////////////////////////////////////////////////////////////
-// class CGUseMessageItemFromInventoryHandler;
-//////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGUseMessageItemFromInventoryHandler 
-{
-public:
-	static void execute(CGUseMessageItemFromInventory* pPacket, Player* player);
-
-protected:
-	static void executeEventTree(CGUseMessageItemFromInventory* pPacket, Player* player);
-};
-#endif
 #endif

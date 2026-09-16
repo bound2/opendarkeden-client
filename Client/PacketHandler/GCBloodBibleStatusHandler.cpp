@@ -20,10 +20,8 @@ void GCBloodBibleStatusHandler::execute ( GCBloodBibleStatus * pPacket , Player 
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 	//cout << pPacket->toString() << endl;
 	UI_SetBloodBibleStatus(pPacket);
-#endif
 
 	__END_CATCH
 }

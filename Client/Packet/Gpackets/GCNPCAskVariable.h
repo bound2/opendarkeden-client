@@ -39,14 +39,8 @@ public:
 
 public:
 	ObjectID_t getObjectID(void) const noexcept { return m_ObjectID; }
-#ifndef __GAME_CLIENT__
-	void setObjectID(ObjectID_t creatureID) noexcept { m_ObjectID = creatureID; }
-#endif
 
 	ScriptID_t getScriptID(void) const noexcept { return m_ScriptID; }
-#ifndef __GAME_CLIENT__
-	void setScriptID(ScriptID_t id) noexcept { m_ScriptID = id; }
-#endif
 
 	void addScriptParameter( ScriptParameter* pParam );
 	void clearScriptParameters();

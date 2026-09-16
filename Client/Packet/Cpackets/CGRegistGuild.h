@@ -100,21 +100,4 @@ public:
 	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE + 30 + szBYTE + 256; }
 };
 
-#ifndef __GAME_CLIENT__
-//////////////////////////////////////////////////////////////////////
-//
-// class CGRegistGuildHandler;
-//
-//////////////////////////////////////////////////////////////////////
-
-class CGRegistGuildHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGRegistGuild* pCGRegistGuild, Player* pPlayer);
-
-};
-#endif
-
 #endif

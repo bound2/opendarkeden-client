@@ -68,16 +68,22 @@ target_include_directories(unit_tests PRIVATE
 
 #----------------------------------------------------------------------
 # Every TU that shares class definitions with the packetwire library
-# (which compiles with __GAME_CLIENT__=1 and the Windows wire macros)
-# must see the identical definitions - Packet's virtual set changes
-# under these macros, so a mismatch would be a real ODR/vtable break,
-# not a style issue. One list, used by every such TU below, so the two
-# blocks cannot drift apart; its platform half is the top-level
+# (which compiles with the Windows wire macros) must see the identical
+# definitions - the packet headers still switch on those macros in
+# places (Types/SystemTypes.h, Datagram.h), and a class definition
+# preprocessed two ways is a real ODR break, not a style issue. The
+# list carried __GAME_CLIENT__=1 as well until task 5.2's tenth slice
+# (2026-09-13) retired that macro from the build; while it existed,
+# Packet's virtual set changed under it, and two TUs that were not on
+# this list, test_player_base.cpp and test_wire_host.cpp, compiled a
+# Packet with two more pure virtuals than the library's and an empty
+# PlayerStatus enum. One list, used by every such TU below, so the two
+# blocks cannot drift apart; it is the top-level
 # DARKEDEN_PLATFORM_DEFINITIONS, the list packetwire itself compiles
 # with, so it cannot drift from the library either (off Windows that
 # list is empty on both sides - basic/Platform.h does the detecting).
 #----------------------------------------------------------------------
-set(PACKETWIRE_TEST_DEFINITIONS "__GAME_CLIENT__=1" ${DARKEDEN_PLATFORM_DEFINITIONS})
+set(PACKETWIRE_TEST_DEFINITIONS ${DARKEDEN_PLATFORM_DEFINITIONS})
 
 #----------------------------------------------------------------------
 # Wire-layout inventory (unit/test_wire_layout.cpp).
@@ -109,7 +115,7 @@ set_source_files_properties(
 	# The framing entry point, SocketOutputStream::write(const Packet*):
 	# what the ring and the sequence counter hold after a body write
 	# throws. Defines its own Packet subclass, so it needs the same
-	# definitions - Packet's virtual set changes under them.
+	# definitions the library's Packet was preprocessed with.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_output_stream_rollback.cpp
 	# The other end of the same stream: what flush() leaves in the ring
 	# when the socket takes only part of it. Derives from SocketImpl to
@@ -140,10 +146,8 @@ set_source_files_properties(
 	# and PacketAssert.h as well.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_stringstream_chars.cpp
 	# gamemodel compiles with the same definitions: its headers reach
-	# Client/Packet/Exception.h, whose inline bodies switch on __WIN32__,
-	# and Client/Packet/Types/CreatureTypes.h, which switches on
-	# __GAME_CLIENT__. Every test that includes a Client/ header needs an
-	# entry here.
+	# Client/Packet/Exception.h, whose inline bodies switch on __WIN32__.
+	# Every test that includes a Client/ header needs an entry here.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_gamemodel_tables.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_item_table.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_item_core.cpp
@@ -170,10 +174,9 @@ set_source_files_properties(
 	# switch on __WIN32__. (__END_CATCH, which it also expands, is
 	# conditioned on NDEBUG alone.)
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_source_location.cpp
-	# PacketIDSet::deletePacketID. It names CPS_NONE, which PlayerStatus.h
-	# declares only under __GAME_CLIENT__, and Packet.h conditions a member
-	# on the same macro, so the TU must see the definitions packetwire was
-	# built with.
+	# PacketIDSet::deletePacketID. It names CPS_NONE from PlayerStatus.h
+	# and shares Packet's class definition, so the TU must see the
+	# definitions packetwire was built with.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_id_set.cpp
 	# What SendBugReport actually sends. It builds a CGSay and hands it
 	# to a Player subclass, so the Packet vtable and the CGSay class
@@ -191,6 +194,13 @@ set_source_files_properties(
 	# seventh and eighth slices took the sending side out). Constructs the
 	# packet and drives write() over the socket stream.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_crwhisper.cpp
+	# The Player base's receive loop and the WireHost forwarders. Both
+	# define a Packet subclass and reach PlayerStatus.h, and both were
+	# missing from this list until the ninth dead-code slice's review
+	# (2026-09-13) found them compiling a different Packet than the
+	# library's; see the block comment above.
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_player_base.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_host.cpp
 	PROPERTIES
 		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS};WIRE_GOLDEN_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/golden\""
 )

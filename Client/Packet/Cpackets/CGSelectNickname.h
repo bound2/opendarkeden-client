@@ -47,7 +47,6 @@ private :
 // Factory for CGSelectNickname
 //
 //////////////////////////////////////////////////////////////////////
-//#ifdef __DEBUG_OUTPUT__
 class CGSelectNicknameFactory : public PacketFactory {
 
 public:
@@ -62,20 +61,4 @@ public:
 	PacketSize_t getPacketMaxSize() const noexcept { return szWORD; }
 };
 
-//#endif
-//////////////////////////////////////////////////////////////////////
-//
-// class CGSelectNicknameHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGSelectNicknameHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGSelectNickname* pCGSelectNickname, Player* pPlayer);
-
-};
-#endif
 #endif

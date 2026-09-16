@@ -22,7 +22,6 @@ void GCTradeErrorHandler::execute ( GCTradeError * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	
 	if (g_pPlayer==NULL
@@ -223,7 +222,6 @@ void GCTradeErrorHandler::execute ( GCTradeError * pPacket , Player * pPlayer )
 
 	UI_CloseExchange();
 
-#endif
 
 	__END_CATCH
 }

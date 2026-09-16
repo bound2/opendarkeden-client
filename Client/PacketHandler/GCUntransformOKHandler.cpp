@@ -21,7 +21,6 @@ void GCUntransformOKHandler::execute ( GCUntransformOK * pPacket , Player * pPla
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	bool bWerWolf = g_pPlayer->GetCreatureType() == CREATURETYPE_WER_WOLF;
 
@@ -104,7 +103,6 @@ void GCUntransformOKHandler::execute ( GCUntransformOK * pPacket , Player * pPla
 	}
 	
 
-#endif
 
 	__END_CATCH
 }

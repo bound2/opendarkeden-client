@@ -29,13 +29,11 @@
 #include "MEventManager.h"
 #include "UIFunction.h"
 
-#ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
 	#include "Cpackets/CGConnect.h"
 	#include "Cpackets/CGStashList.h"
 	#include "VS_UI.h"
 	#include "VS_UI_filepath.h"
-#endif
 
 
 void GCNPCResponseHandler::execute ( GCNPCResponse * pPacket , Player * pPlayer )
@@ -45,7 +43,6 @@ void GCNPCResponseHandler::execute ( GCNPCResponse * pPacket , Player * pPlayer 
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 
 	char sz_temp[512];
 	//------------------------------------------------------
@@ -1151,7 +1148,6 @@ void GCNPCResponseHandler::execute ( GCNPCResponse * pPacket , Player * pPlayer 
 			break;
 
 	}
-#endif
 
 	__END_CATCH
 

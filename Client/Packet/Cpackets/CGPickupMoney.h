@@ -109,21 +109,4 @@ public :
 
 };
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// class CGPickupMoneyHandler;
-//
-//////////////////////////////////////////////////////////////////////
-
-#ifndef __GAME_CLIENT__
-class CGPickupMoneyHandler {
-	
-public :
-
-	// execute packet's handler
-	static void execute ( CGPickupMoney * pPacket , Player * player );
-};
-#endif
-
 #endif

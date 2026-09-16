@@ -49,7 +49,6 @@ bool	g_abSweeperBonusSkills[SWEEPER_BONUS_MAX] = { false, };
 void
 MSkillSet::SetAvailableSkills()
 {
-#ifdef __GAME_CLIENT__
 
 	if (g_pPlayer==NULL 		
 		|| g_pSkillManager==NULL
@@ -1029,13 +1028,11 @@ MSkillSet::SetAvailableSkills()
 	// 스킬이 비었을때 호출되면 -_- 난리난다.
 //	if( size() > 5 )
 //		gC_vs_ui.ResetHotKey();
-#endif
 }
 
 void			
 MSkillSet::SetAvailableVampireSkills()
 {
-#ifdef __GAME_CLIENT__
 	MSkillDomain& vampireDomain = (*g_pSkillManager)[SKILLDOMAIN_VAMPIRE];
 	TYPE_CREATURETYPE PlayerCreatureType = g_pPlayer->GetCreatureType();
 
@@ -1170,7 +1167,6 @@ MSkillSet::SetAvailableVampireSkills()
 		
 		insert(SKILLID_MAP::value_type( MAGIC_UN_TRANSFORM, SKILLID_NODE(MAGIC_UN_TRANSFORM, flag) ));
 	}	
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -1182,7 +1178,6 @@ MSkillSet::SetAvailableVampireSkills()
 void
 MSkillSet::CheckMP()
 {
-#ifdef __GAME_CLIENT__
 	
 	// mp 체크할때.. 현재 장비중인 무기도 체크해야되는데
 	// 일단은.. 이케 간다. T_T;
@@ -1237,5 +1232,4 @@ MSkillSet::CheckMP()
 		iID++;
 	}
 	*/
-#endif
 }

@@ -11,10 +11,6 @@
 
 // include files
 
-//#ifdef __GAME_SERVER__
-//#include "GamePlayer.h"
-//#endif
-
 #include "Packet.h"
 #include "PacketFactory.h"
 
@@ -46,14 +42,6 @@ public :
 	
 	// get packet's body size
 	PacketSize_t getPacketSize () const noexcept { return 0; }
-
-	#ifndef __GAME_CLIENT__
-		// get packet name (required when not GAME_CLIENT)
-		std::string getPacketName () const { return "CGVerifyTime"; }
-
-		// get packet's debug string (required when not GAME_CLIENT)
-		std::string toString () const { return "CGVerifyTime"; }
-	#endif
 
 	#ifdef __DEBUG_OUTPUT__
 		// get packet name
@@ -96,21 +84,5 @@ public :
 
 };
 
-
-//////////////////////////////////////////////////////////////////////
-//
-// class CGVerifyTimeHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGVerifyTimeHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CGVerifyTime * pPacket , Player * pPlayer );
-
-	};
-#endif
 
 #endif

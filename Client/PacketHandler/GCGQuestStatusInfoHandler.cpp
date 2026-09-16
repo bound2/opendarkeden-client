@@ -22,7 +22,6 @@ void GCGQuestStatusInfoHandler::execute ( GCGQuestStatusInfo * pGCGQuestStatusIn
 	__BEGIN_TRY
 //	__BEGIN_DEBUG_EX
 		
-#ifdef __GAME_CLIENT__
 	if(gC_vs_ui.IsRunningQuestManager()) 
 		gC_vs_ui.CloseQuestManager();
 	gC_vs_ui.RunQuestManager(); // ui setting - load xml file
@@ -81,7 +80,6 @@ void GCGQuestStatusInfoHandler::execute ( GCGQuestStatusInfo * pGCGQuestStatusIn
 	}
 
 	gC_vs_ui.ReleaseQuestXML(); // Release xml file
-#endif
 
 	//__END_DEBUG_EX 
 	__END_CATCH

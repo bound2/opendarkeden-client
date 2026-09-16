@@ -44,15 +44,4 @@ public:
 	PacketSize_t getPacketMaxSize() const noexcept { return 0; }
 };
 
-//////////////////////////////////////////////////////////////////////////////
-// class CGResurrectHandler;
-//////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGResurrectHandler 
-	{
-	public:
-		static void execute(CGResurrect* pPacket, Player* player);
-	};
-#endif
-
 #endif

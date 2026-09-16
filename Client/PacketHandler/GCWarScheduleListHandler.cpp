@@ -20,11 +20,9 @@ void GCWarScheduleListHandler::execute ( GCWarScheduleList * pPacket , Player * 
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 	
 	UI_RunWarList(pPacket);
 
-#endif
 
 	__END_CATCH
 }

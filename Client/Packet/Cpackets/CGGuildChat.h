@@ -105,21 +105,4 @@ public:
 
 };
 
-#ifndef __GAME_CLIENT__
-//////////////////////////////////////////////////////////////////////
-//
-// class CGGuildChatHandler;
-//
-//////////////////////////////////////////////////////////////////////
-
-class CGGuildChatHandler {
-
-public:
-
-	// execute packet's handler
-	static void execute(CGGuildChat* pPacket, Player* pPlayer);
-
-};
-#endif
-
 #endif

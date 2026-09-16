@@ -20,7 +20,6 @@ void GCAddEffectHandler::execute ( GCAddEffect * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------
 	// Zone이 아직 생성되지 않은 경우
@@ -160,7 +159,6 @@ void GCAddEffectHandler::execute ( GCAddEffect * pPacket , Player * pPlayer )
 		}
 	}
 
-#endif
 
 	__END_CATCH
 }

@@ -20,13 +20,11 @@ void GCDisconnectHandler::execute ( GCDisconnect * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 	
 	#if	defined(OUTPUT_DEBUG) && defined(__DEBUG_OUTPUT__)
 		//cout << pPacket->toString() << endl;
 	#endif
 
-#endif
 
 	__END_CATCH
 }

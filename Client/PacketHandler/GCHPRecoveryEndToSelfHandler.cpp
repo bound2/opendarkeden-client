@@ -16,7 +16,6 @@ void GCHPRecoveryEndToSelfHandler::execute ( GCHPRecoveryEndToSelf * pPacket , P
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 
@@ -27,7 +26,6 @@ void GCHPRecoveryEndToSelfHandler::execute ( GCHPRecoveryEndToSelf * pPacket , P
 		g_pPlayer->SetStatus( MODIFY_CURRENT_HP, pPacket->getCurrentHP() );
 	}	
 
-#endif
 
 	__END_CATCH
 }

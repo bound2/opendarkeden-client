@@ -18,7 +18,6 @@ void GCUntransformFailHandler::execute ( GCUntransformFail* pPacket , Player * p
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------------------
@@ -33,7 +32,6 @@ void GCUntransformFailHandler::execute ( GCUntransformFail* pPacket , Player * p
 		DEBUG_ADD("[Error] Player is not WaitVerifySkillSuccess");
 	}
 
-#endif
 
 	__END_CATCH
 }

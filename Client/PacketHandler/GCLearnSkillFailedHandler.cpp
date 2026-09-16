@@ -21,7 +21,6 @@ void GCLearnSkillFailedHandler::execute ( GCLearnSkillFailed * pPacket , Player 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	// pPacket->getSkillType();
@@ -51,7 +50,6 @@ void GCLearnSkillFailedHandler::execute ( GCLearnSkillFailed * pPacket , Player 
 		}
 	}
 	
-#endif
 
 	__END_CATCH
 }

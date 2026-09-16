@@ -40,9 +40,7 @@
 #include "Client_PCH.h"
 #include <fstream>
 #include <list>
-#ifdef __GAME_CLIENT__
 	#include "UserOption.h"
-#endif
 
 
 //---------------------------------------------------------------------------
@@ -224,7 +222,7 @@ extern MHelpManager*		g_pHelpManager;
 //-----------------------------------------------------------------------------
 extern void		ExecuteHelpEvent(HELP_EVENT he);
 
-#if defined(__GAME_CLIENT__) && defined(OUTPUT_DEBUG)
+#ifdef OUTPUT_DEBUG
 	#define __BEGIN_HELP_EVENT 		if (g_pUserOption!=NULL && g_pUserOption->UseHelpEvent) {
 	#define __END_HELP_EVENT		}
 	#define __USE_HELP_EVENT

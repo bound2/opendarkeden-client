@@ -19,7 +19,6 @@ void GCCrossCounterOK2Handler::execute ( GCCrossCounterOK2 * pPacket , Player * 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	// 내가 objectID한테 맞는다.
@@ -50,7 +49,6 @@ void GCCrossCounterOK2Handler::execute ( GCCrossCounterOK2 * pPacket , Player * 
 		
 	}	
 
-#endif
 
 	__END_CATCH
 }

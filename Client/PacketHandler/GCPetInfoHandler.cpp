@@ -21,9 +21,7 @@ void GCPetInfoHandler::execute ( GCPetInfo * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 	SetPetInfo(pPacket->getPetInfo(), pPacket->getObjectID());
-#endif
 
 	__END_CATCH
 }

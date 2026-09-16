@@ -14,7 +14,6 @@ void GCEnterVampirePortalHandler::execute ( GCEnterVampirePortal * pPacket , Pla
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------
@@ -58,7 +57,6 @@ void GCEnterVampirePortalHandler::execute ( GCEnterVampirePortal * pPacket , Pla
 		}
 	}
 
-#endif
 
 	__END_CATCH
 }

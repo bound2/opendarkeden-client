@@ -18,7 +18,6 @@ void GCBloodDrainOK2Handler::execute ( GCBloodDrainOK2 * pPacket , Player * pPla
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------
@@ -122,7 +121,6 @@ void GCBloodDrainOK2Handler::execute ( GCBloodDrainOK2 * pPacket , Player * pPla
 	//UI_SetHP( g_pPlayer->GetHP(), g_pPlayer->GetMAX_HP() );
 	//UI_SetMP( g_pPlayer->GetMP(), g_pPlayer->GetMAX_MP() );
 	
-#endif
 
 	__END_CATCH
 }

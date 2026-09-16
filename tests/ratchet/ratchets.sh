@@ -1069,6 +1069,10 @@ fi
 #   PLATFORM_MACOS in any CMakeLists.txt or .cmake outside build
 #   trees, comment tails stripped - the build defines no platform
 #   macro off Windows, and one here would disagree with the compiler.
+#   Matched without word boundaries since 2026-09-13: the R15 review
+#   found that \b misses add_definitions(-DPLATFORM_MACOS), the spelling
+#   basic/ and Client/DXLib use, because -D puts a word character in
+#   front of the name. Over-counting is the safe direction at 0.
 #
 # Tokens are counted by tests/tools/count_identifier.pl, which strips
 # comments and strings per file for the reason count_register.pl gives.
@@ -1101,7 +1105,7 @@ else
 	R13_LINUX=$(r13_cxx_members | sort -u | perl tests/tools/count_identifier.pl '__LINUX__|_LINUX')
 	R13_MACOS=$(r13_cxx_members_outside_basic | sort -u | perl tests/tools/count_identifier.pl 'PLATFORM_MACOS')
 	R13_CMAKE=$(r13_cmake_members | sort -u | tr '\n' '\0' | xargs -0 cat 2>/dev/null \
-		| sed -e 's/#.*//' | grep -aoE '\bPLATFORM_MACOS\b' | wc -l)
+		| sed -e 's/#.*//' | grep -aoE 'PLATFORM_MACOS' | wc -l)
 	R13=$((R13_LINUX + R13_MACOS + R13_CMAKE))
 	check "R13 (platform macros spelled outside basic/Platform.h: __LINUX__/_LINUX $R13_LINUX, PLATFORM_MACOS outside basic/ $R13_MACOS, PLATFORM_MACOS in CMake $R13_CMAKE)" "$R13" "$R13_BASELINE"
 fi
@@ -1149,6 +1153,97 @@ elif [ "$(find Client VS_UI \( -name '*.cpp' -o -name '*.h' \) 2>/dev/null | wc 
 else
 	R14=$(perl tests/tools/count_tick_reads.pl Client VS_UI | tail -1 | awk '{print $1}')
 	check "R14 (live GetTickCount/timeGetTime calls under Client and VS_UI)" "$R14" "$R14_BASELINE"
+fi
+
+#----------------------------------------------------------------------
+# R15 - the build-wide side macros spelled in the sources.
+#
+# The once-shared client/server sources switched on five macros:
+# __GAME_CLIENT__, which every translation unit that read it had
+# defined (CMake passed =1 to the executable, packetwire, gamemodel and
+# the listed test sources; every other reader got it from
+# Client_PCH.h), and __GAME_SERVER__, __LOGIN_SERVER__,
+# __SHARED_SERVER__ and __UPDATE_SERVER__, which nothing ever defined.
+# A conditional on any of the five therefore had one value in every
+# translation unit. Task 5.2's ninth slice (2026-09-13) evaluated the
+# 190 under Client/Packet out - server halves that included headers
+# this repo does not have, client halves whose guard was always true -
+# and the tenth slice, the same day, the 363 in the 256 files of the
+# rest of the tree (always-true #ifdef __GAME_CLIENT__ wrappers in 237
+# of the 280 handler files and 19 files directly under Client/, ten
+# always-false server guards in five handlers; two of the 363 reduced
+# to #ifdef OUTPUT_DEBUG rather than deleted) and then the definition
+# itself, from CMakeLists.txt, tests/CMakeLists.txt and Client_PCH.h in
+# the same commit. Three counts, all 0, checked separately because
+# each is where a return would land:
+#
+#   the five macros as tokens in any .h/.cpp/.inl under Client/Packet -
+#   a server half behind one of the five cannot come back through a
+#   copy from the server repo without this noticing (one behind another
+#   spelling, __UPDATE_CLIENT__ or __EXPO_CLIENT__ say, is the include
+#   checker's both-branch walk to catch, not this count's);
+#
+#   the same tokens in the rest of Client, VS_UI, basic, tools,
+#   third_party and tests - a #ifdef __GAME_CLIENT__ written from habit
+#   is dead code now, since nothing defines the macro, and this is what
+#   says so;
+#
+#   the five names anywhere in a CMakeLists.txt or .cmake file outside
+#   build trees, comment tails stripped - a definition put back there
+#   would make every such #ifdef live again. Matched without word
+#   boundaries on purpose: -D__GAME_CLIENT__ has a word character on
+#   each side of the name, and basic/ and Client/DXLib already spell
+#   their definitions add_definitions(-D...). Over-counting is the
+#   safe direction for a baseline of 0. Not covered: CMakePresets.json,
+#   the workflows, the Makefile and the tracked SpriteLib .vcxproj,
+#   none of which passes a macro today.
+#
+# Counted by tests/tools/count_identifier.pl, so a mention in a comment
+# or a string does not count (the //#ifdef __GAME_CLIENT__ inside the
+# commented-out function at Client/MItemUse.cpp:1749 is one): "no live
+# token", not "no mention". Blind to a spelling assembled by the
+# preprocessor. All three counts pin their denominators (a baseline of
+# 0 cannot notice a shrunken scan, the way R13's font-list 1 does): the
+# two token counts by a file floor, the CMake count by a smaller one.
+# The include checker (tests/arch/check_includes.pl) still evaluates
+# the same five macros, all as undefined, while walking library
+# includes.
+#----------------------------------------------------------------------
+R15_PACKET_BASELINE=0
+R15_REST_BASELINE=0
+R15_CMAKE_BASELINE=0
+R15_PACKET_FILES_FLOOR=1000
+R15_REST_FILES_FLOOR=1000
+R15_CMAKE_FILES_FLOOR=5
+R15_PATTERN='__GAME_CLIENT__|__GAME_SERVER__|__LOGIN_SERVER__|__SHARED_SERVER__|__UPDATE_SERVER__'
+
+r15_packet_members () {
+	find Client/Packet \( -name '*.cpp' -o -name '*.h' -o -name '*.inl' \) 2>/dev/null
+}
+r15_rest_members () {
+	find Client VS_UI basic tools third_party tests \( -name '*.cpp' -o -name '*.h' -o -name '*.inl' \) 2>/dev/null | grep -v '^Client/Packet/'
+}
+
+if [ ! -f tests/tools/count_identifier.pl ]; then
+	echo "FAIL R15: tests/tools/count_identifier.pl is missing"
+	FAIL=1
+elif [ "$(r15_packet_members | wc -l)" -lt "$R15_PACKET_FILES_FLOOR" ]; then
+	echo "FAIL R15: only $(r15_packet_members | wc -l) files enumerated under Client/Packet (floor $R15_PACKET_FILES_FLOOR) - a zero over a shrunken scan would measure nothing"
+	FAIL=1
+elif [ "$(r15_rest_members | wc -l)" -lt "$R15_REST_FILES_FLOOR" ]; then
+	echo "FAIL R15: only $(r15_rest_members | wc -l) files enumerated outside Client/Packet (floor $R15_REST_FILES_FLOOR) - a zero over a shrunken scan would measure nothing"
+	FAIL=1
+elif [ "$(r13_cmake_members | wc -l)" -lt "$R15_CMAKE_FILES_FLOOR" ]; then
+	echo "FAIL R15: only $(r13_cmake_members | wc -l) CMake files enumerated (floor $R15_CMAKE_FILES_FLOOR) - a zero over a shrunken scan would measure nothing"
+	FAIL=1
+else
+	R15_PACKET=$(r15_packet_members | sort -u | perl tests/tools/count_identifier.pl "$R15_PATTERN")
+	R15_REST=$(r15_rest_members | sort -u | perl tests/tools/count_identifier.pl "$R15_PATTERN")
+	R15_CMAKE=$(r13_cmake_members | sort -u | tr '\n' '\0' | xargs -0 cat 2>/dev/null \
+		| sed -e 's/#.*//' | grep -aoE "($R15_PATTERN)" | wc -l)
+	check "R15 (side macros spelled under Client/Packet)" "$R15_PACKET" "$R15_PACKET_BASELINE"
+	check "R15 (side macros spelled outside Client/Packet)" "$R15_REST" "$R15_REST_BASELINE"
+	check "R15 (side macros defined in a CMake file)" "$R15_CMAKE" "$R15_CMAKE_BASELINE"
 fi
 
 #----------------------------------------------------------------------

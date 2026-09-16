@@ -9,9 +9,7 @@
 // include files
 #include "Gpackets/GCAddressListVerify.h"
 
-#ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
-#endif
 
 #include "ClientDef.h"
 #include "TempInformation.h"
@@ -25,7 +23,6 @@ void GCAddressListVerifyHandler::execute ( GCAddressListVerify * pPacket , Playe
 	__BEGIN_TRY /*__BEGIN_DEBUG_EX*/
 	/*__BEGIN_DEBUG*/
 		
-#ifdef __GAME_CLIENT__
 	
 	if(NULL == pPacket)
 		return;
@@ -73,7 +70,6 @@ void GCAddressListVerifyHandler::execute ( GCAddressListVerify * pPacket , Playe
 	g_pTempInformation->SetMode(TempInformation::MODE_NULL); 
 
 
-#endif
 
 	/*__END_DEBUG*/
 	/*__END_DEBUG_EX*/ __END_CATCH

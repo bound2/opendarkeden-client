@@ -78,19 +78,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGVisibleHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGVisibleHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGVisible * pPacket , Player * player );
-	};
-#endif
-
 #endif

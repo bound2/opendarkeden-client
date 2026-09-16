@@ -26,7 +26,6 @@ void GCCannotUseHandler::execute ( GCCannotUse * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	
 	if(g_pPlayer->GetWaitVerify() == MPlayer::WAIT_VERIFY_LOVE_CHAIN)
@@ -170,7 +169,6 @@ void GCCannotUseHandler::execute ( GCCannotUse * pPacket , Player * pPlayer )
 		DEBUG_ADD("[Error] No Item in CheckBuffer");
 	}
 	
-#endif
 
 	__END_CATCH
 }

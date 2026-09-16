@@ -76,12 +76,4 @@ public:
 // class CGThrowBombHandler;
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef __GAME_CLIENT__
-	class CGThrowBombHandler 
-	{
-	public:
-		static void execute(CGThrowBomb* pCGThrowBomb, Player* pPlayer);
-	};
-#endif
-
 #endif

@@ -20,7 +20,6 @@ void GCShopBoughtHandler::execute ( GCShopBought * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	// shop에 아이템 등장
 	//------------------------------------------------------
@@ -118,7 +117,6 @@ void GCShopBoughtHandler::execute ( GCShopBought * pPacket , Player * pPlayer )
 	
 
 
-#endif
 
 	__END_CATCH
 }

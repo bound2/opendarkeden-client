@@ -20,7 +20,6 @@ void GCAddVampireFromTransformationHandler::execute ( GCAddVampireFromTransforma
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------
 	// Zone이 아직 생성되지 않은 경우
@@ -268,7 +267,6 @@ void GCAddVampireFromTransformationHandler::execute ( GCAddVampireFromTransforma
 //	__BEGIN_HELP_EVENT
 ////		ExecuteHelpEvent( HE_CREATURE_APPEAR_VAMPIRE );
 //	__END_HELP_EVENT
-#endif
 
 	__END_CATCH
 }

@@ -10,7 +10,6 @@
 #include "Client_PCH.h"
 #include "Gpackets/GCNPCInfo.h"
 
-#ifdef __GAME_CLIENT__
 
 	#include "ClientPlayer.h"
 	#include "PCSlayerInfo2.h"
@@ -19,7 +18,6 @@
 	#include "ClientDef.h"
 	#include "UIFunction.h"
 
-#endif
 
 //----------------------------------------------------------------------
 // 클라이언트가 게임 서버로부터 GCNPCInfo 패킷을 받게 되면,
@@ -31,7 +29,6 @@ void GCNPCInfoHandler::execute ( GCNPCInfo * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 	
 	// NPC 정보만 날라온다-_-;
 	
@@ -57,7 +54,6 @@ void GCNPCInfoHandler::execute ( GCNPCInfo * pPacket , Player * pPlayer )
 		delete pInfo;
 	}
 
-#endif
 
 	__END_CATCH
 }

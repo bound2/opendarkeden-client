@@ -108,21 +108,4 @@ public:
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGPortCheckHandler;
-//
-////
-//////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGPortCheckHandler {
-	
-public:
-
-	// execute packet's handler
-	static void execute(CGPortCheck* pPacket);
-
-};
-#endif
-
 #endif

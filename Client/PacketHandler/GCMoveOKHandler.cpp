@@ -13,9 +13,7 @@
 #include "VS_UI.h"
 
 
-#ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
-#endif
 
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
@@ -24,7 +22,6 @@ void GCMoveOKHandler::execute ( GCMoveOK * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 	
 	ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
 
@@ -40,7 +37,6 @@ void GCMoveOKHandler::execute ( GCMoveOK * pPacket , Player * pPlayer )
 	//--------------------------------------------------
 	g_pPlayer->PacketMoveOK(pPacket->getX(), pPacket->getY(), pPacket->getDir());
 
-#endif
 
 	__END_CATCH
 }

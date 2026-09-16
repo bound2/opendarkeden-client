@@ -20,7 +20,6 @@ void GCAttackMeleeOK2Handler::execute ( GCAttackMeleeOK2 * pPacket , Player * pP
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	// message
 
@@ -98,7 +97,6 @@ void GCAttackMeleeOK2Handler::execute ( GCAttackMeleeOK2 * pPacket , Player * pP
 	//UI_SetHP( g_pPlayer->GetHP(), g_pPlayer->GetMAX_HP() );
 	//UI_SetMP( g_pPlayer->GetMP(), g_pPlayer->GetMAX_MP() );
 
-#endif
 
 	__END_CATCH
 }

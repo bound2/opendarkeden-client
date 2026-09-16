@@ -32,7 +32,6 @@ void GCDeleteandPickUpOKHandler::execute ( GCDeleteandPickUpOK * pPacket, Player
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//---------------------------------------------
@@ -516,7 +515,6 @@ void GCDeleteandPickUpOKHandler::execute ( GCDeleteandPickUpOK * pPacket, Player
 //	__END_HELP_EVENT
 
 
-#endif
 
 	__END_CATCH
 }

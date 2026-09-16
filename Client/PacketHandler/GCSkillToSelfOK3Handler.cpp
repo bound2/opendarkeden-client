@@ -18,7 +18,6 @@ void GCSkillToSelfOK3Handler::execute ( GCSkillToSelfOK3 * pPacket , Player * pP
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------
@@ -138,7 +137,6 @@ void GCSkillToSelfOK3Handler::execute ( GCSkillToSelfOK3 * pPacket , Player * pP
 			false);			// 기술 첨부터 시작한다.
 	}
 
-#endif
 
 	__END_CATCH
 }

@@ -21,7 +21,6 @@ void GCAttackArmsOK1Handler::execute ( GCAttackArmsOK1 * pPacket , Player * pPla
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	
 	// message
@@ -131,7 +130,6 @@ void GCAttackArmsOK1Handler::execute ( GCAttackArmsOK1 * pPacket , Player * pPla
 	}	
 		
 
-#endif
 
 	__END_CATCH
 }

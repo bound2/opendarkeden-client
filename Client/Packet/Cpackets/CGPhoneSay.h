@@ -96,20 +96,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGPhoneSayHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGPhoneSayHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CGPhoneSay * pPacket , Player * pPlayer );
-
-	};
-#endif
-
 #endif

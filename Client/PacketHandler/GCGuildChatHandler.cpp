@@ -23,7 +23,6 @@ void GCGuildChatHandler::execute ( GCGuildChat * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 	//cout << pPacket->toString() << endl;
 		char str[256];
 
@@ -61,7 +60,6 @@ void GCGuildChatHandler::execute ( GCGuildChat * pPacket , Player * pPlayer )
 				// 2004, 11, 11, sobeit modify start
 			}
 		}
-#endif
 
 	__END_CATCH
 }

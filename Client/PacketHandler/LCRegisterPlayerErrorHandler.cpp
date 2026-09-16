@@ -27,7 +27,6 @@ void LCRegisterPlayerErrorHandler::execute ( LCRegisterPlayerError * pPacket , P
 {
 	__BEGIN_TRY
 
-#ifdef __GAME_CLIENT__
 
 	DEBUG_ADD_FORMAT("[ RegisterPlayerError ] %d", (int)pPacket->getErrorID() );
 
@@ -55,7 +54,6 @@ void LCRegisterPlayerErrorHandler::execute ( LCRegisterPlayerError * pPacket , P
 	// Back to the login window.
 	g_ModeNext = MODE_LOGIN_WRONG;
 
-#endif
 
 	__END_CATCH
 }

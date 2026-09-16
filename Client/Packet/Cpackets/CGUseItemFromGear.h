@@ -52,21 +52,4 @@ public:
 	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szBYTE; }
 };
 
-#ifndef __GAME_CLIENT__
-//////////////////////////////////////////////////////////////////////////////
-// class CGUseItemFromGearHandler;
-//////////////////////////////////////////////////////////////////////////////
-
-class Item;
-
-class CGUseItemFromGearHandler 
-{
-public:
-	static void execute(CGUseItemFromGear* pPacket, Player* player);
-
-protected:
-	static void executeCoupleRing(CGUseItemFromGear* pPacket, Player* player);
-};
-#endif
-
 #endif

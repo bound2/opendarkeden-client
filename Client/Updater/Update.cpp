@@ -17,12 +17,6 @@
 
 #define TEMP_DIR	"Update"
 
-#ifndef __GAME_CLIENT__
-	void __assert__(char const *,unsigned int,char const *,char const *)
-	{
-	}
-#endif
-
 //--------------------------------------------------------------------------------
 // load from file
 //--------------------------------------------------------------------------------

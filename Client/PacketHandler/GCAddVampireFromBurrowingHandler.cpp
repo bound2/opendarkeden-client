@@ -19,7 +19,6 @@ void GCAddVampireFromBurrowingHandler::execute ( GCAddVampireFromBurrowing * pPa
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------
@@ -246,7 +245,6 @@ void GCAddVampireFromBurrowingHandler::execute ( GCAddVampireFromBurrowing * pPa
 ////		ExecuteHelpEvent( HE_CREATURE_APPEAR_VAMPIRE );
 //	__END_HELP_EVENT
 
-#endif
 
 	__END_CATCH
 }

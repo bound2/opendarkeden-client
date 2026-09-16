@@ -14,7 +14,6 @@
 #include "ClientDef.h"
 #include "ServerInfoFileParser.h"
 
-#ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
 	#include "Cpackets/CGConnect.h"
 	#include "Cpackets/CGPortCheck.h"
@@ -24,7 +23,6 @@
 	//add by viva
 	#include "Cpackets/CGConnectSetKey.h"
 	//end
-#endif
 
 #ifdef OUTPUT_DEBUG
 	#include <time.h>

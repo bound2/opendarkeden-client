@@ -591,8 +591,9 @@ TEST(Datagram, ABodyThatDisagreesWithItsDeclaredSizeIsRefused)
 // write() emits two; the server's copy declares both. Under the old
 // Assert-only bound that was a silent heap overrun in Release, and
 // under the declared-size check it would be a refusal. The client
-// never sends or receives this packet (its factory is registered only
-// off __GAME_CLIENT__), so this pins the cross-repo agreement.
+// never sends or receives this packet (its factory sat in the
+// server-side registration list, which task 5.2's ninth slice deleted),
+// so this pins the cross-repo agreement.
 TEST(GLIncomingConnectionError, DeclaresBothStrings)
 {
 	GLIncomingConnectionError packet;

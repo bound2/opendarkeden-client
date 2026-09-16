@@ -55,16 +55,4 @@ public:
 };
 
 
-//////////////////////////////////////////////////////////////////////
-// class CGLearnSkillHandler;
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGLearnSkillHandler 
-{
-public:
-	static void execute ( CGLearnSkill * pCGLearnSkill , Player * pPlayer );
-	static void executeSlayerSkill ( CGLearnSkill * pCGLearnSkill , Player * pPlayer );
-	static void executeVampireSkill ( CGLearnSkill * pCGLearnSkill , Player * pPlayer );
-};
-#endif
 #endif

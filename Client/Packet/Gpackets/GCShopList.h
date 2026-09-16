@@ -69,10 +69,6 @@ public:
 	
 	SHOPLISTITEM getShopItem(BYTE index) const;
 
-#ifndef __GAME_CLIENT__
-	void setShopItem(BYTE index, const Item* pItem);
-#endif
-
 	BYTE getNPCShopType(void) const { return m_ShopType; }
 	void setNPCShopType(BYTE type) { m_ShopType = type; }
 

@@ -20,7 +20,6 @@ void GCUseBonusPointFailHandler::execute ( GCUseBonusPointFail* pPacket , Player
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------------
@@ -30,7 +29,6 @@ void GCUseBonusPointFailHandler::execute ( GCUseBonusPointFail* pPacket , Player
 
 	g_pUIDialog->PopupFreeMessageDlg((*g_pGameStringTable)[STRING_MESSAGE_CANNOT_USE_BONUS_POINT].GetString());
 
-#endif
 
 	__END_CATCH
 }

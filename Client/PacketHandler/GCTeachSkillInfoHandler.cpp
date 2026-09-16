@@ -23,7 +23,6 @@ void GCTeachSkillInfoHandler::execute ( GCTeachSkillInfo * pPacket , Player * pP
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	// get/set NPC's object id
 	//pPacket->getObjectID();
@@ -37,7 +36,6 @@ void GCTeachSkillInfoHandler::execute ( GCTeachSkillInfo * pPacket , Player * pP
 	g_pTempInformation->Value2	=	100;//pPacket->getMaxLevel();
 	
 
-#endif
 
 	__END_CATCH
 }

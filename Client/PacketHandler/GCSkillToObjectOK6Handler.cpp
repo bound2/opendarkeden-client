@@ -18,7 +18,6 @@ void GCSkillToObjectOK6Handler::execute ( GCSkillToObjectOK6 * pPacket , Player 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------------------
@@ -163,7 +162,6 @@ void GCSkillToObjectOK6Handler::execute ( GCSkillToObjectOK6 * pPacket , Player 
 	//UI_SetHP( g_pPlayer->GetHP(), g_pPlayer->GetMAX_HP() );
 	//UI_SetMP( g_pPlayer->GetMP(), g_pPlayer->GetMAX_MP() );
 
-#endif
 
 	__END_CATCH
 }

@@ -77,20 +77,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CLLogoutHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CLLogoutHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CLLogout * pPacket , Player * player );
-
-	};
-#endif
-
 #endif

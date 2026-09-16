@@ -68,17 +68,4 @@ public:
 	PacketSize_t getPacketMaxSize() const noexcept { return szDWORD; }
 };
 
-//////////////////////////////////////////////////////////////////////
-// class CGSelectRankBonusHandler;
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGSelectRankBonusHandler 
-{
-public:
-	// execute packet's handler
-	static void execute(CGSelectRankBonus* pCGSelectRankBonus, Player* pPlayer);
-	static void executeSlayerSkill(CGSelectRankBonus* pCGSelectRankBonus, Player* pPlayer);
-	static void executeVampireSkill(CGSelectRankBonus* pCGSelectRankBonus, Player* pPlayer);
-};
-#endif
 #endif

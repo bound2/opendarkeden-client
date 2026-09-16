@@ -86,21 +86,4 @@ public :
 };
 
 
-//--------------------------------------------------------------------------------
-//
-// class CGRequestRepairHandler;
-//
-//--------------------------------------------------------------------------------
-#ifndef __GAME_CLIENT__
-	class CGRequestRepairHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGRequestRepair * pPacket , Player * player );
-		static void executeNormal ( CGRequestRepair * pPacket , Player * player );
-		static void executeMotorcycle ( CGRequestRepair * pPacket , Player * player );
-	};
-#endif
-
 #endif

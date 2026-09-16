@@ -51,7 +51,6 @@ GCUpdateInfo::~GCUpdateInfo ()
 	// 전달해 준다. 그러므로 서버 측에서는 이를 삭제하면 안 된다.
 	// 그러나 클라이언트에서는 이를 삭제해 줘야 한다.
 
-#ifdef __GAME_CLIENT__
 	std::list<NPCInfo*>::iterator itr = m_NPCInfos.begin();
 	for (; itr != m_NPCInfos.end(); itr++)
 	{
@@ -60,10 +59,6 @@ GCUpdateInfo::~GCUpdateInfo ()
 	}
 	SAFE_DELETE( m_pNicknameInfo );
 	SAFE_DELETE( m_pBloodBibleSign )
-#else
-
-	m_NPCInfos.clear();
-#endif
 }
 
 //--------------------------------------------------------------------------------

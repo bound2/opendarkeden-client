@@ -19,7 +19,6 @@ void GCAddNewItemToZoneHandler::execute ( GCAddNewItemToZone * pPacket , Player 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	#ifdef __DEBUG_OUTPUT__
 		DEBUG_ADD_FORMAT("[Add NewItem] class=%d, type=%d, opt=%d, id=%d, xy=(%d,%d)",
@@ -34,7 +33,6 @@ void GCAddNewItemToZoneHandler::execute ( GCAddNewItemToZone * pPacket , Player 
 	// dropping = FALSE
 	AddItemToZone( (GCAddItemToZone*) pPacket, FALSE );	
 	
-#endif
 
 	__END_CATCH
 }

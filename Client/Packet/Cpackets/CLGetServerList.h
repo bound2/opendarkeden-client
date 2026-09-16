@@ -81,15 +81,4 @@ public :
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifndef __GAME_CLIENT__
-	class CLGetServerListHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CLGetServerList * pPacket , Player * player );
-
-	};
-#endif
-
 #endif

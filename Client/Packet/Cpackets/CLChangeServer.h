@@ -82,20 +82,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CLChangeServerHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CLChangeServerHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CLChangeServer * pPacket , Player * player );
-
-	};
-#endif
-
 #endif

@@ -18,7 +18,6 @@ void GCVisibleOKHandler::execute ( GCVisibleOK * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 
 	//------------------------------------------------------------------
@@ -35,7 +34,6 @@ void GCVisibleOKHandler::execute ( GCVisibleOK * pPacket , Player * pPlayer )
 
 	g_pPlayer->SetVisible();
 
-#endif
 
 	__END_CATCH
 }

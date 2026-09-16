@@ -60,20 +60,4 @@ public:
 	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID*2; }
 };
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// class CGTradeRemoveItemHandler;
-//
-////////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGTradeRemoveItemHandler 
-	{
-	public:
-		static void execute ( CGTradeRemoveItem * pPacket , Player * player );
-		static void executeSlayer ( CGTradeRemoveItem * pPacket , Player * player );
-		static void executeVampire ( CGTradeRemoveItem * pPacket , Player * player );
-		static void executeError ( CGTradeRemoveItem * pPacket , Player * player, BYTE ErrorCode );
-	};
-#endif
-
 #endif

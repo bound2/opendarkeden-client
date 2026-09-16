@@ -24,7 +24,6 @@ void GCRemoveFromGearHandler::execute ( GCRemoveFromGear * pPacket , Player * pP
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 	
 
 	int slotID = pPacket->getSlotID();
@@ -415,7 +414,6 @@ void GCRemoveFromGearHandler::execute ( GCRemoveFromGear * pPacket , Player * pP
 ////		ExecuteHelpEvent( HE_ITEM_BROKEN );
 //	__END_HELP_EVENT
 
-#endif
 
 	__END_CATCH
 }

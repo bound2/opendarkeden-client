@@ -23,7 +23,6 @@ void GCShopListHandler::execute ( GCShopList * pPacket , Player * pPlayer )
 
 	DEBUG_ADD("[GCShopListHandler::execute] run in execute function OK [0].");	
 		
-#ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------
 	// Zone이 아직 생성되지 않은 경우
@@ -188,7 +187,6 @@ void GCShopListHandler::execute ( GCShopList * pPacket , Player * pPlayer )
 //	__BEGIN_HELP_EVENT
 		ExecuteHelpEvent( HELP_EVENT_USE_SHOP );
 //	__END_HELP_EVENT
-#endif
 
 	__END_CATCH
 }

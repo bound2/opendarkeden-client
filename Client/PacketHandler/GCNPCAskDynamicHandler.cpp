@@ -25,7 +25,6 @@ void GCNPCAskDynamicHandler::execute ( GCNPCAskDynamic * pPacket , Player * pPla
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------
 	// Zone이 아직 생성되지 않은 경우
@@ -114,7 +113,6 @@ void GCNPCAskDynamicHandler::execute ( GCNPCAskDynamic * pPacket , Player * pPla
 		}
 	}
 
-#endif
 
 	__END_CATCH
 }

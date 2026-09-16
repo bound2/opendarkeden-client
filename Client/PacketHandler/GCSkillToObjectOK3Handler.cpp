@@ -18,7 +18,6 @@ void GCSkillToObjectOK3Handler::execute ( GCSkillToObjectOK3 * pPacket , Player 
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	
 	//------------------------------------------------------
@@ -75,7 +74,6 @@ void GCSkillToObjectOK3Handler::execute ( GCSkillToObjectOK3 * pPacket , Player 
 		}
 	}	
 
-#endif
 
 	__END_CATCH
 }

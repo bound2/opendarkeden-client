@@ -118,20 +118,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGSkillToObjectHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGSkillToObjectHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CGSkillToObject * pCGSkillToObject , Player * pPlayer );
-
-	};
-#endif
-
 #endif

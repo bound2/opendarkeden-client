@@ -42,16 +42,6 @@ public:
 	PacketID_t getPacketID () const noexcept { return Packet::PACKET_CG_USE_POWER_POINT; }
 	PacketSize_t getPacketMaxSize () const noexcept { return 0; }
 };
-//////////////////////////////////////////////////////////////////////////////
-// class CGUsePowerPointHandler;
-//////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGUsePowerPointHandler 
-{
-public:
-	static void execute ( CGUsePowerPoint * pCGUsePowerPoint , Player * pPlayer );
-};
 
-#endif
 #endif
 

@@ -73,20 +73,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CLGetPCListHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CLGetPCListHandler {
-
-	public :
-
-		// execute packet's handler
-		static void execute ( CLGetPCList * pPacket , Player * player );
-
-	};
-#endif
-
 #endif

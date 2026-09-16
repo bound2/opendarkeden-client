@@ -18,7 +18,6 @@ void GCKnocksTargetBackOK5Handler::execute ( GCKnocksTargetBackOK5 * pPacket , P
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	// message
 
@@ -113,7 +112,6 @@ void GCKnocksTargetBackOK5Handler::execute ( GCKnocksTargetBackOK5 * pPacket , P
 	//------------------------------------------------------
 	pTargetCreature->SetServerPosition( x, y );
 
-#endif
 
 	__END_CATCH
 }

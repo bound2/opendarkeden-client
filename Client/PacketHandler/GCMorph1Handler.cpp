@@ -20,7 +20,6 @@ void GCMorph1Handler::execute ( GCMorph1 * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	if (g_pZone==NULL
 		|| g_pPlayer==NULL)
@@ -194,7 +193,6 @@ void GCMorph1Handler::execute ( GCMorph1 * pPacket , Player * pPlayer )
 	g_SDLAudio.UnSetMute();
 
 
-#endif
 
 	__END_CATCH
 }

@@ -21,7 +21,6 @@ void GCSearchMotorcycleOKHandler::execute ( GCSearchMotorcycleOK * pPacket , Pla
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 	
 
 	ZONETABLE_INFO* pZoneInfo = g_pZoneTable->Get( pPacket->getZoneID() );
@@ -42,7 +41,6 @@ void GCSearchMotorcycleOKHandler::execute ( GCSearchMotorcycleOK * pPacket , Pla
 		g_pUIDialog->PopupFreeMessageDlg( str );
 	}
 
-#endif
 
 	__END_CATCH
 }

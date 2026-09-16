@@ -20,9 +20,7 @@ void GCShowUnionInfoHandler::execute ( GCShowUnionInfo * pPacket , Player * pPla
 {
 	__BEGIN_TRY //__BEGIN_DEBUG_EX
 	
-#ifdef __GAME_CLIENT__
 	UI_ShowUnionGuildMemberInfo(pPacket);
-#endif
 
 	__END_CATCH //__END_CATCH
 }

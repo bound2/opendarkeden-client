@@ -26,7 +26,6 @@ void GCNPCAskHandler::execute ( GCNPCAsk * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 	
-#ifdef __GAME_CLIENT__
 
 	if (g_pPlayer==NULL
 		|| g_pZone==NULL
@@ -126,7 +125,6 @@ void GCNPCAskHandler::execute ( GCNPCAsk * pPacket , Player * pPlayer )
 	}
 
 	
-#endif
 
 	__END_CATCH
 }

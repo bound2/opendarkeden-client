@@ -12,8 +12,8 @@
 // constructs none of them.) MItem.cpp keeps the model half in
 // gamemodel, the container-based gear (belt, arms band, motorcycle)
 // included since the item managers joined it (task 4.3). Bodies are
-// moved verbatim; the __GAME_CLIENT__ guards inside them are the
-// originals.
+// moved verbatim (the always-true __GAME_CLIENT__ guards they carried
+// went with task 5.2's tenth slice, which retired the macro).
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "MItem.h"
@@ -25,7 +25,6 @@
 #include "MFakeCreature.h"
 #include "MItemLimits.h"
 
-#ifdef __GAME_CLIENT__
 	#include "Client.h"
 	#include "SkillDef.h"
 	#include "MSkillManager.h"
@@ -46,16 +45,13 @@
 	#include "VS_UI_GameCommon.h"
 	#include "VS_UI.h"
 	#include "UIDialog.h"
-#endif
 
 #include <fstream>
 #include <algorithm>
 
-#ifdef __GAME_CLIENT__
 	#include "DebugInfo.h"
 	#include "MCreature.h"
 	#include "MTopView.h"	
-#endif
 
 extern bool g_bHolyLand;
 extern bool g_bZoneSafe;
@@ -354,12 +350,10 @@ MCorpse::MCorpse()
 
 MCorpse::~MCorpse() 
 { 
-#ifdef __GAME_CLIENT__
 	if (m_pCreature!=NULL) 
 	{		
 		delete m_pCreature; 		
 	}
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -618,7 +612,6 @@ MMoonCardItem::GetMaxNumber() const
 //----------------------------------------------------------------------
 void	UsePotionFromInventory(MItem* pPotion)
 {
-#ifdef __GAME_CLIENT__
 	CGUsePotionFromInventory _CGUsePotionFromInventory;
 	_CGUsePotionFromInventory.setObjectID( pPotion->GetID() );
 	_CGUsePotionFromInventory.setX( pPotion->GetGridX() );
@@ -633,7 +626,6 @@ void	UsePotionFromInventory(MItem* pPotion)
 	// Wait for the server to verify the use from the inventory.
 	//----------------------------------------------------
 	g_pPlayer->SetItemCheckBuffer( pPotion, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MWater::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -642,7 +634,6 @@ void	MWater::UseInventory()
 	#endif
 
 {
-#ifdef __GAME_CLIENT__
 	bool bUseOK = false;
 	bool bCreateHolyWater = GetItemType() >= 0 && GetItemType() <= 2;
 	bool bCreateHolyPotion = GetItemType() >= 3 && GetItemType() <= 6;
@@ -753,7 +744,6 @@ void	MWater::UseInventory()
 			}
 		}
 	}
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MMagazine::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -762,7 +752,6 @@ void	MMagazine::UseInventory()
 	#endif
 
 {
-#ifdef __GAME_CLIENT__
 	bool		bPossible = false;
 
 	int value = (*g_pItemTable)[ GetItemClass() ][ GetItemType() ].Value3;
@@ -820,12 +809,10 @@ void	MMagazine::UseInventory()
 	{
 		DEBUG_ADD("Weapon is not Gun");
 	}
-#endif
 }
 
 void	MMagazine::UseQuickItem()
 {
-#ifdef __GAME_CLIENT__
 	const MItem* pHandItem = (*g_pSlayerGear).GetItem( MSlayerGear::GEAR_SLAYER_RIGHTHAND );
 
 	if (pHandItem!=NULL && pHandItem->IsGunItem())
@@ -881,7 +868,6 @@ void	MMagazine::UseQuickItem()
 		// 총이 없는 경우
 		DEBUG_ADD("[Can't use Magazine] No Gun");
 	}
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MBombMaterial::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -890,7 +876,6 @@ void	MBombMaterial::UseInventory()
 	#endif
 
 {
-#ifdef __GAME_CLIENT__
 	//int playerSkill = g_pPlayer->GetSpecialActionInfo();
 	bool bUseOK = false;
 
@@ -975,7 +960,6 @@ void	MBombMaterial::UseInventory()
 			}
 		}
 	}
-#endif
 }
 
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
@@ -984,7 +968,6 @@ void	MMoney::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 void	MMoney::UseInventory()
 	#endif
 {
-#ifdef __GAME_CLIENT__
 	// 2개 이상 있어야 분리 된다.
 	if(GetNumber() > 1)
 	{
@@ -1002,7 +985,6 @@ void	MMoney::UseInventory()
 		//----------------------------------------------------
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_PICKUP_SOME_FROM_INVENTORY);
 	}
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MMine::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -1011,7 +993,6 @@ void	MMine::UseInventory()
 	#endif
 
 {
-#ifdef __GAME_CLIENT__
 	bool bUseOK = true;
 	ACTIONINFO useSkill;					
 		
@@ -1065,7 +1046,6 @@ void	MMine::UseInventory()
 		*/
 	
 	}
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MSlayerPortalItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -1074,7 +1054,6 @@ void	MSlayerPortalItem::UseInventory()
 	#endif
 
 {
-#ifdef __GAME_CLIENT__
 	if(g_bHolyLand == false					// 성지가 아니어야 하고
 		&& g_pZoneTable->Get( g_pZone->GetID() )->CannotUseSpecialItem == false		// 현재 존이 스페셜 아이템을 사용할 수 있어야 하고
 		&& IsAffectStatus()						// 적용 가능해야 하고
@@ -1098,7 +1077,6 @@ void	MSlayerPortalItem::UseInventory()
 		
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
 	}
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MVampirePortalItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -1107,7 +1085,6 @@ void	MVampirePortalItem::UseInventory()
 	#endif
 
 {
-#ifdef __GAME_CLIENT__
 	if(g_bHolyLand == false					// 성지가 아니어야 하고
 		&& g_pZoneTable->Get( g_pZone->GetID() )->CannotUseSpecialItem == false		// 현재 존이 스페셜 아이템을 사용할 수 있어야 하고
 		&& IsAffectStatus()						// 적용 가능해야 하고
@@ -1156,7 +1133,6 @@ void	MVampirePortalItem::UseInventory()
 		}
 
 	}
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MEventStarItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -1165,7 +1141,6 @@ void	MEventStarItem::UseInventory()
 	#endif
 
 {
-#ifdef __GAME_CLIENT__
 	// 2개 이상 있어야 분리 된다.
 	if(GetNumber() > 1)
 	{
@@ -1183,7 +1158,6 @@ void	MEventStarItem::UseInventory()
 		//----------------------------------------------------
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_PICKUP_SOME_FROM_INVENTORY);
 	}
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MMixingItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -1192,7 +1166,6 @@ void	MMixingItem::UseInventory()
 	#endif
 
 {
-#ifdef __GAME_CLIENT__
 	if( GetItemType() >= 0 && GetItemType() <= 8 )
 	{
 		if( GetNumber() > 1 )	// 아이템 분리
@@ -1240,7 +1213,6 @@ void	MMixingItem::UseInventory()
 		g_pSocket->sendPacket( &_CGAddInventoryToMouse );
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_PICKUP_SOME_FROM_INVENTORY );
 	}
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void MEffectItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -1249,7 +1221,6 @@ void MEffectItem::UseInventory()
 	#endif
 
 {
-#ifdef __GAME_CLIENT__
 	// add by Coffee 2007-8-5 
 	if (GetItemType() >= 10 && GetItemType() <= 12)
 	{
@@ -1265,7 +1236,6 @@ void MEffectItem::UseInventory()
 	_CGUseItemFromInventory.setY( GetGridY() );
 	g_pSocket->sendPacket( &_CGUseItemFromInventory );
 	g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY );
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void MItemETC::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -1273,7 +1243,6 @@ void MItemETC::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 void MItemETC::UseInventory()
 	#endif
 {
-#ifdef __GAME_CLIENT__
 	if(GetItemType() == 1 )
 	{
 		CGUseItemFromInventory _CGUseItemFromInventory;						
@@ -1283,7 +1252,6 @@ void MItemETC::UseInventory()
 		g_pSocket->sendPacket( &_CGUseItemFromInventory );				
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
 	}
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void MVampireETC::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -1291,7 +1259,6 @@ void MVampireETC::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 void MVampireETC::UseInventory()
 	#endif
 {
-#ifdef __GAME_CLIENT__
 	//----------------------------------------------------
 	//
 	//					변신용 아이템 - vampire인 경우
@@ -1386,7 +1353,6 @@ void MVampireETC::UseInventory()
 			}
 		}
 	}
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MSkull::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -1395,7 +1361,6 @@ void	MSkull::UseInventory()
 	#endif
 
 {
-#ifdef __GAME_CLIENT__
 	//----------------------------------------------------
 	//
 	//					변신용 아이템 - vampire인 경우
@@ -1482,7 +1447,6 @@ void	MSkull::UseInventory()
 			}
 		}
 	}
-#endif
 }
 
 // 해당 크리쳐의 주변에 원하는 시체가 있는지 검사한다.
@@ -1494,7 +1458,6 @@ void	MKey::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 void	MKey::UseInventory()
 	#endif
 {
-#ifdef __GAME_CLIENT__
 	// 주변에 깃발이 없어야 한다.
 	if( !IsExistCorpseFromPlayer( dynamic_cast<MCreature*>(g_pPlayer), 670 ) )
 	{
@@ -1522,11 +1485,9 @@ void	MKey::UseInventory()
 		g_pSystemMessage->Add((*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_ACTION_MOTORCYCLE_FLAG].GetString() );
 	}
 	
-#endif
 }
 void	MKey::UseQuickItem()
 {
-#ifdef __GAME_CLIENT__
 	// 2004, 12, 16, sobeit add start - 인스톨 터렛 상태에서 오토바이를 타면 문제 생김..ㅎㅎ 그래서 막음
 	if(g_pPlayer->HasEffectStatus(EFFECTSTATUS_INSTALL_TURRET))
 	{
@@ -1553,7 +1514,6 @@ void	MKey::UseQuickItem()
 	//----------------------------------------------------
 	UI_LockGear();
 
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MEventTreeItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -1561,7 +1521,6 @@ void	MEventTreeItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 void	MEventTreeItem::UseInventory()
 	#endif
 {
-#ifdef __GAME_CLIENT__
 	if(GetItemType() == 12 ||
 		GetItemType() >= 26 && GetItemType() <= 28)
 	{
@@ -1641,7 +1600,6 @@ void	MEventTreeItem::UseInventory()
 			}
 		}
 	}
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MEventEtcItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -1649,7 +1607,6 @@ void	MEventEtcItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 void	MEventEtcItem::UseInventory()
 	#endif
 {
-#ifdef __GAME_CLIENT__
 	bool bUseOK = true;
 
 	if(IsPlayerInSafePosition() == 2 
@@ -1690,11 +1647,9 @@ void	MEventEtcItem::UseInventory()
 		}
 		
 	}
-#endif
 }
 void	MEventEtcItem::UseQuickItem()
 {
-#ifdef __GAME_CLIENT__
 	if(GetItemType() == 14||
 		GetItemType() == 15||
 		GetItemType() == 16||
@@ -1751,7 +1706,6 @@ void	MEventEtcItem::UseQuickItem()
 			UI_LockGear();
 		}
 	}
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MDyePotionItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -1760,7 +1714,6 @@ void	MDyePotionItem::UseInventory()
 	#endif
 
 {
-#ifdef __GAME_CLIENT__
 	// 아우스터즈는 성이 없기 때문에 성전환 아이템을 사용할 수 없다
 	if( g_pPlayer->IsOusters() && GetItemType() == 48 )
 	{
@@ -1789,7 +1742,6 @@ void	MDyePotionItem::UseInventory()
 		g_pSocket->sendPacket( &_CGUseItemFromInventory );			
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);				
 	}
-#endif
 }
 //
 //void	MDyePotionItem::UseQuickItem()
@@ -1860,7 +1812,6 @@ void	MOustersSummonGem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 void	MOustersSummonGem::UseInventory()
 	#endif
 {
-#ifdef __GAME_CLIENT__
 	if( IsChargeItem() && GetNumber() > 0 && IsAffectStatus() && !g_bZoneSafe &&
 		!g_pPlayer->IsInSafeSector() && g_pPlayer->IsStop() && !g_pPlayer->HasEffectStatus( EFFECTSTATUS_HAS_FLAG) )
 	{
@@ -1883,7 +1834,6 @@ void	MOustersSummonGem::UseInventory()
 		
 		(*g_pSkillInfoTable)[SKILL_SUMMON_SYLPH].SetAvailableTime( 4000 );
 	}
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MCodeSheetItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -1892,17 +1842,14 @@ void	MCodeSheetItem::UseInventory()
 	#endif
 
 {
-#ifdef __GAME_CLIENT__
 	if( GetItemType() == 0 && GetItemOptionListCount() == 30)
 	{
 		gC_vs_ui.RunQuestInventory(this);
 	}
-#endif
 }
 
 void	MPotion::UseQuickItem()
 {
-#ifdef __GAME_CLIENT__
 	CGUsePotionFromQuickSlot _CGUsePotionFromQuickSlot;
 	_CGUsePotionFromQuickSlot.setObjectID( GetID() );
 	_CGUsePotionFromQuickSlot.setSlotID( GetItemSlot() );							
@@ -1927,12 +1874,10 @@ void	MPotion::UseQuickItem()
 //	__BEGIN_HELP_EVENT
 ///		ExecuteHelpEvent( HE_ITEM_USE_BELT_ITEM );	
 //	__END_HELP_EVENT
-#endif
 }
 
 void	MOustersPupa::UseQuickItem()
 {
-#ifdef __GAME_CLIENT__
 	CGUsePotionFromQuickSlot _CGUsePotionFromQuickSlot;
 	_CGUsePotionFromQuickSlot.setObjectID( GetID() );
 	int slotID = GetItemSlot();
@@ -1958,12 +1903,10 @@ void	MOustersPupa::UseQuickItem()
 	// 벨트 못 없애도록..
 	//----------------------------------------------------
 	UI_LockGear();
-#endif
 }
 
 void	MOustersComposMei::UseQuickItem()
 {
-#ifdef __GAME_CLIENT__
 	CGUsePotionFromQuickSlot _CGUsePotionFromQuickSlot;
 	_CGUsePotionFromQuickSlot.setObjectID( GetID() );
 	int slotID = GetItemSlot();
@@ -1989,12 +1932,10 @@ void	MOustersComposMei::UseQuickItem()
 	// 벨트 못 없애도록..
 	//----------------------------------------------------
 	UI_LockGear();
-#endif
 }
 
 void	MCoupleRing::UseGear()
 {
-#ifdef __GAME_CLIENT__
 	CGUseItemFromGear _CGUseItemFromGear;
 	
 	_CGUseItemFromGear.setObjectID ( GetID() );
@@ -2003,12 +1944,10 @@ void	MCoupleRing::UseGear()
 	g_pSocket->sendPacket( &_CGUseItemFromGear );
 	
 	g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_GEAR );
-#endif
 }
 
 void	MVampireCoupleRing::UseGear()
 {
-#ifdef __GAME_CLIENT__
 	CGUseItemFromGear _CGUseItemFromGear;
 	
 	_CGUseItemFromGear.setObjectID ( GetID() );
@@ -2017,13 +1956,11 @@ void	MVampireCoupleRing::UseGear()
 	g_pSocket->sendPacket( &_CGUseItemFromGear );
 	
 	g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_GEAR );
-#endif
 }
 // MPetItem::UseInventory's body (GameInit.cpp installs it through the
 // host); the member is the library's, beside the pet's life countdown.
 void	UsePetFromInventory(MItem* pPet)
 {
-#ifdef __GAME_CLIENT__
 	// Upstream once refused the call while a pet was already out, then
 	// commented that out because the same item dismisses the pet, and
 	// noted that marking the item that summoned the pet was not done
@@ -2043,7 +1980,6 @@ void	UsePetFromInventory(MItem* pPet)
 		g_pPlayer->SetItemCheckBuffer( pPet, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
 	}
 //	}
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MPetFood::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -2051,7 +1987,6 @@ void	MPetFood::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 void	MPetFood::UseInventory()
 	#endif
 {
-#ifdef __GAME_CLIENT__
 	const TYPE_OBJECTID petID = g_pPlayer->GetPetID();
 
 	if(g_pPlayer != NULL && petID != OBJECTID_NULL
@@ -2095,7 +2030,6 @@ void	MPetFood::UseInventory()
 			g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_PICKUP_SOME_FROM_INVENTORY);
 		}
 	}
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MSms_item::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -2103,7 +2037,6 @@ void	MSms_item::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 void	MSms_item::UseInventory()
 	#endif
 {
-#ifdef __GAME_CLIENT__
 	if(g_pPlayer != NULL )
 	{
 		CGUseItemFromInventory _CGUseItemFromInventory;
@@ -2115,7 +2048,6 @@ void	MSms_item::UseInventory()
 		
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
 	}
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void	MPetEnchantItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -2123,7 +2055,6 @@ void	MPetEnchantItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 void	MPetEnchantItem::UseInventory()
 	#endif
 {
-#ifdef __GAME_CLIENT__
 	// 2개 이상 있어야 분리 된다.
 	if(GetNumber() > 1)
 	{
@@ -2141,7 +2072,6 @@ void	MPetEnchantItem::UseInventory()
 		//----------------------------------------------------
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_PICKUP_SOME_FROM_INVENTORY);
 	}
-#endif
 }
 
 std::string MPetItem::GetPetOptionName()
@@ -2282,7 +2212,6 @@ void	MEventGiftBoxItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 void	MEventGiftBoxItem::UseInventory()
 	#endif
 {
-#ifdef __GAME_CLIENT__
 	if(GetItemType() >= 6)
 	{
 		CGUseItemFromInventory _CGUseItemFromInventory;
@@ -2294,7 +2223,6 @@ void	MEventGiftBoxItem::UseInventory()
 		
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
 	}
-#endif
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
 void MMoonCardItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
@@ -2302,7 +2230,6 @@ void MMoonCardItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 void MMoonCardItem::UseInventory()
 	#endif
 {
-#ifdef __GAME_CLIENT__
 	// 2개 이상 있어야 분리 된다.
 	// edit by sonic 2006.11.1  将四叶草设为可分开
 	//if(GetItemType() == 2 && GetNumber() > 1 && GetNumber() < GetMaxNumber())
@@ -2322,7 +2249,6 @@ void MMoonCardItem::UseInventory()
 		//----------------------------------------------------
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_PICKUP_SOME_FROM_INVENTORY);
 	}
-#endif
 }
 
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
@@ -2331,7 +2257,6 @@ void MTrapItem::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 void MTrapItem::UseInventory()
 	#endif
 {
-#ifdef __GAME_CLIENT__
 	CGUseItemFromInventory _CGUseItemFromInventory;
 	_CGUseItemFromInventory.setObjectID( GetID() );
 	_CGUseItemFromInventory.setX( GetGridX() );
@@ -2340,7 +2265,6 @@ void MTrapItem::UseInventory()
 	g_pSocket->sendPacket( &_CGUseItemFromInventory );
 	
 	g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
-#endif
 }
 	
 
@@ -2348,7 +2272,6 @@ void MTrapItem::UseInventory()
 
 void MSubInventory::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 {
-#ifdef __GAME_CLIENT__
 	CGUseItemFromInventory _CGUseItemFromInventory;
 	_CGUseItemFromInventory.setObjectID( GetID() );
 	_CGUseItemFromInventory.setX( GetGridX() );
@@ -2357,7 +2280,6 @@ void MSubInventory::UseInventory(TYPE_OBJECTID SubInventoryItemID)
 	g_pSocket->sendPacket( &_CGUseItemFromInventory );
 	
 	g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
-#endif
 }
 
 void

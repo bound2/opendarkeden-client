@@ -105,19 +105,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGAddQuickSlotToMouseHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGAddQuickSlotToMouseHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGAddQuickSlotToMouse * pPacket , Player * player );
-	};
-
-#endif
 #endif

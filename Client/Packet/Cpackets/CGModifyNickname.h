@@ -46,7 +46,6 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 // class CGModifyNicknameFactory;
 //////////////////////////////////////////////////////////////////////////////
-//#ifdef __DEBUG_OUTPUT__
 class CGModifyNicknameFactory : public PacketFactory 
 {
 public:
@@ -55,15 +54,5 @@ public:
 	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_MODIFY_NICKNAME; }
 	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szBYTE + MAX_NICKNAME_SIZE; }
 };
-//#endif
-//////////////////////////////////////////////////////////////////////////////
-// class CGModifyNicknameHandler;
-//////////////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-class CGModifyNicknameHandler 
-{
-public:
-	static void execute(CGModifyNickname* pPacket, Player* player);
-};
-#endif
+
 #endif

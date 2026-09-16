@@ -19,7 +19,6 @@ void GCAddWolfHandler::execute ( GCAddWolf * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	
 	int wolfCreatureType = 186;
@@ -145,7 +144,6 @@ void GCAddWolfHandler::execute ( GCAddWolf * pPacket , Player * pPlayer )
 //		//ExecuteHelpEvent( HE_CREATURE_APPEAR_VAMPIRE );
 //	__END_HELP_EVENT
 
-#endif
 
 	__END_CATCH
 }

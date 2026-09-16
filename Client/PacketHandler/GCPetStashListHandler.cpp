@@ -20,7 +20,6 @@ void GCPetStashListHandler::execute ( GCPetStashList * pPacket , Player * pPlaye
 //	__BEGIN_DEBUG_EX
 	__BEGIN_DEBUG
 	
-#ifdef __GAME_CLIENT__
 		//------------------------------------------------------------
 		// 기존에걸 지우고 다시 생성한다.
 		//------------------------------------------------------------
@@ -108,7 +107,6 @@ void GCPetStashListHandler::execute ( GCPetStashList * pPacket , Player * pPlaye
 		//------------------------------------------------------------
 		UI_RunPetStorage();
 		UI_SetPetStorage(g_pStorage);
-#endif
 
 	__END_DEBUG
 //	__END_DEBUG_EX 

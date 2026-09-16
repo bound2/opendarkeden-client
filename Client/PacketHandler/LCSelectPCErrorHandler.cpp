@@ -22,7 +22,6 @@ void LCSelectPCErrorHandler::execute ( LCSelectPCError * pPacket , Player * pPla
 	__BEGIN_TRY
 	DEBUG_ADD("[Packet] LCSelectPCErrorHandler");
 
-#ifdef __GAME_CLIENT__
 
 	//cout << "Access Denied... (" << pPacket->toString() << ")" << endl;
 	//throw ProtocolException("SelectPC Failed!");
@@ -50,7 +49,6 @@ void LCSelectPCErrorHandler::execute ( LCSelectPCError * pPacket , Player * pPla
 	}
 	SetMode(MODE_WAIT_SELECTPC);
 
-#endif
 		
 	__END_CATCH
 }

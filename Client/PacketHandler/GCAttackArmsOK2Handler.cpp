@@ -20,7 +20,6 @@ void GCAttackArmsOK2Handler::execute ( GCAttackArmsOK2 * pPacket , Player * pPla
 {
 	__BEGIN_TRY
 		
-#ifdef __GAME_CLIENT__
 
 	// message
 
@@ -137,7 +136,6 @@ void GCAttackArmsOK2Handler::execute ( GCAttackArmsOK2 * pPacket , Player * pPla
 	//UI_SetMP( g_pPlayer->GetMP(), g_pPlayer->GetMAX_MP() );
 	
 
-#endif
 
 	__END_CATCH
 }

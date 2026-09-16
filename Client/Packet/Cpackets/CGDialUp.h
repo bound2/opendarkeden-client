@@ -98,19 +98,4 @@ public :
 };
 
 
-//////////////////////////////////////////////////////////////////////
-//
-// class CGDialUpHandler;
-//
-//////////////////////////////////////////////////////////////////////
-#ifndef __GAME_CLIENT__
-	class CGDialUpHandler {
-		
-	public :
-
-		// execute packet's handler
-		static void execute ( CGDialUp * pPacket , Player * player );
-	};
-#endif
-
 #endif
