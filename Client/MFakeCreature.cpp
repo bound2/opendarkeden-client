@@ -122,7 +122,7 @@ MFakeCreature::MFakeCreature()
 	m_BlockDestX = SECTORPOSITION_NULL;
 	m_BlockDestY = SECTORPOSITION_NULL;
 
-	m_nextMoveTime = timeGetTime()+(rand()%8+3)*1000;
+	m_nextMoveTime = MonotonicClock::Now() + MonotonicClock::Millis((rand()%8+3)*1000);
 	m_PatrolCount = rand()%5+1;
 
 	m_TurretDelay = 0;
@@ -690,7 +690,7 @@ MFakeCreature::IsFakeEnd()
 //					return true;
 //				}
 //			}
-				if( timeGetTime() > m_nextMoveTime || NULL == pCreature)
+				if( MonotonicClock::Now() > m_nextMoveTime || NULL == pCreature)
 				{
 					if(pCreature != NULL)
 						ExecuteActionInfoFromMainNode(SKILL_CLIENT_PLASMA_ROCKET_LAUNCHER_BLOW,pCreature->GetX(), pCreature->GetY(), 0,pCreature->GetDirection(),	0,	
@@ -789,7 +789,7 @@ MFakeCreature::KeepTraceCreature()
 		}
 		lastAction = m_Action;
 
-		if(m_bFastMove == false && timeGetTime() >= m_nextMoveTime)
+		if(m_bFastMove == false && MonotonicClock::Now() >= m_nextMoveTime)
 		{
 			if(m_PatrolCount <= 0)
 			{
@@ -800,14 +800,14 @@ MFakeCreature::KeepTraceCreature()
 					{
 					case 1:
 					case 2:
-						m_nextMoveTime = timeGetTime()+(rand()%5+3)*1000;
+						m_nextMoveTime = MonotonicClock::Now() + MonotonicClock::Millis((rand()%5+3)*1000);
 						m_PatrolCount = rand()%5+3;
 						SetAction(ACTION_VAMPIRE_DRAIN);
 						break;
 
 					case 3:
 						m_PatrolCount = rand()%3+2;
-						m_nextMoveTime = timeGetTime()+(rand()%3+2)*1000;
+						m_nextMoveTime = MonotonicClock::Now() + MonotonicClock::Millis((rand()%3+2)*1000);
 						ExecuteActionInfoFromMainNode(
 							SKILL_CLIENT_TANK_SMOKE,										// 사용 기술 번호
 							
@@ -833,12 +833,12 @@ MFakeCreature::KeepTraceCreature()
 				if(GetCreatureType() == 702 || GetCreatureType() == 703 || GetCreatureType() == 704)
 				{
 					SetTurretFinalDirection( rand()/(RAND_MAX/32) );
-					m_nextMoveTime = timeGetTime()+(rand()%3+2)*1000;
+					m_nextMoveTime = MonotonicClock::Now() + MonotonicClock::Millis((rand()%3+2)*1000);
 					m_PatrolCount--;
 				}
 				else
 				{
-					m_nextMoveTime = timeGetTime()+(rand()%5+3)*1000;
+					m_nextMoveTime = MonotonicClock::Now() + MonotonicClock::Millis((rand()%5+3)*1000);
 					m_PatrolCount--;
 					int minDistance = 1;
 

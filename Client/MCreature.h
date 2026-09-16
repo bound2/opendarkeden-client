@@ -820,7 +820,7 @@ class MCreature : public MObject, public MStatus {
 		//TYPE_FRAMEID			m_CreatureFrameID;
 		CTypeTable<TYPE_FRAMEID>			m_CreatureFrameIDs;
 		BOOL					m_bExistBody;
-		DWORD					m_TraceTimer;				// 따라가기 제한시간
+		MonotonicClock::TimePoint	m_TraceTimer;				// 따라가기 제한시간
 
 		//add by viva
 		BYTE					m_MoveCount;		// 이동한 회수

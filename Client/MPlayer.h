@@ -45,6 +45,7 @@ extern MVampireGear*	g_pVampireGear;
 extern MOustersGear*	g_pOustersGear;
 
 #include "MCreatureWear.h"
+#include "MonotonicClock.h"
 #include "MEffectTarget.h"
 #include "MRequestMode.h"
 
@@ -459,7 +460,7 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		// 행동 반복하기
 		//----------------------------------------------------------
 		BOOL			IsRepeatAction() const			{ return m_bRepeatAction; }
-		void			SetRepeatAction()				{ m_bRepeatAction = TRUE; m_RepeatCount = 0; m_RepeatTimer = GetTickCount(); }		
+		void			SetRepeatAction()				{ m_bRepeatAction = TRUE; m_RepeatCount = 0; m_RepeatTimer = MonotonicClock::Now(); }		
 		void			UnSetRepeatAction();
 
 		// 기술 변경
@@ -551,7 +552,7 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		// Lock Mode
 		//----------------------------------------------------------
 		bool	IsLockMode() const		{ return m_bLockMode; }
-		void	SetLockMode()			{ m_bLockMode = true; m_LockTimer = GetTickCount(); }
+		void	SetLockMode()			{ m_bLockMode = true; m_LockTimer = MonotonicClock::Now(); }
 		void	UnSetLockMode()			{ m_bLockMode = false; }
 		int		FindEnemy();
 
@@ -566,7 +567,7 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		void	SetFlyingCreature();
 
 		// 2004, 5, 7, sobeit add start
-		void	SetPetDelay(DWORD dwDelay) {m_PetDelayTime = dwDelay;}
+		void	SetPetDelay(MonotonicClock::TimePoint tp_delay) {m_PetDelayTime = tp_delay;}
 		// 2004, 5, 7, sobeit add end
 
 		// 2004, 8, 21, sobeit add start
@@ -616,8 +617,8 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		bool	UpDateInstallTurret();
 
 	protected :		
-		DWORD						m_RepeatTimer;				// Repeat모드 제한시간
-		DWORD						m_LockTimer;				// Lock모드 제한시간		
+		MonotonicClock::TimePoint	m_RepeatTimer;				// Repeat모드 제한시간
+		MonotonicClock::TimePoint	m_LockTimer;				// Lock모드 제한시간		
 
 		TYPE_SECTORPOSITION			m_DestX;
 		TYPE_SECTORPOSITION			m_DestY;					// 목표위치(Sector)
@@ -671,7 +672,7 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		DWORD						m_DelayTime;
 
 		// 펫 루팅 사용후의 delay
-		DWORD						m_PetDelayTime;
+		MonotonicClock::TimePoint	m_PetDelayTime;
 
 		// 현재 진행 중인 사용 기술
 		EFFECTTARGET_LIST			m_listEffectTarget;

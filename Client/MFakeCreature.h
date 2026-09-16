@@ -10,6 +10,7 @@
 #define	__MFAKECREATURE_H__
 
 #include "MCreatureWear.h"
+#include "MonotonicClock.h"
 #include <list>
 #include <queue>
 #include "MemoryPool.h"
@@ -234,7 +235,7 @@ class MFakeCreature : public MCreatureWear {
 		// 2004, 11, 8, sobeit add start
 		void KeepRocketLuncher();
 		void SetTurreDirection(BYTE Dir) { m_TurretDirect = Dir;}
-		void SetTime(DWORD dwTime) { m_nextMoveTime = dwTime; }
+		void SetTime(MonotonicClock::TimePoint tp_time) { m_nextMoveTime = tp_time; }
 		// 2004, 11, 8, sobeit add end
 		
 		// 2004, 12, 31, sobeit add start
@@ -282,7 +283,7 @@ class MFakeCreature : public MCreatureWear {
 		DNODE_LIST			m_listDNodes;
 
 		// 계산 했던 곳인지 check
-		DWORD						m_nextMoveTime;
+		MonotonicClock::TimePoint	m_nextMoveTime;
 		int							m_PatrolCount;
 		BYTE						m_TurretDirect;
 		BYTE						m_FinalTurretDirect;

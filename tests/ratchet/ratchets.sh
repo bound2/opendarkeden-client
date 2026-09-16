@@ -1163,8 +1163,15 @@ fi
 # wrap-safe unsigned subtraction. MTopView holds 6, the quest event's
 # parameter fields read as ticks; MPlayer 9 (two in its header, the
 # failing "previous + delay < now" shape), MFakeCreature 7.
+# 35 on 2026-09-16: the player's four stamps (the repeat and lock
+# gates and the pet's dissection delay - all three the failing
+# "stamp + delay < now" shape, so this one does remove a wrap failure -
+# and the trace limit, a plain subtraction), the fake creature's next
+# move deadline (a sum-shaped deadline, the same failing shape) and the
+# two executable setters in PacketFunction that fed them moved to
+# TimePoint (18 calls). MTopView holds 6, the rest ones to fours.
 #----------------------------------------------------------------------
-R14_BASELINE=53
+R14_BASELINE=35
 
 if [ ! -f tests/tools/count_tick_reads.pl ]; then
 	echo "FAIL R14: tests/tools/count_tick_reads.pl is missing"

@@ -838,7 +838,7 @@ MCreature::MCreature()
 	m_bFakeDie = false;
 	m_FakeDieCount = 0;
 	m_GradeActionInfo = 0;
-	m_TraceTimer = 0;
+	m_TraceTimer = MonotonicClock::TimePoint();
 	m_BatColorSet = 0xFFFF;
 
 	m_PetID = OBJECTID_NULL;
