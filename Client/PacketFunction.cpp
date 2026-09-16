@@ -5371,7 +5371,7 @@ SetPetInfo(PetInfo* pPetInfo, TYPE_OBJECTID objectID)
 		g_pPlayer->CalculateLightSight();
 		g_pPlayer->CalculateStatus();
 		
-		g_pPlayer->SetPetDelay(GetTickCount());
+		g_pPlayer->SetPetDelay(MonotonicClock::Now());
 	}
 	else if(pCreature != NULL)
 	{
@@ -6265,7 +6265,7 @@ void Add_RocketRuncher(MCreature* UserCreature, MCreature* TargetCreature)
 		pFakeCreature->SetMoveType(MCreature::CREATURE_FAKE_FLYING);
 		pFakeCreature->AddEffectStatus( (EFFECTSTATUS)(EFFECTSTATUS_ROCKET_LUNCHER), 0xFFFF );
 		pFakeCreature->SetTraceID(TargetCreature->GetID());
-		pFakeCreature->SetTime(timeGetTime() + delayFrame); 
+		pFakeCreature->SetTime(MonotonicClock::Now() + MonotonicClock::Millis(delayFrame)); 
 		pFakeCreature->SetGhost(0xff, 2);
 	}
 }

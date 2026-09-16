@@ -893,7 +893,7 @@ MPlayer::MPlayer()
 
 	// 캐릭터 시야
 	m_Sight = 0;
-	m_PetDelayTime = 0;
+	m_PetDelayTime = MonotonicClock::TimePoint();
 
 	m_SweepVice_Value = 0;
 	m_TempSelectPosX = SECTORPOSITION_NULL;
@@ -2823,9 +2823,9 @@ MPlayer::KeepTraceCreature()
 
 	bool	bTraceTimer = false;
 
-	if( m_TraceTimer != 0 )
+	if( m_TraceTimer != MonotonicClock::TimePoint() )
 	{
-		if( ( GetTickCount() - m_TraceTimer ) / 1000 > g_pClientConfig->TRACE_CHARACTER_LIMIT_TIME )
+		if( (DWORD)(MonotonicClock::Now() - m_TraceTimer).count() / 1000 > g_pClientConfig->TRACE_CHARACTER_LIMIT_TIME )
 		{
 			if( pCreature != NULL &&					// 동족일 경우만.
 				(pCreature->IsSlayer() && IsSlayer()) || 
@@ -2834,7 +2834,7 @@ MPlayer::KeepTraceCreature()
 				)
 			{
 				bTraceTimer = true;
-				m_TraceTimer = 0;
+				m_TraceTimer = MonotonicClock::TimePoint();
 			}			
 		}
 	}
@@ -2862,7 +2862,7 @@ MPlayer::KeepTraceCreature()
 		SetStop();	
 		
 		UnSetRepeatAction();
-		m_TraceTimer = 0;
+		m_TraceTimer = MonotonicClock::TimePoint();
 			
 		return;			
 	}			
@@ -3246,7 +3246,7 @@ MPlayer::TraceCreatureToBasicAction(TYPE_OBJECTID id, bool bForceAttack, bool bC
 
 		if( !bForceAttack && bClick )
 		{
-			m_TraceTimer = GetTickCount();
+			m_TraceTimer = MonotonicClock::Now();
 		}
 		
 		m_fTrace	= FLAG_TRACE_CREATURE_BASIC;
@@ -9448,7 +9448,7 @@ MPlayer::Action()
 				else
 					petDelayTime = 1200+((petLevelMax-petLevel)*2800)/petLevelMax;
 
-				if(m_PetDelayTime+petDelayTime < GetTickCount() )
+				if(MonotonicClock::Now() - m_PetDelayTime > MonotonicClock::Millis((DWORD)max(0, petDelayTime)) )
 				{
 					int itemLimit = 1;	// 머리는 빼고
 
@@ -9472,7 +9472,7 @@ MPlayer::Action()
 						pItem->SetNumber( itemLimit );
 					}
 					
-					m_PetDelayTime = GetTickCount();
+					m_PetDelayTime = MonotonicClock::Now();
 				}
 			}
 		}
@@ -9490,12 +9490,11 @@ MPlayer::Action()
 
 	if(IsRepeatAction())
 	{
-		if(m_RepeatTimer + g_pClientConfig->REPEAT_TIME < GetTickCount())
+		if(MonotonicClock::Now() - m_RepeatTimer > MonotonicClock::Millis(g_pClientConfig->REPEAT_TIME))
 		{
 			// [SKILLREPEAT DIAG] kept
-			DEBUG_ADD_FORMAT("[SKILLREPEAT] why=REPEATTIMER timer=%u limit=%u now=%u",
-				(unsigned)m_RepeatTimer, (unsigned)g_pClientConfig->REPEAT_TIME,
-				(unsigned)GetTickCount());
+			DEBUG_ADD_FORMAT("[SKILLREPEAT] why=REPEATTIMER elapsed=%u limit=%u",
+				(unsigned)(MonotonicClock::Now() - m_RepeatTimer).count(), (unsigned)g_pClientConfig->REPEAT_TIME);
 
 			UnSetRepeatAction();
 		}
@@ -9503,7 +9502,7 @@ MPlayer::Action()
 	// 너무 오래 반복 시키지 않게
 	if(IsLockMode())
 	{
-		if(m_LockTimer + g_pClientConfig->LOCK_TIME < GetTickCount())
+		if(MonotonicClock::Now() - m_LockTimer > MonotonicClock::Millis(g_pClientConfig->LOCK_TIME))
 			UnSetLockMode();
 	}
 	//if (m_ActionCount==m_ActionCountMax)
