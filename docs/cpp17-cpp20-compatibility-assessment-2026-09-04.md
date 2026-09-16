@@ -1366,6 +1366,51 @@ block in the effect status window's `Process` - and
 each), and the rest in ones to fours. Verified by the build on Windows
 in both Debug trees, the ratchet and the clock test; the client not run.
 
+The ninth priority-5 slice (2026-09-16) is the event register's start
+stamp and the HP-modify list's. `MEvent::eventStartTickCount` is set by
+`MEventManager::AddEvent` and reset by the two ending cinematics in
+`MTopView` (the advancement quest's and the Ousters') as each starts,
+and was read as `GetTickCount() - eventStartTickCount` at ten sites: the
+show-time blink and the expiry in the manager, the two countdown
+captions, the two scroll positions, the two fades and two four-second
+script gates in `MTopView`. It is a `TimePoint` now, and the ten reads
+are one `MEvent::ElapsedMillis()`, which returns the elapsed count as
+the `DWORD` every consumer's arithmetic already ran in - so the
+captions' `(delay - elapsed + 999) / 1000`, the scrolls' `-500 + elapsed
+/ 66`, the fades' `min(31, elapsed / speed)` and the gates' `elapsed /
+4000 > 0` are the same expressions over the same width.
+`MCreature::HPModify::TickCount`, stamped as a damage number is queued
+and read once by the list drawer to drop numbers older than
+`HPModifyListTime`, is a `TimePoint` the same way. **What this slice does
+not do:** it removes no wrap defect. Every one of the eleven reads was a
+plain unsigned subtraction, which is exact modulo 2^32 and so measured
+the true elapsed time across the tick's wrap already; none had the
+`previous + delay <= now` shape R14 exists for, and `ElapsedMillis()`
+truncates to `DWORD`, so a span past 49.7 days wraps as it did. The
+slice takes these stamps off the mixed counters and onto the one clock,
+which is what the count measures. Four of the six resets and both
+script gates sit in switch arms whose selector is never set to the
+values they test - the cinematics' script stepping is commented out at
+its two writers - and were retyped with the rest as dead code. The
+quantisation statement this slice owes, hedged because it was not
+measured: these sites read `GetTickCount()`, which on Windows is still
+kernel32's counter (`basic/Platform.h` routes only `timeGetTime()` to
+`platform_get_ticks()` there; off Windows both are the SDL tick), whose
+step is the system timer's - up to 15.6 ms, and likely about 1 ms under
+the timer resolution SDL2 asks for on Windows by default - and they
+read a 1 ms clock now. Both ends of an interval were quantised, so a
+gate, a fade step, a caption's second boundary or a damage number's
+drop can fall up to one old step earlier or later than before; nothing
+else changes. R14 goes from 72 to 53 (19 calls). `MTopView` holds 6:
+the quest event's `parameter1` and `parameter4`, generic `DWORD` fields
+the drawer compares against the tick and the second, which nothing
+sets to a tick today (the writers that did are commented out in
+`GCQuestStatusHandler`) and which want their own reading before they
+are retyped; `MPlayer` holds 9 (two of them in its header, both feeding
+`previous + delay < now` gates - the shape that does fail at the wrap)
+and `MFakeCreature` 7. Verified by the build on Windows in both Debug
+trees and the ratchet; the client not run.
+
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through
 `std::filesystem::directory_iterator` against a DOS-style wildcard and returns
