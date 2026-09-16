@@ -1411,6 +1411,51 @@ are retyped; `MPlayer` holds 9 (two of them in its header, both feeding
 and `MFakeCreature` 7. Verified by the build on Windows in both Debug
 trees and the ratchet; the client not run.
 
+The tenth priority-5 slice (2026-09-16) is the player's four stamps and
+the fake creature's move deadline, with the two executable-side setters
+that fed them. `MPlayer::m_RepeatTimer` and `m_LockTimer` (stamped by
+`SetRepeatAction` and `SetLockMode` in the header) and
+`m_PetDelayTime` (re-armed whenever its gate opens with a pet item
+present, corpse or not, and by `SetPetDelay` from `PacketFunction`)
+were gated as `stamp + delay <
+now` - the sum shape that R14 exists for, open on every frame once the
+sum carries past 2^32 and shut for 49.7 days once the tick does - and
+`MCreature::m_TraceTimer` (stamped on a click-to-follow, `0` for none)
+as `(now - stamp) / 1000 > limit`, a subtraction. `MFakeCreature::
+m_nextMoveTime` was a deadline, `now + (2 to 10 s at random, by site)`,
+compared as `now > deadline` - a sum shape again - and set from
+`PacketFunction` for the rocket as `now + flight time` through
+`SetTime`. All five are `TimePoint`s: the three sum gates read `now -
+stamp > Millis(delay)`, which is the same strict comparison over
+64-bit arithmetic, so a stamp left at the default point still opens
+the gate at once, as the pet delay's `0` did on master - the repeat
+and lock stamps master never initialised at all (read only under their
+flags, which the constructor clears; `docs/skill-repeat-diagnostics-
+2026-08-31.md` records it) and are the epoch now; the trace limit
+keeps its `(DWORD)` elapsed and its default-point sentinel; the deadline
+is `Now() + Millis(...)` and the two comparisons are unchanged. The two
+setters take a `TimePoint`, and the repeat gate's diagnostic line logs
+the elapsed count and the limit where it logged two raw ticks and the
+limit. One trap the review caught before it shipped: the pet's delay is
+computed from its level, a wire byte nothing clamps, and a level past
+the table's maximum makes it negative; master's `DWORD` sum wrapped and
+left that gate open, and `Millis(DWORD)` would have turned the negative
+into 49.7 days and shut it - so the delay is floored at zero at the
+gate, which keeps master's behaviour. `Millis()` taking a `DWORD` is
+worth remembering for the sites still to come: a signed delay handed
+to it does not warn under `/W3`. This is
+the first `Client` slice that removes the wrap failure R14 describes:
+four gates had it - three in the player, and the fake creature's
+deadline at its two comparison sites.
+Quantisation, hedged as in the ninth slice: the player's four stamps
+and `SetPetDelay`'s caller read kernel32's `GetTickCount()` on Windows,
+so those gates can open up to one old step earlier or later; the fake
+creature's and the rocket's read `timeGetTime()`, already the 1 ms
+tick. R14 goes from 53 to 35 (18 calls); `MTopView` holds 6, the quest
+event's parameter fields, and the rest is ones to fours in twelve files.
+Verified by the build on Windows in both Debug trees and the ratchet;
+none of it has a test; the client not run.
+
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through
 `std::filesystem::directory_iterator` against a DOS-style wildcard and returns
