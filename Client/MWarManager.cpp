@@ -66,7 +66,7 @@ void			MWarManager::SetWar(WarInfo *info)
 				{
 					if(itr->zone_id == id && itr->war_type == WAR_RACE)		// 기존에 있으면 업데이트!
 					{
-						itr->left_time = pInfo->getRemainTime() + (timeGetTime()/1000);
+						itr->left_time = MonotonicClock::NowInSeconds() + std::chrono::seconds((std::chrono::seconds::rep)pInfo->getRemainTime());
 						bUpdate = true;
 						break;
 					}
@@ -76,7 +76,7 @@ void			MWarManager::SetWar(WarInfo *info)
 				if(bUpdate == false)
 				{
 					WAR_INFO inf;	
-					inf.left_time = pInfo->getRemainTime() + (timeGetTime()/1000);
+					inf.left_time = MonotonicClock::NowInSeconds() + std::chrono::seconds((std::chrono::seconds::rep)pInfo->getRemainTime());
 					inf.zone_id = id;
 					inf.zone_name = g_pZoneTable->Get(id)->Name;
 					inf.war_type = pInfo->getWarType();
@@ -128,14 +128,14 @@ void			MWarManager::SetWar(WarInfo *info)
 			{
 				if(itr->zone_id == pInfo->getCastleID() && itr->war_type == WAR_GUILD)		// 기존에 있으면 업데이트!
 				{
-					itr->left_time = pInfo->getRemainTime() + (timeGetTime()/1000);
+					itr->left_time = MonotonicClock::NowInSeconds() + std::chrono::seconds((std::chrono::seconds::rep)pInfo->getRemainTime());
 					return;
 				}
 				itr++;
 			}
 
 			WAR_INFO inf;	
-			inf.left_time = pInfo->getRemainTime() + (timeGetTime()/1000);
+			inf.left_time = MonotonicClock::NowInSeconds() + std::chrono::seconds((std::chrono::seconds::rep)pInfo->getRemainTime());
 			inf.zone_id = pInfo->getCastleID();
 			inf.zone_name = g_pZoneTable->Get(pInfo->getCastleID())->Name;
 			inf.war_type = pInfo->getWarType();
@@ -153,7 +153,7 @@ void			MWarManager::SetWar(WarInfo *info)
 			WAR_INFO inf;	
 			inf.zone_id = g_pZone->GetID();
 			inf.zone_name = g_pZoneTable->Get(inf.zone_id)->Name;
-			inf.left_time = pInfo->getRemainTime() + (timeGetTime()/1000);
+			inf.left_time = MonotonicClock::NowInSeconds() + std::chrono::seconds((std::chrono::seconds::rep)pInfo->getRemainTime());
 			inf.war_type = pInfo->getWarType();
 			
 			g_pUserInformation->WarInfo.push_back(inf);

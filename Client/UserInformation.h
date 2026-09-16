@@ -16,13 +16,14 @@
 #include <bitset>
 #include "MString.h"
 #include "RaceType.h"
+#include "MonotonicClock.h"
 
 struct WAR_INFO
 {
 	std::string zone_name;
 	std::string attack_guild_name, defense_guild_name;
 	WORD	zone_id;
-	DWORD left_time;
+	MonotonicClock::SecondPoint left_time;
 	BYTE war_type;
 };
 

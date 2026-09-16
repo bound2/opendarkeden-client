@@ -260,7 +260,7 @@ struct S_SLOT : public S_SLOT_DATA
 	struct UI_EFFECTSTATUS_STRUCT
 	{
 		TYPE_ACTIONINFO actionInfo;
-		DWORD			delayFrame;
+		MonotonicClock::TimePoint	delayFrame;
 	};
 
 	typedef std::vector<UI_EFFECTSTATUS_STRUCT>			UI_EFFECTSTATUS_TYPE;
