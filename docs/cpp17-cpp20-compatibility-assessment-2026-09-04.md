@@ -1280,6 +1280,38 @@ that a quest holds its missions by the same type. The rest is verified
 by the build on Windows and, by the review, on Linux GCC; the client
 was not run.
 
+The seventh priority-5 slice (2026-09-16) is the three minigames' clocks
+in `vs_ui_gamecommon2.cpp`, the last `timeGetTime()` readers in `VS_UI`
+that do not cross the executable boundary. The minesweeper
+(`C_VS_UI_FINDING_MINE`) kept one `DWORD` for two things in turn - the
+tick the game started at, then, once it ended, the milliseconds it had
+taken - and prints whichever the status says it holds; that is a
+`TimePoint` and a `Duration` now, each read where the old field was read
+under that status. The arrow tile (`C_VS_UI_ARROW_TILE`) stamps each
+character's start, end, last move and trap delay and gates its monster
+moves on the time since the last one; the four `S_CHARACTER` fields and
+the gate's stamp are `TimePoint`s, the `= 0` resets are the default time
+point (the epoch, which every comparison treats as the zero tick did),
+and `TimerMonsterMove()` compares the elapsed `Duration` against its
+millisecond argument through `Millis()`. The crazy mine
+(`C_VS_UI_CRAZY_MINE`) stamps its start the same way. The elapsed times
+the three send to `UI_CLEAR_STAGE` are the same millisecond counts,
+64-bit until the message's `intptr_t`, where the handler already divides
+by ten and clamps to a `WORD` for the score packet; the two "%5d.%2d"
+displays compute one 64-bit count and split it, where they read the
+tick twice. No quantisation change: `timeGetTime()` was already the 1 ms
+tick. One initialisation the retyping supplies: the arrow tile's
+monster-move stamp had no initialiser on master, so the first gate read
+compared against whatever the member held; a default time point reads
+as the epoch, so the gate is open before the first move, as it was for
+any stale value more than 600 ms old.
+R14 goes from 113 to 93 (20 calls). `VS_UI` holds 13: the three
+deadlines the executable sets through shared structs (`quest_time`,
+`delayFrame`, `left_time`), which want the same retyping on both sides
+of the boundary and are the next slice. `Client` holds 80. No test
+binary links `VS_UI`; verified by the build on Windows in both Debug
+trees and by the ratchet, the client not run.
+
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through
 `std::filesystem::directory_iterator` against a DOS-style wildcard and returns
