@@ -1158,7 +1158,9 @@ fi
 #----------------------------------------------------------------------
 # R15 - the build-wide side macros spelled in the sources.
 #
-# The once-shared client/server sources switched on five macros:
+# The once-shared client/server sources switched on five macros, and
+# four more spellings no translation unit ever had defined guarded code
+# the same way (the eleventh slice, below). The five:
 # __GAME_CLIENT__, which every translation unit that read it had
 # defined (CMake passed =1 to the executable, packetwire, gamemodel and
 # the listed test sources; every other reader got it from
@@ -1177,10 +1179,10 @@ fi
 # the same commit. Three counts, all 0, checked separately because
 # each is where a return would land:
 #
-#   the five macros as tokens in any .h/.cpp/.inl under Client/Packet -
+#   the nine macros as tokens in any .h/.cpp/.inl under Client/Packet -
 #   a server half behind one of the five cannot come back through a
 #   copy from the server repo without this noticing (one behind another
-#   spelling, __UPDATE_CLIENT__ or __EXPO_CLIENT__ say, is the include
+#   spelling, outside the nine this counts, is the include
 #   checker's both-branch walk to catch, not this count's);
 #
 #   the same tokens in the rest of Client, VS_UI, basic, tools,
@@ -1188,7 +1190,7 @@ fi
 #   is dead code now, since nothing defines the macro, and this is what
 #   says so;
 #
-#   the five names anywhere in a CMakeLists.txt or .cmake file outside
+#   the nine names anywhere in a CMakeLists.txt or .cmake file outside
 #   build trees, comment tails stripped - a definition put back there
 #   would make every such #ifdef live again. Matched without word
 #   boundaries on purpose: -D__GAME_CLIENT__ has a word character on
@@ -1206,8 +1208,21 @@ fi
 # 0 cannot notice a shrunken scan, the way R13's font-list 1 does): the
 # two token counts by a file floor, the CMake count by a smaller one.
 # The include checker (tests/arch/check_includes.pl) still evaluates
-# the same five macros, all as undefined, while walking library
+# the same nine macros, all as undefined, while walking library
 # includes.
+#
+# Eleventh slice (2026-09-16): __EXPO_CLIENT__ (ten sites: the expo
+# build's addon enum; its fullscreen sector geometry through the one
+# macro it defined, __FULLSCREEN_MODE__, defined only inside that dead
+# branch; an invisible-walk clause at four sites, in the two path
+# finders and MPlayer's move check; a skill-to-tile send in MPlayer;
+# the dark-light, weather and lightning handlers, which returned
+# early), __UPDATE_CLIENT__ (one site, two includes in
+# UCRequestLoginModeHandler.cpp) and __GUILD_MANAGER_TOOL__ (already at
+# 0: its three sites went with the tenth slice) joined the pattern, so
+# both source-side counts and the CMake count read the same nine names.
+# Nothing defines any of the four, in CMake or in a source, and the
+# CMake count holds that too.
 #----------------------------------------------------------------------
 R15_PACKET_BASELINE=0
 R15_REST_BASELINE=0
@@ -1215,7 +1230,7 @@ R15_CMAKE_BASELINE=0
 R15_PACKET_FILES_FLOOR=1000
 R15_REST_FILES_FLOOR=1000
 R15_CMAKE_FILES_FLOOR=5
-R15_PATTERN='__GAME_CLIENT__|__GAME_SERVER__|__LOGIN_SERVER__|__SHARED_SERVER__|__UPDATE_SERVER__'
+R15_PATTERN='__GAME_CLIENT__|__GAME_SERVER__|__LOGIN_SERVER__|__SHARED_SERVER__|__UPDATE_SERVER__|__UPDATE_CLIENT__|__EXPO_CLIENT__|__FULLSCREEN_MODE__|__GUILD_MANAGER_TOOL__'
 
 r15_packet_members () {
 	find Client/Packet \( -name '*.cpp' -o -name '*.h' -o -name '*.inl' \) 2>/dev/null

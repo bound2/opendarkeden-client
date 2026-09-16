@@ -3324,12 +3324,6 @@ CGameUpdate::ProcessInput()
 	//if (gC_vs_ui.MouseControl(M_MOVING, g_x, g_y))
 	//	return;
 
-	// 전시회용 Client는 interface를 안 그려줄때가 있다.
-	//#ifdef __EXPO_CLIENT__	
-	//	if ((*g_pUserOption).DrawInterface)
-	//	{
-	//#endif
-
 	#ifdef OUTPUT_DEBUG_PROCESS_INPUT
 		DEBUG_ADD("IRP");
 	#endif

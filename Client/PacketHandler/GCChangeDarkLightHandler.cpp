@@ -23,10 +23,6 @@ void GCChangeDarkLightHandler::execute ( GCChangeDarkLight * pPacket , Player * 
 	__BEGIN_TRY
 		
 
-	#ifdef __EXPO_CLIENT__
-		return;
-	#endif
-
 	// message
 
 

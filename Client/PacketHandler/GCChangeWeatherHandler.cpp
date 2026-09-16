@@ -21,10 +21,6 @@ void GCChangeWeatherHandler::execute ( GCChangeWeather * pPacket , Player * pPla
 	__BEGIN_TRY
 		
 
-	#ifdef __EXPO_CLIENT__
-		return;
-	#endif
-	
 	
 	SetWeather( pPacket->getWeather(), pPacket->getWeatherLevel() );	
 
