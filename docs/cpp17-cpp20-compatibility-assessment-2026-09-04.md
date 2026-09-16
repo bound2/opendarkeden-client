@@ -1327,6 +1327,45 @@ be written against it; none reaches the minigames); verified by the
 build on Windows in both Debug trees and by the ratchet, the client not
 run.
 
+The eighth priority-5 slice (2026-09-16) is the three deadlines the
+executable sets and `VS_UI` reads through shared structs, retyped on
+both sides of the boundary at once. Two were counted in whole seconds -
+`QUEST_STATUS::quest_time`, set by `UI_RunQuestStatus` from the quest
+packet's remaining seconds, and `WAR_INFO::left_time`, set by
+`MWarManager::SetWar` from the war info's - as `remaining +
+timeGetTime()/1000` and read against `timeGetTime()/1000`. Those are
+`MonotonicClock::SecondPoint` now, a time point at whole-second
+resolution the header adds beside a `NowInSeconds()` that floors the
+clock to it, so a deadline set as `NowInSeconds()` plus the seconds
+left and read against `NowInSeconds()` counts down on the clock's second
+boundary exactly as the divided tick did - the arithmetic is the same
+integers, only 64-bit, over the steady clock's second boundaries rather
+than the tick's, so a displayed count can sit one second out of phase
+with what the tick would have shown at the same instant, as approximate
+either way (`tests/unit/test_monotonic_clock.cpp` pins the floor, the
+countdown and the count past the wrap). The time-item register of the
+second slice had written the same typedef and the same floor as a
+file-static of its own; both are the header's now, and its tests are
+unchanged. The third,
+`S_SLOT::UI_EFFECTSTATUS_STRUCT::delayFrame`, is a millisecond deadline
+`UI_AddEffectStatus` sets as now plus the effect's frames scaled to
+milliseconds, and is a `TimePoint`; the effect status window's three
+readers - the tooltip's remaining seconds, and the two icon loops that
+flash an icon under five seconds left - read the clock once and take
+the difference, where the tooltip read the tick twice. The two "reset to
+0" writes of `quest_time` are the default time point, which every
+comparison treats as the zero second did (a quest with no deadline set
+reads as timed out, as before). No quantisation change and no
+resolution change: the second-counted deadlines still floor both ends
+to the second, the millisecond one was already the 1 ms tick. R14 goes
+from 93 to 72 (21 calls: 13 in `VS_UI`, the three setters' 8 in
+`Client`). `VS_UI` holds no live tick read now - what remains is a dozen
+mentions inside comments in five files, two of them in the commented-out
+block in the effect status window's `Process` - and
+`Client` holds 72: `MTopView` (21), `MPlayer` and `MFakeCreature` (7
+each), and the rest in ones to fours. Verified by the build on Windows
+in both Debug trees, the ratchet and the clock test; the client not run.
+
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through
 `std::filesystem::directory_iterator` against a DOS-style wildcard and returns
