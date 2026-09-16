@@ -21476,13 +21476,13 @@ bool C_VS_UI_EFFECT_STATUS::MouseControl(UINT message, int _x, int _y)
 					static std::string str[2];
 
 					str[0] = ifo.zone_name;
-					DWORD	current_time=timeGetTime()/1000;
+					MonotonicClock::SecondPoint	current_time=MonotonicClock::NowInSeconds();
 					char temp_string[512]="";
 
 					if(current_time > ifo.left_time)
 							current_time = ifo.left_time;
 
-					DWORD c_time = ifo.left_time - current_time;
+					DWORD c_time = (DWORD)(ifo.left_time - current_time).count();
 						
 					DWORD hours = c_time / 3600;
 					DWORD min = (c_time - (hours * 3600) )/60;
@@ -21583,8 +21583,9 @@ bool C_VS_UI_EFFECT_STATUS::MouseControl(UINT message, int _x, int _y)
 				
 				static const char *help_string[3];
 
-				DWORD delayFrame = (g_char_slot_ingame.STATUS[select].delayFrame-timeGetTime())/1000;
-				if(timeGetTime() > g_char_slot_ingame.STATUS[select].delayFrame)
+				const MonotonicClock::TimePoint tp_now = MonotonicClock::Now();
+				DWORD delayFrame = (DWORD)((g_char_slot_ingame.STATUS[select].delayFrame-tp_now).count()/1000);
+				if(tp_now > g_char_slot_ingame.STATUS[select].delayFrame)
 					delayFrame = 0;
 				
 //				if(skill_id == SKILL_BLOOD_DRAIN)
@@ -21750,7 +21751,7 @@ void C_VS_UI_EFFECT_STATUS::Show()
 
 			if(!g_char_slot_ingame.STATUS.empty())
 			{
-				DWORD CurrentFrame = timeGetTime();
+				const MonotonicClock::TimePoint CurrentFrame = MonotonicClock::Now();
 
 				for(int i = 0; i < min(10, g_char_slot_ingame.STATUS.size()); i++)
 				{
@@ -21763,7 +21764,7 @@ void C_VS_UI_EFFECT_STATUS::Show()
 					POINT point = {x+5+i*20, y+5};
 					const int sprite_id = (*g_pSkillInfoTable)[skill_id].GetSpriteID();
 
-					DWORD delayFrame = (g_char_slot_ingame.STATUS[i+m_scroll].delayFrame-CurrentFrame);
+					DWORD delayFrame = (DWORD)(g_char_slot_ingame.STATUS[i+m_scroll].delayFrame-CurrentFrame).count();
 					if(CurrentFrame > g_char_slot_ingame.STATUS[i+m_scroll].delayFrame)
 						delayFrame = 0;			
 						
@@ -21863,7 +21864,7 @@ void C_VS_UI_EFFECT_STATUS::Show()
 			
 			if(!g_char_slot_ingame.STATUS.empty())
 			{
-				DWORD CurrentFrame = timeGetTime();
+				const MonotonicClock::TimePoint CurrentFrame = MonotonicClock::Now();
 				
 				for(int i = 0; i < min(10, g_char_slot_ingame.STATUS.size()); i++)
 				{
@@ -21876,7 +21877,7 @@ void C_VS_UI_EFFECT_STATUS::Show()
 					POINT point = {x+5, y+5+i*20};
 					const int sprite_id = (*g_pSkillInfoTable)[skill_id].GetSpriteID();
 					
-					DWORD delayFrame = (g_char_slot_ingame.STATUS[i+m_scroll].delayFrame-CurrentFrame);
+					DWORD delayFrame = (DWORD)(g_char_slot_ingame.STATUS[i+m_scroll].delayFrame-CurrentFrame).count();
 					if(CurrentFrame > g_char_slot_ingame.STATUS[i+m_scroll].delayFrame)
 						delayFrame = 0;	
 
@@ -32798,7 +32799,7 @@ C_VS_UI_QUEST_STATUS::C_VS_UI_QUEST_STATUS()
 	
 	//memset( &m_quest_status, 0 ,sizeof( QUEST_STATUS ) );
 	m_quest_status.current_point = 0;
-	m_quest_status.quest_time = 0;
+	m_quest_status.quest_time = MonotonicClock::SecondPoint();
 	m_quest_status.Title = NULL;
 
 	m_bl_active = false;
@@ -32966,7 +32967,7 @@ void	C_VS_UI_QUEST_STATUS::SetQuestStatusInit()
 {
 	m_quest_status.QuestID = 0xffffffff;
 //	m_quest_status.QuestID = 87;				// 57, 72, 87
-	m_quest_status.quest_time = 0;
+	m_quest_status.quest_time = MonotonicClock::SecondPoint();
 	m_quest_status.current_point = 0;
 
 	m_bl_timeover = false;
@@ -33110,7 +33111,7 @@ void	C_VS_UI_QUEST_STATUS::Show()
 				
 				if( QuestInfo->GetTimeLimit() > 0 )
 				{
-					rate = bar_width * (QuestInfo->GetTimeLimit()-(m_quest_status.quest_time-timeGetTime()/1000)) / QuestInfo->GetTimeLimit();//;
+					rate = bar_width * (QuestInfo->GetTimeLimit()-(DWORD)(m_quest_status.quest_time-MonotonicClock::NowInSeconds()).count()) / QuestInfo->GetTimeLimit();//;
 					
 					rect.Set(0, 0, max(0,min(bar_width,rate)), 10);
 					gpC_global_resource->m_pC_info_spk->BltLockedClip(x+bar_x+tab_x, y+73+tab_y, rect, sprite_bar);			
@@ -33162,7 +33163,7 @@ void	C_VS_UI_QUEST_STATUS::Show()
 		} else
 		{
 			// 퀘스트 중이면 시간이 다 되었거나, 완료 되었거나, 진행중
-			if( m_quest_status.quest_time <= timeGetTime()/1000 && QuestInfo->GetType() == QUEST_INFO_MONSTER_KILL)
+			if( m_quest_status.quest_time <= MonotonicClock::NowInSeconds() && QuestInfo->GetType() == QUEST_INFO_MONSTER_KILL)
 			{
 				//퀘스트 실패
 				if( time_check )
@@ -33297,10 +33298,10 @@ void	C_VS_UI_QUEST_STATUS::Show()
 		//if( QuestInfo.GetType() != QUEST_INFO_TYPE_NULL && m_bl_active && QuestInfo.GetTimeLimit() ) 
 		if( QuestInfo->GetTimeLimit() > 0 && QuestInfo->GetType() == QUEST_INFO_MONSTER_KILL )
 		{				
-			if( m_quest_status.quest_time > timeGetTime()/1000)	
+			if( m_quest_status.quest_time > MonotonicClock::NowInSeconds())	
 			{
 				char temp_str[100];
-				DWORD remain_time = m_quest_status.quest_time - timeGetTime()/1000;
+				DWORD remain_time = (DWORD)(m_quest_status.quest_time - MonotonicClock::NowInSeconds()).count();
 				int hour = remain_time / 3600;
 				int minute = (remain_time/60) % 60;
 				int second = remain_time % 60;
@@ -33616,7 +33617,7 @@ void	C_VS_UI_QUEST_STATUS::ShowQuestDescription(int _x, int _y)
 			// 몬스터 사냥 퀘스트
 			// %s (%d/%d)
 			snprintf(temp_str[0], sizeof(temp_str[0]), "%s", GetGameString(UI_STRING_MESSAGE_QUEST_MONSTER_KILL));
-			if( m_quest_status.quest_time < timeGetTime()/1000)	
+			if( m_quest_status.quest_time < MonotonicClock::NowInSeconds())	
 			{
 				snprintf(temp_str[1], sizeof(temp_str[1]), "%s", GetGameString(UI_STRING_MESSAGE_FAIL_TIME_OVER_QUEST));
 			} else
@@ -33668,8 +33669,8 @@ void	C_VS_UI_QUEST_STATUS::ShowQuestDescription(int _x, int _y)
 		
 		DWORD time_table[3];
 		time_table[0] = QuestInfo->GetTimeLimit();
-		time_table[1] = QuestInfo->GetTimeLimit() - (m_quest_status.quest_time - timeGetTime()/1000);
-		time_table[2] = m_quest_status.quest_time - timeGetTime()/1000;
+		time_table[1] = QuestInfo->GetTimeLimit() - (DWORD)(m_quest_status.quest_time - MonotonicClock::NowInSeconds()).count();
+		time_table[2] = (DWORD)(m_quest_status.quest_time - MonotonicClock::NowInSeconds()).count();
 		
 		snprintf(temp_str[0], sizeof(temp_str[0]), "%s", GetGameString(UI_STRING_MESSAGE_QUEST_DESCRIPTION_TIME_TOTAL));
 		snprintf(temp_str[1], sizeof(temp_str[1]), "%s", GetGameString(UI_STRING_MESSAGE_QUEST_DESCRIPTION_TIME_ELAPSE));
@@ -33677,7 +33678,7 @@ void	C_VS_UI_QUEST_STATUS::ShowQuestDescription(int _x, int _y)
 		
 		for(int i=0; i<3; i++)
 		{
-			if( m_quest_status.quest_time < timeGetTime()/1000 )
+			if( m_quest_status.quest_time < MonotonicClock::NowInSeconds() )
 			{
 				if(i ==1)
 				{

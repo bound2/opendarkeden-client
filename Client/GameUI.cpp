@@ -360,7 +360,7 @@ UI_AddEffectStatus(int es, DWORD delayFrame)
 				{
 					// 2004, 6, 11 sobeit add start - 옵저빙아이,블레스 등등, delay 버그때문에 delay만 갱신
 					if(delayFrame)
-						(itr->delayFrame = timeGetTime()+delayFrame*1000/16);
+						(itr->delayFrame = MonotonicClock::Now() + MonotonicClock::Millis(delayFrame*1000/16));
 					// 2004, 6, 11 sobeit add end
 					return;
 				}
@@ -373,7 +373,7 @@ UI_AddEffectStatus(int es, DWORD delayFrame)
 			//-----------------------------------------------------------------
 			S_SLOT::UI_EFFECTSTATUS_STRUCT efs;
 			efs.actionInfo = ai;
-			efs.delayFrame = timeGetTime()+delayFrame*1000/16;
+			efs.delayFrame = MonotonicClock::Now() + MonotonicClock::Millis(delayFrame*1000/16);
 
 			status.push_back( efs );
 			if(ai == SKILL_BLOOD_DRAIN)
@@ -4210,7 +4210,7 @@ void		UI_RunQuestStatus( GCQuestStatus * pPacket )
 			QuestStatus.Title			= (*g_pGameStringTable)[UI_STRING_MESSAGE_QUEST_MONSTER_KILL].GetString();
 		}
 		QuestStatus.QuestID			= pPacket->getQuestID();
-		QuestStatus.quest_time		= pPacket->getRemainTime() + (timeGetTime() / 1000);
+		QuestStatus.quest_time		= MonotonicClock::NowInSeconds() + std::chrono::seconds((std::chrono::seconds::rep)pPacket->getRemainTime());
 		QuestStatus.current_point	= pPacket->getCurrentNum();	
 
 		gC_vs_ui.RunQuestStatusWindow();

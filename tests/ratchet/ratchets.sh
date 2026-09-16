@@ -1149,8 +1149,13 @@ fi
 # score message as before.
 # VS_UI holds 13, the three deadlines the executable sets through
 # shared structs; Client 80.
+# 72 on 2026-09-16: those three deadlines moved with their setters (21
+# calls) - the quest status's quest_time and the war list's left_time to
+# SecondPoint, the whole-second point the "timeGetTime() / 1000" they
+# were counted in floors to, the effect status's delayFrame to TimePoint;
+# VS_UI holds 0 live calls (a dozen mentions inside comments), Client 72.
 #----------------------------------------------------------------------
-R14_BASELINE=93
+R14_BASELINE=72
 
 if [ ! -f tests/tools/count_tick_reads.pl ]; then
 	echo "FAIL R14: tests/tools/count_tick_reads.pl is missing"

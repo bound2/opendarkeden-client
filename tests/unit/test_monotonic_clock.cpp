@@ -210,3 +210,26 @@ TEST(MonotonicClock, DurationsSurviveMoreThanTheFortyNineDaysTheTickCovers)
 
 	CHECK_EQ(4294967346LL, d_elapsed.count());
 }
+
+TEST(MonotonicClock, NowInSecondsFloorsToTheClockSecond)
+{
+	MonotonicClock::ScopedTestSource guard(&FakeNow);
+
+	// The whole-second clock the second-counted deadlines read: 1999 ms
+	// is still second 1, 2000 ms is second 2, and a deadline set as now
+	// plus 10 s reads 10 s left however far into the second it was set.
+	SetNow(1999);
+	CHECK_EQ(1LL, MonotonicClock::NowInSeconds().time_since_epoch().count());
+	const MonotonicClock::SecondPoint tp_deadline = MonotonicClock::NowInSeconds() + std::chrono::seconds(10);
+
+	SetNow(2000);
+	CHECK_EQ(2LL, MonotonicClock::NowInSeconds().time_since_epoch().count());
+	CHECK_EQ(9LL, (tp_deadline - MonotonicClock::NowInSeconds()).count());
+
+	SetNow(11999);
+	CHECK_EQ(0LL, (tp_deadline - MonotonicClock::NowInSeconds()).count());
+
+	// Past the 32-bit tick's wrap the second count keeps climbing.
+	SetNow(LEGACY_WRAP + 1500);
+	CHECK_EQ(4294968LL, MonotonicClock::NowInSeconds().time_since_epoch().count());
+}

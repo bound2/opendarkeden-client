@@ -1765,7 +1765,7 @@ public :
 		char*			Title;
 		DWORD			QuestID;
 		DWORD			current_point;
-		DWORD			quest_time;
+		MonotonicClock::SecondPoint	quest_time;
 	};
 	
 	QUEST_STATUS		m_quest_status;					// 현재 진행중인 퀘스트 정보

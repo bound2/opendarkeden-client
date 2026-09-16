@@ -99,6 +99,21 @@ Millis(DWORD dw_millisec)
 }
 
 //----------------------------------------------------------------------
+// A time point at whole-second resolution, for the deadlines the client
+// counts in seconds, and the current time floored to one - so a deadline
+// set as NowInSeconds() plus the seconds left, read against
+// NowInSeconds(), counts down on the clock's second boundary the way
+// "timeGetTime() / 1000" did.
+//----------------------------------------------------------------------
+typedef std::chrono::time_point<Clock, std::chrono::seconds>	SecondPoint;
+
+inline SecondPoint
+NowInSeconds()
+{
+	return std::chrono::floor<std::chrono::seconds>(Now());
+}
+
+//----------------------------------------------------------------------
 // A time point built from an absolute millisecond count. Only tests
 // should need this; production code gets its time points from Now().
 //----------------------------------------------------------------------
