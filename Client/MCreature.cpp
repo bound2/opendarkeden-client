@@ -10725,7 +10725,7 @@ MCreature::StopAbsorb()
 void
 MCreature::AddHPModify(const int modify)
 {
-	m_HPModifyList.push_back(HPModify(modify, GetTickCount()));
+	m_HPModifyList.push_back(HPModify(modify, MonotonicClock::Now()));
 	if(m_HPModifyList.size() > g_pClientConfig->HPModifyListMax)m_HPModifyList.pop_front(); 
 }
 

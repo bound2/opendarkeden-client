@@ -15,6 +15,7 @@
 #define	__MCREATURE_H__
 
 #include "MTypeDef.h"
+#include "MonotonicClock.h"
 #include "MObject.h"
 #include "MAttachEffect.h"
 #include "MActionInfoTable.h"
@@ -101,9 +102,9 @@ class MCreature : public MObject, public MStatus {
 		//----------------------------------------------------------------------
 		class HPModify {
 			public :
-				HPModify(int value_modify, DWORD value_TickCount) { modify = value_modify; TickCount = value_TickCount; }
+				HPModify(int value_modify, MonotonicClock::TimePoint value_TickCount) { modify = value_modify; TickCount = value_TickCount; }
 				int		modify;
-				DWORD	TickCount;
+				MonotonicClock::TimePoint	TickCount;
 		};
 
 		typedef	std::list<HPModify>	HPMODIFYLIST;

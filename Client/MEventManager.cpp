@@ -33,13 +33,19 @@ MEvent::~MEvent()
 {
 }
 
+DWORD
+MEvent::ElapsedMillis() const
+{
+	return (DWORD)(MonotonicClock::Now() - eventStartTickCount).count();
+}
+
 const bool
 MEvent::IsShowTime() const
 {
 	if( showTime == -1 )
 		return true;
 
-	if( ( GetTickCount() - eventStartTickCount ) % totalTime < showTime )
+	if( ElapsedMillis() % totalTime < showTime )
 		return true;
 
 	return false;
@@ -59,7 +65,7 @@ MEventManager::~MEventManager()
 //--------------------------------------------------
 void	MEventManager::AddEvent(MEvent &event)
 {
-	event.eventStartTickCount = GetTickCount();
+	event.eventStartTickCount = MonotonicClock::Now();
 	m_Events[event.eventID] = event;
 	if(event.eventFlag | EVENTFLAG_FADE_SCREEN)
 	{
@@ -234,7 +240,7 @@ void	MEventManager::ProcessEvent()
 	{
 		if(itr->second.eventDelay != -1)
 		{
-			if((GetTickCount() - itr->second.eventStartTickCount) > itr->second.eventDelay)
+			if(itr->second.ElapsedMillis() > itr->second.eventDelay)
 			{
 				EVENT_ID delete_id = itr->second.eventID;
 				itr++;
