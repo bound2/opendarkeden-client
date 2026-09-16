@@ -1154,8 +1154,17 @@ fi
 # SecondPoint, the whole-second point the "timeGetTime() / 1000" they
 # were counted in floors to, the effect status's delayFrame to TimePoint;
 # VS_UI holds 0 live calls (a dozen mentions inside comments), Client 72.
+# 53 on 2026-09-16: the event register's start stamp (MEvent, set by
+# AddEvent and reset by the two ending cinematics in MTopView as each
+# starts, read by the show-time blink, the expiry, the countdown
+# captions, the scrolls, the fades and two dead script gates through
+# one ElapsedMillis()) and the HP-modify list's stamp moved to
+# TimePoint (19 calls) - width and clock only: every read was a
+# wrap-safe unsigned subtraction. MTopView holds 6, the quest event's
+# parameter fields read as ticks; MPlayer 9 (two in its header, the
+# failing "previous + delay < now" shape), MFakeCreature 7.
 #----------------------------------------------------------------------
-R14_BASELINE=72
+R14_BASELINE=53
 
 if [ ! -f tests/tools/count_tick_reads.pl ]; then
 	echo "FAIL R14: tests/tools/count_tick_reads.pl is missing"

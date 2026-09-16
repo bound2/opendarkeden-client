@@ -9683,7 +9683,7 @@ MTopView::DrawEventString(int& strX, int& strY)
 				break;
 
 			case EVENTFLAG_SHOW_DELAY:
-				sprintf(str, "%d", (event->eventDelay - (GetTickCount() - event->eventStartTickCount)+999)/1000);
+				sprintf(str, "%d", (event->eventDelay - event->ElapsedMillis()+999)/1000);
 				break;
 
 			case EVENTFLAG_SHOW_DELAY_STRING:
@@ -9695,7 +9695,7 @@ MTopView::DrawEventString(int& strX, int& strY)
 
 					if(stringID >= 0 && stringID < g_pGameStringTable->GetSize()
 						&& (*g_pGameStringTable)[stringID].GetString() != NULL)
-						SafeFormat::Format(str, GetGameString(stringID), (event->eventDelay - (GetTickCount() - event->eventStartTickCount)+999)/1000);
+						SafeFormat::Format(str, GetGameString(stringID), (event->eventDelay - event->ElapsedMillis()+999)/1000);
 				}
 				break;
 			}			
@@ -18489,7 +18489,7 @@ MTopView::DrawCreatureHPModify(POINT *point, MCreature* pCreature)
 
 		py += 15;
 
-		if(GetTickCount() - itr->TickCount > g_pClientConfig->HPModifyListTime)
+		if((DWORD)(MonotonicClock::Now() - itr->TickCount).count() > g_pClientConfig->HPModifyListTime)
 		{
 			pList->pop_front();
 			itr = pList->begin();
@@ -19793,7 +19793,7 @@ MTopView::ExcuteAdvancementQuestEnding(void *pVoid)
 				g_pOGG->streamVolume( max( -10000, min( -1, volume ) ) );
 			}
 			PlaySoundForce(soundID);
-			AdvancementQuestEndingEvent->eventStartTickCount = GetTickCount();
+			AdvancementQuestEndingEvent->eventStartTickCount = MonotonicClock::Now();
 
 
 		}
@@ -19824,7 +19824,7 @@ MTopView::ExcuteAdvancementQuestEnding(void *pVoid)
 		case 9998:
 			if(m_pSurface->Lock())
 			{
-				int scroll_progress = -500+(GetTickCount()-AdvancementQuestEndingEvent->eventStartTickCount)/66;
+				int scroll_progress = -500+AdvancementQuestEndingEvent->ElapsedMillis()/66;
 
 				const int scroll_x = g_GameRect.right/2-m_AdvacementQuestEnding[0].GetWidth()/2, scroll_y = 50;
 
@@ -19871,7 +19871,7 @@ MTopView::ExcuteAdvancementQuestEnding(void *pVoid)
 		rect.top = 0;
 		rect.bottom = g_GameRect.bottom;
 
-		DrawAlphaBox(&rect, fadeColor[0], fadeColor[1], fadeColor[2], min(31, (GetTickCount() - AdvancementQuestEndingEvent->eventStartTickCount) /fadeSpeed)^fadeDirect);	
+		DrawAlphaBox(&rect, fadeColor[0], fadeColor[1], fadeColor[2], min(31, AdvancementQuestEndingEvent->ElapsedMillis() /fadeSpeed)^fadeDirect);	
 
 		if(bFinEnd)
 		{
@@ -19979,14 +19979,14 @@ MTopView::ExcuteOustersFinEvent()
 				g_pOGG->streamVolume( max( -10000, min( -1, volume ) ) );
 			}
 			PlaySoundForce(soundID);
-			OustersFinEvent->eventStartTickCount = GetTickCount();
+			OustersFinEvent->eventStartTickCount = MonotonicClock::Now();
 		}
 
 		switch(OustersFinEvent->parameter1)
 		{
 		case 1000:
 			{
-				if((GetTickCount() - OustersFinEvent->eventStartTickCount)/4000 > 0)
+				if(OustersFinEvent->ElapsedMillis()/4000 > 0)
 				{
 					OustersFinEvent->parameter2++;
 					if(OustersFinEvent->parameter2 > 8)
@@ -20012,7 +20012,7 @@ MTopView::ExcuteOustersFinEvent()
 
 							if(OustersFinEvent->parameter2 > 10)
 							{
-								OustersFinEvent->eventStartTickCount = GetTickCount();
+								OustersFinEvent->eventStartTickCount = MonotonicClock::Now();
 								OustersFinEvent->parameter1 = 9998;
 								OustersFinEvent->parameter4 = EVENTBACKGROUNDID_OUSTERS_SLAYER;
 								g_pMP3->Play( false );
@@ -20027,7 +20027,7 @@ MTopView::ExcuteOustersFinEvent()
 					}
 
 					if(OustersFinEvent->parameter2 < 11)
-						OustersFinEvent->eventStartTickCount = GetTickCount();
+						OustersFinEvent->eventStartTickCount = MonotonicClock::Now();
 				}
 				if(m_pSurface->Lock())
 				{
@@ -20141,7 +20141,7 @@ MTopView::ExcuteOustersFinEvent()
 
 		case 2000:
 			{
-				if((GetTickCount() - OustersFinEvent->eventStartTickCount)/4000 > 0)
+				if(OustersFinEvent->ElapsedMillis()/4000 > 0)
 				{
 					OustersFinEvent->parameter2++;
 
@@ -20168,7 +20168,7 @@ MTopView::ExcuteOustersFinEvent()
 
 							if(OustersFinEvent->parameter2 > 10)
 							{
-								OustersFinEvent->eventStartTickCount = GetTickCount();
+								OustersFinEvent->eventStartTickCount = MonotonicClock::Now();
 								OustersFinEvent->parameter1 = 9998;
 								OustersFinEvent->parameter4 = EVENTBACKGROUNDID_OUSTERS_VAMPIRE;
 								g_pMP3->Play( false );
@@ -20183,7 +20183,7 @@ MTopView::ExcuteOustersFinEvent()
 					}
 
 					if(OustersFinEvent->parameter2 < 11)
-						OustersFinEvent->eventStartTickCount = GetTickCount();
+						OustersFinEvent->eventStartTickCount = MonotonicClock::Now();
 				}
 
 				if(m_pSurface->Lock())
@@ -20266,7 +20266,7 @@ MTopView::ExcuteOustersFinEvent()
 		case 9998:
 			if(m_pSurface->Lock())
 			{
-				int scroll_progress = -500+(GetTickCount()-OustersFinEvent->eventStartTickCount)/66;
+				int scroll_progress = -500+OustersFinEvent->ElapsedMillis()/66;
 
 				const int spriteID = 0;
 				const int scroll_x = g_GameRect.right/2-m_OustersFinSPK[spriteID].GetWidth()/2, scroll_y = 50;
@@ -20333,7 +20333,7 @@ MTopView::ExcuteOustersFinEvent()
 		rect.top = 0;
 		rect.bottom = g_GameRect.bottom;
 
-		DrawAlphaBox(&rect, fadeColor[0], fadeColor[1], fadeColor[2], min(31, (GetTickCount() - OustersFinEvent->eventStartTickCount) /fadeSpeed)^fadeDirect);	
+		DrawAlphaBox(&rect, fadeColor[0], fadeColor[1], fadeColor[2], min(31, OustersFinEvent->ElapsedMillis() /fadeSpeed)^fadeDirect);	
 
 		if(bFinEnd)
 		{

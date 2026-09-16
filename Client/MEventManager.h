@@ -8,6 +8,7 @@
 #pragma warning(disable:4786)
 
 #include "CTypeTable.h"
+#include "MonotonicClock.h"
 /* Explicit path: plain "CDirectDrawSurface.h" resolves to this same
    directory's stale, unmigrated copy (missing m_ddsd) instead of the
    maintained Client/DXLib/CDirectDrawSurface.h. */
@@ -94,7 +95,7 @@ class MEvent
 	public:
 		EVENT_ID				eventID;
 		EVENT_TYPE				eventType;
-		DWORD					eventStartTickCount;
+		MonotonicClock::TimePoint	eventStartTickCount;
 		int						eventDelay;			// 단위 : 1/1000초, event의 지속시간이며 0이 되면 이벤트가 종료된다. -1 : delay없음
 		int						showTime;
 		int						totalTime;
@@ -106,6 +107,7 @@ class MEvent
 		std::vector<int>		m_StringsID;		// GameString의 StringID가 들어간다.
 
 		const bool IsShowTime() const;
+		DWORD ElapsedMillis() const;		// milliseconds since the event started
 };
 
 class MEventManager
