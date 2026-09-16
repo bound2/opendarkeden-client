@@ -1140,10 +1140,6 @@ MFakeCreature::SetDestination(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY)
 	//--------------------------------------------------------------
 	BOOL	bCanStand = m_pZone->CanMove(m_MoveType, sX,sY);
 
-#ifdef __EXPO_CLIENT__
-	bCanStand |= (BOOL)g_UserInformation.Invisible;
-#endif
-
 	//--------------------------------------------------------------
 	// 갈 수 있는 곳이거나
 	// 추적중이면 Best Search~로 길을 찾는다.

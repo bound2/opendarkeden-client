@@ -10,12 +10,6 @@
 #include "Client_PCH.h"
 #include "Upackets/UCRequestLoginMode.h"
 
-#ifdef __UPDATE_CLIENT__
-
-	#include "PacketAssert.h"
-	#include "Properties.h"
-#endif
-
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
 void UCRequestLoginModeHandler::execute ( UCRequestLoginMode * pPacket , Player * pPlayer )

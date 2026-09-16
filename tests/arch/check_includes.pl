@@ -41,7 +41,8 @@
 # evaluated them out of Client/Packet, the tenth evaluated the client
 # halves out of the rest of the tree and retired __GAME_CLIENT__ from
 # the build, and ratchet R15 holds the sources at zero live tokens of
-# all five macros. The walk still evaluates conditionals on them, all
+# all five macros and of the four undefined spellings the eleventh
+# slice took out. The walk still evaluates conditionals on them, all
 # as undefined now, which is what the build makes them - so a half
 # behind one of them that came back through a copy from the server
 # repo is skipped here and reported by R15 rather than as a live
@@ -189,7 +190,8 @@ sub resolve_include {
 
 #----------------------------------------------------------------------
 # Preprocessor conditionals on the macros with one build-wide meaning:
-# none of the five is defined anywhere since the tenth slice, so each
+# none of the five is defined anywhere since the tenth slice, and the
+# four spellings the eleventh slice added to R15 never were, so each
 # is 0 here. Three-valued: 1 = live, 0 = dead, undef = unknown (both
 # branches checked). Expressions are the forms this tree uses -
 # defined(X), !defined(X), bare X, !, &&, || and parentheses; anything
@@ -201,6 +203,10 @@ my %defined = (
 	'__LOGIN_SERVER__'  => 0,
 	'__SHARED_SERVER__' => 0,
 	'__UPDATE_SERVER__' => 0,
+	'__UPDATE_CLIENT__' => 0,
+	'__EXPO_CLIENT__'   => 0,
+	'__FULLSCREEN_MODE__' => 0,
+	'__GUILD_MANAGER_TOOL__' => 0,
 );
 
 sub tv_not { my ($v) = @_; return defined $v ? ($v ? 0 : 1) : undef; }

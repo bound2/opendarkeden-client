@@ -21,10 +21,6 @@ void GCLightningHandler::execute ( GCLightning * pPacket , Player * pPlayer )
 	__BEGIN_TRY
 		
 
-	#ifdef __EXPO_CLIENT__
-		return;
-	#endif
-
 
 	// server : 10 = 1초
 	// client : 1000 = 1초

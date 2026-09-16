@@ -1541,10 +1541,6 @@ MPlayer::SetDestination(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY)
 	//--------------------------------------------------------------
 	BOOL	bCanStand = m_pZone->CanMove(m_MoveType, sX,sY);
 
-#ifdef __EXPO_CLIENT__
-	bCanStand |= (BOOL)g_UserInformation.Invisible;
-#endif
-
 	//--------------------------------------------------------------
 	// 갈 수 있는 곳이거나
 	// 추적중이면 Best Search~로 길을 찾는다.
@@ -1724,10 +1720,6 @@ MPlayer::SetDestination(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY)
 				//-------------------------------------------------------
 				if (m_pZone->CanMove(m_MoveType, next.x, next.y)
 					&& !bHasRelic && !bHasBloodBible
-
-#ifdef __EXPO_CLIENT__
-	|| g_UserInformation.Invisible
-#endif
 					
 					)
 				{		
@@ -5798,10 +5790,6 @@ MPlayer::ActionMove()
 		//--------------------------------------------------------------------
 		if (m_pZone->CanMove(m_MoveType, x,y)
 			|| m_bFastMove		// Fast Move인 경우는 무조건 이동 가능..
-			
-#ifdef __EXPO_CLIENT__
-			|| g_UserInformation.Invisible
-#endif
 			)
 		{		
 			//---------------------------------------------------------------
@@ -7145,8 +7133,6 @@ MPlayer::ActionToSendPacket()
 				else if	(packetType==ACTIONINFO_PACKET_OTHER
 						||	(m_fTraceBuffer & FLAG_TRACE_CREATURE_SPECIAL))
 				{
-					#ifndef __EXPO_CLIENT__
-
 						//-----------------------------------------------
 						// item을 사용해서 skill을 사용하는 경우
 						//-----------------------------------------------					
@@ -7325,42 +7311,6 @@ MPlayer::ActionToSendPacket()
 							g_pSocket->sendPacket( &_CGSkillToObject );						
 						}
 
-					#else
-					// 임시로..
-					// BOMB기술은 target이 object와 tile이므로..
-					// 무조건 tile로 보내준다.
-						if (m_nUsedActionInfo==BOMB_TWISTER)
-						{
-							int SkillType = m_nUsedActionInfo;
-							if( (*g_pActionInfoTable)[SkillType].GetParentActionInfo() != ACTIONINFO_NULL )
-								SkillType = (*g_pActionInfoTable)[SkillType].GetParentActionInfo();
-
-							CGSkillToTile _CGSkillToTile;
-							_CGSkillToTile.setSkillType( SkillType );
-							_CGSkillToTile.setCEffectID( m_pEffectTarget->GetEffectID() );
-							_CGSkillToTile.setX( m_TraceX );
-							_CGSkillToTile.setY( m_TraceY );
-							
-							g_pSocket->sendPacket( &_CGSkillToTile );
-						}
-						else
-						{
-							int SkillType = m_nUsedActionInfo;
-							if( (*g_pActionInfoTable)[SkillType].GetParentActionInfo() != ACTIONINFO_NULL )
-								SkillType = (*g_pActionInfoTable)[SkillType].GetParentActionInfo();
-
-							if(SkillType == SKILL_TELEPORT || SkillType == SKILL_CHARGING_ATTACK)
-							{
-								g_pPlayer->SetDelay(1000);
-							}
-							CGSkillToObject _CGSkillToObject;
-							_CGSkillToObject.setSkillType( SkillType );
-							_CGSkillToObject.setCEffectID( m_pEffectTarget->GetEffectID() );			
-							_CGSkillToObject.setTargetObjectID( m_TraceID );
-							
-							g_pSocket->sendPacket( &_CGSkillToObject );
-						}
-					#endif
 						
 					// 2001.8.20 주석처리
 					SetWaitVerify( WAIT_VERIFY_SKILL_SUCCESS, m_nUsedActionInfo );
