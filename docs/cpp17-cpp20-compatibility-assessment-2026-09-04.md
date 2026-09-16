@@ -1288,29 +1288,44 @@ tick the game started at, then, once it ended, the milliseconds it had
 taken - and prints whichever the status says it holds; that is a
 `TimePoint` and a `Duration` now, each read where the old field was read
 under that status. The arrow tile (`C_VS_UI_ARROW_TILE`) stamps each
-character's start, end, last move and trap delay and gates its monster
-moves on the time since the last one; the four `S_CHARACTER` fields and
-the gate's stamp are `TimePoint`s, the `= 0` resets are the default time
-point (the epoch, which every comparison treats as the zero tick did),
-and `TimerMonsterMove()` compares the elapsed `Duration` against its
-millisecond argument through `Millis()`. The crazy mine
-(`C_VS_UI_CRAZY_MINE`) stamps its start the same way. The elapsed times
-the three send to `UI_CLEAR_STAGE` are the same millisecond counts,
-64-bit until the message's `intptr_t`, where the handler already divides
-by ten and clamps to a `WORD` for the score packet; the two "%5d.%2d"
-displays compute one 64-bit count and split it, where they read the
-tick twice. No quantisation change: `timeGetTime()` was already the 1 ms
-tick. One initialisation the retyping supplies: the arrow tile's
-monster-move stamp had no initialiser on master, so the first gate read
-compared against whatever the member held; a default time point reads
-as the epoch, so the gate is open before the first move, as it was for
-any stale value more than 600 ms old.
+character's start, end and last move, carries a trap delay nothing ever
+sets (the trap status is never assigned; the field is only reset), and
+gates its monster moves on the time since the last one; the four
+`S_CHARACTER` fields and the gate's stamp are `TimePoint`s, the `= 0`
+resets are the default time point (the epoch, which every comparison
+treats as the zero tick did), and `TimerMonsterMove()` compares the
+elapsed `Duration` against its millisecond argument through `Millis()`.
+The crazy mine (`C_VS_UI_CRAZY_MINE`) stamps its start the same way. The
+elapsed times the two that keep a score - the arrow tile and the crazy
+mine; the minesweeper only displays its - send to `UI_CLEAR_STAGE` are
+the same millisecond counts, 64-bit until the message's `intptr_t`,
+where the handler already divides by ten and clamps to a `WORD` for the
+score packet; the two "%5d.%2d" displays compute one 64-bit count and
+split it, where they read the tick twice. No quantisation change:
+`timeGetTime()` was already the 1 ms tick. The retyping supplies three
+initialisers master lacked - the arrow tile's monster-move stamp, the
+crazy mine's start and the monsters' end stamp - and only the first is
+read before anything sets it: the gate compared its first read against
+whatever the member held, and a default time point reads as the epoch,
+so the gate is open before the first move, as it was for any stale
+value more than 600 ms old - and no play reaches it either way, since
+the move counter it runs under is only ever zeroed and decremented, on
+master as here (the crazy mine's start is read only once `m_bStart` is
+set, the monsters' end never). One display change the
+split makes: a left click on the board after a win re-runs the clear
+path, which has no status guard, and master's second `elapsed = tick -
+elapsed` over a field already holding the elapsed time showed roughly
+the seconds since boot; the branch recomputes from the start point that
+still stands, so the timer resumes from where it stopped - a small
+display defect removed, not equivalence.
 R14 goes from 113 to 93 (20 calls). `VS_UI` holds 13: the three
 deadlines the executable sets through shared structs (`quest_time`,
 `delayFrame`, `left_time`), which want the same retyping on both sides
 of the boundary and are the next slice. `Client` holds 80. No test
-binary links `VS_UI`; verified by the build on Windows in both Debug
-trees and by the ratchet, the client not run.
+drives these windows (`user_option_tests` links `VS_UI`, so a test could
+be written against it; none reaches the minigames); verified by the
+build on Windows in both Debug trees and by the ratchet, the client not
+run.
 
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through

@@ -1143,9 +1143,10 @@ fi
 # the three deadlines the executable sets, and Client 80.
 # 93 on 2026-09-16: the three minigames' clocks moved (20 calls) - the
 # minesweeper's start point and the elapsed time it keeps once the game
-# ends, the arrow tile's per-character start, end, move and trap-delay
-# points and its monster-move gate, the crazy mine's start point; the
-# elapsed millisecond counts still reach the score message as before.
+# ends, the arrow tile's per-character start, end and move points, a
+# trap-delay point nothing sets, and its monster-move gate, the crazy
+# mine's start point; the elapsed millisecond counts still reach the
+# score message as before.
 # VS_UI holds 13, the three deadlines the executable sets through
 # shared structs; Client 80.
 #----------------------------------------------------------------------
