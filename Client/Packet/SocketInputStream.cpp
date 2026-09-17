@@ -16,6 +16,7 @@
 #include <errno.h>
 #include "PacketAssert.h"
 #include "Packet.h"
+#include "MonotonicClock.h"
 #include <cstdio>
 #include <limits>
 
@@ -27,7 +28,7 @@
 
 #ifdef __TEST_PACKET_RECEIVED_SIZE_PER_SECOND__
 
-DWORD	g_dwReceivedSizeCheckTime=0;
+MonotonicClock::IntervalTimer	g_ReceivedSizeWindow(MonotonicClock::Millis(1000));
 DWORD	g_dwReceiveSize=0;
 
 #endif
@@ -493,16 +494,9 @@ uint SocketInputStream::fill ()
 	uint nFree;				// 버퍼의 빈 영역의 크기
 
 #ifdef __TEST_PACKET_RECEIVED_SIZE_PER_SECOND__
-	if( g_dwReceivedSizeCheckTime == 0 )
+	if( g_ReceivedSizeWindow.Fire() )
 	{
-		g_dwReceivedSizeCheckTime = timeGetTime();
-		g_dwReceiveSize = 0;
-	}
-
-	if( timeGetTime() - g_dwReceivedSizeCheckTime >= 1000 )
-	{
-//		_MinTrace("Packet Received Size Per Second : %d %d\n", g_dwReceiveSize,timeGetTime() - g_dwReceivedSizeCheckTime );
-		g_dwReceivedSizeCheckTime = timeGetTime();
+//		_MinTrace("Packet Received Size Per Second : %d\n", g_dwReceiveSize );
 		g_dwReceiveSize = 0;
 	}
 #endif

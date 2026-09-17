@@ -425,8 +425,13 @@ printf "check_format_arity: %d note(s)\n", $notes;
 #
 # $MINIMUM_CHECKED moves by 3 rather than 7: the FormatChecked sites name
 # their id through GetGameString and resolve, the other four do not.
-my $MINIMUM_SITES   = 301;
-my $MINIMUM_CHECKED = 289;
+#
+# 295 and 283 on 2026-09-17: the eleventh clocks slice deleted MTopView's
+# quest caption, a block no live event reaches, and six of these with it
+# (the hour, minute and second captions, twice); the converted call
+# sites are 315.
+my $MINIMUM_SITES   = 295;
+my $MINIMUM_CHECKED = 283;
 
 if ($sites < $MINIMUM_SITES)
 {

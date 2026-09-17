@@ -9929,7 +9929,7 @@ void UIMessageManager::Execute_UI_SEND_NAME_FOR_COUPLE(intptr_t left, intptr_t r
 
 	g_pPlayer->SetWaitVerify(MPlayer::WAIT_VERIFY_NPC_ASK);
 	g_pTempInformation->SetMode(TempInformation::MODE_INPUT_NAME);
-	g_pTempInformation->Value1 = (int)timeGetTime();
+	g_pTempInformation->TimeValue1 = MonotonicClock::Now();
 }
 
 void UIMessageManager::Execute_UI_CLOSE_INPUT_NAME_WINDOW(intptr_t left, intptr_t right, void *void_ptr)
@@ -9943,9 +9943,7 @@ void UIMessageManager::Execute_UI_CLOSE_INPUT_NAME_WINDOW(intptr_t left, intptr_
 	{
 		if(g_pTempInformation->GetMode() == TempInformation::MODE_INPUT_NAME)
 		{
-			DWORD dwTime = (DWORD) g_pTempInformation->Value1;
-			
-			if( timeGetTime() - dwTime >= 1000*60 )
+			if( MonotonicClock::Now() - g_pTempInformation->TimeValue1 >= MonotonicClock::Millis(1000*60) )
 			{
 				g_pUIDialog->ClosePCTalkDlg();
 				gC_vs_ui.CloseInputNameWindow();

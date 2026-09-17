@@ -12,6 +12,7 @@
 #include "PacketDispatcher.h"
 #include "Lpackets/LCReconnect.h"
 #include "ClientDef.h"
+#include "MonotonicClock.h"
 #include "ServerInfoFileParser.h"
 
 	#include "ClientPlayer.h"
@@ -91,7 +92,7 @@ void LCReconnectHandler::execute ( LCReconnect * pPacket , Player * pPlayer )
  */
 #ifdef OUTPUT_DEBUG
 	FILE *fp = NULL;
-	DWORD tickCount = 0;
+	MonotonicClock::TimePoint tickCount;
 
 
 	std::list<struct tempStruct> tempStructList;
@@ -148,11 +149,11 @@ void LCReconnectHandler::execute ( LCReconnect * pPacket , Player * pPlayer )
 	
 	try {
 #ifdef OUTPUT_DEBUG
-		tickCount = timeGetTime();//GetTickCount();
+		tickCount = MonotonicClock::Now();
 #endif
 		pClientPlayer->getSocket()->reconnect( pPacket->getGameServerIP() , pPacket->getGameServerPort() );
 #ifdef OUTPUT_DEBUG
-		currentTempStruct.reconnectTickCount = timeGetTime()-tickCount;
+		currentTempStruct.reconnectTickCount = (DWORD)(MonotonicClock::Now() - tickCount).count();
 #endif
 		// reconnect하게 되면 소켓이 새로 만들어지게 된다.
 		// 따라서, 이 소켓 역시 옵션을 새로 지정해줘야 한다.
@@ -189,7 +190,7 @@ void LCReconnectHandler::execute ( LCReconnect * pPacket , Player * pPlayer )
 	cgConnect.setMacAddress( g_macAddress );
 	
 #ifdef OUTPUT_DEBUG
-	tickCount = timeGetTime();
+	tickCount = MonotonicClock::Now();
 #endif
 	pClientPlayer->sendPacket( &cgConnect );
 	pClientPlayer->setPlayerStatus( CPS_AFTER_SENDING_CG_CONNECT );	
@@ -200,7 +201,7 @@ void LCReconnectHandler::execute ( LCReconnect * pPacket , Player * pPlayer )
 //	EMBEDDED_END;
 	
 #ifdef OUTPUT_DEBUG
-	currentTempStruct.sendCGConnectTickCount = timeGetTime()-tickCount;
+	currentTempStruct.sendCGConnectTickCount = (DWORD)(MonotonicClock::Now() - tickCount).count();
 #endif
 	
 	// 2002.6.28 [UDP수정]

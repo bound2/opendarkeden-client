@@ -27,6 +27,7 @@
 #include <string>
 #include <fstream>
 #include "DebugInfo.h"
+#include "MonotonicClock.h"
 
 
 //----------------------------------------------------------------------
@@ -59,9 +60,9 @@ class ProfilerInfo
 		void		WriteToFile(std::ofstream& file) const;
 
 	private :
-		DWORD		m_StartTime;		// 이번 loop 시작 시간
-		DWORD		m_TotalTime;		// 전체 진행 시간
-		DWORD		m_Times;			// 몇 번 반복 했는가?
+		MonotonicClock::TimePoint	m_StartTime;	// start of the open pass; the epoch when none is
+		DWORD		m_TotalTime;		// milliseconds over every closed pass
+		DWORD		m_Times;			// closed passes
 };
 
 //----------------------------------------------------------------------

@@ -1170,8 +1170,22 @@ fi
 # move deadline (a sum-shaped deadline, the same failing shape) and the
 # two executable setters in PacketFunction that fed them moved to
 # TimePoint (18 calls). MTopView holds 6, the rest ones to fours.
+# 10 on 2026-09-17: the scatter (25 calls) - the wait screens' double-click
+# gate and the game screen's write-only click stamp, the title fade's
+# start, the CGVerifyTime deadline (a sum-shaped deadline read against
+# the frame clock, the failing shape), the update handler's loading
+# stopwatch, the profiler's start stamp, the name window's send stamp
+# (a tick parked in TempInformation's generic int slot, now its own
+# TimePoint slot), the reconnect handler's two OUTPUT_DEBUG stopwatches
+# and the socket stream's byte-rate window (an IntervalTimer) moved to
+# the monotonic clock; MTopView's six were a quest caption no live
+# event reaches, deleted with the block. What is left is the frame
+# clock - g_CurrentTime's three live writers, g_StartTime and
+# CWinUpdate's m_CurrentTime - and four that are not clocks: the two
+# log-file names and the hack check that compares timeGetTime() against
+# GetTickCount() on purpose.
 #----------------------------------------------------------------------
-R14_BASELINE=35
+R14_BASELINE=10
 
 if [ ! -f tests/tools/count_tick_reads.pl ]; then
 	echo "FAIL R14: tests/tools/count_tick_reads.pl is missing"
