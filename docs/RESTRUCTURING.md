@@ -242,8 +242,8 @@ against the built-in English table in `MGameStringTable.cpp` (which
 `InitGameStringTable()` installs over the file data on the English path, so
 it is what the default build formats with); it fails when an entry asks for
 more arguments than the site passes or a conversion's argument is provably
-the other kind, and it floors both the sites it finds (301) and the sites it
-resolves (289). `check_packet_indices.pl` (ctest `packet_indices`) is the index
+the other kind, and it floors both the sites it finds (295) and the sites it
+resolves (283). `check_packet_indices.pl` (ctest `packet_indices`) is the index
 half of code-health priority 1: over `Client/Packet` and
 `Client/PacketHandler` it walks packet-derived values into subscripts —
 through locals, across lines, one hop — and reports **114**, 101 into a
@@ -980,7 +980,7 @@ rounds settled* for the host rules). Test fixtures share
   > **Status:** done (2026-09-03/04, PRs #68 through #73); **finding C19
   > is closed**, and its entry in the code-health review lists the five
   > measurements it rests on (R7, R8, the arity audit, and two hand
-  > sweeps) rather than a ratchet reading zero. **321 call sites** are
+  > sweeps) rather than a ratchet reading zero. **315 call sites** are
   > converted across `Client`, `VS_UI` and `Client/PacketHandler`.
   > **`basic/SafeFormat.{h,cpp}`** is the checked formatter: a conversion
   > consumes the next argument only if that argument's type can satisfy

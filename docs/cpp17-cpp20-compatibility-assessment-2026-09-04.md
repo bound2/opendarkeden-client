@@ -1457,7 +1457,7 @@ Verified by the build on Windows in both Debug trees and the ratchet;
 none of it has a test; the client not run.
 
 The eleventh priority-5 slice (2026-09-17) is the scatter: every live
-tick read outside the frame clock, 25 calls in eight files, the one
+clock read outside the frame clock, 25 calls in eight files (the four calls that are not clocks stay), the one
 `packetwire` site among them. The wait screens' double-click gate in
 `CWaitUIUpdate` kept its last click as a `DWORD` and asked
 `labs(GetTickCount() - last) <= g_double_click_time`, resetting the stamp
@@ -1473,9 +1473,7 @@ expression over a `DWORD` elapsed count taken from the clock. The
 `CGVerifyTime` deadline in `CGameUpdate::Update` was set as
 `timeGetTime() + value` and read as `g_CurrentTime > nextTime`: a
 sum-shaped deadline, the failing shape, and one that mixed a fresh tick
-with the frame's stamp; both ends read `Now()` now, so the gate can open
-later than the frame stamp would have opened it by the frame's work so
-far, and `nextTimeValue` is a `DWORD`, so `Millis()` is never handed a
+with the frame's stamp; both ends read `Now()` now, so the gate opens earlier than the frame stamp would have opened it, by the frame's work so far (the deadline is anchored at the same instant; the frame stamp is the older read), and `nextTimeValue` is a `DWORD`, so `Millis()` is never handed a
 signed value (the tenth slice's lesson). `GCUpdateInfoHandler`'s loading
 stopwatch measures from a `TimePoint` to `Now()` instead of to the
 `g_CurrentTime` it has just refreshed, which stays, being the
@@ -1493,18 +1491,17 @@ third slice called dead code rather than a clock to move - are converted
 as dead code, the window to an `IntervalTimer` whose first second runs
 from static initialisation rather than from the first `fill()`; each was
 compiled once with its macro defined (the handler's converted lines
-compile; the link then fails on `DEBUG_ADD`, which `DebugInfo.h`'s
+compile; the link then fails on `DEBUG_ADD` and `DEBUG_ADD_FORMAT`, which `DebugInfo.h`'s
 `OUTPUT_DEBUG` branch declares and nothing defines - a pre-existing
 property of the define, not of these lines) and the define reverted.
 `MTopView`'s six, the quest caption that read the event register's
 `parameter1` and `parameter4` as a tick and a second, are deleted with
 the caption: its only writers are the commented-out event builders in
 `GCQuestStatusHandler`, so `GetEventByFlag(EVENTFLAG_QUEST_INFO)` never
-returns one, and upstream's own comment above it says the part is
-unused. That deletion takes six checked-format sites with it, so
+returns one, and upstream's own comment above it says the part below probably will not be used. That deletion takes six checked-format sites with it, so
 `check_format_arity.pl`'s floors go from 301 and 289 to 295 and 283, and
 the converted-site count C19 quotes from 321 to 315. Removed wrap
-failure: the `CGVerifyTime` deadline; every other read was a subtraction.
+failure: the `CGVerifyTime` deadline; every other converted read was a subtraction, and the six deleted ones were bare comparisons against the tick.
 Quantisation, hedged as before: the two click stamps read kernel32's
 `GetTickCount()` on Windows, so a double click's window can close up to
 one old step earlier or later; the rest read `timeGetTime()`, already

@@ -6279,14 +6279,13 @@ CGameUpdate::Update(void)
 
 /* add by sonic 2006.9.12 */
 //增加时间检测
-		static MonotonicClock::TimePoint nextTime = MonotonicClock::Now() + MonotonicClock::Millis(60000);
-		
 		//------------------------------------------------------------------
 		// 1분 마다 한번씩 garbarge packet을 보낸다.
 		//------------------------------------------------------------------
 #ifdef PLATFORM_WINDOWS
 		// Windows-specific anti-cheat time verification - Windows only
 		DWORD nextTimeValue = 60000;
+		static MonotonicClock::TimePoint nextTime = MonotonicClock::Now() + MonotonicClock::Millis(60000);
 
 		// g_MyCheckTime measures how much time has passed since the 60-second
 		// reset below, and 97620 means the client believes it ran far ahead of

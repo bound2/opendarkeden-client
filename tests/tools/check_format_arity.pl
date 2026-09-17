@@ -421,7 +421,7 @@ printf "check_format_arity: %d note(s)\n", $notes;
 # the paragraph above predicted would count toward the site floor and
 # contribute nothing to coverage. So this number is a floor on what the
 # audit can see, and NOT the number of converted call sites, which is
-# 321. Do not quote it as one.
+# 315 (321 until 2026-09-17). Do not quote it as one.
 #
 # $MINIMUM_CHECKED moves by 3 rather than 7: the FormatChecked sites name
 # their id through GetGameString and resolve, the other four do not.
