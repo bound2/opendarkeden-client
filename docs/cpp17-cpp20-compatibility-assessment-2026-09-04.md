@@ -1850,6 +1850,37 @@ on Windows in both Debug trees (reconfigured, a source having left
 the executable's list) and the test suites in both test trees; the
 client not run.
 
+**Bounded-formatting third slice (2026-09-17):** `Client.cpp`,
+`GameMain.cpp`, `MZone.cpp` and `MCreature.cpp` to zero, 46 lines.
+Thirty-one are converted. In `Client.cpp` the Futec command-line
+parser's two copies (a 4,096-byte scratch, then four 32-byte argument
+slots that a `|`-separated token from the command line overran), the
+restart path's join of the executable name onto the current directory
+(a `sprintf` that read its own destination, undefined behaviour, now
+an append behind `strlen`), the crash message, the log-file name (128
+bytes built from a `_MAX_PATH` `g_CWD`, so an install directory over
+about a hundred characters overran it), the log-directory join, the
+host name, the check string, the two update-directory joins, the
+`OUTPUT_DEBUG` dump, the two nProtect messages and the updater's
+command line are `snprintf(sizeof)`. In `GameMain.cpp` the server-group
+name - 80 bytes, from the group the login server's world list
+supplied - the screenshot path, the three sound file names and the
+two ghost-position XML keys (the second with its `size_t` counter cast
+to the `int` its `%d` reads) are the same. In `MZone.cpp` the
+image-object trace's five type labels and its two self-reading
+appends are bounded under the `__OUTPUT_IMAGEOBJECT__` switch nothing
+defines. In `MCreature.cpp` the creature name is a `memcpy` of the
+length it was just allocated with, and the two chat-row copies - each
+already held to the row by the wrap arithmetic above it - are bounded
+by the configured row width. Fifteen lines were dead: `get_rand_str`,
+which only commented-out lines called, is deleted with them, and
+thirteen lines of block-commented debug dumps (three image-object
+traces in `MZone.cpp`; seven light-sight and move traces in
+`MCreature.cpp`, two of them inside larger commented-out move-logic
+blocks) are deleted with their blocks. R17 goes from 1,016 to
+**970**. Verified by the build on Windows in both Debug trees and the
+test suites in both test trees; the client not run.
+
 ### Packet modernization guardrails
 
 Packet I/O is the highest-value area but also the easiest place to cause a silent
