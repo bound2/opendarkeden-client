@@ -71,7 +71,7 @@ MTradeManager::MTradeManager()
 	m_bAcceptMyTrade = false;
 	m_bAcceptOtherTrade = false;
 	
-	m_NextAcceptTime = 0;
+	m_NextAcceptTime = MonotonicClock::TimePoint();
 }
 
 MTradeManager::~MTradeManager()
@@ -139,7 +139,7 @@ MTradeManager::Release()
 	m_bAcceptMyTrade = false;
 	m_bAcceptOtherTrade = false;
 
-	m_NextAcceptTime = 0;
+	m_NextAcceptTime = MonotonicClock::TimePoint();
 }
 
 //-----------------------------------------------------------------------------
@@ -151,7 +151,7 @@ MTradeManager::Release()
 bool
 MTradeManager::IsAcceptTime() const
 {
-	const DWORD* pClock = MItem::Clock();
+	const MonotonicClock::TimePoint* pClock = MItem::Clock();
 
 	return pClock==NULL || *pClock >= m_NextAcceptTime;
 }
@@ -162,9 +162,9 @@ MTradeManager::IsAcceptTime() const
 void
 MTradeManager::SetNextAcceptTime()
 {
-	const DWORD* pClock = MItem::Clock();
+	const MonotonicClock::TimePoint* pClock = MItem::Clock();
 
-	m_NextAcceptTime = (pClock!=NULL ? *pClock : 0) + g_pClientConfig->TRADE_ACCEPT_DELAY_TIME;
+	m_NextAcceptTime = (pClock!=NULL ? *pClock : MonotonicClock::TimePoint()) + MonotonicClock::Millis(g_pClientConfig->TRADE_ACCEPT_DELAY_TIME);
 }
 
 //-----------------------------------------------------------------------------

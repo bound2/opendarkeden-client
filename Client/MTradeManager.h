@@ -82,7 +82,7 @@ class MTradeManager {
 		bool				m_bAcceptMyTrade;			// 나의 교환확인
 		bool				m_bAcceptOtherTrade;		// 남의 교한확인
 
-		DWORD				m_NextAcceptTime;		// when OK may be pressed again
+		MonotonicClock::TimePoint	m_NextAcceptTime;	// when OK may be pressed again
 };
 
 extern MTradeManager*		g_pTradeManager;

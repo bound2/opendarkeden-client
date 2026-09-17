@@ -1193,8 +1193,13 @@ fi
 # two calls; g_StartTime, the FPS window, is a TimePoint. What is left:
 # the one writer, the two log-file names and the hack check. R16 counts
 # the readers of the DWORD from here.
+# 4 on 2026-09-17: the frame clock's DWORD is gone with its writer, so
+# what is left is the floor - the two log-file names in Client.cpp,
+# which want a number that differs per run and are not clocks, and
+# GameMain's hack check, which compares timeGetTime() against
+# GetTickCount() on purpose and would measure nothing on one clock.
 #----------------------------------------------------------------------
-R14_BASELINE=5
+R14_BASELINE=4
 
 if [ ! -f tests/tools/count_tick_reads.pl ]; then
 	echo "FAIL R14: tests/tools/count_tick_reads.pl is missing"
@@ -1369,8 +1374,15 @@ fi
 # in GameInit (MItemHost::pCurrentTime, WireHost::CurrentTime), the
 # definition, the one write and the log flush's debug print in
 # Client.cpp, and the extern in Client.h.
+# 0 on 2026-09-17: the two library seams carry a TimePoint - the item
+# host's clock pointer (the skill use delays and the trade accept
+# delay behind it) and the wire host's clock function (the request
+# player's timeout behind it), with their tests - and g_CurrentTime is
+# deleted: its definition, its extern, its write and its tick call.
+# The count stays at zero as the guard that nothing brings the name
+# back; StampFrameClock() stamps g_FrameNow alone.
 #----------------------------------------------------------------------
-R16_BASELINE=6
+R16_BASELINE=0
 R16_FILES_FLOOR=1000
 
 r16_members () {

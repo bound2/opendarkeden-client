@@ -119,6 +119,7 @@
 #include "CTypeTable.h"
 #include "DrawTypeDef.h"
 #include "ExpInfo.h"
+#include "MonotonicClock.h"
 #include "RaceType.h"
 
 #include <fstream>
@@ -317,7 +318,7 @@ class SKILLINFO_NODE {
 		// 기술 사용 Delay
 		//------------------------------------------------------
 		DWORD			m_DelayTime;		// 기술 사용후 다시 사용가능한 delay
-		DWORD			m_AvailableTime;	// 다시 사용 가능한 시간
+		MonotonicClock::TimePoint	m_AvailableTime;	// when it can be used again; the epoch for at once
 		
 		//------------------------------------------------------
 		// 사용가능한 기술인가?

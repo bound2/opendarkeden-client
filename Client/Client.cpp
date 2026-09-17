@@ -150,7 +150,6 @@ int					g_Dimension = 0;
 DWORD				g_TimerNPMON = 0;
 
 // FPS
-DWORD				g_CurrentTime		= 0;		// 시간
 MonotonicClock::TimePoint	g_FrameNow;
 DWORD				g_CurrentFrame		= 0;		// frame수
 
@@ -164,7 +163,6 @@ const int			g_FrameGood			= 15;
 void StampFrameClock()
 {
 	g_FrameNow = MonotonicClock::Now();
-	g_CurrentTime = timeGetTime();
 }
 
 // Execute Program --> bActiveApp
@@ -2950,7 +2948,7 @@ ApplyPatch()
 					g_pDebugMessage = new CMessageArray;
 					g_pDebugMessage->Init(MAX_DEBUGMESSAGE, 256, logFile);
 
-					DEBUG_ADD_FORMAT("[Time = %d]", g_CurrentTime);
+					DEBUG_ADD_FORMAT("[Time = %lld]", (long long)g_FrameNow.time_since_epoch().count());
 				}
 
 				// three minutes on

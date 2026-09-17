@@ -24,7 +24,7 @@ namespace {
 
 int		s_Alive = 0;
 DWORD	s_Frame = 0;
-DWORD	s_Now = 0;
+MonotonicClock::TimePoint	s_Now;
 
 int		DropFrameCount(TYPE_FRAMEID)	{ return 0; }
 void	RefreshAffect(MItem*)			{}
@@ -38,7 +38,7 @@ struct TradeWorld : GameModelWorld
 	TradeWorld()
 	{
 		s_Alive = 0;
-		s_Now = 0;
+		s_Now = MonotonicClock::TimePoint();
 
 		g_pItemTable->InitClass(ITEM_CLASS_SWORD, 3);
 		(*g_pItemTable)[ITEM_CLASS_SWORD][0].SetGrid(1, 1);
@@ -123,22 +123,22 @@ TEST(TradeManager, RefusingStartsTheAcceptDelayOnTheClock)
 	trade.RefuseMyTrade();
 	CHECK(trade.IsAcceptTime());
 
-	s_Now = 10000;
+	s_Now = MonotonicClock::FromMillis(10000);
 	trade.AcceptMyTrade();
 	CHECK(trade.IsAcceptMyTrade());
 	trade.RefuseMyTrade();
 	CHECK_EQ(false, trade.IsAcceptMyTrade());
 	CHECK_EQ(false, trade.IsAcceptTime());
-	s_Now = 14999;
+	s_Now = MonotonicClock::FromMillis(14999);
 	CHECK_EQ(false, trade.IsAcceptTime());
-	s_Now = 15000;
+	s_Now = MonotonicClock::FromMillis(15000);
 	CHECK(trade.IsAcceptTime());
 
 	// The other side's refusal restarts it.
 	trade.AcceptOtherTrade();
 	trade.RefuseOtherTrade();
 	CHECK_EQ(false, trade.IsAcceptTime());
-	s_Now = 20000;
+	s_Now = MonotonicClock::FromMillis(20000);
 	CHECK(trade.IsAcceptTime());
 
 	// Without a clock there is no delay - neither with no host at all
@@ -155,7 +155,7 @@ TEST(TradeManager, RefusingStartsTheAcceptDelayOnTheClock)
 	trade.AcceptMyTrade();
 	trade.RefuseMyTrade();
 	CHECK_EQ(false, trade.IsAcceptTime());		// 20000 + 5000 on the clock at 20000
-	s_Now = 25000;
+	s_Now = MonotonicClock::FromMillis(25000);
 	CHECK(trade.IsAcceptTime());
 }
 
@@ -302,4 +302,28 @@ TEST(SortedItemManager, OrdersBiggerFootprintsFirstThenById)
 	sorted.Release();
 	CHECK_EQ(0, s_Alive);
 	CHECK(sorted.empty());
+}
+
+//----------------------------------------------------------------------
+// The legacy wrap
+//----------------------------------------------------------------------
+TEST(TradeManager, AcceptDelayAcrossTheLegacyWrapStillWaits)
+{
+	// The DWORD sum wrapped: (2^32 - 1000) + 5000 is 4000 mod 2^32, and
+	// "clock >= 4000" allowed the next accept at once.
+	const DWORD dw_now = (DWORD)(0x100000000ull - 1000);
+	CHECK(dw_now >= (DWORD)(dw_now + 5000));
+
+	TradeWorld world;
+	MTradeManager trade;
+	trade.Init();
+
+	s_Now = MonotonicClock::FromMillis(0x100000000ull - 1000);
+	trade.AcceptMyTrade();
+	trade.RefuseMyTrade();
+	CHECK_EQ(false, trade.IsAcceptTime());
+	s_Now = MonotonicClock::FromMillis(0x100000000ull + 3999);
+	CHECK_EQ(false, trade.IsAcceptTime());
+	s_Now = MonotonicClock::FromMillis(0x100000000ull + 4000);
+	CHECK(trade.IsAcceptTime());
 }

@@ -31,7 +31,7 @@ namespace {
 // MSkillDomain's tree walk has children to go down into.
 //----------------------------------------------------------------------
 DWORD	s_Frame = 0;
-DWORD	s_Now = 0;
+MonotonicClock::TimePoint	s_Now;
 
 int			DropFrameCount(TYPE_FRAMEID)	{ return 0; }
 void		RefreshAffect(MItem*)			{}
@@ -52,7 +52,7 @@ struct SkillWorld : GameModelWorld
 {
 	SkillWorld()
 	{
-		s_Now = 0;
+		s_Now = MonotonicClock::TimePoint();
 
 		g_pSkillInfoTable = new MSkillInfoTable;
 		g_pSkillManager = new MSkillManager;
