@@ -49,7 +49,7 @@ extern MOustersGear*	g_pOustersGear;
 #include "MEffectTarget.h"
 #include "MRequestMode.h"
 
-extern DWORD	g_CurrentTime;
+extern MonotonicClock::TimePoint	g_FrameNow;
 
 #ifndef __DNODE_DEFINE__
 #define __DNODE_DEFINE__
@@ -472,17 +472,17 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		//----------------------------------------------------------
 		// Delay시간을 지나서 delay가 끝났는가?
 		//----------------------------------------------------------
-		bool			IsNotDelay() const		{ return m_DelayTime==0 || m_DelayTime <= g_CurrentTime; }
-		bool			IsNotDeadDelay() const	{ return m_DeadDelayTime <= g_CurrentTime; }
-		void			SetDelay(DWORD delay)	{ m_DelayTime = g_CurrentTime + delay; }
+		bool			IsNotDelay() const		{ return m_DelayTime <= g_FrameNow; }
+		bool			IsNotDeadDelay() const	{ return m_DeadDelayTime <= g_FrameNow; }
+		void			SetDelay(DWORD delay)	{ m_DelayTime = g_FrameNow + MonotonicClock::Millis(delay); }
 		DWORD			GetDeadDelayLast() const;
 
 		//----------------------------------------------------------
 		// 뱀파이어로 변하는데 남은 시간
 		//----------------------------------------------------------
-		void			SetConversionDelay(DWORD last)		{ m_ConversionDelayTime = g_CurrentTime + last; }
-		DWORD			GetConversionDelayTime() const		{ return m_ConversionDelayTime; }
-		void			UnSetConversionDelay()				{ m_ConversionDelayTime=0; }
+		void			SetConversionDelay(DWORD last)		{ m_ConversionDelayTime = g_FrameNow + MonotonicClock::Millis(last); }
+		MonotonicClock::TimePoint	GetConversionDelayTime() const	{ return m_ConversionDelayTime; }
+		void			UnSetConversionDelay()				{ m_ConversionDelayTime = MonotonicClock::TimePoint(); }
 		void			UpdateConversionTime();
 
 		//----------------------------------------------------------
@@ -668,8 +668,8 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		DIRECTION_LIST	m_listDirection;
 		DIRECTION_LIST	m_listSendDirection;
 
-		// 기술 사용 후의 delay
-		DWORD						m_DelayTime;
+		// the delay after using a skill
+		MonotonicClock::TimePoint	m_DelayTime;
 
 		// 펫 루팅 사용후의 delay
 		MonotonicClock::TimePoint	m_PetDelayTime;
@@ -680,8 +680,8 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		// 현재 전투 Mode
 		ATTACK_MODE					m_AttackMode;
 
-		// 죽고 나서의 delay시간 - 언제까지..
-		DWORD						m_DeadDelayTime;
+		// the delay after death - until when
+		MonotonicClock::TimePoint	m_DeadDelayTime;
 
 		// Item을 기억하고 있자..
 		ITEM_CHECK_BUFFER			m_ItemCheckBufferStatus;
@@ -698,8 +698,8 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		WAIT_VERIFY					m_WaitVerify;
 		TYPE_ACTIONINFO				m_WaitVerifyActionInfo;
 
-		// 뱀파이어로 변하는데 남은 delay frame - 언제까지
-		DWORD						m_ConversionDelayTime;
+		// the change to vampire - until when
+		MonotonicClock::TimePoint	m_ConversionDelayTime;
 
 		// packet을 보내지 않는 actioninfo 
 		// flash sliding때문에 추가됐다. - -;;

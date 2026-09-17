@@ -927,7 +927,7 @@ class MCreature : public MObject, public MStatus {
 		// chat
 		COLORREF				m_ChatColor;				// 현재의 채팅 색
 		COLORREF				m_OriChatColor;				// fade되기 전의 채팅 색
-		DWORD					m_NextChatFadeTime;		// 최근의 Chat string이 입력된 시간
+		MonotonicClock::TimePoint	m_NextChatFadeTime;	// when the chat string starts to fade
 		BYTE					m_ChatStringCurrent;
 		char**					m_ChatString;
 		DWORD					m_ChatTime;
@@ -979,11 +979,11 @@ class MCreature : public MObject, public MStatus {
 		//--------------------------------------------------
 		// 시간에 따른 HP 회복
 		//--------------------------------------------------
-		DWORD					m_RecoveryHPNextTime;
+		MonotonicClock::TimePoint	m_RecoveryHPNextTime;
 		DWORD					m_RecoveryHPDelayTime;
 		int						m_RecoveryHPTimes;
 		int						m_RecoveryHPAmount;
-		DWORD					m_RecoveryMPNextTime;
+		MonotonicClock::TimePoint	m_RecoveryMPNextTime;
 		DWORD					m_RecoveryMPDelayTime;
 		int						m_RecoveryMPTimes;
 		int						m_RecoveryMPAmount;
@@ -993,10 +993,10 @@ class MCreature : public MObject, public MStatus {
 		//end
 		// 자동 regen - -;
 		DWORD					m_RegenDelayTime;
-		DWORD					m_RegenNextTime;
+		MonotonicClock::TimePoint	m_RegenNextTime;
 		int						m_RegenAmount;
 		DWORD					m_RegenBonusDelayTime;
-		DWORD					m_RegenBonusNextTime;
+		MonotonicClock::TimePoint	m_RegenBonusNextTime;
 		int						m_RegenBonusAmount;
 		//add by viva
 		BYTE					m_ActionCountMax;	// ActionCountMax
@@ -1022,7 +1022,7 @@ class MCreature : public MObject, public MStatus {
 		//--------------------------------------------------
 		// 피 흘리기
 		//--------------------------------------------------
-		DWORD					m_NextBloodingTime;
+		MonotonicClock::TimePoint	m_NextBloodingTime;
 
 		//--------------------------------------------------
 		// KnockBack 처리

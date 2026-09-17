@@ -48,7 +48,7 @@
 
 #define ATTACHEFFECTCOLOR_NULL	0xFFFF
 
-extern DWORD	g_CurrentTime;
+extern MonotonicClock::TimePoint	g_FrameNow;
 extern DWORD	g_CurrentFrame;
 
 extern int					g_nZoneLarge;
@@ -728,8 +728,8 @@ MCreature::MCreature()
 	// 빛나는 Effect들
 	//m_nAlphaEffect = 0;
 
-	// 최근에 채팅 String이 추가된 시점
-	m_NextChatFadeTime = g_CurrentTime;
+	// no chat string yet
+	m_NextChatFadeTime = g_FrameNow;
 
 	m_pActionResult = NULL;
 
@@ -775,15 +775,15 @@ MCreature::MCreature()
 
 	m_RecoveryHPAmount = 0; 
 	m_RecoveryHPTimes = 0;
-	m_RecoveryHPNextTime = 0;
+	m_RecoveryHPNextTime = MonotonicClock::TimePoint();
 	m_RecoveryHPDelayTime = 0;	
 	m_RecoveryMPAmount = 0; 
 	m_RecoveryMPTimes = 0;
-	m_RecoveryMPNextTime = 0;
+	m_RecoveryMPNextTime = MonotonicClock::TimePoint();
 	m_RecoveryMPDelayTime = 0;	
 	//m_RecoveryPart = MODIFY_CURRENT_HP;
 
-	m_NextBloodingTime  = 0;
+	m_NextBloodingTime  = MonotonicClock::TimePoint();
 
 	m_DelayActionInfo = ACTIONINFO_NULL;
 
@@ -813,10 +813,10 @@ MCreature::MCreature()
 	m_HalluName = rand()%g_pMonsterNameTable->GetLastNameSize();
 
 	m_RegenDelayTime = 0;
-	m_RegenNextTime = 0;
+	m_RegenNextTime = MonotonicClock::TimePoint();
 	m_RegenAmount = 0;
 	m_RegenBonusDelayTime = 0;
-	m_RegenBonusNextTime = 0;
+	m_RegenBonusNextTime = MonotonicClock::TimePoint();
 	m_RegenBonusAmount = 0;
 
 	m_Competence = 3;
@@ -4956,7 +4956,7 @@ MCreature::SetPersnalString(char *str, COLORREF color)
 	int startIndex = 0,
 		endIndex = 0;
 
-	m_NextChatFadeTime = 0;
+	m_NextChatFadeTime = MonotonicClock::TimePoint();
 	SetInputChatting(false);
 
 	DEBUG_ADD("[SetPersnalString] before while");
@@ -5251,8 +5251,8 @@ MCreature::SetChatString(const char *input, COLORREF color)
 	}
 	
 
-	// 채팅 String이 Delay될 시간을 지정해준다.	
-	m_NextChatFadeTime = g_CurrentTime + g_pClientConfig->DELAY_CHATSTRING_KEEP;
+	// when the chat string starts to fade
+	m_NextChatFadeTime = g_FrameNow + MonotonicClock::Duration(g_pClientConfig->DELAY_CHATSTRING_KEEP);
 
 	// 채팅 색깔
 	m_ChatColor = color;//RGB_WHITE;//0xFFFF;
@@ -5261,7 +5261,7 @@ MCreature::SetChatString(const char *input, COLORREF color)
 	// 크리스마스 트리용 하드 코딩
 	if(GetCreatureType() == 482 || GetCreatureType() == 650)
 	{
-		m_NextChatFadeTime = 0;
+		m_NextChatFadeTime = MonotonicClock::TimePoint();
 	}
 	else
 	{
@@ -5312,7 +5312,7 @@ MCreature::FadeChatString()
 //	}
 
 //	if (m_NextChatFadeTime >= g_CurrentTime || ( CurPernalShop() == 1 && m_NextChatFadeTime == 0 ) )
-	if (m_NextChatFadeTime >= g_CurrentTime || ( CurPernalShop() == 1 && GetInputChatting() == false ) )
+	if (m_NextChatFadeTime >= g_FrameNow || ( CurPernalShop() == 1 && GetInputChatting() == false ) )
 		return;
 
 	BYTE b = (m_OriChatColor & 0xFF000000) >> 24;
@@ -5382,7 +5382,7 @@ MCreature::FadeChatString()
 			m_OriChatColor = m_ChatColor;
 			m_OriChatColor |= 0xFF000000;
 			if(GetCreatureType() == 650 )
-				m_NextChatFadeTime = g_CurrentTime + 0xffffff;
+				m_NextChatFadeTime = g_FrameNow + MonotonicClock::Millis(0xffffff);
 			
 			return;
 		}
@@ -5392,7 +5392,7 @@ MCreature::FadeChatString()
 		}
 	}
 
-	m_NextChatFadeTime = g_CurrentTime + g_pClientConfig->DELAY_CHATSTRING_FADE;
+	m_NextChatFadeTime = g_FrameNow + MonotonicClock::Duration(g_pClientConfig->DELAY_CHATSTRING_FADE);
 	
 	m_ChatColor = RGB(color[0], color[1], color[2]);
 	m_OriChatColor = (m_OriChatColor&0xFFFFFF) | (b<<24);
@@ -7090,8 +7090,8 @@ MCreature::SetRecoveryHP(int amount, int times, DWORD delay)
 		m_RecoveryHPDelayTime = delay;
 		//m_RecoveryHPPart = MODIFY_CURRENT_HP;
 
-		// 다음 회복할 시간 설정
-		m_RecoveryHPNextTime = g_CurrentTime + m_RecoveryHPDelayTime;
+		// the next recovery time
+		m_RecoveryHPNextTime = g_FrameNow + MonotonicClock::Millis(m_RecoveryHPDelayTime);
 	}
 }
 
@@ -7121,8 +7121,8 @@ MCreature::SetRecoveryMP(int amount, int times, DWORD delay)
 		m_RecoveryMPDelayTime = delay;
 		//m_RecoveryMPPart = MODIFY_CURRENT_MP;
 
-		// 다음 회복할 시간 설정
-		m_RecoveryMPNextTime = g_CurrentTime + m_RecoveryMPDelayTime;
+		// the next recovery time
+		m_RecoveryMPNextTime = g_FrameNow + MonotonicClock::Millis(m_RecoveryMPDelayTime);
 	}
 }
 
@@ -7137,10 +7137,10 @@ MCreature::CheckDropBlood()
 	if (!HasEffectStatus(EFFECTSTATUS_COMA))
 	{
 		//----------------------------------------------------------
-		// 피 흘릴 시간이 되었는지(-_-;) 체크..
+		// time to bleed?
 		//----------------------------------------------------------
 		if (g_pUserOption->BloodDrop 
-			&& g_CurrentTime > m_NextBloodingTime)
+			&& g_FrameNow > m_NextBloodingTime)
 		{
 			int currentHP = m_Status[MODIFY_CURRENT_HP];
 			int maxHP = m_Status[MODIFY_MAX_HP];
@@ -7182,12 +7182,12 @@ MCreature::CheckDropBlood()
 			//----------------------------------------------------------
 			if (HasEffectStatus(EFFECTSTATUS_BLOOD_DRAIN))
 			{
-				// 5배 정도 덜 흘린다.
-				m_NextBloodingTime = g_CurrentTime + timeGap*5;
+				// bleeds about five times less
+				m_NextBloodingTime = g_FrameNow + MonotonicClock::Millis(timeGap*5);
 			}
 			else
 			{			
-				m_NextBloodingTime = g_CurrentTime + timeGap;
+				m_NextBloodingTime = g_FrameNow + MonotonicClock::Millis(timeGap);
 			}
 		}
 	}
@@ -7362,10 +7362,10 @@ MCreature::UpdateStatus()
 	bool bChangedHP = false;
 
 	//--------------------------------------------------------
-	// HP 회복
+	// HP recovery
 	//--------------------------------------------------------
 	if (m_RecoveryHPTimes > 0 
-		&& g_CurrentTime >= m_RecoveryHPNextTime)
+		&& g_FrameNow >= m_RecoveryHPNextTime)
 	{		
 		m_RecoveryHPTimes--;
 
@@ -7374,23 +7374,23 @@ MCreature::UpdateStatus()
 
 		bChangedHP = true;
 		
-		// 다음 회복할 시간 설정
-		m_RecoveryHPNextTime += m_RecoveryHPDelayTime;		
+		// the next recovery time
+		m_RecoveryHPNextTime += MonotonicClock::Millis(m_RecoveryHPDelayTime);		
 	}
 
 	//--------------------------------------------------------
 	// MP 회복
 	//--------------------------------------------------------
 	if (m_RecoveryMPTimes > 0 
-		&& g_CurrentTime >= m_RecoveryMPNextTime)
+		&& g_FrameNow >= m_RecoveryMPNextTime)
 	{		
 		m_RecoveryMPTimes--;
 
 		// 회복
 		SetStatus( MODIFY_CURRENT_MP, GetStatus(MODIFY_CURRENT_MP)+m_RecoveryMPAmount );
 
-		// 다음 회복할 시간 설정
-		m_RecoveryMPNextTime += m_RecoveryMPDelayTime;		
+		// the next recovery time
+		m_RecoveryMPNextTime += MonotonicClock::Millis(m_RecoveryMPDelayTime);		
 	}
 
 	//--------------------------------------------------------
@@ -7401,7 +7401,7 @@ MCreature::UpdateStatus()
 		//--------------------------------------------------------
 		// 기본적인 회복
 		//--------------------------------------------------------
-		if (g_CurrentTime >= m_RegenNextTime)
+		if (g_FrameNow >= m_RegenNextTime)
 		{		
 			// [새기술4] mephisto 걸리면 HP regen 안된다.
 
@@ -7430,13 +7430,13 @@ MCreature::UpdateStatus()
 				bChangedHP = true;
 			}
 
-			m_RegenNextTime += m_RegenDelayTime;		
+			m_RegenNextTime += MonotonicClock::Millis(m_RegenDelayTime);		
 			
 
 			//--------------------------------------------------------
-			// 부가적인 회복 - -;
+			// the bonus recovery
 			//--------------------------------------------------------
-			if (g_CurrentTime >= m_RegenBonusNextTime)
+			if (g_FrameNow >= m_RegenBonusNextTime)
 			{		
 				if( GetStatus( MODIFY_SILVER_DAMAGE ) > 0 && IsInCasket() )
 					SetStatus( MODIFY_SILVER_DAMAGE, max( 0, GetStatus( MODIFY_SILVER_DAMAGE ) - m_RegenBonusAmount ) );
@@ -7445,7 +7445,7 @@ MCreature::UpdateStatus()
 
 				//bChangedHP = true;
 
-				m_RegenBonusNextTime += m_RegenBonusDelayTime;		
+				m_RegenBonusNextTime += MonotonicClock::Millis(m_RegenBonusDelayTime);		
 			}
 		}		
 	}
@@ -7503,9 +7503,9 @@ MCreature::Action()
 	#endif
 
 	//--------------------------------------------------------
-	// 채팅 String 어둡게 할 시간
+	// when the chat string darkens
 	//--------------------------------------------------------
-	if (m_NextChatFadeTime < g_CurrentTime)
+	if (m_NextChatFadeTime < g_FrameNow)
 	{
 		FadeChatString();		
 	}
@@ -10606,7 +10606,7 @@ MCreature::SetRegen(int amount, DWORD delay)
 	m_RegenAmount = amount; 
 	
 	m_RegenDelayTime = delay; 
-	m_RegenNextTime = g_CurrentTime; 
+	m_RegenNextTime = g_FrameNow; 
 }
 
 //----------------------------------------------------------------------
@@ -10617,7 +10617,7 @@ MCreature::SetRegenBonus(int amount, DWORD delay)
 { 
 	m_RegenBonusAmount = amount; 
 	m_RegenBonusDelayTime = delay; 
-	m_RegenBonusNextTime = g_CurrentTime; 
+	m_RegenBonusNextTime = g_FrameNow; 
 }
 
 //----------------------------------------------------------------------
