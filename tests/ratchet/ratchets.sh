@@ -17,6 +17,10 @@
 #
 #----------------------------------------------------------------------
 set -u
+# Source files include legacy code-page bytes. These are byte counts;
+# every stage (including BSD sed) must use the same single-byte locale.
+# A UTF-8 locale can stop sed early yet leave a downstream count at zero.
+export LC_ALL=C
 cd "$(dirname "$0")/../.." || exit 2
 
 BUILD_DIR="${1:-}"
@@ -163,7 +167,10 @@ check () {
 # The inbound side (RequestServerPlayer, its manager, the file sender)
 # and the UDP party datagrams stay. Ninja 484 -> 481 by the same
 # arithmetic (no Ninja tree here; the Linux CI reads it).
-R1_BASELINE=484
+# 483 on 2026-09-17: the second bounded-formatting slice deleted the
+# unused md5.cpp. Record the decrease that its first revision missed;
+# the same deletion takes Ninja from 481 to 480.
+R1_BASELINE=483
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -200,7 +207,7 @@ elif [ -n "$BUILD_DIR" ] && [ -f "$BUILD_DIR/build.ninja" ]; then
 	# this branch existed the ratchet SKIPPED on every non-MSVC tree,
 	# which the port assessment listed as fail-open (area A). build.ninja
 	# is rewritten on every configure, so its mtime is the configure time.
-	R1_NINJA_BASELINE=481
+	R1_NINJA_BASELINE=480
 	R1_NINJA="$BUILD_DIR/build.ninja"
 	if [ CMakeLists.txt -nt "$R1_NINJA" ] || [ tests/arch/packetwire_files.txt -nt "$R1_NINJA" ]; then
 		echo "FAIL R1: $BUILD_DIR was configured before CMakeLists.txt or the packetwire membership file last changed - reconfigure that tree first"
