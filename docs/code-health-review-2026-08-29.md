@@ -1338,6 +1338,8 @@ The constructor catches socket-creation failure and sets `m_pDatagramSocket = NU
 
 **Category:** protocol-design  |  **Location:** `Client/Packet/ClientPlayer.cpp:265`
 
+> ✅ **Already fixed; reconciled 2026-09-17:** framed reads now set `m_FrameRemaining`, constrain every body operation and restore the next-frame boundary after rejection. A swallowed inner read error also rejects the outer frame (`c5ff2e5e`). `test_packetwire_parsers.cpp` covers over-consumption, under-consumption, fragmented bodies, every body operation, swallowed errors and standard exceptions; `test_player_base.cpp` proves malformed bodies never dispatch or leak. These regressions continue to pass with the receive-buffer limits below.
+
 processCommand checks `packetSize > getPacketMaxSize(packetID)` (line 256) and `length() < szPacketHeader + packetSize` (line 265), then calls `m_pInputStream->read(pPacket)` (line 280), which skips the header and hands control to the packet's virtual read(). SocketInputStream::read bounds each call only against `length()` — the total bytes buffered from the socket — not against the current packet's declared size. A packet class that reads a length prefix of 255 when the declared body was 20 bytes simply consumes 235 bytes belonging to subsequent packets, all of them attacker-supplied. This is why the per-packet length checks in GCPartySay, GCGuildChat and GCPartyLeave are load-bearing and why their absence is directly exploitable. It also means a packet whose read() over-runs leaves the stream head mid-packet, permanently desynchronising the connection.
 
 **Failure scenario:** Server sends GCPartySay declaring the legal maximum body size, but with a name-length prefix of 255. The client reads 255 bytes across the packet boundary into m_Name, then the handler strcpy's it into char[128]. The size cap that appears to protect the parse provides no protection at all.
@@ -1486,6 +1488,8 @@ Lines 117-121 call `sscanf(readTemp, "%4d/%2d/%2d %2d:%2d:%2d\t%8d\t%8d\n", &ts.
 
 **Category:** correctness  |  **Location:** `Client/Packet/Player.cpp:159`
 
+> ✅ **Already fixed; reconciled 2026-09-17:** all three remaining dispatch loops (`Player`, `ClientPlayer`, `RequestServerPlayer`) branch on a failed `peek()` before reading the header. The outbound `RequestClientPlayer` was removed in `a2b14c33`. `PlayerReceiveLoop.FragmentationAndMalformedBodiesNeverDispatchOrLeak` verifies that a partial wrapped header remains untouched and causes neither allocation nor dispatch; the two specialized loops were also checked at their header reads.
+
 SocketInputStream::peek returns false (rather than throwing) when the buffer holds fewer than the requested bytes — the InsufficientDataException throw is commented out at SocketInputStream.cpp:262. Player.cpp:159, Client/Packet/RequestClientPlayer.cpp:144 and Client/Packet/RequestServerPlayer.cpp:123 all call `m_pInputStream->peek(header, szPacketHeader);` and discard the result, then memcpy packetID and packetSize out of `char header[szPacketHeader]` which peek left untouched. Both packetID and packetSize are declared without initialisers (Player.cpp:146-147, RequestClientPlayer.cpp:124-125). Only ClientPlayer.cpp:140 checks `== false` and breaks.
 
 **Failure scenario:** On any frame where fewer than 7 bytes have arrived — routine with partial TCP reads — the loop reads uninitialized stack memory as a packet ID and size. On the first iteration this is genuinely indeterminate; on later iterations it re-parses the previous packet's stale header. MSVC /RTCu and MemorySanitizer both flag this, and the resulting control flow depends on stack garbage.
@@ -1496,6 +1500,8 @@ SocketInputStream::peek returns false (rather than throwing) when the buffer hol
 
 **Category:** correctness  |  **Location:** `Client/Packet/SocketInputStream.cpp:421`
 
+> ✅ **Fixed (2026-09-17):** `fill()` checks a full ring's backlog before growing and never receives into an empty slice. It preserves bytes received before a later would-block, including across the wrap. `recv_ex(..., 0, ...)` is a no-op. Scripted transport tests reproduce the original failures and cover all 832 combinations of small-ring head, queued length and incoming length, plus partial reads and would-block after progress. Both Windows Debug and ASan suites pass.
+
 When m_Head == 0 and m_Tail == m_BufferLen-1 the buffer is exactly full and line 421 computes `nFree = m_BufferLen - m_Tail - 1` == 0, which is then passed to receiveWithDebug/recv. `SocketAPI::recv_ex` (SocketAPI.cpp:844-845) treats any return of 0 as `throw ConnectException("connect closed.")` — but recv() with len==0 legitimately returns 0 on an open socket. The same zero-length case arises at line 493 (`nFree = m_Head - 1` with m_Head == 1) and line 536 (`nFree = m_Head - m_Tail - 1` when the buffer is full). The resize-on-full path only triggers when `m_pSocket->available() > 0` at that instant, so a momentarily full buffer is reachable.
 
 **Failure scenario:** During a burst of server traffic the 32 KB input buffer fills exactly while the socket's receive queue happens to be empty. The next fill() calls recv with length 0, recv_ex throws ConnectException, and the client reports a lost connection to a perfectly healthy server.
@@ -1505,6 +1511,8 @@ When m_Head == 0 and m_Tail == m_BufferLen-1 the buffer is exactly full and line
 #### 🟡 Medium -- The input buffer grows without bound from server-controlled data and never shrinks; the shrink guard is a dead unsigned comparison.
 
 **Category:** resource-management  |  **Location:** `Client/Packet/SocketInputStream.cpp:656`
+
+> ✅ **Fixed (2026-09-17):** input capacity is capped at 16 MiB; a backlog that would exceed the cap raises `InvalidProtocolException` before allocation or another receive. The wire inventory asserts that at least four copies of every declared maximum frame fit. An emptied grown ring returns to its construction capacity on the next fill. Both stream resize functions calculate the new capacity in signed 64-bit arithmetic and preserve the ring's empty sentinel slot; invalid sizes leave bytes and capacity intact. The unused, separately broken `fill_RAW` path is removed. Tests cover exact-limit growth, excessive/overflowing backlogs, reclamation, wrapped data and rejected shrink/underflow sizes; six initial tests failed before the fix. Full Debug/ASan builds and CTest verify it without a live server.
 
 fill() calls `resize(available + 1)` at lines 445, 508 and 556 whenever the ring buffer fills and the socket still has data, where `available` comes from ioctl(FIONREAD) on the socket — i.e. from how much the peer sent. resize (line 649) computes `uint newBufferLen = m_BufferLen + size;` and allocates that; nothing ever reduces the buffer afterwards, and no ceiling is enforced. The guard at line 663, `if (newBufferLen < 0 || newBufferLen < len)`, tests an unsigned value for `< 0`, which is always false — a compiler-warning-level dead check that leaves only half the intended protection. The same dead comparison exists at Client/Packet/SocketOutputStream.cpp:267.
 

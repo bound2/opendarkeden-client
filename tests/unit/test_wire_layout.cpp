@@ -35,6 +35,7 @@
 //----------------------------------------------------------------------
 
 #include "test_framework.h"
+#include "SocketInputStream.h"
 
 #include "Packet.h"
 #include "PacketFactory.h"
@@ -247,6 +248,7 @@ TEST(WireLayout, EveryFactoryCreatesAPacketWithItsOwnId)
 	for (size_t i = 0; i < all.factories.size(); i++)
 	{
 		const FactoryEntry& entry = all.factories[i];
+		CHECK(static_cast<std::uint64_t>(entry.factory->getPacketMaxSize()) + szPacketHeader < MaxSocketInputBufferSize / 4);
 		Packet* pPacket = entry.factory->createPacket();
 		const bool bCreated = pPacket != NULL;
 		const bool bSameId = bCreated && pPacket->getPacketID() == entry.factory->getPacketID();

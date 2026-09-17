@@ -32,6 +32,8 @@
 
 // constant definitions
 const uint DefaultSocketInputBufferSize = 8192;
+// At least four maximum legal frames fit; the wire inventory tests pin this.
+inline constexpr uint MaxSocketInputBufferSize = 16 * 1024 * 1024;
 
 // forward declaration
 class Packet;
@@ -114,7 +116,6 @@ public :
 	
 	// fill stream (input buffer) from socket
 	uint fill ();
-	uint fill_RAW ();
 
 	// resize buffer
 	void resize ( int size );
@@ -159,6 +160,7 @@ private :
 	
 	// buffer length
 	uint m_BufferLen;
+	uint m_InitialBufferLen;
 	
 	// buffer head/tail
 	uint m_Head;
