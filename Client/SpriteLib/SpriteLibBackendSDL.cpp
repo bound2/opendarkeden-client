@@ -11,6 +11,9 @@
 
 #include "SpriteLibBackendSDL.h"
 #include "FrameUpscaler.h"
+#include "SpriteScanline.h"
+#include <climits>
+#include <limits>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -275,9 +278,15 @@ spritectl_sprite_t spritectl_create_sprite(int width, int height, int format,
                                            const void* pixels, size_t data_size) {
 	spritectl_sprite_t sprite;
 
-	if (!pixels || data_size == 0) {
+	const size_t bytesPerPixel = format == SPRITECTL_FORMAT_RGBA32 ? 4 :
+		(format == SPRITECTL_FORMAT_RGB565 || format == SPRITECTL_FORMAT_RGB555 ? 2 : 0);
+	if (!pixels || width <= 0 || height <= 0 || bytesPerPixel == 0
+		|| width > INT_MAX / height)
 		return SPRITECTL_INVALID_SPRITE;
-	}
+	const size_t pixelCount = size_t(width) * size_t(height);
+	if (pixelCount > (std::numeric_limits<size_t>::max)() / bytesPerPixel
+		|| data_size < pixelCount * bytesPerPixel)
+		return SPRITECTL_INVALID_SPRITE;
 
 	/* Allocate sprite structure */
 	sprite = (spritectl_sprite_t)malloc(sizeof(struct spritectl_sprite_s));
@@ -388,18 +397,14 @@ size_t spritectl_get_sprite_data(spritectl_sprite_t sprite, void* buffer, size_t
  */
 int spritectl_blt_sprite_rle(spritectl_surface_t dest, int x, int y,
                               spritectl_sprite_t sprite, int flags, int alpha) {
-	if (!dest || !sprite || !sprite->has_rle || !sprite->scanline_rle) {
+	if (!dest || !sprite || !sprite->has_rle || !sprite->scanline_rle
+		|| !sprite->scanline_lens || sprite->width <= 0 || sprite->height <= 0) {
 		return -1;
 	}
 
 	SDL_Surface* sdl_surface = dest->surface;
 	if (!sdl_surface) {
 		return -1;
-	}
-
-	/* Lock destination surface for direct pixel access */
-	if (SDL_MUSTLOCK(sdl_surface)) {
-		SDL_LockSurface(sdl_surface);
 	}
 
 	/* Get destination surface info */
@@ -412,17 +417,22 @@ int spritectl_blt_sprite_rle(spritectl_surface_t dest, int x, int y,
     // Direct RLE writes bypass SDL_BlitSurface, so apply the same destination
     // clip explicitly. SDL_SetClipRect already intersects it with the surface.
     const SDL_Rect& viewport = sdl_surface->clip_rect;
-    int clip_left = SDL_max(0, viewport.x - x);
-    int clip_top = SDL_max(0, viewport.y - y);
-    int clip_right = SDL_min(sprite->width, viewport.x + viewport.w - x);
-    int clip_bottom = SDL_min(sprite->height, viewport.y + viewport.h - y);
+	const int64_t clip_left = SDL_max(int64_t(0), int64_t(viewport.x) - x);
+	const int64_t clip_top = SDL_max(int64_t(0), int64_t(viewport.y) - y);
+	const int64_t clip_right = SDL_min(int64_t(sprite->width), int64_t(viewport.x) + viewport.w - x);
+	const int64_t clip_bottom = SDL_min(int64_t(sprite->height), int64_t(viewport.y) + viewport.h - y);
+	if (clip_left >= clip_right || clip_top >= clip_bottom)
+		return 0;
 
-	if (clip_left >= clip_right || clip_top >= clip_bottom) {
-		if (SDL_MUSTLOCK(sdl_surface)) {
-			SDL_UnlockSurface(sdl_surface);
-		}
-		return 0;  /* Completely clipped, but not an error */
+	// Validate all visible rows before the first write, including later segment
+	// headers after earlier segments have consumed their color data.
+	for (int sy = int(clip_top); sy < clip_bottom; ++sy) {
+		const size_t length = sprite->scanline_lens[sy];
+		if (length && (!sprite->scanline_rle[sy]
+			|| !ValidateSpriteScanline({sprite->scanline_rle[sy], length}, sprite->width)))
+			return -1;
 	}
+	if (SDL_LockSurface(sdl_surface) != 0) return -1;
 
 	/* Debug: print surface info on first call */
 	static int debug_printed = 0;
@@ -540,11 +550,7 @@ int spritectl_blt_sprite_rle(spritectl_surface_t dest, int x, int y,
 		}
 	}
 
-	/* Unlock destination surface */
-	if (SDL_MUSTLOCK(sdl_surface)) {
-		SDL_UnlockSurface(sdl_surface);
-	}
-
+	SDL_UnlockSurface(sdl_surface);
 	return 0;
 }
 
@@ -591,32 +597,17 @@ spritectl_sprite_t spritectl_create_sprite_rle(int width, int height) {
 
 int spritectl_sprite_set_scanline_rle(spritectl_sprite_t sprite, int y,
                                        const uint16_t* rle_data, int rle_size) {
-	if (!sprite || !sprite->has_rle) {
+	if (!sprite || !sprite->has_rle || !sprite->scanline_rle || !sprite->scanline_lens
+		|| y < 0 || y >= sprite->height || !rle_data || rle_size <= 0 || rle_size > UINT16_MAX
+		|| !ValidateSpriteScanline({rle_data, size_t(rle_size)}, sprite->width))
 		return -1;
-	}
 
-	if (y < 0 || y >= sprite->height) {
-		return -1;
-	}
-
-	if (rle_size <= 0) {
-		return -1;
-	}
-
-	/* Free existing RLE data for this scanline */
-	if (sprite->scanline_rle[y]) {
-		free(sprite->scanline_rle[y]);
-	}
-
-	/* Allocate and copy RLE data */
-	sprite->scanline_rle[y] = (uint16_t*)malloc(rle_size * sizeof(uint16_t));
-	if (!sprite->scanline_rle[y]) {
-		return -1;
-	}
-
-	memcpy(sprite->scanline_rle[y], rle_data, rle_size * sizeof(uint16_t));
-	sprite->scanline_lens[y] = rle_size;
-
+	uint16_t* replacement = static_cast<uint16_t*>(malloc(size_t(rle_size) * sizeof(uint16_t)));
+	if (!replacement) return -1;
+	memcpy(replacement, rle_data, size_t(rle_size) * sizeof(uint16_t));
+	free(sprite->scanline_rle[y]);
+	sprite->scanline_rle[y] = replacement;
+	sprite->scanline_lens[y] = uint16_t(rle_size);
 	return 0;
 }
 
@@ -1243,7 +1234,8 @@ int spritectl_load_sprite_from_file(FILE* file, spritectl_sprite_t* sprite_out,
 		return 0;
 	}
 
-	pixel_count = width * height;
+	if (int(width) > INT_MAX / int(height)) goto cleanup;
+	pixel_count = size_t(width) * size_t(height);
 
 	/* Allocate scanline length array */
 	scanline_lengths = (uint16_t*)calloc(height, sizeof(uint16_t));
@@ -1269,6 +1261,13 @@ int spritectl_load_sprite_from_file(FILE* file, spritectl_sprite_t* sprite_out,
 				goto cleanup;
 			}
 		}
+	}
+
+	// Validate the complete file before decoding any scanline.
+	for (int y = 0; y < height; ++y) {
+		if (scanline_lengths[y] && !ValidateSpriteScanline(
+			{scanline_rle[y], scanline_lengths[y]}, width))
+			goto cleanup;
 	}
 
 	/* Decode RLE to raw pixels */
@@ -1307,12 +1306,7 @@ int spritectl_load_sprite_from_file(FILE* file, spritectl_sprite_t* sprite_out,
 	/* Create sprite structure */
 	sprite = spritectl_create_sprite(width, height, SPRITECTL_FORMAT_RGB565,
 	                                  pixels, pixel_count * sizeof(uint16_t));
-	if (!sprite) {
-		free(pixels);
-		goto cleanup;
-	}
-
-	free(pixels);  /* Sprite copied the data */
+	if (!sprite) goto cleanup;
 
 	/* Preserve RLE data for correct transparency rendering */
 	sprite->scanline_rle = scanline_rle;
@@ -1325,6 +1319,7 @@ int spritectl_load_sprite_from_file(FILE* file, spritectl_sprite_t* sprite_out,
 	result = 0;
 
 cleanup:
+	free(pixels);
 	if (scanline_rle) {
 		for (int y = 0; y < height; y++) {
 			if (scanline_rle[y]) {
