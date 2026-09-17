@@ -1090,6 +1090,8 @@ CTypePack::Get (lines 141-160) does `m_pData[n].IsInit()`, `m_file_index[n]` and
 
 **Category:** memory-safety  |  **Location:** `Client/SpriteLib/SpriteLibBackendSDL.cpp:1286`
 
+> ✅ **Fixed in the 2026-09-17 follow-up** (`fix/review-sprite-rle`). The file loader validates each complete scanline against both its allocation length and decoded width before decoding. It rejects truncated headers/data and overflowing runs, and releases all temporary allocations on failure. `tests/unit/test_sprite_backend_bounds.cpp` covers every byte-truncated prefix, malformed later headers, excessive transparent/color runs, and a valid multi-segment sprite.
+
 Lines 1273-1299 decode each scanline: `int count = scanline_rle[y][rle_index++];` then per segment `int trans_count = scanline_rle[y][rle_index++]; int color_count = scanline_rle[y][rle_index++];` and `row[x] = scanline_rle[y][rle_index++]` in the inner loop. The buffer was allocated with exactly scanline_lengths[y] WORDs (line 1257) but rle_index is never bounded by it — only `x < width` is checked, which constrains the writes but not the reads. A .spk whose segment counts exceed the stored scanline length reads arbitrarily far past the heap allocation. The sibling function spritectl_blt_sprite_rle at line 452 does at least attempt a header check, so the inconsistency is visible within the same file.
 
 **Recommendation:** Bound rle_index against scanline_lengths[y] before each of the four reads and abandon the scanline on violation, the same way the blit path attempts to.
@@ -1097,6 +1099,8 @@ Lines 1273-1299 decode each scanline: `int count = scanline_rle[y][rle_index++];
 #### 🟠 High -- spritectl_blt_sprite_rle's header-only validation stops holding once the first segment consumes pixel data, allowing out-of-bounds reads in later segments.
 
 **Category:** memory-safety  |  **Location:** `Client/SpriteLib/SpriteLibBackendSDL.cpp:452`
+
+> ✅ **Fixed in the 2026-09-17 follow-up** (`fix/review-sprite-rle`). A shared bounded scanline validator checks every visible row before the first destination write. The scanline setter also validates before replacing existing data and rejects lengths that cannot fit its 16-bit length field. Clipping arithmetic is widened before subtracting extreme coordinates and SDL lock failures abort drawing. Tests cover a malformed later row without partial drawing, rejected replacements preserving the old row, clipped valid rendering and extreme origins (`tests/unit/test_sprite_backend_bounds.cpp`).
 
 Line 452 checks `if (rle_index + seg_count * 2 > rle_data_size)`, which would be sufficient only if rle_index advanced by exactly 2 per segment. But rle_index also advances by color_count in the pixel loop (line 531) and by `rle_index += color_count` in the skip path (line 471). After the first segment with a nonzero color_count, the header guarantee is void, and the unguarded `int trans_count = rle_data[rle_index++]; int color_count = rle_data[rle_index++];` at lines 463-464 can read past the end of the scanline buffer. The inner loop's guard at line 478 breaks out of the *pixel* loop but then falls back into the segment loop, which immediately performs those two unguarded reads.
 
@@ -1179,6 +1183,8 @@ MPalette declares `WORD* m_pColor` (MPalette.h:43) and a destructor that deletes
 #### 🟡 Medium -- spritectl_create_sprite accepts any width/height/data_size combination, and the consumers then read width*height elements from a buffer sized only data_size.
 
 **Category:** memory-safety  |  **Location:** `Client/SpriteLib/SpriteLibBackendSDL.cpp:270`
+
+> ✅ **Fixed in the 2026-09-17 follow-up** (`fix/review-sprite-rle`). Raw sprite creation accepts only positive dimensions, supported formats, a pixel count representable by its integer consumers, and a buffer large enough for every pixel at the format's byte width. `tests/unit/test_sprite_backend_bounds.cpp` tests short buffers, zero/negative/overflowing dimensions, unknown formats, and valid RGB565/RGB555/RGBA32 data.
 
 spritectl_create_sprite (lines 270-305) copies data_size bytes but never checks data_size against width*height*bytes-per-pixel, nor that width/height are positive. spritectl_blt_sprite then reads `sprite->width * sprite->height` uint16 elements out of sprite->pixels via spritectl_convert_565_to_rgba (lines 693-698), and for the RGBA32 case takes `pixel_src = (const uint32_t*)sprite->pixels` and memcpys width*height*4 bytes (lines 710, 736-741) — both over-read whenever data_size is smaller. Related in the same file: `pixel_count = width * height` at line 1240 is evaluated in int after integer promotion of two uint16 values, so a 65535x65535 header overflows signed int (UB) before reaching size_t.
 
