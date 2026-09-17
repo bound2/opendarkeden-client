@@ -4,7 +4,7 @@
 #include <Windows.h>
 #include "DXLib/CDirectSound.h"
 #else
-#include "../../basic/Platform.h"
+#include "../basic/Platform.h"
 #include "DXLib/CDirectSound.h"
 #endif
 #include "CMP3.h"

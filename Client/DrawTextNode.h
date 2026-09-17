@@ -10,7 +10,7 @@
 #ifdef PLATFORM_WINDOWS
 #include <Windows.h>
 #else
-#include "../../basic/Platform.h"
+#include "../basic/Platform.h"
 #endif
 
 #define	FLAG_DRAWTEXT_OUTLINE			0x01	// 외곽선

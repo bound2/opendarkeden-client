@@ -14,7 +14,7 @@
 #ifdef PLATFORM_WINDOWS
 #include <Windows.h>
 #else
-#include "../../basic/Platform.h"
+#include "../basic/Platform.h"
 #endif
 #include <string>
 #include "TextSystem/TextService.h"

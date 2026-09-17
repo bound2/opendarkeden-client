@@ -2777,6 +2777,8 @@ basic/Timer2.cpp:73 `timer_id_t tid = m_id_generator++;` uses the monotonically 
 
 #### 🟡 Medium -- CDataTable::LoadFromFile allocates from an unvalidated 32-bit count read from file and raw-dumps whole C++ objects to and from disk.
 
+> ✅ **Fixed by removal (2026-09-18)**: `CDataTable.h` has no include or instantiation anywhere in the tracked C++ tree. Removed the unused raw-object serializer and its commented size-report entry. No live file format or loader changes; the reported failure scenario was not reachable in the current client.
+
 **Category:** security  |  **Location:** `Client/CDataTable.h:153`
 
 Client/CDataTable.h:148-170 reads `int numSize` with `file.read((char*)&numSize, 4)` and, when it differs from m_Size, calls Init(numSize). Init (lines 87-102) does `m_Size = size; m_pTypeInfo = new Type [m_Size];` with no upper bound and no rejection of negative values — a negative count converts to an enormous size_t and throws std::bad_array_new_length; a large positive count throws std::bad_alloc. Neither is caught. Two further defects in the same class: (a) Init returns early on `if (size==0) return;` at line 92 *before* calling Release(), so Init(0) leaves the previous buffer allocated and m_Size stale; (b) if `new Type[m_Size]` throws, m_Size has already been assigned while m_pTypeInfo stays NULL, and Release() only resets m_Size inside `if (m_pTypeInfo != NULL)` (line 112-119), leaving the object claiming a non-zero size over a null pointer that operator[] (line 36-38) will happily dereference. Finally, SaveToFile/LoadFromFile at lines 139 and 168 memcpy raw `Type` objects to and from disk; for any Type containing a pointer or vtable this serialises addresses and reads them back as live pointers.
@@ -2786,6 +2788,8 @@ Client/CDataTable.h:148-170 reads `int numSize` with `file.read((char*)&numSize,
 **Recommendation:** Validate the count against a per-table maximum before allocating, move the size==0 early return after Release(), reset m_Size in Release() unconditionally, and replace the raw-object dump with explicit per-field serialisation.
 
 #### 🟡 Medium -- 48 files directly under Client/ include "../../basic/Platform.h", one directory level too deep, and only resolve by accident through a subdirectory include path.
+
+> ✅ **Fixed (2026-09-18)**: corrected all 43 remaining top-level `Client/` includes from `../../basic/Platform.h` to `../basic/Platform.h`. The paths now resolve relative to their source files. The deeper library paths remain relative to their actual locations; the duplicate TArray headers now forward to the shared basic header.
 
 **Category:** build  |  **Location:** `Client/CPositionList.h:21`
 
@@ -2832,6 +2836,8 @@ Client/framelib/TArray.h declares `~TArray()` (line 99) which deletes m_pData, a
 **Recommendation:** Add a deep-copying copy constructor (or delete it explicitly), add a self-assignment guard `if (this == &array) return;` at the top of operator=, and have operator= return TArray& for conventional semantics. Mirror the change in Client/SpriteLib/TArray.h.
 
 #### 🟡 Medium -- TArray, huffman.cpp and BIT_RES.CPP each exist as two divergent copies of the same global-namespace code, and the CMakeLists comment justifying the MP3 exclusions is factually wrong.
+
+> ✅ **Fixed (2026-09-18)**: `basic/TArray.h` is the single implementation, using the already-tested framelib body. Both former locations are compatibility includes. The existing TArray suite includes the shared header and both public paths; two redundant SpriteLib-only ownership tests are removed because they exercised the same body twice. The MP3 duplicates and misleading exclusions had already been deleted, as recorded below.
 
 **Category:** maintainability  |  **Location:** `Client/framelib/TArray.h:1`
 
