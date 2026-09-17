@@ -1,17 +1,15 @@
 //-----------------------------------------------------------------------------
 // MGameTime.h
 //-----------------------------------------------------------------------------
-// 
-// 기준 시간으로부터 현재 시간을 구해낸다.
-//
-// 실제 시간과 게임 시간의 비율을 고려해야 한다..
-//
-// timeGetTime()의 값이 [기준시간], [현재시간]이 된다.
+// Derives the current game time from a start time, at the ratio of game
+// time to real time; the frame stamp is the start and the current time.
 //
 //-----------------------------------------------------------------------------
 
 #ifndef __MGAMETIME_H__
 #define	__MGAMETIME_H__
+
+#include "MonotonicClock.h"
 
 class MGameTime {
 	public :
@@ -19,20 +17,20 @@ class MGameTime {
 		~MGameTime();
 
 		//-------------------------------------------------------------
-		// 기준 시간 : y-m-d : h-m-s
+		// the start time: y-m-d h:m:s
 		//-------------------------------------------------------------
-		void	SetStartTime(DWORD time, WORD year, BYTE month, BYTE day, BYTE hour, BYTE minute, BYTE second);
+		void	SetStartTime(MonotonicClock::TimePoint time, WORD year, BYTE month, BYTE day, BYTE hour, BYTE minute, BYTE second);
 
 		//-------------------------------------------------------------
-		// game시간은 실제 시간의 몇 배인가?
+		// how many times faster game time runs than real time
 		//-------------------------------------------------------------
 		void	SetTimeRatio(int ratio)		{ m_TimeRatio = ratio; }
 		int		GetTimeRatio()				{ return m_TimeRatio; }
 
 		//-------------------------------------------------------------
-		// 현재 시간
+		// the current time
 		//-------------------------------------------------------------
-		void	SetCurrentTime(DWORD time);
+		void	SetCurrentTime(MonotonicClock::TimePoint time);
 
 		//-------------------------------------------------------------
 		// Get
@@ -60,9 +58,9 @@ class MGameTime {
 		BYTE		m_StartSecond;
 
 		//-------------------------------------------------------------
-		// 기준 시간 : timeGetTime()의 값
+		// the frame stamp the start time was taken at
 		//-------------------------------------------------------------
-		DWORD		m_StartTime;
+		MonotonicClock::TimePoint	m_StartTime;
 
 		//-------------------------------------------------------------
 		// 게임 시간과 실제 시간의 비율 : 실제시간*비율 = 게임시간

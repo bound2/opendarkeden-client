@@ -1317,9 +1317,9 @@ SetMode(enum CLIENT_MODE mode)
 
 			DEBUG_ADD("UserInformation");
 			//-----------------------------------------------------------
-			// Logout 시간 제거
+			// cancel the logout
 			//-----------------------------------------------------------
-			g_pUserInformation->LogoutTime = 0;
+			g_pUserInformation->CancelLogout();
 		
 			//-----------------------------------------------------------
 			// hot key를 저장한다.

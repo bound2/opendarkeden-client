@@ -41,21 +41,19 @@ UserInformation::UserInformation()
 
 	FaceStyle = 0;
 
-	GlobalSayTime = 0;
-
 	GoreLevel = true;
 
 	KeepConnection = FALSE;
 	IsMaster = FALSE;
-	ItemDropEnableTime = 0;
+	ItemDropEnableTime = MonotonicClock::TimePoint();
 	HasSkillRestore = false;
 	HasMagicGroundAttack = false;
 	HasMagicHallu = false;
 	HasMagicBloodyWarp = false;
 	HasMagicBloodySnake = false;
 
-	// 0이면 시간이 설정되어 있지 않는거다.
-	LogoutTime = 0;
+	// the epoch: no logout scheduled
+	LogoutTime = MonotonicClock::TimePoint();
 
 	GameVersion = 0;
 
@@ -88,6 +86,20 @@ UserInformation::UserInformation()
 
 UserInformation::~UserInformation()
 {
+}
+
+//----------------------------------------------------------------------
+// SecondsToLogout
+//----------------------------------------------------------------------
+DWORD
+UserInformation::SecondsToLogout(MonotonicClock::TimePoint now) const
+{
+	if (!IsLogoutScheduled() || LogoutTime <= now)
+	{
+		return 0;
+	}
+
+	return (DWORD)((LogoutTime - now).count() / 1000);
 }
 
 //----------------------------------------------------------------------

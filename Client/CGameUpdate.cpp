@@ -5946,13 +5946,12 @@ CGameUpdate::Update(void)
 	// Logout 할 시간인치 체크한다.
 	//------------------------------------------
 	if (g_pUserInformation!=NULL
-		&& g_pUserInformation->LogoutTime!=0
-		&& g_CurrentTime > g_pUserInformation->LogoutTime
+		&& g_pUserInformation->IsLogoutDue(g_FrameNow)
 		&& g_pPlayer->GetWaitVerify() == MPlayer::WAIT_VERIFY_LOGOUT)
 	{
 		ExecuteLogout();
 
-		g_pUserInformation->LogoutTime = 0;	// Logout시간 제거
+		g_pUserInformation->CancelLogout();
 
 		#ifdef OUTPUT_DEBUG_UPDATE_LOOP
 			//DEBUG_ADD("UE2");
@@ -6445,7 +6444,7 @@ CGameUpdate::Update(void)
 
 		if (g_pGameStringTable!=NULL)
 		{
-			g_pGameTime->SetCurrentTime( g_CurrentTime );
+			g_pGameTime->SetCurrentTime( g_FrameNow );
 		
 			SafeFormat::Format(str, GetGameString(STRING_DRAW_GAME_TIME),
 							g_pGameTime->GetHour(),
@@ -6526,44 +6525,6 @@ CGameUpdate::Update(void)
 					//DEBUG_ADD("d");//[Update] Before Draw");
 			#endif
 			
-			/*
-			//------------------------------------------------------
-			// 외치기 시간 갱신..
-			//------------------------------------------------------
-			if (g_CurrentTime > g_pUserInformation->GlobalSayTime+g_pClientConfig->DELAY_GLOBAL_SAY
-				//#if defined(OUTPUT_DEBUG) && defined(_DEBUG)
-				//	|| 1
-				//#endif
-				)			
-			{
-				// 정상적인 출력			
-				gC_vs_ui.SetInputStringColor( gpC_base->m_chatting_pi.text_color );
-			}
-			//------------------------------------------------------
-			// 외치기 불가능 상태
-			//------------------------------------------------------
-			else
-			{
-				const char* pString = gC_vs_ui.GetInputString();
-
-				//if (pString!=NULL && pString[0]=='!')
-				if (gC_vs_ui.GetChatMode()==ZONE)
-				{
-					//if (gbl_vampire_interface)
-					{
-					//	gC_vs_ui.SetInputStringColor( RGB(50, 50, 200) );
-					}
-					//else
-					{
-						gC_vs_ui.SetInputStringColor( RGB(250, 50, 50) );
-					}
-				}
-				else
-				{				
-					gC_vs_ui.SetInputStringColor( gpC_base->m_chatting_pi.text_color );
-				}
-			}
-			*/
 
 			//------------------------------------------------------
 			// 화면 출력
