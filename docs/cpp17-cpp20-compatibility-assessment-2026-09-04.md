@@ -1576,6 +1576,64 @@ the build on Windows in both Debug trees and the ctest suites in both
 test trees (nothing a test binary links changed; the ratchets and the
 include checker ran); the client not run.
 
+The thirteenth priority-5 slice (2026-09-17) is the second frame-clock
+group: the creatures' and the player's member stamps. `MCreature` kept
+six `DWORD` deadlines on the frame clock - the chat string's fade
+(`m_NextChatFadeTime`: now plus the config's keep delay on a new line,
+now plus the fade delay on a fade step, now plus `0xffffff` for the
+type-650 creature's permanent line, and cleared to 0), the HP and MP
+recovery (`m_RecoveryHPNextTime`, `m_RecoveryMPNextTime`: now plus the
+recovery delay, then advanced by the delay per step), the regeneration
+and its bonus (`m_RegenNextTime`, `m_RegenBonusNextTime`: now when set,
+advanced by the delay per step) and the bleeding (`m_NextBloodingTime`:
+now plus a gap, or five gaps) - and `MPlayer` three more: the action
+delay (`m_DelayTime`: now plus the action's delay from the table, 300
+ms for a skill used standing still, cleared to 0; read by
+`IsNotDelay()`, which `CGameUpdate` asks before every action), the
+death delay (`m_DeadDelayTime`: now plus the config's delay, read by
+`GetDeadDelayLast()` as whole seconds left) and the conversion
+countdown (`m_ConversionDelayTime`: now plus the delay
+`SetConversionDelay` gets from the effect's frames, cleared at four
+sites; read as minutes left and by the blink schedule). All nine are
+`TimePoint`s: every "now + delay" is `g_FrameNow` plus a duration,
+every `+= delay` advances by one, every comparison is the same
+comparison against `g_FrameNow`, and every clear is the epoch, which
+the gates read as they read `0` (an epoch deadline has passed;
+`IsNotDelay()`'s `m_DelayTime==0 ||` half folds into the `<=`, since
+the epoch is below every stamp). `MFakeCreature`'s one read, the
+inherited chat fade, moves with them. The delays split by signedness:
+the config's `int` delays and `GetActionInfoDelay()`'s `int` go
+through a signed `MonotonicClock::Duration`, so a negative value still
+puts the deadline in the past as the `DWORD` sum's wrap did (the
+twelfth slice's comparison sites took `Millis(DWORD)` because there
+the `int` was already compared unsigned; a sum is different); the
+`DWORD` delays (recovery, regeneration, the bleeding gap, the blink
+table, `SetDelay`'s and `SetConversionDelay`'s arguments) go through
+`Millis`. `GetDeadDelayLast()`'s `int second = deadline - now` is the
+same `int` over the 64-bit difference, 0 when negative as before; the
+conversion countdown's `(int)` casts, master's way of comparing two
+ticks as signed, go with the width, and its blink `timeGap` is a
+`DWORD` of the same difference, read only when the deadline is ahead.
+One reader changes: `m_DeadDelayTime` was never initialised -
+`GetDeadDelayLast()` read whatever the allocation held until the first
+death - and is the epoch now. The debug line that printed the tick and
+the deadline prints the delay; `GetConversionDelayTime()` returns the
+point (its one caller is a comment). Removed wrap failure: all nine
+were sum-shaped deadlines, the shape R14 exists for. Quantisation:
+unchanged, the frame stamp on both sides as in the twelfth slice. The
+four `extern DWORD g_CurrentTime` declarations these files carried go
+with their last reader, and the Korean comments beside the rewritten
+lines are translated. R16 goes from 57 to 18: what is left is
+`UserInformation`'s two live deadlines (`LogoutTime`,
+`ItemDropEnableTime`, with their readers in `CGameUpdate`,
+`UIMessageManager` and `GameUI`), `MGameTime`'s start and current time
+(with `GCUpdateInfoHandler`'s and `CGameUpdate`'s calls), the two
+library seams in `GameInit`, the definition, the one write and the log
+flush's debug print in `Client.cpp`, and the externs in `Client.h`,
+`MGameTime.cpp` and `GCUpdateInfoHandler.cpp`. Verified by the build on
+Windows in both Debug trees and the ctest suites in both test trees
+(nothing a test binary links changed); the client not run.
+
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through
 `std::filesystem::directory_iterator` against a DOS-style wildcard and returns
