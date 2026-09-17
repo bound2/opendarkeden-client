@@ -1996,7 +1996,7 @@ MFakeCreature::ActionMovePet()
 		{
 			m_NextDestX = m_DestX;
 			m_NextDestY = m_DestY;
-			m_listDirection.empty();
+			m_listDirection.clear();
 
 
 			DEBUG_ADD("다른 캐릭터에 의해서 Block됐음.");					

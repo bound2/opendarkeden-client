@@ -1593,9 +1593,10 @@ ExecuteActionInfoFromMainNode(
 		return;
 	}
 
-	if( nActionInfo >= g_pActionInfoTable->GetSize() )
+	if (g_pActionInfoTable == NULL || nActionInfo >= g_pActionInfoTable->GetSize())
 	{
 		DEBUG_ADD_FORMAT("[ExecuteActionInfoFromMainNode] skill type error %d", nActionInfo );
+		delete pActionResult;
 		return;
 	}
 

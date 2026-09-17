@@ -6042,7 +6042,7 @@ MPlayer::ActionMove()
 		{
 			m_NextDestX = m_DestX;
 			m_NextDestY = m_DestY;
-			m_listDirection.empty();
+			m_listDirection.clear();
 
 
 			DEBUG_ADD("다른 캐릭터에 의해서 Block됐음.");					
@@ -10425,7 +10425,7 @@ MPlayer::PacketMoveOK(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY, BYTE direc
 		m_ActionCount	= m_ActionCountMax; 
 
 		// 길찾기 제거
-		m_listDirection.empty();			
+		m_listDirection.clear();
 
 		//----------------------------------------------------
 		// Creature를 계속 추적하던 중이면..
@@ -10541,7 +10541,7 @@ MPlayer::PacketMoveNO()
 		else
 		{		
 			// 길찾기 했던걸 없애준다.
-			m_listDirection.empty();
+			m_listDirection.clear();
 
 			/*
 			// 다 주석처리하면 왠지 될거같다... - -;  2001.8.1		
@@ -10828,7 +10828,7 @@ MPlayer::PacketSpecialActionResult(TYPE_ACTIONINFO nResultActionInfo, TYPE_OBJEC
 	m_TraceY	= sY;
 
 	// 길찾기 했던걸 없애준다.
-	m_listDirection.empty();
+	m_listDirection.clear();
 	m_DestX		= m_X;//SECTORPOSITION_NULL;
 	m_DestY		= m_Y;//SECTORPOSITION_NULL;
 	m_NextDestX	= SECTORPOSITION_NULL;
