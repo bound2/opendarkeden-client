@@ -1663,6 +1663,47 @@ extern in `Client.h`. Verified by the build on Windows in both Debug
 trees and the test suites in both test trees, the new tests included;
 the client not run.
 
+The fifteenth priority-5 slice (2026-09-17) is the last of the frame
+clock: the two library seams that read it, and then the `DWORD`
+itself. `MItemHost::pCurrentTime` handed the item core a `const DWORD*`
+that `MItem::Clock()` returned to the skill delays (`SKILLINFO_NODE`'s
+`m_AvailableTime`, "clock + delay", read as `*clock >= it` and as the
+time left) and the trade accept delay (`MTradeManager`'s
+`m_NextAcceptTime`, the same shape); `WireHost::CurrentTime` handed the
+wire layer a `DWORD()` that `RequestServerPlayer`'s timeout ran on
+(`CurrentTime() + EXPIRE_DELAY`, read as `CurrentTime() > it`). Both
+seams carry a `TimePoint` now - a pointer to `g_FrameNow` and a
+function returning it - and the three deadlines behind them are
+`TimePoint`s: every sum is the point plus a duration (the skill's
+signed `int` delay through `Duration`, the `DWORD` delays through
+`Millis`), every comparison is unchanged, the "no host" cases read as
+they did (`Clock()` NULL means no delay; the wire host's epoch plus a
+minute never expires, as `0 + 60000` never did), and the skill's
+time-left is the same `DWORD` over the 64-bit difference where it
+was a signed `int` over two ticks. Both seams were tested already, so
+the tests move with them: the fake clocks in the trade, skill,
+container-helper and wire-host tests are `TimePoint`s set through
+`FromMillis`, and two new cases pin the delays across the legacy wrap
+with the `DWORD` sum's failure worked out beside each - a trade
+refused 1 s before the wrap could be accepted again at once, a skill
+used then was available at once. With no reader left, `g_CurrentTime`
+goes: its definition, its extern, its write in `StampFrameClock()`
+(which stamps `g_FrameNow` alone now) and its `timeGetTime()` call,
+and the log flush's debug print prints the point's millisecond count.
+R16 goes from 6 to 0 and stays as the guard that nothing brings the
+name back; R14 goes from 5 to 4, and the four are the floor: the two
+log-file names in `Client.cpp`, which want a number that differs per
+run and are not clocks, and `GameMain`'s hack check, which compares
+`timeGetTime()` against `GetTickCount()` on purpose and would measure
+nothing on one clock. That closes priority 5: every tick read that was
+a clock, in `Client`, `VS_UI`, `basic`, `gamemodel` and `packetwire`,
+runs on `MonotonicClock` - the widgets' interval gates on
+`IntervalTimer`, the deadlines and stamps on `TimePoint`, the
+second-counted ones on `SecondPoint` - and the frame clock is one
+`TimePoint` stamped once per frame. Verified by the build on Windows in
+both Debug trees and the test suites in both test trees (674 tests,
+297,466 checks, 0 failed in each); the client not run.
+
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through
 `std::filesystem::directory_iterator` against a DOS-style wildcard and returns
