@@ -1449,8 +1449,20 @@ fi
 # sixteen lines inside block-commented debug code in CPartManager.h,
 # MCreatureWear.cpp and CWaitUIUpdate.cpp - counted, since this grep
 # strips only // tails, as R3's does - are deleted with their blocks.
+# 970 on 2026-09-17: the third slice took Client.cpp, GameMain.cpp,
+# MZone.cpp and MCreature.cpp to zero (46 lines). Thirty-one are
+# converted: snprintf(sizeof) into the local array read at each site
+# (the Futec command-line parser's 32-byte argument slots, the
+# 128-byte log-file name built from a _MAX_PATH g_CWD and the 80-byte
+# server-group name were live overflows), the three sprintf calls that
+# read their own destination (the restart path, the two image-object
+# traces) are appends behind strlen, the creature name is a memcpy of
+# the length it was just allocated with, and the chat rows are bounded
+# by their configured width. Fifteen were dead: get_rand_str, which
+# only commented-out lines called, and thirteen lines of block-commented
+# debug dumps in MZone.cpp and MCreature.cpp, deleted with their blocks.
 #----------------------------------------------------------------------
-R17_BASELINE=1016
+R17_BASELINE=970
 R17_FILES_FLOOR=500
 
 r17_members () {

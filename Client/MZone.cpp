@@ -1071,7 +1071,7 @@ MZone::LoadFromFile(std::ifstream& file)
 					pImageObject = new MImageObject;
 					
 					#ifdef __OUTPUT_IMAGEOBJECT__	
-						strcpy(str, "ImageObject : ");
+						snprintf(str, sizeof(str), "ImageObject : ");
 					#endif
 				break;
 
@@ -1079,7 +1079,7 @@ MZone::LoadFromFile(std::ifstream& file)
 					pImageObject = new MShadowObject;
 
 					#ifdef __OUTPUT_IMAGEOBJECT__
-						strcpy(str, "ShadowObject : ");
+						snprintf(str, sizeof(str), "ShadowObject : ");
 					#endif
 				break;
 
@@ -1087,7 +1087,7 @@ MZone::LoadFromFile(std::ifstream& file)
 					pImageObject = new MAnimationObject;
 					
 					#ifdef __OUTPUT_IMAGEOBJECT__
-						strcpy(str, "AnimationObject : ");
+						snprintf(str, sizeof(str), "AnimationObject : ");
 					#endif
 				break;
 
@@ -1095,7 +1095,7 @@ MZone::LoadFromFile(std::ifstream& file)
 					pImageObject = new MShadowAnimationObject;
 					
 					#ifdef __OUTPUT_IMAGEOBJECT__
-						strcpy(str, "ShadowAnimationObject : ");
+						snprintf(str, sizeof(str), "ShadowAnimationObject : ");
 					#endif
 				break;
 
@@ -1103,7 +1103,7 @@ MZone::LoadFromFile(std::ifstream& file)
 					pImageObject = new MInteractionObject;
 					
 					#ifdef __OUTPUT_IMAGEOBJECT__
-						strcpy(str, "InteractionObject : ");
+						snprintf(str, sizeof(str), "InteractionObject : ");
 					#endif
 				break;
 
@@ -1127,7 +1127,7 @@ MZone::LoadFromFile(std::ifstream& file)
 			pImageObject->LoadFromFile(file);
 			
 			#ifdef __OUTPUT_IMAGEOBJECT__
-				sprintf(str, "%s[%d] vp=%d. ", str, pImageObject->GetImageObjectID(), pImageObject->GetViewpoint());
+				snprintf(str + strlen(str), sizeof(str) - strlen(str), "[%d] vp=%d. ", pImageObject->GetImageObjectID(), pImageObject->GetViewpoint());
 			#endif
 
 			// ImageObject을 IMAGEOBJECT_MAP에 추가한다.
@@ -1148,33 +1148,16 @@ MZone::LoadFromFile(std::ifstream& file)
 				iImageObjectPosition = ImageObjectPositionList.GetIterator();
 
 
-			/*
-			// File로 SpriteID가 61번인 것의 정보 출력
-			char str[256];
-			char str2[80];
-			if (pImageObject->GetSpriteID()==61)
-			{
-				sprintf(str, "IO[%d] Pixel=(%d, %d)  View=%d  Position=", pImageObject->GetID(), pImageObject->GetPixelX(), pImageObject->GetPixelY(), pImageObject->GetViewpoint());
-			}
-			*/
 
 			// 각 Sector에 ImageObject표시
 			for (int j=0; j<ImageObjectPositionList.GetSize(); j++)
 			{
 				#ifdef __OUTPUT_IMAGEOBJECT__
-					sprintf(str, "%s(%d,%d) ", str, (int)(*iImageObjectPosition).X, (int)(*iImageObjectPosition).Y);
+					snprintf(str + strlen(str), sizeof(str) - strlen(str), "(%d,%d) ", (int)(*iImageObjectPosition).X, (int)(*iImageObjectPosition).Y);
 				#endif
 
 				SetImageObjectSector((*iImageObjectPosition).X, (*iImageObjectPosition).Y, pImageObject->GetID());
 
-				/*
-				// File로 SpriteID가 61번인 것의 정보 출력
-				if (pImageObject->GetSpriteID()==61)
-				{
-					sprintf(str2, "(%d, %d)  ", (*iImageObjectPosition).X, (*iImageObjectPosition).Y);
-					strcat(str, str2);			
-				}
-				*/
 
 				iImageObjectPosition++;			
 			}			
@@ -1183,14 +1166,6 @@ MZone::LoadFromFile(std::ifstream& file)
 				if (g_pDebugMessage!=NULL)
 					g_pDebugMessage->AddToFile( str );
 			#endif
-			/*
-			// File로 SpriteID가 61번인 것의 정보 출력
-			if (pImageObject->GetSpriteID()==61)
-			{
-				strcpy(g_pDebugMessage->GetCurrent(), str);
-				g_pDebugMessage->Next();
-			}
-			*/
 		}					
 	}
 	//-----------------------------------------------------------------
