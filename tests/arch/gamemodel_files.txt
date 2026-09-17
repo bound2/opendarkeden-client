@@ -58,6 +58,8 @@ Client/RankBonusTable.h
 Client/RankBonusDef.h
 
 # Map-file records; live geometry and scheduled actions stay executable-side.
+Client/ZoneMapData.cpp
+Client/ZoneMapData.h
 Client/ZoneFileHeader.cpp
 Client/ZoneFileHeader.h
 Client/MZoneDef.h

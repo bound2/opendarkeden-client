@@ -7,6 +7,7 @@
 #include "MInteractionObject.h"
 #include <cstdio>
 #include <cstring>
+#include <memory>
 
 TEST(ZoneMapRecords, RealRecordClassesLinkWithoutGameGlobals)
 {
@@ -45,4 +46,18 @@ TEST(ZoneMapRecords, RealRecordClassesLinkWithoutGameGlobals)
 		CHECK(loaded.Description == "description");
 	}
 	std::remove(path);
+}
+
+TEST(ZoneMapRecords, TheImageBaseDestroysTheOwnedDerivedRecord)
+{
+	bool destroyed = false;
+	struct Derived : MImageObject {
+		bool& destroyed;
+		explicit Derived(bool& flag) : destroyed(flag) {}
+		~Derived() { destroyed = true; }
+	};
+	{
+		std::unique_ptr<MImageObject> record = std::make_unique<Derived>(destroyed);
+	}
+	CHECK(destroyed);
 }

@@ -102,7 +102,10 @@ MImageObject::LoadFromFile(ifstream& file)
 	file.read((char*)&m_PixelX, 4);
 	file.read((char*)&m_PixelY, 4);
 	file.read((char*)&m_Viewpoint, SIZE_SECTORPOSITION);
-	file.read((char*)&m_bAnimation, 1);
+	BYTE animation = 0;
+	file.read(reinterpret_cast<char*>(&animation), 1);
+	if (animation > 1) file.setstate(std::ios::failbit);
+	m_bAnimation = animation != 0;
 	file.read((char*)&m_bTrans, 1);
 }
 

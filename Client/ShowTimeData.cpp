@@ -37,7 +37,10 @@ ShowTimeChecker::SaveToFile(std::ofstream& file)
 void					
 ShowTimeChecker::LoadFromFile(std::ifstream& file)
 {
-	file.read((char*)&Loop, 1);
+	BYTE loop = 0;
+	file.read(reinterpret_cast<char*>(&loop), 1);
+	if (loop > 1) file.setstate(std::ios::failbit);
+	Loop = loop != 0;
 
 	// MinDelay ~ MaxDelay 사이에는 꼭 한 번 소리가 나야한다.
 	file.read((char*)&MinDelay, 4);

@@ -45,6 +45,7 @@ public :
 
 public :
 	FILEINFO_ZONE_HEADER()
+		: ZoneID(0), ZoneGroupID(0), ZoneType(0), ZoneLevel(0)
 	{
 		ZoneVersion = MAP_VERSION_2000_05_10;
 	}
