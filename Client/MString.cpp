@@ -4,6 +4,8 @@
 
 #include "Client_PCH.h"
 #include <stdarg.h>
+#include <cstdint>
+#include <memory>
 #include "MString.h"
 #include "DebugLog.h"
 
@@ -191,13 +193,20 @@ MString::Format(const char* format, ...)
 void		
 MString::SaveToFile(std::ofstream& file)
 {
-	file.write((const char*)&m_Length, 4);
-
-	// length가 0이 아닌 경우에만..
-	if (m_Length!=0)
-	{
-		file.write((const char*)m_pString, static_cast<int>(m_Length));
+	if (m_Length > UINT32_MAX) {
+		file.setstate(std::ios::failbit);
+		return;
 	}
+	const std::uint32_t length = static_cast<std::uint32_t>(m_Length);
+	const unsigned char prefix[4] = {
+		static_cast<unsigned char>(length),
+		static_cast<unsigned char>(length >> 8),
+		static_cast<unsigned char>(length >> 16),
+		static_cast<unsigned char>(length >> 24)
+	};
+	file.write(reinterpret_cast<const char*>(prefix), sizeof(prefix));
+	if (length != 0)
+		file.write(m_pString, static_cast<std::streamsize>(length));
 }
 
 //--------------------------------------------------------------------------
@@ -206,50 +215,35 @@ MString::SaveToFile(std::ofstream& file)
 void
 MString::LoadFromFile(std::ifstream& file)
 {
-	if (m_pString!=NULL)
-	{
-		delete [] m_pString;
-		m_pString = NULL;
-	}
-
-	file.read((char*)&m_Length, 4);
-
-	// Sanity check: reject obviously corrupted lengths
-	// Maximum reasonable string length is 64KB
-	const size_t MAX_STRING_LENGTH = 65536;
-	if (m_Length > MAX_STRING_LENGTH)
-	{
-		// Corrupted length - treat as empty string
-		DEBUG_ADD_FORMAT("MString: Corrupted length %zu, treating as empty string", m_Length);
-		m_Length = 0;
-		m_pString = new char[1];
-		m_pString[0] = '\0';
+	unsigned char prefix[4]{};
+	if (!file.read(reinterpret_cast<char*>(prefix), sizeof(prefix)))
+		return;
+	const std::uint32_t length = std::uint32_t(prefix[0]) |
+		(std::uint32_t(prefix[1]) << 8) |
+		(std::uint32_t(prefix[2]) << 16) |
+		(std::uint32_t(prefix[3]) << 24);
+	if (length > 65536u) {
+		file.setstate(std::ios::failbit);
 		return;
 	}
 
-	// len이 0이 아닌 경우에만...
-	if (m_Length!=0)
-	{
-		char* pTemp = new char [m_Length + 1];
-		file.read((char*)pTemp, static_cast<int>(m_Length));
-		pTemp[m_Length] = '\0';
+	// Neither failed reads nor conversion/allocation failures publish a partial
+	// value. In particular, never hand an unread tail to the encoding converter.
+	auto input = std::make_unique<char[]>(static_cast<size_t>(length) + 1);
+	if (length != 0 && !file.read(input.get(), length))
+		return;
+	input[length] = '\0';
 
-		// Convert from GBK to UTF-8 at runtime
-		// Resource files are in GBK encoding, convert to UTF-8
-		size_t convertedLen = 0;
-		char* pConverted = ConvertGBKToUTF8(pTemp, m_Length, convertedLen);
-		delete [] pTemp;
-
-		// Update m_Length to the converted length
-		m_Length = convertedLen;
-		m_pString = pConverted;
-	}
+	size_t convertedLength = 0;
+	std::unique_ptr<char[]> converted;
+	if (length != 0)
+		converted.reset(ConvertGBKToUTF8(input.get(), length, convertedLength));
 	else
-	{
-		// Empty string - allocate a buffer for it
-		m_pString = new char[1];
-		m_pString[0] = '\0';
-	}
+		converted = std::move(input);
+
+	delete[] m_pString;
+	m_pString = converted.release();
+	m_Length = convertedLength;
 }
 
 //--------------------------------------------------------------------------
