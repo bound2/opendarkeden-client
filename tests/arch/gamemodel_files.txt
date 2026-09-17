@@ -57,6 +57,23 @@ Client/RankBonusTable.cpp
 Client/RankBonusTable.h
 Client/RankBonusDef.h
 
+# Map-file records; live geometry and scheduled actions stay executable-side.
+Client/ZoneFileHeader.cpp
+Client/ZoneFileHeader.h
+Client/MZoneDef.h
+Client/MImageObject.cpp
+Client/MImageObject.h
+Client/MAnimationObject.cpp
+Client/MAnimationObject.h
+Client/MShadowObject.cpp
+Client/MShadowObject.h
+Client/MShadowAnimationObject.cpp
+Client/MShadowAnimationObject.h
+Client/MInteractionObject.cpp
+Client/MInteractionObject.h
+Client/ShowTimeData.cpp
+Client/ShowTimeChecker.h
+
 # Money (task 4.2; the price and trade managers wait for the item core)
 Client/MMoneyManager.cpp
 Client/MMoneyManager.h
