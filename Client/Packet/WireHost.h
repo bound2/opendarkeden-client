@@ -181,4 +181,9 @@ private :
 //----------------------------------------------------------------------
 void	SendBugReport ( const char * bug , ... );
 
+// The same report with "[file,line] " in front, from a site captured
+// at the call.
+struct DiagnosticSite;
+void	SendBugReportAt ( const DiagnosticSite & site , const char * bug , ... );
+
 #endif	// __WIREHOST_H__

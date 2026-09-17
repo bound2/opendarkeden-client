@@ -67,7 +67,7 @@ void GCSkillToTileOK1Handler::execute ( GCSkillToTileOK1 * pPacket, Player * pPl
 
 		if( g_pActionInfoTable->GetSize() <= skillID )
 		{
-			SendBugReport("[%s,%d] %d",__FILE__, __LINE__, skillID );
+			SendBugReportAt(DiagnosticSite(), "%d", skillID);
 			return;
 		}
 //		// 2004, 9, 9, sobeit add start
@@ -98,7 +98,7 @@ void GCSkillToTileOK1Handler::execute ( GCSkillToTileOK1 * pPacket, Player * pPl
 
 			if (useSkillID >= g_pActionInfoTable->GetMinResultActionInfo())
 			{
-				SendBugReport("[%s,%d] %d",__FILE__, __LINE__, skillID);
+				SendBugReportAt(DiagnosticSite(), "%d", skillID);
 				return;
 			}
 		}

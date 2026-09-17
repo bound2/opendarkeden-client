@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "WireHost.h"
+#include "Exception.h"
 #include "Player.h"
 #include "Cpackets/CGSay.h"
 #include "DebugLog.h"		// DEBUG_ADD_FORMAT, for the __DEBUG_OUTPUT__ block below
@@ -205,19 +206,27 @@ static_assert(BUG_REPORT_TEXT_MAX > 0, "the bug report prefix does not fit in a 
 
 } // namespace
 
+namespace {
+
+//----------------------------------------------------------------------
+// The report's text: an optional site prefix, then the caller's format,
+// into one bounded buffer, cut where the packet ends.
+//----------------------------------------------------------------------
 void
-SendBugReport ( const char * bug , ... )
+SendBugReportV ( const char * prefix , const char * bug , va_list vl )
 {
-	if( bug == NULL )
-		return;
-
-
-	va_list		vl;
 	char Buffer[256];
+	int at = 0;
 
-	va_start(vl, bug);
-	int written = vsnprintf(Buffer, sizeof(Buffer), bug, vl);
-	va_end(vl);
+	if( prefix != NULL )
+	{
+		at = snprintf(Buffer, sizeof(Buffer), "%s", prefix);
+
+		if (at < 0 || at >= (int)sizeof(Buffer))
+			return;
+	}
+
+	int written = vsnprintf(Buffer + at, sizeof(Buffer) - at, bug, vl);
 
 	// vsnprintf NUL terminates within sizeof(Buffer), so a report longer than
 	// the buffer is truncated instead of overrunning the stack. That also makes
@@ -257,5 +266,36 @@ SendBugReport ( const char * bug , ... )
 
 	if( pTarget != NULL )
 		pTarget->sendPacket( &_CGSay );
+}
 
+} // namespace
+
+void
+SendBugReport ( const char * bug , ... )
+{
+	if( bug == NULL )
+		return;
+
+	va_list		vl;
+
+	va_start(vl, bug);
+	SendBugReportV(NULL, bug, vl);
+	va_end(vl);
+}
+
+void
+SendBugReportAt ( const DiagnosticSite & site , const char * bug , ... )
+{
+	if( bug == NULL )
+		return;
+
+	// The "[file,line] " the callers used to format by hand.
+	char prefix[256];
+	snprintf(prefix, sizeof(prefix), "[%s,%d] ", site.file != NULL ? site.file : "", site.line);
+
+	va_list		vl;
+
+	va_start(vl, bug);
+	SendBugReportV(prefix, bug, vl);
+	va_end(vl);
 }

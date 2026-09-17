@@ -245,3 +245,32 @@ TEST(BugReport, NoReportOutgrowsThePacketThatCarriesIt)
 		CHECK(ACGSayCarries(report));
 	}
 }
+
+//----------------------------------------------------------------------
+// A report at a site carries the site in front
+//----------------------------------------------------------------------
+TEST(BugReport, AReportAtASiteCarriesTheSiteInFront)
+{
+	CapturingTarget	target;
+	NoHost		restore;
+
+	s_pTarget = &target;
+	Wire::SetHost(&s_Host);
+
+	// An explicit site: the "[file,line] " the callers used to format.
+	SendBugReportAt(DiagnosticSite("Some.cpp", 42), "%d,%d", 7, 9);
+
+	CHECK_EQ(1, target.m_nSent);
+	CHECK(target.m_Message == PREFIX + "[Some.cpp,42] 7,9");
+
+	// The defaulted site is the caller's line, not the header's.
+	const int line = __LINE__ + 1;
+	SendBugReportAt(DiagnosticSite(), "%d", 1);
+
+	CHECK_EQ(2, target.m_nSent);
+	CHECK(target.m_Message == PREFIX + "[" + __FILE__ + "," + std::to_string(line) + "] 1");
+
+	// Nothing to format: nothing sent, as SendBugReport does.
+	SendBugReportAt(DiagnosticSite("Some.cpp", 42), NULL);
+	CHECK_EQ(2, target.m_nSent);
+}

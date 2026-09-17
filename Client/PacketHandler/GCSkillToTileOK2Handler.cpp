@@ -63,7 +63,7 @@ void GCSkillToTileOK2Handler::execute ( GCSkillToTileOK2 * pPacket , Player * pP
 			if( g_pActionInfoTable->GetSize() <= skillID )
 			{
 				//DEBUG_ADD_FORMAT("[Error] Exceed SkillType %d",skillID);				
-				SendBugReport("[%s,%d] %d",__FILE__, __LINE__, skillID );
+				SendBugReportAt(DiagnosticSite(), "%d", skillID);
 				return;
 			}
 	

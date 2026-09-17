@@ -1772,7 +1772,7 @@ SetInventoryInfo(InventoryInfo* pInventoryInfo)
 			if( pSlotInfo->getItemClass() >= g_pItemTable->GetSize() ||
 				pSlotInfo->getItemType() >= (*g_pItemTable)[pSlotInfo->getItemClass()].GetSize() )
 			{
-				SendBugReport("[%s] %d,%d",__FILE__, pSlotInfo->getItemClass(), pSlotInfo->getItemType());
+				SendBugReportAt(DiagnosticSite(), "%d,%d", pSlotInfo->getItemClass(), pSlotInfo->getItemType());
 				delete pSlotInfo;
 				continue;
 			}
@@ -2056,7 +2056,7 @@ SetGearInfo(GearInfo* pGearInfo, BloodBibleSignInfo* pBloodBibleInfo)
 			if( pSlotInfo->getItemClass() >= g_pItemTable->GetSize() ||
 				pSlotInfo->getItemType() >= (*g_pItemTable)[pSlotInfo->getItemClass()].GetSize() )
 			{
-				SendBugReport("[%s,%d] %d,%d",__FILE__, __LINE__,pSlotInfo->getItemClass(), pSlotInfo->getItemType());
+				SendBugReportAt(DiagnosticSite(), "%d,%d", pSlotInfo->getItemClass(), pSlotInfo->getItemType());
 				delete pSlotInfo;
 				continue;
 			}
@@ -6365,7 +6365,7 @@ void SetSubInventoryInfo(InventoryInfo* pInventoryInfo)
 		if( pSlotInfo->getItemClass() >= g_pItemTable->GetSize() ||
 			pSlotInfo->getItemType() >= (*g_pItemTable)[pSlotInfo->getItemClass()].GetSize() )
 		{
-			SendBugReport("[%s] %d,%d",__FILE__, pSlotInfo->getItemClass(), pSlotInfo->getItemType());
+			SendBugReportAt(DiagnosticSite(), "%d,%d", pSlotInfo->getItemClass(), pSlotInfo->getItemType());
 			delete pSlotInfo;
 			continue;
 		}
