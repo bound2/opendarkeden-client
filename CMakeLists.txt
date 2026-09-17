@@ -960,7 +960,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		# list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*GameMain.*")  # Re-enabled for cross-platform support
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*EXECryptor.*")
 		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*GetWinVer.*")
-		list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*MInternetConnection.*")
 		# Three anchored "^Client/..." filters used to sit here, for the
 		# root-level *Handler.cpp files, Client.cpp and ClientFunction.cpp.
 		# None ever matched: the glob yields absolute paths. There is no
@@ -1039,8 +1038,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 
 	# Standard Windows import libraries for APIs this project calls
 	# directly (Winsock: SocketAPI.cpp/DatagramSocket.cpp/...; Winmm:
-	# WavePackFileManager.cpp's mmio* calls; WinInet:
-	# MInternetConnection.cpp; Comctl32: InitCommonControls). None of
+	# WavePackFileManager.cpp's mmio* calls; Comctl32: InitCommonControls). None of
 	# these were previously in the link line, so every symbol from them
 	# was an unresolved external (LNK2001/LNK2019) once the code that
 	# calls them started compiling.
@@ -1048,7 +1046,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		target_link_libraries(DarkEden PRIVATE
 			ws2_32
 			winmm
-			wininet
 			comctl32
 			netapi32
 		)

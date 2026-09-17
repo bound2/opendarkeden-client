@@ -12,7 +12,6 @@
 #include "PacketDispatcher.h"
 #include "Lpackets/LCReconnect.h"
 #include "ClientDef.h"
-#include "MonotonicClock.h"
 #include "ServerInfoFileParser.h"
 
 	#include "ClientPlayer.h"
@@ -25,16 +24,6 @@
 	#include "Cpackets/CGConnectSetKey.h"
 	//end
 
-#ifdef OUTPUT_DEBUG
-	#include <time.h>
-
-	struct tempStruct
-	{
-		SYSTEMTIME st;
-		DWORD reconnectTickCount;
-		DWORD sendCGConnectTickCount;
-	};
-#endif
 
 // ACProtect include removed (SDL2) - Copy protection no longer needed
 
@@ -50,90 +39,6 @@ void LCReconnectHandler::execute ( LCReconnect * pPacket , Player * pPlayer )
 {
 	__BEGIN_TRY
 
-		/*
-#ifdef __GAME_CLIENT__
-
-	ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
-
-	// 로그인 서버와의 연결을 종료한다
-	// 이때 로그인 서버는 LCReconnect 패킷을 보내면서 연결을 종료한다는 사실에 유의하라.
-	cout << "Disconnecting from login server" << endl;
-	pClientPlayer->disconnect();
-
-	// LCReconnect 패킷에 들어있는 정보를 사용해서, 게임 서버로 연결한다.
-	cout << "Reconnecting to " << pPacket->getGameServerIP() << ":" << pPacket->getGameServerPort() << endl;
-
-	try {
-
-		pClientPlayer->getSocket()->reconnect( pPacket->getGameServerIP() , pPacket->getGameServerPort() );
-
-		// reconnect하게 되면 소켓이 새로 만들어지게 된다.
-		// 따라서, 이 소켓 역시 옵션을 새로 지정해줘야 한다.
-		pClientPlayer->getSocket()->setNonBlocking();
-		pClientPlayer->getSocket()->setLinger(0);
-
-	} catch ( ConnectException & ce ) {
-		throw Error(ce.toString());
-	}
-
-	// 연결이 이루어지면, 바로 CGConnect 패킷을 전송한다.
-	// 이전에 Select 한 PC의 타입과 이름을 클라이언트 플레이어 객체에 저장해둔다.
-	cout << "Sending CGConnect with Key(" << pPacket->getKey() << ")" << endl;
-
-	CGConnect cgConnect;
-	cgConnect.setKey( pPacket->getKey() );
-	cgConnect.setPCType( pClientPlayer->getPCType() );
-	cgConnect.setPCName( pClientPlayer->getPCName() );
-
-	pClientPlayer->sendPacket( &cgConnect );
-	pClientPlayer->setPlayerStatus( CPS_AFTER_SENDING_CG_CONNECT );
-
-#endif
- */
-#ifdef OUTPUT_DEBUG
-	FILE *fp = NULL;
-	MonotonicClock::TimePoint tickCount;
-
-
-	std::list<struct tempStruct> tempStructList;
-	struct tempStruct currentTempStruct;
-
-	fp = fopen("Log\\ConnectTime.txt", "rt");
-	if(fp != NULL)
-	{
-		char readTemp[512];
-		fgets(readTemp, 512, fp);
-		while(fgets(readTemp, 512, fp) != NULL)
-		{
-			if(readTemp[0] == 'r')break;
-			
-			struct tempStruct ts;
-
-			DWORD reconnectTickCount = 0, sendCGConnectTickCount = 0;
-			sscanf(readTemp, "%4d/%2d/%2d %2d:%2d:%2d\t%8d\t%8d\n", 
-				&ts.st.wYear, &ts.st.wMonth, &ts.st.wDay, &ts.st.wHour, &ts.st.wMinute, &ts.st.wSecond,
-				&ts.reconnectTickCount,
-				&ts.sendCGConnectTickCount);
-
-			tempStructList.push_back(ts);
-		}
-
-		fclose(fp);
-	}
-
-// 	fp = fopen("Log\\ConnectTime.txt", "wt");
-//	if(fp != NULL)
-//	{
-// 		fprintf(fp, "CurrentTime\tReconnect TickCount\tSend cgConnect TickCount\n");
-
-		SYSTEMTIME st;
-		GetLocalTime(&st);
-
-		currentTempStruct.st = st;
-//		fprintf(fp, "%4d/%2d/%2d %2d:%2d:%2d\t", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond );
-//		fclose(fp);
-// 	}
-#endif
 
 	ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
 
@@ -148,13 +53,7 @@ void LCReconnectHandler::execute ( LCReconnect * pPacket , Player * pPlayer )
 										pPacket->getGameServerPort());
 	
 	try {
-#ifdef OUTPUT_DEBUG
-		tickCount = MonotonicClock::Now();
-#endif
 		pClientPlayer->getSocket()->reconnect( pPacket->getGameServerIP() , pPacket->getGameServerPort() );
-#ifdef OUTPUT_DEBUG
-		currentTempStruct.reconnectTickCount = (DWORD)(MonotonicClock::Now() - tickCount).count();
-#endif
 		// reconnect하게 되면 소켓이 새로 만들어지게 된다.
 		// 따라서, 이 소켓 역시 옵션을 새로 지정해줘야 한다.
 		pClientPlayer->getSocket()->setNonBlocking();
@@ -189,9 +88,6 @@ void LCReconnectHandler::execute ( LCReconnect * pPacket , Player * pPlayer )
 	cgConnect.setPCName( pClientPlayer->getPCName() );
 	cgConnect.setMacAddress( g_macAddress );
 	
-#ifdef OUTPUT_DEBUG
-	tickCount = MonotonicClock::Now();
-#endif
 	pClientPlayer->sendPacket( &cgConnect );
 	pClientPlayer->setPlayerStatus( CPS_AFTER_SENDING_CG_CONNECT );	
 
@@ -200,9 +96,6 @@ void LCReconnectHandler::execute ( LCReconnect * pPacket , Player * pPlayer )
 	UpdateSocketOutput();
 //	EMBEDDED_END;
 	
-#ifdef OUTPUT_DEBUG
-	currentTempStruct.sendCGConnectTickCount = (DWORD)(MonotonicClock::Now() - tickCount).count();
-#endif
 	
 	// 2002.6.28 [UDP수정]
 	// 서버에 UDP port를 알려주기 위해서
@@ -234,42 +127,5 @@ void LCReconnectHandler::execute ( LCReconnect * pPacket , Player * pPlayer )
 	SetMode( MODE_WAIT_UPDATEINFO );
 	DEBUG_ADD("[ MODE ] END SETMODE MODE_WAIT_UPDATEINFO");
 
-#ifdef OUTPUT_DEBUG
- 	fp = fopen("Log\\ConnectTime.txt", "wt");
-	if(fp != NULL)
-	{
-		tempStructList.push_back(currentTempStruct);
-
- 		fprintf(fp, "CurrentTime\tReconnect TickCount\tSend cgConnect TickCount\n");
-		
-		DWORD minReconnectTickCount = 0xffffffff, minCGTickCount = 0xffffffff, maxReconnectTickCount = 0, maxCGTickCount = 0, reconnectSum = 0, CGSum = 0;
-		int size = tempStructList.size();
-
-		while(!tempStructList.empty())
-		{
-			tempStruct ts;
-			ts = tempStructList.front();
-			tempStructList.pop_front();
-
-			fprintf(fp, "%4d/%2d/%2d %2d:%2d:%2d\t%8d\t%8d\n", 
-				ts.st.wYear, ts.st.wMonth, ts.st.wDay, ts.st.wHour, ts.st.wMinute, ts.st.wSecond,
-				ts.reconnectTickCount,
-				ts.sendCGConnectTickCount);
-
-			if(ts.reconnectTickCount < minReconnectTickCount)minReconnectTickCount = ts.reconnectTickCount;
-			if(ts.reconnectTickCount > maxReconnectTickCount)maxReconnectTickCount = ts.reconnectTickCount;
-			if(ts.sendCGConnectTickCount < minCGTickCount)minCGTickCount = ts.sendCGConnectTickCount;
-			if(ts.sendCGConnectTickCount > maxCGTickCount)maxCGTickCount = ts.sendCGConnectTickCount;
-
-			reconnectSum += ts.reconnectTickCount;
-			CGSum += ts.sendCGConnectTickCount;
-
-		}
-
-		fprintf(fp, "reconnect TickCount Min : %d Max : %d Avr : %d\n", minReconnectTickCount, maxReconnectTickCount, reconnectSum/size);
-		fprintf(fp, "send cgConnect TickCount Min : %d Max : %d Avr : %d\n", minCGTickCount, maxCGTickCount, CGSum/size);
-		fclose(fp);
-	}
-#endif
 	__END_CATCH
 }

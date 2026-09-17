@@ -150,7 +150,9 @@ void Datagram::read ( DatagramPacket * & pPacket )
 	readWire( packetID );
 	readWire( packetSize );
 
-	cout << "DatagramPacket I  D : " << packetID;
+	#ifdef __DEBUG_OUTPUT__
+		cout << "DatagramPacket I  D : " << packetID;
+	#endif
 
 	// 패킷 아이디가 이상할 경우
 	if ( packetID >= Packet::PACKET_MAX )
@@ -163,7 +165,9 @@ void Datagram::read ( DatagramPacket * & pPacket )
 		cout << " ( " << g_pPacketFactoryManager->getPacketName(packetID).c_str() << " ) " << endl;
 	#endif
 
-	cout << "DatagramPacket Size : " << packetSize << endl;
+	#ifdef __DEBUG_OUTPUT__
+		cout << "DatagramPacket Size : " << packetSize << endl;
+	#endif
 
 	// 패킷 사이즈가 이상할 경우
 	if ( packetSize > g_pPacketFactoryManager->getPacketMaxSize(packetID) )
