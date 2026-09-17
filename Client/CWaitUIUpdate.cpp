@@ -231,7 +231,7 @@ CWaitUIUpdate::Update()
 	#endif
 
 	//------------------------------------------
-	// 일정시간마다 한번씩 update
+	// update once per interval
 	//------------------------------------------
 	if (g_FrameNow - lastTime >= MonotonicClock::Millis(g_UpdateDelay))
 	{

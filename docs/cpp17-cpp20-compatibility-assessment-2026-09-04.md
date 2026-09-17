@@ -1518,8 +1518,7 @@ test suite in both; the client not run.
 The twelfth priority-5 slice (2026-09-17) opens the frame clock, the
 last of the tick's readers. `g_CurrentTime` is a `DWORD` stamped from
 `timeGetTime()` at the top of every frame and was read at 144 sites:
-the static-local gates of the update loops, some forty member stamps
-in twenty classes, three deadlines in `UserInformation`, `MGameTime`'s
+the static-local gates of the update loops, some forty member stamps in a dozen classes, three deadlines in `UserInformation`, `MGameTime`'s
 base, and two library seams (`MItemHost::pCurrentTime`, the pointer the
 item core's trade-accept and skill-use delays run on, and
 `WireHost::CurrentTime`, the function the wire layer's timeouts run
@@ -1543,8 +1542,7 @@ elapsed, the help scroll and the resurrect dialog's frame step;
 `MTopView`'s four message scrolls and click frame; `GameMain`'s
 request-manager tick and keep-alive; the wait screens' update gate;
 `Client.cpp`'s log flush and the FPS window (`g_StartTime` a
-`TimePoint`; `g_EndTime`, never read, deleted); the party status send
-in `MPlayer`; and `MZone`'s personal-shop reset, whose interval is a
+`TimePoint`; `g_EndTime`, never read, deleted); the party status send and the conversion countdown's blink gate in `MPlayer`; and `MZone`'s personal-shop reset, whose interval is a
 signed option value floored at zero, since a negative one made the
 `DWORD` sum wrap so the reset fired every frame and `Millis()` would
 have made it 49.7 days. With them the small stamp classes only the
@@ -1560,9 +1558,7 @@ zone random-sound deadline shared by `GameMain` and `MZone`, and
 delay and the overrun instead of two raw ticks). `CWinUpdate`, the base
 of the update classes, kept a static tick, a last-update stamp and a
 delay that no class outside it read; they are deleted rather than
-retyped, with the two tick calls in them. Two write-only statics in
-`CGameUpdate` (`lastDisplayGameTime`, the `TempCurrentTime` and
-`TemplastTime` pair) went the same way. Gates that compared a `DWORD`
+retyped, with the two tick calls in them. A write-only static in `CGameUpdate` (`lastDisplayGameTime`) and a write-only pair of locals (`TempCurrentTime`, `TemplastTime`) went the same way. Gates that compared a `DWORD`
 difference against an `int` delay (`g_UpdateDelay`, the config's
 message delays, `tmp`) hand the `int` to `Millis(DWORD)` as they handed
 it to the unsigned comparison: a negative delay never fired before and
@@ -1571,7 +1567,7 @@ never fires now. Quantisation: every one of these read the 1 ms
 through the same stamp; the frame-consistent read (one stamp per
 frame, not a fresh `Now()` per gate) is kept on purpose. R14 goes from
 10 to 5 (the one remaining writer, the two log-file names, the hack
-check); R16 starts at 59 from 144. What is left for the next slices:
+check); R16 starts at 57 from 144. What is left for the next slices:
 the creatures' and the player's member stamps (chat fade, recovery,
 regeneration, bleeding, action and death delays, the conversion
 countdown), `UserInformation`'s deadlines with their `gamemodel` test

@@ -5814,7 +5814,7 @@ CGameUpdate::UpdateDrawHelp()
 		}		
 	}
 
-	// 5초마다 한번씩.. scroll
+	// scroll every 5 seconds
 	static MonotonicClock::TimePoint HelplastTime = g_FrameNow;
 	if (g_FrameNow - HelplastTime >= MonotonicClock::Millis(g_pClientConfig->DELAY_GAMEMESSAGE))
 	{
@@ -5996,10 +5996,10 @@ CGameUpdate::Update(void)
 
 	if (g_FrameNow > nextSoundCheckTime)
 	{
-		// 초당 play한 sound 수..
+		// sounds played this second
 		g_SoundPerSecond = 0;
 
-		// 1초 후
+		// one second on
 		nextSoundCheckTime = g_FrameNow + MonotonicClock::Millis(1000);
 	}
 

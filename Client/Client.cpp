@@ -2953,7 +2953,7 @@ ApplyPatch()
 					DEBUG_ADD_FORMAT("[Time = %d]", g_CurrentTime);
 				}
 
-				// 3분 후
+				// three minutes on
 				flushTime = g_FrameNow + MonotonicClock::Millis(flushDelay);
 			}
 		//#endif

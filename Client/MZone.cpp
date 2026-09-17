@@ -53,7 +53,7 @@ MZone*				g_pZone				= NULL;
 BOOL g_bPlayPropeller = FALSE;
 
 extern HWND					g_hWnd;
-extern MonotonicClock::TimePoint				g_ZoneRandomSoundTime;
+extern MonotonicClock::TimePoint	g_ZoneRandomSoundTime;
 
 extern void		SendPositionInfoToParty();
 extern void		SendStatusInfoToParty();
@@ -5684,7 +5684,7 @@ MZone::UpdateSound()
 				PlaySound( soundID, false, x, y );
 			}
 			
-			// 10~30초 후에 다시 소리 낸다
+			// the next random sound in 6 to 15 seconds
 			g_ZoneRandomSoundTime = g_FrameNow + MonotonicClock::Millis(((rand()%10)+6)*1000);			
 		}
 	}

@@ -7,6 +7,8 @@
 #ifndef	__CWINUPDATE_H__
 #define	__CWINUPDATE_H__
 
+// Platform.h, not <MMSystem.h>: the real header conflicts with the SDL
+// stand-ins in basic/AudioTypes.h and with the timeGetTime() macro it defines.
 #include "../../basic/Platform.h"
 
 class CWinUpdate {

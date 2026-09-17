@@ -9472,7 +9472,7 @@ MTopView::DrawInformation()
 		}
 	}
 
-	// 5초마다 한번씩.. scroll
+	// scroll every 5 seconds
 	static MonotonicClock::TimePoint lastTime = g_FrameNow;
 	if (g_FrameNow - lastTime >= MonotonicClock::Millis(g_pClientConfig->DELAY_SYSTEMMESSAGE))
 	{
@@ -9480,7 +9480,7 @@ MTopView::DrawInformation()
 		lastTime = g_FrameNow;
 	}
 
-	// 7초마다 한번씩.. scroll
+	// scroll every 7 seconds
 	static MonotonicClock::TimePoint lastNoticeTime = g_FrameNow;
 	if (g_FrameNow - lastNoticeTime >= MonotonicClock::Millis(g_pClientConfig->DELAY_SYSTEMMESSAGE + 2000))
 	{
@@ -9488,7 +9488,7 @@ MTopView::DrawInformation()
 		lastNoticeTime = g_FrameNow;
 	}
 
-	// 7초마다 한번씩.. scroll
+	// scroll every 7 seconds
 	static MonotonicClock::TimePoint lastPlayerTimer = g_FrameNow;
 	if (g_FrameNow - lastPlayerTimer >= MonotonicClock::Millis(g_pClientConfig->DELAY_SYSTEMMESSAGE + 10000))
 	{
@@ -9561,7 +9561,7 @@ MTopView::DrawInformation()
 		}		
 	}
 
-	// 5초마다 한번씩.. scroll
+	// scroll every 5 seconds
 	static MonotonicClock::TimePoint gamelastTime = g_FrameNow;
 	if (g_FrameNow - gamelastTime >= MonotonicClock::Millis(g_pClientConfig->DELAY_GAMEMESSAGE))
 	{

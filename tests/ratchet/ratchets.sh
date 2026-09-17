@@ -1314,14 +1314,13 @@ else
 fi
 
 #----------------------------------------------------------------------
-#----------------------------------------------------------------------
 # R16 - live spellings of g_CurrentTime, the frame clock's DWORD, under
 # Client and VS_UI.
 #
 # The frame clock is stamped once per frame and read at every gate the
 # game runs on. It was one DWORD, g_CurrentTime, wrapping every 49.7
 # days like the tick it copies, so the "deadline = g_CurrentTime +
-# delay" shape at some forty stamps in twenty classes had the sum-wrap
+# delay" shape at some forty stamps in a dozen classes had the sum-wrap
 # failure R14 describes. The twelfth clocks slice (2026-09-17) put a
 # TimePoint beside it, g_FrameNow, stamped by the same StampFrameClock()
 # call, and moves the readers over one group at a time; the DWORD goes
@@ -1331,25 +1330,27 @@ fi
 # tests/tools/count_identifier.pl, so a mention in a comment or a
 # string does not count.
 #
-# 59 on 2026-09-17, from 144 before the slice: the static-local gates
+# 57 on 2026-09-17, from 144 before the slice, which moved the static-local gates
 # in CGameUpdate (the fixed-step accumulator with its catch-up loop and
 # draw interpolation, the sound-per-second window, the anti-cheat
 # elapsed clamp, the help scroll, the resurrect-dialog frame step), in
 # MTopView (the four message scrolls, the click frame), in GameMain
 # (the request-manager tick, the keep-alive, the zone random sound
 # deadline shared with MZone), in CWaitUIUpdate, in Client.cpp (the log
-# flush and the FPS window) and in MPlayer (the party status send); the
+# flush and the FPS window) and in MPlayer (the party status send and the
+# conversion countdown's blink gate); the
 # wait-for-packet deadline; and the small stamp classes - SoundNode,
 # ShowTimeChecker, MHelpDisplayer, MParty, MJusticeAttackManager,
 # MZoneSoundManager. What is left is the creatures' and the player's
 # member stamps (chat fade, recovery, regeneration, bleeding, action and
-# death delays, the conversion countdown), UserInformation's three
-# deadlines (a gamemodel member), MGameTime's start and current time,
+# death delays, the conversion countdown), two of UserInformation's three
+# deadlines (a gamemodel member; GlobalSayTime's reads are commented
+# out), MGameTime's start and current time,
 # the item host's clock pointer and the wire host's clock function (two
 # library seams), the debug prints, the one write in StampFrameClock()
 # and the externs.
 #----------------------------------------------------------------------
-R16_BASELINE=59
+R16_BASELINE=57
 R16_FILES_FLOOR=1000
 
 r16_members () {
@@ -1367,6 +1368,7 @@ else
 	check "R16 (live reads of the frame clock's DWORD, g_CurrentTime)" "$R16" "$R16_BASELINE"
 fi
 
+#----------------------------------------------------------------------
 # R6 was here for exactly one slice, and retired by doing its job.
 #
 # Task 5.1 stubbed SendBugReport in tests/stubs/client_globals.cpp so

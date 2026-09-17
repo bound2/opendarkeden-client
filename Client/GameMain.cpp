@@ -337,7 +337,7 @@ UpdateSocketInput()
 		}
 
 
-		// 초당 3번 update한다.
+		// three updates a second
 		nextTime = g_FrameNow + MonotonicClock::Millis(330);
 	}
 
@@ -2712,7 +2712,7 @@ LoadZone(int n)
 	//------------------------------------------------
 	// Random SoundID 시간 설정
 	//------------------------------------------------
-	g_ZoneRandomSoundTime = g_FrameNow + MonotonicClock::Millis(((rand()%5)+10)*1000);	// 10~15초후..
+	g_ZoneRandomSoundTime = g_FrameNow + MonotonicClock::Millis(((rand()%5)+10)*1000);	// 10 to 15 s from now
 	
 	
 
@@ -4583,7 +4583,7 @@ KeepConnection()
 			static MonotonicClock::TimePoint lastTime = g_FrameNow;
 
 			//------------------------------------------------------------------
-			// 3분 마다 한번씩 garbarge packet을 보낸다.
+			// a keep-alive packet every three minutes
 			//------------------------------------------------------------------
 			if (g_FrameNow - lastTime > MonotonicClock::Millis(180000))		// 3 * 60 * 1000
 			{
