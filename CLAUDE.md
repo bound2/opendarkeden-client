@@ -149,9 +149,12 @@ the failure count, so the exit code is 0 only when the suite is clean.
   asserts the rejected input or the preserved value.
 - **Then run the same suite under ASan**, where the invalid access aborts the process.
   Both trees green, or the fix is not verified.
-- **Executable-only code has no test path.** It gets verified by running the client
-  against a live server. The ten defects under *Runtime defects* in the review were
-  all found that way, and none were reachable from a test binary. The ones in the
+- **Executable-only code cannot be linked by the unit binary.** Verify changes
+  with builds and available automated regression checks. **Live-server verification
+  is optional and must not block a merge or completion** (user instruction,
+  2026-09-17); do not request a runtime report as merge approval. The ten defects
+  under *Runtime defects* in the review were found against a live server, and none
+  were reachable from a test binary. The ones in the
   short table below them were found by *reading*, during remediation passes, and are
   filed separately for exactly that reason — the heading is a claim about how a
   defect was found, not a bin for anything executable-side.

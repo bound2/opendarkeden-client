@@ -2,6 +2,11 @@
 
 Date: 2026-09-05
 
+Verification policy updated 2026-09-17: per the user's instruction, live-server
+checks are optional and do not block merging or completion. Automated build,
+test and wire checks remain required; historical runtime results below are not
+claims that additional runtime testing was performed.
+
 These three slices follow the C++20 build, span I/O, and typed wire scalar work.
 They concentrate on repeatable verification and bounded input handling. Strict
 second-compiler conformance, wider fuzzing, timing/rendering extraction, and
@@ -28,8 +33,8 @@ reports. Automatic runs are limited to pushes to `master`, including merged PRs,
 to conserve Actions minutes; manual dispatch remains available. PR updates do
 not trigger CI. The ordinary Debug configuration retains `/RTC1`; ASan uses its own
 configuration and runtime. The workflow does not launch the client or fetch game
-assets. Hosted verification runs after merge; local verification and live-server
-smoke tests provide the pre-merge checks.
+assets. Hosted verification runs after merge; local automated verification
+provides the pre-merge checks. Live-server smoke testing is optional.
 
 ## UI text preparation
 
@@ -51,7 +56,7 @@ Owner: `tests/unit/test_ui_safe_text.cpp` covers long and multibyte strings,
 supplementary characters, truncated UTF-8, output capacity, and grade-table
 boundaries. These are regression guards; the original widget overflows were
 identified from the source and were not reproduced through a running game.
-Visual checks of text editing and tooltips remain part of the runtime smoke test.
+Visual checks of text editing and tooltips are optional runtime diagnostics.
 
 ## Packet framing
 
@@ -72,8 +77,8 @@ Owners: malformed-frame tests in `test_packetwire_parsers.cpp`, receive-loop
 tests, and the framed round trips added to `test_packet_goldens.cpp`. Existing
 golden files and the wire-layout inventory must remain byte-identical. Exact
 consumption can expose pre-existing reader/writer disagreements in packet
-families without fixtures; login, zone entry, inventory/shop operations, chat,
-and reconnect therefore still require a live-server smoke test before merge.
+families without fixtures. Live-server checks of login, zone entry, inventory/shop
+operations, chat and reconnect are optional, not a merge gate.
 
 ## Validation performed
 
