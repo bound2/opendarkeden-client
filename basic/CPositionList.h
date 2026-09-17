@@ -36,12 +36,12 @@ class POSITION_NODE {
 			Y = node.Y;
 		}
 
-		bool	operator == (const POSITION_NODE& node)
+		bool	operator == (const POSITION_NODE& node) const
 		{
 			return X==node.X && Y==node.Y;
 		}
 
-		bool	operator > (const POSITION_NODE& node)
+		bool	operator > (const POSITION_NODE& node) const
 		{
 			if (X > node.X) return true;
 			if (X < node.X) return false;
@@ -49,7 +49,7 @@ class POSITION_NODE {
 			return false;
 		}
 
-		bool	operator < (const POSITION_NODE& node)
+		bool	operator < (const POSITION_NODE& node) const
 		{
 			if (X < node.X) return true;
 			if (X > node.X) return false;
@@ -102,6 +102,7 @@ class CPositionList {
 		//--------------------------------------------------------------
 		int										GetSize() const		{ return m_listPosition.size(); }
 		typename POSITION_LIST::const_iterator	GetIterator() const	{ return m_listPosition.begin(); }
+		typename POSITION_LIST::const_iterator	GetEnd() const		{ return m_listPosition.end(); }
 
 
 		//--------------------------------------------------------------
@@ -116,7 +117,6 @@ class CPositionList {
 		POSITION_LIST		m_listPosition;
 
 		
-		static BYTE			s_SizeOfPositionType;
 };
 
 
@@ -129,8 +129,6 @@ class CPositionList {
 //----------------------------------------------------------------------
 // Init Static Member
 //----------------------------------------------------------------------
-template <class Type>
-BYTE	CPositionList<Type>::s_SizeOfPositionType	= sizeof(Type);
 
 //----------------------------------------------------------------------
 //
@@ -253,71 +251,42 @@ template <class Type>
 void		
 CPositionList<Type>::SaveToFile(std::ofstream& file)
 {
-	//----------------------------------------
-	// Size저장
-	//----------------------------------------
-	WORD size = m_listPosition.size();
-
-	file.write((const char*)&size, 2);
-
-	// 아무것도 없으면 return
-	if (size==0)
+	// Preserve the WORD-count file format; never narrow an unrepresentable size.
+	if (m_listPosition.size() > 65535u) {
+		file.setstate(std::ios::failbit);
 		return;
-
-
-	typename POSITION_LIST::iterator iPosition = m_listPosition.begin();
-
-	POSITION_NODE<Type>	node;
-
-	//----------------------------------------
-	// 각각의 POSITION_NODE를 저장한다.
-	//----------------------------------------
-	while (iPosition != m_listPosition.end())
-	{		
-		node = *iPosition;
-
-		file.write((const char*)&node.X, s_SizeOfPositionType);
-		file.write((const char*)&node.Y, s_SizeOfPositionType);
-
-		iPosition++;
-	}	
-	
+	}
+	const WORD size = static_cast<WORD>(m_listPosition.size());
+	file.write(reinterpret_cast<const char*>(&size), sizeof(size));
+	for (const auto& node : m_listPosition) {
+		file.write(reinterpret_cast<const char*>(&node.X), sizeof(Type));
+		file.write(reinterpret_cast<const char*>(&node.Y), sizeof(Type));
+	}
 }
 
 //----------------------------------------------------------------------
 // Load From File
 //----------------------------------------------------------------------
 template <class Type>
-void		
+void
 CPositionList<Type>::LoadFromFile(std::ifstream& file)
 {
-	// 이전에 있던 list를 제거
-	Release();
-
-	WORD size;
-
-	//----------------------------------------
-	// size를 읽어온다.
-	//----------------------------------------
-	file.read((char*)&size, 2);
-
-	// 아무것도 없으면 return
-	if (size==0)
+	WORD size = 0;
+	if (!file.read(reinterpret_cast<char*>(&size), sizeof(size)))
 		return;
 
-	POSITION_NODE<Type> node;
-
-	//----------------------------------------
-	// size개수만큼 POSITION_NODE를 읽어오면서
-	// list에 추가시킨다.
-	//----------------------------------------
-	for (int i=0; i<size; i++)
-	{		
-		file.read((char*)&node.X, s_SizeOfPositionType);
-		file.read((char*)&node.Y, s_SizeOfPositionType);
-
-		m_listPosition.push_back( node );
+	POSITION_LIST loaded;
+	for (unsigned i = 0; i < size; ++i) {
+		POSITION_NODE<Type> node{};
+		if (!file.read(reinterpret_cast<char*>(&node.X), sizeof(Type)) ||
+			!file.read(reinterpret_cast<char*>(&node.Y), sizeof(Type)))
+			return;
+		loaded.push_back(node);
 	}
+	// Sorting once also keeps large valid files O(n log n), unlike repeated Add.
+	loaded.sort();
+	loaded.unique();
+	m_listPosition.swap(loaded);
 }
 
 
