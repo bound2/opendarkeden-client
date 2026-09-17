@@ -171,7 +171,10 @@ check () {
 # (483 -> 482). The preceding bounded-formatting slice deleted md5.cpp
 # without recording its 484 -> 483 decrease here. Ninja 481 -> 479 for
 # the same two files; its three platform exclusions are unchanged.
-R1_BASELINE=482
+# 478 on 2026-09-17: delete the four unused Direct3D texture/shadow cache
+# translation units. Their last object declarations were commented out;
+# the active sprite path never constructed them. Ninja 479 -> 475.
+R1_BASELINE=478
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -208,7 +211,7 @@ elif [ -n "$BUILD_DIR" ] && [ -f "$BUILD_DIR/build.ninja" ]; then
 	# this branch existed the ratchet SKIPPED on every non-MSVC tree,
 	# which the port assessment listed as fail-open (area A). build.ninja
 	# is rewritten on every configure, so its mtime is the configure time.
-	R1_NINJA_BASELINE=479
+	R1_NINJA_BASELINE=475
 	R1_NINJA="$BUILD_DIR/build.ninja"
 	if [ CMakeLists.txt -nt "$R1_NINJA" ] || [ tests/arch/packetwire_files.txt -nt "$R1_NINJA" ] || [ tests/arch/gamemodel_files.txt -nt "$R1_NINJA" ]; then
 		echo "FAIL R1: $BUILD_DIR was configured before CMakeLists.txt or a library membership file last changed - reconfigure that tree first"

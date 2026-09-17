@@ -544,9 +544,6 @@ void SizeOfObjects()
 //	fprintf(fp,"CTypeMap2 : %d\n",sizeof(CTypeMap2) );
 //	fprintf(fp,"CTypeMap : %d\n",sizeof(CTypeMap) );
 	fprintf(fp,"CToken : %d\n",sizeof(CToken) );
-	fprintf(fp,"CTexturePartManager : %d\n",sizeof(CTexturePartManager) );
-	fprintf(fp,"CNormalSpriteTexturePartManager : %d\n",sizeof(CNormalSpriteTexturePartManager) );
-	fprintf(fp,"CSpriteTexturePartManager : %d\n",sizeof(CSpriteTexturePartManager) );
 	fprintf(fp,"CSpritePalPack : %d\n",sizeof(CSpritePalPack) );
 	fprintf(fp,"CSpritePal : %d\n",sizeof(CSpritePal) );
 	fprintf(fp,"MPalettePack : %d\n",sizeof(MPalettePack) );
@@ -556,7 +553,6 @@ void SizeOfObjects()
 	fprintf(fp,"MPalette555 : %d\n",sizeof(MPalette555) );
 	fprintf(fp,"MPalette : %d\n",sizeof(MPalette) );
 	fprintf(fp,"CSoundPartManager : %d\n",sizeof(CSoundPartManager) );
-	fprintf(fp,"CShadowPartManager : %d\n",sizeof(CShadowPartManager) );
 //	fprintf(fp,"CPositionList : %d\n",sizeof(CPositionList) );
 //	fprintf(fp,"POSITION_NODE : %d\n",sizeof(POSITION_NODE) );
 //	fprintf(fp,"CPartManager : %d\n",sizeof(CPartManager) );
