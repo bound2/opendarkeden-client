@@ -381,8 +381,8 @@ TEST(WireHostSeam, TheRequestSeamsAnswerConservativelyWithNoHost)
 
 	Wire::SetHost(NULL);
 
-	// A clock of zero.
-	CHECK(Wire::CurrentTime() == MonotonicClock::TimePoint());
+	// The epoch.
+	CHECK_EQ(0, (long long)Wire::CurrentTime().time_since_epoch().count());
 
 	// And no file transfer is registered, which is what a caller
 	// asking whether it still has one needs to hear so that it cleans
@@ -400,7 +400,7 @@ TEST(WireHostSeam, TheRequestSeamsAnswerConservativelyWithNoHost)
 	// found half of its eight were only covered the short-circuiting
 	// way.
 	Wire::SetHost(&s_EmptyHost);
-	CHECK(Wire::CurrentTime() == MonotonicClock::TimePoint());
+	CHECK_EQ(0, (long long)Wire::CurrentTime().time_since_epoch().count());
 	CHECK_EQ(false, Wire::SendOtherRequest("peer", NULL));
 	CHECK_EQ(false, Wire::HasOtherRequest("peer"));
 	CHECK_EQ(false, Wire::RemoveOtherRequest("peer"));
@@ -415,12 +415,12 @@ TEST(WireHostSeam, AHostAnswersTheRequestSeamsAndIsAskedTheRightOne)
 
 	Wire::SetHost(&s_Host);
 
-	CHECK(Wire::CurrentTime() == MonotonicClock::FromMillis(4321));
+	CHECK_EQ(4321, (long long)Wire::CurrentTime().time_since_epoch().count());
 
 	// Read each time. The request timeouts are differences against this
 	// clock, so a value copied once would freeze every one of them.
 	s_Now = MonotonicClock::FromMillis(9999);
-	CHECK(Wire::CurrentTime() == MonotonicClock::FromMillis(9999));
+	CHECK_EQ(9999, (long long)Wire::CurrentTime().time_since_epoch().count());
 
 	// The three file-transfer calls are near-identical in shape (two
 	// share a signature), which is exactly how one gets wired to the

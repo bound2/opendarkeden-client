@@ -145,7 +145,7 @@ MTradeManager::Release()
 //-----------------------------------------------------------------------------
 // Is AcceptTime
 //-----------------------------------------------------------------------------
-// The accept delay runs on the item host's millisecond clock; without
+// The accept delay runs on the item host's frame stamp; without
 // one (a test binary) there is no delay.
 //-----------------------------------------------------------------------------
 bool

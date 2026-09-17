@@ -75,7 +75,7 @@ void RequestServerPlayer::processCommand ()
 		case REQUEST_CLIENT_MODE_PROFILE :
 			if (Wire::SendOtherRequest(m_Name, this))
 			{
-				// 화일을 보내는 중이므로 processCommand()가 필요없다.
+				// the file is being sent, so processCommand() is not needed
 				m_ExpireTime = Wire::CurrentTime() + MonotonicClock::Millis(EXPIRE_DELAY);
 				return;
 			}			

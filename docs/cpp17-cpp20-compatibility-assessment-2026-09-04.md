@@ -1681,9 +1681,7 @@ they did (`Clock()` NULL means no delay; the wire host's epoch plus a
 minute never expires, as `0 + 60000` never did), and the skill's
 time-left is the same `DWORD` over the 64-bit difference where it
 was a signed `int` over two ticks. Both seams were tested already, so
-the tests move with them: the fake clocks in the trade, skill,
-container-helper and wire-host tests are `TimePoint`s set through
-`FromMillis`, and two new cases pin the delays across the legacy wrap
+the tests move with them: the fake clocks in the trade, skill, container-helper and wire-host tests are `TimePoint`s (the trade, skill and wire-host ones set through `FromMillis`; the container helpers never advance theirs), and two new cases pin the delays across the legacy wrap
 with the `DWORD` sum's failure worked out beside each - a trade
 refused 1 s before the wrap could be accepted again at once, a skill
 used then was available at once. With no reader left, `g_CurrentTime`

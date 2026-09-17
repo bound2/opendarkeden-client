@@ -4,7 +4,7 @@
 #include "Client_PCH.h"
 #include "MSkillManager.h"
 #include "MTypeDef.h"
-#include "MItem.h"		// the item host carries the millisecond clock the delays run on
+#include "MItem.h"		// the item host carries the frame stamp the delays run on
 
 #include <algorithm>
 
