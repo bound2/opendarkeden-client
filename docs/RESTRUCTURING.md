@@ -1018,8 +1018,11 @@ rounds settled* for the host rules). Test fixtures share
   > `DXInput::Host` carries six application callbacks (position, activation,
   > focus and text delivery), designated-initialized by `InitInput`; the
   > backend keeps SDL processing and key mapping. No test supplies `g_x`,
-  > `g_y`, `g_bActiveApp` or a fake text editor. Nine adapter tests exercise
-  > the real event pump, callback ordering, wheel consumption and key bounds.
+  > `g_y`, `g_bActiveApp` or a fake text editor. Ten adapter tests exercise
+  > the real event dispatcher, callback ordering, wheel consumption and key
+  > bounds; a queued key also verifies the polling loop. Wheel/text fixtures
+  > enter after polling because SDL2 compatibility libraries can discard or
+  > reject synthetic versions of those events during SDL3 conversion.
   - Owner: the `unit_tests` link line.
 
 - [x] **5.4 Format-string audit** (code-health C19/C20/C22: `sprintf`
