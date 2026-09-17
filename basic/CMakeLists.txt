@@ -13,7 +13,6 @@ if(WIN32)
 	option(USE_SDL_BACKEND "Use SDL backend on Windows" OFF)
 
 	if(USE_SDL_BACKEND)
-		add_definitions(-DPLATFORM_USE_SDL)
 		message(STATUS "Basic: Using SDL backend on Windows")
 		# SDL2 should be found in parent scope
 		if(NOT TARGET SDL2::SDL2)
@@ -24,7 +23,6 @@ if(WIN32)
 	endif()
 else()
 	# Force SDL on non-Windows platforms
-	add_definitions(-DPLATFORM_USE_SDL)
 	# SDL2 should be found in parent scope
 	if(NOT TARGET SDL2::SDL2)
 		find_package(SDL2 REQUIRED)
@@ -86,6 +84,11 @@ message(STATUS "Basic: Compiling PlatformSDL.cpp")
 
 # Create static library
 add_library(basic STATIC ${BASIC_SOURCES})
+
+# Platform.h is public, so its backend selection must reach every consumer.
+if(USE_SDL_BACKEND OR NOT WIN32)
+	target_compile_definitions(basic PUBLIC PLATFORM_USE_SDL)
+endif()
 
 # Public include directories
 target_include_directories(basic

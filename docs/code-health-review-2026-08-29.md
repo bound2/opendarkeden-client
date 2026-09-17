@@ -2931,6 +2931,8 @@ Client/huffman.cpp:415-432 walks the decoder tree with `point` and terminates on
 
 #### 🟠 High -- PLATFORM_USE_SDL and DXLIB_USE_SDL_BACKEND are set with directory-scoped add_definitions(), so libraries and their consumers see different versions of the same headers.
 
+> ✅ **Fixed (2026-09-18):** `basic` now publishes `PLATFORM_USE_SDL` through its CMake link interface, completing the earlier `dxlib` change for `DXLIB_USE_SDL_BACKEND`. Ordinary consumers receive the same backend selection as each library. `test_build_contract.cpp` compiles without source-specific defines and checks both interfaces; its SDL assertion failed before this change.
+
 **Category:** build  |  **Location:** `basic/CMakeLists.txt:16`
 
 basic/CMakeLists.txt:16 uses `add_definitions(-DPLATFORM_USE_SDL)` and Client/DXLib/CMakeLists.txt:16 uses `add_definitions(-DDXLIB_USE_SDL_BACKEND)`. `add_definitions()` applies to the current directory and below only — it does not propagate to consumers the way `target_compile_definitions(... PUBLIC ...)` does. Both macros are load-bearing inside public headers. basic/Platform.h:63-70 gates `#include <SDL.h>` (`<SDL2/SDL.h>` until the macOS port; `basic/Platform.h` says why) on `PLATFORM_USE_SDL`, so on Windows the TUs in `basic/` see the SDL declarations and every other TU in the project (which reaches Platform.h through Typedef.h and Client_PCH.h) does not. Client/DXLib/DXLibBackend.h:27-31 picks `DXLIB_BACKEND_WINDOWS` when `DXLIB_USE_SDL_BACKEND` is absent and `DXLIB_BACKEND_SDL` when present, so on Windows the dxlib library compiles its adapters under `DXLIB_BACKEND_SDL` (CDirectInput_Adapter.cpp:26, CDirectSound_Adapter.cpp:22, CDirectMusic_Adapter.cpp:22, CDirectSoundStream_Adapter.cpp:19 are all wrapped in `#ifdef DXLIB_BACKEND_SDL`) while every caller in Client/ and VS_UI/ compiles the same header believing the backend is native Windows. The top-level FORCEd `USE_SDL_BACKEND` (CMakeLists.txt:54) is a *different* macro and does not fix this.
@@ -2958,6 +2960,8 @@ The sanitizer block (lines 27-51) is entirely wrapped in `if(CMAKE_CXX_COMPILER_
 **Recommendation:** Add an MSVC branch mapping USE_ASAN to `/fsanitize=address` (and note that MSVC ASan is incompatible with `/RTC1`, which CMake's default Debug flags include, so strip it). Add an `else()` that emits `message(WARNING "USE_ASAN requested but not supported for ${CMAKE_CXX_COMPILER_ID} - building without sanitizers")` so the no-op is never silent. Reject USE_ASAN+USE_TSAN together with `message(FATAL_ERROR)`.
 
 #### 🟠 High -- __WIN32__ and __WINDOWS__ are defined only on the DarkEden target, so shared Packet headers mean different things in VS_UI than in the executable.
+
+> ✅ **Fixed (2026-09-18):** `packetwire` now publishes the Windows wire macros through its CMake link interface. They reach `gamemodel`, `VS_UI`, the executable and tests transitively. Removed the duplicate target definitions and manual test-source macro list; only actual fixture paths remain source-specific. The ordinary consumer in `test_build_contract.cpp` failed its Windows-definition assertion before the fix, and generated projects are checked for the inherited definitions.
 
 **Category:** portability  |  **Location:** `CMakeLists.txt:856`
 

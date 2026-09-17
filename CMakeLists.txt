@@ -61,10 +61,9 @@ option(DARKEDEN_MACOS_BUNDLE "macOS: build DarkEden as an application bundle (bi
 # On Windows the wire layer still wants __WIN32__ and __WINDOWS__ - the
 # original VC6 project passed both via /D, and Client/Packet branches
 # on them with bare `#if __WINDOWS__` (see the DarkEden target for the
-# history). One list, used by the targets that share the wire layer's
-# class definitions - packetwire, gamemodel, the executable, and the
-# test translation units - so the preprocessing cannot drift between
-# them. The viewer tools compile a few Client/ files without it, as
+# history). packetwire publishes one list through its link interface,
+# so gamemodel, VS_UI, the executable and ordinary test consumers inherit
+# identical header definitions. The viewer tools compile a few Client/ files without it, as
 # they always did; they link neither packetwire nor gamemodel.
 set(DARKEDEN_PLATFORM_DEFINITIONS "")
 if(WIN32)
@@ -348,7 +347,7 @@ target_compile_definitions(packetwire PRIVATE
 	USE_SDL_BACKEND
 	SPRITELIB_BACKEND_SDL
 )
-target_compile_definitions(packetwire PRIVATE ${DARKEDEN_PLATFORM_DEFINITIONS})
+target_compile_definitions(packetwire PUBLIC ${DARKEDEN_PLATFORM_DEFINITIONS})
 
 target_link_libraries(packetwire PUBLIC basic)
 
@@ -406,7 +405,6 @@ target_compile_definitions(gamemodel PRIVATE
 	USE_SDL_BACKEND
 	SPRITELIB_BACKEND_SDL
 )
-target_compile_definitions(gamemodel PRIVATE ${DARKEDEN_PLATFORM_DEFINITIONS})
 
 # packetwire for Properties (the file-definition table the string
 # table's language test reads); framelib for CAnimationFrame, the item
@@ -1100,8 +1098,8 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		SPRITELIB_BACKEND_SDL
 	)
 
-	# Platform-specific definitions: the one list from the top of this
-	# file. On Windows it carries __WIN32__ and __WINDOWS__, and here is
+	# Platform-specific definitions come from packetwire's link interface.
+	# On Windows it carries __WIN32__ and __WINDOWS__, and here is
 	# why. __WIN32__ was always passed via /D in the original VC6 build
 	# (Client.dsp) and Client/Packet/Exception.h's __BEGIN_DEBUG/__END_DEBUG
 	# (and Assert1.h's Assert()) macros are conditioned on it. Without it,
@@ -1117,7 +1115,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# fd/result/client/nSent declared in the branch that never ran.
 	# Off Windows the list is empty: the POSIX branches test
 	# PLATFORM_POSIX, which basic/Platform.h derives from the compiler.
-	target_compile_definitions(DarkEden PRIVATE ${DARKEDEN_PLATFORM_DEFINITIONS})
 
 	message(STATUS "DarkEden executable will be built from remaining Client files (VS_UI compiled separately)")
 endif()

@@ -1107,8 +1107,14 @@ links an unused engine library. Hand-written CMake modules and Makefiles are
 visible to Git, while local compilation databases stay ignored. The unused
 Emscripten workflow was removed. GNU Make and the effect-viewer helper select
 portable job counts and explicit build configurations; README documents their
-options. A direct MSBuild target can need a retry after source removal if it
+options. A direct MSBuild target can need a retry after a source-list change if it
 loaded the old project before CMake regenerated it.
+
+`basic` and `packetwire` now publish the SDL and Windows wire definitions
+their public headers require. Consumers inherit them through target links,
+including VS_UI and newly added test sources. The manual list of test files
+needing wire macros is gone; a consumer compiled without source-specific
+defines guards the contract and reproduced both missing-definition failures.
 
 The code-health review also records 18 previously completed fixes that still
 had open headings, with their current source/test evidence. These status

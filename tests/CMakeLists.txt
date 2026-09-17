@@ -67,147 +67,18 @@ target_include_directories(unit_tests PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/support
 )
 
-#----------------------------------------------------------------------
-# Every TU that shares class definitions with the packetwire library
-# (which compiles with the Windows wire macros) must see the identical
-# definitions - the packet headers still switch on those macros in
-# places (Types/SystemTypes.h, Datagram.h), and a class definition
-# preprocessed two ways is a real ODR break, not a style issue. The
-# list carried __GAME_CLIENT__=1 as well until task 5.2's tenth slice
-# (2026-09-13) retired that macro from the build; while it existed,
-# Packet's virtual set changed under it, and two TUs that were not on
-# this list, test_player_base.cpp and test_wire_host.cpp, compiled a
-# Packet with two more pure virtuals than the library's and an empty
-# PlayerStatus enum. One list, used by every such TU below, so the two
-# blocks cannot drift apart; it is the top-level
-# DARKEDEN_PLATFORM_DEFINITIONS, the list packetwire itself compiles
-# with, so it cannot drift from the library either (off Windows that
-# list is empty on both sides - basic/Platform.h does the detecting).
-#----------------------------------------------------------------------
-set(PACKETWIRE_TEST_DEFINITIONS ${DARKEDEN_PLATFORM_DEFINITIONS})
-
-#----------------------------------------------------------------------
-# Wire-layout inventory (unit/test_wire_layout.cpp).
-#
-# That one source constructs every packet factory under Client/Packet
-# through tests/generated/WireInventory.inc, the registry that
-# tests/tools/gen_wire_inventory.pl writes (one include and one
-# registration per factory class; the wire_inventory_fresh test below
-# pins it). Its include dirs are packetwire's PUBLIC ones plus the
-# generated directory, and it needs the packetwire defines so the class
-# definitions match the library's (docs/RESTRUCTURING.md task 2.5).
-#----------------------------------------------------------------------
+# Packet header definitions arrive through packetwire, including in tests
+# added later. Only fixture locations need per-source definitions.
 set_source_files_properties(
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_layout.cpp
 	PROPERTIES
 		INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/generated"
-		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS};WIRE_LAYOUT_FILE=\"${CMAKE_CURRENT_SOURCE_DIR}/wire-layout.txt\""
+		COMPILE_DEFINITIONS "WIRE_LAYOUT_FILE=\"${CMAKE_CURRENT_SOURCE_DIR}/wire-layout.txt\""
 )
-
-#----------------------------------------------------------------------
-# packetwire tests. Include dirs come from packetwire's PUBLIC dirs.
-#----------------------------------------------------------------------
 set_source_files_properties(
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packetwire_parsers.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_dispatcher.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_factories.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_goldens.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_span_io.cpp
-	# The framing entry point, SocketOutputStream::write(const Packet*):
-	# what the ring and the sequence counter hold after a body write
-	# throws. Defines its own Packet subclass, so it needs the same
-	# definitions the library's Packet was preprocessed with.
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_output_stream_rollback.cpp
-	# The other end of the same stream: what flush() leaves in the ring
-	# when the socket takes only part of it. Derives from SocketImpl to
-	# script the partial send, so it needs the same definitions too.
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_output_stream_flush.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_input_stream_fill.cpp
-	# The second span/typed-scalar slice: the CGSkillTo* family's fields
-	# and its truncated-input contract, over the same stream classes.
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_skill_family_wire.cpp
-	# The third: the melee combat packets, the last raw scalar casts in
-	# the packet directories, over the same stream classes.
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_combat_family_wire.cpp
-	# The UDP framing contract: Datagram::read through the real factory
-	# manager, its refusals, and the bounded primitives underneath.
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_datagram_frame.cpp
-	# The bool and char overloads of the four socket streams, byte for
-	# byte under every encrypt code.
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_bool_char.cpp
-	# The per-mission UI record the wire layer declares: its time-limit
-	# default, which the handlers and the quest manager rest on.
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_quest_status_record.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_scalar.cpp
-	# The 32-bit width of long/ulong on the wire, pinned on every platform
-	# (the port assessment, area C), over the same streams.
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_widths.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_stringstream.cpp
-	# The character overloads and the diagnostic texts built out of them
-	# (Throwable, __assert__), which is why this one reaches Exception.h
-	# and PacketAssert.h as well.
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_stringstream_chars.cpp
-	# gamemodel compiles with the same definitions: its headers reach
-	# Client/Packet/Exception.h, whose inline bodies switch on __WIN32__.
-	# Every test that includes a Client/ header needs an entry here.
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_gamemodel_tables.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_mstring_files.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_zone_map_records.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_zone_map_loader.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_item_table.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_item_core.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_pet_item_countdown.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_item_containers.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_inventory_storage_shop.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_trade_manager.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_price_manager.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_player_gear.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_skill_core.cpp
-	# The C++20 container/string helper slice spans both libraries: the
-	# packet and Properties sites and the gamemodel manager sites.
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_cpp20_container_helpers.cpp
-	# The second slice of the same backlog item: the skill domain's step
-	# map and step lists, the two line-parsing loaders and the two
-	# availability filter scans. It includes the four Client/ headers it
-	# tests, and gamemodel_world.h besides, so it needs the same
-	# definitions.
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_cpp20_container_helpers_2.cpp
-	# The second source_location slice. It expands Assert() itself and
-	# pins the message the library's Assert() produces; the macro is one
-	# spelling on every platform now (PacketAssert.h), but the TU still
-	# shares Exception.h's class definitions with the library, which
-	# switch on __WIN32__. (__END_CATCH, which it also expands, is
-	# conditioned on NDEBUG alone.)
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_source_location.cpp
-	# PacketIDSet::deletePacketID. It names CPS_NONE from PlayerStatus.h
-	# and shares Packet's class definition, so the TU must see the
-	# definitions packetwire was built with.
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_id_set.cpp
-	# What SendBugReport actually sends. It builds a CGSay and hands it
-	# to a Player subclass, so the Packet vtable and the CGSay class
-	# definition must be the library's.
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_bug_report_message.cpp
-	# Every BYTE-length-prefixed string write() under Client/Packet/Cpackets,
-	# over the lengths the length byte cannot express. Constructs the packet
-	# classes and drives their read()/write() over the socket streams.
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_string_write_caps.cpp
-	# The seven writers in the same family that had no cap at all, and so
-	# narrowed with nothing to refuse them. Same needs: the packet classes
-	# and the socket streams.
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_uncapped_string_writes.cpp
-	# CRWhisper, the peer whisper this client still receives (task 5.2's
-	# seventh and eighth slices took the sending side out). Constructs the
-	# packet and drives write() over the socket stream.
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_crwhisper.cpp
-	# The Player base's receive loop and the WireHost forwarders. Both
-	# define a Packet subclass and reach PlayerStatus.h, and both were
-	# missing from this list until the ninth dead-code slice's review
-	# (2026-09-13) found them compiling a different Packet than the
-	# library's; see the block comment above.
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_player_base.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_wire_host.cpp
 	PROPERTIES
-		COMPILE_DEFINITIONS "${PACKETWIRE_TEST_DEFINITIONS};WIRE_GOLDEN_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/golden\""
+		COMPILE_DEFINITIONS "WIRE_GOLDEN_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/golden\""
 )
 
 add_test(NAME unit_tests COMMAND unit_tests)
@@ -219,7 +90,6 @@ add_executable(user_option_tests
 	${CMAKE_SOURCE_DIR}/Client/UserOption.cpp
 )
 target_include_directories(user_option_tests PRIVATE ${CMAKE_SOURCE_DIR}/Client)
-target_compile_definitions(user_option_tests PRIVATE ${PACKETWIRE_TEST_DEFINITIONS})
 target_link_libraries(user_option_tests PRIVATE test_framework VS_UI basic)
 add_test(NAME user_option_tests COMMAND user_option_tests)
 
