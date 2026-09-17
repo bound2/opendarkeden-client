@@ -30,6 +30,7 @@
 #include "FameInfo.h"
 #include "SystemAvailabilities.h"
 #include "MGameStringTable.h"
+#include "RankBonusTable.h"
 
 #include <cstdio>
 #include <cstring>
@@ -421,6 +422,118 @@ TEST(ItemOptionInfo, ConstructsWithEveryFieldZero)
 	CHECK_EQ(0, info.PreviousOptionType);
 	CHECK(info.Name.GetString() == NULL);
 	CHECK(info.EName.GetString() == NULL);
+}
+
+//----------------------------------------------------------------------
+// RankBonus.inf: [count:4], then rows of [type:2][name:MString]
+// [level:1][race:1][points:4][icon:2]. Rows are indexed by their file
+// position; the type is data, and learned status comes from packets.
+// Calling the real constructor and loader also pins the library link:
+// removing RankBonusTable.cpp from gamemodel must fail to link.
+//----------------------------------------------------------------------
+TEST(RankBonusInfo, DefaultsAreAnUnlearnedSlayerBonus)
+{
+	RankBonusInfo info;
+	CHECK_EQ(0, info.GetType());
+	CHECK(info.GetName() == NULL);
+	CHECK_EQ(0, info.GetLevel());
+	CHECK(info.IsSlayerSkill());
+	CHECK(!info.IsVampireSkill());
+	CHECK(!info.IsOustersSkill());
+	CHECK_EQ(0, info.GetPoint());
+	CHECK_EQ(0, info.GetSkillIconID());
+	CHECK_EQ(RankBonusInfo::STATUS_NULL, info.GetStatus());
+}
+
+TEST(RankBonusTable, LoadsEveryRaceAndPreservesTheOnDiskFieldWidths)
+{
+	Bytes b;
+	b.Int(3);
+	b.Word(513).Str("Slayer bonus").Byte(5).Byte(RACE_SLAYER).Int(70000).Word(1025);
+	b.Word(257).Str("Vampire bonus").Byte(10).Byte(RACE_VAMPIRE).Int(-250).Word(65535);
+	b.Word(65535).Str("").Byte(15).Byte(RACE_OUSTERS).Int(123456).Word(256);
+	WriteScratch(b);
+
+	RankBonusTable table;
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		table.LoadFromFile(in);
+		CHECK(in.good());
+		CHECK_EQ(static_cast<std::streamoff>(b.data.size()), static_cast<std::streamoff>(in.tellg()));
+	}
+	RemoveScratch();
+
+	CHECK_EQ(3, table.GetSize());
+	CHECK_EQ(513, table[0].GetType());
+	CHECK(StrEq(table[0].GetName(), "Slayer bonus"));
+	CHECK_EQ(5, table[0].GetLevel());
+	CHECK_EQ(70000, table[0].GetPoint());
+	CHECK_EQ(1025, table[0].GetSkillIconID());
+	CHECK_EQ(257, table[1].GetType());
+	CHECK(StrEq(table[1].GetName(), "Vampire bonus"));
+	CHECK_EQ(10, table[1].GetLevel());
+	CHECK_EQ(-250, table[1].GetPoint());
+	CHECK_EQ(65535, table[1].GetSkillIconID());
+	CHECK_EQ(65535, table[2].GetType());
+	CHECK(StrEq(table[2].GetName(), ""));
+	CHECK_EQ(15, table[2].GetLevel());
+	CHECK_EQ(123456, table[2].GetPoint());
+	CHECK_EQ(256, table[2].GetSkillIconID());
+	for (int i = 0; i < 3; ++i)
+	{
+		CHECK_EQ(i == 0, table[i].IsSlayerSkill());
+		CHECK_EQ(i == 1, table[i].IsVampireSkill());
+		CHECK_EQ(i == 2, table[i].IsOustersSkill());
+		CHECK_EQ(RankBonusInfo::STATUS_NULL, table[i].GetStatus());
+	}
+
+	// Packet-driven status changes are independent for each row.
+	table[1].SetStatus(RankBonusInfo::STATUS_LEARNED);
+	table[2].SetStatus(RankBonusInfo::STATUS_CANNOT_LEARN);
+	CHECK_EQ(RankBonusInfo::STATUS_NULL, table[0].GetStatus());
+	CHECK_EQ(RankBonusInfo::STATUS_LEARNED, table[1].GetStatus());
+	CHECK_EQ(RankBonusInfo::STATUS_CANNOT_LEARN, table[2].GetStatus());
+}
+
+TEST(RankBonusTable, MissingRowsReturnTheDefaultAndReleaseEmptiesTheTable)
+{
+	RankBonusTable table;
+	table.Init(2);
+	table[0].SetStatus(RankBonusInfo::STATUS_LEARNED);
+	const RankBonusTable& readOnly = table;
+	for (int index : { -1, 2, 65535 })
+	{
+		CHECK_EQ(0, table[index].GetPoint());
+		CHECK(table[index].GetName() == NULL);
+		CHECK_EQ(RankBonusInfo::STATUS_NULL, readOnly[index].GetStatus());
+		CHECK_EQ(0, table.Get(index).GetType());
+	}
+	CHECK_EQ(RankBonusInfo::STATUS_LEARNED, table[0].GetStatus());
+	table.Release();
+	CHECK_EQ(0, table.GetSize());
+	CHECK(table.GetInternalPointer() == NULL);
+	CHECK_EQ(RankBonusInfo::STATUS_NULL, readOnly[0].GetStatus());
+}
+
+TEST(RankBonusTable, EmptyReloadClearsExistingRowsAndNegativeCountIsRejected)
+{
+	RankBonusTable table;
+	table.Init(1);
+	table[0].SetStatus(RankBonusInfo::STATUS_LEARNED);
+	Bytes negative;
+	negative.Int(-1);
+	WriteScratch(negative);
+	table.LoadFromFile(kTempFile);
+	CHECK_EQ(1, table.GetSize());
+	CHECK_EQ(RankBonusInfo::STATUS_LEARNED, table[0].GetStatus());
+
+	Bytes empty;
+	empty.Int(0);
+	WriteScratch(empty);
+	table.LoadFromFile(kTempFile);
+	RemoveScratch();
+	CHECK_EQ(0, table.GetSize());
+	CHECK(table.GetInternalPointer() == NULL);
 }
 
 TEST(GameStringTable, EnglishItemCounterIsReadableEmptyText)

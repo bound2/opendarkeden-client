@@ -51,6 +51,12 @@ Client/FameInfo.cpp
 Client/FameInfo.h
 Client/SkillDef.h
 
+# Rank bonuses (task 4.5): the RankBonus.inf rows and their learned state.
+# The constructor, loader and global move unchanged from the executable.
+Client/RankBonusTable.cpp
+Client/RankBonusTable.h
+Client/RankBonusDef.h
+
 # Money (task 4.2; the price and trade managers wait for the item core)
 Client/MMoneyManager.cpp
 Client/MMoneyManager.h

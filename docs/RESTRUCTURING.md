@@ -1,6 +1,6 @@
 # Client Restructuring Plan
 
-**Complete as of 2026-09-09.** Every task below is `done` and has its owner;
+**Original plan complete as of 2026-09-09.** Its tasks are `done` and have their owners;
 PRs #144 and #145 carry the last slices. What the plan leaves behind is the
 machinery, not a to-do list: the membership files, the include checker, the
 fourteen ratchets and the fix policy (task 3.1) are what keep the end state
@@ -8,7 +8,8 @@ true from here, and *What the review rounds settled* is what a later slice
 of any kind should read first. 5.2's *Candidates for a next slice* - dead
 code the plan found and did not take unasked - was the last list open and
 closed on 2026-09-16 with the eleventh slice; what still shrinks is the
-exemption list, whenever a task extracts a seam.
+exemption list, whenever a task extracts a seam. Further game-model extractions
+are tracked under Phase 4; task 4.5 continues that work with the rank-bonus table.
 
 Living, trackable plan for moving the OpenDarkEden client's game code out of the
 `DarkEden` executable and into testable static libraries, while the outstanding
@@ -214,7 +215,7 @@ every baseline move; the table below is the current reading.
 
 | # | Metric | Now | What it counts, and does not |
 |---|--------|---:|---|
-| R1 | Translation units compiled directly into the `DarkEden` target | **484** | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj`, read from the ctest run's own build dir; SKIP (never PASS) on a generator with no vcxproj, and FAIL on a vcxproj older than the membership files. On the Ninja generator (the Linux and macOS presets) the same count is read from `build.ninja`'s object rules for the target against its own baseline, **481** - the non-Windows source list is three files shorter - so the ratchet no longer skips there (2026-09-08). Baseline 1,044 on 2026-09-01. 489 → 484 on 2026-09-09: the last holdout moved into `packetwire`, then `WhisperManager.cpp` and three `RC*` handlers went with the outbound peer side (task 5.2's seventh and eighth slices); this row was not moved with the first two of those and the script's own FAIL message is what says to. It counts what still cannot be unit-tested. Recorded growths, each the executable side of a split: `PacketHandlerRegistry.cpp`, `GCExchangeBuyHandler.cpp`, `MItemUse.cpp`, `MObjectScreen.cpp`, `MSkillAvailable.cpp`, `TextServiceScreen.cpp`. |
+| R1 | Translation units compiled directly into the `DarkEden` target | **482** | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj`, read from the ctest run's own build dir; SKIP (never PASS) without a supported generated project. Both the Visual Studio configure stamp and Ninja's `build.ninja` must be newer than CMakeLists.txt and both library membership files. Ninja's baseline is **479**, since the non-Windows source list is three files shorter; Linux/macOS CI verifies that count. Baseline 1,044 on 2026-09-01; 484 after task 5.2's eighth slice. **482 on 2026-09-17:** the earlier deletion of `md5.cpp` had left the recorded 484 one too high (483 measured before this extraction); task 4.5 moves `RankBonusTable.cpp` into `gamemodel` (483 → 482). It counts what still cannot be unit-tested. Recorded growths, each the executable side of a split: `PacketHandlerRegistry.cpp`, `GCExchangeBuyHandler.cpp`, `MItemUse.cpp`, `MObjectScreen.cpp`, `MSkillAvailable.cpp`, `TextServiceScreen.cpp`. |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l`. Baseline 448. Holds the line since `Packet::execute` itself was deleted; the client twin of the server's R4. |
 | R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` and `Client/PacketHandler` | **0** | Line-based; strips `//` tails before matching, so a commented-out call does not count. `\b` rejects the `w` in `wsprintf`, which R7 sees instead. Baseline 61 (a quarter of it commented-out code). Holds the line since the packet-tree copy pass (2026-09-04, PR #76). |
 | R4 | Library-compiled `.cpp` files referencing `g_p*` client globals no library file defines | **21** | Over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files; comment lines excluded; the subtraction is library-wide, so a library file reading a global another library defines is not a seam. **All 21 are `VS_UI` files.** Blind to a library file calling an executable-side *function* (the link proofs cover that) and to a global not named `g_p*`. Baseline 83. |
@@ -651,6 +652,26 @@ rounds settled* for the host rules). Test fixtures share
   - Owner (all of 4.x): `gamemodel`'s membership file, the M0–M2 include
     rules, R4 shrinking; `test_item_table.cpp`, `test_item_core.cpp`,
     `test_player_gear.cpp`, `test_skill_core.cpp`.
+
+- [ ] **4.5 Rank-bonus table:** `RankBonusTable`, `RankBonusInfo` and
+  their enum definitions.
+  > **Status:** in progress (live-server verification pending; implementation
+  > and automated checks complete, 2026-09-17).
+  > `RankBonusTable.cpp` moves unchanged into `gamemodel`, including the
+  > `g_pRankBonusTable` definition; its header and `RankBonusDef.h` join
+  > the membership closure. No host is needed: the loader reads only its
+  > own state and uses `MString`, `CTypeTable` and the wire race enum.
+  > Packet-driven selection and UI rendering stay with their callers.
+  > This is an extraction, not a loader-hardening pass: malformed or
+  > truncated row handling is unchanged. Both Windows Debug builds and
+  > their complete CTest suites pass, including `wire_inventory_fresh`.
+  > Live-server verification of rank-bonus display and selection remains
+  > required before merge.
+  - Owner: the membership file, CMake's executable-source exclusion,
+    M0–M2, R1, and the `RankBonusInfo` / `RankBonusTable` cases in
+    `test_gamemodel_tables.cpp` (defaults, binary field layout for all
+    three races, row status, lookup bounds, release and table counts).
+    The tests fail to link without the extracted constructor and loader.
 
 ---
 
