@@ -1515,6 +1515,71 @@ check, which compares `timeGetTime()` against `GetTickCount()` on
 purpose. Verified by the build on Windows in both Debug trees and the
 test suite in both; the client not run.
 
+The twelfth priority-5 slice (2026-09-17) opens the frame clock, the
+last of the tick's readers. `g_CurrentTime` is a `DWORD` stamped from
+`timeGetTime()` at the top of every frame and was read at 144 sites:
+the static-local gates of the update loops, some forty member stamps
+in twenty classes, three deadlines in `UserInformation`, `MGameTime`'s
+base, and two library seams (`MItemHost::pCurrentTime`, the pointer the
+item core's trade-accept and skill-use delays run on, and
+`WireHost::CurrentTime`, the function the wire layer's timeouts run
+on). Most of the stamps are `g_CurrentTime + delay`, the sum shape, so
+this is where the wrap failure R14 describes lives at scale, and it
+cannot be retyped in one step without touching every reader and both
+seams at once. So the slice puts a `TimePoint` beside it: `g_FrameNow`,
+stamped by one `StampFrameClock()` in `Client.cpp` that sets both from
+one read each (the three writers - the frame loop,
+`CWaitPacketUpdate::SetDelay` and the update-info handler - call it),
+and a new ratchet, R16, counts what still reads the `DWORD`, so the
+readers can move a group at a time and the `DWORD` goes when the count
+reaches its definition, declarations and writer. The first group is
+every static-local gate: `CGameUpdate`'s fixed-step accumulator
+(`lastTime += delay` with its catch-up loop, its
+`MAX_UPDATE_ONETIME_COUNT` reset and the draw interpolation's
+`sinceTick`, the same arithmetic over 64-bit milliseconds, where an
+accumulator ahead of the frame reads as a negative elapsed rather than
+a huge one), the sound-per-second window, the anti-cheat's clamped
+elapsed, the help scroll and the resurrect dialog's frame step;
+`MTopView`'s four message scrolls and click frame; `GameMain`'s
+request-manager tick and keep-alive; the wait screens' update gate;
+`Client.cpp`'s log flush and the FPS window (`g_StartTime` a
+`TimePoint`; `g_EndTime`, never read, deleted); the party status send
+in `MPlayer`; and `MZone`'s personal-shop reset, whose interval is a
+signed option value floored at zero, since a negative one made the
+`DWORD` sum wrap so the reset fired every frame and `Millis()` would
+have made it 49.7 days. With them the small stamp classes only the
+frame clock fed: `SoundNode`'s play time, `ShowTimeChecker`'s next
+show, `MHelpDisplayer`'s hold, `MParty`'s join time (its `0xFFFFFFFF`
+"never joined" was a sum that wrapped to "kick allowed"; the epoch says
+the same without the wrap), `MJusticeAttackManager`'s map value
+(written, never read) and `MZoneSoundManager`'s last update, plus the
+zone random-sound deadline shared by `GameMain` and `MZone`, and
+`CWaitPacketUpdate`'s give-up deadline (`0xFFFFFFFF` for "not set" is
+`TimePoint::max()`, spelled with the parentheses that keep
+`<windows.h>`'s `max` macro off it; its two debug lines print the
+delay and the overrun instead of two raw ticks). `CWinUpdate`, the base
+of the update classes, kept a static tick, a last-update stamp and a
+delay that no class outside it read; they are deleted rather than
+retyped, with the two tick calls in them. Two write-only statics in
+`CGameUpdate` (`lastDisplayGameTime`, the `TempCurrentTime` and
+`TemplastTime` pair) went the same way. Gates that compared a `DWORD`
+difference against an `int` delay (`g_UpdateDelay`, the config's
+message delays, `tmp`) hand the `int` to `Millis(DWORD)` as they handed
+it to the unsigned comparison: a negative delay never fired before and
+never fires now. Quantisation: every one of these read the 1 ms
+`timeGetTime()` through the frame stamp and reads the 1 ms clock
+through the same stamp; the frame-consistent read (one stamp per
+frame, not a fresh `Now()` per gate) is kept on purpose. R14 goes from
+10 to 5 (the one remaining writer, the two log-file names, the hack
+check); R16 starts at 59 from 144. What is left for the next slices:
+the creatures' and the player's member stamps (chat fade, recovery,
+regeneration, bleeding, action and death delays, the conversion
+countdown), `UserInformation`'s deadlines with their `gamemodel` test
+path, `MGameTime`, the two seams, then the `DWORD` itself. Verified by
+the build on Windows in both Debug trees and the ctest suites in both
+test trees (nothing a test binary links changed; the ratchets and the
+include checker ran); the client not run.
+
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through
 `std::filesystem::directory_iterator` against a DOS-style wildcard and returns
