@@ -1112,6 +1112,8 @@ Line 452 checks `if (rle_index + seg_count * 2 > rle_data_size)`, which would be
 
 **Category:** memory-safety  |  **Location:** `Client/SpriteLib/CSprite.cpp:121`
 
+> ✅ **Fixed in the 2026-09-17 follow-up** (`fix/review-sprite-release`). `CSprite::Release()` checks the row array before traversing it, and its constructors of row arrays plus the plain/indexed loaders value-initialize every pointer. Alpha loaders already publish fully owned rows transactionally in the preceding alpha-sprite fix. `tests/unit/test_sprite_release.cpp` reproduces the null-row-array state after an allocation failure and guards repeated cleanup of a partially allocated sprite. The test synthesizes those states; it does not inject allocator failures.
+
 Lines 121-124 run `for (int i=0; i<m_Height; i++) delete [] m_Pixels[i]; delete [] m_Pixels;` with no `if (m_Pixels != NULL)` test. CShadowSprite::Release (Client/SpriteLib/CShadowSprite.cpp:70-83) guards the identical loop. Any state where m_Height is nonzero while m_Pixels is NULL crashes here — reachable if `new WORD*[m_Height]` throws in CSprite565::LoadFromFile (line 133) after m_Height was already assigned at line 112, since m_Height is only cleared on the next successful Release. The loaders also leave `new WORD*[m_Height]` uninitialized and fill it element by element, so an allocation failure partway through the loop leaves indeterminate pointers that a later Release will delete[].
 
 **Recommendation:** Add the NULL guard and value-initialize the pointer array (`new WORD*[m_Height]()`) in all five LoadFromFile variants so a partial load cannot leave indeterminate pointers behind.
@@ -1158,6 +1160,8 @@ Lines 180-182 compute `pixel = ((rgb565 & 0xF800) >> 1) | ((rgb565 & 0x0600) >> 
 
 **Category:** undefined-behavior  |  **Location:** `Client/SpriteLib/CTypePack.h:514`
 
+> ✅ **Already fixed in `6ee3e76b`; status reconciled 2026-09-17.** `CTypePack2` initializes `m_bSecond` to `false` in its constructor and assigns the selected pixel format before allocating either array type in `Init()`. The old claim below no longer describes the current constructor.
+
 The constructor at lines 474-483 initializes m_pData, m_Size, m_bRunningLoad, m_nLoadData, m_file_index and m_file, but not m_bSecond. Release() at lines 514-517 reads it to pick between `delete [] ((Type2*)m_pData)` and `delete [] ((Type1*)m_pData)` — a read of an indeterminate value, and one that selects between two different array-delete semantics. Today this is masked by the `m_pData != NULL` guard at line 510 (m_pData is NULL on the first Release), but the flag is load-bearing for correctness of the delete and should not be indeterminate; the comment at line 512-513 acknowledges how delicate the type pairing is.
 
 **Recommendation:** Initialize m_bSecond in the constructor initializer list, ideally to ColorDraw::Is565() so it matches what Init() will allocate.
@@ -1195,6 +1199,8 @@ spritectl_create_sprite (lines 270-305) copies data_size bytes but never checks 
 #### ⚪ Low -- The LRU counter-wrap normalization subtracts a value that becomes zero partway through the loop, so half the timestamps are left un-normalized.
 
 **Category:** correctness  |  **Location:** `Client/CPartManager.h:513`
+
+> ✅ **Already fixed by the audio/media pass; status reconciled 2026-09-17.** `CPartManager::GetData` snapshots `leastTime` before modifying any timestamps. `CPartManager.RolloverNormalizesEveryTimestamp` in `tests/unit/test_part_manager.cpp` pins every slot and the resulting counter. This duplicates the rollover defect already recorded as fixed in the Input, Audio & Media finding.
 
 Lines 512-516: `int leastTime = m_pLastTime[leastTimeIndex]; for (int i=0; i<m_nPart; i++) m_pLastTime[i] -= m_pLastTime[leastTimeIndex];`. The loop reads m_pLastTime[leastTimeIndex] fresh on every iteration, so once i reaches leastTimeIndex that entry becomes 0 and every subsequent entry has 0 subtracted from it. The local `leastTime` that holds the correct value is computed and then never used. After a wrap the LRU ordering is corrupted for all entries after leastTimeIndex, causing the wrong texture to be evicted. Reached only when m_Counter hits 0xFFFFFFFF, so impact is low, but the fix is one token.
 

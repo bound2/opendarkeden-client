@@ -130,7 +130,7 @@ CIndexSprite555::LoadFromFile(ifstream& file)
 	}
 	
 	m_Pixels = NULL;
-	m_Pixels = new WORD* [m_Height];
+	m_Pixels = new WORD* [m_Height]{};
 
 	// Cleared up front so Release() is safe if a scanline below is
 	// rejected: it walks every row of this array and frees it, and would

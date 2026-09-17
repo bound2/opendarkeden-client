@@ -118,11 +118,12 @@ CSprite::Release()
 		m_backend_dirty = false;
 	}
 #endif
-	for (int i=0; i<m_Height; i++)
-		delete [] m_Pixels[i];
-		//free(m_Pixels[i]);
-	delete [] m_Pixels;
-	//free(m_Pixels);
+	if (m_Pixels != nullptr)
+	{
+		for (int i=0; i<m_Height; i++)
+			delete [] m_Pixels[i];
+		delete [] m_Pixels;
+	}
 
 	//s_Delete++;
 
@@ -157,7 +158,7 @@ CSprite::operator = (const CSprite& Sprite)
 	int j;
 
 	// 메모리 잡기
-	m_Pixels = new WORD* [m_Height];
+	m_Pixels = new WORD* [m_Height]{};
 
 	for (int i=0; i<m_Height; i++)
 	{
@@ -258,7 +259,7 @@ CSprite::SetPixel(WORD *pSource, WORD pitch, WORD width, WORD height)
 
 
 	// height줄 만큼 memory잡기
-	m_Pixels = new WORD* [height];
+	m_Pixels = new WORD* [height]{};
 
 	int i;
 	int j;
@@ -371,7 +372,7 @@ CSprite::SetPixelNoColorkey(WORD *pSource, WORD pitch, WORD width, WORD height)
 
 
 	// height줄 만큼 memory잡기
-	m_Pixels = new WORD* [height];
+	m_Pixels = new WORD* [height]{};
 
 	int i;
 	int j;
