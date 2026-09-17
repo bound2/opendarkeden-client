@@ -4,10 +4,9 @@
 //
 // Tests for TextService::NormalizeText in Client/TextSystem/TextService.cpp.
 //
-// MString::LoadFromFile routes every string it reads out of the shipped .inf
-// tables through this function, because that data is still CP949 while the
-// SDL text backend renders UTF-8. Two properties have to hold for that to be
-// safe:
+// TextService's layout and drawing paths call this function before decoding
+// UTF-8. MString::LoadFromFile has a separate platform-dependent conversion;
+// these tests do not exercise that loader. Two properties must hold here:
 //
 //   - text that is already valid UTF-8 comes back untouched, or a table that
 //     has been converted ahead of time would be decoded a second time;

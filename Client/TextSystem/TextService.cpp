@@ -1,4 +1,5 @@
 #include "TextService.h"
+#include "TextUtf8.h"
 
 #include <algorithm>
 #include <cstring>
@@ -16,42 +17,6 @@ namespace TextSystem {
 
 // Forward declaration of SDL backend factory
 TextBackend* CreateSDLTextBackend();
-
-static bool IsValidUtf8(const char* data, size_t len)
-{
-	size_t i = 0;
-	while (i < len) {
-		unsigned char c = static_cast<unsigned char>(data[i]);
-		if (c < 0x80) {
-			++i;
-			continue;
-		}
-
-		int needed = 0;
-		if ((c & 0xE0) == 0xC0) {
-			if (c < 0xC2)
-				return false;
-			needed = 1;
-		} else if ((c & 0xF0) == 0xE0) {
-			needed = 2;
-		} else if ((c & 0xF8) == 0xF0) {
-			if (c > 0xF4)
-				return false;
-			needed = 3;
-		} else {
-			return false;
-		}
-
-		if (i + needed >= len)
-			return false;
-		for (int j = 1; j <= needed; ++j) {
-			if ((static_cast<unsigned char>(data[i + j]) & 0xC0) != 0x80)
-				return false;
-		}
-		i += static_cast<size_t>(needed) + 1;
-	}
-	return true;
-}
 
 // Transcodes input from fromEncoding to UTF-8, returning an empty string when
 // that code page is unavailable or the bytes are not valid in it. An empty
@@ -116,61 +81,6 @@ std::string TextService::NormalizeText(const std::string& text)
 	}
 
 	return text;
-}
-
-static uint32_t Utf8Decode(const char* s, int maxLen, int* outLen)
-{
-	if (maxLen < 1) {
-		*outLen = 0;
-		return 0xFFFD; // Replacement character for empty input
-	}
-
-	unsigned char c = static_cast<unsigned char>(*s);
-
-	// ASCII (0x00-0x7F)
-	if (c < 0x80) {
-		*outLen = 1;
-		return c;
-	}
-
-	// 2-byte sequence (0xC0-0xDF)
-	if ((c >> 5) == 0x6) {
-		if (maxLen < 2) {
-			*outLen = 1;
-			return 0xFFFD; // Truncated sequence
-		}
-		*outLen = 2;
-		return ((c & 0x1F) << 6) | (static_cast<unsigned char>(s[1]) & 0x3F);
-	}
-
-	// 3-byte sequence (0xE0-0xEF)
-	if ((c >> 4) == 0xE) {
-		if (maxLen < 3) {
-			*outLen = 1;
-			return 0xFFFD; // Truncated sequence
-		}
-		*outLen = 3;
-		return ((c & 0x0F) << 12) |
-			((static_cast<unsigned char>(s[1]) & 0x3F) << 6) |
-			(static_cast<unsigned char>(s[2]) & 0x3F);
-	}
-
-	// 4-byte sequence (0xF0-0xF7)
-	if ((c >> 3) == 0x1E) {
-		if (maxLen < 4) {
-			*outLen = 1;
-			return 0xFFFD; // Truncated sequence
-		}
-		*outLen = 4;
-		return ((c & 0x07) << 18) |
-			((static_cast<unsigned char>(s[1]) & 0x3F) << 12) |
-			((static_cast<unsigned char>(s[2]) & 0x3F) << 6) |
-			(static_cast<unsigned char>(s[3]) & 0x3F);
-	}
-
-	// Invalid UTF-8 lead byte
-	*outLen = 1;
-	return 0xFFFD;
 }
 
 TextService::TextService()
