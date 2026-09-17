@@ -1456,6 +1456,65 @@ event's parameter fields, and the rest is ones to fours in twelve files.
 Verified by the build on Windows in both Debug trees and the ratchet;
 none of it has a test; the client not run.
 
+The eleventh priority-5 slice (2026-09-17) is the scatter: every live
+clock read outside the frame clock, 25 calls in eight files (the four calls that are not clocks stay), the one
+`packetwire` site among them. The wait screens' double-click gate in
+`CWaitUIUpdate` kept its last click as a `DWORD` and asked
+`labs(GetTickCount() - last) <= g_double_click_time`, resetting the stamp
+to 0 after a double click; it is a `TimePoint` now, the reset is the
+epoch, and the gate is the same comparison over the 64-bit difference -
+the `labs` guarded against a clock that runs backwards, which this one
+does not. `CGameUpdate`'s copy of that stamp is write-only (its gate has
+been commented out since the DirectInput original) and is retyped with
+it. The title screen's fade kept a static start tick and computed `31 -
+elapsed * 16 / 1000` in `DWORD`, cast to `int` - which is how a fade past
+two seconds went negative and clamped to zero - and computes the same
+expression over a `DWORD` elapsed count taken from the clock. The
+`CGVerifyTime` deadline in `CGameUpdate::Update` was set as
+`timeGetTime() + value` and read as `g_CurrentTime > nextTime`: a
+sum-shaped deadline, the failing shape, and one that mixed a fresh tick
+with the frame's stamp; both ends read `Now()` now, so the gate opens earlier than the frame stamp would have opened it, by the frame's work so far (the deadline is anchored at the same instant; the frame stamp is the older read), and `nextTimeValue` is a `DWORD`, so `Millis()` is never handed a
+signed value (the tenth slice's lesson). `GCUpdateInfoHandler`'s loading
+stopwatch measures from a `TimePoint` to `Now()` instead of to the
+`g_CurrentTime` it has just refreshed, which stays, being the
+frame clock's. `ProfilerInfo::m_StartTime` is a `TimePoint` whose epoch
+is the "no pass open" sentinel that `0` was, and the total keeps
+accumulating `DWORD` milliseconds; only the `OUTPUT_DEBUG` macros call
+it. The name window's sixty-second auto-close parked its tick in
+`TempInformation::Value1`, an `intptr_t` slot, through an `int` cast;
+`TempInformation` has a `TimeValue1` for it. `LCReconnectHandler`'s two
+stopwatches under `OUTPUT_DEBUG`, which nothing defines, and
+`SocketInputStream::fill`'s byte-rate window under
+`__TEST_PACKET_RECEIVED_SIZE_PER_SECOND__`, which the file's own first
+line defines out - the `packetwire` site, which the survey after the
+third slice called dead code rather than a clock to move - are converted
+as dead code, the window to an `IntervalTimer` whose first second runs
+from static initialisation rather than from the first `fill()`; each was
+compiled once with its macro defined (the handler's converted lines
+compile; the link then fails on `DEBUG_ADD` and `DEBUG_ADD_FORMAT`, which `DebugInfo.h`'s
+`OUTPUT_DEBUG` branch declares and nothing defines - a pre-existing
+property of the define, not of these lines) and the define reverted.
+`MTopView`'s six, the quest caption that read the event register's
+`parameter1` and `parameter4` as a tick and a second, are deleted with
+the caption: its only writers are the commented-out event builders in
+`GCQuestStatusHandler`, so `GetEventByFlag(EVENTFLAG_QUEST_INFO)` never
+returns one, and upstream's own comment above it says the part below probably will not be used. That deletion takes six checked-format sites with it, so
+`check_format_arity.pl`'s floors go from 301 and 289 to 295 and 283, and
+the converted-site count C19 quotes from 321 to 315. Removed wrap
+failure: the `CGVerifyTime` deadline; every other converted read was a subtraction, and the six deleted ones were bare comparisons against the tick.
+Quantisation, hedged as before: the two click stamps read kernel32's
+`GetTickCount()` on Windows, so a double click's window can close up to
+one old step earlier or later; the rest read `timeGetTime()`, already
+the 1 ms tick. The `MMSystem.h` notes in `CGameUpdate`, `CWaitUIUpdate`
+and `Profiler` go with their last tick call (`CWaitUIUpdate`'s remaining
+one sits in a block comment). R14 goes from 35 to 10 (25 calls), and what
+is left is the frame clock - `g_CurrentTime`'s three live writers,
+`g_StartTime` and `CWinUpdate::m_CurrentTime` - and four calls that are
+not clocks: the two log-file names in `Client.cpp` and `GameMain`'s hack
+check, which compares `timeGetTime()` against `GetTickCount()` on
+purpose. Verified by the build on Windows in both Debug trees and the
+test suite in both; the client not run.
+
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through
 `std::filesystem::directory_iterator` against a DOS-style wildcard and returns

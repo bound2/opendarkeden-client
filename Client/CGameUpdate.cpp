@@ -13,9 +13,6 @@
 //-----------------------------------------------------------------------------
 #ifdef PLATFORM_WINDOWS
 #include <Windows.h>
-// <MMSystem.h> not included: this file only uses timeGetTime()/GetTickCount(),
-// which basic/Platform.h already routes through platform_get_ticks(); including
-// the real header here conflicts with that macro (see basic/Platform.h).
 #else
 #include "../../basic/Platform.h"
 #endif
@@ -23,6 +20,7 @@
 #include "TextSystem/TextService.h"
 #include "TextSystem/RenderTargetSpriteSurface.h"
 #include "Client.h"
+#include "MonotonicClock.h"
 #include "PacketDispatcher.h"
 #include "GameObject.h"
 #include "UserInformation.h"
@@ -257,7 +255,7 @@ CGameUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 		return;
 	}
 
-	static DWORD	last_click_time;
+	static MonotonicClock::TimePoint	last_click_time;
 	static int		double_click_x, double_click_y;
 	
 	switch (event)
@@ -293,7 +291,7 @@ CGameUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 				// an equip swap undid itself. The wait-UI screens have their
 				// own receiver and are unaffected.
 				//gC_vs_ui.MouseControl(M_LEFTBUTTON_DOWN, g_x, g_y);
-				last_click_time = GetTickCount();
+				last_click_time = MonotonicClock::Now();
 				double_click_x = g_x;
 				double_click_y = g_y;
 				
@@ -6281,14 +6279,13 @@ CGameUpdate::Update(void)
 
 /* add by sonic 2006.9.12 */
 //增加时间检测
-		static DWORD nextTime = g_CurrentTime + 60000;
-		
 		//------------------------------------------------------------------
 		// 1분 마다 한번씩 garbarge packet을 보낸다.
 		//------------------------------------------------------------------
 #ifdef PLATFORM_WINDOWS
 		// Windows-specific anti-cheat time verification - Windows only
-		int nextTimeValue =60000;
+		DWORD nextTimeValue = 60000;
+		static MonotonicClock::TimePoint nextTime = MonotonicClock::Now() + MonotonicClock::Millis(60000);
 
 		// g_MyCheckTime measures how much time has passed since the 60-second
 		// reset below, and 97620 means the client believes it ran far ahead of
@@ -6321,7 +6318,7 @@ CGameUpdate::Update(void)
 			}
 		}
 		// end by Coffee
-		if (g_CurrentTime > nextTime)		// 60 * 1000
+		if (MonotonicClock::Now() > nextTime)		// 60 * 1000
 		{
 			CGVerifyTime _CGVerifyTime;
 			if(g_MyCheckTime>=97620)
@@ -6329,13 +6326,13 @@ CGameUpdate::Update(void)
 					g_CheckErrorTime++;
 					nextTimeValue=5390;
 					g_pSocket->sendPacket( &_CGVerifyTime );
-					nextTime = timeGetTime() + nextTimeValue;//g_CurrentTime;
+					nextTime = MonotonicClock::Now() + MonotonicClock::Millis(nextTimeValue);
 			}else
 			{
 				nextTimeValue =60000;
 				g_pSocket->sendPacket( &_CGVerifyTime );
 
-				nextTime = timeGetTime() + nextTimeValue;//g_CurrentTime;
+				nextTime = MonotonicClock::Now() + MonotonicClock::Millis(nextTimeValue);
 			}
 			g_MyCheckTime=0;
 		}

@@ -11,15 +11,13 @@
 //-----------------------------------------------------------------------------
 #ifdef PLATFORM_WINDOWS
 #include <Windows.h>
-// <MMSystem.h> not included: this file only uses timeGetTime()/GetTickCount(),
-// which basic/Platform.h already routes through platform_get_ticks(); including
-// the real header here conflicts with that macro (see basic/Platform.h).
 #else
 #include "../../basic/Platform.h"
 #endif
 #include <string>
 #include "TextSystem/TextService.h"
 #include "Client.h"
+#include "MonotonicClock.h"
 #include "GameObject.h"
 #include "ServerInfo.h"
 #include "PacketDef.h"
@@ -168,14 +166,14 @@ CWaitUIUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 void		
 CWaitUIUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 {
-	static DWORD	last_click_time;
+	static MonotonicClock::TimePoint	last_click_time;
 	static int		double_click_x, double_click_y;
 
 	switch (event)
 	{
 		case CSDLInput::LEFTDOWN:
 			//  double-click interval?
-			if ((DWORD)labs((long)(GetTickCount() - last_click_time)) <= g_double_click_time)
+			if (MonotonicClock::Now() - last_click_time <= MonotonicClock::Millis(g_double_click_time))
 			{
 				if (g_x>= double_click_x-1 && g_x <= double_click_x+1 &&
 					 g_y>= double_click_y-1 && g_y <= double_click_y+1)
@@ -190,13 +188,13 @@ CWaitUIUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 						DEBUG_ADD("MLD2");
 					#endif
 
-					last_click_time = 0;
+					last_click_time = MonotonicClock::TimePoint();
 					return;
 				}
 			}				
 
 			gC_vs_ui.MouseControl(M_LEFTBUTTON_DOWN, g_x, g_y);
-			last_click_time = GetTickCount();
+			last_click_time = MonotonicClock::Now();
 			double_click_x = g_x;
 			double_click_y = g_y;
 		break;
@@ -741,13 +739,14 @@ CWaitUIUpdate::UpdateDraw()
 	{
 		POINT point;
 
-		static DWORD oldTime = timeGetTime();
+		static const MonotonicClock::TimePoint oldTime = MonotonicClock::Now();
 
 		gC_vs_ui.Show();
 
 		if(g_TitleSpriteAlpha > 0)
 		{
-			int alpha = (int)(31-(timeGetTime()-oldTime)*16/1000);
+			const DWORD elapsed = (DWORD)(MonotonicClock::Now() - oldTime).count();
+			int alpha = (int)(31-elapsed*16/1000);
 			g_TitleSpriteAlpha = (alpha > 0) ? alpha : 0;
 			DrawTitleLoading();
 

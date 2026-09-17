@@ -302,7 +302,7 @@ Critical among them. In priority order:
 2. Fixed-size buffers fed by variable-length server strings (the 21-byte chat rows
    are fixed; 128-byte stack buffers remain in other handlers), and format strings
    loaded from data files passed to sprintf (C19/C20/C22). That last one is
-   **closed** (C19, 2026-09-04, task 5.4's fifth slice). **321 sites** are
+   **closed** (C19, 2026-09-04, task 5.4's fifth slice). **315 sites** are
    converted to `SafeFormat::Format` in `basic/SafeFormat.h`, which checks a
    table entry's conversions against the arguments the call site really passed,
    across `Client`, `VS_UI`, the `AddFormat` family (through

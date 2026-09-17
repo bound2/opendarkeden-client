@@ -4,10 +4,6 @@
 #include "Client_PCH.h"
 #include "Profiler.h"
 
-// <MMSystem.h> not included: this file only uses timeGetTime(), which
-// basic/Platform.h already routes through platform_get_ticks(); including
-// the real header here conflicts with that macro (see basic/Platform.h).
-
 using namespace std;
 
 
@@ -36,7 +32,7 @@ ProfilerInfo::~ProfilerInfo()
 void		
 ProfilerInfo::Clear()
 {
-	m_StartTime = 0;
+	m_StartTime = MonotonicClock::TimePoint();
 	m_TotalTime = 0;
 	m_Times = 0;
 }
@@ -53,7 +49,7 @@ ProfilerInfo::Begin()
 
 	}
 
-	m_StartTime = timeGetTime();
+	m_StartTime = MonotonicClock::Now();
 }
 
 //----------------------------------------------------------------------
@@ -62,14 +58,12 @@ ProfilerInfo::Begin()
 void		
 ProfilerInfo::End()
 {
-	if (m_StartTime!=0)
+	if (m_StartTime != MonotonicClock::TimePoint())
 	{
-		DWORD endTime = timeGetTime();
-
-		m_TotalTime += endTime - m_StartTime;
+		m_TotalTime += (DWORD)(MonotonicClock::Now() - m_StartTime).count();
 		m_Times ++;
 
-		m_StartTime = 0;
+		m_StartTime = MonotonicClock::TimePoint();
 	}
 }
 

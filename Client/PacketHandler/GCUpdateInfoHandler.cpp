@@ -11,6 +11,7 @@
 #include "MTopView.h"
 #include "Gpackets/GCUpdateInfo.h"
 #include "ClientDef.h"
+#include "MonotonicClock.h"
 #include "AddonDef.h"
 #include "MGameTime.h"
 #include "MQuickSlot.h"
@@ -122,7 +123,7 @@ void GCUpdateInfoHandler::execute ( GCUpdateInfo * pPacket , Player * pPlayer )
 	//-----------------------------------------------------------
 	// updateInfo를 처리하기 시작할때의 시간을 저장한다.
 	//-----------------------------------------------------------
-	DWORD	startTime	= timeGetTime();
+	const MonotonicClock::TimePoint startTime = MonotonicClock::Now();
 	
 	ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
 
@@ -837,7 +838,7 @@ void GCUpdateInfoHandler::execute ( GCUpdateInfo * pPacket , Player * pPlayer )
 	
 	// updateInfo를 처리한다고 소요된 시간
 	// ...을 frame으로 환산한 값
-	int delayedFrame = ConvertMillisecondToFrame( g_CurrentTime - startTime );		
+	int delayedFrame = ConvertMillisecondToFrame( (DWORD)(MonotonicClock::Now() - startTime).count() );		
 
 	// 게임 frame 증가
 	g_CurrentFrame += delayedFrame;

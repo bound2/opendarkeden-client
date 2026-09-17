@@ -14,6 +14,7 @@
 #endif
 
 #include <string>
+#include "MonotonicClock.h"
 
 class TempInformation {
 	public :
@@ -90,6 +91,8 @@ class TempInformation {
 		intptr_t			Value2;
 		intptr_t			Value3;
 		intptr_t			Value4;
+
+		MonotonicClock::TimePoint	TimeValue1;	// MODE_INPUT_NAME: when the name was sent
 
 		//
 		// The SMS and nickname modes carry text across a server round trip, and
