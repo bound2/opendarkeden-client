@@ -1629,6 +1629,47 @@ flush's debug print in `Client.cpp`, and the externs in `Client.h`,
 Windows in both Debug trees and the ctest suites in both test trees
 (nothing a test binary links changed); the client not run.
 
+The fourteenth priority-5 slice (2026-09-17) is the third frame-clock
+group, and the first with a test path: `UserInformation`'s deadlines,
+a `gamemodel` member, and `MGameTime`. `UserInformation` kept three
+`DWORD`s on the frame clock. `LogoutTime`, `0` for "none scheduled",
+is set by the ESC handler to now plus five seconds (two in `_DEBUG`),
+read by the same handler as whole seconds left for the countdown
+caption, tested by the update loop as `!= 0 && now > it` to run the
+logout, and cleared at three sites. `ItemDropEnableTime`, set after a
+trade to now plus the config's delay, gates dropping an item as
+`it < now`. `GlobalSayTime` had no live reader or writer left (its
+three mentions are commented out) and is deleted. The two live ones
+are `TimePoint`s with the epoch as the sentinel, and the class gains
+the five one-line readers the executable's sites were spelling by
+hand - `IsLogoutScheduled()`, `IsLogoutDue(now)`,
+`SecondsToLogout(now)`, `CancelLogout()`, `IsItemDropEnabled(now)` -
+so the contract has a home a test can reach:
+`tests/unit/test_user_information_deadlines.cpp` pins the defaults, the
+whole-second countdown and its strict "due" edge, the cancel, the
+strict item-drop edge, and the logout scheduled across the legacy
+wrap, with the `DWORD` sum's failure worked out beside it (a deadline
+set 1 s before the wrap for 5 s later came out as 4000, and `now >
+4000` logged the player out at once). The executable's sites call the
+readers or assign the point from `g_FrameNow`; the strict comparisons
+are unchanged. `MGameTime` derived the game clock from `(now - start)
+/ 1000 * ratio` over two `DWORD`s and re-based itself on the frame
+clock at a month's turn; its start is a `TimePoint`, `SetStartTime`
+and `SetCurrentTime` take one, the gap is the same `DWORD` over the
+64-bit difference, and the re-base uses the `now` it was handed rather
+than the global (the same frame's stamp). Its three callers - the
+update-info handler's start, the update loop's per-frame current time
+and the class's own re-base - pass `g_FrameNow`. Removed wrap failure:
+the logout and item-drop deadlines were sum-shaped; the game clock's
+subtraction was exact already and changes width and clock only.
+Quantisation: unchanged, the frame stamp on both sides. R16 goes from
+18 to 6: what is left is the two library seams in `GameInit`
+(`MItemHost::pCurrentTime`, `WireHost::CurrentTime`), the definition,
+the one write and the log flush's debug print in `Client.cpp`, and the
+extern in `Client.h`. Verified by the build on Windows in both Debug
+trees and the test suites in both test trees, the new tests included;
+the client not run.
+
 **Filesystem status (2026-09-05):** the first priority-6 slice is implemented.
 `basic/DirectoryListing.{h,cpp}` lists a directory through
 `std::filesystem::directory_iterator` against a DOS-style wildcard and returns
