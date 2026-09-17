@@ -25,14 +25,7 @@
 #include "CDirectInput.h"
 #include "MonotonicClock.h"
 
-#ifdef PLATFORM_WINDOWS
-// VS_UI_widget.h's gpC_Imm-as-macro stub (expanding to &gpC_Imm_instance)
-// is #ifndef PLATFORM_WINDOWS only - on Windows it #include's the real
-// CImm.h instead, which only declares `extern CImm *gpC_Imm;` (see
-// CImm.h). Nothing ever defined it here, so it was an unresolved external
-// symbol (LNK2001) in every one of the many files that reference it.
-CImm *gpC_Imm = NULL;
-#else
+#ifndef PLATFORM_WINDOWS
 // On non-Windows platforms, undefine the macro and use a proper variable
 #undef gpC_Imm
 CImm *gpC_Imm = NULL;

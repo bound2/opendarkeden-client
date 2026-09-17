@@ -2350,6 +2350,8 @@ Line 15893 builds `szString` with `sprintf(szString, <table format>, i+1, TempIn
 
 #### 🟠 High -- C_VS_UI_EVENT_BUTTON's constructor tests the uninitialized member m_image_index instead of the parameter, so every default-image button gets a garbage or -1 sprite/menu index.
 
+> ✅ **Fixed (2026-09-18)**: the event-button constructor selects its image from the parameter and initializes the member directly. Two tests against the real UI class reproduce both paths with prefilled storage: the missing-image case selected -1, and the explicit-image case selected the button ID. Both now select the requested value, and animation reset preserves it. The interval timer already initializes its clock state.
+
 **Category:** undefined-behavior  |  **Location:** `VS_UI/src/header/VS_UI_widget.h:103`
 
 Lines 97-107: the constructor body is `Init(); m_dw_millisec = millisec; if (m_image_index == -1) m_image_index = id; else m_image_index = image_index;`. `Init()` (lines 109-113) sets only `m_bl_start` and `m_alpha` — `m_image_index` is never initialized before the test, so this reads an indeterminate value (UB) and the intended "no image index given -> use the button id" fallback never fires for real. With an indeterminate non-(-1) value the else branch stores `image_index`, which for the default argument is `-1`. `m_image_index` is then used directly as a sprite index (`Blt(x, y, p_button->m_image_index)`, VS_UI/src/VS_UI_Dialog.cpp:511; VS_UI/src/VS_UI_Exchange.cpp:649; VS_UI/src/VS_UI_ELEVATOR.cpp:149) and as an array subscript (`m_p_menu[p_button->m_image_index]`, VS_UI/src/VS_UI_Dialog.cpp:569/571/576).
@@ -2509,6 +2511,8 @@ Lines 569, 571 and 576 do `m_p_menu[p_button->m_image_index].sz_menu_str...` wit
 **Recommendation:** Introduce a single `USE_SDL_INPUT`-style macro driven by the CMake option (which is already forced ON for all platforms) and replace every `PLATFORM_MACOS`/`!PLATFORM_WINDOWS` use that is really about the SDL backend, then delete the dead Win32 branches.
 
 #### 🟡 Medium -- Button's default constructor leaves the exec handler pointer, id and click option uninitialized while Run() guards only against null.
+
+> ✅ **Fixed (2026-09-18)**: the default button initializes its handler to null, ID to zero, and click mode to release. Tests link the real UI implementation: prefilled storage reproduced the garbage ID and missing callback, and clicking before handler installation crashed. Three tests now cover default settings, handler-free clicks, and explicit press-mode behavior.
 
 **Category:** undefined-behavior  |  **Location:** `VS_UI/src/widget/u_button.h:105`
 
