@@ -15,6 +15,7 @@
 #include "CDirectInput.h"
 #include "DXLibBackend.h"
 #include "DXInputHost.h"
+#include "DXInputEvents.h"
 
 /* Implemented in Client/SpriteLib/SpriteLibBackendSDL.cpp (declared in
  * SpriteLibBackend.h, which dxlib cannot include - it builds without the
@@ -367,6 +368,133 @@ void dxlib_input_release(void) {
 	g_mouse_wheel = 0;
 }
 
+void DXInput::ProcessEvent(const SDL_Event& event) {
+	if (!g_input_initialized) return;
+	switch (event.type) {
+		case SDL_QUIT:
+			g_bRunning = false;
+			break;
+
+		case SDL_WINDOWEVENT:
+			if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
+				DXInput::SetActiveApp(true);
+			} else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
+				// Don't deactivate - keep game running in background
+				// g_bActiveApp = FALSE;
+			}
+			break;
+
+		case SDL_KEYDOWN:
+			/* Handle control keys for text input */
+			if (DXInput::GetHost().hasTextFocus && DXInput::GetHost().hasTextFocus()) {
+				SDL_Keycode key = event.key.keysym.sym;
+				unsigned int vk_code = 0;
+
+				// Map SDL key codes to Windows virtual key codes
+				switch (key) {
+				case SDLK_BACKSPACE:	vk_code = 0x08; break; // VK_BACK
+				case SDLK_TAB:		vk_code = 0x09; break; // VK_TAB
+				case SDLK_RETURN:	vk_code = 0x0D; break; // VK_RETURN
+				case SDLK_ESCAPE:	vk_code = 0x1B; break; // VK_ESCAPE
+				case SDLK_LEFT:		vk_code = 0x25; break; // VK_LEFT
+				case SDLK_UP:		vk_code = 0x26; break; // VK_UP
+				case SDLK_RIGHT:	vk_code = 0x27; break; // VK_RIGHT
+				case SDLK_DOWN:		vk_code = 0x28; break; // VK_DOWN
+				case SDLK_DELETE:	vk_code = 0x2E; break; // VK_DELETE
+				case SDLK_HOME:		vk_code = 0x24; break; // VK_HOME
+				case SDLK_END:		vk_code = 0x23; break; // VK_END
+				}
+
+				if (vk_code != 0 && DXInput::GetHost().keyDown) {
+					DXInput::GetHost().keyDown(vk_code);
+					// Don't break here - let keyboard state update below
+					// This ensures dxlib_input_key_down() works correctly
+				}
+			}
+			/* Fall through to update keyboard state */
+			/* IMPORTANT: Keyboard state MUST be updated even when InputFocusManager has focus */
+
+		case SDL_KEYUP:
+			/* Keyboard state is updated by SDL_GetKeyboardState below */
+			/* No additional handling needed */
+			break;
+
+		case SDL_MOUSEMOTION:
+			g_mouse_x = event.motion.x;
+			g_mouse_y = event.motion.y;
+			DXInput::SetMousePosition(event.motion.x, event.motion.y);
+			break;
+
+		case SDL_MOUSEBUTTONDOWN:
+		case SDL_MOUSEBUTTONUP:
+			DXInput::SetMousePosition(event.button.x, event.button.y);
+
+			{
+				int button = -1;
+				int down = (event.type == SDL_MOUSEBUTTONDOWN) ? 1 : 0;
+
+				if (event.button.button == SDL_BUTTON_LEFT) {
+					button = 0;
+				} else if (event.button.button == SDL_BUTTON_RIGHT) {
+					button = 1;
+				} else if (event.button.button == SDL_BUTTON_MIDDLE) {
+					button = 2;
+				}
+
+				if (button >= 0) {
+					g_mouse_buttons[button] = down;
+
+					if (g_mouse_button_event_count < DXLIB_MOUSE_EVENT_QUEUE) {
+						int slot = (g_mouse_button_event_head + g_mouse_button_event_count) % DXLIB_MOUSE_EVENT_QUEUE;
+						struct dxlib_mouse_button_event* ev = &g_mouse_button_events[slot];
+						ev->button = button;
+						ev->down = down;
+						/* Event coordinates are window space; the game
+						 * works in the letterboxed frame's space. */
+						ev->x = event.button.x;
+						ev->y = event.button.y;
+						spritectl_window_to_game_coords(&ev->x, &ev->y);
+						g_mouse_button_event_count++;
+					}
+				}
+			}
+			break;
+
+		case SDL_MOUSEWHEEL:
+			// Keep pending input across multiple pumps before the adapter
+			// consumes it. Widen before adding; saturate even if no consumer runs.
+			if (event.wheel.y > 0 && g_mouse_wheel > (std::numeric_limits<std::int64_t>::max)() - event.wheel.y)
+				g_mouse_wheel = (std::numeric_limits<std::int64_t>::max)();
+			else if (event.wheel.y < 0 && g_mouse_wheel < (std::numeric_limits<std::int64_t>::min)() - event.wheel.y)
+				g_mouse_wheel = (std::numeric_limits<std::int64_t>::min)();
+			else
+				g_mouse_wheel += event.wheel.y;
+			break;
+
+		/* Text input is routed to InputFocusManager by design: it takes the
+		 * SDL UTF-8 buffer as a const char* and hands it to the focused
+		 * editor. Do not re-route this through gC_vs_ui.KeyboardControl()
+		 * - its `extra` parameter is a `long`, 32-bit on LLP64, so a
+		 * pointer passed that way is truncated. */
+		case SDL_TEXTINPUT:
+			/* Handle text input for IME and text entry */
+			{
+				if (event.text.text[0] != '\0' && DXInput::GetHost().textInput) {
+					DXInput::GetHost().textInput(event.text.text);
+				}
+			}
+			break;
+
+		case SDL_TEXTEDITING:
+			/* Handle IME composition (text editing in progress) */
+			{
+				if (DXInput::GetHost().textEditing)
+					DXInput::GetHost().textEditing(event.edit.text, event.edit.start, event.edit.length);
+			}
+			break;
+	}
+}
+
 void dxlib_input_update(void) {
 	if (!g_input_initialized) {
 		static int notInitCount = 0;
@@ -380,129 +508,7 @@ void dxlib_input_update(void) {
 	/* Update SDL events */
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
-		switch (event.type) {
-			case SDL_QUIT:
-				g_bRunning = false;
-				break;
-
-			case SDL_WINDOWEVENT:
-				if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
-					DXInput::SetActiveApp(true);
-				} else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
-					// Don't deactivate - keep game running in background
-					// g_bActiveApp = FALSE;
-				}
-				break;
-
-			case SDL_KEYDOWN:
-				/* Handle control keys for text input */
-				if (DXInput::GetHost().hasTextFocus && DXInput::GetHost().hasTextFocus()) {
-					SDL_Keycode key = event.key.keysym.sym;
-					unsigned int vk_code = 0;
-
-					// Map SDL key codes to Windows virtual key codes
-					switch (key) {
-					case SDLK_BACKSPACE:	vk_code = 0x08; break; // VK_BACK
-					case SDLK_TAB:		vk_code = 0x09; break; // VK_TAB
-					case SDLK_RETURN:	vk_code = 0x0D; break; // VK_RETURN
-					case SDLK_ESCAPE:	vk_code = 0x1B; break; // VK_ESCAPE
-					case SDLK_LEFT:		vk_code = 0x25; break; // VK_LEFT
-					case SDLK_UP:		vk_code = 0x26; break; // VK_UP
-					case SDLK_RIGHT:	vk_code = 0x27; break; // VK_RIGHT
-					case SDLK_DOWN:		vk_code = 0x28; break; // VK_DOWN
-					case SDLK_DELETE:	vk_code = 0x2E; break; // VK_DELETE
-					case SDLK_HOME:		vk_code = 0x24; break; // VK_HOME
-					case SDLK_END:		vk_code = 0x23; break; // VK_END
-					}
-
-					if (vk_code != 0 && DXInput::GetHost().keyDown) {
-						DXInput::GetHost().keyDown(vk_code);
-						// Don't break here - let keyboard state update below
-						// This ensures dxlib_input_key_down() works correctly
-					}
-				}
-				/* Fall through to update keyboard state */
-				/* IMPORTANT: Keyboard state MUST be updated even when InputFocusManager has focus */
-
-			case SDL_KEYUP:
-				/* Keyboard state is updated by SDL_GetKeyboardState below */
-				/* No additional handling needed */
-				break;
-
-			case SDL_MOUSEMOTION:
-				g_mouse_x = event.motion.x;
-				g_mouse_y = event.motion.y;
-				DXInput::SetMousePosition(event.motion.x, event.motion.y);
-				break;
-
-			case SDL_MOUSEBUTTONDOWN:
-			case SDL_MOUSEBUTTONUP:
-				DXInput::SetMousePosition(event.button.x, event.button.y);
-
-				{
-					int button = -1;
-					int down = (event.type == SDL_MOUSEBUTTONDOWN) ? 1 : 0;
-
-					if (event.button.button == SDL_BUTTON_LEFT) {
-						button = 0;
-					} else if (event.button.button == SDL_BUTTON_RIGHT) {
-						button = 1;
-					} else if (event.button.button == SDL_BUTTON_MIDDLE) {
-						button = 2;
-					}
-
-					if (button >= 0) {
-						g_mouse_buttons[button] = down;
-
-						if (g_mouse_button_event_count < DXLIB_MOUSE_EVENT_QUEUE) {
-							int slot = (g_mouse_button_event_head + g_mouse_button_event_count) % DXLIB_MOUSE_EVENT_QUEUE;
-							struct dxlib_mouse_button_event* ev = &g_mouse_button_events[slot];
-							ev->button = button;
-							ev->down = down;
-							/* Event coordinates are window space; the game
-							 * works in the letterboxed frame's space. */
-							ev->x = event.button.x;
-							ev->y = event.button.y;
-							spritectl_window_to_game_coords(&ev->x, &ev->y);
-							g_mouse_button_event_count++;
-						}
-					}
-				}
-				break;
-
-			case SDL_MOUSEWHEEL:
-				// Keep pending input across multiple pumps before the adapter
-				// consumes it. Widen before adding; saturate even if no consumer runs.
-				if (event.wheel.y > 0 && g_mouse_wheel > (std::numeric_limits<std::int64_t>::max)() - event.wheel.y)
-					g_mouse_wheel = (std::numeric_limits<std::int64_t>::max)();
-				else if (event.wheel.y < 0 && g_mouse_wheel < (std::numeric_limits<std::int64_t>::min)() - event.wheel.y)
-					g_mouse_wheel = (std::numeric_limits<std::int64_t>::min)();
-				else
-					g_mouse_wheel += event.wheel.y;
-				break;
-
-			/* Text input is routed to InputFocusManager by design: it takes the
-			 * SDL UTF-8 buffer as a const char* and hands it to the focused
-			 * editor. Do not re-route this through gC_vs_ui.KeyboardControl()
-			 * - its `extra` parameter is a `long`, 32-bit on LLP64, so a
-			 * pointer passed that way is truncated. */
-			case SDL_TEXTINPUT:
-				/* Handle text input for IME and text entry */
-				{
-					if (event.text.text[0] != '\0' && DXInput::GetHost().textInput) {
-						DXInput::GetHost().textInput(event.text.text);
-					}
-				}
-				break;
-
-			case SDL_TEXTEDITING:
-				/* Handle IME composition (text editing in progress) */
-				{
-					if (DXInput::GetHost().textEditing)
-						DXInput::GetHost().textEditing(event.edit.text, event.edit.start, event.edit.length);
-				}
-				break;
-		}
+		DXInput::ProcessEvent(event);
 	}
 
 	/* Update keyboard state */
