@@ -23,6 +23,8 @@
 #include "CFilter.h"
 
 #include "SpriteLibBackend.h"
+#include "SpriteScanline.h"
+#include <climits>
 #include "DebugLog.h"
 
 /* ============================================================================
@@ -184,7 +186,8 @@ static spritectl_sprite_t get_backend_alpha_sprite(CAlphaSprite* pSprite)
 		WORD width = pSprite->GetWidth();
 		WORD height = pSprite->GetHeight();
 
-		size_t pixel_count = width * height;
+		size_t pixel_count = size_t(width) * height;
+		if (!pixel_count || pixel_count > INT_MAX) return SPRITECTL_INVALID_SPRITE;
 		size_t data_size = pixel_count * sizeof(WORD);
 
 		/* Allocate and decompress pixel data */
@@ -202,8 +205,13 @@ static spritectl_sprite_t get_backend_alpha_sprite(CAlphaSprite* pSprite)
 
 		/* Decompress each line */
 		for (WORD y = 0; y < height; y++) {
-			WORD* pPixels = pSprite->GetPixelLine(y);
-			WORD* dst_line = pixels + (y * width);
+			const auto line = pSprite->GetPixelLineSpan(y);
+			if (!ValidateSpriteScanline(line, width, 2)) {
+				free(pixels);
+				return SPRITECTL_INVALID_SPRITE;
+			}
+			const WORD* pPixels = line.data();
+			WORD* dst_line = pixels + (size_t(y) * width);
 
 			int count = *pPixels++;  // RLE run count
 			int x = 0;
