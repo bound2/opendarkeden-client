@@ -3,7 +3,7 @@
 **Original plan complete as of 2026-09-09.** Its tasks are `done` and have their owners;
 PRs #144 and #145 carry the last slices. What the plan leaves behind is the
 machinery, not a to-do list: the membership files, the include checker, the
-fourteen ratchets and the fix policy (task 3.1) are what keep the end state
+ratchets and the fix policy (task 3.1) are what keep the end state
 true from here, and *What the review rounds settled* is what a later slice
 of any kind should read first. 5.2's *Candidates for a next slice* - dead
 code the plan found and did not take unasked - was the last list open and
@@ -54,8 +54,10 @@ adversarial reviews recorded the traps.
 - Verification for every extraction: both Debug trees build
   (`build/vs2022` with /RTC1, `build/vs2022-asan` with ASan), the test suite
   is green in a plain tree **and** an ASan tree, `wire_inventory_fresh`
-  passes, and the user runtime-verifies the client against a live server
-  before the branch merges (do not launch `DarkEden.exe` yourself).
+  passes, and the applicable CI checks pass. **Live-server verification is
+  optional, not a merge or completion gate** (user instruction, 2026-09-17).
+  Do not wait for a runtime report or request one as approval to merge.
+  Do not launch `DarkEden.exe` yourself unless the user asks.
 
 ### Working agreements for refactoring agents
 
@@ -180,16 +182,18 @@ per-task status lines no longer restate.
   explicitly. Layout stays pinned by the wire inventory + the server diff.
 - No rewrite of the render/game loop (`GameMain.cpp`, `MZone` drawing,
   `GameUI.cpp`) or the VS_UI widget tree. These stay executable-or-UI-side
-  and keep their live-server verification path.
+  and are covered by builds and available regression checks; runtime
+  verification is optional.
 - No new test framework. `tests/framework/test_framework.h` stays; tests are
   files in `tests/unit/` (globbed — reconfigure after adding one).
 - Not a port of the server's kernel wholesale: the two repos stay separate
   codebases pinned to one wire contract by the shared inventory.
 
-## Exemption list (tangled, verified at runtime instead)
+## Exemption list (tangled, outside the unit-test libraries)
 
-Code on this list is fixed executable-side with live-server verification and
-a **regression guard** note in the commit message, per existing practice.
+Code on this list is fixed executable-side with build verification, available
+automated checks and a **regression guard** note in the commit message when
+the defect was not reproduced. Live-server verification is optional.
 Shrink it when a task extracts a seam, and record the removal here.
 
 | Code | Why exempt |
@@ -653,10 +657,9 @@ rounds settled* for the host rules). Test fixtures share
     rules, R4 shrinking; `test_item_table.cpp`, `test_item_core.cpp`,
     `test_player_gear.cpp`, `test_skill_core.cpp`.
 
-- [ ] **4.5 Rank-bonus table:** `RankBonusTable`, `RankBonusInfo` and
+- [x] **4.5 Rank-bonus table:** `RankBonusTable`, `RankBonusInfo` and
   their enum definitions.
-  > **Status:** in progress (live-server verification pending; implementation
-  > and automated checks complete, 2026-09-17).
+  > **Status:** done (2026-09-17, PR #172, `ad86a5aa`).
   > `RankBonusTable.cpp` moves unchanged into `gamemodel`, including the
   > `g_pRankBonusTable` definition; its header and `RankBonusDef.h` join
   > the membership closure. No host is needed: the loader reads only its
@@ -665,8 +668,8 @@ rounds settled* for the host rules). Test fixtures share
   > This is an extraction, not a loader-hardening pass: malformed or
   > truncated row handling is unchanged. Both Windows Debug builds and
   > their complete CTest suites pass, including `wire_inventory_fresh`.
-  > Live-server verification of rank-bonus display and selection remains
-  > required before merge.
+  > Windows Release and all four macOS CI configurations also pass.
+  > Live-server verification was not performed and is not a completion gate.
   - Owner: the membership file, CMake's executable-source exclusion,
     M0–M2, R1, and the `RankBonusInfo` / `RankBonusTable` cases in
     `test_gamemodel_tables.cpp` (defaults, binary field layout for all

@@ -7,6 +7,11 @@ tools. This is not an operating-system port or a general modernization rewrite.
 
 **Current live platform:** Windows x64, Visual Studio 2022, vcpkg, SDL2.
 
+**Verification policy (2026-09-17):** live-server smoke testing is optional,
+not a merge or migration-completion requirement, per the user's instruction.
+The automated build, compiler, test and wire-compatibility criteria below remain
+required. The original estimates and historical findings do not add a runtime gate.
+
 ## Executive conclusion
 
 The project is close to **building in a newer MSVC language mode**, but it is not
@@ -532,20 +537,19 @@ second-order failures.
 
 ### 7. Automated coverage is useful but not sufficient
 
-The six CTest entries cover the unit binary plus architecture, formatting, packet
+The seven CTest entries cover the unit binaries plus architecture, formatting, packet
 index, and generated-inventory checks. The unit binary exercises the static
 libraries, including `packetwire` and `gamemodel`, and its wire goldens are valuable
 because the port should not change packet bytes.
 
 `tests/CMakeLists.txt` explicitly records the main limit: game logic compiled
 directly into `DarkEden`, including packet handlers, cannot be linked into the unit
-test binary. The language change therefore also needs an in-game smoke test against
-a live server. Compile success alone cannot validate UI string lifetime, exception
-paths, login, zone loading, chat, or shutdown.
+test binary. Automated checks do not prove every UI string lifetime, exception
+path, login, zone loading, chat or shutdown interaction. Live-server smoke testing
+can investigate those paths, but is optional and does not block this migration.
 
-There is no checked-in CI workflow, so compatibility could regress immediately
-unless the new language mode becomes the only supported build contract or is
-enforced in CI.
+The Windows, Linux and macOS workflows under `.github/workflows/` enforce the
+C++20 build and automated checks; the original assessment predated those workflows.
 
 ## Estimated work breakdown
 
@@ -585,8 +589,9 @@ but it should be named "MSVC C++20 build" rather than "portable C++20."
 6. Add Clang compilation. The local machine has a Clang 19 executable, but the
    Visual Studio ClangCL toolset integration is not installed, so this audit could
    run representative compile probes rather than a complete Clang target graph.
-7. Run all tests in ordinary and ASan trees, add Release coverage, then perform the
-   live-server smoke test before declaring the port complete.
+7. Run all tests in ordinary and ASan trees, add Release coverage, and verify the
+   compiler and wire checks before declaring the port complete. Live-server smoke
+   testing is optional.
 
 ## Acceptance criteria
 
@@ -602,9 +607,10 @@ The port is complete when all of the following are true:
 - a second compiler builds the intended portable subset or complete Windows graph,
   depending on the agreed support promise;
 - all CTest checks and the unit suite pass in ordinary and ASan builds;
-- packet wire inventories and golden bytes are unchanged;
-- startup, login, zone entry, UI interaction, chat, and clean shutdown are verified
-  against a live server.
+- packet wire inventories and golden bytes are unchanged.
+
+Live-server startup, login, zone entry, UI, chat and shutdown checks are optional;
+their absence does not block merging or declaring this migration complete.
 
 Modernizing unrelated raw pointers, containers, rendering code, platform APIs, or
 the remaining warning backlog is explicitly outside these criteria.
@@ -1910,7 +1916,8 @@ with compile-time, developer-owned log messages and bounded destinations.
 3. Add typed wire helpers and concepts after the span boundary is established.
 4. Migrate clocks and filesystem operations one subsystem at a time.
 5. Treat formatting, thread ownership, and raw-pointer ownership as dedicated
-   stabilization projects with their own tests and runtime smoke checks.
+   stabilization projects with their own automated tests. Runtime smoke checks
+   are optional.
 
 Modules, coroutines, mass ranges rewrites, blanket `char8_t` conversion, and broad
 syntax-only modernization are deliberately not priorities. They offer less defect
