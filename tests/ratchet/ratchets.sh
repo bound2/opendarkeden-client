@@ -1349,8 +1349,19 @@ fi
 # the item host's clock pointer and the wire host's clock function (two
 # library seams), the debug prints, the one write in StampFrameClock()
 # and the externs.
+# 18 on 2026-09-17: the creatures' and the player's member stamps moved
+# (MCreature's chat fade, HP and MP recovery, regeneration and its
+# bonus, bleeding; MPlayer's action delay, death delay and conversion
+# countdown; MFakeCreature's inherited read), with the four extern
+# declarations those files carried. What is left: UserInformation's
+# two live deadlines and their readers in CGameUpdate, UIMessageManager
+# and GameUI, MGameTime's start and current time with
+# GCUpdateInfoHandler's and CGameUpdate's calls, the two library seams
+# in GameInit, the definition, the one write and the log flush's debug
+# print in Client.cpp, and the externs in Client.h, MGameTime.cpp and
+# GCUpdateInfoHandler.cpp.
 #----------------------------------------------------------------------
-R16_BASELINE=57
+R16_BASELINE=18
 R16_FILES_FLOOR=1000
 
 r16_members () {

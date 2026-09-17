@@ -10,7 +10,7 @@
 #include "SkillDef.h"
 #include "UserInformation.h"
 #include "VS_UI.h"
-extern DWORD g_CurrentTime;
+extern MonotonicClock::TimePoint g_FrameNow;
 extern bool			HasEffectStatusSummonSylph( MCreature* pCreature );
 extern void			RemoveEffectStatusSummonSylph( MCreature* pCreature );
 extern	LONG g_SECTOR_WIDTH;
@@ -236,9 +236,9 @@ MFakeCreature::Action()
 	}
 
 	//--------------------------------------------------------
-	// 채팅 String 어둡게 할 시간
+	// when the chat string darkens
 	//--------------------------------------------------------
-	if (m_NextChatFadeTime < g_CurrentTime)
+	if (m_NextChatFadeTime < g_FrameNow)
 	{
 		FadeChatString();		
 	}

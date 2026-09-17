@@ -128,7 +128,6 @@ BYTE GetCreatureActionCountMax( const MCreature* pCreature, int action );
 #include "CImm.h"
 #endif
 
-extern	DWORD	g_CurrentTime;
 extern	MonotonicClock::TimePoint	g_FrameNow;
 extern	int		g_x;
 extern	int		g_y;
@@ -852,7 +851,7 @@ MPlayer::MPlayer()
 	m_SendMove = 0;
 
 	// Delay시간
-	m_DelayTime	= 0;
+	m_DelayTime	= MonotonicClock::TimePoint();
 	
 	// attack mode
 	m_AttackMode = ATTACK_MODE_NORMAL;
@@ -877,7 +876,7 @@ MPlayer::MPlayer()
 	m_bRepeatAction		= FALSE;
 
 	// 뱀파이어로 변하는 시간
-	m_ConversionDelayTime = 0;
+	m_ConversionDelayTime = MonotonicClock::TimePoint();
 
 	m_nNoPacketUsedActionInfo = ACTIONINFO_NULL;
 
@@ -1301,7 +1300,7 @@ MPlayer::ResetSendMove()
 DWORD			
 MPlayer::GetDeadDelayLast() const
 {
-	int second = m_DeadDelayTime - g_CurrentTime;
+	int second = (int)(m_DeadDelayTime - g_FrameNow).count();
 
 	if (second < 0) 
 	{
@@ -3219,8 +3218,8 @@ MPlayer::TraceCreatureToBasicAction(TYPE_OBJECTID id, bool bForceAttack, bool bC
 
 							m_fNextTrace	= FLAG_TRACE_NULL;
 
-							// 탄창 없을때 delay
-							m_DelayTime	= g_CurrentTime + GetActionInfoDelay(m_nBasicActionInfo);
+							// the delay for an empty magazine
+							m_DelayTime	= g_FrameNow + MonotonicClock::Duration(GetActionInfoDelay(m_nBasicActionInfo));
 
 							// [도움말] 총알 다 썼을 때
 //							__BEGIN_HELP_EVENT
@@ -3765,8 +3764,8 @@ MPlayer::TraceCreatureToSpecialAction(TYPE_OBJECTID id, bool bForceAttack)
 						// 총을 사용하는데 탄창이 없는 경우
 						PlaySound( SOUND_ITEM_NO_MAGAZINE );
 
-						// 탄창 없을때 delay
-							m_DelayTime	= g_CurrentTime + GetActionInfoDelay(m_nBasicActionInfo);
+						// the delay for an empty magazine
+							m_DelayTime	= g_FrameNow + MonotonicClock::Duration(GetActionInfoDelay(m_nBasicActionInfo));
 
 						m_fNextTrace	= FLAG_TRACE_NULL;
 						return false;					
@@ -3778,8 +3777,8 @@ MPlayer::TraceCreatureToSpecialAction(TYPE_OBJECTID id, bool bForceAttack)
 							// 총을 사용하는데 탄창이 없는 경우
 							PlaySound( SOUND_ITEM_NO_MAGAZINE );
 
-							// 탄창 없을때 delay
-							m_DelayTime	= g_CurrentTime + GetActionInfoDelay(m_nBasicActionInfo);
+							// the delay for an empty magazine
+							m_DelayTime	= g_FrameNow + MonotonicClock::Duration(GetActionInfoDelay(m_nBasicActionInfo));
 
 							if (IsRepeatAction())
 							{
@@ -4413,8 +4412,8 @@ MPlayer::TraceSectorToSpecialAction(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION 
 							InstallTurretStopAttack();
 						}
 						else
-							// 탄창 없을때 delay
-						m_DelayTime	= g_CurrentTime + GetActionInfoDelay(m_nBasicActionInfo);
+							// the delay for an empty magazine
+						m_DelayTime	= g_FrameNow + MonotonicClock::Duration(GetActionInfoDelay(m_nBasicActionInfo));
 						// 2004, 9, 23, sobeit add end
 						return false;
 					}
@@ -6951,16 +6950,16 @@ MPlayer::ActionToSendPacket()
 			//--------------------------------------------------------
 			if (m_Action==ACTION_STAND)
 			{
-				// 정지 동작 기술은 0.3초의 delay를 가진다.
-				m_DelayTime	= g_CurrentTime + 300;
+				// a skill used standing still has a 0.3 s delay
+				m_DelayTime	= g_FrameNow + MonotonicClock::Millis(300);
 			}
 			else if (m_bRepeatAction)
 			{				
 			}
 			else
 			{
-				m_DelayTime	= g_CurrentTime 
-								+ GetActionInfoDelay(m_nUsedActionInfo);
+				m_DelayTime	= g_FrameNow
+								+ MonotonicClock::Duration(GetActionInfoDelay(m_nUsedActionInfo));
 								// [적절한 타이밍]에 보낼때는 - 해야 한다.
 								// - (m_ActionCount<<6);	// 지나간 ActionCount만큼 delay를 빼준다.
 			}
@@ -8596,8 +8595,8 @@ MPlayer::SetDead()
 			m_TraceZ			= 0;	
 		}
 
-		// Delay 시간
-		m_DeadDelayTime	= g_CurrentTime + g_pClientConfig->DELAY_PLAYER_DEAD;
+		// the delay
+		m_DeadDelayTime	= g_FrameNow + MonotonicClock::Duration(g_pClientConfig->DELAY_PLAYER_DEAD);
 
 
 		//-------------------------------------------------------
@@ -9129,7 +9128,7 @@ MPlayer::AddEffectStatus(EFFECTSTATUS status, DWORD delayFrame)
 
 			SetConversionDelay( conversionTime );
 
-			DEBUG_ADD_FORMAT( "[BloodDrained] %ld --> %ld", g_CurrentTime, m_ConversionDelayTime );
+			DEBUG_ADD_FORMAT( "[BloodDrained] conversion in %lu ms", (unsigned long)conversionTime );
 
 //			delayFrame *= 16;
 //			UI_SetHP( GetHP(), GetMAX_HP() );
@@ -9335,13 +9334,13 @@ MPlayer::UpdateConversionTime()
 	
 	if (IsSlayer())
 	{
-		if ((int)m_ConversionDelayTime > (int)g_CurrentTime)
+		if (m_ConversionDelayTime > g_FrameNow)
 		{
 			//--------------------------------------------------------
-			// 뱀파이어로 변하는 남은 시간을 UI에 설정한다.
+			// give the UI the time left before the change
 			//--------------------------------------------------------
-			// msec --> min으로 바꾼다.   * GetTimeRatio / 1000 / 60 
-			int changeTime = ((int)m_ConversionDelayTime - (int)g_CurrentTime)/* * g_pGameTime->GetTimeRatio()*/ / 60000 ;
+			// msec to minutes: * GetTimeRatio / 1000 / 60
+			int changeTime = (int)(m_ConversionDelayTime - g_FrameNow).count()/* * g_pGameTime->GetTimeRatio()*/ / 60000 ;
 			g_char_slot_ingame.CHANGE_VAMPIRE = changeTime;
 
 			static MonotonicClock::TimePoint enableBlinkTime;	// when the next blink may start
@@ -9367,13 +9366,13 @@ MPlayer::UpdateConversionTime()
 			};
 
 			//--------------------------------------------------------
-			// 마지막에 깜빡이고 나서.. 
-			// 다시 깜빡일 수 있는 시간인지 체크한다.
+			// after the last blink,
+			// is it time to blink again?
 			//--------------------------------------------------------
 			if (g_FrameNow > enableBlinkTime)
 			{
 				// 변하기까지 남은 시간.. /1000하면 '초'로 나온다.
-				DWORD timeGap = m_ConversionDelayTime - g_CurrentTime;
+				DWORD timeGap = (DWORD)(m_ConversionDelayTime - g_FrameNow).count();
 				
 				// 무조건 출력. 6시간이 안 남은 경우에만 effect출력
 				if (1)//timeGap < sixHour)
@@ -9386,7 +9385,7 @@ MPlayer::UpdateConversionTime()
 						{
 							g_pTopView->SetFadeStart(25, 31, 2, 31,0,0);
 
-							// 다음에 깜빡일 수 있는 시간을 설정한다.
+							// when the next blink may start
 							enableBlinkTime = g_FrameNow + MonotonicClock::Millis(blinkValue[i][1]);
 
 							bBlink = TRUE;
@@ -9404,10 +9403,10 @@ MPlayer::UpdateConversionTime()
 		}
 		else
 		{
-			m_ConversionDelayTime = 0;
+			m_ConversionDelayTime = MonotonicClock::TimePoint();
 
 			//--------------------------------------------------------
-			// 뱀파이어로 변하는 남은 시간을 UI에 설정한다.
+			// give the UI the time left before the change
 			//--------------------------------------------------------
 			g_char_slot_ingame.CHANGE_VAMPIRE = 0;
 		}
@@ -9586,9 +9585,9 @@ MPlayer::Action()
 	UpdateConversionTime();
 	
 	//--------------------------------------------------------
-	// 채팅 String Scroll 시킬 시간
+	// when the chat string scrolls
 	//--------------------------------------------------------
-	if (m_NextChatFadeTime < g_CurrentTime)
+	if (m_NextChatFadeTime < g_FrameNow)
 	{
 		FadeChatString();
 	}
@@ -12184,7 +12183,7 @@ MPlayer::ChangeToSlayer()
 {
 	if (MCreature::ChangeToSlayer())
 	{
-		m_ConversionDelayTime = 0;
+		m_ConversionDelayTime = MonotonicClock::TimePoint();
 
 		g_pCurrentMagazine = NULL;
 		
@@ -12225,7 +12224,7 @@ MPlayer::ChangeToVampire()
 {
 	if (MCreature::ChangeToVampire())
 	{
-		m_ConversionDelayTime = 0;
+		m_ConversionDelayTime = MonotonicClock::TimePoint();
 
 		g_pCurrentMagazine = NULL;
 		
