@@ -780,6 +780,9 @@ uint SocketAPI::recv_ex ( SOCKET s , void * buf , uint len , uint flags )
 {
 	__BEGIN_TRY
 
+	if (len == 0)
+		return 0;
+
 #if defined(PLATFORM_POSIX)
 	int nrecv = recv(s,buf,len,flags);
 #elif __WINDOWS__

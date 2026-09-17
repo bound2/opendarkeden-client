@@ -78,10 +78,11 @@ public :
 	virtual uint send ( const void * buf , uint len , uint flags = 0 );
 	
 	// receive data from peer
-	uint receive ( void * buf , uint len , uint flags = 0 );
+	// Like send(), these are virtual so tests can script partial transport I/O.
+	virtual uint receive ( void * buf , uint len , uint flags = 0 );
 	
 	// how much available?
-	uint available () const;
+	virtual uint available () const;
 	
 
 //////////////////////////////////////////////////

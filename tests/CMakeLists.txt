@@ -121,6 +121,7 @@ set_source_files_properties(
 	# when the socket takes only part of it. Derives from SocketImpl to
 	# script the partial send, so it needs the same definitions too.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_output_stream_flush.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_input_stream_fill.cpp
 	# The second span/typed-scalar slice: the CGSkillTo* family's fields
 	# and its truncated-input contract, over the same stream classes.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_packet_skill_family_wire.cpp

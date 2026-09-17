@@ -15,6 +15,7 @@
 #include "Packet.h"
 
 #include <limits>
+#include <cstdint>
 
 //////////////////////////////////////////////////////////////////////
 // constructor
@@ -25,7 +26,8 @@ SocketOutputStream::SocketOutputStream ( Socket * sock , uint BufferLen )
 	__BEGIN_TRY
 
 	Assert( m_Socket != NULL );
-	Assert( m_BufferLen > 0 );
+	if (m_BufferLen < 2 || m_BufferLen > static_cast<uint>((std::numeric_limits<int>::max)()))
+		throw IOException("invalid socket output buffer size");
 	
 	m_Buffer = new char[ m_BufferLen ];
 
@@ -82,7 +84,7 @@ uint SocketOutputStream::write ( std::span<const char> buf )
 
 	if ( buf.empty() )
 		return 0;
-	if ( buf.size() > (std::numeric_limits<uint>::max)() )
+	if ( buf.size() > static_cast<uint>((std::numeric_limits<int>::max)()) - length() - 1 )
 		throw InvalidProtocolException("span is too large");
 
 	const uint len = static_cast<uint>(buf.size());
@@ -292,21 +294,15 @@ void SocketOutputStream::resize ( int size )
 {
 	__BEGIN_TRY
 		
-	Assert( size != 0 );
+	if (size == 0)
+		return;
+	const std::int64_t requested = static_cast<std::int64_t>(m_BufferLen) + size;
+	const uint len = length();
+	// Keep the sentinel slot, reject signed underflow and bound allocation.
+	if (requested < 2 || requested <= len || requested > (std::numeric_limits<int>::max)())
+		throw IOException("invalid socket buffer size");
+	const uint newBufferLen = static_cast<uint>(requested);
 
-	uint newBufferLen = m_BufferLen + size;
-	uint len = length();
-	
-	if ( size < 0 ) {
-		
-		// 만약 크기를 줄이려는데 버퍼에 들어있는 데이타를 
-		// 다 못담아낼 경우 
-		if ( newBufferLen < 0 || newBufferLen < len )
-			throw IOException("new buffer is too small!");
-		
-	} 
-	
-	// 새 버퍼를 할당받는다.
 	char * newBuffer = new char[ newBufferLen ];
 		
 	// 원래 버퍼의 내용을 복사한다.
