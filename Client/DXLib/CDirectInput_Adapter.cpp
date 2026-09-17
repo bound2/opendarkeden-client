@@ -18,8 +18,6 @@
 /* Global instance */
 CSDLInput*	g_pSDLInput = NULL;
 
-/* Keep the original key name table - it's defined in the header */
-
 /*=============================================================================
  * SDL Backend Implementation
  *=============================================================================*/
@@ -56,6 +54,8 @@ CSDLInput::~CSDLInput()
 /* Clear input state */
 void CSDLInput::Clear()
 {
+	m_mouse_z = 0;
+	(void)dxlib_input_get_mouse_wheel();
 	for (int i=0; i<256; i++)
 	{
 		m_key[i] = FALSE;
@@ -149,14 +149,13 @@ void CSDLInput::UpdateInput()
 	}
 
 	// Wheel: a delta since the last frame is all the game wants.
-	int old_z = m_mouse_z;
 	m_mouse_z = dxlib_input_get_mouse_wheel();
 
-	if (old_z != m_mouse_z) {
+	if (m_mouse_z != 0) {
 		if (m_fp_mouse_event_receiver) {
 			int cur_x, cur_y;
 			dxlib_input_get_mouse_pos(&cur_x, &cur_y);
-			m_fp_mouse_event_receiver(m_mouse_z > old_z ? WHEELUP : WHEELDOWN, cur_x, cur_y, m_mouse_z);
+			m_fp_mouse_event_receiver(m_mouse_z > 0 ? WHEELUP : WHEELDOWN, cur_x, cur_y, m_mouse_z);
 		}
 	}
 
@@ -262,6 +261,7 @@ int CSDLInput::GetMouseAcceleration(int value)
 /* Set mouse move limit */
 void CSDLInput::SetMouseMoveLimit(int x, int y)
 {
+	(void)dxlib_input_get_mouse_wheel();
 	m_mouse_x = 0;
 	m_mouse_y = 0;
 	m_mouse_z = 0;

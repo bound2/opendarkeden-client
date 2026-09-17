@@ -97,8 +97,10 @@ including the packet *handlers* under `Client/PacketHandler/` — cannot be link
 a test binary. That is a structural limit, and it is the single biggest constraint on
 how work gets verified here.
 
-`unit_tests` links `basic`, `SpriteLib`, `TextSystem`, `packetwire` and `gamemodel`. Covering
-something in `dxlib` or `VS_UI` means adding it to `target_link_libraries` in
+`unit_tests` links `basic`, `SpriteLib`, `TextSystem`, `packetwire`, `gamemodel`
+and `dxlib`. The input pump reaches application state and text editors through
+`DXInput::Host`, installed in `GameInit.cpp`; tests link the real adapter and
+backend without game-global stubs. Covering `VS_UI` still requires adding it to
 `tests/CMakeLists.txt` first. Packet tests construct real packets through the real
 factories and pin their bytes against `tests/golden/*.hex` — 138 of those files are
 also pinned by the server repo and 135 are byte-identical copies of its goldens

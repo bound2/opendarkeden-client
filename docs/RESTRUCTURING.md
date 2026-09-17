@@ -1014,6 +1014,12 @@ rounds settled* for the host rules). Test fixtures share
   > `TextSystem` with no stub translation unit — that link is the proof.
   > Whether the client still draws its FPS counter and debug overlays is
   > what running it shows.
+  > **Input follow-up (2026-09-18):** `unit_tests` also links `dxlib`.
+  > `DXInput::Host` carries six application callbacks (position, activation,
+  > focus and text delivery), designated-initialized by `InitInput`; the
+  > backend keeps SDL processing and key mapping. No test supplies `g_x`,
+  > `g_y`, `g_bActiveApp` or a fake text editor. Nine adapter tests exercise
+  > the real event pump, callback ordering, wheel consumption and key bounds.
   - Owner: the `unit_tests` link line.
 
 - [x] **5.4 Format-string audit** (code-health C19/C20/C22: `sprintf`

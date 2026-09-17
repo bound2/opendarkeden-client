@@ -964,6 +964,8 @@ Lines 512-516: `int leastTime = m_pLastTime[leastTimeIndex];` (computed but neve
 
 **Category:** correctness  |  **Location:** `Client/DXLib/CDirectInput_Adapter.cpp:29`
 
+> ✅ **Fixed (2026-09-18):** removed the unused swap flag, unreferenced key-name API/table declaration and unbuilt DirectInput implementation. `KeyDown` rejects indices outside its 256 entries. `dxlib` now links into `unit_tests` through an application host instead of game-global/UI references; its SDL backend selection is public to consumers. The key-index test reproduced reading mouse state through index 256 before the guard.
+
 `CSDLInput::CSDLInput()` (lines 29-47) initializes every member except `BOOL m_bSwapMouseButtons` (declared CDirectInput.h:36), leaving it indeterminate. Separately, `static const char* s_KeyName[256]` is declared at CDirectInput.h:40 and used by the inline `GetKeyName(DWORD dik) { return s_KeyName[dik]; }` (line 118), but its only definition is CDirectInput.cpp:20, a file wrapped entirely in `#ifdef PLATFORM_WINDOWS` (line 7) and not listed in DXLIB_SOURCES at all. The comment at CDirectInput_Adapter.cpp:20 claims 'it's defined in the header', which is not true. Both GetKeyName and KeyDown also index with an unchecked DWORD.
 
 **Failure scenario:** Reading m_bSwapMouseButtons is UB (it is unused on the SDL path today, so this is latent). The first caller of CSDLInput::GetKeyName — e.g. a key-binding UI — fails to link with an unresolved external for s_KeyName, with a source comment pointing the reader in the wrong direction.
@@ -973,6 +975,8 @@ Lines 512-516: `int leastTime = m_pLastTime[leastTimeIndex];` (computed but neve
 #### ⚪ Low -- The mouse wheel accumulator is never reset and is out of sync with CSDLInput's copy, producing spurious wheel events after SetMouseMoveLimit.
 
 **Category:** correctness  |  **Location:** `Client/DXLib/DXLibBackendSDL.cpp:444`
+
+> ✅ **Fixed (2026-09-18):** wheel reads consume a signed pending delta, with widened/saturating accumulation. Adapter callbacks use that delta directly; clears, mode changes and release discard old pending input. Multiple SDL pumps before consumption preserve movement, including the non-Windows outer-loop pump. Tests reproduced the phantom mode-change event and old cumulative values; regressions cover consecutive frames, repeated reads, multiple pumps, pending input at mode changes and extreme deltas.
 
 `g_mouse_wheel += event.wheel.y;` (line 444) accumulates for the lifetime of the process and is never cleared; `dxlib_input_get_mouse_wheel()` (line 497) just returns the running total. `CSDLInput::UpdateInput` compares `old_z` to the freshly read total and fires WHEELUP/WHEELDOWN on any difference (CDirectInput_Adapter.cpp:141-153). But `CSDLInput::SetMouseMoveLimit` sets `m_mouse_z = 0` (CDirectInput_Adapter.cpp:236) without touching the backend accumulator.
 

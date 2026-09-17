@@ -27,7 +27,7 @@
 #include "ServerInfo.h"
 #include "Packet/WireHost.h"
 #include "DXLib/DXInputHost.h"
-#include "InputFocusManager.h"
+#include "../VS_UI/src/InputFocusManager.h"
 #include "PacketDef.h"
 #include "PacketHandlerRegistry.h"
 #include "VS_UI.h"

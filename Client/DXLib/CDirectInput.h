@@ -9,7 +9,7 @@
 -----------------------------------------------------------------------------*/
 
 /* Include Platform.h first for type definitions (outside header guard) */
-#include "../basic/Platform.h"
+#include "../../basic/Platform.h"
 
 #ifndef __CSDLINPUT_H__
 #define __CSDLINPUT_H__
@@ -33,11 +33,9 @@ private:
 	IDirectInput *          m_pDI;
 	IDirectInputDevice *    m_pMouse;
 	IDirectInputDevice *		m_pKeyboard;
-	BOOL                    m_bSwapMouseButtons;
 	int							m_mouse_info[3]; // Mouse 정보를 얻기 위한 integer array.
 
 	BOOL					m_key[256];				// 키가 눌려있는가?
-	static const char*		s_KeyName[256];
 
 public:
 	int							m_mouse_x;
@@ -120,12 +118,11 @@ public:
 	void		UpdateInput();
 
 	// dik key가 눌려졌는가?
-	BOOL		KeyDown(DWORD dik)		{ return m_key[dik]; }
+	BOOL		KeyDown(DWORD dik) const	{ return dik < 256 ? m_key[dik] : FALSE; }
 
 	//int 		GetMouseInfo1() const { return m_mouse_info[0]; }
 	//int 		GetMouseInfo2() const { return m_mouse_info[1]; }
 	//int 		GetMouseInfo3() const { return m_mouse_info[2]; }
-	static const char*	GetKeyName(DWORD dik)	{ return s_KeyName[dik]; }
 };
 
 

@@ -12,7 +12,7 @@
 #ifndef __DXLIB_BACKEND_H__
 #define __DXLIB_BACKEND_H__
 
-#include "../basic/Platform.h"
+#include "../../basic/Platform.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,8 +71,8 @@ int dxlib_input_key_down(int dik_key);
 void dxlib_input_get_mouse_pos(int* x, int* y);
 
 /**
- * Get mouse wheel position
- * @return Wheel position (z-coordinate)
+ * Consume the pending mouse wheel delta since the previous read.
+ * @return Signed delta, saturated to int range; subsequent reads return zero.
  */
 int dxlib_input_get_mouse_wheel(void);
 

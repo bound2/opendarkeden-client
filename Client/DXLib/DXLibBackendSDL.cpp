@@ -27,6 +27,10 @@ extern "C" void spritectl_window_to_game_coords(int* x, int* y);
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <algorithm>
+#include <cstdint>
+#include <limits>
+#include <utility>
 
 /* For MP3/OGG support.
  * HAVE_SDL2_MIXER comes from Client/DXLib/CMakeLists.txt when SDL2_mixer is
@@ -189,7 +193,7 @@ static int g_stream_initialized = 0;
 static Uint8 g_key_state[SDL_NUM_SCANCODES];
 static int g_mouse_x = 0;
 static int g_mouse_y = 0;
-static int g_mouse_wheel = 0;
+static std::int64_t g_mouse_wheel = 0;
 static int g_mouse_buttons[3] = {0, 0, 0};
 
 /* Buffered button transitions, in the order SDL delivered them. Drained by
@@ -360,6 +364,7 @@ int dxlib_input_init(void* window_handle) {
 
 void dxlib_input_release(void) {
 	g_input_initialized = 0;
+	g_mouse_wheel = 0;
 }
 
 void dxlib_input_update(void) {
@@ -466,7 +471,14 @@ void dxlib_input_update(void) {
 				break;
 
 			case SDL_MOUSEWHEEL:
-				g_mouse_wheel += event.wheel.y;
+				// Keep pending input across multiple pumps before the adapter
+				// consumes it. Widen before adding; saturate even if no consumer runs.
+				if (event.wheel.y > 0 && g_mouse_wheel > (std::numeric_limits<std::int64_t>::max)() - event.wheel.y)
+					g_mouse_wheel = (std::numeric_limits<std::int64_t>::max)();
+				else if (event.wheel.y < 0 && g_mouse_wheel < (std::numeric_limits<std::int64_t>::min)() - event.wheel.y)
+					g_mouse_wheel = (std::numeric_limits<std::int64_t>::min)();
+				else
+					g_mouse_wheel += event.wheel.y;
 				break;
 
 			/* Text input is routed to InputFocusManager by design: it takes the
@@ -528,7 +540,10 @@ void dxlib_input_get_mouse_pos(int* x, int* y) {
 }
 
 int dxlib_input_get_mouse_wheel(void) {
-	return g_mouse_wheel;
+	const auto delta = std::exchange(g_mouse_wheel, 0);
+	return static_cast<int>(std::clamp(delta,
+		std::int64_t((std::numeric_limits<int>::min)()),
+		std::int64_t((std::numeric_limits<int>::max)())));
 }
 
 void dxlib_input_get_mouse_buttons(int* left, int* right, int* center) {

@@ -4,6 +4,9 @@
 #include "DXInputHost.h"
 #include <SDL.h>
 #include <vector>
+#include <limits>
+#include <cstring>
+#include <string>
 
 #ifndef DXLIB_BACKEND_SDL
 #error dxlib must publish its backend selection to consumers
@@ -13,10 +16,36 @@ namespace {
 struct Event { CSDLInput::E_MOUSE_EVENT kind; int x, y, z; };
 std::vector<Event> events;
 int hostX = 0, hostY = 0;
+bool activated = false;
+unsigned int keyValue = 0;
+std::string textValue, editValue;
+int editStart = 0, editLength = 0;
 void Receive(CSDLInput::E_MOUSE_EVENT kind, int x, int y, int z)
 {
 	CHECK_EQ(x, hostX); CHECK_EQ(y, hostY);
 	events.push_back({kind, x, y, z});
+}
+
+struct Session {
+	CSDLInput input;
+	Session()
+	{
+		CHECK_EQ(0, SDL_InitSubSystem(SDL_INIT_EVENTS));
+		SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
+		DXInput::SetHost({.mousePosition = [](int x, int y) { hostX = x; hostY = y; }});
+		CHECK(input.Init(nullptr, nullptr));
+		input.SetMouseEventReceiver(Receive);
+		events.clear();
+	}
+	~Session() { DXInput::SetHost({}); SDL_QuitSubSystem(SDL_INIT_EVENTS); }
+};
+
+void Wheel(int amount)
+{
+	SDL_Event event{};
+	event.type = SDL_MOUSEWHEEL;
+	event.wheel.y = amount;
+	CHECK_EQ(1, SDL_PushEvent(&event));
 }
 }
 
@@ -37,4 +66,120 @@ TEST(InputAdapter, LinksRealInputAndPublishesPositionBeforeOrderedCallbacks)
 	input.SetMouseEventReceiver(nullptr);
 	input.DispatchMouseAt(CSDLInput::MOVE, 30, 40);
 	CHECK_EQ(30, input.m_mouse_x); CHECK_EQ(40, input.m_mouse_y);
+}
+
+TEST(InputAdapter, KeyQueriesOutsideTheTableCannotReadMouseState)
+{
+	CSDLInput input;
+	input.m_mouse_x = input.m_mouse_y = input.m_mouse_z = 1;
+	CHECK(!input.KeyDown(256)); CHECK(!input.KeyDown(257)); CHECK(!input.KeyDown(258));
+	CHECK(!input.KeyDown(0)); CHECK(!input.KeyDown(255));
+	CHECK(!input.KeyDown((std::numeric_limits<DWORD>::max)()));
+}
+
+TEST(InputAdapter, AModeChangeDoesNotReplayTheLastWheelMovement)
+{
+	Session session;
+	Wheel(5);
+	session.input.UpdateInput();
+	events.clear();
+	session.input.SetMouseMoveLimit(1024, 768);
+	session.input.UpdateInput();
+	CHECK(events.empty());
+	CHECK_EQ(0, session.input.m_mouse_z);
+}
+
+TEST(InputAdapter, ConsecutiveFramesDeliverTheirOwnSignedWheelDelta)
+{
+	Session session;
+	for (int delta : {3, -2, 0, 4}) {
+		events.clear();
+		if (delta) Wheel(delta);
+		session.input.UpdateInput();
+		CHECK_EQ(delta, session.input.m_mouse_z);
+		CHECK_EQ(delta == 0 ? 0 : 1, events.size());
+		if (delta && events.size() == 1) {
+			CHECK_EQ(delta > 0 ? CSDLInput::WHEELUP : CSDLInput::WHEELDOWN, events[0].kind);
+			CHECK_EQ(delta, events[0].z);
+		}
+	}
+}
+
+TEST(InputAdapter, BackendWheelReadsConsumeThePendingDelta)
+{
+	Session session;
+	Wheel(7);
+	dxlib_input_update();
+	CHECK_EQ(7, dxlib_input_get_mouse_wheel());
+	CHECK_EQ(0, dxlib_input_get_mouse_wheel());
+}
+
+TEST(InputAdapter, OuterLoopAndAdapterPumpsDoNotLosePendingWheelInput)
+{
+	Session session;
+	Wheel(2);
+	dxlib_input_update(); // The non-Windows application loop also pumps events.
+	session.input.UpdateInput();
+	CHECK_EQ(2, session.input.m_mouse_z);
+	CHECK_EQ(1, events.size());
+}
+
+TEST(InputAdapter, ModeChangesDiscardPumpedButUnconsumedWheelInput)
+{
+	Session session;
+	Wheel(2);
+	dxlib_input_update();
+	session.input.SetMouseMoveLimit(1024, 768);
+	session.input.UpdateInput();
+	CHECK_EQ(0, session.input.m_mouse_z);
+	CHECK(events.empty());
+}
+
+TEST(InputAdapter, LargeWheelDeltasAreSummedBeforeNarrowing)
+{
+	Session session;
+	const int maximum = (std::numeric_limits<int>::max)();
+	Wheel(maximum); Wheel(maximum); Wheel(-maximum);
+	session.input.UpdateInput();
+	CHECK_EQ(maximum, session.input.m_mouse_z);
+	events.clear();
+	Wheel(-maximum); Wheel(-maximum);
+	session.input.UpdateInput();
+	CHECK_EQ((std::numeric_limits<int>::min)(), session.input.m_mouse_z);
+	CHECK_EQ(1, events.size());
+	if (events.size() == 1) CHECK_EQ(CSDLInput::WHEELDOWN, events[0].kind);
+}
+
+TEST(InputAdapter, EventPumpDeliversActivationAndTextThroughTheInstalledHost)
+{
+	Session session;
+	activated = false; keyValue = 0; textValue.clear(); editValue.clear();
+	DXInput::SetHost({
+		.mousePosition = [](int x, int y) { hostX = x; hostY = y; },
+		.activeApp = [](bool active) { activated = active; },
+		.hasTextFocus = []() { return true; },
+		.keyDown = [](unsigned int key) { keyValue = key; },
+		.textInput = [](const char* text) { textValue = text; },
+		.textEditing = [](const char* text, int start, int length) {
+			editValue = text; editStart = start; editLength = length;
+		}
+	});
+	SDL_Event event{};
+	event.type = SDL_WINDOWEVENT; event.window.event = SDL_WINDOWEVENT_FOCUS_GAINED;
+	CHECK_EQ(1, SDL_PushEvent(&event));
+	event = {}; event.type = SDL_KEYDOWN; event.key.keysym.sym = SDLK_LEFT;
+	CHECK_EQ(1, SDL_PushEvent(&event));
+	event = {}; event.type = SDL_TEXTINPUT; std::memcpy(event.text.text, "hello", 6);
+	CHECK_EQ(1, SDL_PushEvent(&event));
+	event = {}; event.type = SDL_TEXTEDITING; std::memcpy(event.edit.text, "abc", 4);
+	event.edit.start = 1; event.edit.length = 2;
+	CHECK_EQ(1, SDL_PushEvent(&event));
+	session.input.UpdateInput();
+	CHECK(activated); CHECK_EQ(0x25, keyValue);
+	CHECK(textValue == "hello"); CHECK(editValue == "abc");
+	CHECK_EQ(1, editStart); CHECK_EQ(2, editLength);
+
+	DXInput::SetHost({}); // A standalone consumer can omit application callbacks.
+	CHECK_EQ(1, SDL_PushEvent(&event));
+	session.input.UpdateInput();
 }
