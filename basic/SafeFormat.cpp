@@ -104,8 +104,8 @@ Accepts(char cConversion, const Arg& arg)
 // that was really passed rather than a wchar_t* scan of it.
 //----------------------------------------------------------------------
 void
-BuildSpec(char* pSpec, const char* pFlags, int nWidth, int nPrecision,
-		  char cConversion, const Arg& arg)
+BuildSpec(char* pSpec, size_t nSpec, const char* pFlags, int nWidth,
+		  int nPrecision, char cConversion, const Arg& arg)
 {
 	char* w = pSpec;
 
@@ -123,7 +123,7 @@ BuildSpec(char* pSpec, const char* pFlags, int nWidth, int nPrecision,
 			nWidth = MAX_FIELD_WIDTH;
 		}
 
-		w += sprintf(w, "%d", nWidth);
+		w += snprintf(w, nSpec - (w - pSpec), "%d", nWidth);
 	}
 
 	if (nPrecision >= 0)
@@ -133,7 +133,7 @@ BuildSpec(char* pSpec, const char* pFlags, int nWidth, int nPrecision,
 			nPrecision = MAX_PRECISION;
 		}
 
-		w += sprintf(w, ".%d", nPrecision);
+		w += snprintf(w, nSpec - (w - pSpec), ".%d", nPrecision);
 	}
 
 	const bool bIsInteger = (cConversion=='d' || cConversion=='i'
@@ -438,7 +438,7 @@ FormatV(char* pDest, size_t nSize, const char* pFormat,
 		}
 
 		char szSpec[32];
-		BuildSpec(szSpec, szFlags, nWidth, nPrecision, cConversion, *pArg);
+		BuildSpec(szSpec, sizeof(szSpec), szFlags, nWidth, nPrecision, cConversion, *pArg);
 
 		nOut += Emit(pDest, nSize, nOut, szSpec, cConversion, *pArg);
 		nNext++;

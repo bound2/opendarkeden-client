@@ -22,7 +22,7 @@
 │     basic/*.h（使用平台抽象）         │
 ├─────────────────────────────────────┤
 │ Typedef.h, PlatformUtil.h,          │
-│ Directory.h, BasicMemory.h, etc.    │
+│ BasicMemory.h, DebugLog.h, etc.    │
 └──────────────┬──────────────────────┘
                │
 ┌──────────────┴──────────────────────┐
@@ -46,7 +46,6 @@ basic/
 ├── PlatformSDL.cpp         # SDL/跨平台实现
 ├── Typedef.h               # 基础类型定义
 ├── PlatformUtil.h          # 平台工具
-├── Directory.h/.cpp        # 目录操作
 ├── BasicMemory.h           # 内存管理
 ├── BasicException.h        # 异常处理
 ├── DLL.h                   # 动态库加载
@@ -194,7 +193,6 @@ platform_config_get_string("SOFTWARE\\DarkEden", "RunFileName", buffer, &size);
 ```cpp
 #include "Typedef.h"           // ✅ 包含 Platform.h
 #include "PlatformUtil.h"      // ✅ 使用 platform_is_ctrl_pressed()
-#include "Directory.h"         // ✅ 使用 platform_get_executable_dir()
 ```
 
 **上层代码无需修改！**

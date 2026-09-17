@@ -394,8 +394,7 @@ int platform_get_executable_dir(char* buffer, size_t size) {
 	size_t len = strlen(dir);
 	if (len + 2 > size) return 1;
 
-	strcpy(buffer, dir);
-	strcat(buffer, "/");
+	snprintf(buffer, size, "%s/", dir);
 	return 0;
 }
 
@@ -441,7 +440,7 @@ static void get_config_file_path(void) {
 	/* Get executable directory */
 	char exeDir[PATH_MAX];
 	if (platform_get_executable_dir(exeDir, sizeof(exeDir)) != 0) {
-		strcpy(exeDir, "./");
+		snprintf(exeDir, sizeof(exeDir), "%s", "./");
 	}
 
 	/* Use config file in executable directory */
@@ -470,7 +469,7 @@ int platform_config_get_string(const char* key, const char* value,
 
 			size_t len = strlen(val) + 1;
 			if (len <= *size) {
-				strcpy(buffer, val);
+				memcpy(buffer, val, len);
 				*size = (DWORD)len;
 				found = 1;
 			}

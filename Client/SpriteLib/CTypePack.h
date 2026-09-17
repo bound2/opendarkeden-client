@@ -291,7 +291,7 @@ bool CTypePack<Type>::SaveToFile(std::ofstream&dataFile, std::ofstream&indexFile
 	if(realSize != m_Size)
 	{
 		char szTemp[512];
-		sprintf(szTemp, "real size : %d size : %d", realSize, m_Size);
+		snprintf(szTemp, sizeof(szTemp), "real size : %d size : %d", realSize, m_Size);
 		MessageBox(NULL, szTemp, "CTypePack", MB_OK);
 
 		dataFile.seekp(0);
@@ -829,7 +829,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::SaveToFile(std::ofstream&dataFile, std:
 	if(realSize != m_Size)
 	{
 		char szTemp[512];
-		sprintf(szTemp, "real size : %d size : %d", realSize, m_Size);
+		snprintf(szTemp, sizeof(szTemp), "real size : %d size : %d", realSize, m_Size);
 		MessageBox(NULL, szTemp, "CTypePack2", MB_OK);
 
 		dataFile.seekp(0);
