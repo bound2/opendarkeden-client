@@ -105,17 +105,17 @@ Wire::EncryptUsesEnglishSeed ()
 //----------------------------------------------------------------------
 // The request-service family's seams.
 //----------------------------------------------------------------------
-// A clock of 0 with no host, and no file transfer registered - the
+// The epoch with no host, and no file transfer registered - the
 // three calls answer false, which is what a caller asking whether it
 // still has one needs to hear so that it cleans up instead of waiting
 // on a manager that is not there.
 //----------------------------------------------------------------------
-DWORD
+MonotonicClock::TimePoint
 Wire::CurrentTime ()
 {
 	if (s_pHost==NULL || s_pHost->CurrentTime==NULL)
 	{
-		return 0;
+		return MonotonicClock::TimePoint();
 	}
 
 	return s_pHost->CurrentTime();

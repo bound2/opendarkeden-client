@@ -28,6 +28,8 @@
 
 #include <string>
 
+#include "MonotonicClock.h"
+
 class Player;
 class RequestServerPlayer;
 
@@ -83,8 +85,8 @@ struct WireHost {
 	// fifth slice had put here.
 	//------------------------------------------------------------------
 
-	// The clock its timeouts are measured against, in milliseconds.
-	DWORD		(*CurrentTime)();
+	// The frame stamp its timeouts are measured against.
+	MonotonicClock::TimePoint	(*CurrentTime)();
 
 	// The peer file-transfer manager, which stays executable-side: it
 	// writes into the profile directory and reads the UI's own state.
@@ -145,7 +147,7 @@ public :
 	static int	EncryptServerID ();
 	static bool	EncryptUsesEnglishSeed ();
 
-	static DWORD	CurrentTime ();
+	static MonotonicClock::TimePoint	CurrentTime ();
 
 	// NOT nothrow, and the omission is deliberate. The file-transfer
 	// manager behind it reads the profile file and writes the peer

@@ -13,6 +13,7 @@
 #include "PlayerStatus.h"
 #include "Packet.h"
 #include "Types/RequestTypes.h"
+#include "MonotonicClock.h"
 
 //--------------------------------------------------------------------------------
 //
@@ -73,7 +74,7 @@ public :
 
 private :
 
-	DWORD		m_ExpireTime;
+	MonotonicClock::TimePoint	m_ExpireTime;
 	std::string		m_Name;
 
 	// Request하고 있는 것

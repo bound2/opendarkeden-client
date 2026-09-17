@@ -36,7 +36,7 @@ ZoneID_t	s_EncryptZoneID		= 0;
 int		s_EncryptServerID	= 0;
 bool		s_EnglishSeed		= false;
 
-DWORD		s_Now			= 0;
+MonotonicClock::TimePoint	s_Now;
 
 // The six file-transfer entries have the same signature in pairs, so a
 // host wired to the wrong one would still answer. Recording the name
@@ -59,7 +59,7 @@ ZoneID_t	HostEncryptZoneID()	{ return s_EncryptZoneID; }
 int	HostEncryptServerID()		{ return s_EncryptServerID; }
 bool	HostEnglishSeed()		{ return s_EnglishSeed; }
 
-DWORD	HostCurrentTime()		{ return s_Now; }
+MonotonicClock::TimePoint	HostCurrentTime()	{ return s_Now; }
 
 bool	HostSendOtherRequest(const std::string& n, RequestServerPlayer*)	{ Asked("SendOther", n); return true; }
 bool	HostHasOtherRequest(const std::string& n)			{ Asked("HasOther", n); return true; }
@@ -381,8 +381,8 @@ TEST(WireHostSeam, TheRequestSeamsAnswerConservativelyWithNoHost)
 
 	Wire::SetHost(NULL);
 
-	// A clock of zero.
-	CHECK_EQ(0, (int)Wire::CurrentTime());
+	// The epoch.
+	CHECK_EQ(0, (long long)Wire::CurrentTime().time_since_epoch().count());
 
 	// And no file transfer is registered, which is what a caller
 	// asking whether it still has one needs to hear so that it cleans
@@ -400,7 +400,7 @@ TEST(WireHostSeam, TheRequestSeamsAnswerConservativelyWithNoHost)
 	// found half of its eight were only covered the short-circuiting
 	// way.
 	Wire::SetHost(&s_EmptyHost);
-	CHECK_EQ(0, (int)Wire::CurrentTime());
+	CHECK_EQ(0, (long long)Wire::CurrentTime().time_since_epoch().count());
 	CHECK_EQ(false, Wire::SendOtherRequest("peer", NULL));
 	CHECK_EQ(false, Wire::HasOtherRequest("peer"));
 	CHECK_EQ(false, Wire::RemoveOtherRequest("peer"));
@@ -410,17 +410,17 @@ TEST(WireHostSeam, AHostAnswersTheRequestSeamsAndIsAskedTheRightOne)
 {
 	NoHost	restore;
 
-	s_Now		= 4321;
+	s_Now		= MonotonicClock::FromMillis(4321);
 	s_RequestAsked.clear();
 
 	Wire::SetHost(&s_Host);
 
-	CHECK_EQ(4321, (int)Wire::CurrentTime());
+	CHECK_EQ(4321, (long long)Wire::CurrentTime().time_since_epoch().count());
 
 	// Read each time. The request timeouts are differences against this
 	// clock, so a value copied once would freeze every one of them.
-	s_Now = 9999;
-	CHECK_EQ(9999, (int)Wire::CurrentTime());
+	s_Now = MonotonicClock::FromMillis(9999);
+	CHECK_EQ(9999, (long long)Wire::CurrentTime().time_since_epoch().count());
 
 	// The three file-transfer calls are near-identical in shape (two
 	// share a signature), which is exactly how one gets wired to the

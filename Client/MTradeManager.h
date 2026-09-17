@@ -13,6 +13,7 @@
 
 #include "MInventory.h"
 #include "MMoneyManager.h"
+#include "MonotonicClock.h"
 
 class MTradeManager {
 	public :
@@ -40,7 +41,7 @@ class MTradeManager {
 		//-------------------------------------------------------
 		// Trade OK ?
 		//-------------------------------------------------------
-		// The accept delay runs on the item host's millisecond clock
+		// The accept delay runs on the item host's frame stamp
 		// (docs/RESTRUCTURING.md task 4.2); without one there is no delay.
 		bool				IsAcceptTime() const;
 		void				SetNextAcceptTime();		// when accepting is allowed again
@@ -82,7 +83,7 @@ class MTradeManager {
 		bool				m_bAcceptMyTrade;			// 나의 교환확인
 		bool				m_bAcceptOtherTrade;		// 남의 교한확인
 
-		DWORD				m_NextAcceptTime;		// when OK may be pressed again
+		MonotonicClock::TimePoint	m_NextAcceptTime;	// when OK may be pressed again
 };
 
 extern MTradeManager*		g_pTradeManager;

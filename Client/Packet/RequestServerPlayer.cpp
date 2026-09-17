@@ -33,7 +33,7 @@ RequestServerPlayer::RequestServerPlayer ( Socket * pSocket )
 {
 	m_RequestMode = REQUEST_CLIENT_MODE_NULL;
 
-	m_ExpireTime = Wire::CurrentTime() + EXPIRE_DELAY;
+	m_ExpireTime = Wire::CurrentTime() + MonotonicClock::Millis(EXPIRE_DELAY);
 }
 
 
@@ -75,8 +75,8 @@ void RequestServerPlayer::processCommand ()
 		case REQUEST_CLIENT_MODE_PROFILE :
 			if (Wire::SendOtherRequest(m_Name, this))
 			{
-				// 화일을 보내는 중이므로 processCommand()가 필요없다.
-				m_ExpireTime = Wire::CurrentTime() + EXPIRE_DELAY;
+				// the file is being sent, so processCommand() is not needed
+				m_ExpireTime = Wire::CurrentTime() + MonotonicClock::Millis(EXPIRE_DELAY);
 				return;
 			}			
 		break;
@@ -212,7 +212,7 @@ void RequestServerPlayer::processCommand ()
 				
 				pPacket.reset();
 
-				m_ExpireTime = Wire::CurrentTime() + EXPIRE_DELAY;
+				m_ExpireTime = Wire::CurrentTime() + MonotonicClock::Millis(EXPIRE_DELAY);
 
 				//---------------------------------------------------------	
 				// 한번에 처리하는 packet의 한계 개수를 넘어간 경우

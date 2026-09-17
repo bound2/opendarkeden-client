@@ -167,8 +167,7 @@ extern BOOL					g_bNeedUpdate; // update해야되나?
 
 
 // FPS
-extern DWORD				g_CurrentTime;
-extern MonotonicClock::TimePoint	g_FrameNow;	// the frame's monotonic stamp, set beside g_CurrentTime
+extern MonotonicClock::TimePoint	g_FrameNow;	// the frame clock, stamped once per frame
 void						StampFrameClock();
 extern DWORD				g_CurrentFrame;
 

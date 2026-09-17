@@ -4,7 +4,7 @@
 #include "Client_PCH.h"
 #include "MSkillManager.h"
 #include "MTypeDef.h"
-#include "MItem.h"		// the item host carries the millisecond clock the delays run on
+#include "MItem.h"		// the item host carries the frame stamp the delays run on
 
 #include <algorithm>
 
@@ -46,7 +46,7 @@ SKILLINFO_NODE::SKILLINFO_NODE()
 	m_eSkillRace = RACE_SLAYER;
 
 	m_DelayTime = 0;		// the delay before it can be used again
-	m_AvailableTime = 0;	// when it can be used again
+	m_AvailableTime = MonotonicClock::TimePoint();	// when it can be used again
 
 	m_bEnable = false;
 
@@ -337,9 +337,9 @@ SKILLINFO_NODE::SetDelayTime(DWORD delay)
 bool
 SKILLINFO_NODE::IsAvailableTime() const
 {
-	// The delays run on the item host's millisecond clock; without one
+	// The delays run on the item host's frame stamp; without one
 	// (a test binary) there is no delay.
-	const DWORD* pClock = MItem::Clock();
+	const MonotonicClock::TimePoint* pClock = MItem::Clock();
 
 	return pClock==NULL || *pClock >= m_AvailableTime;
 }
@@ -352,15 +352,15 @@ SKILLINFO_NODE::IsAvailableTime() const
 DWORD				
 SKILLINFO_NODE::GetAvailableTimeLeft() const
 {
-	const DWORD* pClock = MItem::Clock();
+	const MonotonicClock::TimePoint* pClock = MItem::Clock();
 
 	if (pClock!=NULL)
 	{
-		int timeGap = (int)m_AvailableTime - (int)*pClock;
+		const MonotonicClock::Duration left = m_AvailableTime - *pClock;
 
-		if (timeGap > 0)
+		if (left > MonotonicClock::Duration(0))
 		{
-			return timeGap;
+			return (DWORD)left.count();
 		}
 	}
 
@@ -376,12 +376,12 @@ void
 SKILLINFO_NODE::SetAvailableTime(int delay)
 {
 	// No delay at all reads as zero rather than as "now".
-	const DWORD* pClock = MItem::Clock();
+	const MonotonicClock::TimePoint* pClock = MItem::Clock();
 
 	if(delay == 0)
-		m_AvailableTime = 0;
+		m_AvailableTime = MonotonicClock::TimePoint();
 	else
-		m_AvailableTime = (pClock!=NULL ? *pClock : 0) + delay;
+		m_AvailableTime = (pClock!=NULL ? *pClock : MonotonicClock::TimePoint()) + MonotonicClock::Duration(delay);
 }
 
 //----------------------------------------------------------------------
@@ -393,9 +393,9 @@ void
 SKILLINFO_NODE::SetNextAvailableTime()
 {
 	// Available again once the delay has run from now.
-	const DWORD* pClock = MItem::Clock();
+	const MonotonicClock::TimePoint* pClock = MItem::Clock();
 
-	m_AvailableTime = (pClock!=NULL ? *pClock : 0) + m_DelayTime;
+	m_AvailableTime = (pClock!=NULL ? *pClock : MonotonicClock::TimePoint()) + MonotonicClock::Millis(m_DelayTime);
 }
 
 //----------------------------------------------------------------------

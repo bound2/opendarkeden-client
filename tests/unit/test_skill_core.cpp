@@ -24,7 +24,7 @@
 
 namespace {
 
-DWORD	s_Now = 0;
+MonotonicClock::TimePoint	s_Now;
 
 int			DropFrameCount(TYPE_FRAMEID)	{ return 0; }
 void		RefreshAffect(MItem*)			{}
@@ -52,7 +52,7 @@ struct SkillWorld : GameModelWorld
 {
 	SkillWorld()
 	{
-		s_Now = 0;
+		s_Now = MonotonicClock::TimePoint();
 
 		g_pSkillInfoTable = new MSkillInfoTable;
 		g_pSkillManager = new MSkillManager;
@@ -93,14 +93,14 @@ TEST(SkillInfoNode, UseDelaysRunOnTheHostClock)
 	// Using it starts its delay from now.
 	node.SetDelayTime(3000);
 	CHECK_EQ(3000, (int)node.GetDelayTime());
-	s_Now = 10000;
+	s_Now = MonotonicClock::FromMillis(10000);
 	node.SetNextAvailableTime();
 	CHECK_EQ(false, node.IsAvailableTime());
 	CHECK_EQ(3000, (int)node.GetAvailableTimeLeft());
-	s_Now = 12999;
+	s_Now = MonotonicClock::FromMillis(12999);
 	CHECK_EQ(false, node.IsAvailableTime());
 	CHECK_EQ(1, (int)node.GetAvailableTimeLeft());
-	s_Now = 13000;
+	s_Now = MonotonicClock::FromMillis(13000);
 	CHECK(node.IsAvailableTime());
 	CHECK_EQ(0, (int)node.GetAvailableTimeLeft());
 
@@ -1042,4 +1042,30 @@ TEST(SkillDomain, TheGlobalsTheExecutableOwnsMayBeGone)
 
 	g_pSkillAvailable = pSet;
 	g_pSkillManager = pManager;
+}
+
+//----------------------------------------------------------------------
+// The legacy wrap
+//----------------------------------------------------------------------
+TEST(SkillInfoNode, UseDelayAcrossTheLegacyWrapStillWaits)
+{
+	// The DWORD sum wrapped: (2^32 - 1000) + 3000 is 2000 mod 2^32, and
+	// "clock >= 2000" made the skill available at once.
+	const DWORD dw_now = (DWORD)(0x100000000ull - 1000);
+	CHECK(dw_now >= (DWORD)(dw_now + 3000));
+
+	SkillWorld world;
+	SKILLINFO_NODE node;
+	node.SetDelayTime(3000);
+
+	s_Now = MonotonicClock::FromMillis(0x100000000ull - 1000);
+	node.SetNextAvailableTime();
+	CHECK_EQ(false, node.IsAvailableTime());
+	CHECK_EQ(3000, (int)node.GetAvailableTimeLeft());
+	s_Now = MonotonicClock::FromMillis(0x100000000ull + 1999);
+	CHECK_EQ(false, node.IsAvailableTime());
+	CHECK_EQ(1, (int)node.GetAvailableTimeLeft());
+	s_Now = MonotonicClock::FromMillis(0x100000000ull + 2000);
+	CHECK(node.IsAvailableTime());
+	CHECK_EQ(0, (int)node.GetAvailableTimeLeft());
 }

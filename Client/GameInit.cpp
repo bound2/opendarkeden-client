@@ -2931,7 +2931,7 @@ static const MItemHost	s_ItemHost = {
 	.DropFrameCount			= ItemDropFrameCount,
 	.RefreshAffect			= RefreshAffect,
 	.PlayItemSound			= PlayItemSound,
-	.pCurrentTime			= &g_CurrentTime,
+	.pCurrentTime			= &g_FrameNow,
 	.RecalculateStatus		= RecalculateStatus,
 	.ResetQuickItemSlot		= ResetQuickItemSlot,
 	.RepairHint				= RepairHint,
@@ -3032,7 +3032,7 @@ static bool	WireEncryptUsesEnglishSeed()
 // pointer. The old call sites tested the same expression, so nothing
 // here widens the window - but nothing here closes it either.
 //-----------------------------------------------------------------------------
-static DWORD	WireCurrentTime()		{ return g_CurrentTime; }
+static MonotonicClock::TimePoint	WireCurrentTime()	{ return g_FrameNow; }
 
 static bool	WireSendOtherRequest(const std::string& name, RequestServerPlayer* pPlayer)
 		{ return g_pRequestFileManager!=NULL && g_pRequestFileManager->SendOtherRequest(name, pPlayer); }

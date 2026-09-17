@@ -85,7 +85,7 @@ struct MItemHost {
 	int				(*DropFrameCount)(TYPE_FRAMEID dropID);	// frames in the drop animation of a drop frame id
 	void			(*RefreshAffect)(MItem* pItem);			// the player re-evaluates whether it can use the item (containers on add, a pet before its colour is read)
 	void			(*PlayItemSound)(TYPE_SOUNDID soundID);	// the sound an item makes landing in a container or going on as gear
-	const DWORD*	pCurrentTime;							// the millisecond clock the trade accept delay and the skill use delays run on; NULL means no delay
+	const MonotonicClock::TimePoint*	pCurrentTime;	// the frame stamp the trade accept delay and the skill use delays run on; NULL means no delay
 	void			(*RecalculateStatus)();					// the player recomputes its stats after its gear changed
 	void			(*ResetQuickItemSlot)();				// the UI rebuilds the quick-item slots after the belt or an arms band changed
 	void			(*RepairHint)();						// the help event for a piece of gear that started to break
@@ -447,8 +447,8 @@ class MItem : public MObject, public CAnimationFrame {
 		static void				ResetQuickItemSlot()			{ if (s_pHost!=NULL && s_pHost->ResetQuickItemSlot!=NULL) s_pHost->ResetQuickItemSlot(); }
 		static void				RepairHint()					{ if (s_pHost!=NULL && s_pHost->RepairHint!=NULL) s_pHost->RepairHint(); }
 		static MMagazine*		EmptyMagazineFor(MItem* pGun)	{ return s_pHost!=NULL && s_pHost->EmptyMagazineFor!=NULL ? s_pHost->EmptyMagazineFor(pGun) : NULL; }
-		// The executable's millisecond clock; NULL without a host, or with one that carries none.
-		static const DWORD*		Clock()							{ return s_pHost!=NULL ? s_pHost->pCurrentTime : NULL; }
+		// The executable's frame stamp; NULL without a host, or with one that carries none.
+		static const MonotonicClock::TimePoint*	Clock()	{ return s_pHost!=NULL ? s_pHost->pCurrentTime : NULL; }
 		BOOL		IsDropping() const		{ return m_bDropping; }
 		int			GetDropHeight() const	{ return s_DropHeight[m_DropCount]; }
 		void		NextDropFrame();		
