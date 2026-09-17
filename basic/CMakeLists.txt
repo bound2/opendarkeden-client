@@ -71,6 +71,7 @@ set(BASIC_SOURCES
 	# C library.
 	SafeFormat.cpp
 	CMessageArray.cpp
+	ConfigFile.cpp
 	# The monotonic clock adapter (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md,
 	# modernization backlog priority 5). Timer2.cpp is its first caller
 	# and lives here already; the UI timers that follow are in VS_UI and
