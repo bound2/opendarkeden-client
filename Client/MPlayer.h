@@ -668,7 +668,7 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		DIRECTION_LIST	m_listDirection;
 		DIRECTION_LIST	m_listSendDirection;
 
-		// 기술 사용 후의 delay
+		// the delay after using a skill
 		MonotonicClock::TimePoint	m_DelayTime;
 
 		// 펫 루팅 사용후의 delay
@@ -680,7 +680,7 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		// 현재 전투 Mode
 		ATTACK_MODE					m_AttackMode;
 
-		// 죽고 나서의 delay시간 - 언제까지..
+		// the delay after death - until when
 		MonotonicClock::TimePoint	m_DeadDelayTime;
 
 		// Item을 기억하고 있자..
@@ -698,7 +698,7 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		WAIT_VERIFY					m_WaitVerify;
 		TYPE_ACTIONINFO				m_WaitVerifyActionInfo;
 
-		// 뱀파이어로 변하는데 남은 delay frame - 언제까지
+		// the change to vampire - until when
 		MonotonicClock::TimePoint	m_ConversionDelayTime;
 
 		// packet을 보내지 않는 actioninfo 

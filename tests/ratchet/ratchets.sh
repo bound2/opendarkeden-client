@@ -1354,7 +1354,7 @@ fi
 # bonus, bleeding; MPlayer's action delay, death delay and conversion
 # countdown; MFakeCreature's inherited read), with the four extern
 # declarations those files carried. What is left: UserInformation's
-# two live deadlines and their readers in CGameUpdate, UIMessageManager
+# two live deadlines and their sites in CGameUpdate, UIMessageManager
 # and GameUI, MGameTime's start and current time with
 # GCUpdateInfoHandler's and CGameUpdate's calls, the two library seams
 # in GameInit, the definition, the one write and the log flush's debug

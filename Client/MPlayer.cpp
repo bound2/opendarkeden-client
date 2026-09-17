@@ -850,7 +850,7 @@ MPlayer::MPlayer()
 	// Server로 보낸 메세지 개수
 	m_SendMove = 0;
 
-	// Delay시간
+	// the action delay
 	m_DelayTime	= MonotonicClock::TimePoint();
 	
 	// attack mode
@@ -875,7 +875,7 @@ MPlayer::MPlayer()
 	// 행동 반복
 	m_bRepeatAction		= FALSE;
 
-	// 뱀파이어로 변하는 시간
+	// when the change to vampire is due
 	m_ConversionDelayTime = MonotonicClock::TimePoint();
 
 	m_nNoPacketUsedActionInfo = ACTIONINFO_NULL;
@@ -1300,14 +1300,14 @@ MPlayer::ResetSendMove()
 DWORD			
 MPlayer::GetDeadDelayLast() const
 {
-	int second = (int)(m_DeadDelayTime - g_FrameNow).count();
+	const MonotonicClock::Duration left = m_DeadDelayTime - g_FrameNow;
 
-	if (second < 0) 
+	if (left <= MonotonicClock::Duration(0))
 	{
 		return 0;
 	}
-	
-	return second/1000;
+
+	return (DWORD)(left.count() / 1000);
 }
 
 //----------------------------------------------------------------------
@@ -6960,8 +6960,8 @@ MPlayer::ActionToSendPacket()
 			{
 				m_DelayTime	= g_FrameNow
 								+ MonotonicClock::Duration(GetActionInfoDelay(m_nUsedActionInfo));
-								// [적절한 타이밍]에 보낼때는 - 해야 한다.
-								// - (m_ActionCount<<6);	// 지나간 ActionCount만큼 delay를 빼준다.
+								// when sent at the right moment, subtract
+								// - (m_ActionCount<<6);	// the delay of the action counts already passed
 			}
 
 		//----------------------------------------------------------
@@ -9371,7 +9371,7 @@ MPlayer::UpdateConversionTime()
 			//--------------------------------------------------------
 			if (g_FrameNow > enableBlinkTime)
 			{
-				// 변하기까지 남은 시간.. /1000하면 '초'로 나온다.
+				// time left to the change; /1000 gives seconds
 				DWORD timeGap = (DWORD)(m_ConversionDelayTime - g_FrameNow).count();
 				
 				// 무조건 출력. 6시간이 안 남은 경우에만 effect출력

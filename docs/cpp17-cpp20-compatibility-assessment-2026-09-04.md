@@ -1588,13 +1588,11 @@ and its bonus (`m_RegenNextTime`, `m_RegenBonusNextTime`: now when set,
 advanced by the delay per step) and the bleeding (`m_NextBloodingTime`:
 now plus a gap, or five gaps) - and `MPlayer` three more: the action
 delay (`m_DelayTime`: now plus the action's delay from the table, 300
-ms for a skill used standing still, cleared to 0; read by
-`IsNotDelay()`, which `CGameUpdate` asks before every action), the
+ms for a skill used standing still, cleared to 0; read by `IsNotDelay()` before every action), the
 death delay (`m_DeadDelayTime`: now plus the config's delay, read by
 `GetDeadDelayLast()` as whole seconds left) and the conversion
 countdown (`m_ConversionDelayTime`: now plus the delay
-`SetConversionDelay` gets from the effect's frames, cleared at four
-sites; read as minutes left and by the blink schedule). All nine are
+`SetConversionDelay` gets from the effect's frames, cleared at five sites, the header's `UnSetConversionDelay()` among them; read as minutes left and by the blink schedule). All nine are
 `TimePoint`s: every "now + delay" is `g_FrameNow` plus a duration,
 every `+= delay` advances by one, every comparison is the same
 comparison against `g_FrameNow`, and every clear is the epoch, which
@@ -1604,9 +1602,7 @@ the epoch is below every stamp). `MFakeCreature`'s one read, the
 inherited chat fade, moves with them. The delays split by signedness:
 the config's `int` delays and `GetActionInfoDelay()`'s `int` go
 through a signed `MonotonicClock::Duration`, so a negative value still
-puts the deadline in the past as the `DWORD` sum's wrap did (the
-twelfth slice's comparison sites took `Millis(DWORD)` because there
-the `int` was already compared unsigned; a sum is different); the
+puts the deadline in the past as the `DWORD` sum's wrap did (the `int` converts unsigned in a sum too, but the sum's modular wrap restores now minus the delay, which a comparison cannot recover; the twelfth slice's comparison sites therefore took `Millis(DWORD)`); the
 `DWORD` delays (recovery, regeneration, the bleeding gap, the blink
 table, `SetDelay`'s and `SetConversionDelay`'s arguments) go through
 `Millis`. `GetDeadDelayLast()`'s `int second = deadline - now` is the
@@ -1625,8 +1621,7 @@ four `extern DWORD g_CurrentTime` declarations these files carried go
 with their last reader, and the Korean comments beside the rewritten
 lines are translated. R16 goes from 57 to 18: what is left is
 `UserInformation`'s two live deadlines (`LogoutTime`,
-`ItemDropEnableTime`, with their readers in `CGameUpdate`,
-`UIMessageManager` and `GameUI`), `MGameTime`'s start and current time
+`ItemDropEnableTime`, with their readers and writers in `CGameUpdate`, `UIMessageManager` and `GameUI`), `MGameTime`'s start and current time
 (with `GCUpdateInfoHandler`'s and `CGameUpdate`'s calls), the two
 library seams in `GameInit`, the definition, the one write and the log
 flush's debug print in `Client.cpp`, and the externs in `Client.h`,

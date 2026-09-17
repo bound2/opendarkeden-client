@@ -728,7 +728,7 @@ MCreature::MCreature()
 	// 빛나는 Effect들
 	//m_nAlphaEffect = 0;
 
-	// when the last chat string was added
+	// no chat string yet
 	m_NextChatFadeTime = g_FrameNow;
 
 	m_pActionResult = NULL;
@@ -7090,7 +7090,7 @@ MCreature::SetRecoveryHP(int amount, int times, DWORD delay)
 		m_RecoveryHPDelayTime = delay;
 		//m_RecoveryHPPart = MODIFY_CURRENT_HP;
 
-		// the next recovery
+		// the next recovery time
 		m_RecoveryHPNextTime = g_FrameNow + MonotonicClock::Millis(m_RecoveryHPDelayTime);
 	}
 }
@@ -7121,7 +7121,7 @@ MCreature::SetRecoveryMP(int amount, int times, DWORD delay)
 		m_RecoveryMPDelayTime = delay;
 		//m_RecoveryMPPart = MODIFY_CURRENT_MP;
 
-		// the next recovery
+		// the next recovery time
 		m_RecoveryMPNextTime = g_FrameNow + MonotonicClock::Millis(m_RecoveryMPDelayTime);
 	}
 }
@@ -7137,7 +7137,7 @@ MCreature::CheckDropBlood()
 	if (!HasEffectStatus(EFFECTSTATUS_COMA))
 	{
 		//----------------------------------------------------------
-		// 피 흘릴 시간이 되었는지(-_-;) 체크..
+		// time to bleed?
 		//----------------------------------------------------------
 		if (g_pUserOption->BloodDrop 
 			&& g_FrameNow > m_NextBloodingTime)
@@ -7182,7 +7182,7 @@ MCreature::CheckDropBlood()
 			//----------------------------------------------------------
 			if (HasEffectStatus(EFFECTSTATUS_BLOOD_DRAIN))
 			{
-				// 5배 정도 덜 흘린다.
+				// bleeds about five times less
 				m_NextBloodingTime = g_FrameNow + MonotonicClock::Millis(timeGap*5);
 			}
 			else
@@ -7362,7 +7362,7 @@ MCreature::UpdateStatus()
 	bool bChangedHP = false;
 
 	//--------------------------------------------------------
-	// HP 회복
+	// HP recovery
 	//--------------------------------------------------------
 	if (m_RecoveryHPTimes > 0 
 		&& g_FrameNow >= m_RecoveryHPNextTime)
@@ -7374,7 +7374,7 @@ MCreature::UpdateStatus()
 
 		bChangedHP = true;
 		
-		// the next recovery
+		// the next recovery time
 		m_RecoveryHPNextTime += MonotonicClock::Millis(m_RecoveryHPDelayTime);		
 	}
 
@@ -7389,7 +7389,7 @@ MCreature::UpdateStatus()
 		// 회복
 		SetStatus( MODIFY_CURRENT_MP, GetStatus(MODIFY_CURRENT_MP)+m_RecoveryMPAmount );
 
-		// the next recovery
+		// the next recovery time
 		m_RecoveryMPNextTime += MonotonicClock::Millis(m_RecoveryMPDelayTime);		
 	}
 
@@ -7434,7 +7434,7 @@ MCreature::UpdateStatus()
 			
 
 			//--------------------------------------------------------
-			// 부가적인 회복 - -;
+			// the bonus recovery
 			//--------------------------------------------------------
 			if (g_FrameNow >= m_RegenBonusNextTime)
 			{		
