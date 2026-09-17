@@ -1638,11 +1638,8 @@ read by the same handler as whole seconds left for the countdown
 caption, tested by the update loop as `!= 0 && now > it` to run the
 logout, and cleared at three sites. `ItemDropEnableTime`, set after a
 trade to now plus the config's delay, gates dropping an item as
-`it < now`. `GlobalSayTime` had no live reader or writer left (its
-three mentions are commented out) and is deleted. The two live ones
-are `TimePoint`s with the epoch as the sentinel, and the class gains
-the five one-line readers the executable's sites were spelling by
-hand - `IsLogoutScheduled()`, `IsLogoutDue(now)`,
+`it < now`. `GlobalSayTime`'s three uses are commented out, and it is deleted with its declaration and constructor write. The two live ones
+are `TimePoint`s with the epoch as the sentinel, and the class gains five small members - four one-line accessors and an out-of-line countdown - for what the executable's sites were spelling by hand - `IsLogoutScheduled()`, `IsLogoutDue(now)`,
 `SecondsToLogout(now)`, `CancelLogout()`, `IsItemDropEnabled(now)` -
 so the contract has a home a test can reach:
 `tests/unit/test_user_information_deadlines.cpp` pins the defaults, the
@@ -1650,16 +1647,12 @@ whole-second countdown and its strict "due" edge, the cancel, the
 strict item-drop edge, and the logout scheduled across the legacy
 wrap, with the `DWORD` sum's failure worked out beside it (a deadline
 set 1 s before the wrap for 5 s later came out as 4000, and `now >
-4000` logged the player out at once). The executable's sites call the
-readers or assign the point from `g_FrameNow`; the strict comparisons
-are unchanged. `MGameTime` derived the game clock from `(now - start)
+4000` logged the player out at once). The executable's sites call the members or assign the point from `g_FrameNow` (the ESC handler's countdown branch lets `SecondsToLogout` answer instead of comparing by hand; it returns 0 once due, which the branch's `sec > 0` test already required); the strict comparisons are unchanged. `MGameTime` derived the game clock from `(now - start)
 / 1000 * ratio` over two `DWORD`s and re-based itself on the frame
 clock at a month's turn; its start is a `TimePoint`, `SetStartTime`
 and `SetCurrentTime` take one, the gap is the same `DWORD` over the
 64-bit difference, and the re-base uses the `now` it was handed rather
-than the global (the same frame's stamp). Its three callers - the
-update-info handler's start, the update loop's per-frame current time
-and the class's own re-base - pass `g_FrameNow`. Removed wrap failure:
+than the global (the same frame's stamp). Its two callers, the update-info handler's start and the update loop's per-frame current time, pass `g_FrameNow`. Removed wrap failure:
 the logout and item-drop deadlines were sum-shaped; the game clock's
 subtraction was exact already and changes width and clock only.
 Quantisation: unchanged, the frame stamp on both sides. R16 goes from

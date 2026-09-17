@@ -2715,11 +2715,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 									//---------------------------------------------------------
 									// delay가 안 끝났으면 말 못한다.
 									//---------------------------------------------------------
-									if (1)//g_CurrentTime > g_pUserInformation->GlobalSayTime+g_pClientConfig->DELAY_GLOBAL_SAY
-										//#if defined(OUTPUT_DEBUG) && defined(_DEBUG)
-										//	|| 1
-										//#endif
-										//)
+									if (1)
 									{
 										CGGlobalChat _CGGlobalChat;
 										_CGGlobalChat.setMessage( str );//+ 1 );	//pWansungString+1 );
@@ -2736,9 +2732,6 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 										//sprintf(temp, "[%s] %s", g_pUserInformation->CharacterID.GetString(), str+1);
 										//UI_AddChatToHistory( temp );
 										UI_AddChatToHistory( temp, g_pUserInformation->CharacterID.GetString(), CLD_ZONECHAT, right );
-
-										// 현재 시간을 설정해둔다.
-										//g_pUserInformation->GlobalSayTime = g_CurrentTime;
 
 										// [도움말] 외치기 할 때
 //										__BEGIN_HELP_EVENT
@@ -3429,7 +3422,7 @@ UIMessageManager::Execute_UI_LOGOUT(intptr_t left, intptr_t right, void* void_pt
 	{		
 		if (!g_pUserInformation->IsLogoutScheduled())
 		{
-			// 5초 후 강제 Logout 시킨다.
+			// force the logout five seconds on
 			
 			#ifdef _DEBUG
 				g_pUserInformation->LogoutTime = g_FrameNow + MonotonicClock::Millis(2000);
@@ -3449,7 +3442,7 @@ UIMessageManager::Execute_UI_LOGOUT(intptr_t left, intptr_t right, void* void_pt
 			g_pPlayer->SetWaitVerify(MPlayer::WAIT_VERIFY_LOGOUT);
 //			g_pSystemMessage->AddFormat((*g_pGameStringTable)[STRING_MESSAGE_LOGOUT_AFTER_SECOND].GetString(), 5);
 		}
-		else if (g_pUserInformation->LogoutTime > g_FrameNow)
+		else
 		{
 			DWORD sec = g_pUserInformation->SecondsToLogout(g_FrameNow);
 
@@ -3604,9 +3597,9 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_CLIENT(intptr_t left, intptr_t right, 
 	}
 				
 	if (!g_bWatchMode
-		// 교환 중에는 버릴 수 없다.
+		// nothing may be dropped during a trade,
 		&& !UI_IsRunningExchange()
-		// 교환 창이 뜬 후.. 일정 시간 동안은 버릴 수 없다.
+		// nor for a while after the trade window opened
 		&& g_pUserInformation->IsItemDropEnabled(g_FrameNow))
 	{
 		//void_ptr = MItem *

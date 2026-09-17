@@ -1317,7 +1317,7 @@ SetMode(enum CLIENT_MODE mode)
 
 			DEBUG_ADD("UserInformation");
 			//-----------------------------------------------------------
-			// Logout 시간 제거
+			// cancel the logout
 			//-----------------------------------------------------------
 			g_pUserInformation->CancelLogout();
 		

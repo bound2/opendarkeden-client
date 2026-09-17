@@ -95,7 +95,7 @@ MGameTime::SetCurrentTime(MonotonicClock::TimePoint time)
 	//------------------------------------------------------------
 	// 기준시간과 현재시간의 차이 
 	//------------------------------------------------------------
-	// 1000 = 1초, 시간비율 고려..
+	// 1000 = one second, at the time ratio
 	//------------------------------------------------------------
 	DWORD gap = (DWORD)((time - m_StartTime).count() / 1000) * m_TimeRatio;
 
@@ -152,7 +152,7 @@ MGameTime::SetCurrentTime(MonotonicClock::TimePoint time)
 			m_Year = m_StartYear;
 		}
 
-		// 날짜 다시 설정
+		// re-base the date
 		SetStartTime(time, m_Year, m_Month, m_Day, m_Hour, m_Minute, m_Second);
 	}
 	else

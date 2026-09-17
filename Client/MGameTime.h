@@ -17,18 +17,18 @@ class MGameTime {
 		~MGameTime();
 
 		//-------------------------------------------------------------
-		// 기준 시간 : y-m-d : h-m-s
+		// the start time: y-m-d h:m:s
 		//-------------------------------------------------------------
 		void	SetStartTime(MonotonicClock::TimePoint time, WORD year, BYTE month, BYTE day, BYTE hour, BYTE minute, BYTE second);
 
 		//-------------------------------------------------------------
-		// game시간은 실제 시간의 몇 배인가?
+		// how many times faster game time runs than real time
 		//-------------------------------------------------------------
 		void	SetTimeRatio(int ratio)		{ m_TimeRatio = ratio; }
 		int		GetTimeRatio()				{ return m_TimeRatio; }
 
 		//-------------------------------------------------------------
-		// 현재 시간
+		// the current time
 		//-------------------------------------------------------------
 		void	SetCurrentTime(MonotonicClock::TimePoint time);
 
