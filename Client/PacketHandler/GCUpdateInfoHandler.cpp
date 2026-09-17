@@ -49,6 +49,7 @@
 
 
 extern DWORD		g_CurrentTime;
+extern void		StampFrameClock();
 extern DWORD		g_CurrentFrame;
 extern MGameTime*	g_pGameTime;
 extern CMessageArray*			g_pNoticeMessage;
@@ -834,7 +835,7 @@ void GCUpdateInfoHandler::execute ( GCUpdateInfo * pPacket , Player * pPlayer )
 	//--------------------------------------------------
 	// 현재 시간과 Frame 계산을 다시 해준다.
 	//--------------------------------------------------
-	g_CurrentTime = timeGetTime();	// 필요할까? -_-;
+	StampFrameClock();
 	
 	// updateInfo를 처리한다고 소요된 시간
 	// ...을 frame으로 환산한 값

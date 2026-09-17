@@ -1,17 +1,12 @@
 //-----------------------------------------------------------------------------
 // CWinUpdate.h
 //-----------------------------------------------------------------------------
-// 시간을 비교하면서 일정시간마다 한번씩 Update가 되도록 한다.
+// The base of the per-mode update classes.
 //-----------------------------------------------------------------------------
 
 #ifndef	__CWINUPDATE_H__
 #define	__CWINUPDATE_H__
 
-// <MMSystem.h> (real timeGetTime/HMMIO/MMCKINFO) conflicts with this
-// project's SDL stand-ins (basic/AudioTypes.h) and with the
-// timeGetTime()->platform_get_ticks() macro below basic/Platform.h defines
-// for PLATFORM_WINDOWS; USE_SDL_BACKEND is mandatory on all platforms now,
-// so always route through Platform.h instead of pulling MMSystem.h back in.
 #include "../../basic/Platform.h"
 
 class CWinUpdate {
@@ -28,31 +23,6 @@ class CWinUpdate {
 		// Update
 		//-------------------------------------------------------
 		virtual void	Update();
-
-		//-------------------------------------------------------
-		// Current Time
-		//-------------------------------------------------------
-		static void		SetCurrentTime()	{ m_CurrentTime	= timeGetTime(); }
-		static DWORD	GetCurrentTime()	{ return m_CurrentTime; }
-
-		//-------------------------------------------------------
-		// Update Delay
-		//-------------------------------------------------------
-		void			SetDelay(DWORD delay)	{ m_UpdateDelay = delay; }
-		DWORD			GetDelay() const		{ return m_UpdateDelay; }
-
-		//-------------------------------------------------------
-		// Last Time
-		//-------------------------------------------------------
-		DWORD			GetLastTime()		{ return m_LastTime; }
-		
-
-	private :
-		static DWORD	m_CurrentTime;		// 현재 time
-
-	protected :
-		DWORD			m_LastTime;			// 가장 최근에 Update()한 시간
-		DWORD			m_UpdateDelay;		// update delay시간
 };
 
-#endif		
+#endif

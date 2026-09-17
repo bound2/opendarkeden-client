@@ -13,11 +13,12 @@
 
 #include <map>
 #include <string>
+#include "MonotonicClock.h"
 
 class MJusticeAttackManager {
 	public :
 		// <이름, 최초의시간>		시간은 의미없지 싶은데.. 걍..
-		typedef std::map<std::string, DWORD>		TIME_MAP;
+		typedef std::map<std::string, MonotonicClock::TimePoint>	TIME_MAP;
 
 	public :
 		MJusticeAttackManager();

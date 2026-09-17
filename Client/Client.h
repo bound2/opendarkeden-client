@@ -21,6 +21,7 @@
 #include "DebugInfo.h"
 
 #include "ClientDef.h"
+#include "MonotonicClock.h"
 
 //#include "MInput.h"
 //#include "MMusic.h"
@@ -148,7 +149,7 @@ extern bool					g_bZoneSmallLoadImage;
 extern MZone*				g_pZoneLarge;
 extern MZone*				g_pZoneSmall;
 extern bool					g_bZonePlayerInLarge;
-extern DWORD				g_ZoneRandomSoundTime;
+extern MonotonicClock::TimePoint	g_ZoneRandomSoundTime;
 
 // EffectManager
 extern MScreenEffectManager*	g_pInventoryEffectManager;
@@ -167,12 +168,13 @@ extern BOOL					g_bNeedUpdate; // update해야되나?
 
 // FPS
 extern DWORD				g_CurrentTime;
+extern MonotonicClock::TimePoint	g_FrameNow;	// the frame's monotonic stamp, set beside g_CurrentTime
+void						StampFrameClock();
 extern DWORD				g_CurrentFrame;
 
 extern int					g_FrameCount;
 extern int					g_StartFrameCount;
-extern DWORD				g_StartTime;
-extern DWORD				g_EndTime;
+extern MonotonicClock::TimePoint	g_StartTime;
 extern int					g_FrameRate;
 extern bool				g_bGoodFPS;
 

@@ -11,7 +11,7 @@
 //---------------------------------------------------------------------------
 MHelpDisplayer*		g_pHelpDisplayer = NULL;
 
-extern DWORD			g_CurrentTime;
+extern MonotonicClock::TimePoint	g_FrameNow;
 extern CMessageArray*	g_pHelpMessage;
 
 //---------------------------------------------------------------------------
@@ -27,7 +27,7 @@ extern CMessageArray*	g_pHelpMessage;
 //---------------------------------------------------------------------------
 MHelpDisplayer::MHelpDisplayer()
 {
-	m_DelayTime = 0;
+	m_DelayTime = MonotonicClock::TimePoint();
 }
 
 MHelpDisplayer::~MHelpDisplayer()
@@ -52,7 +52,7 @@ MHelpDisplayer::OutputHelp(HELP_OUTPUT ho)
 {
 	if (ho < g_pHelpStringTable->GetSize())
 	{
-		if (g_CurrentTime > m_DelayTime)
+		if (g_FrameNow > m_DelayTime)
 		{
 			if (g_pHelpStringTable->IsDisplayed(ho))
 			{			
@@ -64,7 +64,7 @@ MHelpDisplayer::OutputHelp(HELP_OUTPUT ho)
 
 				g_pHelpMessage->Add( helpString.GetString() );
 
-				m_DelayTime = g_CurrentTime + DELAY_HELP_OUTPUT_LAST;
+				m_DelayTime = g_FrameNow + MonotonicClock::Millis(DELAY_HELP_OUTPUT_LAST);
 			}					
 		}	
 		else

@@ -25,7 +25,7 @@ MZoneSoundTable*	g_pZoneSoundTable = NULL;
 
 MZoneSoundManager*	g_pZoneSoundManager = NULL;
 
-	extern DWORD	g_CurrentTime;
+	extern MonotonicClock::TimePoint	g_FrameNow;
 
 	extern CSoundPartManager*	g_pSoundManager;
 
@@ -313,7 +313,7 @@ MZoneSoundManager::MZoneSoundManager()
 {
 	m_LastX = -1;
 	m_LastY = -1;
-	m_LastUpdateTime = 0;
+	m_LastUpdateTime = MonotonicClock::TimePoint();
 }
 
 MZoneSoundManager::~MZoneSoundManager()
@@ -338,7 +338,7 @@ MZoneSoundManager::UpdateSound()
 	// 음악 update해야할 시간이 됐거나..
 	// Player의 좌표가 달라진 경우..
 	//--------------------------------------------------------------------
-	if (g_CurrentTime - m_LastUpdateTime > 5000
+	if (g_FrameNow - m_LastUpdateTime > MonotonicClock::Millis(5000)
 		|| g_pPlayer->GetX()!=m_LastX
 		|| g_pPlayer->GetY()!=m_LastY)
 	{
@@ -510,6 +510,6 @@ MZoneSoundManager::UpdateSound()
 		//---------------------------------------------------------
 		m_LastX = g_pPlayer->GetX();
 		m_LastY = g_pPlayer->GetY();
-		m_LastUpdateTime = g_CurrentTime;
+		m_LastUpdateTime = g_FrameNow;
 	}
 }

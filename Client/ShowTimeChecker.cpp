@@ -6,7 +6,7 @@
 #include "Client_PCH.h"
 	#include "MGameTime.h"
 
-extern DWORD	g_CurrentTime;
+extern MonotonicClock::TimePoint	g_FrameNow;
 
 //-----------------------------------------------------------------------------
 //
@@ -25,7 +25,7 @@ ShowTimeChecker::ShowTimeChecker()
 	StartHour = 0;
 	EndHour = 24;
 
-	NextPlayTime = 0;
+	NextPlayTime = MonotonicClock::TimePoint();
 }
 
 ShowTimeChecker::~ShowTimeChecker()
@@ -47,7 +47,7 @@ ShowTimeChecker::IsShowTime() const
 		// 반복 출력이거나..
 		// 출력할 시간이 지났나?
 		//----------------------------------------------------------------
-		return Loop || g_CurrentTime >= NextPlayTime;		
+		return Loop || g_FrameNow >= NextPlayTime;		
 	}
 
 	return false;		
@@ -105,11 +105,11 @@ ShowTimeChecker::SetNextShowTime()
 
 	if (delayGap==0)
 	{
-		NextPlayTime = g_CurrentTime;
+		NextPlayTime = g_FrameNow;
 	}
 	else
 	{
-		NextPlayTime = g_CurrentTime + MinDelay + rand()%delayGap;
+		NextPlayTime = g_FrameNow + MonotonicClock::Millis(MinDelay + rand()%delayGap);
 	}
 }
 

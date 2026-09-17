@@ -129,6 +129,7 @@ BYTE GetCreatureActionCountMax( const MCreature* pCreature, int action );
 #endif
 
 extern	DWORD	g_CurrentTime;
+extern	MonotonicClock::TimePoint	g_FrameNow;
 extern	int		g_x;
 extern	int		g_y;
 extern	bool	g_bNetStatusGood;
@@ -649,9 +650,9 @@ SendPositionInfoToParty()
 void
 SendStatusInfoToParty()
 {
-	static DWORD nextTime = g_CurrentTime;
+	static MonotonicClock::TimePoint nextTime = g_FrameNow;
 
-	if (g_CurrentTime >= nextTime)
+	if (g_FrameNow >= nextTime)
 	{
 		//------------------------------------------------------
 		// 지속적으로 좌표를 보내는 경우
@@ -726,7 +727,7 @@ SendStatusInfoToParty()
 
 		// 시야에 없는 경우의 HP이기 때문에..
 		// 5초에 한번 갱신해준다.
-		nextTime = g_CurrentTime + g_pClientConfig->CLIENT_COMMUNICATION_STATUS_DELAY;
+		nextTime = g_FrameNow + MonotonicClock::Millis(g_pClientConfig->CLIENT_COMMUNICATION_STATUS_DELAY);
 	}
 }
 

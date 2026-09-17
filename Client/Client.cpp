@@ -151,15 +151,21 @@ DWORD				g_TimerNPMON = 0;
 
 // FPS
 DWORD				g_CurrentTime		= 0;		// 시간
+MonotonicClock::TimePoint	g_FrameNow;
 DWORD				g_CurrentFrame		= 0;		// frame수
 
 int					g_FrameCount		= 0;
 int					g_StartFrameCount	= 0;
-DWORD				g_StartTime			= timeGetTime();
-DWORD				g_EndTime			= g_StartTime;
+MonotonicClock::TimePoint	g_StartTime		= MonotonicClock::Now();
 int					g_FrameRate			= 0;
 bool				g_bGoodFPS			= true;
 const int			g_FrameGood			= 15;
+
+void StampFrameClock()
+{
+	g_FrameNow = MonotonicClock::Now();
+	g_CurrentTime = timeGetTime();
+}
 
 // Execute Program --> bActiveApp
 // minimize | anotherWnd click--> !ActiveGame
@@ -2919,9 +2925,9 @@ ApplyPatch()
 	{
 		//#ifdef OUTPUT_DEBUG_UPDATE_LOOP
 		const DWORD flushDelay = 3*60*1000;
-		static DWORD flushTime = g_CurrentTime + flushDelay;
+		static MonotonicClock::TimePoint flushTime = g_FrameNow + MonotonicClock::Millis(flushDelay);
 
-			if (g_CurrentTime > flushTime)
+			if (g_FrameNow > flushTime)
 			{
 				if (g_pDebugMessage!=NULL)
 				{
@@ -2948,7 +2954,7 @@ ApplyPatch()
 				}
 
 				// 3분 후
-				flushTime = g_CurrentTime + flushDelay;
+				flushTime = g_FrameNow + MonotonicClock::Millis(flushDelay);
 			}
 		//#endif
 	}
@@ -4360,7 +4366,7 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 	
 				{						
 
-					g_CurrentTime = timeGetTime();
+					StampFrameClock();
 
 					//if (g_CurrentTime - lastTime > g_UpdateDelay)
 					{
@@ -4389,7 +4395,7 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 					}
 
 					//#ifdef OUTPUT_DEBUG
-						DWORD timeGap = g_CurrentTime - g_StartTime;
+						DWORD timeGap = (DWORD)(g_FrameNow - g_StartTime).count();
 							
 						if (timeGap > 1000)
 						{
@@ -4400,7 +4406,7 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 							// 15 fps 이상
 							g_bGoodFPS = (g_FrameRate >= g_FrameGood);
 							
-							g_StartTime = g_CurrentTime;
+							g_StartTime = g_FrameNow;
 							g_StartFrameCount = g_FrameCount;
 						}								
 				}

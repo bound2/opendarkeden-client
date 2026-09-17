@@ -8,10 +8,11 @@
 #define	__CWAITPACKETUPDATE_H__
 
 #include "WinLib/CWinUpdate.h"
+#include "MonotonicClock.h"
 
 class CWaitPacketUpdate : public CWinUpdate {
 	public :
-		CWaitPacketUpdate()	{ m_DelayLimit = 0xFFFFFFFF; }  // Will be set by SetDelay()
+		CWaitPacketUpdate()	{ m_DelayLimit = (MonotonicClock::TimePoint::max)(); }  // Will be set by SetDelay()
 		~CWaitPacketUpdate() {}
 
 		// 초기화
@@ -24,7 +25,7 @@ class CWaitPacketUpdate : public CWinUpdate {
 		void		Update();		
 
 	protected :				
-		DWORD		m_DelayLimit;	// 기다리는 한계 시간
+		MonotonicClock::TimePoint	m_DelayLimit;	// give up waiting past this point
 };
 
 

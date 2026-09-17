@@ -8,7 +8,7 @@
 	#include "MCreature.h"
 	#include "ClientConfig.h"
 
-	extern DWORD	g_CurrentTime;
+	extern MonotonicClock::TimePoint	g_FrameNow;
 
 #define	MAX_PARTY_MEMBER	6
 
@@ -46,7 +46,7 @@ MParty::MParty()
 	m_pInfo.reserve( MAX_PARTY_MEMBER );
 
 	m_bAccept = true;
-	m_JoinTime = 0xFFFFFFFF;
+	m_JoinTime = MonotonicClock::TimePoint();
 }
 
 MParty::~MParty()
@@ -334,7 +334,7 @@ MParty::HasMember(const char* pName) const
 void		
 MParty::SetJoinTime()
 {
-	m_JoinTime = g_CurrentTime;
+	m_JoinTime = g_FrameNow;
 }
 
 //----------------------------------------------------------------------
@@ -343,5 +343,5 @@ MParty::SetJoinTime()
 bool		
 MParty::IsKickAvailableTime() const
 {
-	return m_JoinTime + g_pClientConfig->AFTER_PARTY_KICK_DELAY < g_CurrentTime;
+	return g_FrameNow - m_JoinTime > MonotonicClock::Millis(g_pClientConfig->AFTER_PARTY_KICK_DELAY);
 }

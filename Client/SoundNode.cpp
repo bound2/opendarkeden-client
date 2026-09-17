@@ -4,7 +4,7 @@
 #include "Client_PCH.h"
 #include "SoundNode.h"
 
-extern DWORD	g_CurrentTime;
+extern MonotonicClock::TimePoint	g_FrameNow;
 
 //----------------------------------------------------------------------
 //
@@ -17,7 +17,7 @@ extern DWORD	g_CurrentTime;
 void			
 SOUND_NODE::Set(TYPE_SOUNDID sid, DWORD delay, int x, int y)
 {
-	m_PlayTime	= g_CurrentTime + delay;
+	m_PlayTime	= g_FrameNow + MonotonicClock::Millis(delay);
 	m_SoundID	= sid;
 	m_X			= x;
 	m_Y			= y;
