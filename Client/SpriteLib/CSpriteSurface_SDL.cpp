@@ -22,6 +22,26 @@
 #include "CSpriteSurface.h"
 #include "SpriteLibBackend.h"
 #include "SpriteLibBackendSDL.h"
+#include <algorithm>
+#include <cstdint>
+
+namespace {
+// Internal drawing holds SDL pixels until its last read/write. The public
+// DirectDraw compatibility lock remains an idempotent game-state flag.
+class SurfacePixelLock {
+public:
+	explicit SurfacePixelLock(spritectl_surface_t surface) : m_surface(surface)
+	{
+		if (spritectl_lock_surface(surface, &info) != 0) m_surface = nullptr;
+	}
+	~SurfacePixelLock() { if (m_surface) spritectl_unlock_surface(m_surface); }
+	SurfacePixelLock(const SurfacePixelLock&) = delete;
+	SurfacePixelLock& operator=(const SurfacePixelLock&) = delete;
+	spritectl_surface_info_t info{};
+private:
+	spritectl_surface_t m_surface;
+};
+}
 
 /* ============================================================================
  * Static Member Initialization
@@ -128,6 +148,8 @@ void CSpriteSurface::Release()
 	m_width = 0;
 	m_height = 0;
 	m_transparency = 0;
+	m_lock_count = 0;
+	m_ddsd = {};
 }
 
 /* ============================================================================
@@ -186,7 +208,7 @@ void CSpriteSurface::DrawRect(RECT* rect, WORD color)
 
 	// For 16-bit surfaces, try to use the color value directly if it matches the format
 	if (SDL_ISPIXELFORMAT_INDEXED(surf->format->format) ||
-	    surf->format->BitsPerPixel == 16) {
+	    surf->format->BytesPerPixel == 2) {
 		// Check if this is RGB565 format
 		if (surf->format->Rmask == 0xF800 &&
 		    surf->format->Gmask == 0x07E0 &&
@@ -212,8 +234,8 @@ void CSpriteSurface::DrawRect(RECT* rect, WORD color)
 			// RGB555 format - convert from RGB565
 			uint16_t rgb565 = (uint16_t)color;
 			// Convert RGB565 to RGB555
-			pixel = ((rgb565 & 0xF800) >> 1) | ((rgb565 & 0x0600) >> 1) |  // R (5 bits)
-			        ((rgb565 & 0x07E0) >> 1) |  // G (5 bits)
+			pixel = ((rgb565 & 0xF800) >> 1) |  // R (5 bits)
+			        ((rgb565 & 0x07C0) >> 1) |  // G (5 bits)
 			        (rgb565 & 0x001F);         // B (5 bits)
 			static int rgb555_count = 0;
 			if (rgb555_count < 3 && (color & 0xF800) != 0) {
@@ -309,63 +331,8 @@ void CSpriteSurface::BltHalf(POINT* pPoint, CSpriteSurface* SourceSurface, RECT*
 
 void CSpriteSurface::BltNoColorkey(POINT* pPoint, CSpriteSurface* SourceSurface, RECT* pRect)
 {
-	/* Blt from source surface to this surface without colorkey transparency */
-	/* This is identical to Blt() in SDL backend - both copy pixels directly */
-	if (!pPoint || !SourceSurface) {
-		return;
-	}
-
-	/* Get source and destination info */
-	S_SURFACEINFO src_info, dst_info;
-	SourceSurface->GetSurfaceInfo(&src_info);
-	this->GetSurfaceInfo(&dst_info);
-
-	if (!src_info.p_surface || !dst_info.p_surface) {
-		return;
-	}
-
-	/* Calculate dimensions */
-	int src_x = pRect ? pRect->left : 0;
-	int src_y = pRect ? pRect->top : 0;
-	int src_w = pRect ? (pRect->right - pRect->left) : src_info.width;
-	int src_h = pRect ? (pRect->bottom - pRect->top) : src_info.height;
-
-	/* Clamp to source surface bounds */
-	if (src_x + src_w > src_info.width) src_w = src_info.width - src_x;
-	if (src_y + src_h > src_info.height) src_h = src_info.height - src_y;
-
-	/* Clamp to destination surface bounds */
-	if (pPoint->x + src_w > dst_info.width) src_w = dst_info.width - pPoint->x;
-	if (pPoint->y + src_h > dst_info.height) src_h = dst_info.height - pPoint->y;
-
-	if (src_w <= 0 || src_h <= 0) {
-		return;
-	}
-
-	/* Copy pixels line by line (handle overlap for self-blits) */
-	WORD* src_pixels = (WORD*)src_info.p_surface;
-	WORD* dst_pixels = (WORD*)dst_info.p_surface;
-	const int src_pitch_words = src_info.pitch / 2;
-	const int dst_pitch_words = dst_info.pitch / 2;
-	const bool same_surface = (SourceSurface == this) || (src_info.p_surface == dst_info.p_surface);
-
-	if (same_surface && pPoint->y > src_y) {
-		for (int y = src_h - 1; y >= 0; --y) {
-			WORD* src_row = src_pixels + (src_y + y) * src_pitch_words + src_x;
-			WORD* dst_row = dst_pixels + (pPoint->y + y) * dst_pitch_words + pPoint->x;
-			memmove(dst_row, src_row, src_w * sizeof(WORD));
-		}
-	} else {
-		for (int y = 0; y < src_h; y++) {
-			WORD* src_row = src_pixels + (src_y + y) * src_pitch_words + src_x;
-			WORD* dst_row = dst_pixels + (pPoint->y + y) * dst_pitch_words + pPoint->x;
-			if (same_surface) {
-				memmove(dst_row, src_row, src_w * sizeof(WORD));
-			} else {
-				memcpy(dst_row, src_row, src_w * sizeof(WORD));
-			}
-		}
-	}
+	// These compatibility methods both copy raw pixels.
+	Blt(pPoint, SourceSurface, pRect);
 }
 
 void CSpriteSurface::BltDarkness(POINT* pPoint, CSpriteSurface* SourceSurface, RECT* pRect, BYTE DarkBits)
@@ -546,29 +513,17 @@ int CSpriteSurface::GetHeight() const
 
 void CSpriteSurface::GetSurfaceInfo(S_SURFACEINFO* info)
 {
-	/* Fill surface info structure for SDL backend */
-	if (m_backend_surface == SPRITECTL_INVALID_SURFACE) {
-		info->p_surface = nullptr;
-		info->width = 0;
-		info->height = 0;
-		info->pitch = 0;
-		return;
-	}
-	
-	/* Lock surface to get info */
-	spritectl_surface_info_t sdl_info;
-	if (spritectl_lock_surface(m_backend_surface, &sdl_info) == 0) {
-		info->p_surface = sdl_info.pixels;
-		info->width = sdl_info.width;
-		info->height = sdl_info.height;
-		info->pitch = sdl_info.pitch;
-		spritectl_unlock_surface(m_backend_surface);
-	} else {
-		info->p_surface = nullptr;
-		info->width = m_width;
-		info->height = m_height;
-		info->pitch = m_width * 2; /* RGB565 = 2 bytes per pixel */
-	}
+	if (!info) return;
+	*info = {};
+	if (!m_backend_surface || !m_backend_surface->surface) return;
+	SDL_Surface* surface = m_backend_surface->surface;
+	info->width = surface->w;
+	info->height = surface->h;
+	info->pitch = surface->pitch;
+	// Legacy callers borrow pixels without a release operation. This is only
+	// supported for the uncompressed software surfaces Init() creates; never
+	// return a pointer that SDL can invalidate on unlock.
+	if (!SDL_MUSTLOCK(surface)) info->p_surface = surface->pixels;
 }
 
 /* ============================================================================
@@ -577,10 +532,8 @@ void CSpriteSurface::GetSurfaceInfo(S_SURFACEINFO* info)
 
 S_SURFACEINFO* CSpriteSurface::GetDDSD()
 {
-	/* Static buffer for surface info - returned as pointer for compatibility */
-	static S_SURFACEINFO ddsd_buffer;
-	GetSurfaceInfo(&ddsd_buffer);
-	return &ddsd_buffer;
+	GetSurfaceInfo(&m_ddsd);
+	return &m_ddsd;
 }
 
 /* ============================================================================
@@ -612,62 +565,38 @@ void CSpriteSurface::SetClipNULL()
 
 void CSpriteSurface::Blt(POINT* pPoint, CSpriteSurface* SourceSurface, RECT* pRect)
 {
-	/* Stub: Basic blit from source surface to this surface */
-	/* In practice, this should copy pixels from SourceSurface to this surface */
-	if (!pPoint || !SourceSurface) {
+	if (!pPoint || !SourceSurface || !m_backend_surface || !SourceSurface->m_backend_surface)
 		return;
-	}
-
-	/* Get source and destination info */
-	S_SURFACEINFO src_info, dst_info;
-	SourceSurface->GetSurfaceInfo(&src_info);
-	this->GetSurfaceInfo(&dst_info);
-
-	if (!src_info.p_surface || !dst_info.p_surface) {
+	if (m_backend_surface->surface->format->BytesPerPixel != 2
+		|| SourceSurface->m_backend_surface->surface->format->BytesPerPixel != 2)
 		return;
-	}
 
-	/* Calculate dimensions */
-	int src_x = pRect ? pRect->left : 0;
-	int src_y = pRect ? pRect->top : 0;
-	int src_w = pRect ? (pRect->right - pRect->left) : src_info.width;
-	int src_h = pRect ? (pRect->bottom - pRect->top) : src_info.height;
+	// Intersect both surfaces in offset coordinates. Widen before arithmetic:
+	// RECT and POINT may contain extreme signed values.
+	int64_t sx = pRect ? pRect->left : 0, sy = pRect ? pRect->top : 0;
+	int64_t width = pRect ? int64_t(pRect->right) - sx : SourceSurface->m_width;
+	int64_t height = pRect ? int64_t(pRect->bottom) - sy : SourceSurface->m_height;
+	int64_t dx = pPoint->x, dy = pPoint->y;
+	const SDL_Rect& clip = m_backend_surface->surface->clip_rect;
+	const int64_t left = (std::max)({int64_t(0), -sx, int64_t(clip.x) - dx});
+	const int64_t top = (std::max)({int64_t(0), -sy, int64_t(clip.y) - dy});
+	const int64_t right = (std::min)({width, int64_t(SourceSurface->m_width) - sx,
+		int64_t(clip.x) + clip.w - dx});
+	const int64_t bottom = (std::min)({height, int64_t(SourceSurface->m_height) - sy,
+		int64_t(clip.y) + clip.h - dy});
+	if (left >= right || top >= bottom) return;
+	sx += left; dx += left; sy += top; dy += top;
+	width = right - left; height = bottom - top;
 
-	/* Clamp to source surface bounds */
-	if (src_x + src_w > src_info.width) src_w = src_info.width - src_x;
-	if (src_y + src_h > src_info.height) src_h = src_info.height - src_y;
-
-	/* Clamp to destination surface bounds */
-	if (pPoint->x + src_w > dst_info.width) src_w = dst_info.width - pPoint->x;
-	if (pPoint->y + src_h > dst_info.height) src_h = dst_info.height - pPoint->y;
-
-	if (src_w <= 0 || src_h <= 0) {
-		return;
-	}
-
-	/* Copy pixels line by line (handle overlap for self-blits) */
-	WORD* src_pixels = (WORD*)src_info.p_surface;
-	WORD* dst_pixels = (WORD*)dst_info.p_surface;
-	const int src_pitch_words = src_info.pitch / 2;
-	const int dst_pitch_words = dst_info.pitch / 2;
-	const bool same_surface = (SourceSurface == this) || (src_info.p_surface == dst_info.p_surface);
-
-	if (same_surface && pPoint->y > src_y) {
-		for (int y = src_h - 1; y >= 0; --y) {
-			WORD* src_row = src_pixels + (src_y + y) * src_pitch_words + src_x;
-			WORD* dst_row = dst_pixels + (pPoint->y + y) * dst_pitch_words + pPoint->x;
-			memmove(dst_row, src_row, src_w * sizeof(WORD));
-		}
-	} else {
-		for (int y = 0; y < src_h; y++) {
-			WORD* src_row = src_pixels + (src_y + y) * src_pitch_words + src_x;
-			WORD* dst_row = dst_pixels + (pPoint->y + y) * dst_pitch_words + pPoint->x;
-			if (same_surface) {
-				memmove(dst_row, src_row, src_w * sizeof(WORD));
-			} else {
-				memcpy(dst_row, src_row, src_w * sizeof(WORD));
-			}
-		}
+	SurfacePixelLock source(SourceSurface->m_backend_surface);
+	SurfacePixelLock dest(m_backend_surface);
+	if (!source.info.pixels || !dest.info.pixels) return;
+	const bool sameSurface = source.info.pixels == dest.info.pixels;
+	for (int64_t row = 0; row < height; ++row) {
+		const int64_t y = sameSurface && dy > sy ? height - 1 - row : row;
+		const BYTE* from = static_cast<BYTE*>(source.info.pixels) + (sy + y) * source.info.pitch + sx * 2;
+		BYTE* to = static_cast<BYTE*>(dest.info.pixels) + (dy + y) * dest.info.pitch + dx * 2;
+		memmove(to, from, static_cast<size_t>(width) * sizeof(WORD));
 	}
 }
 
@@ -677,23 +606,12 @@ void CSpriteSurface::Blt(POINT* pPoint, CSpriteSurface* SourceSurface, RECT* pRe
 
 void CSpriteSurface::FillSurface(WORD color)
 {
-	/* Fill the entire surface with the specified color */
-	if (m_backend_surface == SPRITECTL_INVALID_SURFACE) {
-		return;
-	}
-
-	/* Lock surface to get pixel data */
-	spritectl_surface_info_t info;
-	if (spritectl_lock_surface(m_backend_surface, &info) == 0) {
-		WORD* pixels = (WORD*)info.pixels;
-		int pixel_count = info.width * info.height;
-
-		/* Fill all pixels with the specified color */
-		for (int i = 0; i < pixel_count; i++) {
-			pixels[i] = color;
-		}
-
-		spritectl_unlock_surface(m_backend_surface);
+	if (!m_backend_surface || m_backend_surface->surface->format->BytesPerPixel != 2) return;
+	SurfacePixelLock lock(m_backend_surface);
+	if (!lock.info.pixels) return;
+	for (int y = 0; y < lock.info.height; ++y) {
+		WORD* row = reinterpret_cast<WORD*>(static_cast<BYTE*>(lock.info.pixels) + y * lock.info.pitch);
+		std::fill_n(row, lock.info.width, color);
 	}
 }
 
@@ -755,9 +673,9 @@ void CSpriteSurface::GammaBox565(RECT* pRect, int p)
 		return;
 	}
 
-	S_SURFACEINFO info;
-	GetSurfaceInfo(&info);
-	if (info.p_surface == NULL)
+	SurfacePixelLock lock(m_backend_surface);
+	const auto& info = lock.info;
+	if (info.pixels == NULL)
 	{
 		return;
 	}
@@ -781,7 +699,7 @@ void CSpriteSurface::GammaBox565(RECT* pRect, int p)
 		return;
 	}
 
-	WORD* pDest = (WORD*)((BYTE*)info.p_surface + pRect->top * info.pitch + (pRect->left << 1));
+	WORD* pDest = (WORD*)((BYTE*)info.pixels + pRect->top * info.pitch + (pRect->left << 1));
 	int dLen = pRect->right - pRect->left;
 	int rows = pRect->bottom - pRect->top;
 
@@ -826,34 +744,20 @@ void CSpriteSurface::GammaBox555(RECT* pRect, int p)
 /* Pure accessor: returns the pixel pointer without changing the lock state. */
 void* CSpriteSurface::GetSurfacePointer()
 {
-	if (m_backend_surface == SPRITECTL_INVALID_SURFACE) return NULL;
-
-	spritectl_surface_info_t info;
-	if (spritectl_lock_surface(m_backend_surface, &info) != 0) {
-		return NULL;
-	}
-	spritectl_unlock_surface(m_backend_surface);
-
-	return info.pixels;
+	S_SURFACEINFO info{};
+	GetSurfaceInfo(&info);
+	return info.p_surface;
 }
 
 void* CSpriteSurface::Lock(RECT* rect, DWORD* pitch)
 {
-	(void)rect;  // Not used in SDL backend
-	if (m_backend_surface == SPRITECTL_INVALID_SURFACE) return NULL;
-
-	spritectl_surface_info_t info;
-	if (spritectl_lock_surface(m_backend_surface, &info) != 0) {
-		return NULL;
-	}
-	spritectl_unlock_surface(m_backend_surface);
-
-	if (pitch != NULL) {
-		*pitch = info.pitch;
-	}
-
-	m_lock_count = 1;  // DirectDraw-style flag, not a nesting counter
-	return info.pixels;
+	(void)rect;
+	S_SURFACEINFO info{};
+	GetSurfaceInfo(&info);
+	if (pitch) *pitch = info.pitch;
+	if (!info.p_surface) return nullptr;
+	m_lock_count = 1;
+	return info.p_surface;
 }
 
 void CSpriteSurface::Unlock()

@@ -41,7 +41,7 @@ int spritectl_init(void) {
 	}
 
 	/* Initialize SDL video subsystem */
-	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+	if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0) {
 		fprintf(stderr, "SpriteLib Backend: SDL_Init failed: %s\n", SDL_GetError());
 		return -1;
 	}
@@ -69,7 +69,7 @@ void spritectl_shutdown(void) {
 		g_spritectl_blt_scratch_h = 0;
 	}
 
-	SDL_Quit();
+	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	g_spritectl_initialized = 0;
 }
 

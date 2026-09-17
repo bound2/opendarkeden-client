@@ -60,6 +60,8 @@ A subsystem-by-subsystem review surfaced **197 findings**. Every area graded **D
 
 ## Remediation Status
 
+**2026-09-17 follow-up in progress:** all remaining findings are being checked against the current tree. The dated totals below are historical and include stale open entries; closure notes in the individual findings record the current evidence. Live-server verification is optional and does not gate these fixes or their merges.
+
 **Updated 2026-09-10, later:** the Medium *Networking & Protocol* finding below — wire bytes copied raw into `bool` members — is fixed on `feature/cpp20-macaddress-span`, centrally in the two stream reads, taking the total to 88 fixed and Medium to 19 fixed / 62 open. Its red run showed a bool holding 0x02 answering `if (a)` and `a == true` differently under MSVC; no consumer in the tree compares a wire bool with `== true`, so in play this was a sanitizer trap and an invalid value propagating into UI structs, not an inverted branch.
 
 **Updated 2026-09-10:** the Medium *Networking & Protocol* finding below — `Datagram`'s bounds checks wrapping in unsigned arithmetic, with the write bound an `Assert` that Release compiles away — is fixed on `feature/cpp20-framing-header`, taking the total to 87 fixed and Medium to 18 fixed / 63 open. Its test is a reproduction rather than a guard: on the unfixed code the wrapping read did not fail the test, it crashed the test process. The same branch found and fixed a defect this review had not seen, recorded under *Found by reading*: the datagram sent one byte of uninitialised heap memory behind every UDP packet, in the pad slot both peers count and neither reads.
@@ -1032,6 +1034,8 @@ m_Size is a DWORD read verbatim from the file (line 53) and used unchecked as th
 
 **Category:** resource-leak  |  **Location:** `Client/CTexturePartManager.cpp:409`
 
+> ✅ **Closed in the 2026-09-17 follow-up.** The counting-lock implementation described here had already been replaced with an idempotent DirectDraw compatibility flag: `GetSurfacePointer()` does not acquire a lock, and `Unlock()` clears the flag. `tests/unit/test_spritesurface_bounds.cpp` now pins repeated `Lock()`, pointer access, one `Unlock()`, and release/reinitialization; the follow-up also clears the flag on `Release()`. No double SDL lock remains at the cited manager call sites.
+
 CTexturePartManager::GetTexture calls `pTextureSurface->Lock()` at line 393, which increments m_lock_count and calls spritectl_lock_surface (Client/SpriteLib/CSpriteSurface_SDL.cpp:739-760). It then calls `pTextureSurface->GetSurfacePointer()` at line 409, which locks *again* and increments m_lock_count again (CSpriteSurface_SDL.cpp:718-737 — the function even prints 'GetSurfacePointer() is deprecated and leaks locks!' under _DEBUG). Only one `Unlock()` follows, at line 467. The surface therefore stays locked for its whole lifetime; SDL refuses to blit to or from a locked surface, and spritectl_blt_sprite's fallback path has to hand-unwind dest->locked in a loop to work around it (SpriteLibBackendSDL.cpp:643-652). The identical Lock+GetSurfacePointer+single-Unlock pattern appears in Client/CSpriteTexturePartManager.cpp:395/411, Client/CShadowPartManager.cpp:458/516, and Client/CNormalSpriteTexturePartManager.cpp:385/401. The GetSurfacePointer() return value is also not null-checked before the memset loop at line 417.
 
 **Recommendation:** Use the pointer already returned by Lock() instead of calling GetSurfacePointer(), or add the matching Unlock(); null-check the pixel pointer before memset. Consider deleting GetSurfacePointer() outright now that its own implementation documents it as broken.
@@ -1056,6 +1060,8 @@ Lines 204-232 decompress each scanline: `int count = *pPixels++;` then per run `
 
 **Category:** memory-safety  |  **Location:** `Client/SpriteLib/CSpriteSurface_SDL.cpp:479`
 
+> ✅ **Fixed in the 2026-09-17 follow-up** (`fix/review-sprite-surfaces`). The two blits and gamma drawing hold scoped SDL locks for their complete pixel access. Legacy borrowed-pointer accessors now return pixels only for uncompressed software surfaces, which are what `Init()` creates; they reject RLE surfaces instead of returning invalidated pixels. `GetDDSD()` uses the existing per-object description. `tests/unit/test_spritesurface_bounds.cpp` covers independent descriptions, actual RLE compression/decompression, blitting and gamma drawing, plus balanced locks.
+
 Lines 481-486 do `spritectl_lock_surface(...); info->p_surface = sdl_info.pixels; ...; spritectl_unlock_surface(...)`. The returned p_surface is then used for direct pixel writes by Blt (line 562), BltNoColorkey (line 311) and GammaBox565 (line 697), all outside any lock. This violates the SDL contract: SDL_UnlockSurface on an RLE-accelerated surface re-encodes the pixel data and invalidates the pointer, and the pointer is not guaranteed stable for any surface where SDL_MUSTLOCK is true. It happens to work today only because these are plain SDL_CreateRGBSurface software surfaces. Relatedly, GetDDSD() at line 499 returns the address of a function-local `static S_SURFACEINFO`, so holding two GetDDSD() results (source and destination) silently aliases the same struct.
 
 **Recommendation:** Have GetSurfaceInfo keep the lock and require a matching release, or convert the three call sites to use Lock()/Unlock() directly. Replace GetDDSD()'s static buffer with a caller-provided struct.
@@ -1063,6 +1069,8 @@ Lines 481-486 do `spritectl_lock_surface(...); info->p_surface = sdl_info.pixels
 #### 🟠 High -- CSpriteSurface::Blt and BltNoColorkey clamp only the right/bottom edges, so negative destination or source coordinates index before the start of the pixel buffer.
 
 **Category:** memory-safety  |  **Location:** `Client/SpriteLib/CSpriteSurface_SDL.cpp:549`
+
+> ✅ **Fixed in the 2026-09-17 follow-up** (`fix/review-sprite-surfaces`). Both methods use one implementation that intersects source bounds and the destination SDL clip rectangle before forming any pixel pointer. Wide arithmetic handles extreme signed coordinates, and overlapping self-copies preserve the original pixels. `tests/unit/test_spritesurface_bounds.cpp` exhausts small rectangles across every edge and covers empty/reversed rectangles, extreme coordinates, destination clips, pitch and self-overlap.
 
 Lines 549-555 clamp src_w/src_h when `src_x + src_w > src_info.width` and when `pPoint->x + src_w > dst_info.width`, but neither src_x/src_y nor pPoint->x/pPoint->y is ever clamped to >= 0. The row pointers at lines 570-571 and 576-577 are then computed as `dst_pixels + (pPoint->y + y) * dst_pitch_words + pPoint->x` and `src_pixels + (src_y + y) * src_pitch_words + src_x`. With pPoint->x = -10 the memcpy destination starts 20 bytes before the surface allocation; with a negative pPoint->y it starts a whole pitch-multiple before it. BltNoColorkey at lines 298-333 is a verbatim copy of the same logic with the same omission. The clipping helper that would normally catch this, ClippingRectToPoint at line 400, is a stub that unconditionally returns true.
 
@@ -1134,6 +1142,8 @@ s_pMemcpyEffectFunctionTable and s_pMemcpyPalEffectFunctionTable are defined as 
 
 **Category:** correctness  |  **Location:** `Client/SpriteLib/CSpriteSurface_SDL.cpp:180`
 
+> ✅ **Fixed in the 2026-09-17 follow-up** (`fix/review-sprite-surfaces`). The green mask is `0x07C0`; the format branch now tests bytes per pixel, since SDL reports RGB555 as 15 bits per pixel and previously bypassed that branch entirely. `tests/unit/test_spritesurface_bounds.cpp` checks low-green, saturated-green, white, red and blue on a real RGB555 surface.
+
 Lines 180-182 compute `pixel = ((rgb565 & 0xF800) >> 1) | ((rgb565 & 0x0600) >> 1) | ((rgb565 & 0x07E0) >> 1) | (rgb565 & 0x001F);`. The three shifted terms are 0x7C00, 0x0300 and 0x03F0 — the last extends one bit below the 555 green field (0x03E0) into bit 4, which belongs to blue. Any pixel whose green LSB is set therefore corrupts blue's top bit, and the redundant 0x0600 term contributes nothing. The correct mask is `((rgb565 & 0x07C0) >> 1)`. Note the file also has an unconditional `if (rgb555_count < 3 && ...)` fprintf branch inside this hot path (lines 183-187).
 
 **Recommendation:** Replace the three-term expression with `((rgb565 & 0xF800) >> 1) | ((rgb565 & 0x07C0) >> 1) | (rgb565 & 0x001F)`, and route the conversion through the existing spritectl_565_to_rgb/SDL_MapRGB path so there is only one implementation.
@@ -1194,6 +1204,8 @@ Comments such as line 56 ('source --> dest �� pixels��ŭ \u3designĪ��
 
 **Category:** correctness  |  **Location:** `Client/SpriteLib/CSpriteSurface_SDL.cpp:601`
 
+> ✅ **Fixed in the 2026-09-17 follow-up** (`fix/review-sprite-surfaces`). Fill walks each row by pitch under a scoped SDL lock. The test uses a three-pixel-wide surface with padding, verifies every visible pixel and verifies that the padding remains unchanged (`tests/unit/test_spritesurface_bounds.cpp`).
+
 Lines 601-607 do `WORD* pixels = (WORD*)info.pixels; int pixel_count = info.width * info.height; for (i...) pixels[i] = color;`. SDL aligns 16bpp surface pitch to 4 bytes, so an odd-width surface has pitch = width*2 + 2 and the linear walk drifts one pixel left per row, leaving the right edge unfilled and smearing the fill diagonally. GammaBox565 in the same file (line 697) correctly steps by info.pitch, so the two are inconsistent.
 
 **Recommendation:** Walk row by row using info.pitch, as GammaBox565 already does.
@@ -1201,6 +1213,8 @@ Lines 601-607 do `WORD* pixels = (WORD*)info.pixels; int pixel_count = info.widt
 #### ⚪ Low -- spritectl_shutdown calls SDL_Quit(), tearing down the video subsystem that DXLib's window and renderer also depend on.
 
 **Category:** maintainability  |  **Location:** `Client/SpriteLib/SpriteLibBackendSDL.cpp:68`
+
+> ✅ **Fixed in the 2026-09-17 follow-up** (`fix/review-sprite-surfaces`). Initialization and shutdown now pair `SDL_InitSubSystem(SDL_INIT_VIDEO)` with `SDL_QuitSubSystem(SDL_INIT_VIDEO)`. The test holds separate video and timer references and verifies both survive SpriteLib shutdown (`tests/unit/test_spritesurface_bounds.cpp`).
 
 spritectl_init calls SDL_Init(SDL_INIT_VIDEO) at line 41 and spritectl_shutdown calls SDL_Quit() at line 68. SDL_Quit shuts down every subsystem, not just the one this module initialized, so whichever of SpriteLib or DXLib shuts down first invalidates the other's window/renderer — CSDLGraphics::Flip (Client/CSDLGraphicsFlip.cpp:26) dereferences m_pSDLRenderer with only a NULL check, not a validity check. spritectl_destroy_surface (line 182) also frees the SDL_Surface without checking surface->locked, which given the part-manager lock leak above means locked surfaces are routinely freed.
 
