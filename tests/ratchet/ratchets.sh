@@ -17,6 +17,10 @@
 #
 #----------------------------------------------------------------------
 set -u
+# Source files include legacy code-page bytes. These are byte counts;
+# every stage (including BSD sed) must use the same single-byte locale.
+# A UTF-8 locale can stop sed early yet leave a downstream count at zero.
+export LC_ALL=C
 cd "$(dirname "$0")/../.." || exit 2
 
 BUILD_DIR="${1:-}"
