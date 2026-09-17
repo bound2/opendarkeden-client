@@ -11,9 +11,7 @@
 
 #include "CDirectInput.h"
 #include "DXLibBackend.h"
-
-/* Cursor position globals the game reads directly; defined in Client. */
-extern int g_x, g_y;
+#include "DXInputHost.h"
 
 #define MSB		0x80
 
@@ -216,16 +214,14 @@ void CSDLInput::UpdateInput()
 	}
 }
 
-/* Move the cursor to (x, y) if needed, then deliver the event there. The
- * receiver (CGameUpdate::DXMouseEvent) reads the position from the g_x/g_y
- * globals rather than its arguments, so those are set as well. */
+/* Move the cursor to (x, y) if needed, then deliver the event there.
+ * Publish the same position to the application before its event callback. */
 void CSDLInput::DispatchMouseAt(E_MOUSE_EVENT event, int x, int y)
 {
 	if (x != m_mouse_x || y != m_mouse_y) {
 		m_mouse_x = x;
 		m_mouse_y = y;
-		g_x = x;
-		g_y = y;
+		DXInput::SetMousePosition(x, y);
 		if (event != MOVE && m_fp_mouse_event_receiver) {
 			m_fp_mouse_event_receiver(MOVE, x, y, m_mouse_z);
 		}

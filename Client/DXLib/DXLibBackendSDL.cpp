@@ -14,6 +14,7 @@
 /* Include CDirectInput.h first to get DIK constants */
 #include "CDirectInput.h"
 #include "DXLibBackend.h"
+#include "DXInputHost.h"
 
 /* Implemented in Client/SpriteLib/SpriteLibBackendSDL.cpp (declared in
  * SpriteLibBackend.h, which dxlib cannot include - it builds without the
@@ -26,9 +27,6 @@ extern "C" void spritectl_window_to_game_coords(int* x, int* y);
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-/* Include input focus manager */
-#include "../../VS_UI/src/InputFocusManager.h"
 
 /* For MP3/OGG support.
  * HAVE_SDL2_MIXER comes from Client/DXLib/CMakeLists.txt when SDL2_mixer is
@@ -208,15 +206,11 @@ static struct dxlib_mouse_button_event g_mouse_button_events[DXLIB_MOUSE_EVENT_Q
 static int g_mouse_button_event_head = 0;
 static int g_mouse_button_event_count = 0;
 
-/* Legacy global mouse coordinates (used by CWaitUIUpdate) */
-extern int g_x, g_y;
-
 /* Global game state: cleared by the event pump below on SDL_QUIT, read by
    ClientMain's frame loop off Windows (Client.cpp). Defined here on every
    platform - this file is built on all of them - since SDLMain.cpp, which
    used to define it off Windows, is the bootstrap alone now. */
 bool g_bRunning = true;
-extern BOOL g_bActiveApp;
 
 /* DIK to SDL scancode mapping table */
 static SDL_Scancode g_dik_to_scancode[256] = {SDL_SCANCODE_UNKNOWN};
@@ -388,7 +382,7 @@ void dxlib_input_update(void) {
 
 			case SDL_WINDOWEVENT:
 				if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
-					g_bActiveApp = TRUE;
+					DXInput::SetActiveApp(true);
 				} else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
 					// Don't deactivate - keep game running in background
 					// g_bActiveApp = FALSE;
@@ -397,7 +391,7 @@ void dxlib_input_update(void) {
 
 			case SDL_KEYDOWN:
 				/* Handle control keys for text input */
-				if (g_GetInputFocusManager().HasFocus()) {
+				if (DXInput::GetHost().hasTextFocus && DXInput::GetHost().hasTextFocus()) {
 					SDL_Keycode key = event.key.keysym.sym;
 					unsigned int vk_code = 0;
 
@@ -416,8 +410,8 @@ void dxlib_input_update(void) {
 					case SDLK_END:		vk_code = 0x23; break; // VK_END
 					}
 
-					if (vk_code != 0) {
-						g_GetInputFocusManager().HandleKeyDown(vk_code);
+					if (vk_code != 0 && DXInput::GetHost().keyDown) {
+						DXInput::GetHost().keyDown(vk_code);
 						// Don't break here - let keyboard state update below
 						// This ensures dxlib_input_key_down() works correctly
 					}
@@ -433,16 +427,12 @@ void dxlib_input_update(void) {
 			case SDL_MOUSEMOTION:
 				g_mouse_x = event.motion.x;
 				g_mouse_y = event.motion.y;
-				// Also update global g_x and g_y for legacy code
-				g_x = event.motion.x;
-				g_y = event.motion.y;
+				DXInput::SetMousePosition(event.motion.x, event.motion.y);
 				break;
 
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:
-				// Update global g_x and g_y for legacy code
-				g_x = event.button.x;
-				g_y = event.button.y;
+				DXInput::SetMousePosition(event.button.x, event.button.y);
 
 				{
 					int button = -1;
@@ -487,8 +477,8 @@ void dxlib_input_update(void) {
 			case SDL_TEXTINPUT:
 				/* Handle text input for IME and text entry */
 				{
-					if (event.text.text[0] != '\0') {
-						g_GetInputFocusManager().HandleTextInput(event.text.text);
+					if (event.text.text[0] != '\0' && DXInput::GetHost().textInput) {
+						DXInput::GetHost().textInput(event.text.text);
 					}
 				}
 				break;
@@ -496,9 +486,8 @@ void dxlib_input_update(void) {
 			case SDL_TEXTEDITING:
 				/* Handle IME composition (text editing in progress) */
 				{
-					g_GetInputFocusManager().HandleTextEditing(event.edit.text,
-					                                         event.edit.start,
-					                                         event.edit.length);
+					if (DXInput::GetHost().textEditing)
+						DXInput::GetHost().textEditing(event.edit.text, event.edit.start, event.edit.length);
 				}
 				break;
 		}
@@ -518,9 +507,7 @@ void dxlib_input_update(void) {
 	 * coordinates, and this runs after both. */
 	spritectl_window_to_game_coords(&g_mouse_x, &g_mouse_y);
 
-	/* Also update global g_x, g_y for legacy code (IMPORTANT!) */
-	g_x = g_mouse_x;
-	g_y = g_mouse_y;
+	DXInput::SetMousePosition(g_mouse_x, g_mouse_y);
 }
 
 int dxlib_input_key_down(int dik_key) {

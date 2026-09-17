@@ -13,7 +13,6 @@ if(WIN32)
 	option(USE_SDL_BACKEND "Use SDL2 backend instead of DirectX" OFF)
 
 	if(USE_SDL_BACKEND)
-		add_definitions(-DDXLIB_USE_SDL_BACKEND)
 		message(STATUS "DXLib: Using SDL2 backend")
 		find_package(SDL2 REQUIRED)
 		find_package(SDL2_mixer)
@@ -27,7 +26,6 @@ endif()
 
 # Non-Windows platforms must use SDL
 if(NOT WIN32)
-	add_definitions(-DDXLIB_USE_SDL_BACKEND)
 	# No platform macro: basic/Platform.h detects it from the compiler.
 	find_package(SDL2 REQUIRED)
 	find_package(SDL2_mixer)
@@ -50,6 +48,7 @@ endif()
 set(DXLIB_SOURCES
 	# Platform backend
 	DXLibBackendSDL.cpp
+	DXInputHost.cpp
 
 	# Core DirectDraw implementations
 	CDirectDraw.cpp
@@ -90,6 +89,10 @@ endif()
 # Create library
 add_library(dxlib STATIC ${DXLIB_SOURCES})
 
+if(USE_SDL_BACKEND OR NOT WIN32)
+	target_compile_definitions(dxlib PUBLIC DXLIB_USE_SDL_BACKEND)
+endif()
+
 # Public include directories
 target_include_directories(dxlib
 	PUBLIC
@@ -120,7 +123,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 endif()
 
 # Link basic library for platform abstraction
-target_link_libraries(dxlib PUBLIC basic)
+target_link_libraries(dxlib PUBLIC basic SpriteLib)
 
 # Windows-specific libraries
 if(WIN32 AND NOT USE_SDL_BACKEND)

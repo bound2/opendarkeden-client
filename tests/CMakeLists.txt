@@ -55,6 +55,7 @@ target_link_libraries(unit_tests PRIVATE
 	TextSystem
 	packetwire
 	gamemodel
+	dxlib
 )
 
 target_include_directories(unit_tests PRIVATE
