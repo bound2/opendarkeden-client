@@ -1,13 +1,8 @@
 //----------------------------------------------------------------------
 // CSDLGraphicsFlip.cpp
 //----------------------------------------------------------------------
-// CSDLGraphics::Flip()의 실제 구현.
-//
-// CSDLGraphics 자체는 Client/DXLib/CDirectDraw.cpp(dxlib 라이브러리)에
-// 있지만, Flip()은 g_pBack(CSpriteSurface)의 전체 정의가 필요하다.
-// dxlib 프로젝트는 SPRITELIB_BACKEND_SDL 없이, /IClient 없이 빌드되어
-// SpriteLib/CSpriteSurface.h를 안전하게 끌어올 수 없으므로, 여기
-// DarkEden.exe 쪽(Client_MAIN_SOURCES)에 따로 둔다.
+// Frame presentation stays in the executable, which owns g_pBack and
+// connects dxlib's graphics wrapper to the SpriteLib back buffer.
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "DXLib/CDirectDraw.h"

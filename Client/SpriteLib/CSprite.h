@@ -326,7 +326,7 @@ class CSprite
 		static DWORD	s_Value2;
 		static DWORD	s_Value3;
 	
-		// Filter 占쏙옙占쏙옙
+		// Filter origin and active filter.
 		static short	s_X;
 		static short	s_Y;
 		static CFilter*	s_pFilter;
