@@ -2583,6 +2583,8 @@ basic/CMakeLists.txt:36-42 lists Directory.cpp in BASIC_SOURCES unconditionally.
 
 **Recommendation:** Add a Windows implementation of platform_get_executable_dir (GetModuleFileNameA plus a path trim) so the function is defined everywhere it is declared, or guard Directory.cpp out of the Windows build and make that explicit in basic/CMakeLists.txt.
 
+> ✅ **Fixed** on `feature/cpp20-bounded-format-1` (2026-09-17, the first bounded-formatting slice): `basic/Directory.{h,cpp}` are deleted rather than guarded. Nothing referenced `C_DIRECTORY` or `gC_directory`, and the class could not have linked on Windows had anything done so; `basic/PS.h` loses the include.
+
 #### 🟡 Medium -- Platform.h defines min/max as function-like macros on non-Windows from a header that reaches nearly every translation unit, breaking std::min/std::max and numeric_limits.
 
 **Category:** maintainability  |  **Location:** `basic/Platform.h:1847`

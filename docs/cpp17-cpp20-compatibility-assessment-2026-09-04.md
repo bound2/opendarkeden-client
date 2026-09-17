@@ -747,8 +747,7 @@ constructor references `platform_get_executable_dir`, which `basic/PlatformSDL.c
 defines only under `#ifndef PLATFORM_WINDOWS`, so pulling `Directory.obj` into
 `unit_tests` fails with `LNK2019`. The whole tree links today only because
 nothing on the Windows build references `C_DIRECTORY` at all. That is a latent
-defect rather than a compatibility one and is not fixed here; until it is,
-`basic/Directory.cpp` has no test path and this slice left it alone.
+defect rather than a compatibility one and was not fixed here; the first bounded-formatting slice (2026-09-17) deleted the class and its two files instead, since nothing referenced it.
 
 Candidates read and rejected: every `find` whose iterator is
 dereferenced afterwards, which is not a membership test (`MItemManager`'s
@@ -1787,6 +1786,38 @@ tutorial loop. `FILETIME` stayed, because `Client/CrashReport.cpp` declares one,
 and so did `INVALID_HANDLE_VALUE`, which `Client/Client.cpp`,
 `Client/CGameUpdate.cpp` and `Client/CrashReport.cpp` still compare against.
 Priority 6 now has no `_findfirst` or `FindFirstFile` residue left.
+
+**Bounded-formatting status (2026-09-17):** the first priority-7 slice
+is implemented, and it is mostly an instrument. The formats the data
+files own are C19's and closed (`SafeFormat`, R7 and R8, the arity
+audit); what priority 7 is about is the other kind - a developer-owned
+literal or a plain copy into a fixed buffer, where the defect is the
+destination, not the format. The packet tree has been at zero on that
+since task 5.4 (R3). The rest of the tree measures **1,102** such lines
+by R3's grep with `wsprintf` added and headers scanned beside sources - `sprintf`, `wsprintf`, `strcpy` and `strcat`, with the `//` tail of each line stripped, read with `grep -a` because of the NUL bytes in `VS_UI_GameCommon.cpp` - and **ratchet R17** holds that
+count over `basic`, `VS_UI` and `Client` outside the two packet
+directories, so each slice retreats along it and a new unbounded copy
+fails the suite. A site leaves the count when its destination is a
+real array and the call is `snprintf(dst, sizeof(dst), ...)` or an
+exact-length `memcpy`, checked by hand - `sizeof()` on a pointer is
+the mistake the packet-tree pass warned about, and the reason this is not scripted. What the instrument cannot see: `vsprintf`, eleven live lines in `MinTr.h` and the two `DebugInfo.cpp` that forward a vararg list into a fixed buffer (the `\b` that rejects its leading `v` is the same one that would reject `lstrcpy`, of which the tree has none), `strncpy`, and a copy spelled any other way. This slice takes `basic` and `SpriteLib` to zero (`SafeFormat`'s bounding is nominal - the `*w++` writes around the two `snprintf` are held inside the 32-byte spec by the flag, width and precision caps declared 300 lines away, which is why the sizes are passed down at all):
+`C_DIRECTORY`, a class nothing constructs whose constructor calls a
+POSIX-only function and so could not have linked into the Windows
+client had anything referenced it, is deleted with its six lines and its two files (the PS.h umbrella loses the include; nothing else named
+it); `PlatformSDL.cpp`'s three sites (four lines) are bounded by the size each already checked - the executable-directory join is one `snprintf` into
+the caller's buffer behind the existing `len + 2 > size` test, the
+"./" fallback is one into its array, and the config value's copy is a
+`memcpy` of the length the guard above it has just admitted;
+`SafeFormat`'s `BuildSpec` takes the spec buffer's size and writes its
+width and precision with `snprintf` against the space left (the caller's
+32-byte array, and the two values are capped well inside it, so
+nothing changes but the spelling); and `SpriteLib`'s two size-mismatch captions in `CTypePack.h` are `snprintf(sizeof)`; the other two lines were in `CTypePackVector.h`, a header no translation unit includes (its Windows branch still asks for `<fstream.h>`, which no compiler here has shipped), and it is deleted with its listings rather than bounded - the first version of this slice bounded it and called its index file name a fixed overflow, which a review corrected: a site nothing compiles is not a live path. R17 goes from 1,102 to **1,086**; what
+is left is `VS_UI` (783) and the rest of `Client` (303), most of them
+`wsprintf` and `sprintf` into local `char` arrays, to be taken a file
+group at a time with each destination read. Verified by the build on
+Windows in both Debug trees (reconfigured, since a source left the
+`basic` list) and the test suites in both test trees; the client not
+run.
 
 ### Packet modernization guardrails
 
