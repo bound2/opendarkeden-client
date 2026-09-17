@@ -45,7 +45,7 @@ class MInteractionObject : public MAnimationObject {
 		//--------------------------------------------------------		
 		// InteractionObject type
 		//--------------------------------------------------------		
-		BYTE			GetInteractionObjectType() const	{ return m_InteractionObjectType; }
+		TYPE_INTERACTIONOBJECTTYPE GetInteractionObjectType() const { return m_InteractionObjectType; }
 
 		//-------------------------------------------------------
 		// File I/O
@@ -69,7 +69,7 @@ class MInteractionObject : public MAnimationObject {
 		void			ChangeActionSwitch();
 
 	protected :
-		BYTE			m_InteractionObjectType;
+		TYPE_INTERACTIONOBJECTTYPE m_InteractionObjectType;
 };
 
 

@@ -5,7 +5,7 @@
 #include "MObject.h"
 #include "MImageObject.h"
 
-	#include "MTopView.h"
+
 
 
 //----------------------------------------------------------------------
@@ -102,7 +102,10 @@ MImageObject::LoadFromFile(ifstream& file)
 	file.read((char*)&m_PixelX, 4);
 	file.read((char*)&m_PixelY, 4);
 	file.read((char*)&m_Viewpoint, SIZE_SECTORPOSITION);
-	file.read((char*)&m_bAnimation, 1);
+	BYTE animation = 0;
+	file.read(reinterpret_cast<char*>(&animation), 1);
+	if (animation > 1) file.setstate(std::ios::failbit);
+	m_bAnimation = animation != 0;
 	file.read((char*)&m_bTrans, 1);
 }
 
@@ -172,51 +175,4 @@ MImageObject::GetWallDirection() const
 //			sX+sY가 value보다 적은 경우 투명이 된다.
 //
 //----------------------------------------------------------------------
-bool
-MImageObject::IsWallTransPosition(int sX, int sY) const
-{
-		switch (m_X)
-		{
-			//-------------------------------------------------------------
-			// 오른쪽으로 가면서 아래로 내려가는 벽
-			//-------------------------------------------------------------
-			case WALL_RIGHTDOWN :
-			{
-				// imageObject의 sector X좌표
-				int objectSX = MTopView::PixelToMapX( m_PixelX );
-		
-				// x - y
-				int value = objectSX - (int)m_Viewpoint;			
-				
-				if (sX-sY > value)
-				{
-					return true;
-				}
-
-				return false;
-			}
-			break;
-
-			//-------------------------------------------------------------
-			// 오른쪽으로 가면서 위로 올라가는 벽
-			//-------------------------------------------------------------
-			case WALL_RIGHTUP :
-			{
-				// imageObject의 sector X좌표
-				int objectSX = MTopView::PixelToMapX( m_PixelX );
-				
-				// x + y
-				int value = objectSX + (int)m_Viewpoint;			
-
-				if (sX+sY < value)
-				{
-					return true;
-				}
-
-				return false;
-			}
-			break;
-		}
-
-	return true;
-}
+// Wall transparency against the screen geometry is in MImageObjectScreen.cpp.

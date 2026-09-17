@@ -7,6 +7,7 @@
 #include <math.h>
 #include <memory>
 #include "MZoneDef.h"
+#include "ZoneMapData.h"
 #include "MSector.h"
 #include "MCreature.h"
 #include "MFakeCreature.h"
@@ -260,31 +261,23 @@ MZone::~MZone()
 void
 MZone::Init(TYPE_SECTORPOSITION width, TYPE_SECTORPOSITION height)
 {
-	// 0 이 있으면 return
-	if (width==0 || height==0) 
+	if (width == 0 || height == 0)
 		return;
 
-	// memory해제
-	Release();
-
-	m_Width	 = width;
-	m_Height = height;
-
-	m_ppSector = new MSector* [m_Height];
-
-	int i;
-	for (i=0; i<m_Height; i++)
-	{
-		m_ppSector[i] = new MSector [m_Width];
+	// Allocate every row before replacing the live grid. A failed allocation
+	// must not leave Release() walking uninitialized row pointers.
+	std::vector<std::unique_ptr<MSector[]>> ownedRows;
+	ownedRows.reserve(height);
+	auto rows = std::make_unique<MSector*[]>(height);
+	for (unsigned y = 0; y < height; ++y) {
+		ownedRows.push_back(std::make_unique<MSector[]>(width));
+		rows[y] = ownedRows.back().get();
 	}
-
-	//for (i=0; i<m_Height; i++)
-	//{
-	//	for (int j=0; j<m_Width; j++)
-	//	{
-	//		m_ppSector[i][j].SetFilterSpriteID( 0 );
-	//	}
-	//}
+	Release();
+	m_ppSector = rows.release();
+	for (auto& row : ownedRows) row.release();
+	m_Width = width;
+	m_Height = height;
 }
 
 //----------------------------------------------------------------------
@@ -913,272 +906,43 @@ MZone::LoadFromFileSectorSound(std::ifstream& file)
 //   Obstacle수,  Obstacle수 * Obstacle 정보
 //   ImageObject수,  ImageObject수 * (ImageObject, ImageObjectSectorInfo)
 //----------------------------------------------------------------------
-bool		
+bool
 MZone::LoadFromFile(std::ifstream& file)
 {
-	//-------------------------------------------------
-	// Header
-	//-------------------------------------------------
-	m_Info.LoadFromFile( file );
-	
-
-	//-------------------------------------------------
-	//
-	// 5월 11일 version
-	//
-	//-------------------------------------------------
-	if (m_Info.ZoneVersion==MAP_VERSION_2000_05_10)
-	{
-		//-------------------------------------------------
-		// ZoneID 
-		// 속성
-		//-------------------------------------------------	
-		file.read((char*)&m_fpTile, 4);				// Tile FP
-		file.read((char*)&m_fpImageObject, 4);		// ImageObject FP
-
-		//-------------------------------------------------
-		// 이미 있던 것 제거
-		//-------------------------------------------------
-		Release();
-
-		//-------------------------------------------------
-		// Zone의 가로 Size, 
-		//        세로 Size
-		//-------------------------------------------------
-		file.read((char*)&m_Width, 2);
-		file.read((char*)&m_Height, 2);
-
-		// 아무것도 없는 경우
-		if (m_Width==0 || m_Height==0)
-			return false;
-
-		//-------------------------------------------------
-		// Zone의 각 Sector들을 Load
-		//-------------------------------------------------
-		// memory잡기
-		Init(m_Width, m_Height);
-
-		///*
-		int i,j;
-
-		for (i=0; i<m_Height; i++)
-		{
-			for (j=0; j<m_Width; j++)
-			{
-				m_ppSector[i][j].LoadFromFile(file);			
-			}
-		}
-
-		//*/
-		/*
-		struct MSector_st
-		{
-			TYPE_SPRITEID	spriteID;
-			BYTE			property;
-			BYTE			light;
-		};
-
-		MSector_st* tempSector = new MSector_st[m_Height*m_Width];
-
-		file.read((char*)tempSector, sizeof(MSector_st)*m_Height*m_Width);
-
-		int i,j;
-		
-		MSector_st* tempSectorPtr = tempSector;
-
-		for (i=0; i<m_Height; i++)
-		{
-			for (j=0; j<m_Width; j++)
-			{
-				m_ppSector[i][j].Set( tempSectorPtr->spriteID, tempSectorPtr->property );
-				// light는 의미없다.
-
-				tempSectorPtr++;
-			}
-		}
-		
-		delete [] tempSector;
-		*/
-
-		//-------------------------------------------------
-		// 빛에 따른 Filter 모양 생성
-		//-------------------------------------------------
-		// 이부분을 MapEditor에서??
-		/*
-		for (i=0; i<m_Height; i++)
-		{
-			for (j=0; j<m_Width; j++)
-			{
-				if (m_ppSector[i][j].GetLight()!=0)	
-				{
-					SetLight(j,i, 0);
-				}
-			}
-		}
-		*/
-		
-
-		int size;
-
-		//-------------------------------------------------
-		// Portal을 읽어들인다.
-		//-------------------------------------------------
-		// 2001.7.11에 제거
-		/*
-		file.read((char *)&size, 4);
-
-		// Client에서는 필요없는 정보이므로 읽어들이기만 한다.
-		// [!] 아예 file position을 기억해서 건너띌수도 있겠다.
-		MPortal portal;
-		for (i=0; i<size; i++)
-		{
-			portal.LoadFromFile( file );
-		}
-		*/
-
-		//-------------------------------------------------
-		// ImageObject 개수를 Load
-		//-------------------------------------------------	
-		file.read((char *)&size, 4);
-
+	bool skipImageObjects = false;
 #ifdef __EMSCRIPTEN__
-		extern bool g_demoSkipImageObjects;
-		if (g_demoSkipImageObjects)
-		{
-			printf("Web demo: skipping ImageObject load (count=%d)\n", size);
-			return true;
-		}
+	extern bool g_demoSkipImageObjects;
+	skipImageObjects = g_demoSkipImageObjects;
 #endif
-
-		//-------------------------------------------------
-		// Zone의 ImageObject들을 Load
-		//-------------------------------------------------
-		IMAGEOBJECT_POSITION_LIST	ImageObjectPositionList;
-		BYTE						ObjectType;
-		for (i=0; i<size; i++)	
-		{
-			#ifdef __OUTPUT_IMAGEOBJECT__
-				char str[1024];
-			#endif
-
-			// Allocate the ImageObject and load it.
-			file.read((char*)&ObjectType, 1);
-
-			MImageObject				*pImageObject = NULL;
-
-			switch (ObjectType)
-			{
-				case MObject::TYPE_IMAGEOBJECT :
-					pImageObject = new MImageObject;
-					
-					#ifdef __OUTPUT_IMAGEOBJECT__	
-						snprintf(str, sizeof(str), "ImageObject : ");
-					#endif
-				break;
-
-				case MObject::TYPE_SHADOWOBJECT :
-					pImageObject = new MShadowObject;
-
-					#ifdef __OUTPUT_IMAGEOBJECT__
-						snprintf(str, sizeof(str), "ShadowObject : ");
-					#endif
-				break;
-
-				case MObject::TYPE_ANIMATIONOBJECT :
-					pImageObject = new MAnimationObject;
-					
-					#ifdef __OUTPUT_IMAGEOBJECT__
-						snprintf(str, sizeof(str), "AnimationObject : ");
-					#endif
-				break;
-
-				case MObject::TYPE_SHADOWANIMATIONOBJECT :
-					pImageObject = new MShadowAnimationObject;
-					
-					#ifdef __OUTPUT_IMAGEOBJECT__
-						snprintf(str, sizeof(str), "ShadowAnimationObject : ");
-					#endif
-				break;
-
-				case MObject::TYPE_INTERACTIONOBJECT :
-					pImageObject = new MInteractionObject;
-					
-					#ifdef __OUTPUT_IMAGEOBJECT__
-						snprintf(str, sizeof(str), "InteractionObject : ");
-					#endif
-				break;
-
-				//-------------------------------------------------
-				// The type byte comes straight out of the .map
-				// file, so an unrecognised one leaves nothing
-				// allocated. Everything below assumes an object,
-				// and the rest of the record cannot be skipped
-				// because only the object itself knows its length.
-				//-------------------------------------------------
-				default :
-					DEBUG_ADD_FORMAT("[Error] Unknown ImageObject type %d in map file", (int)ObjectType);
-				break;
-			}
-
-			if (pImageObject==NULL)
-			{
-				return false;
-			}
-
-			pImageObject->LoadFromFile(file);
-			
-			#ifdef __OUTPUT_IMAGEOBJECT__
-				snprintf(str + strlen(str), sizeof(str) - strlen(str), "[%d] vp=%d. ", pImageObject->GetImageObjectID(), pImageObject->GetViewpoint());
-			#endif
-
-			// ImageObject을 IMAGEOBJECT_MAP에 추가한다.
-			AddImageObject(pImageObject);
-
-			//-------------------------------------------------
-			// 방금 Load한 ImageObject이 존재하는 
-			// Sector들의 좌표를 Load해야한다.
-			// (*) 이 정보는 더 이상 저장하고 있지 않는다.
-			//-------------------------------------------------		
-			ImageObjectPositionList.LoadFromFile(file);		
-			
-			//-------------------------------------------------------
-			// Load한 ImageObjectPositionList의 각 Position에 대해서 
-			// Zone에 ImageObjectSector를 표시해야 한다.
-			//-------------------------------------------------------
-			IMAGEOBJECT_POSITION_LIST::POSITION_LIST::const_iterator 
-				iImageObjectPosition = ImageObjectPositionList.GetIterator();
-
-
-
-			// 각 Sector에 ImageObject표시
-			for (int j=0; j<ImageObjectPositionList.GetSize(); j++)
-			{
-				#ifdef __OUTPUT_IMAGEOBJECT__
-					snprintf(str + strlen(str), sizeof(str) - strlen(str), "(%d,%d) ", (int)(*iImageObjectPosition).X, (int)(*iImageObjectPosition).Y);
-				#endif
-
-				SetImageObjectSector((*iImageObjectPosition).X, (*iImageObjectPosition).Y, pImageObject->GetID());
-
-
-				iImageObjectPosition++;			
-			}			
-
-			#ifdef __OUTPUT_IMAGEOBJECT__
-				if (g_pDebugMessage!=NULL)
-					g_pDebugMessage->AddToFile( str );
-			#endif
-		}					
-	}
-	//-----------------------------------------------------------------
-	// 다른 버전??
-	//-----------------------------------------------------------------
-	else
-	{
+	ZoneMapData loaded;
+	if (!loaded.LoadFromFile(file, skipImageObjects)) {
+		DEBUG_ADD_ERR("Invalid or truncated map file");
 		return false;
 	}
 
-
-
+	// Parsing, record ownership and all resource limits are in gamemodel.
+	// No live world state changes until the complete map has been accepted.
+	Init(loaded.width, loaded.height);
+	m_Info = loaded.info;
+	m_fpTile = loaded.tileOffset;
+	m_fpImageObject = loaded.imageOffset;
+	for (unsigned y = 0; y < loaded.height; ++y) {
+		for (unsigned x = 0; x < loaded.width; ++x) {
+			const auto& data = loaded.sectors[std::size_t(y) * loaded.width + x];
+			m_ppSector[y][x].Set(data.sprite, data.property);
+			m_ppSector[y][x].SetLight(data.light);
+		}
+	}
+	for (auto& entry : loaded.objects) {
+		auto* object = entry.object.get();
+		if (!AddImageObject(object)) {
+			Release();
+			return false;
+		}
+		entry.object.release(); // The zone map now owns this object.
+		for (auto p = entry.positions.GetIterator(); p != entry.positions.GetEnd(); ++p)
+			SetImageObjectSector(p->X, p->Y, object->GetID());
+	}
 	return true;
 }
 

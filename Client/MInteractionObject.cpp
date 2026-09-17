@@ -3,9 +3,7 @@
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "MInteractionObject.h"
-#include "MInteractionObjectTable.h"
-#include "ClientDef.h"
-#include "MSoundTable.h"
+
 
 
 //----------------------------------------------------------------------
@@ -80,30 +78,7 @@ MInteractionObject::LoadFromFile(ifstream& file)
 void
 MInteractionObject::SetAction(BYTE action)
 { 
-	/*
-	m_CurrentFrame = action; 
-
-	// InteractionObject의 Action이 변경될 때, 소리가 나게 한다.
-	//g_Sound.Play( g_SoundTable[(*g_pInteractionObjectTable)[action].SoundID].pDSBuffer );
-	PlaySound( (*g_pInteractionObjectTable)[action].SoundID, false, m_X, m_Y );
-
-	// InteractionObjectType의 종류에 따라서 
-	// 실행할 함수를 선택한다.
-	switch ((*g_pInteractionObjectTable)[m_InteractionObjectType].Type)
-	{
-		case TYPE_DOOR :
-			ChangeActionDoor();
-		break;
-
-		case TYPE_TRAP :
-			ChangeActionTrap();
-		break;
-
-		case TYPE_SWITCH :
-			ChangeActionSwitch();
-		break;
-	}
-	*/
+	// Action dispatch is disabled in this client.
 }
 
 //----------------------------------------------------------------------
@@ -114,92 +89,10 @@ MInteractionObject::SetAction(BYTE action)
 void			
 MInteractionObject::SetNextAction(BYTE action)
 {
-	/*
-	BYTE nextAction = action+1;
-
-	if (nextAction >= m_MaxFrame)
-	{
-		nextAction = 0;
-	}
-	
-	m_CurrentFrame = nextAction;
-
-	// InteractionObject의 Action이 변경될 때, 소리가 나게 한다.
-	//g_Sound.Play( g_SoundTable[(*g_pInteractionObjectTable)[action].SoundID].pDSBuffer );
-	PlaySound( (*g_pInteractionObjectTable)[action].SoundID, false, m_X, m_Y );
-
-	// InteractionObjectType의 종류에 따라서 
-	// 실행할 함수를 선택한다.
-	switch ((*g_pInteractionObjectTable)[m_InteractionObjectType].Type)
-	{
-		case TYPE_DOOR :
-			ChangeActionDoor();
-		break;
-
-		case TYPE_TRAP :
-			ChangeActionTrap();
-		break;
-
-		case TYPE_SWITCH :
-			ChangeActionSwitch();
-		break;
-	}
-	*/
+	// Action dispatch is disabled in this client.
 }
 
 //----------------------------------------------------------------------
 // ChangeAction Door
 //----------------------------------------------------------------------
-void
-MInteractionObject::ChangeActionDoor()
-{
-	switch (m_CurrentFrame)
-	{
-		// Open
-		case 0 :
-			g_pZone->UnSetBlockAllSector( m_X, m_Y );
-		break;
-
-		// Closed
-		case 1 :
-			g_pZone->SetBlockAllSector( m_X, m_Y );
-		break;
-	}
-}
-
-//----------------------------------------------------------------------
-// ChangeAction Door
-//----------------------------------------------------------------------
-void
-MInteractionObject::ChangeActionTrap()
-{
-	switch (m_CurrentFrame)
-	{
-		// Hidden
-		case 0 :			
-		break;
-
-		// Discovered
-		case 1 :
-		break;
-	}
-}
-
-//----------------------------------------------------------------------
-// ChangeAction Switch
-//----------------------------------------------------------------------
-void
-MInteractionObject::ChangeActionSwitch()
-{
-	switch (m_CurrentFrame)
-	{
-		// UP
-		case 0 :
-			
-		break;
-
-		// DOWN
-		case 1 :
-		break;
-	}
-}
+// Live door/trap/switch actions are in MInteractionObjectAction.cpp.

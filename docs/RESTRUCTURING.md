@@ -199,7 +199,7 @@ Shrink it when a task extracts a seam, and record the removal here.
 | Code | Why exempt |
 |---|---|
 | `GameMain.cpp`, `GameInit.cpp`, `Client.cpp`, `SDLMain.cpp` | process lifecycle, DLL whitelist, render loop; also where the hosts (`MItemHost`, `MPriceHost`, `WireHost`) are installed, which no test can prove - `WireHost`'s installer is designated-initialised since 2026-09-09, so a wrong slot there is a compile error, but a wrong *body* still is not |
-| `MZone` rendering and visual-effect ownership / `TileRenderer` draw paths | effects reach live sectors, creature status, sprite tables and `MTopView`; drawing uses live surfaces. Viewer tools cover some drawing; ownership guards use full builds and source-path audits. |
+| `MZone` live sector allocation/application, rendering and visual-effect ownership / `TileRenderer` draw paths | map parsing is tested in `ZoneMapData`; application and effects reach live sectors, creature status, sprite tables and `MTopView`; drawing uses live surfaces. Viewer tools cover some drawing; ownership guards use full builds and source-path audits. |
 | `MCreature`, `MPlayer`, `MFakeCreature` movement and attached-effect orchestration; `PacketFunction::ExecuteActionInfoFromMainNode` | virtual character classes reach the live zone, UI, sprite tables and effect generators; action results transfer to `MEffectTarget` and execute through the same game objects. Bounds/queue/ownership guards stay here; extracting those classes would require the render/game-loop rewrite excluded above. Review regression guards use full builds and existing automated checks, without a runtime gate. |
 | `VS_UI/src/**` widgets and dialogs | deep two-way coupling with game globals; UI verified visually; `unit_tests` does not link `VS_UI` |
 | `Client/PacketHandler/*Handler.cpp` bodies | mutate `g_pZone`/creature state; the *parsers* they consume are in `packetwire` and testable, the mutations are not |
@@ -220,7 +220,7 @@ every baseline move; the table below is the current reading.
 
 | # | Metric | Now | What it counts, and does not |
 |---|--------|---:|---|
-| R1 | Translation units compiled directly into the `DarkEden` target | **477** | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj`, read from the ctest run's own build dir; SKIP (never PASS) without a supported generated project. Both the Visual Studio configure stamp and Ninja's `build.ninja` must be newer than CMakeLists.txt and both library membership files. Ninja's baseline is **475**, since the non-Windows source list is two files shorter; Linux/macOS CI verifies that count. Baseline 1,044 on 2026-09-01; 484 after task 5.2's eighth slice. **482 on 2026-09-17:** the earlier deletion of `md5.cpp` had left the recorded 484 one too high (483 measured before this extraction); task 4.5 moves `RankBonusTable.cpp` into `gamemodel` (483 → 482). **478 later that day:** delete the four unused Direct3D texture/shadow cache translation units; their object declarations were commented out and the active sprite path never constructed them. **477 later still:** remove the unused Windows-only WinINet downloader; Ninja remains 475. It counts what still cannot be unit-tested. Recorded growths, each the executable side of a split: `PacketHandlerRegistry.cpp`, `GCExchangeBuyHandler.cpp`, `MItemUse.cpp`, `MObjectScreen.cpp`, `MSkillAvailable.cpp`, `TextServiceScreen.cpp`. |
+| R1 | Translation units compiled directly into the `DarkEden` target | **473** | `grep -c "<ClCompile Include" build/vs2022/DarkEden.vcxproj`, read from the ctest run's own build dir; SKIP (never PASS) without a supported generated project. Both the Visual Studio configure stamp and Ninja's `build.ninja` must be newer than CMakeLists.txt and both library membership files. Ninja's baseline is **471**, since the non-Windows source list is two files shorter; Linux/macOS CI verifies that count. Baseline 1,044 on 2026-09-01; 484 after task 5.2's eighth slice. **482 on 2026-09-17:** the earlier deletion of `md5.cpp` had left the recorded 484 one too high (483 measured before this extraction); task 4.5 moves `RankBonusTable.cpp` into `gamemodel` (483 → 482). **478 later that day:** delete the four unused Direct3D texture/shadow cache translation units; their object declarations were commented out and the active sprite path never constructed them. **477 later still:** remove the unused Windows-only WinINet downloader; Ninja remains 475. It counts what still cannot be unit-tested. Recorded growths, each the executable side of a split: `PacketHandlerRegistry.cpp`, `GCExchangeBuyHandler.cpp`, `MItemUse.cpp`, `MObjectScreen.cpp`, `MSkillAvailable.cpp`, `TextServiceScreen.cpp`. **473 Windows / 471 Ninja later that day:** six map-record/header translation units move to `gamemodel`, while two new executable files retain screen geometry and live interaction actions; `ShowTimeChecker`'s pure constructor and I/O move to `ShowTimeData.cpp`. |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l`. Baseline 448. Holds the line since `Packet::execute` itself was deleted; the client twin of the server's R4. |
 | R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` and `Client/PacketHandler` | **0** | Line-based; strips `//` tails before matching, so a commented-out call does not count. `\b` rejects the `w` in `wsprintf`, which R7 sees instead. Baseline 61 (a quarter of it commented-out code). Holds the line since the packet-tree copy pass (2026-09-04, PR #76). |
 | R4 | Library-compiled `.cpp` files referencing `g_p*` client globals no library file defines | **21** | Over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files; comment lines excluded; the subtraction is library-wide, so a library file reading a global another library defines is not a seam. **All 21 are `VS_UI` files.** Blind to a library file calling an executable-side *function* (the link proofs cover that) and to a global not named `g_p*`. Baseline 83. |
@@ -676,6 +676,20 @@ rounds settled* for the host rules). Test fixtures share
     `test_gamemodel_tables.cpp` (defaults, binary field layout for all
     three races, row status, lookup bounds, release and table counts).
     The tests fail to link without the extracted constructor and loader.
+
+- [x] **4.6 Map-file loading (code-health follow-up):** the header and five
+  scenery record classes, with pure show-time data, are in `gamemodel`.
+  > **Status:** implemented 2026-09-18. `MImageObjectScreen.cpp` retains
+  > screen geometry; `MInteractionObjectAction.cpp` retains live actions;
+  > `ShowTimeChecker.cpp` retains scheduling. `ZoneMapData` now owns parsing
+  > and validates the complete map before live sectors are replaced. Its
+  > budgets bound input bytes, dimensions, sectors, objects and positions.
+  > The executable allocates rows under RAII and transfers accepted records
+  > to the zone. Regression tests use real record classes and binary fixtures,
+  > including every truncation point and inclusive resource limits. R1 falls
+  > from 477/475 to 473/471; no test invents game globals.
+  - Owner: `tests/arch/gamemodel_files.txt`, M0-M2, R1,
+    `test_zone_map_records.cpp` and `test_zone_map_loader.cpp`.
 
 ---
 

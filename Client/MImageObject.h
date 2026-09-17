@@ -76,7 +76,7 @@ class MImageObject : public MObject {
 	public :
 		MImageObject();
 		MImageObject(TYPE_OBJECTID id, TYPE_OBJECTID ImageObjectID, TYPE_SPRITEID nSprite, int pX, int pY, TYPE_SECTORPOSITION viewpoint, BYTE trans);
-		~MImageObject();
+		virtual ~MImageObject();
 		
 		//-------------------------------------------------------
 		// File I/O

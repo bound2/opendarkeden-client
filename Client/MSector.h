@@ -378,6 +378,7 @@ class MSector {
 
 		// 빛 관련..
 		BYTE			GetLight() const					{ return m_Light; }
+		void			SetLight(BYTE light)				{ m_Light = light; }
 		void			AddLight()							{ if (m_Light<0xFF) m_Light++; }
 		void			RemoveLight() 						{ if (m_Light>0) m_Light--; }
 		

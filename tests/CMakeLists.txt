@@ -151,6 +151,8 @@ set_source_files_properties(
 	# Every test that includes a Client/ header needs an entry here.
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_gamemodel_tables.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_mstring_files.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_zone_map_records.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_zone_map_loader.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_item_table.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_item_core.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_pet_item_countdown.cpp
