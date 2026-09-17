@@ -9,8 +9,7 @@
 -----------------------------------------------------------------------------*/
 
 #include "timer2.h"
-#include <cstring>
-#include <cstdlib>
+#include <limits>
 
 //----------------------------------------------------------------------------
 // This manager keeps the API it has always had - DWORD milliseconds in,
@@ -48,7 +47,7 @@ C_TIMER2::C_TIMER2()
 //----------------------------------------------------------------------------
 C_TIMER2::~C_TIMER2()
 {
-	m_timer_queue.clear();
+	m_timer_queue.reset();
 }
 
 //----------------------------------------------------------------------------
@@ -57,18 +56,9 @@ C_TIMER2::~C_TIMER2()
 C_TIMER2::S_TIMERUNIT *
 C_TIMER2::Find(timer_id_t tid)
 {
-	if (tid < 0 || (size_t)tid >= m_timer_queue.size())
-	{
-		return NULL;
-	}
-
-	S_TIMERUNIT* pUnit = &m_timer_queue[(size_t)tid];
-	if (pUnit->tid == INVALID_TID)
-	{
-		return NULL;
-	}
-
-	return pUnit;
+	if (!m_timer_queue) return NULL;
+	const auto found = m_timer_queue->find(tid);
+	return found == m_timer_queue->end() ? NULL : &found->second;
 }
 
 //----------------------------------------------------------------------------
@@ -77,30 +67,29 @@ C_TIMER2::Find(timer_id_t tid)
 timer_id_t
 C_TIMER2::Add(DWORD dw_millisec, void (*fp_proc)(void))
 {
-	// The slot's index is the id, and slots are never reused.
-	const timer_id_t tid = (timer_id_t)m_timer_queue.size();
-
+	if (m_next_tid == INVALID_TID) return INVALID_TID;
+	const timer_id_t tid = m_next_tid;
 	S_TIMERUNIT unit;
-
-	// Initialize the timer unit
-	unit.tid = tid;
 	unit.fp_proc = fp_proc;
 	unit.d_interval = MonotonicClock::Millis(dw_millisec);
 	unit.tp_prev = MonotonicClock::Now();
-	unit.bl_pause = 1; // Start paused
+	unit.bl_pause = 1; // Start paused.
 
 	try
 	{
-		m_timer_queue.push_back(unit);
+		if (!m_timer_queue) m_timer_queue.emplace();
+		if (!m_timer_queue->emplace(tid, unit).second) return INVALID_TID;
 	}
 	catch (...)
 	{
-		// The realloc()'d array this replaced answered a failed
-		// allocation with INVALID_TID rather than an exception, and
-		// callers (VS_UI) test the returned id, so keep that contract.
+		// Preserve the legacy allocation-failure contract.
+		if (m_timer_queue && m_timer_queue->empty()) m_timer_queue.reset();
 		return INVALID_TID;
 	}
 
+	// Never wrap into a negative or previously issued ID. Failed insertion
+	// does not consume an ID; deletion does not make an old ID available.
+	m_next_tid = tid == (std::numeric_limits<timer_id_t>::max)() ? INVALID_TID : tid + 1;
 	return tid;
 }
 
@@ -110,17 +99,9 @@ C_TIMER2::Add(DWORD dw_millisec, void (*fp_proc)(void))
 bool
 C_TIMER2::Delete(timer_id_t &tid)
 {
-	S_TIMERUNIT* pUnit = Find(tid);
-	if (pUnit == NULL)
-	{
-		return false;
-	}
-
-	// Mark as deleted
-	pUnit->tid = INVALID_TID;
-	pUnit->fp_proc = NULL;
+	if (!m_timer_queue || m_timer_queue->erase(tid) == 0) return false;
+	if (m_timer_queue->empty()) m_timer_queue.reset();
 	tid = INVALID_TID;
-
 	return true;
 }
 
@@ -131,48 +112,24 @@ void
 C_TIMER2::Execute()
 {
 	const MonotonicClock::TimePoint tp_now = MonotonicClock::Now();
-
-	// size() is re-read every iteration, as the old m_id_generator bound
-	// was: a callback may Add() a timer, and the new one is reached in
-	// this same pass - where it is skipped, because Add() starts a timer
-	// paused.
-	for (size_t i = 0; i < m_timer_queue.size(); i++)
+	timer_id_t previous = INVALID_TID;
+	while (m_timer_queue)
 	{
-		// Skip invalid or paused timers
-		if (m_timer_queue[i].tid == INVALID_TID || m_timer_queue[i].bl_pause)
+		const auto current = m_timer_queue->upper_bound(previous);
+		if (current == m_timer_queue->end()) break;
+		const timer_id_t tid = current->first;
+		previous = tid;
+		const S_TIMERUNIT unit = current->second;
+		if (!unit.bl_pause && tp_now - unit.tp_prev >= unit.d_interval)
 		{
-			continue;
+			if (unit.fp_proc != NULL) unit.fp_proc();
+			// The callback may have deleted this timer. Only update it if
+			// the same ID is still live; replacement timers have fresh IDs.
+			if (S_TIMERUNIT* live = Find(tid)) live->tp_prev = tp_now;
 		}
-
-		// Check if timer has elapsed. The rep behind these is 64-bit
-		// milliseconds, so there is no 32-bit wrap for a sum to carry
-		// past; the typing is what keeps a millisecond count from being
-		// compared with anything else.
-		if (tp_now - m_timer_queue[i].tp_prev >= m_timer_queue[i].d_interval)
-		{
-			// Execute the timer callback
-			if (m_timer_queue[i].fp_proc != NULL)
-			{
-				Execute(&m_timer_queue[i]);
-			}
-
-			// Update the reference time. Addressed by index rather than
-			// through a pointer held across the callback, because a
-			// callback that calls Add() can reallocate the queue.
-			m_timer_queue[i].tp_prev = tp_now;
-		}
-	}
-}
-
-//----------------------------------------------------------------------------
-// Execute - Execute a single timer unit (private)
-//----------------------------------------------------------------------------
-void
-C_TIMER2::Execute(S_TIMERUNIT *pS_timerunit)
-{
-	if (pS_timerunit != NULL && pS_timerunit->fp_proc != NULL)
-	{
-		pS_timerunit->fp_proc();
+		// Do not retain an iterator across a callback that can erase it.
+		// Timers added during a callback are reached in this same pass,
+		// as before, but Add() starts them paused.
 	}
 }
 
