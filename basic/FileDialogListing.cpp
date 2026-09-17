@@ -9,6 +9,30 @@
 -----------------------------------------------------------------------------*/
 
 #include "FileDialogListing.h"
+#include "StringReduction.h"
+#include <cstring>
+
+std::string Basic::BuildDialogPathLabel(const std::string& path,
+		const std::vector<std::string>& filters)
+{
+	std::string title = path;
+	title.erase(title.size() - 2, 2);
+	for (const auto& filter : filters)
+	{
+		title += filter;
+		title += ';';
+	}
+	title.erase(title.size() - 1, 1);
+	return title;
+}
+
+std::string Basic::ShortenDialogLabel(const std::string& label)
+{
+	char name[300];
+	std::strcpy(name, label.c_str());
+	ReduceString(name, 38);
+	return name;
+}
 
 namespace {
 

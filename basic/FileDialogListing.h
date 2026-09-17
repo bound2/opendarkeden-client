@@ -20,6 +20,10 @@
 
 namespace Basic {
 
+std::string BuildDialogPathLabel(const std::string& path,
+		const std::vector<std::string>& filters);
+std::string ShortenDialogLabel(const std::string& label);
+
 /*-----------------------------------------------------------------------------
   Whether sName ends with any of vSuffixes, compared case-insensitively
   over ASCII. An empty suffix list matches nothing; an empty suffix

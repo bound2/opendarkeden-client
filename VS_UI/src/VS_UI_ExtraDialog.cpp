@@ -2912,14 +2912,10 @@ void	C_VS_UI_FILE_DIALOG::Show()
 	g_FL2_GetDC();	
 	// 열린 폴더명의 길이가 길경우 잘라준다 
 	// 38자 이상 되지 않도록 한다. 
-	title+= mp_open_current_directory[mi_open_drive_index];
-	title.erase(strlen(mp_open_current_directory[mi_open_drive_index])-2,2);
-	for(i=0;i<m_filter.size();i++){title+=m_filter[i].c_str();title+=";";}
-	title.erase(title.size()-1,1);
-	strcpy(name,title.c_str());
-	ReduceString(name,38);
+	title = Basic::BuildDialogPathLabel(mp_open_current_directory[mi_open_drive_index], m_filter);
+	const std::string folderName = Basic::ShortenDialogLabel(title);
 	
-	g_PrintColorStr(x+m_string_x, y+37, name, gpC_base->m_desc_menu_pi, RGB_WHITE);
+	g_PrintColorStr(x+m_string_x, y+37, folderName.c_str(), gpC_base->m_desc_menu_pi, RGB_WHITE);
 
 	//----------------------------------------------------------------------------------------
 	// 타이틀 출력
@@ -2938,9 +2934,9 @@ void	C_VS_UI_FILE_DIALOG::Show()
 	for(int i = 0; i < m_scroll_max && i+m_pC_scroll_bar->GetScrollPos() < m_vs_file_list.size(); i++) {		
 		// 이름들 출력
 		// 파일이름이 너무 길면 적당히 자른다. 
-		strcpy(name, m_vs_file_list[i+m_pC_scroll_bar->GetScrollPos()].c_str());
-		ReduceString(name,38);
-		if(name[0]=='\\')	p_name=&name[1];		else			p_name=&name[0];
+		const std::string filename = Basic::ShortenDialogLabel(m_vs_file_list[i+m_pC_scroll_bar->GetScrollPos()]);
+		const char* p_name = filename.c_str();
+		if (p_name[0] == '\\') ++p_name;
 		g_PrintColorStr(x+m_string_x, y+m_string_y+i*m_string_gap, p_name, gpC_base->m_desc_msg_pi, RGB_WHITE);
 	}	
 	m_pC_button_group->ShowDescription();
@@ -2968,13 +2964,9 @@ void	C_VS_UI_FILE_DIALOG::Show()
 		}
 		g_FL2_GetDC();
 		for(int i = 0; i < mi_open_drive_count; i++)	{
-			std::string filename;filename+=mp_open_current_directory[i];
-			filename.erase(filename.size()-2,2);
-			for(j=0;j<m_filter.size();j++){filename+=m_filter[j].c_str();filename+=";";}
-			filename.erase(filename.size()-1,1);
-			strcpy(name,filename.c_str());
-			ReduceString(name,38);
-			g_PrintColorStr(x+m_string_x+17, y+37+(i+1)*m_string_gap, name, gpC_base->m_desc_menu_pi, RGB_WHITE);
+			std::string filename = Basic::BuildDialogPathLabel(mp_open_current_directory[i], m_filter);
+			filename = Basic::ShortenDialogLabel(filename);
+			g_PrintColorStr(x+m_string_x+17, y+37+(i+1)*m_string_gap, filename.c_str(), gpC_base->m_desc_menu_pi, RGB_WHITE);
 		}
 		g_FL2_ReleaseDC();
 	}
@@ -2986,10 +2978,7 @@ void	C_VS_UI_FILE_DIALOG::Show()
 		std::string title;
 		if(STAY_FOLDER==0)
 		{				// 현재 열린 폴더
-			title+=mp_open_current_directory[mi_open_drive_index];
-			title.erase(title.size()-2,2);
-			for(i=0;i<m_filter.size();i++) {title+=m_filter[i].c_str();	title+=';';}
-			title.erase(title.size()-1,1);
+			title = Basic::BuildDialogPathLabel(mp_open_current_directory[mi_open_drive_index], m_filter);
 			if(title.size()>38)
 			{	
 				SetRect(&rect, x+m_string_x+10,y+45,x+m_string_x+9*title.size(),y+68);
@@ -3000,10 +2989,7 @@ void	C_VS_UI_FILE_DIALOG::Show()
 		}
 		else if(STAY_FOLDER!=-1&&m_bl_open_drive&&STAY_FOLDER!=0xfffffffe)	
 		{		// 드라이브 리스트 중 			
-			title+=mp_open_current_directory[STAY_FOLDER-1];
-			title.erase(title.size()-2,2);
-			for(i=0;i<m_filter.size();i++){title+=m_filter[i].c_str();	title+=';';}
-			title.erase(title.size()-1,1);			
+			title = Basic::BuildDialogPathLabel(mp_open_current_directory[STAY_FOLDER-1], m_filter);
 			if(title.size()>38)
 			{	
 				SetRect(&rect, x+m_string_x+17,y+35+(STAY_FOLDER)*m_string_gap,x+m_string_x+17+9*title.size(),y+39+(STAY_FOLDER)*m_string_gap+18);
