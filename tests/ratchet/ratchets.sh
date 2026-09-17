@@ -1481,7 +1481,8 @@ fi
 # debug dumps in MZone.cpp and MCreature.cpp, deleted with their blocks.
 #----------------------------------------------------------------------
 # 969 on 2026-09-17: delete the unused WinINet downloader and its one strcpy.
-R17_BASELINE=969
+# 966 on 2026-09-18: the message ring uses owned copies and bounded memmove.
+R17_BASELINE=966
 R17_FILES_FLOOR=500
 
 r17_members () {

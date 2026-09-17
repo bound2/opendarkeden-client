@@ -18,6 +18,8 @@ class CMessageArray {
 	public :
 		CMessageArray();
 		~CMessageArray();
+		CMessageArray(const CMessageArray&) = delete;
+		CMessageArray& operator=(const CMessageArray&) = delete;
 
 		//--------------------------------------------------
 		// Init / Release
@@ -69,7 +71,7 @@ class CMessageArray {
 		const char*	operator [] (int i);
 
 		// 외부에서 편집..
-		char*&		GetCurrent()		{ return m_ppMessage[m_Current]; }
+		char*		GetCurrent()		{ return m_ppMessage ? m_ppMessage[m_Current] : nullptr; }
 
 		// 다음 것
 		void		Next();
@@ -89,7 +91,7 @@ class CMessageArray {
 		// width, the ring advance. AddFormat, AddFormatVL and
 		// AddSafeFormatV differ only in how they fill the
 		// buffer, and this is the part they must not differ in.
-		void		StoreRow(const char* pBuffer, int nLength);
+		void		StoreRow(const char* pBuffer, size_t nLength);
 
 		int			m_Length;		// Message 하나의 길이
 		int			m_Max;			// Message 개수

@@ -4,6 +4,9 @@
 #include "Platform.h"
 #include "CMessageArray.h"
 #include <sys/stat.h>
+#include <algorithm>
+#include <memory>
+#include <vector>
 
 #ifdef OUTPUT_DEBUG
 	//#define OUTPUT_FILE_LOG
@@ -68,7 +71,7 @@ CMessageArray::CMessageArray()
 	m_ppMessage = NULL;
 
 	m_bLog		= false;
-	m_LogFile	= 0;
+	m_LogFile	= -1;
 	m_Filename	= NULL;
 }
 
@@ -90,35 +93,34 @@ CMessageArray::~CMessageArray()
 void
 CMessageArray::Init(int max, int length, const char* filename)
 {
-	// 일단 메모리 제거..
-	Release();
-
-	m_Max		= max;
-	m_Length	= length;
-	m_Current	= 0;
-
-	// new
-	m_ppMessage = new char* [ m_Max ];
-
-	for (int i=0; i<m_Max; i++)
-	{
-		m_ppMessage[i] = new char [ m_Length+1 ];
-		m_ppMessage[i][0] = NULL;
+	// Allocate under owners before replacing the previous ring. A failed
+	// allocation leaves it intact, and a filename may alias GetFilename().
+	if (max <= 0 || length < 0) {
+		Release();
+		return;
+	}
+	std::vector<std::unique_ptr<char[]>> rows(static_cast<size_t>(max));
+	auto table = std::make_unique<char*[]>(static_cast<size_t>(max));
+	for (int i = 0; i < max; ++i) {
+		rows[i] = std::make_unique<char[]>(static_cast<size_t>(length) + 1);
+		table[i] = rows[i].get();
+	}
+	std::unique_ptr<char[]> name;
+	if (filename) {
+		const size_t bytes = strlen(filename) + 1;
+		name = std::make_unique<char[]>(bytes);
+		memcpy(name.get(), filename, bytes);
 	}
 
-	// file Log
-	if (filename!=NULL)
-	{
-		// filename을 기억해둔다.
-		m_Filename = new char [strlen(filename)+1];
-		strcpy(m_Filename, filename);
-
-		m_LogFile = PLATFORM_OPEN(filename, _O_WRONLY | _O_TEXT | _O_CREAT | _O_TRUNC, LogFileMode);
-
-		if (m_LogFile!=-1)
-		{
-			m_bLog = true;
-		}
+	Release();
+	m_Max = max;
+	m_Length = length;
+	m_ppMessage = table.release();
+	for (auto& row : rows) row.release();
+	m_Filename = name.release();
+	if (m_Filename) {
+		m_LogFile = PLATFORM_OPEN(m_Filename, _O_WRONLY | _O_TEXT | _O_CREAT | _O_TRUNC, LogFileMode);
+		m_bLog = m_LogFile != -1;
 	}
 }
 
@@ -128,46 +130,19 @@ CMessageArray::Init(int max, int length, const char* filename)
 void
 CMessageArray::Release()
 {
-	// (upstream note) This kept erroring out here.. hmm.. where on earth does
-	// the problem come from. Can't find it.. oh dear..
-	//#ifndef _DEBUG
-		if (m_ppMessage!=NULL)
-		{
-			for (int i=0; i<m_Max; i++)
-			{
-				if (m_ppMessage[i]!=NULL)
-				{			
-					delete [] m_ppMessage[i];			
-				}
-			}
-
-			delete [] m_ppMessage;
-
-			m_Max		= 0;
-			m_Length	= 0;
-			m_Current	= 0;
-			m_ppMessage = NULL;
-		}
-	//#endif
-
-	// file log
-	if (m_bLog)
-	{
-		PLATFORM_CLOSE(m_LogFile);
-		m_bLog = false;
+	if (m_ppMessage) {
+		for (int i = 0; i < m_Max; ++i) delete[] m_ppMessage[i];
+		delete[] m_ppMessage;
 	}
+	m_ppMessage = nullptr;
+	m_Max = m_Length = m_Current = 0;
 
-	// Init() allocates m_Filename before it attempts the open and only raises
-	// m_bLog once the open has succeeded, so the name outlives a failed open
-	// and cannot be released under m_bLog. Clearing the pointer is what keeps
-	// GetFilename() from handing back freed memory: Init() reassigns
-	// m_Filename only when it is given a filename, so a later Init() without
-	// one would otherwise leave the freed pointer in place.
-	if (m_Filename != NULL)
-	{
-		delete [] m_Filename;
-		m_Filename = NULL;
-	}
+	if (m_bLog) PLATFORM_CLOSE(m_LogFile);
+	m_bLog = false;
+	m_LogFile = -1;
+	// A failed open still owns the copied filename.
+	delete[] m_Filename;
+	m_Filename = nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -177,51 +152,10 @@ CMessageArray::Release()
 //----------------------------------------------------------------------
 void		
 CMessageArray::Add(const char *str)
-{	
-	#ifndef __LOGGING__
-		return;
-	#endif
-
-	__BEGIN_LOCK	
-
-	int len = strlen(str);
-	
-	// file log
-	if (m_bLog)
-	{ 
-		// [ TEST CODE ] 시간 출력
-		//sprintf(g_MessageBuffer, "[%4d] ", timeGetTime() % 10000);
-		//PLATFORM_WRITE( m_LogFile, g_MessageBuffer, strlen(g_MessageBuffer) );
-
-		//m_LogFile << str << endl;
-		PLATFORM_WRITE( m_LogFile, str, len );
-		PLATFORM_WRITE( m_LogFile, "\n", 1 );
-
-		// [ TEST CODE ] 화일 닫고 다시 열기
-		#ifdef OUTPUT_FILE_LOG
-			PLATFORM_CLOSE( m_LogFile );
-			m_LogFile = PLATFORM_OPEN(m_Filename, _O_WRONLY | _O_TEXT | _O_APPEND | _O_CREAT, LogFileMode);
-		#endif
-	}	
-
-	if (len >= m_Length)
-	{		
-		for (int i=0; i<m_Length; i++)
-		{
-			m_ppMessage[m_Current][i] = str[i];
-		}	
-		m_ppMessage[m_Current][m_Length] = NULL;		
-		//strcpy(m_ppMessage[m_Current], "[ERROR] CMessageArray::Add() - String too long");		
-	}
-	else
-	{
-		// 저장
-		strcpy(m_ppMessage[m_Current], str);
-	}
-
-	m_Current++;
-	if (m_Current==m_Max) m_Current=0;
-
+{
+	if (!str || !m_ppMessage) return;
+	__BEGIN_LOCK
+	StoreRow(str, strlen(str));
 	__END_LOCK
 }
 
@@ -233,6 +167,7 @@ CMessageArray::Add(const char *str)
 void		
 CMessageArray::AddToFile(const char *str)
 {
+	if (!str) return;
 	#ifndef __LOGGING__
 		return;
 	#endif
@@ -273,44 +208,24 @@ CMessageArray::AddToFile(const char *str)
 // store together, not the store alone.
 //--------------------------------------------------------------------------
 void
-CMessageArray::StoreRow(const char* pBuffer, int nLength)
+CMessageArray::StoreRow(const char* pBuffer, size_t nLength)
 {
-	// file log
-	if (m_bLog)
-	{
-		// [ TEST CODE ] print the time
-		//sprintf(g_MessageBuffer, "[%4d] ", timeGetTime() % 10000);
-		//PLATFORM_WRITE( m_LogFile, g_MessageBuffer, strlen(g_MessageBuffer) );
-
-		//m_LogFile << str << endl;
-		PLATFORM_WRITE( m_LogFile, pBuffer, nLength );
-		PLATFORM_WRITE( m_LogFile, "\n", 1 );
-
-		// [ TEST CODE ] close the file and open it again
+	if (!m_ppMessage || !pBuffer) return;
+	if (m_bLog) {
+		PLATFORM_WRITE(m_LogFile, pBuffer, nLength);
+		PLATFORM_WRITE(m_LogFile, "\n", 1);
 		#ifdef OUTPUT_FILE_LOG
-			PLATFORM_CLOSE( m_LogFile );
+			PLATFORM_CLOSE(m_LogFile);
 			m_LogFile = PLATFORM_OPEN(m_Filename, _O_WRONLY | _O_TEXT | _O_APPEND | _O_CREAT, LogFileMode);
+			m_bLog = m_LogFile != -1;
+			m_bLog = m_LogFile != -1;
 		#endif
 	}
-
-	// in case it runs over.. (this one is serious. - -;;)
-	if (nLength >= m_Length)
-	{
-		for (int i=0; i<m_Length; i++)
-		{
-			m_ppMessage[m_Current][i] = pBuffer[i];
-		}
-
-		m_ppMessage[m_Current][m_Length] = NULL;
-	}
-	else
-	{
-		// store
-		strcpy(m_ppMessage[m_Current], pBuffer);
-	}
-
-	m_Current++;
-	if (m_Current==m_Max) m_Current=0;
+	const size_t count = (std::min)(nLength, static_cast<size_t>(m_Length));
+	// memmove also permits Add(GetCurrent()) and other ring-backed text.
+	memmove(m_ppMessage[m_Current], pBuffer, count);
+	m_ppMessage[m_Current][count] = '\0';
+	if (++m_Current == m_Max) m_Current = 0;
 }
 
 //--------------------------------------------------------------------------
@@ -319,6 +234,7 @@ CMessageArray::StoreRow(const char* pBuffer, int nLength)
 void
 CMessageArray::AddFormatVL(const char* format, va_list& vl)
 {
+	if (!format || !m_ppMessage) return;
 	__BEGIN_LOCK
 
 	//AddFormat( format, vl );
@@ -394,6 +310,7 @@ CMessageArray::AddSafeFormatV(const char* format,
 void
 CMessageArray::AddFormat(const char* format, ...)
 {
+	if (!format || !m_ppMessage) return;
 	#ifndef __LOGGING__
 		return;
 	#endif
@@ -436,6 +353,7 @@ CMessageArray::AddFormat(const char* format, ...)
 void
 CMessageArray::Next()
 {	
+	if (!m_ppMessage) return;
 	#ifndef __LOGGING__
 		return;
 	#endif
@@ -465,30 +383,16 @@ CMessageArray::Next()
 //----------------------------------------------------------------------
 const char*	
 CMessageArray::operator [] (int i)
-{ 
-	//                i   = 실제로 return되어야 하는 값
-	//m_Current - (3-[0]) = m_Current;
-	//m_Current - (3-[1]) = m_Current - 2;
-	//m_Current - (3-[2]) = m_Current - 1;
-
+{
+	if (!m_ppMessage || i < 0 || i >= m_Max) return "";
 	__BEGIN_LOCK
-
-	BYTE gap = m_Max - i;
-
-	if (gap > m_Current)
-	{
-
-		const char* pMessage = m_ppMessage[m_Current + m_Max - gap];
-		__END_LOCK
-
-		return pMessage;
-	}
-	
-	const char* pMessage = m_ppMessage[m_Current - gap];	
-
+	// Index zero is the oldest slot. Keep both branches below m_Max
+	// without truncating to BYTE or overflowing m_Current + i.
+	const int untilWrap = m_Max - m_Current;
+	const int index = i < untilWrap ? m_Current + i : i - untilWrap;
+	const char* message = m_ppMessage[index];
 	__END_LOCK
-
-	return pMessage;
+	return message;
 }
 
 //----------------------------------------------------------------------
@@ -497,6 +401,7 @@ CMessageArray::operator [] (int i)
 void
 CMessageArray::Clear()
 {
+	if (!m_ppMessage) return;
 	for (int i=0; i<m_Max; i++)
 	{
 		m_ppMessage[i][0] = NULL;
