@@ -2190,6 +2190,8 @@ Release() deletes m_Filename (line 160) only when m_bLog is true and never nulls
 
 **Category:** correctness  |  **Location:** `Client/MString.cpp:226`
 
+> ✅ **Fixed (2026-09-17):** binary I/O uses an explicit four-byte little-endian `uint32_t` length. The reader rejects over-64-KiB lengths with stream failure, checks the entire payload before encoding conversion, and retains the previous string on read/allocation/conversion failure; RAII frees temporary buffers even when streams throw. The writer refuses lengths outside the file format before emitting bytes. Five tests cover all truncation boundaries, hostile lengths, empty/sequential records, a 64-KiB byte-exact round trip and throwing streams; three reproduced the old failures.
+
 Line 226 does `file.read((char*)pTemp, m_Length)` with no subsequent `file.gcount()` or stream-state check, then line 227 NUL-terminates at pTemp[m_Length] and passes the buffer on as a string. On a truncated file the tail of pTemp is uninitialized heap. Separately, `m_Length` is declared `size_t` (MString.h:66) but SaveToFile writes only 4 bytes of it (line 186) and LoadFromFile reads only 4 bytes into it (line 207) — on 64-bit the upper half of the member is left at whatever it previously held, and the on-disk format is implicitly little-endian.
 
 **Failure scenario:** A Strings file truncated by an interrupted patch download yields MString objects whose content is uninitialized heap memory, which is then rendered on screen and, per the format-string finding, used as a printf format.
