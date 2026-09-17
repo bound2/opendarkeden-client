@@ -9,8 +9,6 @@
 //-----------------------------------------------------------------------------
 MGameTime*	g_pGameTime = NULL;
 
-extern DWORD		g_CurrentTime;
-
 //-----------------------------------------------------------------------------
 //
 // constructor / destructor
@@ -26,8 +24,7 @@ MGameTime::MGameTime()
 	m_StartMinute	= 0;
 	m_StartSecond	= 0;
 
-	// timeGetTime
-	m_StartTime		= 0;
+	m_StartTime		= MonotonicClock::TimePoint();
 
 	// 시간 비율
 	m_TimeRatio		= 1;
@@ -57,9 +54,8 @@ MGameTime::~MGameTime()
 // 기준 시간 : y-m-d : h-m-s
 //-----------------------------------------------------------------------------
 void	
-MGameTime::SetStartTime(DWORD time, WORD year, BYTE month, BYTE day, BYTE hour, BYTE minute, BYTE second)
+MGameTime::SetStartTime(MonotonicClock::TimePoint time, WORD year, BYTE month, BYTE day, BYTE hour, BYTE minute, BYTE second)
 {
-	// timeGetTime
 	m_StartTime		= time;
 
 	m_StartYear		= year;
@@ -77,7 +73,7 @@ MGameTime::SetStartTime(DWORD time, WORD year, BYTE month, BYTE day, BYTE hour, 
 // 기준시간과 시간비율을 고려해서 현재 시간을 저장한다.
 //-----------------------------------------------------------------------------
 void	
-MGameTime::SetCurrentTime(DWORD time)
+MGameTime::SetCurrentTime(MonotonicClock::TimePoint time)
 {
 	//------------------------------------------------------------
 	// 초(second)로 환산한 값
@@ -101,7 +97,7 @@ MGameTime::SetCurrentTime(DWORD time)
 	//------------------------------------------------------------
 	// 1000 = 1초, 시간비율 고려..
 	//------------------------------------------------------------
-	DWORD gap = (time - m_StartTime) / 1000 * m_TimeRatio;
+	DWORD gap = (DWORD)((time - m_StartTime).count() / 1000) * m_TimeRatio;
 
 	int rem = gap;
 
@@ -157,7 +153,7 @@ MGameTime::SetCurrentTime(DWORD time)
 		}
 
 		// 날짜 다시 설정
-		SetStartTime(g_CurrentTime, m_Year, m_Month, m_Day, m_Hour, m_Minute, m_Second);
+		SetStartTime(time, m_Year, m_Month, m_Day, m_Hour, m_Minute, m_Second);
 	}
 	else
 	{

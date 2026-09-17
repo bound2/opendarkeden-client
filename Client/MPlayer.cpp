@@ -8626,7 +8626,7 @@ MPlayer::SetDead()
 		UI_CloseSelectWayPoint();
 
 		// Logout시간 제거
-		g_pUserInformation->LogoutTime = 0;	
+		g_pUserInformation->CancelLogout();	
 
 		SetWaitVerifyNULL();
 

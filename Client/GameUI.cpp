@@ -1027,8 +1027,8 @@ UI_CloseExchange()
 			g_pTradeManager = NULL;
 
 			// trade 후 item떨어지기가 가능해지는 시간
-			g_pUserInformation->ItemDropEnableTime = g_CurrentTime 
-													+ g_pClientConfig->AFTER_TRADE_ITEM_DROP_DELAY;
+			g_pUserInformation->ItemDropEnableTime = g_FrameNow
+													+ MonotonicClock::Millis(g_pClientConfig->AFTER_TRADE_ITEM_DROP_DELAY);
 		}
 	}
 }

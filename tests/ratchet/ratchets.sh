@@ -1360,8 +1360,17 @@ fi
 # in GameInit, the definition, the one write and the log flush's debug
 # print in Client.cpp, and the externs in Client.h, MGameTime.cpp and
 # GCUpdateInfoHandler.cpp.
+# 6 on 2026-09-17: UserInformation's two live deadlines moved (the
+# scheduled logout with its countdown, the item-drop enable point;
+# GlobalSayTime, with no live site, deleted) behind five one-line
+# readers the executable's sites call, tested in
+# tests/unit/test_user_information_deadlines.cpp, and MGameTime's start
+# and current time take the point. What is left: the two library seams
+# in GameInit (MItemHost::pCurrentTime, WireHost::CurrentTime), the
+# definition, the one write and the log flush's debug print in
+# Client.cpp, and the extern in Client.h.
 #----------------------------------------------------------------------
-R16_BASELINE=18
+R16_BASELINE=6
 R16_FILES_FLOOR=1000
 
 r16_members () {

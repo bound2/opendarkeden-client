@@ -3427,14 +3427,14 @@ UIMessageManager::Execute_UI_LOGOUT(intptr_t left, intptr_t right, void* void_pt
 	//-------------------------------------------------------------------
 	else if (g_pPlayer!=NULL && g_pPlayer->IsAlive())
 	{		
-		if (g_pUserInformation->LogoutTime == 0)
+		if (!g_pUserInformation->IsLogoutScheduled())
 		{
 			// 5초 후 강제 Logout 시킨다.
 			
 			#ifdef _DEBUG
-				g_pUserInformation->LogoutTime = g_CurrentTime + 2000;
+				g_pUserInformation->LogoutTime = g_FrameNow + MonotonicClock::Millis(2000);
 			#else
-				g_pUserInformation->LogoutTime = g_CurrentTime + 5000;
+				g_pUserInformation->LogoutTime = g_FrameNow + MonotonicClock::Millis(5000);
 			#endif
 
 			MEvent event;
@@ -3449,9 +3449,9 @@ UIMessageManager::Execute_UI_LOGOUT(intptr_t left, intptr_t right, void* void_pt
 			g_pPlayer->SetWaitVerify(MPlayer::WAIT_VERIFY_LOGOUT);
 //			g_pSystemMessage->AddFormat((*g_pGameStringTable)[STRING_MESSAGE_LOGOUT_AFTER_SECOND].GetString(), 5);
 		}
-		else if (g_pUserInformation->LogoutTime > g_CurrentTime)
+		else if (g_pUserInformation->LogoutTime > g_FrameNow)
 		{
-			DWORD sec = (g_pUserInformation->LogoutTime - g_CurrentTime) / 1000;
+			DWORD sec = g_pUserInformation->SecondsToLogout(g_FrameNow);
 
 			if (sec > 0)
 			{
@@ -3607,7 +3607,7 @@ UIMessageManager::Execute_UI_ITEM_DROP_TO_CLIENT(intptr_t left, intptr_t right, 
 		// 교환 중에는 버릴 수 없다.
 		&& !UI_IsRunningExchange()
 		// 교환 창이 뜬 후.. 일정 시간 동안은 버릴 수 없다.
-		&& g_pUserInformation->ItemDropEnableTime < g_CurrentTime)
+		&& g_pUserInformation->IsItemDropEnabled(g_FrameNow))
 	{
 		//void_ptr = MItem *
 

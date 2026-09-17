@@ -48,7 +48,7 @@
 
 
 
-extern DWORD		g_CurrentTime;
+extern MonotonicClock::TimePoint	g_FrameNow;
 extern void		StampFrameClock();
 extern DWORD		g_CurrentFrame;
 extern MGameTime*	g_pGameTime;
@@ -490,7 +490,7 @@ void GCUpdateInfoHandler::execute ( GCUpdateInfo * pPacket , Player * pPlayer )
 	GameTime gt = pPacket->getGameTime();
 	
 	// 기준 시간 설정
-	g_pGameTime->SetStartTime(g_CurrentTime, 
+	g_pGameTime->SetStartTime(g_FrameNow,
 							gt.getYear(),
 							gt.getMonth(),
 							gt.getDay(),

@@ -45,6 +45,15 @@ class UserInformation {
 		~UserInformation();
 
 		//--------------------------------------------------------
+		// The logout and item-drop deadlines, on the frame stamp
+		//--------------------------------------------------------
+		bool	IsLogoutScheduled() const					{ return LogoutTime != MonotonicClock::TimePoint(); }
+		bool	IsLogoutDue(MonotonicClock::TimePoint now) const	{ return IsLogoutScheduled() && now > LogoutTime; }
+		DWORD	SecondsToLogout(MonotonicClock::TimePoint now) const;
+		void	CancelLogout()								{ LogoutTime = MonotonicClock::TimePoint(); }
+		bool	IsItemDropEnabled(MonotonicClock::TimePoint now) const	{ return ItemDropEnableTime < now; }
+
+		//--------------------------------------------------------
 		// File I/O
 		//--------------------------------------------------------
 		//void	SaveToFile(const char* filename);
@@ -79,15 +88,13 @@ class UserInformation {
 		int				Slot;				// 선택할려는 Slot
 //		bool			Invisible;			// 투명 캐릭터(Super User용?)
 
-		DWORD			GlobalSayTime;		// 마지막으로 외치기~한 시간.
-
 		bool			GoreLevel;			// 피 튀게 할까?
 
 		BOOL			KeepConnection;		// 접속 유지해야하는 상태인가?
 		BOOL			IsMaster;			// 운영자인가?
-		DWORD			ItemDropEnableTime;	// item을 떨어뜨려도 되는 시간
+		MonotonicClock::TimePoint	ItemDropEnableTime;	// dropping an item is allowed after this point
 		bool			HasSkillRestore;	// Restore 사용할 수 있는가?
-		DWORD			LogoutTime;			// Logout이 가능한 시간
+		MonotonicClock::TimePoint	LogoutTime;		// the scheduled logout; the epoch when none is
 		DWORD			GameVersion;		// Game의 Version
 		bool			HasMagicGroundAttack;	// 불기둥 사용할 수 있는가?
 		bool			HasMagicHallu;			// Hallu 사용할 수 있는가?
