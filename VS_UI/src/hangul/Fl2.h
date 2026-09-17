@@ -12,6 +12,7 @@
 #define __FL2_H__
 
 #include "Ci.h"
+#include "StringReduction.h"
 #include <string>
 
 // NOTE: Do not include SP.h here as it defines a stub PrintInfo that conflicts
@@ -52,9 +53,6 @@ int		g_GetStringHeight(const char * sz_str, void* hfont=NULL);
 bool	g_PossibleStringCut(const char * sz_str, int position);
 bool	g_FL2_GetDC();
 bool	g_FL2_ReleaseDC();
-void	ReduceString(char *str,int len);
-void	ReduceString2(char *str,int len);
-void	ReduceString3(char *str,int len);
 int g_PrintColorStr(int x, int y, const char * sz_str, PrintInfo &pi, COLORREF str_rgb);
 int g_PrintColorStrOut(int x, int y, const char * sz_str, PrintInfo &pi, COLORREF str_rgb, COLORREF out_rgb);
 int g_PrintColorStrShadow(int x, int y, const char * sz_str, PrintInfo &pi, COLORREF str_rgb, COLORREF shadow_rgb = 0xFFFFFFFF);
