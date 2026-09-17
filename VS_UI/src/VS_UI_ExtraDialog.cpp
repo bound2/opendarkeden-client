@@ -2852,9 +2852,7 @@ void	C_VS_UI_FILE_DIALOG::KeyboardControl(UINT message, UINT key, long extra)
 void	C_VS_UI_FILE_DIALOG::Show()
 {
 	std::string title;
-	char name[300],*p_name;
 	RECT rect;
-	int i,j;
 	// 600,133
 
 	// 미리보기
@@ -2919,9 +2917,9 @@ void	C_VS_UI_FILE_DIALOG::Show()
 
 	//----------------------------------------------------------------------------------------
 	// 타이틀 출력
-	if(m_mode==MODE_PROFILE_SELECT)	
-		strcpy(name,(*g_pGameStringTable)[UI_STRING_MESSAGE_FILE_DIALOG_SELECT_PROFILE_PICTURE].GetString());
-	else strcpy(name,(*g_pGameStringTable)[UI_STRING_MESSAGE_FILE_DIALOG_SELECT_FILE].GetString());
+	const char* dialogTitle = GetGameString(m_mode == MODE_PROFILE_SELECT
+		? UI_STRING_MESSAGE_FILE_DIALOG_SELECT_PROFILE_PICTURE
+		: UI_STRING_MESSAGE_FILE_DIALOG_SELECT_FILE);
 	
 	int titleX = x+40, titleY = y+5;
 	if(g_eRaceInterface == RACE_OUSTERS)
@@ -2929,7 +2927,7 @@ void	C_VS_UI_FILE_DIALOG::Show()
 		titleX += 3;
 		titleY += 3;
 	}
-	g_PrintColorStr(titleX, titleY, name,gpC_base->m_desc_menu_pi, RGB_WHITE);
+	g_PrintColorStr(titleX, titleY, dialogTitle,gpC_base->m_desc_menu_pi, RGB_WHITE);
 
 	for(int i = 0; i < m_scroll_max && i+m_pC_scroll_bar->GetScrollPos() < m_vs_file_list.size(); i++) {		
 		// 이름들 출력

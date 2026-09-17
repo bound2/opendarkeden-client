@@ -16,21 +16,25 @@ std::string Basic::BuildDialogPathLabel(const std::string& path,
 		const std::vector<std::string>& filters)
 {
 	std::string title = path;
-	title.erase(title.size() - 2, 2);
+	// Stored paths end in "*.*". Preserve the '*' before suffix filters,
+	// or remove the whole search pattern when there are no filters.
+	if (title.ends_with("*.*"))
+		title.resize(title.size() - (filters.empty() ? 3 : 2));
+	bool first = true;
 	for (const auto& filter : filters)
 	{
+		if (!first) title += ';';
 		title += filter;
-		title += ';';
+		first = false;
 	}
-	title.erase(title.size() - 1, 1);
 	return title;
 }
 
 std::string Basic::ShortenDialogLabel(const std::string& label)
 {
-	char name[300];
-	std::strcpy(name, label.c_str());
-	ReduceString(name, 38);
+	std::string name = label;
+	ReduceString(name.data(), 38);
+	name.resize(std::strlen(name.c_str()));
 	return name;
 }
 

@@ -20,8 +20,11 @@
 
 namespace Basic {
 
+// Replace a trailing search pattern with the configured suffix display;
+// paths without that pattern remain intact, including empty/short input.
 std::string BuildDialogPathLabel(const std::string& path,
 		const std::vector<std::string>& filters);
+// Return an owned label of at most 38 bytes, with the legacy ellipsis.
 std::string ShortenDialogLabel(const std::string& label);
 
 /*-----------------------------------------------------------------------------
