@@ -138,7 +138,6 @@
 #include "MQuestInfo.h"
 #include "MMeteorDropEffectGenerator.h"
 #include "MJusticeAttackManager.h"
-#include "MInternetConnection.h"
 #include "MMonsterKillQuestInfo.h"
 #include "MInteractionObjectTable.h"
 #include "MInput.h"
@@ -429,8 +428,6 @@ void SizeOfObjects()
 	fprintf(fp,"MGearItem : %d\n",sizeof(MGearItem) );
 	fprintf(fp,"MItem : %d\n",sizeof(MItem) );
 	fprintf(fp,"MInventory : %d\n",sizeof(MInventory) );
-	fprintf(fp,"MInternetFile : %d\n",sizeof(MInternetFile) );
-	fprintf(fp,"MInternetConnection : %d\n",sizeof(MInternetConnection) );
 	fprintf(fp,"INTERACTIONOBJECTTABLE_INFO : %d\n",sizeof(INTERACTIONOBJECTTABLE_INFO) );
 	fprintf(fp,"MInteractionObject : %d\n",sizeof(MInteractionObject) );
 	fprintf(fp,"MInput : %d\n",sizeof(MInput) );

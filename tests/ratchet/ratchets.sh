@@ -174,7 +174,9 @@ check () {
 # 478 on 2026-09-17: delete the four unused Direct3D texture/shadow cache
 # translation units. Their last object declarations were commented out;
 # the active sprite path never constructed them. Ninja 479 -> 475.
-R1_BASELINE=478
+# 477: remove the unused WinINet downloader (Windows-only source).
+# The Ninja baseline stays 475; the platform difference is now two files.
+R1_BASELINE=477
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -203,9 +205,9 @@ if [ -n "$R1_VCXPROJ" ]; then
 elif [ -n "$BUILD_DIR" ] && [ -f "$BUILD_DIR/build.ninja" ]; then
 	# The Ninja generator (the Linux and macOS presets): the same count,
 	# read from build.ninja's object rules for the DarkEden target. Its
-	# own baseline, because the non-Windows source list is three files
+	# own baseline, because the non-Windows source list is two files
 	# shorter: of CMakeLists.txt's NOT WIN32 filters only GetWinVer,
-	# MInternetConnection and WavePackFileManager match anything the glob
+	# and WavePackFileManager match anything the glob
 	# yields (the Immersion, D3D, EXECryptor and VolumeOut patterns match
 	# no file at all). Before
 	# this branch existed the ratchet SKIPPED on every non-MSVC tree,
@@ -1473,7 +1475,8 @@ fi
 # only commented-out lines called, and thirteen lines of block-commented
 # debug dumps in MZone.cpp and MCreature.cpp, deleted with their blocks.
 #----------------------------------------------------------------------
-R17_BASELINE=970
+# 969 on 2026-09-17: delete the unused WinINet downloader and its one strcpy.
+R17_BASELINE=969
 R17_FILES_FLOOR=500
 
 r17_members () {

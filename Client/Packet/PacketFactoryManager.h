@@ -36,6 +36,8 @@ public :
 	
 	// 팩토리 객체를 특정 인덱스에 추가한다.
 	void addFactory (PacketFactory* pFactory);
+	// Ownership transfers only on successful registration; rejected factories
+	// remain the caller's responsibility.
 	
 	// 패킷아이디로 패킷객체를 생성한다.
 	Packet* createPacket (PacketID_t packetID);

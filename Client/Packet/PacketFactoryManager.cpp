@@ -952,7 +952,12 @@ void PacketFactoryManager::addFactory (PacketFactory * pFactory)
 {
 	__BEGIN_TRY
 		
-	if (m_Factories[ pFactory->getPacketID() ] != NULL) {
+	if (pFactory == nullptr)
+		throw InvalidProtocolException("null packet factory");
+	const PacketID_t packetID = pFactory->getPacketID();
+	if (packetID >= m_Size)
+		throw InvalidProtocolException("packet factory id out of range");
+	if (m_Factories[packetID] != NULL) {
 		StringStream msg;
 	#ifdef __DEBUG_OUTPUT__
 		msg << "duplicate packet factories, " << pFactory->getPacketName() ;
@@ -963,7 +968,7 @@ void PacketFactoryManager::addFactory (PacketFactory * pFactory)
 	}
 	
 	// 패킷팩토리를 등록한다.
-	m_Factories[ pFactory->getPacketID() ] = pFactory;
+	m_Factories[packetID] = pFactory;
 			
 	__END_CATCH
 }

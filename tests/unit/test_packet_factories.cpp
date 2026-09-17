@@ -28,6 +28,7 @@
 #include "Packet.h"
 #include "PacketFactoryManager.h"
 #include "Exception.h"
+#include <memory>
 
 #include "Gpackets/GCSay.h"
 #include "Lpackets/LCLoginOK.h"
@@ -106,4 +107,53 @@ TEST(PacketFactoryManager, UnregisteredAndOutOfRangeIdsAreRefused)
 	CHECK(Rejects(manager, Packet::PACKET_CG_MOVE));
 	CHECK(Rejects(manager, Packet::PACKET_MAX));
 	CHECK(Rejects(manager, (PacketID_t)0xFFFF));
+}
+
+namespace {
+class InvalidIdFactory : public GCSayFactory
+{
+public:
+	explicit InvalidIdFactory(PacketID_t id) : m_Id(id) {}
+	PacketID_t getPacketID() const noexcept override { return m_Id; }
+private:
+	PacketID_t m_Id;
+};
+}
+
+TEST(PacketFactoryManager, RegistrationRejectsInvalidIdsBeforeIndexing)
+{
+	PacketFactoryManager manager;
+	manager.addFactory(new GCSayFactory);
+	for (PacketID_t id : {static_cast<PacketID_t>(Packet::PACKET_MAX), static_cast<PacketID_t>(0xFFFF)})
+	{
+		auto candidate = std::make_unique<InvalidIdFactory>(id);
+		bool refused = false;
+		try { manager.addFactory(candidate.get()); candidate.release(); }
+		catch (const InvalidProtocolException&) { refused = true; }
+		catch (const Throwable&) {}
+		CHECK(refused);
+		CHECK(CreatesA<GCSay>(manager, Packet::PACKET_GC_SAY));
+	}
+}
+
+TEST(PacketFactoryManager, RegistrationRejectsNull)
+{
+	PacketFactoryManager manager;
+	bool refused = false;
+	try { manager.addFactory(nullptr); }
+	catch (const InvalidProtocolException&) { refused = true; }
+	CHECK(refused);
+}
+
+TEST(PacketFactoryManager, DuplicateRegistrationLeavesTheOriginalFactory)
+{
+	PacketFactoryManager manager;
+	manager.addFactory(new GCSayFactory);
+	auto candidate = std::make_unique<GCSayFactory>();
+	bool refused = false;
+	try { manager.addFactory(candidate.get()); candidate.release(); }
+	catch (const Error&) { refused = true; }
+	CHECK(refused);
+	CHECK(CreatesA<GCSay>(manager, Packet::PACKET_GC_SAY));
+	CHECK_EQ(GCSayFactory().getPacketMaxSize(), manager.getPacketMaxSize(Packet::PACKET_GC_SAY));
 }

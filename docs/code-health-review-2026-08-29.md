@@ -1436,9 +1436,7 @@ Line 79: `int dot = m_FilenameTemp.rfind(".");`. `std::string::rfind` returns `s
 
 **Recommendation:** Use `size_t dot = m_FilenameTemp.rfind('.'); if (dot != std::string::npos) m_FilenameTemp[dot] = '-';` and handle the no-extension case explicitly.
 
-> ⚠️ **Not reachable; deliberately left unchanged.** The `int dot = rfind(".")` and the `m_FilenameTemp[dot] = '-'` are textually still there, but a peer can no longer drive them. `ReceiveFileInfo` has exactly one construction site in the tree, and the C12 rework (`76a1185` → `3bc340e` → `1200625`) made it keep only the leaf name and require a `.spk`/`.spki` extension, so a dotless name is rejected before it can reach `StartReceive`. That commit's own comment records the coupling deliberately.
->
-> **The risk this leaves is worth stating, because it is not obvious from either file.** The safety of `RequestFileManager.cpp:81` now lives in a whitelist in a *different* file. Relax that extension check and the index -1 write returns with no local signal. A one-line `size_t`/`npos` test here would decouple them, and should be done the next time this file is opened — it is cheap insurance against a fix that looks unrelated.
+> ✅ **Closed; reconciled 2026-09-17:** `a2b14c33` removed `ReceiveFileInfo` and the rest of the unused outbound peer file-transfer side. Neither the dotless-name write nor the class that contained it remains. The inbound request service and file sender remain separate and unchanged.
 
 #### 🟡 Medium -- Datagram bounds checks compute m_InputOffset + len in unsigned arithmetic that can wrap, bypassing the check.
 
@@ -1468,6 +1466,8 @@ SocketInputStream.h:65 implements `read(bool& buf)` as `read((char*)&buf, szbool
 
 **Category:** correctness  |  **Location:** `Client/Packet/Gpackets/GCExchangeList.cpp:25`
 
+> ✅ **Already fixed; reconciled 2026-09-17:** `49263379` reconciled the exchange wire layouts with the server and registered both reply factories. `GCExchangeList` now reads and writes the same page fields, count and bounded listing records, and reports their actual wire size. Factory/inventory tests and the exchange round-trip, maximum-string and shared-golden tests remain passing.
+
 GCExchangeListFactory is declared (GCExchangeList.h:54) but never passed to addFactory — PacketFactoryManager.cpp:1198-1199 registers only CGExchangeListFactory and CGExchangeBuyFactory. ClientPlayer::processCommand calls getPacketMaxSize(packetID) at line 256, which throws InvalidProtocolException("packet factory [...] not exist") for any unregistered ID, tearing down the session. Independently, the packet is internally inconsistent: read() (lines 28-30) consumes three `int` members (12 bytes, per GCExchangeList.h:44-46), write() (lines 42-48) emits those 12 bytes plus a 2-byte count, and getPacketSize() (line 56) reports `szBYTE+szBYTE+szBYTE+szWORD` == 5. `m_pListings` is set to NULL in the constructor and never used or freed.
 
 **Failure scenario:** The server replies to CGExchangeList with PACKET_GC_EXCHANGE_LIST. The client cannot find a factory for it, throws InvalidProtocolException out of processCommand, and disconnects — so the exchange feature can never work end to end.
@@ -1477,6 +1477,8 @@ GCExchangeListFactory is declared (GCExchangeList.h:54) but never passed to addF
 #### 🟡 Medium -- sscanf writes 4-byte ints into 2-byte SYSTEMTIME WORD fields, corrupting the surrounding struct.
 
 **Category:** memory-safety  |  **Location:** `Client/Packet/Lpackets/LCReconnectHandler.cpp:117`
+
+> ✅ **Closed (2026-09-17):** removed the obsolete `OUTPUT_DEBUG` reconnect timing-file report, including its mismatched `sscanf`, persisted records and aggregate output. No build defines this diagnostic macro; active reconnect/send operations and their existing log messages remain. This is dead-code removal verified by builds, not a runtime reproduction.
 
 Lines 117-121 call `sscanf(readTemp, "%4d/%2d/%2d %2d:%2d:%2d\t%8d\t%8d\n", &ts.st.wYear, &ts.st.wMonth, &ts.st.wDay, &ts.st.wHour, &ts.st.wMinute, &ts.st.wSecond, &ts.reconnectTickCount, &ts.sendCGConnectTickCount)`. The `%d` conversion requires an `int*`, but wYear/wMonth/wDay/wHour/wMinute/wSecond are `WORD` (16-bit) members of SYSTEMTIME. Each conversion writes 4 bytes into a 2-byte slot, overwriting the adjacent field. The field-width prefixes limit the parsed digits, not the size of the store. `reconnectTickCount`/`sendCGConnectTickCount` are DWORD and read with `%d` (signed) — a further mismatch.
 
@@ -1536,6 +1538,8 @@ The send loops at lines 189-194, 209-214 and 225-230 call `m_Socket->send(...)`,
 
 **Category:** portability  |  **Location:** `Client/RequestFileManager.cpp:419`
 
+> ✅ **Already fixed; reconciled 2026-09-17:** the C++20 migration removed dynamic exception specifications across the project. Ratchets R9/R10 are zero, strict C++20 builds pass on Windows, Linux and macOS, and the framed-read tests exercise exceptions through the packet layer. Destructors that can throw are explicitly `noexcept(false)`.
+
 `RequestFileManager::ReceiveMyRequest(...) throw (ConnectException)` (lines 418-419) calls `pRequestClientPlayer->readInputStream(...)`, which reaches SocketInputStream::read and can throw InvalidProtocolException (SocketInputStream.cpp:90, when len==0) or InsufficientDataException (line 98). Neither derives from ConnectException — the hierarchy in Client/Packet/Exception.h puts InvalidProtocolException/InsufficientDataException under ProtocolException:IOException while ConnectException sits under SocketException:IOException (lines 324, 367, 381). Under C++11 (the standard the project sets, CMakeLists.txt:13) violating a dynamic exception specification calls std::unexpected() and then std::terminate(). MSVC ignores throw-specs entirely, so this only manifests on the Linux/macOS targets the SDL migration is aiming at. Dynamic exception specifications are also removed outright in C++17, so any standard bump breaks the entire Packet layer.
 
 **Failure scenario:** During a peer file transfer the input stream momentarily has 0 bytes for the current chunk; readInputStream throws InvalidProtocolException("len==0"); on a Clang/GCC build the runtime calls std::terminate and the client aborts instead of recovering. On MSVC the same code recovers normally, so the bug is invisible on the primary dev platform.
@@ -1545,6 +1549,8 @@ The send loops at lines 189-194, 209-214 and 225-230 call `m_Socket->send(...)`,
 #### ⚪ Low -- InternetReadFile's return value is ignored and its byte count is read from an uninitialized DWORD.
 
 **Category:** correctness  |  **Location:** `Client/MInternetConnection.cpp:246`
+
+> ✅ **Closed (2026-09-17):** removed the unused `MInternetConnection`/`MInternetFile` classes, their type-size diagnostics, non-Windows exclusion and sole WinINet link dependency. A source-reference audit found no object construction or call site. Correction to the original finding: the file was excluded only off Windows; removing it reduces Windows executable membership by one. No live downloader behavior changes.
 
 Line 246 declares `DWORD nRead;` with no initialiser; line 248 calls `InternetReadFile(m_hFile, pBuffer, BUFFER_SIZE, &nRead)` and discards the BOOL result; lines 249 and 258 then use nRead for `m_nReceived += nRead` and `m_LocalFile.write(&pBuffer, nRead)`. If the call fails without writing the out-parameter, nRead holds stack garbage and the write reads far past the 4096-byte pBuffer. Separately, line 62 passes the literal `TEXT("pAppName")` to InternetOpen instead of the pAppName parameter, so the user-agent is always the string "pAppName".
 
@@ -1556,6 +1562,8 @@ Line 246 declares `DWORD nRead;` with no initialiser; line 248 calls `InternetRe
 
 **Category:** correctness  |  **Location:** `Client/Packet/ClientCommunicationManager.cpp:128`
 
+> ✅ **Fixed (2026-09-17):** both UDP-path conditions explicitly compare the substring result with `NULL` using `!=`, preserving their existing behavior without the misleading negation. The stream-path counterpart is addressed separately in the `GameMain.cpp:281` finding.
+
 Line 128 reads `if( !strstr( t.toString().c_str(), "(datagram)" ) == NULL )` and line 204 repeats it verbatim. `!strstr(...)` evaluates first to a bool, which is then compared against NULL — so the condition is true precisely when the substring IS present, the opposite of what the negation reads as. Comparing a bool to NULL is itself a diagnosable construct on modern compilers.
 
 **Failure scenario:** A maintainer reading the code concludes the bug report is suppressed for datagram-related exceptions when in fact it is only sent for those, and 'fixes' it in the wrong direction.
@@ -1566,6 +1574,8 @@ Line 128 reads `if( !strstr( t.toString().c_str(), "(datagram)" ) == NULL )` and
 
 **Category:** correctness  |  **Location:** `Client/Packet/PacketFactoryManager.cpp:1218`
 
+> ✅ **Fixed (2026-09-17):** `addFactory` rejects null and out-of-range factories before indexing, reads the ID once and preserves existing entries on rejection. Ownership transfers only on success. New tests reproduced the invalid-ID rejection failures and null dereference; duplicate registration is also covered. Removed the hand-numbered enum comments without changing any of the 504 packet enum declarations. Full Debug/ASan builds and suites pass.
+
 createPacket (line 1251), getPacketMaxSize (line 1275) and getPacketName (line 1300) all guard with `packetID >= m_Size`. addFactory does not: line 1218 reads `m_Factories[pFactory->getPacketID()]` and line 1233 writes to the same slot with no bound. m_Factories is allocated with m_Size == Packet::PACKET_MAX entries (line 587). Note also that the ID enum in Packet.h is the wire protocol, and its trailing comments are already stale — PACKET_CG_ENCODE_KEY is commented '483' but the two 'add by viva' entries after it shift the Exchange block, whose comments restart at '484'.
 
 **Failure scenario:** Someone adds a packet class whose getPacketID() returns a value not present in the enum (a typo, or an ID copied from the server repo after the two enums drift apart). addFactory writes a pointer out of bounds at startup with no diagnostic, corrupting whatever follows the array.
@@ -1575,6 +1585,8 @@ createPacket (line 1251), getPacketMaxSize (line 1275) and getPacketName (line 1
 #### ⚪ Low -- An unconditional printf fires on every outgoing packet in the send hot path.
 
 **Category:** maintainability  |  **Location:** `Client/Packet/SocketOutputStream.cpp:150`
+
+> ✅ **Fixed (2026-09-17):** both datagram header prints now use the existing `__DEBUG_OUTPUT__` guard. The TCP send print was already guarded; the unused `Packet::writeHeaderNBody` helper and its misleading queued-length diagnostic are removed. All production TCP framing goes through `SocketOutputStream::write(const Packet*)`, covered by framing/rollback and golden tests.
 
 SocketOutputStream::write(const Packet*) contains a bare `printf("%s:%d SocketOutputStream::write packetID: %d, packetSZ: %d sequence %d\n", __FILE__, __LINE__, packetID, packetSize, m_Sequence-1);` at lines 150-152, outside any #ifdef. Every packet the client sends — movement, attacks, chat — writes a line to stdout. Client/Packet/Packet.h:606 has a matching unguarded `std::cout` in writeHeaderNBody, and Client/Packet/Datagram.cpp:125 and :138 print each datagram's ID and size.
 
@@ -1887,6 +1899,8 @@ CheckTime() opens with a bare `return;` at line 461, so everything from 463 to 5
 #### ⚪ Low -- An operator-precedence error inverts the datagram test guarding SendBugReport.
 
 **Category:** correctness  |  **Location:** `Client/GameMain.cpp:281`
+
+> ✅ **Fixed (2026-09-17):** the two stream error paths explicitly report `InvalidProtocolException` messages without the datagram marker (`strstr(...) == NULL`), and both nested conditions have braces. This restores the stream-reporting intent; the UDP manager retains its explicit positive marker check. Executable-side regression guard, verified by full builds; no runtime reproduction is claimed.
 
 `if( !strstr( t.toString().c_str(), "(datagram)" ) == NULL )` at line 281 and again at 432. `!strstr(...)` yields a bool, so the expression is `(!p) == 0`, i.e. `p != NULL` — the bug report is sent only when the exception text does contain "(datagram)". The surrounding code and the stray `!` indicate the author meant the opposite (report non-datagram protocol errors). Line 432 additionally has no braces on the outer if, so the two conditions silently chain.
 
