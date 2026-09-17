@@ -34,7 +34,6 @@ endif()
 
 # Basic library sources
 set(BASIC_SOURCES
-	Directory.cpp
 	# Directory enumeration on std::filesystem
 	# (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md, priority
 	# 6). Here for the same reason DebugLog and SafeFormat are: the
@@ -135,7 +134,6 @@ install(FILES
 	Platform.h
 	Typedef.h
 	PlatformUtil.h
-	Directory.h
 	DirectoryListing.h
 	FileDialogListing.h
 	BasicMemory.h

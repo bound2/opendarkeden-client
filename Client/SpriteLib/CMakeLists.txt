@@ -147,7 +147,6 @@ set(SPRITELIB_HEADERS
 	DrawTypeDef.h
 	TArray.h
 	CTypePack.h
-	CTypePackVector.h
 	CSetManager.h
 )
 

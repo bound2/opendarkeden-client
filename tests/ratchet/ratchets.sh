@@ -1401,6 +1401,59 @@ else
 fi
 
 #----------------------------------------------------------------------
+# R17 - unbounded format and copy lines outside the packet tree.
+#
+# R3 holds Client/Packet and Client/PacketHandler at zero. This is R3's
+# grep with wsprintf added and headers scanned beside sources -
+# \b(sprintf|wsprintf|strcpy|strcat)\s*\( with the // comment tail of
+# every line stripped first - over the rest of the tree a test binary can
+# reach or the executable is built from: basic, VS_UI and Client
+# outside the two packet directories. It is the measure the bounded
+# formatting work of the assessment (priority 7) retreats along: a
+# site leaves this count when its destination is a real array and the
+# call is snprintf(dst, sizeof(dst), ...) or an exact-length memcpy,
+# checked by hand, never by sizeof() on a pointer. Read with -a,
+# because VS_UI_GameCommon.cpp carries NUL bytes and a plain grep
+# stops at the first one (CLAUDE.md, Traps).
+#
+# Excluded on purpose: the non-Windows wsprintf shim's own definition
+# in basic/Platform.h (a definition, not a call; it forwards to
+# vsnprintf with a fixed 1024, whatever the buffer holds, which
+# Platform.h says at length), matched by "int wsprintf(" and dropped.
+# What it cannot see: vsprintf (11 live lines, the vararg forwarders in
+# Client/MinTr.h and the two DebugInfo.cpp, into fixed buffers - the
+# \b in the pattern rejects the leading v, as it rejects the l of
+# lstrcpy and lstrcat, of which the tree has none), strncpy, and a
+# copy spelled any other way; snprintf never matched, having no
+# "sprintf" inside it.
+#
+# 1,086 on 2026-09-17, from 1,102 before the first slice, which took
+# basic to 0 (C_DIRECTORY, an unused class whose constructor called a
+# POSIX-only function and could not have linked on Windows, deleted
+# with its six lines; PlatformSDL's three sites, four lines, bounded by
+# the size each already checked; SafeFormat's two spec writes bounded by the
+# spec buffer's size, now a parameter) and SpriteLib to 0 (two captions
+# bounded; CTypePackVector.h, a header nothing includes, deleted). What is left is
+# VS_UI (783) and the rest of Client (303), most of them wsprintf and
+# sprintf into local char arrays.
+#----------------------------------------------------------------------
+R17_BASELINE=1086
+R17_FILES_FLOOR=500
+
+r17_members () {
+	find basic VS_UI Client \( -name '*.cpp' -o -name '*.h' \) 2>/dev/null | grep -v '^Client/Packet/\|^Client/PacketHandler/'
+}
+
+if [ "$(r17_members | wc -l)" -lt "$R17_FILES_FLOOR" ]; then
+	echo "FAIL R17: only $(r17_members | wc -l) files enumerated (floor $R17_FILES_FLOOR) - a count over a shrunken scan would measure nothing"
+	FAIL=1
+else
+	R17=$(r17_members | sort -u | tr '\n' '\0' | xargs -0 grep -haE '\b(sprintf|wsprintf|strcpy|strcat)\s*\(' \
+		| sed -e 's://.*::' | grep -aE '\b(sprintf|wsprintf|strcpy|strcat)\s*\(' | grep -avE '\bint\s+wsprintf\s*\(' | wc -l)
+	check "R17 (unbounded format/copy lines outside the packet tree)" "$R17" "$R17_BASELINE"
+fi
+
+#----------------------------------------------------------------------
 # R6 was here for exactly one slice, and retired by doing its job.
 #
 # Task 5.1 stubbed SendBugReport in tests/stubs/client_globals.cpp so

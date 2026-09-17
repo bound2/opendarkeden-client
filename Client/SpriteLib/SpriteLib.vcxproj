@@ -176,7 +176,6 @@
     <ClInclude Include="CSpriteSurface.h" />
     <ClInclude Include="CStorageSurface.h" />
     <ClInclude Include="CTypePack.h" />
-    <ClInclude Include="CTypePackVector.h" />
     <ClInclude Include="DrawTypeDef.h" />
     <ClInclude Include="MPalette.h" />
     <ClInclude Include="MPalettePack.h" />

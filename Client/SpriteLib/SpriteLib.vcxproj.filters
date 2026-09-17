@@ -163,9 +163,6 @@
     <ClInclude Include="CTypePack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CTypePackVector.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DrawTypeDef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
