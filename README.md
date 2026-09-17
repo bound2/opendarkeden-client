@@ -111,6 +111,23 @@ the startup project, and build from there.
 
 The executable lands in `build/vs2022/bin/Debug/DarkEden.exe`.
 
+The optional GNU Make wrapper requires a POSIX shell (Git Bash on Windows).
+Its build and test targets select Debug/Release explicitly, including with the
+Visual Studio generator. Pass initial configure options through `CMAKE_ARGS`,
+for example `make debug CMAKE_ARGS=-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake`.
+`NPROCS` overrides the detected parallel job count. The direct CMake commands
+above remain the Windows setup path.
+
+Ninja and Makefile generators write `compile_commands.json` into the selected
+build directory. Point clangd or another editor at that directory; a local copy
+or symlink at the repository root is ignored. Visual Studio generators do not
+produce this database.
+
+`BUILD_ENGINE=OFF` omits the map viewer, whose loader requires the optional
+sprite engine. The effect viewer uses the client libraries and remains available.
+Its Bash build/run helper accepts `DARKEDEN_DIR` (the directory containing
+`Data/`, default `DarkEden/` beside this README), `BUILD_DIR` and `NPROCS`.
+
 ### Reproducible builds and the complete test suite
 
 The checked-in presets use separate trees under `build/presets/`, enable all

@@ -1099,6 +1099,22 @@ rounds settled* for the host rules). Test fixtures share
 
 ---
 
+## Build and review follow-up (2026-09-18)
+
+Source globs now trigger CMake regeneration when files are added or removed.
+The optional map viewer follows `BUILD_ENGINE`; the effect viewer no longer
+links an unused engine library. Hand-written CMake modules and Makefiles are
+visible to Git, while local compilation databases stay ignored. The unused
+Emscripten workflow was removed. GNU Make and the effect-viewer helper select
+portable job counts and explicit build configurations; README documents their
+options. A direct MSBuild target can need a retry after source removal if it
+loaded the old project before CMake regenerated it.
+
+The code-health review also records 18 previously completed fixes that still
+had open headings, with their current source/test evidence. These status
+corrections do not claim new runtime reproductions. Live-server verification
+remains optional and is not a merge or completion requirement.
+
 ## First candidate (decided 2026-09-01)
 
 **Task 1.1: the `packetwire` library.** Chosen over the alternatives

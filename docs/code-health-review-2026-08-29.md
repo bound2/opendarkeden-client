@@ -2186,6 +2186,8 @@ Release() deletes m_Filename (line 160) only when m_bLog is true and never nulls
 
 #### 🟡 Medium -- 1630 lines of string-table literals are unreachable — their only caller is excluded from every build configuration.
 
+> ✅ **Verified resolved (2026-09-18)**: `GameInit.cpp` calls `InitGameStringTable()` on the live English-language path. `MGameStringTable.cpp` is compiled into `gamemodel`; the language-selection and English-counter tests in `test_gamemodel_tables.cpp` exercise the real table. The dead-only-caller claim describes the old build.
+
 **Category:** dead-code  |  **Location:** `Client/MGameStringTable.cpp:18`
 
 `InitGameStringTable()` is defined here and called from exactly one place: VS_UI/WinMain.cpp:3229. CMakeLists.txt excludes VS_UI/WinMain.cpp on non-Windows (line 179, `EXCLUDE REGEX ".*WinMain.*"`) and on Windows (line 209, `EXCLUDE REGEX "VS_UI/WinMain\\.cpp"`), so it is in no build. The table is therefore populated exclusively by the file load at Client/GameInit.cpp:1604. The file is also the tree's worst encoding casualty: it mixes correctly-encoded Chinese with irreversibly mojibake'd CP949-read-as-GBK text in the same statements (compare line 102 "生命力(HP)最大值变成了%d。" with line 106 "제좆(STR)긴냥죄%d。" and line 44 "꼇콘뗬陵。").
@@ -2368,6 +2370,8 @@ Lines 97-107: the constructor body is `Init(); m_dw_millisec = millisec; if (m_i
 
 #### 🟠 High -- Item-class labels from the game string table are passed as the format string to wsprintf into a 50-byte buffer with neither a bounds limit nor a format guard.
 
+> ✅ **Verified resolved (2026-09-18)**: item-class labels use bounded `snprintf(..., "%s", GetGameString(...))` in `VS_UI_Description.cpp`. The related title-screen messages likewise use bounded literal copies or `SafeFormat::Format`. Existing formatter tests and the R7/R8 and format-arity checks cover the shared formatting path; no new runtime reproduction is claimed.
+
 **Category:** security  |  **Location:** `VS_UI/src/VS_UI_Description.cpp:271`
 
 `char sz_buf[50];` (line 215). Lines 271-318 call `wsprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_CLASS_*].GetString());` — the data-file string is the *format* argument with no variadic arguments supplied. Any `%` in that string is a conversion specifier reading nonexistent varargs, and `wsprintf` performs no bounds checking against the 50-byte destination. The same table-string-as-format pattern recurs throughout this file (lines 371, 405, 411, 417, 594, 605, 1116, ...) and in VS_UI/src/VS_UI_Title.cpp:2638-2651 / 3634-3647.
@@ -2377,6 +2381,8 @@ Lines 97-107: the constructor body is `Init(); m_dw_millisec = millisec; if (m_i
 **Recommendation:** Use `wsprintf(sz_buf, "%s", table.GetString())` for the no-argument cases and a bounded `snprintf` everywhere; validate at load time that each table entry's specifier list matches what the call site supplies.
 
 #### 🟠 High -- The item tooltip builds its name strings with an unbounded strcat chain from server-supplied text into two 100-byte stack buffers.
+
+> ✅ **Verified resolved (2026-09-18)**: both tooltip rendering and size measurement call `BuildItemTooltipNames`, which delegates to the dynamically sized `UISafeText::FinishItemTooltipNames`. `test_ui_safe_text.cpp` covers long/multibyte names and complete versus incomplete grade tokens.
 
 **Category:** memory-safety  |  **Location:** `VS_UI/src/VS_UI_Description.cpp:217`
 
@@ -2398,6 +2404,8 @@ Lines 97-107: the constructor body is `Init(); m_dw_millisec = millisec; if (m_i
 
 #### 🟠 High -- strncpy into a 1024-byte cursor buffer with a byte length that can reach 4096, overflowing the stack buffer.
 
+> ✅ **Verified resolved (2026-09-18)**: cursor measurement uses `UISafeText::Utf8Prefix` and `std::string` in the editor's platform branches. Existing tests cover long supplementary-character text, character boundaries and truncated tails, without a fixed 1,024-byte cursor buffer.
+
 **Category:** memory-safety  |  **Location:** `VS_UI/src/widget/U_edit.cpp:538`
 
 `char cursorBuffer[1024];` (line 525, and again at line 567 in the non-macOS branch). `bytePos` is computed by walking UTF-8 bytes until `m_Editor.m_CursorPos` characters have been passed — `m_CursorPos` can be up to `LineEditor::MAX_TEXT-1` = 1023 characters, and `GetBuffer()` returns up to 4 bytes per character (its own buffer is `char[MAX_TEXT*4+1]`, U_edit.cpp:240). `strncpy(cursorBuffer, fullText, bytePos); cursorBuffer[bytePos] = '\0';` therefore writes up to 4097 bytes into a 1024-byte stack array. Both the PLATFORM_MACOS branch (lines 525-539) and the Windows branch (lines 567-581) have the identical defect.
@@ -2408,6 +2416,8 @@ Lines 97-107: the constructor body is `Init(); m_dw_millisec = millisec; if (m_i
 
 #### 🟠 High -- Password mode writes the NUL terminator at an unbounded index into a 1024-byte stack buffer.
 
+> ✅ **Verified resolved (2026-09-18)**: password masks are dynamically sized by `UISafeText::MakePasswordMask`; the editor no longer indexes a fixed stack buffer. Existing tests cover the largest editor UTF-8 result and null/empty input. One mask glyph per input byte is intentionally preserved as the established display contract; changing that count is a separate behavior choice.
+
 **Category:** memory-safety  |  **Location:** `VS_UI/src/widget/U_edit.cpp:495`
 
 Lines 489-496: `char displayBuffer[1024]; int len = strlen(textToDisplay);` the asterisk-fill loop is correctly bounded by `i < (int)sizeof(displayBuffer) - 1`, but the terminator write `displayBuffer[len] = '\0';` uses the unclamped `len`. `textToDisplay` comes from `m_Editor.GetBuffer()`, whose static buffer is `MAX_TEXT*4+1` = 4097 bytes (line 240), so `len` can be up to 4096.
@@ -2417,6 +2427,8 @@ Lines 489-496: `char displayBuffer[1024]; int len = strlen(textToDisplay);` the 
 **Recommendation:** Clamp: `int n = min(len, (int)sizeof(displayBuffer)-1); ... displayBuffer[n] = '\0';` — and count characters, not bytes, so the asterisk count matches the visible character count for multi-byte input.
 
 #### 🟠 High -- The UTF-8 decoder reads past the string terminator on truncated sequences and has unsequenced side effects on the same pointer, which is undefined behavior.
+
+> ✅ **Verified resolved (2026-09-18)**: the editor uses `UISafeText::DecodeNext`/`Utf8ToUtf32`, with sequenced continuation reads, terminator checks and a null-input guard. `test_ui_safe_text.cpp` covers truncated sequences, malformed input and small output capacities. This closes the out-of-bounds/unsequenced-read finding, not a claim that every legacy editor decoding rule was redesigned.
 
 **Category:** undefined-behavior  |  **Location:** `VS_UI/src/widget/U_edit.cpp:44`
 
@@ -2582,6 +2594,8 @@ Client/MemoryPool.cpp:72 allocates each pool chunk via `CBlock *pPool = (CBlock*
 
 #### 🟠 High -- Five #include directives in basic/ use the wrong filename case, so the library cannot compile on a case-sensitive filesystem despite the documented Linux support.
 
+> ✅ **Verified resolved (2026-09-18)**: the named live include directives now match the tracked filenames. The complete client and tests pass on case-sensitive Linux under GCC, Clang and GCC ASan/UBSan ([CI run](https://github.com/bound2/opendarkeden-client/actions/runs/35276197859)). Historical commented include lines are not compiled.
+
 **Category:** build  |  **Location:** `basic/Basics.h:15`
 
 git ls-files shows the tracked names as basic/Basics.h, basic/i_signal.h, basic/timer2.h and basic/2d.h, but the includes spell them differently: basic/Basics.h:15 `#include "I_signal.h"` (file is i_signal.h); basic/timer2.h:14 and basic/IMG.h:14 `#include "BasicS.h"` (file is Basics.h); basic/Timer2.cpp:11 `#include "Timer2.h"` (file is timer2.h); basic/TGA.h:14 and basic/GL_import.h:4 `#include "2D.h"` (file is 2d.h). Four VS_UI headers repeat the "BasicS.h" spelling (VS_UI/src/header/VS_UI_Base.h:12, VS_UI/src/header/VS_UI_util.h:18, VS_UI/src/widget/SimpleDataList.h:12, VS_UI/src/hangul/Ci.h:17), while sibling headers in the same directory use the correct "Basics.h" (VS_UI/src/widget/u_button.h:15). basic/Timer2.cpp is unconditionally in BASIC_SOURCES (basic/CMakeLists.txt:37-42), so this is not dead code. CLAUDE.md states "Linux (should work)" — it cannot, and the inconsistent spelling within the same directory means this was never caught because development happens on case-insensitive Windows/macOS.
@@ -2681,6 +2695,8 @@ basic/CMakeLists.txt:36-42 lists Directory.cpp in BASIC_SOURCES unconditionally.
 
 #### 🟡 Medium -- Platform.h defines min/max as function-like macros on non-Windows from a header that reaches nearly every translation unit, breaking std::min/std::max and numeric_limits.
 
+> ✅ **Verified resolved (2026-09-18)**: non-Windows `min`/`max` are C++ templates outside the C-linkage block in `Platform.h`, preserving mixed arithmetic types without preprocessor substitution. The full Linux builds and tests compile this implementation.
+
 **Category:** maintainability  |  **Location:** `basic/Platform.h:1847`
 
 basic/Platform.h:1845-1856 defines `#define max(a, b) (((a) > (b)) ? (a) : (b))` and the matching min inside `#ifndef PLATFORM_WINDOWS`. Platform.h is included by basic/Typedef.h:17, which sits at the base of essentially every include chain in the project, so on Linux and macOS every subsequent header sees these macros. Any use of std::min/std::max, std::numeric_limits<T>::max(), or a member function named min/max in a header included afterwards fails to compile or expands into nonsense. The same header also macro-defines a number of very common identifiers unconditionally on that platform: TRANSPARENT and OPAQUE (lines 339-340), IN / OUT / OPTIONAL (lines 454-462), and `#define stricmp strcasecmp` (line 549) and `#define CloseHandle(handle)` to nothing (line 557). Note that Windows itself is normally compiled with NOMINMAX for exactly this reason.
@@ -2701,6 +2717,8 @@ basic/Platform.h:1864-1877 defines `static inline int wsprintf(char* buf, const 
 
 #### 🟡 Medium -- The WideCharToMultiByte stub writes to index -1 when cbMultiByte is 0 and never null-checks its output pointer.
 
+> ✅ **Verified resolved (2026-09-18)**: `Platform.h` now measures the required UTF-8 size first, returns it without writing for a zero-capacity query, and rejects a null or undersized destination before encoding. Invalid negative sizes are also rejected. This is verification of the existing implementation, not a newly reproduced crash.
+
 **Category:** memory-safety  |  **Location:** `basic/Platform.h:745`
 
 basic/Platform.h:729-747. The copy loop is `for (int i = 0; i < cchWideChar && i < cbMultiByte - 1; i++)` and the terminator is written as `lpMultiByteStr[cchWideChar < cbMultiByte ? cchWideChar : cbMultiByte - 1] = '\0';`. Both use `cbMultiByte - 1`, and the standard Win32 idiom for this API is to call it once with cbMultiByte == 0 (and lpMultiByteStr == NULL) to query the required buffer size. With cbMultiByte == 0 the loop is skipped but the terminator statement evaluates `cbMultiByte - 1` as -1 and writes `lpMultiByteStr[-1]`; with lpMultiByteStr also NULL that is a null-pointer write at offset -1. There is no null check on either pointer argument. The stub also does not perform the UTF-16 to UTF-8 conversion its comment claims — line 743 copies only the low byte of each wide character, which corrupts every non-ASCII character in a client whose whole point is Korean text.
@@ -2710,6 +2728,8 @@ basic/Platform.h:729-747. The copy loop is `for (int i = 0; i < cchWideChar && i
 **Recommendation:** Return the required byte count and write nothing when cbMultiByte is 0 or lpMultiByteStr is NULL, and implement a real UTF-16 to UTF-8 conversion (or delegate to SDL_iconv) instead of byte truncation.
 
 #### 🟡 Medium -- Platform.h defines assert() as a no-op evaluation on non-Windows, silently disabling every assertion in translation units that include it before <assert.h>.
+
+> ✅ **Verified resolved (2026-09-18)**: `Platform.h` includes the real `<assert.h>` and no longer defines an assertion replacement. Non-Windows Debug assertions retain standard behavior, including normal `NDEBUG` control. The duplicate build finding below has the same resolution.
 
 **Category:** correctness  |  **Location:** `basic/Platform.h:27`
 
@@ -2774,6 +2794,8 @@ Client/CPositionList.h:21 has `#include "../../basic/Platform.h"`, but CPosition
 **Recommendation:** Normalise all Client/ top-level files to "../basic/Platform.h" (or, better, rely on the basic target's PUBLIC include directory and write <Platform.h> everywhere), so the includes state a truth rather than depending on search-path luck.
 
 #### 🟡 Medium -- CToken owns a raw char* with no copy constructor or assignment operator, and Release() frees without nulling, so SetString(NULL) after a real string double-frees.
+
+> ✅ **Verified resolved (2026-09-18)**: `CToken` deletes its copy constructor/assignment and `Release()` deletes then nulls both owned/current pointers. Repeated release after `SetString(NULL)` cannot free the old allocation again. Source/build verification only: this executable-side class is not linked by the unit suite.
 
 **Category:** memory-safety  |  **Location:** `Client/CToken.cpp:39`
 
@@ -2927,6 +2949,8 @@ basic/CMakeLists.txt:16 uses `add_definitions(-DPLATFORM_USE_SDL)` and Client/DX
 
 #### 🟠 High -- USE_ASAN/USE_TSAN/USE_UBSAN are silently ignored on MSVC, so the documented primary dev command produces an unsanitized build.
 
+> ✅ **Verified resolved (2026-09-18)**: CMake enables MSVC AddressSanitizer explicitly, checks its incompatible Debug runtime flags, and rejects unsupported MSVC TSan/UBSan requests at configure time. Separate full `/RTC1` and `/fsanitize=address` Windows builds and CTest runs verify the actual configurations; an ASan option no longer silently produces an ordinary MSVC build.
+
 **Category:** build  |  **Location:** `CMakeLists.txt:28`
 
 The sanitizer block (lines 27-51) is entirely wrapped in `if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")`. MSVC reports `MSVC`, so on the Windows/VS2022 toolchain that README.md:9 and :84 document as *the* build, `-DUSE_ASAN=ON` sets no compile flags, no linker flags, and — because the `message(STATUS ...)` at line 49 is inside the same guard — prints nothing at all. There is no `else()` branch warning the user. CLAUDE.md states "For development, the most commonly used one is `make debug-asan`", and Makefile:57-60 implements that as `-DUSE_ASAN=ON`. A contributor on Windows therefore believes they are running under AddressSanitizer while running a plain Debug build, and concludes the codebase is memory-clean when ASan simply never ran. MSVC has supported `/fsanitize=address` since VS2019 16.9, so this is a gap in the CMake logic, not a toolchain limitation. Two secondary issues in the same block: enabling USE_ASAN and USE_TSAN together concatenates `-fsanitize=address -fsanitize=thread`, which the compiler rejects; and USE_UBSAN omits `-fno-sanitize-recover`, so UBSan findings are logged and execution continues, which is easy to miss in a game's console spam.
@@ -2988,6 +3012,8 @@ Six tracked sources use an uppercase extension: Client/BIT_RES.CPP, Client/COGGS
 
 #### 🟡 Medium -- .gitignore ignores `Makefile` — the repo's own tracked build entry point — and `*.cmake`, which would swallow any future CMake module.
 
+> ✅ **Fixed (2026-09-18)**: removed the blanket `Makefile` and `*.cmake` ignore rules and their exception list. Only generated CMake filenames/build directories remain ignored. `git check-ignore --no-index` confirms hand-written Makefiles/modules are visible.
+
 **Category:** build  |  **Location:** `.gitignore:49`
 
 Line 49 is a bare `Makefile` pattern. Because Git ignore rules without a slash match at every directory level, this matches the repository's own hand-written, tracked `Makefile` (confirmed: `git check-ignore --no-index -v Makefile` reports `.gitignore:49:Makefile`). It survives only because it is already in the index — the moment anyone runs `git rm --cached Makefile`, or a contributor adds a `tools/Makefile` or `emscripten/Makefile`, it silently will not be added and `git status` will not mention it. Line 50's `*.cmake` has the same shape: it would ignore a `cmake/FindSDL2.cmake` or a `cmake/Toolchain.cmake` module, which is the natural next step for a project already doing manual ATL discovery at CMakeLists.txt:298-321. Line 51's `!CMakeLists.txt` negation is a no-op — `CMakeLists.txt` does not end in `.cmake` and was never matched by line 50, so it gives a false impression that the negation is protecting something. All of this is redundant anyway: line 25's `[Bb]uild/` already excludes generated CMake trees, which is where these files actually appear.
@@ -2995,6 +3021,8 @@ Line 49 is a bare `Makefile` pattern. Because Git ignore rules without a slash m
 **Recommendation:** Delete lines 45-52 (the "CMake Generated Files" block) entirely — `[Bb]uild/` covers the real case. If per-file rules are wanted, scope them to the build tree (`build/**/Makefile`, `build/**/*.cmake`) so they cannot reach hand-written files.
 
 #### 🟡 Medium -- Platform.h defines assert() as a no-op on all non-Windows platforms, and whether the real assert survives depends on include order.
+
+> ✅ **Verified resolved (2026-09-18)**: duplicate of the non-Windows assertion finding in the platform section. `Platform.h` uses `<assert.h>` with no project replacement; Debug builds retain the standard assertion behavior.
 
 **Category:** correctness  |  **Location:** `basic/Platform.h:27`
 
@@ -3011,6 +3039,8 @@ Line 21 opens `extern "C" {` and it is not closed until the end of the 2037-line
 **Recommendation:** Move all `#include` directives above the `extern "C" {` at line 21 so only this header's own C declarations are inside it. Longer term, split Platform.h: a small C-linkage type/function header, and a separate implementation header that pulls in windows.h/SDL only where it is actually needed, so a 2000-line Win32+SDL include is not on the critical path of every one of ~1000 translation units.
 
 #### 🟡 Medium -- PLATFORM_MACOS is defined for every non-Windows platform, so Linux builds compile the macOS code paths.
+
+> ✅ **Verified resolved (2026-09-18)**: `Platform.h` derives Windows, Linux and macOS from the compiler's platform macros; shared Unix behavior uses `PLATFORM_POSIX`. CMake no longer defines a fake macOS platform for Linux, and ratchet R13 prevents those build-defined platform macros from returning.
 
 **Category:** portability  |  **Location:** `CMakeLists.txt:841`
 
@@ -3036,6 +3066,8 @@ A repo-wide search for `add_compile_options`/`target_compile_options`/warning fl
 
 #### 🟡 Medium -- Three non-Windows source exclusions are anchored ^Client/ but match against absolute paths, so they never fire.
 
+> ✅ **Verified resolved (2026-09-18)**: the ineffective anchored exclusion block is gone. The obsolete root handlers were deleted; `ClientFunction.cpp` is compiled on all supported platforms. Current full Linux/macOS builds verify the resulting source set instead of relying on those filters.
+
 **Category:** build  |  **Location:** `CMakeLists.txt:696`
 
 Inside the `if(NOT WIN32)` block, line 696 filters `"^Client/[^/]+Handler\\.cpp"`, line 698 filters `"^Client/Client\\.cpp"` and line 699 filters `"^Client/ClientFunction\\.cpp"`. All three are anchored to the start of the string with `^`, but `CLIENT_MAIN_SOURCES` came from `file(GLOB)` at line 583 and contains absolute paths (`/Users/.../client/Client/Client.cpp`), so the anchor can never match. Confirmed empirically: the checked-in macOS-generated compile_commands.json still contains `/Users/genius/project/opendarkeden/client/Client/Client.cpp` despite line 698 claiming to exclude it. Line 713 repeats the Client.cpp exclusion *without* the anchor, which is the only reason that particular one has any effect at all — meaning the file is protected by an accidental duplicate rather than by the rule that names it. The `^Client/[^/]+Handler\.cpp` rule at line 696 has no unanchored twin and is simply dead: its stated intent (exclude root-level Handler files but keep the ones under Packet/) is not being enforced on any platform.
@@ -3043,6 +3075,8 @@ Inside the `if(NOT WIN32)` block, line 696 filters `"^Client/[^/]+Handler\\.cpp"
 **Recommendation:** Drop the `^` anchors and match on a path separator instead — e.g. `"/Client/[^/]+Handler\\.cpp$"` — matching the style already used correctly at lines 650, 651, 660-662, 669 and 676. Then remove the now-redundant duplicate at line 713.
 
 #### 🟡 Medium -- Every file(GLOB) lacks CONFIGURE_DEPENDS, so adding or deleting a source does not trigger a reconfigure.
+
+> ✅ **Fixed (2026-09-18)**: all four source globs (client, UI, framelib and unit tests) now use `CONFIGURE_DEPENDS`; the one-level packet glob is spelled `*`, not a misleading `**`. A temporary framelib source was added and removed without running configure manually, and both changes regenerated the project. MSBuild had already loaded the old target on removal, so that direct target build required a second invocation after regeneration; the regenerated source list was correct.
 
 **Category:** build  |  **Location:** `CMakeLists.txt:583`
 
@@ -3052,6 +3086,8 @@ CMakeLists.txt:171-174 (`file(GLOB_RECURSE VS_UI_SRC_SOURCES ...)`), :583-589 (`
 
 #### 🟡 Medium -- cmake_minimum_required(VERSION 3.10) understates the real requirement; the file uses commands that need 3.13.
 
+> ✅ **Verified resolved (2026-09-18)**: the root project and test project require CMake 3.21, matching the documented Visual Studio 2022 generator requirement. Older 3.20 declarations in individual subdirectories cannot lower the root requirement.
+
 **Category:** build  |  **Location:** `CMakeLists.txt:1`
 
 Line 1 declares 3.10, but line 77 calls `add_link_options()` and line 752 calls `target_link_directories()`, both introduced in CMake 3.13. README.md:43 tells contributors to install "CMake 3.20+" and CLAUDE.md's build requirements say "CMake 3.20+". A contributor on 3.10-3.12 passes the version gate and then fails with `Unknown CMake command "target_link_directories"` partway through configure, which reads as a broken CMakeLists rather than an out-of-date CMake. The understated minimum also silences policies the project would benefit from: at 3.10 compatibility, CMP0077 (option() honouring normal variables) and CMP0079 stay at OLD, which matters here because the file mixes `option()` in subdirectories (basic/CMakeLists.txt:13, Client/DXLib/CMakeLists.txt:13) with a FORCEd cache set at line 54. Note also that all five sub-CMakeLists repeat `cmake_minimum_required(VERSION 3.10)`, which is redundant and drifts independently.
@@ -3059,6 +3095,8 @@ Line 1 declares 3.10, but line 77 calls `add_link_options()` and line 752 calls 
 **Recommendation:** Raise the top-level minimum to match reality and the docs — `cmake_minimum_required(VERSION 3.20)` — and delete the redundant per-subdirectory calls so there is one number to keep in sync with README.md:43.
 
 #### 🟡 Medium -- map_viewer and effect_viewer link the `sprite` target unconditionally, but that target only exists when BUILD_ENGINE is ON.
+
+> ✅ **Fixed (2026-09-18)**: `map_viewer` is created only with `BUILD_ENGINE=ON`; its loader really uses the engine's `zone.c`. Removed the unused `sprite` link from `effect_viewer`, which remains available with the engine off. A Windows `BUILD_ENGINE=OFF` build reproduced LNK1104 before the change; afterwards the map viewer is absent from the solution and the effect viewer builds successfully.
 
 **Category:** build  |  **Location:** `CMakeLists.txt:511`
 
@@ -3068,6 +3106,8 @@ Line 1 declares 3.10, but line 77 calls `add_link_options()` and line 752 calls 
 
 #### 🟡 Medium -- A 3.4 MB generated compile_commands.json full of another developer's macOS absolute paths is tracked in git and not gitignored.
 
+> ✅ **Fixed (2026-09-18)**: the stale compilation database was already untracked; `/compile_commands.json` is now explicitly ignored. README explains how to use the build-directory database generated by Ninja/Makefile generators and that Visual Studio generators do not produce one.
+
 **Category:** maintainability  |  **Location:** `compile_commands.json:2`
 
 The tracked root `compile_commands.json` has `"directory": "/Users/genius/project/opendarkeden/client"`, invokes `/Library/Developer/CommandLineTools/usr/bin/c++`, and passes `-DPLATFORM_MACOS` with `-I/Users/genius/project/opendarkeden/client/...` include paths. None of that exists on any other machine. Meanwhile CMakeLists.txt:20 sets `CMAKE_EXPORT_COMPILE_COMMANDS ON`, so a real, correct database is generated into the build tree on every configure. `git check-ignore --no-index compile_commands.json` reports it is not ignored, so it will keep being re-committed. The practical cost is direct: clangd, ccls and every editor that auto-discovers a compilation database at the repo root will read this file first, resolve nothing, and give every contributor broken navigation and phantom diagnostics across a 2500-file codebase. The 3.4 MB also re-diffs noisily on any commit that touches it. Note the same stale artifact is what let me confirm several of the other findings — it is a useful forensic record, but it does not belong at the repo root.
@@ -3075,6 +3115,8 @@ The tracked root `compile_commands.json` has `"directory": "/Users/genius/projec
 **Recommendation:** `git rm --cached compile_commands.json`, add it to .gitignore, and document in README.md that the database is generated at `build/<dir>/compile_commands.json` (a symlink or a `file(CREATE_LINK)` in CMake can put it at the root for editors without tracking it).
 
 #### 🟡 Medium -- The Makefile's entire Emscripten workflow points at an emscripten/ directory that does not exist, and `make clean` invokes it.
+
+> ✅ **Fixed by removal (2026-09-18)**: deleted the four dead web targets, SDK variables, help entries and cleanup chain, plus the root CMake Emscripten SDL aliases/link options and iconv bypasses. The repository has no Emscripten application to support these paths.
 
 **Category:** dead-code  |  **Location:** `Makefile:188`
 
@@ -3092,6 +3134,8 @@ Despite the name and the header comment ("Minimal precompiled header for CMake b
 
 #### ⚪ Low -- 97 Korean-named files are tracked under 참고자료/, and CMakeLists.txt cites one of them as normative build documentation.
 
+> ✅ **Verified resolved (2026-09-18)**: the historical Korean-named archive is no longer tracked, and CMake's WinMain rationale is inline. Removed the stale archive row from `CLAUDE.md`; the current build documentation no longer points to that tree.
+
 **Category:** maintainability  |  **Location:** `CMakeLists.txt:207`
 
 The `참고자료/` tree holds 97 tracked files with fully Korean paths (e.g. `참고자료/분석관련/07. VS2019 마이그레이션 가이드.md`, `참고자료/작업지시/build_after 4(DEBUG 출력 설정).md`). CMakeLists.txt:207 points at one of them as the justification for excluding VS_UI/WinMain.cpp: "See 참고자료/커밋로그/2026-08-21_VS_UI_WinMain_cpp_죽은_진입점_제외.md". Non-ASCII paths are a practical hazard on Windows: `git` renders them as octal escapes under the default `core.quotepath`, `cmd.exe` and some CI checkout steps mangle them under a non-UTF-8 codepage, and archive extraction (`git archive`, GitHub's zip download) can produce unopenable names. Having the build file itself depend on such a path for its rationale means a contributor debugging the WinMain exclusion may be unable to open the referenced document. This also sits against the project's own stated direction — CLAUDE.md says "only **English** should be used" for comments, and the repo's memory notes record that this fork is English-only.
@@ -3100,6 +3144,8 @@ The `참고자료/` tree holds 97 tracked files with fully Korean paths (e.g. `�
 
 #### ⚪ Low -- A 320 KB mojibake `tree /f` dump and the batch file that regenerates it are tracked in git, already stale.
 
+> ✅ **Verified resolved (2026-09-18)**: `git ls-files Documents filelist.txt make_tree.bat` is empty. Both the generated tree dump and its generator, as well as the duplicated historical documentation tree, were already removed.
+
 **Category:** maintainability  |  **Location:** `filelist.txt:1`
 
 `filelist.txt` is 327 KB of CP949-encoded Windows `tree /f` output, tracked in git and not ignored. Its first lines identify volume `2TB_Nvme2` and root `H:.`, and its listing includes `plan.md` at the repo root — a file that no longer exists. Every line renders as mojibake in any UTF-8 tool. `make_tree.bat` (a single line: `tree /f > filelist.txt`) is tracked alongside it. The file duplicates information `git ls-files` gives accurately and for free, goes stale on every commit that adds or removes a file, and adds 320 KB to every clone. Related hygiene in the same category: `Documents/` tracks ten `*_kr.md` documents plus a `Documents/backup/` directory holding 14 files that are the same documents under their original names — two copies of the project's migration notes, with no indication which is current.
@@ -3107,6 +3153,8 @@ The `참고자료/` tree holds 97 tracked files with fully Korean paths (e.g. `�
 **Recommendation:** `git rm filelist.txt make_tree.bat`. Reconcile `Documents/` and `Documents/backup/` down to one copy of each document; a `git log` on the deleted path recovers anything needed later.
 
 #### ⚪ Low -- The Makefile is single-threaded on Windows, and helper scripts are macOS-only, despite Windows being the documented build platform.
+
+> ✅ **Fixed (2026-09-18)**: the Makefile detects Windows processor counts or uses `nproc`/`sysctl`, respects `NPROCS`, and passes explicit build/test configurations. Test targets build both registered test executables. The effect-viewer Bash helper uses the same portable job selection, an overridable in-repository data path, and Debug/single-config executable locations. Removed the identical CMake branch. GNU Make dry runs checked Unix and Windows job selection plus Debug/Release/test commands; the helper passes Bash syntax checking. No viewer or game was launched.
 
 **Category:** build  |  **Location:** `Makefile:31`
 
