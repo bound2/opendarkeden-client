@@ -98,6 +98,7 @@ add_executable(ui_tests
 	framework/test_main.cpp
 	ui/test_button.cpp
 	ui/test_event_button.cpp
+	ui/test_skin_manager.cpp
 )
 target_link_libraries(ui_tests PRIVATE test_framework VS_UI basic)
 add_test(NAME ui_tests COMMAND ui_tests)
