@@ -4,6 +4,8 @@
 #include "Client_PCH.h"
 #include "CSpriteSurface.h"
 #include "CAlphaSprite.h"
+#include "SpriteScanline.h"
+#include <memory>
 
 #ifdef SPRITELIB_BACKEND_SDL
 #include "SpriteLibBackend.h"
@@ -65,8 +67,6 @@ CAlphaSprite::Release()
 #endif
 	if (m_Pixels!=NULL)
 	{
-		m_bInit		= false;
-
 		for (int i=0; i<m_Height; i++)
 			delete [] m_Pixels[i];
 			//free(m_Pixels[i]);
@@ -75,10 +75,59 @@ CAlphaSprite::Release()
 
 		//s_Delete++;
 
-		m_Pixels	= NULL;
-		m_Width		= 0;
-		m_Height	= 0;	
 	}
+	m_Pixels = nullptr;
+	m_Width = m_Height = 0;
+	m_bInit = false;
+	m_PixelLengths.clear();
+}
+
+bool CAlphaSprite::LoadPixels(std::ifstream& file, bool convertTo555)
+{
+	Release();
+	WORD width = 0, height = 0;
+	if (!file.read(reinterpret_cast<char*>(&width), sizeof(width))
+		|| !file.read(reinterpret_cast<char*>(&height), sizeof(height))) return false;
+	if (width == 0 || height == 0) {
+		m_Width = width;
+		m_Height = height;
+		m_bInit = true;
+		return true;
+	}
+
+	std::vector<std::unique_ptr<WORD[]>> rows(height);
+	std::vector<std::size_t> lengths(height);
+	// Read all rows before validation to preserve the next packed sprite's
+	// position when a complete but malformed row is rejected.
+	for (WORD y = 0; y < height; ++y) {
+		WORD length = 0;
+		if (!file.read(reinterpret_cast<char*>(&length), sizeof(length))) return false;
+		lengths[y] = length;
+		if (!length) continue;
+		rows[y] = std::make_unique<WORD[]>(length);
+		if (!file.read(reinterpret_cast<char*>(rows[y].get()), length * sizeof(WORD))) return false;
+	}
+	for (WORD y = 0; y < height; ++y) {
+		if (!ValidateSpriteScanline({rows[y].get(), lengths[y]}, width, 2)) return false;
+		if (convertTo555) {
+			WORD* line = rows[y].get();
+			std::size_t offset = 1;
+			for (int run = 0; run < line[0]; ++run) {
+				const WORD colored = line[offset + 1];
+				offset += 2;
+				for (int pixel = 0; pixel < colored; ++pixel, offset += 2)
+					line[offset + 1] = ColorDraw::Convert565to555(line[offset + 1]);
+			}
+		}
+	}
+	auto pointers = std::make_unique<WORD*[]>(height);
+	for (WORD y = 0; y < height; ++y) pointers[y] = rows[y].release();
+	m_PixelLengths = std::move(lengths);
+	m_Pixels = pointers.release();
+	m_Width = width;
+	m_Height = height;
+	m_bInit = true;
+	return true;
 }
 
 //----------------------------------------------------------------------
@@ -87,50 +136,23 @@ CAlphaSprite::Release()
 void
 CAlphaSprite::operator = (const CAlphaSprite& Sprite)
 {
-		// 메모리 해제
+	if (this == &Sprite) return;
 	Release();
+	if (!Sprite.m_Pixels || !Sprite.m_Width || !Sprite.m_Height) return;
 
-
-	// NULL이면 저장하지 않는다.
-	if (Sprite.m_Pixels==NULL || Sprite.m_Width==0 || Sprite.m_Height==0)
-		return;
-
-	// 크기 설정
+	std::vector<std::unique_ptr<WORD[]>> rows(Sprite.m_Height);
+	for (WORD y = 0; y < Sprite.m_Height; ++y) {
+		const auto line = Sprite.GetPixelLineSpan(y);
+		if (!ValidateSpriteScanline(line, Sprite.m_Width, 2)) return;
+		rows[y] = std::make_unique<WORD[]>(line.size());
+		memcpy(rows[y].get(), line.data(), line.size_bytes());
+	}
+	auto pointers = std::make_unique<WORD*[]>(Sprite.m_Height);
+	m_PixelLengths = Sprite.m_PixelLengths;
+	for (WORD y = 0; y < Sprite.m_Height; ++y) pointers[y] = rows[y].release();
+	m_Pixels = pointers.release();
 	m_Width = Sprite.m_Width;
 	m_Height = Sprite.m_Height;
-	
-	// 압축 된 것 저장
-	int index;	
-	int i;
-	int j;
-
-	// 메모리 잡기
-	m_Pixels = new WORD* [m_Height];
-
-	for (int i=0; i<m_Height; i++)
-	{
-		// 반복 회수의 2 byte
-		int	count = Sprite.m_Pixels[i][0], 
-				colorCount;
-		index	= 1;
-
-		// 각 line마다 byte수를 세어서 저장해야한다.
-		for (j=0; j<count; j++)
-		{
-			//transCount = m_Pixels[i][index];
-			colorCount = Sprite.m_Pixels[i][index+1];
-
-			index+=2;	// 두 count 만큼
-
-			index += (colorCount<<1);	// 투명색 아닌것만큼 +				
-		}
-
-		// 메모리 잡기
-		m_Pixels[i] = new WORD [index];
-		memcpy(m_Pixels[i], Sprite.m_Pixels[i], index<<1);
-	}
-
-	// 복사 완료
 	m_bInit = true;
 }
 
@@ -167,7 +189,7 @@ CAlphaSprite::SetPixel(WORD *pSource, WORD sourcePitch,
 	m_Height = height;
 
 	// 일단 memory를 적당히 잡아둔다.	
-	WORD*	data = new WORD[m_Width*4+10];
+	std::vector<WORD> data(m_Width * 4 + 10);
 
 	int	index,				// data의 index로 사용
 			lastColorIndex;		// 투명이 아닌색 개수의 최근 index
@@ -180,7 +202,8 @@ CAlphaSprite::SetPixel(WORD *pSource, WORD sourcePitch,
 	WORD	*pSourceTemp, *pFilterTemp;
 
 	// height줄 만큼 memory잡기
-	m_Pixels = new WORD* [height];
+	m_PixelLengths.assign(height, 0);
+	m_Pixels = new WORD* [height]{};
 
 	for (int i=0; i<height; i++)
 	{
@@ -261,17 +284,16 @@ CAlphaSprite::SetPixel(WORD *pSource, WORD sourcePitch,
 		
 		// memory를 다시 잡는다.
 		m_Pixels[i] = new WORD [index+1];
+		m_PixelLengths[i] = index + 1;
 
 		// m_Pixels[i]를 압축했으므로 data로 대체한다.
 		// m_Pixels[i][0]에는 count를 넣어야 한다.
 		m_Pixels[i][0] = count;
-		memcpy(m_Pixels[i]+1, data, index<<1);
+		memcpy(m_Pixels[i]+1, data.data(), index<<1);
 
 		pSource = (WORD*)((BYTE*)pSource + sourcePitch);
 		pFilter = (WORD*)((BYTE*)pFilter + filterPitch);
 	}
-
-	delete [] data;
 
 	m_bInit = true;
 }

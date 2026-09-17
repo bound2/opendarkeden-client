@@ -6,6 +6,9 @@
 #ifndef	__CALPHASPRITE_H__
 #define	__CALPHASPRITE_H__
 
+#include <span>
+#include <vector>
+
 #ifdef PLATFORM_WINDOWS
 	#include <Windows.h>
 #else
@@ -98,6 +101,11 @@ class CAlphaSprite
 		WORD		GetHeight()		const			{ return m_Height; }
 		WORD		GetPixel(int x, int y, int bColor=1) const;
 		WORD*		GetPixelLine(WORD y)	const	{ return m_Pixels[y]; }
+		std::span<const WORD> GetPixelLineSpan(WORD y) const
+		{
+			if (!m_Pixels || y >= m_Height || y >= m_PixelLengths.size() || !m_Pixels[y]) return {};
+			return {m_Pixels[y], m_PixelLengths[y]};
+		}
 
 #ifdef SPRITELIB_BACKEND_SDL
 		/* Backend sprite management */
@@ -225,6 +233,8 @@ class CAlphaSprite
 
 
 	protected :
+		bool LoadPixels(std::ifstream& file, bool convertTo555);
+		std::vector<std::size_t> m_PixelLengths;
 		WORD			m_Width;		// 가로 pixel수
 		WORD			m_Height;		// 세로 pixel수		
 		WORD**			m_Pixels;		// pixels

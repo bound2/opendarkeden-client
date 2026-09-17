@@ -65,55 +65,9 @@ CAlphaSprite565::SaveToFile(ofstream& file)
 //----------------------------------------------------------------------
 // fstream에서 load한다.
 //----------------------------------------------------------------------
-bool	
+bool
 CAlphaSprite565::LoadFromFile(ifstream& file)
 {
-	// 이미 잡혀있는 memory를 release한다.
-	Release();
-
-	// width와 height를 Load한다.
-	file.read((char*)&m_Width , 2);
-	file.read((char*)&m_Height, 2);	
-
-	// 길이가 0이면 더 Load할게 없겠지..
-	if (m_Width==0 || m_Height==0) 
-	{	
-		m_bInit = true;
-
-		return true;
-	}
-
-	//---------------------------------
-	// for OLD version of CAlphaSprite
-	//---------------------------------
-	//BOOL dummy;
-	//file.read((char*)&dummy, 1);	
-	//---------------------------------
-	
-	m_Pixels = NULL;
-	m_Pixels = new WORD* [m_Height];	
-	//m_Pixels = (WORD**)malloc(sizeof(WORD*)*m_Height);
-
-	WORD len;
-
-
-	//--------------------------------
-	// 5:6:5
-	//--------------------------------
-	for (int i=0; i<m_Height; i++)
-	{
-		// byte수와 실제 data를 Load한다.
-		file.read((char*)&len, 2);
-		
-		m_Pixels[i] = NULL;
-		m_Pixels[i] = new WORD [len];		
-		//m_Pixels[i] = (WORD*)malloc(sizeof(WORD)*len);		
-
-		file.read((char*)m_Pixels[i], len<<1);
-	}	
-	
-	m_bInit = true;
-
-	return true;
+	return LoadPixels(file, false);
 }
 
