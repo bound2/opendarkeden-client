@@ -1117,7 +1117,7 @@ AddItemToZone(GCAddItemToZone* pPacket, BOOL bDropping)
 	if ( pPacket->getItemClass() >= g_pItemTable->GetSize() ||
 		(*g_pItemTable)[pPacket->getItemClass()].GetSize() <= pPacket->getItemType() )
 	{
-		SendBugReport("[PacketFunction::AddItemToZone,%d] %d,%d",__LINE__,pPacket->getItemClass(), pPacket->getItemType() );
+		SendBugReportAt(DiagnosticSite(), "%d,%d",pPacket->getItemClass(), pPacket->getItemType() );
 		return NULL;
 	}
 
@@ -1246,7 +1246,7 @@ AddItemToZone(GCAddItemToZone* pPacket, BOOL bDropping)
 					if ( pSubItemInfo->getItemClass() >= g_pItemTable->GetSize() ||
 						(*g_pItemTable)[pSubItemInfo->getItemClass()].GetSize() <= pSubItemInfo->getItemType() )
 					{
-						SendBugReport("[PacketFunction::AddItemToZone,%d] %d,%d",__LINE__,pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
+						SendBugReportAt(DiagnosticSite(), "%d,%d",pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
 						continue;
 					}
 					MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
@@ -1295,7 +1295,7 @@ AddItemToZone(GCAddItemToZone* pPacket, BOOL bDropping)
 					if ( pSubItemInfo->getItemClass() >= g_pItemTable->GetSize() ||
 						(*g_pItemTable)[pSubItemInfo->getItemClass()].GetSize() <= pSubItemInfo->getItemType() )
 					{
-						SendBugReport("[PacketFunction::AddItemToZone,%d] %d,%d",__LINE__,pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
+						SendBugReportAt(DiagnosticSite(), "%d,%d",pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
 						continue;
 					}
 					MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
@@ -1881,7 +1881,7 @@ SetInventoryInfo(InventoryInfo* pInventoryInfo)
 							if ( pSubItemInfo->getItemClass() >= g_pItemTable->GetSize() ||
 								(*g_pItemTable)[pSubItemInfo->getItemClass()].GetSize() <= pSubItemInfo->getItemType() )
 							{
-								SendBugReport("[PacketFunction::SetInventoryInfo,%d] %d,%d",__LINE__,pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
+								SendBugReportAt(DiagnosticSite(), "%d,%d",pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
 								return;
 							}
 							MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
@@ -1931,7 +1931,7 @@ SetInventoryInfo(InventoryInfo* pInventoryInfo)
 							if ( pSubItemInfo->getItemClass() >= g_pItemTable->GetSize() ||
 								(*g_pItemTable)[pSubItemInfo->getItemClass()].GetSize() <= pSubItemInfo->getItemType() )
 							{
-								SendBugReport("[PacketFunction::SetInventoryInfo,%d] %d,%d",__LINE__,pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
+								SendBugReportAt(DiagnosticSite(), "%d,%d",pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
 								return;
 							}
 							MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
@@ -2173,7 +2173,7 @@ SetGearInfo(GearInfo* pGearInfo, BloodBibleSignInfo* pBloodBibleInfo)
 							if ( pSubItemInfo->getItemClass() >= g_pItemTable->GetSize() ||
 								(*g_pItemTable)[pSubItemInfo->getItemClass()].GetSize() <= pSubItemInfo->getItemType() )
 							{
-								SendBugReport("[PacketFunction::SetGearInfo,%d] %d,%d",__LINE__,pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
+								SendBugReportAt(DiagnosticSite(), "%d,%d",pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
 								return;
 							}
 							MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
@@ -2223,7 +2223,7 @@ SetGearInfo(GearInfo* pGearInfo, BloodBibleSignInfo* pBloodBibleInfo)
 							if ( pSubItemInfo->getItemClass() >= g_pItemTable->GetSize() ||
 								(*g_pItemTable)[pSubItemInfo->getItemClass()].GetSize() <= pSubItemInfo->getItemType() )
 							{
-								SendBugReport("[PacketFunction::SetGearInfo,%d] %d,%d",__LINE__,pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
+								SendBugReportAt(DiagnosticSite(), "%d,%d",pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
 								return;
 							}
 							MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
@@ -2437,7 +2437,7 @@ SetExtraInfo(ExtraInfo* pExtraInfo)
 			if ( pSlotInfo->getItemClass() >= g_pItemTable->GetSize() ||
 				(*g_pItemTable)[pSlotInfo->getItemClass()].GetSize() <= pSlotInfo->getItemType() )
 			{
-				SendBugReport("[PacketFunction::SetExtraInfo,%d] %d,%d",__LINE__,pSlotInfo->getItemClass(), pSlotInfo->getItemType() );
+				SendBugReportAt(DiagnosticSite(), "%d,%d",pSlotInfo->getItemClass(), pSlotInfo->getItemType() );
 				return;
 			}
 			MItem* pItem = MItem::NewItem( (ITEM_CLASS)pSlotInfo->getItemClass() );
@@ -2538,7 +2538,7 @@ SetExtraInfo(ExtraInfo* pExtraInfo)
 							if ( pSubItemInfo->getItemClass() >= g_pItemTable->GetSize() ||
 								(*g_pItemTable)[pSubItemInfo->getItemClass()].GetSize() <= pSubItemInfo->getItemType() )
 							{
-								SendBugReport("[PacketFunction::SetExtraInfo,%d] %d,%d",__LINE__,pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
+								SendBugReportAt(DiagnosticSite(), "%d,%d",pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
 								return;
 							}
 							MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
@@ -2588,7 +2588,7 @@ SetExtraInfo(ExtraInfo* pExtraInfo)
 							if ( pSubItemInfo->getItemClass() >= g_pItemTable->GetSize() ||
 								(*g_pItemTable)[pSubItemInfo->getItemClass()].GetSize() <= pSubItemInfo->getItemType() )
 							{
-								SendBugReport("[PacketFunction::SetExtraInfo,%d] %d,%d",__LINE__,pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
+								SendBugReportAt(DiagnosticSite(), "%d,%d",pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
 								return;
 							}
 
@@ -6474,7 +6474,7 @@ void SetSubInventoryInfo(InventoryInfo* pInventoryInfo)
 						if ( pSubItemInfo->getItemClass() >= g_pItemTable->GetSize() ||
 							(*g_pItemTable)[pSubItemInfo->getItemClass()].GetSize() <= pSubItemInfo->getItemType() )
 						{
-							SendBugReport("[PacketFunction::SetInventoryInfo,%d] %d,%d",__LINE__,pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
+							SendBugReportAt(DiagnosticSite(), "%d,%d",pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
 							return;
 						}
 						MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );
@@ -6524,7 +6524,7 @@ void SetSubInventoryInfo(InventoryInfo* pInventoryInfo)
 						if ( pSubItemInfo->getItemClass() >= g_pItemTable->GetSize() ||
 							(*g_pItemTable)[pSubItemInfo->getItemClass()].GetSize() <= pSubItemInfo->getItemType() )
 						{
-							SendBugReport("[PacketFunction::SetInventoryInfo,%d] %d,%d",__LINE__,pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
+							SendBugReportAt(DiagnosticSite(), "%d,%d",pSubItemInfo->getItemClass(), pSubItemInfo->getItemType() );
 							return;
 						}
 						MItem* pSubItem = MItem::NewItem( (enum ITEM_CLASS)pSubItemInfo->getItemClass() );

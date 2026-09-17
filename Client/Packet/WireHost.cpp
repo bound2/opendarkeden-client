@@ -222,8 +222,11 @@ SendBugReportV ( const char * prefix , const char * bug , va_list vl )
 	{
 		at = snprintf(Buffer, sizeof(Buffer), "%s", prefix);
 
-		if (at < 0 || at >= (int)sizeof(Buffer))
+		if (at < 0)
 			return;
+
+		if (at >= (int)sizeof(Buffer))
+			at = (int)sizeof(Buffer) - 1;
 	}
 
 	int written = vsnprintf(Buffer + at, sizeof(Buffer) - at, bug, vl);
@@ -245,7 +248,8 @@ SendBugReportV ( const char * prefix , const char * bug , va_list vl )
 
 	int len = strlen(Buffer);
 
-	if( len <= 1 )
+	// The rule is on the caller's text, prefix or none.
+	if( len - at <= 1 )
 		return;
 
 	// Cut where the packet ends, not short of it.
