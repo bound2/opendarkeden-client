@@ -3325,39 +3325,7 @@ void C_VS_UI_GEAR::Show()
 	m_pC_button_group->ShowDescription();
 	
 	SHOW_WINDOW_ATTR;
-	/*
-	#ifndef _LIB
-	//
-	// focus slot rect -- Test
-	//
-	if (gpC_base->m_p_DDSurface_back->Lock())
-	{
-	S_SURFACEINFO surface_info;
-	SetSurfaceInfo(&surface_info, gpC_base->m_p_DDSurface_back->GetDDSD());
 	
-	  if (m_focus_slot != NOT_SELECTED)
-	  {
-	  S_RECT rect;
-	  SetRect(rect, m_p_slot_rect[m_focus_slot].x+x, m_p_slot_rect[m_focus_slot].y+y, 
-	  m_p_slot_rect[m_focus_slot].w, m_p_slot_rect[m_focus_slot].h);
-	  filledRect(&surface_info, &rect, 0xFF);
-	  }
-	  
-		//for (int i=0; i < ITEM_REF_POINT_COUNT; i++)
-		//{
-		//	putPixel(&surface_info, 
-		//		      g_item_ref_point[i].x+gpC_mouse_pointer->GetPointerX(),
-		//				g_item_ref_point[i].y+gpC_mouse_pointer->GetPointerY(),
-		//				RED);
-		//}
-		}
-		
-		  gpC_base->m_p_DDSurface_back->Unlock();
-		  char str[100];
-		  sprintf(str, "Gear focus slot = %d", m_focus_slot);
-		  g_Print(10, 420, str);
-		  #endif
-	*/
 }
 
 //-----------------------------------------------------------------------------
@@ -8176,45 +8144,7 @@ void C_VS_UI_INVENTORY::Show()
 		// -- TEST
 		//
 #ifndef _LIB
-		/*
-		if (gpC_base->m_p_DDSurface_back->Lock())
-		{
-		S_SURFACEINFO	surface_info;
-		S_RECT			rect;
-		SetSurfaceInfo(&surface_info, gpC_base->m_p_DDSurface_back->GetDDSD());
 		
-		  // Grid 전체영역 표시 
-		  rectangle(&surface_info, &m_grid_rect, GREEN);
-		  
-			//rectangle(&surface_info, &m_money_button_rect, WHITE);
-			//rectangle(&surface_info, &m_close_button_rect, WHITE);
-			
-			  // 마우스 focus된 Grid 한 칸 표시
-			  if (m_focus_grid_x != NOT_SELECTED && m_focus_grid_y != NOT_SELECTED)
-			  {
-			  SetRect(rect, m_grid_rect.x+(GRID_UNIT_PIXEL_X)*m_focus_grid_x,
-			  m_grid_rect.y+(GRID_UNIT_PIXEL_Y)*m_focus_grid_y,
-			  GRID_UNIT_PIXEL_X,
-			  GRID_UNIT_PIXEL_Y);
-			  
-				filledRect(&surface_info, &rect, BLUE);
-				}
-				
-				  for (int i=0; i < ITEM_REF_POINT_COUNT; i++)
-				  {
-				  //	putPixel(&surface_info, 
-				  //		      g_item_ref_point[i].x+gpC_mouse_pointer->GetPointerX(),
-				  //				g_item_ref_point[i].y+gpC_mouse_pointer->GetPointerY(),
-				  //				RED);
-				  }
-				  
-					gpC_base->m_p_DDSurface_back->Unlock();
-					
-					  char str[100];
-					  
-						sprintf(str, "focus grid (x, y) = %d, %d", m_focus_grid_x, m_focus_grid_y);
-						g_Print(10, 420, str);
-	}*/
 #endif
 	SetDebugEnd();
 }
@@ -10123,28 +10053,7 @@ void C_VS_UI_SKILL::Show2()
 			i++;
 		}
 	}
-	/*
-	if (focused_id != NOT_SELECTED && m_focus_slot != NOT_SELECTED)
-	if (gpC_base->m_p_DDSurface_back->Lock())
-	{
-	S_SURFACEINFO	surface_info;
-	S_RECT			rect;
-	SetSurfaceInfo(&surface_info, gpC_base->m_p_DDSurface_back->GetDDSD());
 	
-	  gpC_base->SelectFont(FONT_ITEM);
-	  
-		SetRect(rect, gpC_mouse_pointer->GetPointerX(), gpC_mouse_pointer->GetPointerY()-30, gC_font.GetStringWidth((*g_pSkillInfoTable)[focused_id].GetName())+10, 30);
-		
-		  filledRect(&surface_info, &rect, 0);
-		  rectangle(&surface_info, rect.x, rect.y, rect.x+rect.w-1, rect.y+rect.h-1, LIGHT_MAGENTA);
-		  
-			gC_font.PrintString(&surface_info, (*g_pSkillInfoTable)[focused_id].GetName(), 
-			rect.x+5, 
-			rect.y+5, WHITE);
-			
-			  gpC_base->m_p_DDSurface_back->Unlock();
-			  }
-			  */
 			  if(Timer() && GetSelectedSkillID() != NOT_SELECTED)
 			  {
 				  Point point = GetIconPoint(0);
@@ -14773,6 +14682,10 @@ bool	C_VS_UI_INFO::SkillInfoMouseControl(UINT message, int _x, int _y)
 			}
 
 
+
+
+
+
 		}
 		break;
 		
@@ -14907,10 +14820,6 @@ bool	C_VS_UI_INFO::SkillInfoMouseControl(UINT message, int _x, int _y)
 				}
 			}
 
-
-
-
-			
 
 		}
 		break;

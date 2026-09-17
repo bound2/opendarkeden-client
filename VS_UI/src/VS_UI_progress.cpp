@@ -208,20 +208,7 @@ C_VS_UI_PROGRESS::C_VS_UI_PROGRESS()
 //	gpC_base->m_DDSurface_offscreen.FillSurface(BAR_COLORKEY);
 //	m_pC_progress->BltOffscreen(0, 0, BAR);
 
-	// blt from offscreen
-//	if (gpC_base->m_DDSurface_offscreen.Lock())
-//	{
-//		S_SURFACEINFO	src_surface, dest_surface;
-//		S_RECT			src_rect, dest_rect;
-//		SetSurfaceInfo(&src_surface, gpC_base->m_DDSurface_offscreen.GetDDSD());
-//		SetSurfaceInfo(dest_surface, m_p_bar_buf, m_bar_width, m_bar_height);
-//		SetRect(src_rect, 0, 0, m_bar_width, m_bar_height);
-//		SetRect(dest_rect, 0, 0, m_bar_width, m_bar_height);
-//
-//		Bltz(&dest_surface, &src_surface, &dest_rect, &src_rect);
-//
-//		gpC_base->m_DDSurface_offscreen.Unlock();
-//	}
+
 }
 
 //-----------------------------------------------------------------------------
@@ -360,32 +347,6 @@ void C_VS_UI_PROGRESS::SetProgress(WORD cur_val, WORD max_val)
 	}
 }
 
-//-----------------------------------------------------------------------------
-// DrawBar (Based on Vampire Energy interface)
-//
-//
-//-----------------------------------------------------------------------------
-/*
-void C_VS_UI_PROGRESS::DrawBar()
-{
-	if (m_cur_line < 1 || m_cur_line > TOTAL_BAR_LINE)
-		return;
-
-	if (gpC_base->m_p_DDSurface_back->Lock())
-	{
-		S_SURFACEINFO	src_surface, dest_surface;
-		S_RECT			src_rect, dest_rect;
-		SetSurfaceInfo(&dest_surface, gpC_base->m_p_DDSurface_back->GetDDSD());
-		SetSurfaceInfo(src_surface, m_p_bar_buf, m_bar_width, m_bar_height);
-		SetRect(src_rect, 0, 0, m_cur_line, m_bar_height);
-		SetRect(dest_rect, x+BAR_GAP_X, y+BAR_GAP_Y, m_cur_line, m_bar_height);
-
-		CkBltz(&dest_surface, &src_surface, &dest_rect, &src_rect, BAR_COLORKEY);
-
-		gpC_base->m_p_DDSurface_back->Unlock();
-	}
-}
-*/
 
 //-----------------------------------------------------------------------------
 // Show

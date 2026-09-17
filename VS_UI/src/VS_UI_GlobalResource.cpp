@@ -24,7 +24,6 @@ bool	gbl_wood_skin;
 C_GLOBAL_RESOURCE::C_GLOBAL_RESOURCE()
 {
 	//LoadAniButton();
-//	LoadAssembleBox();
 	//LoadCommonImage();
 //	LoadCommonButton();
 	m_pC_assemble_box_spk = NULL;
@@ -44,7 +43,6 @@ C_GLOBAL_RESOURCE::C_GLOBAL_RESOURCE()
 C_GLOBAL_RESOURCE::~C_GLOBAL_RESOURCE()
 {
 	//FreeAniButton();
-//	FreeAssembleBox();
 	//FreeCommonImage();
 //	FreeCommonButton();
 	//FreeCommonInTitle();
@@ -175,34 +173,6 @@ void C_GLOBAL_RESOURCE::LoadAniButton()
 void C_GLOBAL_RESOURCE::FreeAniButton()
 {
 	DeleteNew(m_pC_ao_ani_button);
-}
-*/
-//-----------------------------------------------------------------------------
-// LoadAssembleBox
-//
-
-//-----------------------------------------------------------------------------
-/*void C_GLOBAL_RESOURCE::LoadAssembleBox()
-{
-	m_pic_box_back = new Tga;
-	if (!m_pic_box_back->Load(IMAGE_BOXBACK))
-		_Error(FAILED_JOB);
-
-	m_pC_box_line_spk = new C_SPRITE_PACK(SPK_BOX_LINE);
-
-	m_pC_ok_spk = new C_SPRITE_PACK(SPK_OK);
-}*/
-
-//-----------------------------------------------------------------------------
-// FreeAssembleBox
-//
-// 
-//-----------------------------------------------------------------------------
-/*void C_GLOBAL_RESOURCE::FreeAssembleBox()
-{
-	DeleteNew(m_pC_ok_spk);
-	DeleteNew(m_pC_box_line_spk);
-	DeleteNew(m_pic_box_back);
 }
 */
 /*

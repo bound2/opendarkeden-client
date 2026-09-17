@@ -714,21 +714,6 @@ void C_VS_UI_DIALOG::Show()
 			if (m_line_count > m_print_line_count)
 			{
 				line = m_print_line_count;
-
-//				if (gpC_base->m_p_DDSurface_back->Lock()) // draw track
-//				{
-//				if(m_msg_rect.h > 0)
-//				{
-//					S_SURFACEINFO	surfaceinfo;
-//					SetSurfaceInfo(&surfaceinfo, gpC_base->m_p_DDSurface_back->GetDDSD());
-//
-//					int track_x = m_msg_rect.x+m_msg_rect.w+m_tag_rect.w/2;
-//					vertline(&surfaceinfo, track_x, m_msg_rect.y, track_x, m_msg_rect.Down(), BLACK);
-//					vertline(&surfaceinfo, track_x+1, m_msg_rect.y, track_x+1, m_msg_rect.Down(), DARKGRAY);
-//				}
-
-//				}
-
 //				if (m_available_tag == true)
 //					gpC_global_resource->m_pC_assemble_box_etc_spk->BltLocked(m_tag_rect.x, m_tag_rect.y, C_GLOBAL_RESOURCE::AB_SCROLL_TAG);
 			}
@@ -776,21 +761,7 @@ void C_VS_UI_DIALOG::Show()
 			}
 		}
 
-		// draw boundary line
-//		if (m_menu_count > 0)
-//		{
-//			if (gpC_base->m_p_DDSurface_back->Lock()) // draw track
-//			{
-//				S_SURFACEINFO	surfaceinfo;
-//				SetSurfaceInfo(&surfaceinfo, gpC_base->m_p_DDSurface_back->GetDDSD());
-//
-//				int b_y = m_msg_rect.y+m_msg_rect.h+4;
-//				horzline(&surfaceinfo, m_msg_rect.x, b_y, m_msg_rect.Right(), b_y, BLACK);
-//				horzline(&surfaceinfo, m_msg_rect.x, b_y+1, m_msg_rect.Right(), b_y+1, DARKGRAY);
-//
-//				gpC_base->m_p_DDSurface_back->Unlock();
-//			}
-//		}
+
 	}
 	else
 	{
