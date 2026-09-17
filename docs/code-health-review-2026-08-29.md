@@ -1122,6 +1122,8 @@ Lines 121-124 run `for (int i=0; i<m_Height; i++) delete [] m_Pixels[i]; delete 
 
 **Category:** maintainability  |  **Location:** `Client/SpriteLib/CSpriteSurface.h:73`
 
+> ✅ **Fixed in the 2026-09-17 follow-up** (`refactor/review-single-sprite-surface`). The unused DirectDraw-derived definition and all layout-selecting guards in `CSpriteSurface.h` are removed. Every consumer sees the same SDL class, and CMake no longer exports `SPRITESURFACE_STANDALONE`. `CSDLGraphicsFlip.cpp` stays in the executable because it connects the executable-owned `g_pBack` to the two rendering libraries; its old macro-layout rationale is removed. This is declaration/dead-code cleanup, verified by full Debug/ASan builds and the existing surface, alpha and palette tests.
+
 Lines 73-341 define the standalone/SDL CSpriteSurface, and lines 350-579 define `class CSpriteSurface : public CDirectDrawSurface` for the legacy path; the two carry separate copies of the FUNCTION_EFFECT enum (lines 192 and 503), separate static tables (lines 249-250 and 572-573) and different member layouts. SPRITESURFACE_STANDALONE is set in exactly one place, `target_compile_definitions(SpriteLib PUBLIC ...)` in Client/SpriteLib/CMakeLists.txt:173-177; the DarkEden target itself defines only SPRITELIB_BACKEND_SDL (CMakeLists.txt:833-837). Any translation unit that pulls in this header without inheriting SpriteLib's PUBLIC interface gets the other layout, and the resulting mismatch is an ODR violation that links cleanly. Client/CSDLGraphicsFlip.cpp exists solely as a workaround for exactly this hazard — its header comment explains that dxlib is built without SPRITELIB_BACKEND_SDL and therefore cannot safely include CSpriteSurface.h.
 
 **Recommendation:** Delete the dead CDirectDrawSurface-derived branch now that D3DLib/ is gone, leaving a single class definition; that also removes the need for the CSDLGraphicsFlip.cpp split.
@@ -1209,6 +1211,8 @@ Lines 512-516: `int leastTime = m_pLastTime[leastTimeIndex]; for (int i=0; i<m_n
 #### ⚪ Low -- Several source comments are irrecoverable mojibake rather than readable Korean or English.
 
 **Category:** maintainability  |  **Location:** `Client/SpriteLib/CSpriteSurface_Effects.cpp:56`
+
+> ✅ **Fixed in the 2026-09-17 follow-up** (`refactor/review-single-sprite-surface`). The corrupted effect comments and filter-member comment are rewritten in English from their implementations. The effect notes distinguish the registered RGB565 screen blend from unregistered legacy routines, including their 5-bit channel assumptions and raw palette-index copies. A non-comment-line comparison confirms this documentation cleanup changes no code.
 
 Comments such as line 56 ('source --> dest �� pixels��ŭ \u3designĪ�ȿ�� ó���� \u3d���.') and Client/SpriteLib/CSprite.h:328 ('// Filter 점쓹옆점쓹옆') have been through a double encoding conversion and no longer decode to anything in any charset, so the original explanation of these pixel-blending routines is lost. CLAUDE.md states this fork should be English-only and that comments should be converted where possible; these particular ones cannot be converted, only rewritten from the code.
 

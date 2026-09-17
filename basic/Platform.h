@@ -2121,8 +2121,7 @@ static inline void GetLocalTime(LPSYSTEMTIME lpSystemTime) {
 /* SetSurfaceInfo for SDL backend - copies S_SURFACEINFO. Needed on Windows
    too: with SPRITELIB_BACKEND_SDL (the only backend this project builds,
    Windows included), CSpriteSurface is a standalone SDL class whose own
-   GetDDSD() returns S_SURFACEINFO* (see CSpriteSurface.h's
-   SPRITESURFACE_STANDALONE branch), not the DDSURFACEDESC2* that
+   GetDDSD() returns S_SURFACEINFO*, not the DDSURFACEDESC2* that
    basic/GL_import.h's Windows-only SetSurfaceInfo() overload expects (that
    overload is itself unimplemented dead weight from the old GL_import DLL -
    no .cpp in this project defines it). */

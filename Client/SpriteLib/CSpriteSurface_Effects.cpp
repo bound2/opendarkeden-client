@@ -2,8 +2,8 @@
 // CSpriteSurface_Effects.cpp
 //
 // Pure pixel manipulation effect functions extracted from CSpriteSurface.cpp
-// These functions are backend-agnostic and work with both DirectX and SDL
-//
+// Screen is registered for RGB565. Other legacy palette effects remain
+// unregistered: several assume 5-bit channels or perform raw index copies.
 // 2025.01.27 - Extracted for SDL backend support
 //----------------------------------------------------------------------
 
@@ -54,7 +54,7 @@ CSpriteSurface::memcpyPalEffectDarker(WORD* pDest, BYTE* pSource, WORD pixels, M
 //----------------------------------------------------------------------
 // Effect Copy - GrayScale
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// Replace each pixel with the average of its source palette channels.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectGrayScale(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -84,7 +84,7 @@ CSpriteSurface::memcpyPalEffectGrayScale(WORD* pDest, BYTE* pSource, WORD pixels
 //----------------------------------------------------------------------
 // Effect Copy - Lighten
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// Select the larger source/destination value for each channel.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectLighten(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -109,7 +109,7 @@ CSpriteSurface::memcpyPalEffectLighten(WORD* pDest, BYTE* pSource, WORD pixels, 
 //----------------------------------------------------------------------
 // Effect Copy - Darken
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// Select the smaller source/destination value for each channel.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectDarken(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -136,7 +136,7 @@ CSpriteSurface::memcpyPalEffectDarken(WORD* pDest, BYTE* pSource, WORD pixels, M
 //----------------------------------------------------------------------
 // Effect Copy - ColorDodge
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// Scale each destination channel by 32 / (32 - source); assumes 5-bit channels.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectColorDodge(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -164,7 +164,7 @@ CSpriteSurface::memcpyPalEffectColorDodge(WORD* pDest, BYTE* pSource, WORD pixel
 //----------------------------------------------------------------------
 // Effect Copy - Screen
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// Blend through the initialized per-channel screen tables.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectScreen(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -215,7 +215,7 @@ CSpriteSurface::memcpyPalEffectScreen(WORD* pDest, BYTE* pSource, WORD pixels, M
 //----------------------------------------------------------------------
 // Effect Copy - Screen
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// Legacy placeholder: this function does not draw any pixels.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectScreenAlpha(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -225,7 +225,7 @@ CSpriteSurface::memcpyPalEffectScreenAlpha(WORD* pDest, BYTE* pSource, WORD pixe
 //----------------------------------------------------------------------
 // Effect Copy - DodgeBurn
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// Scale each destination channel by (32 - source) / 32.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectDodgeBurn(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -253,7 +253,7 @@ CSpriteSurface::memcpyPalEffectDodgeBurn(WORD* pDest, BYTE* pSource, WORD pixels
 //----------------------------------------------------------------------
 // Effect Copy - Different
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// Write the absolute source/destination difference for each channel.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectDifferent(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -292,9 +292,9 @@ CSpriteSurface::memcpyPalEffectDifferent(WORD* pDest, BYTE* pSource, WORD pixels
 //----------------------------------------------------------------------
 // Effect Copy - Gradation
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+// Map each source pixel's channel sum through the selected color set.
 //
-// s_Value1�� ColorSet��ȣ�̴�.
+// s_Value1 selects the ColorSet row.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectGradation(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -328,29 +328,29 @@ CSpriteSurface::memcpyPalEffectGradation(WORD* pDest, BYTE* pSource, WORD pixels
 //----------------------------------------------------------------------
 // Effect SimpleOutline
 //----------------------------------------------------------------------
-// �� �������� �ܰ��� ���(������ ������ �� �� ���� ���)
-// pixels�� 1�̻��̶�� �����Ѵ�.
+// Draw the first and last endpoints of a run; the caller must supply
+// at least one pixel. This legacy routine is not registered for SDL.
 //----------------------------------------------------------------------
 void		
 CSpriteSurface::memcpyPalEffectSimpleOutline(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	// ù ��
+	// First endpoint uses the source palette color.
 	*pDest = pal[*pSource];
 	
 	int pixels_1 = pixels-1;
 
-	// �� �� - pixels�� 1�϶� ���ϴ°ź��� �׳� ��°� �� ������?
+	// Last endpoint copies a raw palette index, a remaining legacy limitation.
 	*(pDest+pixels_1) = *(pSource+pixels_1);	
 }
 
 //----------------------------------------------------------------------
 // Effect WipeOut
 //----------------------------------------------------------------------
-// s_Value1 : �� ����� ����? 
-//				64 - ����
-//				0 - �� ���
+// s_Value1 controls the omitted center fraction:
+//              64 skips the entire run;
+//               0 skips no pixels.
 //
-// �߽ɿ������� �������� ����������.
+// The retained pixels are split between the two ends.
 //
 // ***************
 // ******   ******
@@ -364,25 +364,25 @@ CSpriteSurface::memcpyPalEffectWipeOut(WORD* pDest, BYTE* pSource, WORD pixels, 
 	int drawPixels = (pixels - skipPixels)>>1;
 	int drawPixels2 = pixels - drawPixels - skipPixels;
 	
-	// [1] drawPixels��ŭ ����ϰ�..
-	// [2] skipPixels ��ŭ �ǳʶ��
-	// [3] drawPixels2��ŭ ���
+	// [1] Copy the first drawPixels entries.
+	// [2] Leave skipPixels entries in the center untouched.
+	// [3] Copy the final drawPixels2 entries.
 	
 	//------------------------------------------------------------	
-	// drawPixels��ŭ ���
+	// Copy the left segment (legacy raw copy, not palette expansion).
 	//------------------------------------------------------------	
 	memcpy(pDest, pSource, (drawPixels<<1));
 	pDest += drawPixels;
 	pSource += drawPixels;
 
 	//------------------------------------------------------------	
-	// skipPixels��ŭ �ǳʶ�
+	// Advance over the center segment without drawing.
 	//------------------------------------------------------------	
 	pDest += skipPixels;
 	pSource += skipPixels;
 
 	//------------------------------------------------------------	
-	// drawPixels2��ŭ ���
+	// Copy the right segment.
 	//------------------------------------------------------------	
 	memcpy(pDest, pSource, (drawPixels2<<1));
 	//pDest += drawPixels2;
@@ -392,9 +392,9 @@ CSpriteSurface::memcpyPalEffectWipeOut(WORD* pDest, BYTE* pSource, WORD pixels, 
 //----------------------------------------------------------------------
 // Effect Net
 //----------------------------------------------------------------------
-// s_Value1 : �ǳʶ�� ��
+// s_Value1 is the number of pixels skipped between drawn pixels.
 //
-// �� �� ���.. s_Value1�� �� ����ŭ �ǳʶ��.
+// Draw a palette pixel, then advance both pointers by 1 + s_Value1.
 //
 // ***************
 // * * * * * * * *	: s_Value1 = 1
@@ -409,7 +409,7 @@ CSpriteSurface::memcpyPalEffectNet(WORD* pDest, BYTE* pSource, WORD pixels, MPal
 	int skipPixels = 1 + s_Value1;
 	
 	//------------------------------------------------------------	
-	// drawPixels��ŭ ���
+	// Draw every skipPixels-th source palette entry.
 	//------------------------------------------------------------	
 	do {
 		//memcpy(pDest, pSource, (drawPixels<<1));
@@ -425,10 +425,10 @@ CSpriteSurface::memcpyPalEffectNet(WORD* pDest, BYTE* pSource, WORD pixels, MPal
 //----------------------------------------------------------------------
 // Effect Copy - GrayScaleVarious
 //----------------------------------------------------------------------
-// s_Value1 �� �󸶳� gray�Ǵ°�?(-_-;)�̴�..
-// s_Value1���� 0~31.. 32�ΰ�?.. - -
-// 0�̸� ���� gray
-// 32�̸� ��������
+// s_Value1 interpolates each source channel away from the channel average.
+// The arithmetic uses a scale of 32:
+// 0 produces grayscale;
+// 32 preserves the original source channels.
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectGrayScaleVarious(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
