@@ -194,7 +194,7 @@ bool				g_bZoneSmallLoadImage = false;
 MZone*				g_pZoneLarge = NULL;				
 MZone*				g_pZoneSmall = NULL;
 bool				g_bZonePlayerInLarge = true;
-DWORD				g_ZoneRandomSoundTime = 0;
+MonotonicClock::TimePoint	g_ZoneRandomSoundTime;
 bool				g_bWatchMode = false;
 
 
@@ -301,9 +301,9 @@ UpdateSocketInput()
 	//----------------------------------------------------------------
 	// RequestServerPlayerManager도 처리한다.
 	//----------------------------------------------------------------
-	static DWORD nextTime = g_CurrentTime;
+	static MonotonicClock::TimePoint nextTime = g_FrameNow;
 
-	if (nextTime <= g_CurrentTime)
+	if (nextTime <= g_FrameNow)
 	{	
 		#ifdef OUTPUT_DEBUG_UPDATE_LOOP
 			DEBUG_ADD( "RequestUpdate" );
@@ -337,8 +337,8 @@ UpdateSocketInput()
 		}
 
 
-		// 초당 3번 update한다.
-		nextTime = g_CurrentTime + 330;
+		// three updates a second
+		nextTime = g_FrameNow + MonotonicClock::Millis(330);
 	}
 
 	//DEBUG_ADD("-OK-");
@@ -1023,7 +1023,7 @@ SetMode(enum CLIENT_MODE mode)
 			// LCPCListHandler에서 하게 했다.
 			//UI_StartCharacterManager();				
 
-			g_ZoneRandomSoundTime = g_CurrentTime;
+			g_ZoneRandomSoundTime = g_FrameNow;
 
 			//------------------------------------------------------------
 			// server name 설정
@@ -1203,7 +1203,7 @@ SetMode(enum CLIENT_MODE mode)
 
 			DEBUG_ADD("[ SetMode ] UI FINISH");
 
-			g_ZoneRandomSoundTime = g_CurrentTime;
+			g_ZoneRandomSoundTime = g_FrameNow;
 
 			// Debug Message
 			DEBUG_ADD("[ SetMode ]  MODE_WAIT_UPDATEINFO");
@@ -2712,7 +2712,7 @@ LoadZone(int n)
 	//------------------------------------------------
 	// Random SoundID 시간 설정
 	//------------------------------------------------
-	g_ZoneRandomSoundTime = g_CurrentTime + ((rand()%5)+10)*1000;	// 10~15초후..
+	g_ZoneRandomSoundTime = g_FrameNow + MonotonicClock::Millis(((rand()%5)+10)*1000);	// 10 to 15 s from now
 	
 	
 
@@ -4580,12 +4580,12 @@ KeepConnection()
 			g_pSocket!=NULL)
 	
 		{
-			static DWORD lastTime = g_CurrentTime;
+			static MonotonicClock::TimePoint lastTime = g_FrameNow;
 
 			//------------------------------------------------------------------
-			// 3분 마다 한번씩 garbarge packet을 보낸다.
+			// a keep-alive packet every three minutes
 			//------------------------------------------------------------------
-			if (g_CurrentTime - lastTime > 180000)		// 3 * 60 * 1000
+			if (g_FrameNow - lastTime > MonotonicClock::Millis(180000))		// 3 * 60 * 1000
 			{
 				#ifdef	CONNECT_SERVER			
 					CGSay _CGSay;
@@ -4593,7 +4593,7 @@ KeepConnection()
 					g_pSocket->sendPacket( &_CGSay );			
 				#endif
 
-				lastTime = g_CurrentTime;
+				lastTime = g_FrameNow;
 			}
 		}
 	#endif

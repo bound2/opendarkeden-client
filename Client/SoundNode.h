@@ -13,6 +13,7 @@
 #include "../../basic/Platform.h"
 #endif
 #include "MTypeDef.h"
+#include "MonotonicClock.h"
 
 class SOUND_NODE {
 	public :
@@ -29,13 +30,13 @@ class SOUND_NODE {
 		//------------------------------------------------------
 		// get
 		//------------------------------------------------------
-		DWORD			GetPlayTime() const			{ return m_PlayTime; }
+		MonotonicClock::TimePoint	GetPlayTime() const	{ return m_PlayTime; }
 		TYPE_SOUNDID	GetSoundID() const			{ return m_SoundID; }
 		int				GetX() const				{ return m_X; }
 		int				GetY() const				{ return m_Y; }
 
 	protected :
-		DWORD			m_PlayTime;
+		MonotonicClock::TimePoint	m_PlayTime;
 		TYPE_SOUNDID	m_SoundID;
 		
 		// 소리가 나는 위치

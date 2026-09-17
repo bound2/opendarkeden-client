@@ -8,6 +8,7 @@
 #define __MHELPDISPLAYER_H__
 
 #include "MHelpDef.h"
+#include "MonotonicClock.h"
 
 class MHelpDisplayer {
 	public :
@@ -20,7 +21,7 @@ class MHelpDisplayer {
 		void	OutputHelp(HELP_OUTPUT ho);
 		
 	protected :
-		DWORD	m_DelayTime;		// 최근에 출력한 시간
+		MonotonicClock::TimePoint	m_DelayTime;	// when the shown help may be replaced
 };
 
 extern MHelpDisplayer*		g_pHelpDisplayer;

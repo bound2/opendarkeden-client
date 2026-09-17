@@ -5339,11 +5339,11 @@ CGameUpdate::UpdateDraw()
 				}
 			}
 
-			static DWORD lastTime = g_CurrentTime;
-			if (g_CurrentTime - lastTime >= g_UpdateDelay)
+			static MonotonicClock::TimePoint lastTime = g_FrameNow;
+			if (g_FrameNow - lastTime >= MonotonicClock::Millis(g_UpdateDelay))
 			{
 				if (++count==6) { count = 0; a++; }
-				lastTime = g_CurrentTime;
+				lastTime = g_FrameNow;
 			}			
 		}
 	}
@@ -5814,12 +5814,12 @@ CGameUpdate::UpdateDrawHelp()
 		}		
 	}
 
-	// 5초마다 한번씩.. scroll
-	static DWORD HelplastTime = g_CurrentTime;
-	if (g_CurrentTime - HelplastTime >= g_pClientConfig->DELAY_GAMEMESSAGE)
+	// scroll every 5 seconds
+	static MonotonicClock::TimePoint HelplastTime = g_FrameNow;
+	if (g_FrameNow - HelplastTime >= MonotonicClock::Millis(g_pClientConfig->DELAY_GAMEMESSAGE))
 	{
 		g_pHelpMessage->Add("\0");
-		HelplastTime = g_CurrentTime;
+		HelplastTime = g_FrameNow;
 	}
 }
 
@@ -5931,7 +5931,7 @@ CGameUpdate::Update(void)
 
 	__BEGIN_PROFILE("GameUpdate")
 
-	static DWORD lastTime = g_CurrentTime;
+	static MonotonicClock::TimePoint lastTime = g_FrameNow;
 	//bool bChanged = false;
 
 	if (g_Mode!=MODE_GAME || g_pClientConfig==NULL)
@@ -5992,15 +5992,15 @@ CGameUpdate::Update(void)
 		//DEBUG_ADD("DXRTDBk");
 	#endif
 	
-	static DWORD nextSoundCheckTime = g_CurrentTime;
+	static MonotonicClock::TimePoint nextSoundCheckTime = g_FrameNow;
 
-	if (g_CurrentTime > nextSoundCheckTime)
+	if (g_FrameNow > nextSoundCheckTime)
 	{
-		// 초당 play한 sound 수..
+		// sounds played this second
 		g_SoundPerSecond = 0;
 
-		// 1초 후
-		nextSoundCheckTime = g_CurrentTime + 1000;
+		// one second on
+		nextSoundCheckTime = g_FrameNow + MonotonicClock::Millis(1000);
 	}
 
 	//---------------------------------------------------
@@ -6032,8 +6032,6 @@ CGameUpdate::Update(void)
 	// k값마다 한번씩은 Draw를 해주기 때문에
 	// Frame Skipping을 적용시킨다.				
 	//------------------------------------------
-	DWORD	TempCurrentTime	=g_CurrentTime;
-	DWORD	TemplastTime =lastTime;
 //CRYPT_START
 //VM_START
 
@@ -6072,7 +6070,7 @@ CGameUpdate::Update(void)
 	tmp=tmp-19;
 	tmp--;
 	FindWindow("a","b");
-	if (g_CurrentTime - lastTime >= tmp)
+	if (g_FrameNow - lastTime >= MonotonicClock::Millis(tmp))
 	{
 		// 변화된것이 있다고 check
 		g_bFrameChanged = true;
@@ -6260,9 +6258,9 @@ CGameUpdate::Update(void)
 
 		
 			
-			lastTime += g_UpdateDelay;
+			lastTime += MonotonicClock::Millis(g_UpdateDelay);
 		
-		} while (g_CurrentTime - lastTime >= g_UpdateDelay  
+		} while (g_FrameNow - lastTime >= MonotonicClock::Millis(g_UpdateDelay)  
 					&& --k);
 //add by viva : friend system CG_UPDATE
 #ifdef __FRIEND_SYSTEM_VIVA__
@@ -6301,9 +6299,9 @@ CGameUpdate::Update(void)
 		//
 		// Accumulate the real elapsed milliseconds instead, clamped so a
 		// debugger pause or a suspended window does not read as a time jump.
-		static DWORD lastCheckTime = g_CurrentTime;
-		DWORD checkTimeGap = (g_CurrentTime > lastCheckTime)? (g_CurrentTime - lastCheckTime) : 0;
-		lastCheckTime = g_CurrentTime;
+		static MonotonicClock::TimePoint lastCheckTime = g_FrameNow;
+		DWORD checkTimeGap = (g_FrameNow > lastCheckTime)? (DWORD)(g_FrameNow - lastCheckTime).count() : 0;
+		lastCheckTime = g_FrameNow;
 		if (checkTimeGap > 1000) checkTimeGap = 1000;
 		g_MyCheckTime += (int)checkTimeGap;
 
@@ -6373,7 +6371,7 @@ CGameUpdate::Update(void)
 			if (OnetimeUpdateCount > g_pClientConfig->MAX_UPDATE_ONETIME_COUNT)
 			{
 				// 더 이상은 update못하게 한다.
-				lastTime = g_CurrentTime;
+				lastTime = g_FrameNow;
 				OnetimeUpdateCount = 0;
 			}
 		}
@@ -6445,8 +6443,6 @@ CGameUpdate::Update(void)
 		//---------------------------------------------
 		char str[80];
 
-		static DWORD lastDisplayGameTime = g_CurrentTime;	
-
 		if (g_pGameStringTable!=NULL)
 		{
 			g_pGameTime->SetCurrentTime( g_CurrentTime );
@@ -6457,8 +6453,6 @@ CGameUpdate::Update(void)
 							g_pGameTime->GetSecond()
 					);
 			
-			lastDisplayGameTime = g_CurrentTime;
-
 			gC_vs_ui.SetTime( str );
 		}
 
@@ -6515,17 +6509,17 @@ CGameUpdate::Update(void)
 		// matters when the renderer ignores vsync (SDL_RENDER_DRIVER=
 		// software) - it keeps the message loop from spin-presenting.
 		g_DrawAlphaNum = 256;
-		if (g_UpdateDelay > 0 && g_CurrentTime >= lastTime)
+		if (g_UpdateDelay > 0 && g_FrameNow >= lastTime)
 		{
-			DWORD sinceTick = g_CurrentTime - lastTime;
+			DWORD sinceTick = (DWORD)(g_FrameNow - lastTime).count();
 			if (sinceTick < (DWORD)g_UpdateDelay)
 				g_DrawAlphaNum = (sinceTick << 8) / (DWORD)g_UpdateDelay;
 		}
 
-		static DWORD s_lastDrawTime = 0;
-		if (g_bFrameChanged || g_CurrentTime - s_lastDrawTime >= 15)
+		static MonotonicClock::TimePoint s_lastDrawTime;
+		if (g_bFrameChanged || g_FrameNow - s_lastDrawTime >= MonotonicClock::Millis(15))
 		{
-			s_lastDrawTime = g_CurrentTime;
+			s_lastDrawTime = g_FrameNow;
 			g_bNewDraw = true;
 			
 			#ifdef OUTPUT_DEBUG_UPDATE_LOOP

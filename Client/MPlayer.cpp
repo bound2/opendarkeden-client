@@ -129,6 +129,7 @@ BYTE GetCreatureActionCountMax( const MCreature* pCreature, int action );
 #endif
 
 extern	DWORD	g_CurrentTime;
+extern	MonotonicClock::TimePoint	g_FrameNow;
 extern	int		g_x;
 extern	int		g_y;
 extern	bool	g_bNetStatusGood;
@@ -649,9 +650,9 @@ SendPositionInfoToParty()
 void
 SendStatusInfoToParty()
 {
-	static DWORD nextTime = g_CurrentTime;
+	static MonotonicClock::TimePoint nextTime = g_FrameNow;
 
-	if (g_CurrentTime >= nextTime)
+	if (g_FrameNow >= nextTime)
 	{
 		//------------------------------------------------------
 		// 지속적으로 좌표를 보내는 경우
@@ -724,9 +725,9 @@ SendStatusInfoToParty()
 			}
 		}
 
-		// 시야에 없는 경우의 HP이기 때문에..
-		// 5초에 한번 갱신해준다.
-		nextTime = g_CurrentTime + g_pClientConfig->CLIENT_COMMUNICATION_STATUS_DELAY;
+		// HP of members out of sight, so
+		// refresh it every five seconds
+		nextTime = g_FrameNow + MonotonicClock::Millis(g_pClientConfig->CLIENT_COMMUNICATION_STATUS_DELAY);
 	}
 }
 
@@ -9343,7 +9344,7 @@ MPlayer::UpdateConversionTime()
 			int changeTime = ((int)m_ConversionDelayTime - (int)g_CurrentTime)/* * g_pGameTime->GetTimeRatio()*/ / 60000 ;
 			g_char_slot_ingame.CHANGE_VAMPIRE = changeTime;
 
-			static DWORD enableBlinkTime = 0;	// 깜빡거려도 되는 시간
+			static MonotonicClock::TimePoint enableBlinkTime;	// when the next blink may start
 			
 			//const DWORD sixHour = 6*60*60*1000;
 
@@ -9369,7 +9370,7 @@ MPlayer::UpdateConversionTime()
 			// 마지막에 깜빡이고 나서.. 
 			// 다시 깜빡일 수 있는 시간인지 체크한다.
 			//--------------------------------------------------------
-			if (g_CurrentTime > enableBlinkTime)
+			if (g_FrameNow > enableBlinkTime)
 			{
 				// 변하기까지 남은 시간.. /1000하면 '초'로 나온다.
 				DWORD timeGap = m_ConversionDelayTime - g_CurrentTime;
@@ -9386,7 +9387,7 @@ MPlayer::UpdateConversionTime()
 							g_pTopView->SetFadeStart(25, 31, 2, 31,0,0);
 
 							// 다음에 깜빡일 수 있는 시간을 설정한다.
-							enableBlinkTime = g_CurrentTime + blinkValue[i][1];
+							enableBlinkTime = g_FrameNow + MonotonicClock::Millis(blinkValue[i][1]);
 
 							bBlink = TRUE;
 

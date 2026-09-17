@@ -24,6 +24,7 @@
    header to supply it on Windows), so declare the opaque pointer type here
    directly for all platforms instead. */
 #include "../basic/Platform.h"
+#include "MonotonicClock.h"
 
 #ifndef LPDIRECTSOUNDBUFFER
 typedef struct IDirectSoundBuffer* LPDIRECTSOUNDBUFFER;
@@ -114,7 +115,7 @@ class MZoneSoundManager : public CTypeMap<ZONESOUND_NODE>
 
 	protected :
 		TYPE_SECTORPOSITION		m_LastX, m_LastY;
-		DWORD					m_LastUpdateTime;
+		MonotonicClock::TimePoint	m_LastUpdateTime;
 };
 
 //-----------------------------------------------------------------------------

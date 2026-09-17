@@ -9472,28 +9472,28 @@ MTopView::DrawInformation()
 		}
 	}
 
-	// 5초마다 한번씩.. scroll
-	static DWORD lastTime = g_CurrentTime;
-	if (g_CurrentTime - lastTime >= g_pClientConfig->DELAY_SYSTEMMESSAGE)
+	// scroll every 5 seconds
+	static MonotonicClock::TimePoint lastTime = g_FrameNow;
+	if (g_FrameNow - lastTime >= MonotonicClock::Millis(g_pClientConfig->DELAY_SYSTEMMESSAGE))
 	{
 		g_pSystemMessage->Add("\0");		
-		lastTime = g_CurrentTime;
+		lastTime = g_FrameNow;
 	}
 
-	// 7초마다 한번씩.. scroll
-	static DWORD lastNoticeTime = g_CurrentTime;
-	if (g_CurrentTime - lastNoticeTime >= (g_pClientConfig->DELAY_SYSTEMMESSAGE + 2000) )
+	// scroll every 7 seconds
+	static MonotonicClock::TimePoint lastNoticeTime = g_FrameNow;
+	if (g_FrameNow - lastNoticeTime >= MonotonicClock::Millis(g_pClientConfig->DELAY_SYSTEMMESSAGE + 2000))
 	{
 		g_pNoticeMessage->Add("\0");
-		lastNoticeTime = g_CurrentTime;
+		lastNoticeTime = g_FrameNow;
 	}
 
-	// 7초마다 한번씩.. scroll
-	static DWORD lastPlayerTimer = g_CurrentTime;
-	if (g_CurrentTime - lastPlayerTimer >= (g_pClientConfig->DELAY_SYSTEMMESSAGE + 10000) )
+	// scroll every 7 seconds
+	static MonotonicClock::TimePoint lastPlayerTimer = g_FrameNow;
+	if (g_FrameNow - lastPlayerTimer >= MonotonicClock::Millis(g_pClientConfig->DELAY_SYSTEMMESSAGE + 10000))
 	{
 		g_pPlayerMessage->Add("\0");		
-		lastPlayerTimer = g_CurrentTime;
+		lastPlayerTimer = g_FrameNow;
 	}
 	//-----------------------------------------------------------------
 	//
@@ -9561,12 +9561,12 @@ MTopView::DrawInformation()
 		}		
 	}
 
-	// 5초마다 한번씩.. scroll
-	static DWORD gamelastTime = g_CurrentTime;
-	if (g_CurrentTime - gamelastTime >= g_pClientConfig->DELAY_GAMEMESSAGE)
+	// scroll every 5 seconds
+	static MonotonicClock::TimePoint gamelastTime = g_FrameNow;
+	if (g_FrameNow - gamelastTime >= MonotonicClock::Millis(g_pClientConfig->DELAY_GAMEMESSAGE))
 	{
 		g_pGameMessage->Add("\0");
-		gamelastTime = g_CurrentTime;
+		gamelastTime = g_FrameNow;
 	}
 
 	//-----------------------------------------------------------------
@@ -12826,11 +12826,11 @@ if (!m_pSurface->Lock()) return;
 				m_pSurface->BltSprite(&selectedPoint, pSprite);
 			}
 
-			static DWORD lastTime = g_CurrentTime;
-			if (g_CurrentTime - lastTime >= g_UpdateDelay)
+			static MonotonicClock::TimePoint lastTime = g_FrameNow;
+			if (g_FrameNow - lastTime >= MonotonicClock::Millis(g_UpdateDelay))
 			{
 				if (++clickFrame==MaxClickFrame) clickFrame = 0;
-				lastTime = g_CurrentTime;
+				lastTime = g_FrameNow;
 			}
 
 

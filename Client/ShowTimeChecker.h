@@ -13,6 +13,8 @@
 #include <fstream>
 #endif
 
+#include "MonotonicClock.h"
+
 class ShowTimeChecker {
 	public :
 		ShowTimeChecker();
@@ -41,7 +43,7 @@ class ShowTimeChecker {
 		BYTE			StartHour;
 		BYTE			EndHour;
 
-		DWORD			NextPlayTime;		// 다음에 show할 시간
+		MonotonicClock::TimePoint	NextPlayTime;	// the next show
 };
 
 #endif

@@ -21,6 +21,7 @@
 
 #include "MString.h"
 #include "MTypeDef.h"
+#include "MonotonicClock.h"
 
 class PARTY_INFO
 {
@@ -64,8 +65,8 @@ class MParty {
 		//--------------------------------------------------------
 		// SetJoinTime
 		//--------------------------------------------------------
-		DWORD		GetJoinTime() const		{ return m_JoinTime; }		
-		void		SetJoinTime(DWORD time)	{ m_JoinTime = time; }
+		MonotonicClock::TimePoint	GetJoinTime() const	{ return m_JoinTime; }		
+		void		SetJoinTime(MonotonicClock::TimePoint time)	{ m_JoinTime = time; }
 		void		SetJoinTime();		
 		bool		IsKickAvailableTime() const;
 
@@ -104,7 +105,7 @@ class MParty {
 
 		bool						m_bAccept;		// 초대를 받아들이는가?
 
-		DWORD						m_JoinTime;
+		MonotonicClock::TimePoint	m_JoinTime;
 };
 
 extern MParty*	g_pParty;

@@ -37,9 +37,9 @@ CWaitPacketUpdate::Update()
 	//------------------------------------------	
 	// 한계 시간을 넘어갔으면..
 	//------------------------------------------
-	if ((DWORD)g_CurrentTime > m_DelayLimit)
+	if (g_FrameNow > m_DelayLimit)
 	{
-		DEBUG_ADD_FORMAT("[WaitPacket] 시간 초과 : Current=%d, Limit=%d", g_CurrentTime, m_DelayLimit);			
+		DEBUG_ADD_FORMAT("[WaitPacket] timed out: %d ms past the limit", (int)(g_FrameNow - m_DelayLimit).count());			
 
 		SetMode( MODE_MAINMENU );
 		UpdateDisconnected();
@@ -89,15 +89,15 @@ CWaitPacketUpdate::Update()
 //-----------------------------------------------------------------------------
 // Set Delay
 //-----------------------------------------------------------------------------
-// 현재 시간(g_CurrentTime)부터 delay만큼 더 Update를 하다가
-// Server부터 메세지가 오지 않으면 .... 프로그램 종료~
+// Keep updating for delay milliseconds from now; if the server has not
+// answered by then, give up.
 //-----------------------------------------------------------------------------
 void		
 CWaitPacketUpdate::SetDelay(DWORD delay)
 {
-	g_CurrentTime = timeGetTime();
-			
-	m_DelayLimit = g_CurrentTime + delay;
+	StampFrameClock();
 
-	DEBUG_ADD_FORMAT("[WaitPacket] Current=%d, Limit=%d", g_CurrentTime, m_DelayLimit);
+	m_DelayLimit = g_FrameNow + MonotonicClock::Millis(delay);
+
+	DEBUG_ADD_FORMAT("[WaitPacket] Limit=%u ms from now", delay);
 }

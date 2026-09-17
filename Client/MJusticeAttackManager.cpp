@@ -10,7 +10,7 @@
 //----------------------------------------------------------------------
 MJusticeAttackManager* g_pJusticeAttackManager = NULL;
 
-extern DWORD g_CurrentTime;
+extern MonotonicClock::TimePoint g_FrameNow;
 
 //----------------------------------------------------------------------
 //
@@ -49,7 +49,7 @@ MJusticeAttackManager::AddCreature(const char* pName)
 
 	// 이미 있거나 없거나 관계없이 시간을 설정해주면 된다.
 	// 시간의 의미는 없지만.. ㅡ.ㅡ;
-	m_Creatures[name] = g_CurrentTime;
+	m_Creatures[name] = g_FrameNow;
 }
 
 //----------------------------------------------------------------------

@@ -217,7 +217,7 @@ CWaitUIUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 void		
 CWaitUIUpdate::Update()
 {
-	static DWORD lastTime = g_CurrentTime;
+	static MonotonicClock::TimePoint lastTime = g_FrameNow;
 	bool bChanged = false;
 
 	#ifdef OUTPUT_DEBUG_UPDATE_LOOP
@@ -231,9 +231,9 @@ CWaitUIUpdate::Update()
 	#endif
 
 	//------------------------------------------
-	// 일정시간마다 한번씩 update
+	// update once per interval
 	//------------------------------------------
-	if (g_CurrentTime - lastTime >= g_UpdateDelay)
+	if (g_FrameNow - lastTime >= MonotonicClock::Millis(g_UpdateDelay))
 	{
 		// CheckInvalidProcess()는 최상위 데스크톱 창을 모두 열거합니다.
 		// (GetWindowText + std::string은 창별로 작동합니다). WinMain 메시지
@@ -330,7 +330,7 @@ CWaitUIUpdate::Update()
 			#endif
 		}
 
-		lastTime = g_CurrentTime;
+		lastTime = g_FrameNow;
 
 		// Frame증가
 		g_FrameCount++;

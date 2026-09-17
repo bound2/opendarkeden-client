@@ -53,7 +53,7 @@ MZone*				g_pZone				= NULL;
 BOOL g_bPlayPropeller = FALSE;
 
 extern HWND					g_hWnd;
-extern DWORD				g_ZoneRandomSoundTime;
+extern MonotonicClock::TimePoint	g_ZoneRandomSoundTime;
 
 extern void		SendPositionInfoToParty();
 extern void		SendStatusInfoToParty();
@@ -2064,12 +2064,13 @@ MZone::UpdateAllCreature()
 
 	//	DEBUG_ADD_FORMAT("[UpdateAllCreature] %d Creature(s)", m_mapCreature.size());
 
-	static DWORD nextResetTime = g_CurrentTime + g_pUserOption->persnalShopupdatetime;
+	const DWORD resetDelay = g_pUserOption->persnalShopupdatetime > 0 ? g_pUserOption->persnalShopupdatetime : 0;
+	static MonotonicClock::TimePoint nextResetTime = g_FrameNow + MonotonicClock::Millis(resetDelay);
 	bool bResetPersonalShopValue = false;
 	
-	if( g_CurrentTime > nextResetTime )
+	if( g_FrameNow > nextResetTime )
 	{
-		nextResetTime = g_CurrentTime+ g_pUserOption->persnalShopupdatetime;
+		nextResetTime = g_FrameNow + MonotonicClock::Millis(resetDelay);
 		bResetPersonalShopValue = true;
 	}	
 	
@@ -5613,7 +5614,7 @@ MZone::UpdateSound()
 		//-------------------------------------------------
 		// 소리를 출력할 시간이 지났으면.. PlaySound
 		//-------------------------------------------------
-		if (pNode->GetPlayTime() < g_CurrentTime)
+		if (pNode->GetPlayTime() < g_FrameNow)
 		{
 			// 한번만 소리를 낸다.
 			PlaySound( pNode->GetSoundID(), false, pNode->GetX(), pNode->GetY() );
@@ -5667,7 +5668,7 @@ MZone::UpdateSound()
 			g_bPlayPropeller = FALSE;
 		}
 
-		if (g_CurrentTime > g_ZoneRandomSoundTime)
+		if (g_FrameNow > g_ZoneRandomSoundTime)
 		{
 			ZONETABLE_INFO* pZoneInfo = g_pZoneTable->Get( zoneID );
 
@@ -5683,8 +5684,8 @@ MZone::UpdateSound()
 				PlaySound( soundID, false, x, y );
 			}
 			
-			// 10~30초 후에 다시 소리 낸다
-			g_ZoneRandomSoundTime = g_CurrentTime + ((rand()%10)+6)*1000;			
+			// the next random sound in 6 to 15 seconds
+			g_ZoneRandomSoundTime = g_FrameNow + MonotonicClock::Millis(((rand()%10)+6)*1000);			
 		}
 	}
 }
