@@ -17,6 +17,10 @@
 #
 #----------------------------------------------------------------------
 set -u
+# Source files include legacy code-page bytes. These are byte counts;
+# every stage (including BSD sed) must use the same single-byte locale.
+# A UTF-8 locale can stop sed early yet leave a downstream count at zero.
+export LC_ALL=C
 cd "$(dirname "$0")/../.." || exit 2
 
 BUILD_DIR="${1:-}"
@@ -163,7 +167,11 @@ check () {
 # The inbound side (RequestServerPlayer, its manager, the file sender)
 # and the UDP party datagrams stay. Ninja 484 -> 481 by the same
 # arithmetic (no Ninja tree here; the Linux CI reads it).
-R1_BASELINE=484
+# 482 on 2026-09-17: task 4.5 moves RankBonusTable.cpp into gamemodel
+# (483 -> 482). The preceding bounded-formatting slice deleted md5.cpp
+# without recording its 484 -> 483 decrease here. Ninja 481 -> 479 for
+# the same two files; its three platform exclusions are unchanged.
+R1_BASELINE=482
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -182,8 +190,8 @@ if [ -n "$R1_VCXPROJ" ]; then
 	# unchanged CMakeCache.txt) alone, so those mtimes would report a
 	# fresh reconfigure as stale.
 	R1_CACHE="$(dirname "$R1_VCXPROJ")/CMakeFiles/generate.stamp"
-	if [ ! -f "$R1_CACHE" ] || [ CMakeLists.txt -nt "$R1_CACHE" ] || [ tests/arch/packetwire_files.txt -nt "$R1_CACHE" ]; then
-		echo "FAIL R1: $(dirname "$R1_VCXPROJ") was configured before CMakeLists.txt or the packetwire membership file last changed - reconfigure that tree first"
+	if [ ! -f "$R1_CACHE" ] || [ CMakeLists.txt -nt "$R1_CACHE" ] || [ tests/arch/packetwire_files.txt -nt "$R1_CACHE" ] || [ tests/arch/gamemodel_files.txt -nt "$R1_CACHE" ]; then
+		echo "FAIL R1: $(dirname "$R1_VCXPROJ") was configured before CMakeLists.txt or a library membership file last changed - reconfigure that tree first"
 		FAIL=1
 	else
 		R1=$(grep -c "<ClCompile Include" "$R1_VCXPROJ")
@@ -200,10 +208,10 @@ elif [ -n "$BUILD_DIR" ] && [ -f "$BUILD_DIR/build.ninja" ]; then
 	# this branch existed the ratchet SKIPPED on every non-MSVC tree,
 	# which the port assessment listed as fail-open (area A). build.ninja
 	# is rewritten on every configure, so its mtime is the configure time.
-	R1_NINJA_BASELINE=481
+	R1_NINJA_BASELINE=479
 	R1_NINJA="$BUILD_DIR/build.ninja"
-	if [ CMakeLists.txt -nt "$R1_NINJA" ] || [ tests/arch/packetwire_files.txt -nt "$R1_NINJA" ]; then
-		echo "FAIL R1: $BUILD_DIR was configured before CMakeLists.txt or the packetwire membership file last changed - reconfigure that tree first"
+	if [ CMakeLists.txt -nt "$R1_NINJA" ] || [ tests/arch/packetwire_files.txt -nt "$R1_NINJA" ] || [ tests/arch/gamemodel_files.txt -nt "$R1_NINJA" ]; then
+		echo "FAIL R1: $BUILD_DIR was configured before CMakeLists.txt or a library membership file last changed - reconfigure that tree first"
 		FAIL=1
 	else
 		R1=$(grep -cE '^build CMakeFiles/DarkEden\.dir/.*\.(cpp|c)\.o:' "$R1_NINJA")
@@ -1436,8 +1444,33 @@ fi
 # bounded; CTypePackVector.h, a header nothing includes, deleted). What is left is
 # VS_UI (783) and the rest of Client (303), most of them wsprintf and
 # sprintf into local char arrays.
+# 1,016 on 2026-09-17: the second slice took ten Client utility files
+# to zero (70 lines). GetWinVersion takes the caller's buffer size and
+# writes with it (its one caller, the crash report, passes sizeof);
+# CMd5, which nothing constructs, is deleted with its two files (its
+# 50-byte error text overflowed for a path over 21 bytes, on a path
+# nothing reached); the crash report's four stamps, the profile
+# manager's five file-name joins, the utility functions' four copies,
+# the guild-mark manager's four index names and the wait screen's one
+# live caption are snprintf(sizeof); MMusic's error text becomes the char array it was
+# always used as (it was declared as eighty LPSTRs and cast); and the
+# sixteen lines inside block-commented debug code in CPartManager.h,
+# MCreatureWear.cpp and CWaitUIUpdate.cpp - counted, since this grep
+# strips only // tails, as R3's does - are deleted with their blocks.
+# 970 on 2026-09-17: the third slice took Client.cpp, GameMain.cpp,
+# MZone.cpp and MCreature.cpp to zero (46 lines). Thirty-one are
+# converted: snprintf(sizeof) into the local array read at each site
+# (the Futec command-line parser's 32-byte argument slots, the
+# 128-byte log-file name built from a _MAX_PATH g_CWD and the 80-byte
+# server-group name were live overflows), the three sprintf calls that
+# read their own destination (the restart path, the two image-object
+# traces) are appends behind strlen, the creature name is a memcpy of
+# the length it was just allocated with, and the chat rows are bounded
+# by their configured width. Fifteen were dead: get_rand_str, which
+# only commented-out lines called, and thirteen lines of block-commented
+# debug dumps in MZone.cpp and MCreature.cpp, deleted with their blocks.
 #----------------------------------------------------------------------
-R17_BASELINE=1086
+R17_BASELINE=970
 R17_FILES_FLOOR=500
 
 r17_members () {

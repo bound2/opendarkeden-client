@@ -1036,7 +1036,7 @@ SetMode(enum CLIENT_MODE mode)
 
 			if (g_pServerInformation->GetServerGroupName()!=NULL)
 			{
-				strcpy(str, g_pServerInformation->GetServerGroupName());
+				snprintf(str, sizeof(str), "%s", g_pServerInformation->GetServerGroupName());
 
 				//gC_vs_ui.SetServerName( str );
 				DEBUG_ADD_FORMAT("[ SetMode ]  MODE_WAIT_PCLIST - ServerName[%d]=%s", serverID, str);
@@ -3452,7 +3452,7 @@ MakeScreenShot()
 	// MAX_SCREENSHOT개의 ScreenCapture만 가능하다.
 	for (; g_ScreenShotNumber<maxScreenShot; g_ScreenShotNumber++)
 	{
-		sprintf(str, "%s%03d.jpg", g_pFileDef->getProperty("PATH_SCREENSHOT").c_str(), g_ScreenShotNumber);
+		snprintf(str, sizeof(str), "%s%03d.jpg", g_pFileDef->getProperty("PATH_SCREENSHOT").c_str(), g_ScreenShotNumber);
 
 #ifdef PLATFORM_WINDOWS
 		int fd = _open( str, _O_RDONLY );
@@ -3711,7 +3711,7 @@ PlaySound(TYPE_SOUNDID soundID, bool repeat, int x, int y)
 					if (pFilename!=NULL)
 					{					
 						char strFilename[256];
-						strcpy(strFilename, pFilename);
+						snprintf(strFilename, sizeof(strFilename), "%s", pFilename);
 
 						gpC_Imm->ForceSound( strFilename );
 					}
@@ -3854,7 +3854,7 @@ PlaySound(TYPE_SOUNDID soundID)
 		if (pFilename!=NULL)
 		{
 			char strFilename[256];
-			strcpy(strFilename, pFilename);
+			snprintf(strFilename, sizeof(strFilename), "%s", pFilename);
 			if (gpC_Imm!=NULL && gpC_Imm->IsDevice())
 			{
 				gpC_Imm->ForceSound( strFilename );
@@ -3983,7 +3983,7 @@ void PlaySoundForce(TYPE_SOUNDID soundID)
 		if (pFilename!=NULL)
 		{
 			char strFilename[256];
-			strcpy(strFilename, pFilename);
+			snprintf(strFilename, sizeof(strFilename), "%s", pFilename);
 			if (gpC_Imm!=NULL && gpC_Imm->IsDevice())
 			{
 				gpC_Imm->ForceSound( strFilename );
@@ -5796,7 +5796,7 @@ Add_GDR_Ghost(int ZoneID)
 	char szTempBuffer[64];
 	int MapX = 0, MapY = 0;
 
-	sprintf(szTempBuffer, "PositionList_%d", ZoneID);
+	snprintf(szTempBuffer, sizeof(szTempBuffer), "PositionList_%d", ZoneID);
 	parser.parse( (char *)GhostFile.GetFilePointer(), &computerTree );
 	
 	const XMLTree *pMapElement = computerTree.GetChild( szTempBuffer );
@@ -5806,7 +5806,7 @@ Add_GDR_Ghost(int ZoneID)
 		
 		for( size_t GhostCount = 0; GhostCount < GhostMax; GhostCount++ )
 		{
-			sprintf(szTempBuffer, "Position%d", GhostCount+1);
+			snprintf(szTempBuffer, sizeof(szTempBuffer), "Position%d", (int)(GhostCount+1));
 			const XMLTree *pGhostPos = pMapElement->GetChild( szTempBuffer );
 			if( pGhostPos != NULL )
 			{

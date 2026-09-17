@@ -36,7 +36,7 @@ protected:
 	HWND		m_hwnd;
 
 
-	LPSTR		MIDI_ERROR_MSG[80];				// 에러 메세지 저장 
+	char		MIDI_ERROR_MSG[80];				// the last MCI error text
 
 public:
 	bool		m_bInit;

@@ -449,23 +449,6 @@ CPartManager<IndexType, PartIndexType, DataType>::SetData(IndexType index, const
 	m_listLRU.push_front( newPartIndex );
 	m_pPartIterator[newPartIndex] = m_listLRU.begin();
 	
-	//---------------------------------------------------
-	// [ TEST CODE ]
-	/*
-	PARTINDEX_LIST_ITERATOR	iIndex = m_listLRU.begin();
-
-	char str[1024] = "[SetData] ";
-	char str2[256];
-	while (iIndex != m_listLRU.end())
-	{
-		sprintf(str2, "%d ", *iIndex);
-		strcat(str, str2);
-
-		iIndex++;
-	}
-	DEBUG_ADD(str);
-	*/
-	//---------------------------------------------------
 	
 	// 사용한 개수 증가
 	if (m_nPartUsed < m_nPart) 
@@ -517,23 +500,6 @@ CPartManager<IndexType, PartIndexType, DataType>::GetData(IndexType index, DataT
 	m_listLRU.push_front( partIndex );				// 추가
 	m_pPartIterator[partIndex] = m_listLRU.begin();		// iterator 다시 설정
 
-	//---------------------------------------------------
-	// [ TEST CODE ]
-	/*
-	PARTINDEX_LIST_ITERATOR	iIndex = m_listLRU.begin();
-
-	char str[1024] = "[GetData] ";
-	char str2[256];
-	while (iIndex != m_listLRU.end())
-	{
-		sprintf(str2, "%d ", *iIndex);
-		strcat(str, str2);
-
-		iIndex++;
-	}
-	DEBUG_ADD(str);
-	*/
-	//---------------------------------------------------
 
 
 	//------------------------------------------------------
@@ -612,23 +578,6 @@ CPartManager<IndexType, PartIndexType, DataType>::GetLRU() const
 	PartIndexType leastTimeIndex = *m_listLRU.rbegin();
 
 
-	//---------------------------------------------------
-	// [ TEST CODE ]
-	/*
-	PARTINDEX_LIST::const_iterator	iIndex = m_listLRU.begin();
-
-	char str[1024] = "[GetLRU] ";
-	char str2[256];
-	while (iIndex != m_listLRU.end())
-	{
-		sprintf(str2, "%d ", *iIndex);
-		strcat(str, str2);
-
-		iIndex++;
-	}
-	DEBUG_ADD(str);
-	*/
-	//---------------------------------------------------
 
 	//---------------------------------------------------
 	// 전체를 검색해서 가장 오래전에 사용된 걸 찾는다.

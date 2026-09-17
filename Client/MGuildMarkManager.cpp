@@ -287,8 +287,7 @@ MGuildMarkManager::LoadGuildMark(WORD guildID)
 		char spkiFilename[256];
 
 		// filename.spki
-		strcpy(spkiFilename, m_GuildMarkSPKFilename.GetString());
-		strcat(spkiFilename, "i");
+		snprintf(spkiFilename, sizeof(spkiFilename), "%si", m_GuildMarkSPKFilename.GetString());
 
 		std::ifstream spkFile(m_GuildMarkSPKFilename.GetString(), ios::binary );
 		std::ifstream spkiFile(spkiFilename, ios::binary );
@@ -378,8 +377,7 @@ MGuildMarkManager::SaveGuildMark(WORD guildID, CSprite* pSprite, CSprite* pSprit
 		char spkiFilename[256];
 
 		// filename.spki
-		strcpy(spkiFilename, m_GuildMarkSPKFilename.GetString());
-		strcat(spkiFilename, "i");
+		snprintf(spkiFilename, sizeof(spkiFilename), "%si", m_GuildMarkSPKFilename.GetString());
 
 		
 		//---------------------------------------------------------
@@ -525,8 +523,8 @@ MGuildMarkManager::MergeGuildMark(const char* pSPKFilenameOrg,
 		char pSPKIFilenameOrg[256];
 		char pSPKIFilenameApp[256];
 
-		sprintf(pSPKIFilenameOrg, "%si", pSPKFilenameOrg);
-		sprintf(pSPKIFilenameApp, "%si", pSPKFilenameApp);
+		snprintf(pSPKIFilenameOrg, sizeof(pSPKIFilenameOrg), "%si", pSPKFilenameOrg);
+		snprintf(pSPKIFilenameApp, sizeof(pSPKIFilenameApp), "%si", pSPKFilenameApp);
 		
 
 		//---------------------------------------------------------

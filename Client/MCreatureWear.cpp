@@ -1472,20 +1472,6 @@ MCreatureWear::UpdateAttachEffect()
 				// 시야 바꾸기
 //				g_pZone->UnSetLight(x, y, light);
 //				g_pZone->SetLight(pEffect->GetX(), pEffect->GetY(), pEffect->GetLight());
-
-				/*
-				// UnSetLightSight
-				#ifdef	OUTPUT_DEBUG
-					sprintf(g_pDebugMessage->GetCurrent(), "UnSetLightSight : Type=%d, Light=%d, (%d, %d)", pEffect->GetFrameID(), light, x,y);	
-					g_pDebugMessage->Next();
-				#endif
-
-				// SetLightSight
-				#ifdef	OUTPUT_DEBUG
-					sprintf(g_pDebugMessage->GetCurrent(), "SetLightSight : Type=%d, Light=%d, (%d, %d)", pEffect->GetFrameID(), pEffect->GetLight(), pEffect->GetX(), pEffect->GetY());	
-					g_pDebugMessage->Next();
-				#endif
-				*/
 			}
 
 			//---------------------------------------------------------------------
@@ -1601,13 +1587,6 @@ MCreatureWear::UpdateAttachEffect()
 				{
 //					g_pZone->UnSetLight(x, y, light);
 
-					// UnSet LightSight
-					/*
-					#ifdef	OUTPUT_DEBUG
-						sprintf(g_pDebugMessage->GetCurrent(), "RemoveEffect : Type=%d, Light=%d, (%d, %d)", pEffect->GetFrameID(), light, x,y);	
-						g_pDebugMessage->Next();
-					#endif
-					*/
 				}
 			}
 
@@ -1671,20 +1650,6 @@ MCreatureWear::UpdateAttachEffect()
 				// 시야 바꾸기
 //				g_pZone->UnSetLight(x, y, light);
 //				g_pZone->SetLight(pEffect->GetX(), pEffect->GetY(), pEffect->GetLight());
-
-				/*
-				// UnSetLightSight
-				#ifdef	OUTPUT_DEBUG
-					sprintf(g_pDebugMessage->GetCurrent(), "UnSetLightSight : Type=%d, Light=%d, (%d, %d)", pEffect->GetFrameID(), light, x,y);	
-					g_pDebugMessage->Next();
-				#endif
-
-				// SetLightSight
-				#ifdef	OUTPUT_DEBUG
-					sprintf(g_pDebugMessage->GetCurrent(), "SetLightSight : Type=%d, Light=%d, (%d, %d)", pEffect->GetFrameID(), pEffect->GetLight(), pEffect->GetX(), pEffect->GetY());	
-					g_pDebugMessage->Next();
-				#endif
-				*/
 			}
 
 			//-----------------------------------------------
@@ -1742,13 +1707,6 @@ MCreatureWear::UpdateAttachEffect()
 				{
 //					g_pZone->UnSetLight(x, y, light);
 
-					// UnSet LightSight
-					/*
-					#ifdef	OUTPUT_DEBUG
-						sprintf(g_pDebugMessage->GetCurrent(), "RemoveEffect : Type=%d, Light=%d, (%d, %d)", pEffect->GetFrameID(), light, x,y);	
-						g_pDebugMessage->Next();
-					#endif
-					*/
 				}
 			}
 

@@ -291,21 +291,6 @@ LONG	g_TILE_Y_HALF = 12;
 				}										\
 			}											\
 		}
-//随机字符串
-void get_rand_str(char s[],int number);
-void get_rand_str(char s[],int number)
-{
-        char str[64] = "00123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"; 
-        int i;
-        char ss[2];
-        //printf("%c %c\n",str[1],str[62]);
-        srand((unsigned int)time((time_t *)NULL));
-        for(i=1;i<=number;i++){
-                sprintf(ss,"%c",str[(rand()%62)+1]);
-                //printf(ss);
-                strcat(s,ss);
-        }
-}
 //-----------------------------------------------------------------------
 // Get Futec Address [Futec수정]
 //-----------------------------------------------------------------------
@@ -357,7 +342,7 @@ ParsingRealServer(const char* pCommandLine, int Dimention, REALSERVER_INFO &info
 		return false;
 	}
 	
-	strcpy(szTemp, pString+1);
+	snprintf(szTemp, sizeof(szTemp), "%s", pString+1);
 	
 	int argcnt = 0;
 	char* token = NULL;
@@ -369,7 +354,7 @@ ParsingRealServer(const char* pCommandLine, int Dimention, REALSERVER_INFO &info
 		return false;
 	while(token && argcnt < 4)
 	{
-		strcpy(arg2[argcnt], token);
+		snprintf(arg2[argcnt], sizeof(arg2[argcnt]), "%s", token);
 		argcnt++;
 		token = strtok(NULL, "|");
 	//	if(NULL == token)
@@ -824,8 +809,9 @@ CheckDXVersion()
 	// 현재 디렉토리를 얻어서 
 	GetCurrentDirectory( _MAX_PATH, directory );
 
-	// 실행화일 이름을 붙인다.
-	sprintf(directory, "%s\\%s", directory, PROGRAM_FILENAME);
+	// Append the executable name.
+	const size_t used = strlen(directory);
+	snprintf(directory + used, sizeof(directory) - used, "\\%s", PROGRAM_FILENAME);
 
 	CDirectSetup::SetRestartProgram(directory);
 	CDirectSetup::DirectXInstall(g_hWnd, g_hInstance, "DirectX7", true);
@@ -1698,11 +1684,6 @@ InitApp(int nCmdShow)
 {
 #ifdef PLATFORM_WINDOWS
 	WNDCLASS                    wc;
-	//生成随机类名,窗口标题
-	//char rnd_PROGRAM_NAME[50];
-	//char rnd_PROGRAM_TITLE[50];
-	//get_rand_str(rnd_PROGRAM_NAME,5);
-	//get_rand_str(rnd_PROGRAM_TITLE,5);
     // Set up and register window class
     wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
     wc.lpfnWndProc = (WNDPROC)WindowProc;
@@ -2210,7 +2191,7 @@ CheckTerriblePatchOLD()
 	if (bCrash)
 	{
 		char str[256];
-		sprintf(str, "화일이 손상되었습니다. 다크에덴 운영팀으로 연락주세요 [에러코드:%d]", errorCode);
+		snprintf(str, sizeof(str), "화일이 손상되었습니다. 다크에덴 운영팀으로 연락주세요 [에러코드:%d]", errorCode);
 		MessageBox(NULL, str, PROGRAM_TITLE, MB_OK);
 
 		return false;
@@ -2872,7 +2853,7 @@ ApplyPatch()
 					continue;
 				}
 
-				sprintf(filename, "Log\\%s", sFilename.c_str());
+				snprintf(filename, sizeof(filename), "Log\\%s", sFilename.c_str());
 
 				std::ifstream file( filename, ios::binary );
 				file.seekg( 0, ios::end );
@@ -3478,7 +3459,7 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 
 		// g_pRequestManager는 등록된 RequestServerPlayer에 대해서 processInput/Command/Output 처리
 
-		strcpy(strClient, pSocket->getHost().c_str());
+		snprintf(strClient, sizeof(strClient), "%s", pSocket->getHost().c_str());
 		port = pSocket->getPort();
 	}
 	*/
@@ -3565,7 +3546,7 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 		if (g_pDebugMessage!=NULL)
 		{
 			char logFile[128];
-			sprintf(logFile, "%s\\Log\\Log%d.txt", g_CWD, timeGetTime());			
+			snprintf(logFile, sizeof(logFile), "%s\\Log\\Log%d.txt", g_CWD, timeGetTime());			
 
 //			#include <fcntl.h>
 //			char clogFile[128];
@@ -3757,7 +3738,7 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 		GetCommand = 0x00000000;  //用于调试
 		char checkStr[9];
 		memset(checkStr,0,9);
-		sprintf(checkStr, "%X" ,GetCommand);
+		snprintf(checkStr, sizeof(checkStr), "%X", GetCommand);
 		char T_checkStr[9];
 		memset(T_checkStr,0,9);
 		if (8 -strlen(checkStr) !=0)
@@ -4060,11 +4041,11 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 		{
 			if (CWD[lenCWD-1]=='\\')
 			{
-				sprintf(UpdateDir, "%s%s", CWD, DIRECTORY_UPDATE);
+				snprintf(UpdateDir, sizeof(UpdateDir), "%s%s", CWD, DIRECTORY_UPDATE);
 			}
 			else
 			{
-				sprintf(UpdateDir, "%s\\%s", CWD, DIRECTORY_UPDATE);
+				snprintf(UpdateDir, sizeof(UpdateDir), "%s\\%s", CWD, DIRECTORY_UPDATE);
 			}
 		}
 		
@@ -4289,7 +4270,7 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 
 #ifdef OUTPUT_DEBUG
 				char szBuf[1024];
-				sprintf(szBuf, "mode = %d, id = %d,world = %s,key = %s", g_pUserInformation->IsAutoLogIn,
+				snprintf(szBuf, sizeof(szBuf), "mode = %d, id = %d,world = %s,key = %s", g_pUserInformation->IsAutoLogIn,
 																		
 
 	g_Dimension,
@@ -4448,13 +4429,13 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 				if( g_nProtectMessage.find( g_nProtectErrorMessage ) != g_nProtectMessage.end() )
 				{
 					char szTemp[256];
-					wsprintf(szTemp,"%s [%d]", g_nProtectMessage[g_nProtectErrorMessage].c_str(), g_nProtectErrorMessage2 );
+					snprintf(szTemp, sizeof(szTemp), "%s [%d]", g_nProtectMessage[g_nProtectErrorMessage].c_str(), g_nProtectErrorMessage2 );
 					g_pUIDialog->PopupFreeMessageDlg( szTemp );
 				}
 				else
 				{
 					char szTemp[256];
-					wsprintf(szTemp, "nProtect의 알 수 없는 오류 에러코드[%d][%d]입니다. 다크에덴을 종료합니다.", g_nProtectErrorMessage, g_nProtectErrorMessage2);
+					snprintf(szTemp, sizeof(szTemp), "nProtect의 알 수 없는 오류 에러코드[%d][%d]입니다. 다크에덴을 종료합니다.", g_nProtectErrorMessage, g_nProtectErrorMessage2);
 					g_pUIDialog->PopupFreeMessageDlg( szTemp );
 				}
 			}
@@ -4568,7 +4549,7 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 	{
 		//_spawnl(_P_NOWAIT, UPDATER_FILENAME, UPDATER_FILENAME, "UPDATE", NULL);
 		char szTemp[512];
-		sprintf(szTemp, "UPDATE %s", lpCmdLine);
+		snprintf(szTemp, sizeof(szTemp), "UPDATE %s", lpCmdLine);
 		_chdir(g_CWD);
 		//::MessageBox(0,"뗍혤溝固DLL놔댄，댄轎ID：8004,헝섟珂蕨乖쳬瓊슥댄轎。","댄轎",MB_OK);
 		_spawnl(_P_OVERLAY, UPDATER_FILENAME, UPDATER_FILENAME, szTemp, NULL);

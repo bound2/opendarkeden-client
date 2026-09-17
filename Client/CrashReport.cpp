@@ -136,7 +136,7 @@ tSFTA pSFTA = NULL;
 typedef DWORD64 (__stdcall *tSGMB)( IN HANDLE hProcess, IN DWORD64 dwAddr );
 tSGMB pSGMB = NULL;
 
-extern BOOL GetWinVersion(char *szVersion);
+extern BOOL GetWinVersion(char *szVersion, size_t nSize);
 
 LONG __stdcall RecordExceptionInfo( _EXCEPTION_POINTERS* pExp )
 {
@@ -170,7 +170,7 @@ LONG __stdcall RecordExceptionInfo( _EXCEPTION_POINTERS* pExp )
 			FileTimeToLocalFileTime(&LastWriteTime, &LastWriteTime);
 			FileTimeToSystemTime(&LastWriteTime, &st);
 
-			wsprintf(szTemp, "%04d-%02d-%02d %02d:%02d:%02d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+			snprintf(szTemp, sizeof(szTemp), "%04d-%02d-%02d %02d:%02d:%02d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
 			cr.SetExcutableTime(szTemp);
 		}
 		CloseHandle(ModuleFile);
@@ -187,17 +187,17 @@ LONG __stdcall RecordExceptionInfo( _EXCEPTION_POINTERS* pExp )
 	cr.SetVersion(version);
 
 	// print out operating system
-	strcpy(szTemp, "");
-	GetWinVersion(szTemp);
+	szTemp[0] = '\0';
+	GetWinVersion(szTemp, sizeof(szTemp));
 	cr.SetOS(szTemp);
 
 	// Eip/Ebp are the x86 CONTEXT register names; on x64 the equivalent
 	// fields are Rip/Rbp (64-bit). wsprintf doesn't reliably support
 	// 64-bit arguments, so use sprintf here instead.
-	sprintf(szTemp, "0x%016llx", Context->Rip);
+	snprintf(szTemp, sizeof(szTemp), "0x%016llx", Context->Rip);
 	cr.SetAddress(szTemp);
 
-	wsprintf(szTemp, "%s(0x%08x)", GetExceptionDescription(Exception->ExceptionCode), Exception->ExceptionCode);
+	snprintf(szTemp, sizeof(szTemp), "%s(0x%08x)", GetExceptionDescription(Exception->ExceptionCode), Exception->ExceptionCode);
 	cr.SetMessage(szTemp);
 
 	std::string callStack;
@@ -236,7 +236,7 @@ LONG __stdcall RecordExceptionInfo( _EXCEPTION_POINTERS* pExp )
 
 					// AddrPC.Offset is DWORD64 - wsprintf doesn't reliably
 					// support 64-bit arguments, so use sprintf here instead.
-					sprintf(szTemp, "0x%016llx", s.AddrPC.Offset);
+					snprintf(szTemp, sizeof(szTemp), "0x%016llx", s.AddrPC.Offset);
 					callStack += ' ';
 					callStack += szTemp;
 				}

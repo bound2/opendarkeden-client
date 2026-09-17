@@ -28,7 +28,7 @@ MMusic		g_Music;
 bool 
 MMusic::ErrorMsg()
 {
-	if(MIDI_ERROR_MSG[0] == NULL) ::strcpy((LPSTR)MIDI_ERROR_MSG, "Midi Error!");
+	if (MIDI_ERROR_MSG[0] == '\0') snprintf(MIDI_ERROR_MSG, sizeof(MIDI_ERROR_MSG), "%s", "Midi Error!");
 
     //::MessageBox( NULL, (LPSTR)MIDI_ERROR_MSG, "Class Midi Message", MB_ICONINFORMATION|MB_OK );
 
@@ -154,7 +154,7 @@ bool MMusic::Play(LPCSTR	filename)
 
 		if(filename == NULL)
 		{
-			::strcpy((LPSTR)MIDI_ERROR_MSG, "Midi Play Error! 2001");
+			snprintf(MIDI_ERROR_MSG, sizeof(MIDI_ERROR_MSG), "%s", "Midi Play Error! 2001");
 			return ErrorMsg();
 		}
 
@@ -164,19 +164,19 @@ bool MMusic::Play(LPCSTR	filename)
 
 		if(::mciSendString("close all", NULL, 0, NULL) != 0)
 		{
-			::strcpy((LPSTR)MIDI_ERROR_MSG, "Midi Play Error! 2002");
+			snprintf(MIDI_ERROR_MSG, sizeof(MIDI_ERROR_MSG), "%s", "Midi Play Error! 2002");
 			return ErrorMsg();
 		}
 
 		if(::mciSendString(buffer, NULL, 0, NULL) != 0)
 		{	
-			::strcpy((LPSTR)MIDI_ERROR_MSG, "Midi Play Error! 2003");
+			snprintf(MIDI_ERROR_MSG, sizeof(MIDI_ERROR_MSG), "%s", "Midi Play Error! 2003");
 			return ErrorMsg();
 		}
 
 		if(::mciSendString("play Midi from 0 notify", NULL, 0, m_hwnd) != 0)
 		{
-			::strcpy((LPSTR)MIDI_ERROR_MSG, "Midi Play Error! 2004");
+			snprintf(MIDI_ERROR_MSG, sizeof(MIDI_ERROR_MSG), "%s", "Midi Play Error! 2004");
 			return ErrorMsg();
 		}	
 
@@ -202,7 +202,7 @@ MMusic::Stop()
 
 		if(::mciSendString("close all", NULL, 0, NULL) != 0)
 		{
-			::strcpy((LPSTR)MIDI_ERROR_MSG, "Midi Stop Error!");
+			snprintf(MIDI_ERROR_MSG, sizeof(MIDI_ERROR_MSG), "%s", "Midi Stop Error!");
 			return ErrorMsg();
 		}   
 
@@ -227,7 +227,7 @@ bool MMusic::Pause()
 		// Pause if we're not already paused
 		if(::mciSendString("stop Midi", NULL, 0, NULL) != 0)
 		{
-			::strcpy((LPSTR)MIDI_ERROR_MSG, "Midi Pause Error!");
+			snprintf(MIDI_ERROR_MSG, sizeof(MIDI_ERROR_MSG), "%s", "Midi Pause Error!");
 			return ErrorMsg();
 		}
 
@@ -251,7 +251,7 @@ bool MMusic::Resume()
 		// Resume midi
 		if(::mciSendString("play Midi notify", NULL, 0, m_hwnd) != 0)
 		{
-			::strcpy((LPSTR)MIDI_ERROR_MSG, "Midi Resume Error!");
+			snprintf(MIDI_ERROR_MSG, sizeof(MIDI_ERROR_MSG), "%s", "Midi Resume Error!");
 			return ErrorMsg();
 		}
 
@@ -276,7 +276,7 @@ bool MMusic::RePlay()
 		// Replay midi
 		if(::mciSendString("play Midi from 0 notify", NULL, 0, m_hwnd) != 0)
 		{
-			::strcpy((LPSTR)MIDI_ERROR_MSG, "Midi RePlay Error!");
+			snprintf(MIDI_ERROR_MSG, sizeof(MIDI_ERROR_MSG), "%s", "Midi RePlay Error!");
 			return ErrorMsg();
 		}
 

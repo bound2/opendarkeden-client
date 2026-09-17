@@ -2559,14 +2559,6 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 			
 		}
 	
-
-		// Set LightSight
-		/*
-		#ifdef	OUTPUT_DEBUG
-			sprintf(g_pDebugMessage->GetCurrent(), "NewEffect : Type=%d, Light=%d, (%d, %d)", pEffect->GetFrameID(), pEffect->GetLight(), pEffect->GetX(), pEffect->GetY());	
-			g_pDebugMessage->Next();
-		#endif
-		*/
 	}
 	//------------------------------------------------------------
 	//
@@ -2686,9 +2678,10 @@ MCreature::SetName(const char* pName)
 		delete [] m_pName;
 	}
 
-	m_pName = new char [strlen(pName) + 1];
+	const size_t nName = strlen(pName) + 1;
+	m_pName = new char [nName];
 
-	strcpy(m_pName, pName);
+	memcpy(m_pName, pName, nName);
 }
 
 //----------------------------------------------------------------------
@@ -3792,19 +3785,6 @@ MCreature::UpdateAttachEffect()
 //				g_pZone->UnSetLight(x, y, light);
 //				g_pZone->SetLight(pEffect->GetX(), pEffect->GetY(), pEffect->GetLight());
 
-				/*
-				// UnSetLightSight
-				#ifdef	OUTPUT_DEBUG
-					sprintf(g_pDebugMessage->GetCurrent(), "UnSetLightSight : Type=%d, Light=%d, (%d, %d)", pEffect->GetFrameID(), light, x,y);	
-					g_pDebugMessage->Next();
-				#endif
-
-				// SetLightSight
-				#ifdef	OUTPUT_DEBUG
-					sprintf(g_pDebugMessage->GetCurrent(), "SetLightSight : Type=%d, Light=%d, (%d, %d)", pEffect->GetFrameID(), pEffect->GetLight(), pEffect->GetX(), pEffect->GetY());	
-					g_pDebugMessage->Next();
-				#endif
-				*/
 			}
 
 			//---------------------------------------------------------------------
@@ -3883,13 +3863,6 @@ MCreature::UpdateAttachEffect()
 				{
 //					g_pZone->UnSetLight(x, y, light);
 
-					// UnSet LightSight
-					/*
-					#ifdef	OUTPUT_DEBUG
-						sprintf(g_pDebugMessage->GetCurrent(), "RemoveEffect : Type=%d, Light=%d, (%d, %d)", pEffect->GetFrameID(), light, x,y);	
-						g_pDebugMessage->Next();
-					#endif
-					*/
 				}
 			}
 
@@ -3954,19 +3927,6 @@ MCreature::UpdateAttachEffect()
 //				g_pZone->UnSetLight(x, y, light);
 //				g_pZone->SetLight(pEffect->GetX(), pEffect->GetY(), pEffect->GetLight());
 
-				/*
-				// UnSetLightSight
-				#ifdef	OUTPUT_DEBUG
-					sprintf(g_pDebugMessage->GetCurrent(), "UnSetLightSight : Type=%d, Light=%d, (%d, %d)", pEffect->GetFrameID(), light, x,y);	
-					g_pDebugMessage->Next();
-				#endif
-
-				// SetLightSight
-				#ifdef	OUTPUT_DEBUG
-					sprintf(g_pDebugMessage->GetCurrent(), "SetLightSight : Type=%d, Light=%d, (%d, %d)", pEffect->GetFrameID(), pEffect->GetLight(), pEffect->GetX(), pEffect->GetY());	
-					g_pDebugMessage->Next();
-				#endif
-				*/
 			}
 
 			//---------------------------------------------------------------------
@@ -4039,13 +3999,6 @@ MCreature::UpdateAttachEffect()
 				{
 //					g_pZone->UnSetLight(x, y, light);
 
-					// UnSet LightSight
-					/*
-					#ifdef	OUTPUT_DEBUG
-						sprintf(g_pDebugMessage->GetCurrent(), "RemoveEffect : Type=%d, Light=%d, (%d, %d)", pEffect->GetFrameID(), light, x,y);	
-						g_pDebugMessage->Next();
-					#endif
-					*/
 				}
 			}
 
@@ -4989,8 +4942,8 @@ MCreature::SetPersnalString(char *str, COLORREF color)
 		{
 			endIndex = len;
 
-			// 일정 개수의 String을 copy한다.
-			strcpy(m_ChatString[m_ChatStringCurrent], str+startIndex);					
+			// Copy what is left of the string.
+			snprintf(m_ChatString[m_ChatStringCurrent], g_pClientConfig->MAX_CHATSTRINGLENGTH_PLUS1, "%s", str+startIndex);
 		}
 		else
 		{
@@ -5190,8 +5143,8 @@ MCreature::SetChatString(const char *input, COLORREF color)
 		{
 			endIndex = len;
 
-			// 일정 개수의 String을 copy한다.
-			strcpy(m_ChatString[m_ChatStringCurrent], str+startIndex);					
+			// Copy what is left of the string.
+			snprintf(m_ChatString[m_ChatStringCurrent], g_pClientConfig->MAX_CHATSTRINGLENGTH_PLUS1, "%s", str+startIndex);
 		}
 		else
 		{
@@ -8262,40 +8215,6 @@ MCreature::AffectMoveBuffer()
 	}
 
 	//--------------------------------------------------
-	// Player가 이미 갈 자리에 있다면....
-	//--------------------------------------------------
-	// 못 간다~~
-	/*
-	if (g_pPlayer->GetX()==next.x && g_pPlayer->GetY()==next.y)
-	{
-		// 방향만 설정..
-		//pCreature->SetDirection( pGCMove->getDir() );	
-		
-		// 이전에 있던 좌표에서 움직이려고 한 경우..
-		if (oldX==x && oldY==y)
-		{
-			// 그냥 서 있으면 된다.
-		}
-		else
-		{
-			// 이전에 있던 좌표(oldX, oldY)에서 새좌표(x,y)로 이동한다.
-			m_X = oldX;
-			m_Y = oldY;
-
-			MovePosition( x, y );			
-
-			// 새 좌표에서 방향(direction)으로 움직여야 하지만
-			// 그냥 새 좌표에 서 있어야 한다.
-		}
-
-		// message		
-		#ifdef	OUTPUT_DEBUG
-			sprintf(g_pDebugMessage->GetCurrent(), "[Can't Move] : Player(%d, %d) Already Exist... ", g_pPlayer->GetX(), g_pPlayer->GetY());
-			g_pDebugMessage->Next();
-		#endif
-	}
-	*/
-	//--------------------------------------------------
 	// 목적지에 이미 가 있는 경우는 움직일 필요없다.
 	//--------------------------------------------------		
 	//else 
@@ -9080,24 +8999,6 @@ MCreature::PacketAttackNormal(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY, BY
 	m_sY = 0;
 	
 	// server에서 날아온~ 정보 설정..
-	//--------------------------------------------------
-	// Player가 이미 그 자리에 있다면....
-	//--------------------------------------------------
-	// 못 간다~~
-	/*
-	if (g_pPlayer->GetX()==sX && g_pPlayer->GetY()==sY)
-	{
-		// message
-		#ifdef	OUTPUT_DEBUG
-			sprintf(g_pDebugMessage->GetCurrent(), "[Can't Move To Attack] : Player(%d, %d) Already Exist... ", g_pPlayer->GetX(), g_pPlayer->GetY());
-			g_pDebugMessage->Next();
-		#endif
-
-		// 현재 Player가 있는 위치로 바라본다.
-		SetDirectionToPosition( g_pPlayer->GetX(), g_pPlayer->GetY() );
-	}	
-	else
-	*/
 	{
 		//--------------------------------------------------
 		// 다른 Creature가 이미 있다면?

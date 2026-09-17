@@ -169,7 +169,7 @@ IsValidID(const char* strID, const char* strPermit)
 
 	char strtempID[128];
 
-	strcpy( strtempID, strID );
+	snprintf(strtempID, sizeof(strtempID), "%s", strID);
 
 	char* str = strtempID;
 
@@ -362,9 +362,9 @@ LoadImageToSurface(const char* pFilename, CDirectDrawSurface& surface)
 		return false;
 	}
 
-	// file이름이 이상한 경우
+	// in case the file name is malformed
 	char checkStr[10];
-	strcpy(checkStr, (pFilename+fileLen-4));
+	snprintf(checkStr, sizeof(checkStr), "%s", pFilename + fileLen - 4);
 	// _strlwr is Windows-only, removed - lowercase conversion done below
 
 	bool bBmp = false;
@@ -507,9 +507,9 @@ SaveSurfaceToImage(const char* pFilename, CDirectDrawSurface& surface)
 		return false;
 	}
 
-	// file이름이 이상한 경우
+	// in case the file name is malformed
 	char checkStr[10];
-	strcpy(checkStr, (pFilename+fileLen-4));
+	snprintf(checkStr, sizeof(checkStr), "%s", pFilename + fileLen - 4);
 	// _strlwr is Windows-only, removed - lowercase conversion done below
 
 	bool bBmp = false;
@@ -983,7 +983,7 @@ bool LoadImageToSurface(const char* pFilename, CSpriteSurface& surface)
 
 	// Check file extension
 	char checkStr[10];
-	strcpy(checkStr, (pFilename + fileLen - 4));
+	snprintf(checkStr, sizeof(checkStr), "%s", pFilename + fileLen - 4);
 	for (int i = 0; i < strlen(checkStr); i++) {
 		if (checkStr[i] >= 'A' && checkStr[i] <= 'Z') {
 			checkStr[i] += 'a' - 'A';

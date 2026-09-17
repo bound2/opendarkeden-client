@@ -756,67 +756,6 @@ CWaitUIUpdate::UpdateDraw()
 			}
 		}
 				
-		//-----------------------------------------------------------------
-		// 서버 이름 출력
-		//-----------------------------------------------------------------
-		/*
-		#ifdef OUTPUT_DEBUG
-
-			if (g_Mode==MODE_WAIT_SELECTPC)
-			{
-				char str[80];
-
-				sprintf(str, "ServerGroup: %s", g_pServerInformation->GetServerGroupName());						
-
-				// g_pLast->GDI_Text(101,11, str, RGB(0,0,0));
-				TextSystem::TextService::RenderText(101, 11, str);
-				// g_pLast->GDI_Text(100,10, str, RGB(240,240,240));
-				TextSystem::TextService::RenderText(100, 10, str);
-
-				//sprintf(str, "Server: %s", g_pServerInformation->GetServerName());
-
-				//g_pLast->GDI_Text(401,11, str, RGB(0,0,0));
-				//g_pLast->GDI_Text(400,10, str, RGB(240,240,240));
-
-				CServerInformation::const_iterator iGroup = g_pServerInformation->begin();
-
-				int y = 30;
-				
-				while (iGroup!=g_pServerInformation->end())
-				{
-					ServerGroup* pGroup = iGroup->second;
-
-					sprintf(str, "[%d] %s", iGroup->first, pGroup->GetGroupName());
-
-					// g_pLast->GDI_Text(101,y+1, str, RGB(0,0,0));
-					TextSystem::TextService::RenderText(101, y+1, str);
-					// g_pLast->GDI_Text(100,y, str, RGB(240,240,240));
-					TextSystem::TextService::RenderText(100, y, str);
-
-					y += 20;
-
-					//ServerGroup::const_iterator iServer = pGroup->begin();
-
-					//while (iServer!=pGroup->end())
-					{
-					//	SERVER_INFO* pServer = iServer->second;
-
-					//	sprintf(str, "[%d] %s", iServer->first, pServer->ServerName.GetString());
-
-					//	g_pLast->GDI_Text(401,y+1, str, RGB(0,0,0));
-					//	g_pLast->GDI_Text(400,y, str, RGB(240,240,240));
-
-					//	y += 20;
-
-					//	iServer++;
-					}
-					
-
-					iGroup++;
-				}
-			}
-		#endif
-		*/
 
 		/*
 		static float anim = 0.0f;
@@ -906,7 +845,7 @@ CWaitUIUpdate::UpdateDraw()
 			{
 				char str[256];
 				
-				sprintf(str, "%d FPS", g_FrameRate);	
+				snprintf(str, sizeof(str), "%d FPS", g_FrameRate);	
 				
 				// g_pLast->GDI_Text(11,11, str, RGB(20,20,20));
 				TextSystem::TextService::RenderText(11, 11, str);
@@ -930,41 +869,6 @@ CWaitUIUpdate::UpdateDraw()
 		//g_pBack->GetSurface()->ReleaseDC(hdc);
 	}	
 
-	/*
-#ifdef OUTPUT_DEBUG
-	if (g_pUserOption->DrawFPS)
-	{
-		char str[256];
-		//-----------------------------------------------------------------
-		// FPS 찍기	
-		//-----------------------------------------------------------------
-		if (true)
-		{
-			sprintf(str, "%d FPS(HAL)", g_FrameRate);	
-		}
-		else
-		{
-			sprintf(str, "%d FPS", g_FrameRate);	
-		}
-		// g_pBack->GDI_Text(11,11, str, RGB(20,20,20));
-		TextSystem::TextService::RenderText(11, 11, str);
-		// g_pBack->GDI_Text(10,10, str, 0xFFFFFF);
-		TextSystem::TextService::RenderText(10, 10, str);
-
-		//RECT rect = { 0, 0, 50, 50 };
-		//g_pBack->DrawRect(&rect, 0xFFFF);
-
-		//DDSURFACEDESC2    ddsd;
-		//ZeroMemory(&ddsd, sizeof(ddsd));
-		//ddsd.dwSize = sizeof(ddsd);
-		//g_pBack->GetSurface()->GetSurfaceDesc(&ddsd);		
-	}
-#endif
-	*/
-	// FPS 찍기	
-//	sprintf(str, "%d Updates", g_FrameRate);	
-	//g_pBack->GDI_Text(11,11, str, RGB(20,20,20));
-//	g_pBack->GDI_Text(1,1, str, 0xFFFFFF);
 
 	// Mouse Cursor
 	/*
