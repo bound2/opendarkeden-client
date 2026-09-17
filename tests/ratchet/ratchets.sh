@@ -1436,8 +1436,21 @@ fi
 # bounded; CTypePackVector.h, a header nothing includes, deleted). What is left is
 # VS_UI (783) and the rest of Client (303), most of them wsprintf and
 # sprintf into local char arrays.
+# 1,016 on 2026-09-17: the second slice took ten Client utility files
+# to zero (70 lines). GetWinVersion takes the caller's buffer size and
+# writes with it (its one caller, the crash report, passes sizeof);
+# CMd5, which nothing constructs, is deleted with its two files (its
+# 50-byte error text overflowed for a path over 21 bytes, on a path
+# nothing reached); the crash report's four stamps, the profile
+# manager's five file-name joins, the utility functions' four copies,
+# the guild-mark manager's four index names and the wait screen's one
+# live caption are snprintf(sizeof); MMusic's error text becomes the char array it was
+# always used as (it was declared as eighty LPSTRs and cast); and the
+# sixteen lines inside block-commented debug code in CPartManager.h,
+# MCreatureWear.cpp and CWaitUIUpdate.cpp - counted, since this grep
+# strips only // tails, as R3's does - are deleted with their blocks.
 #----------------------------------------------------------------------
-R17_BASELINE=1086
+R17_BASELINE=1016
 R17_FILES_FLOOR=500
 
 r17_members () {

@@ -1,7 +1,10 @@
 #include "Client_PCH.h"
 
-BOOL GetWinVersion(char *szVersion)
+BOOL GetWinVersion(char *szVersion, size_t nSize)
 {
+   if (szVersion == NULL || nSize == 0)
+      return FALSE;
+
 #ifdef PLATFORM_WINDOWS
    // Windows implementation - simplified version
    OSVERSIONINFOEX osvi;
@@ -14,61 +17,60 @@ BOOL GetWinVersion(char *szVersion)
    if( !(bOsVersionInfoEx = GetVersionEx ((OSVERSIONINFO *) &osvi)) )
    {
       osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
-      if (! GetVersionEx ( (OSVERSIONINFO *) &osvi) ) 
+      if (! GetVersionEx ( (OSVERSIONINFO *) &osvi) )
          return FALSE;
    }
-
-   char szTemp[512];
 
    switch (osvi.dwPlatformId)
    {
       // Test for the Windows NT product family.
       case VER_PLATFORM_WIN32_NT:
          if ( osvi.dwMajorVersion == 10 && osvi.dwMinorVersion == 0 )
-            strcat (szVersion, "Windows 10/11");
+            snprintf(szVersion, nSize, "%s", "Windows 10/11");
          else if ( osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 3 )
-            strcat (szVersion, "Windows 8.1");
+            snprintf(szVersion, nSize, "%s", "Windows 8.1");
          else if ( osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 2 )
-            strcat (szVersion, "Windows 8");
+            snprintf(szVersion, nSize, "%s", "Windows 8");
          else if ( osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 1 )
-            strcat (szVersion, "Windows 7");
+            snprintf(szVersion, nSize, "%s", "Windows 7");
          else if ( osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0 )
-            strcat (szVersion, "Windows Vista");
+            snprintf(szVersion, nSize, "%s", "Windows Vista");
          else if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1 )
-            strcat (szVersion, "Windows XP");
+            snprintf(szVersion, nSize, "%s", "Windows XP");
          else
-            sprintf(szVersion, "Windows NT %d.%d", osvi.dwMajorVersion, osvi.dwMinorVersion);
+            snprintf(szVersion, nSize, "Windows NT %d.%d", osvi.dwMajorVersion, osvi.dwMinorVersion);
          break;
 
       // Test for the Windows 95 product family.
       case VER_PLATFORM_WIN32_WINDOWS:
          if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 0)
-             strcpy(szVersion, "Windows 95");
+             snprintf(szVersion, nSize, "%s", "Windows 95");
          else if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 10)
-             strcpy(szVersion, "Windows 98");
+             snprintf(szVersion, nSize, "%s", "Windows 98");
          else if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 90)
-             strcpy(szVersion, "Windows ME");
+             snprintf(szVersion, nSize, "%s", "Windows ME");
          else
-             strcpy(szVersion, "Windows 9x");
+             snprintf(szVersion, nSize, "%s", "Windows 9x");
          break;
 
       default:
-         strcpy(szVersion, "Unknown Windows");
+         snprintf(szVersion, nSize, "%s", "Unknown Windows");
          break;
    }
 
    // Add build number if available
    if (osvi.dwBuildNumber > 0)
    {
-      sprintf(szTemp, " (Build %d)", osvi.dwBuildNumber & 0xFFFF);
-      strcat(szVersion, szTemp);
+      const size_t used = strlen(szVersion);
+      if (used < nSize)
+         snprintf(szVersion + used, nSize - used, " (Build %d)", osvi.dwBuildNumber & 0xFFFF);
    }
 
    return TRUE;
 
 #else
    // Non-Windows platforms
-   strcpy(szVersion, "Non-Windows Platform");
+   snprintf(szVersion, nSize, "%s", "Non-Windows Platform");
    return TRUE;
 #endif
 }

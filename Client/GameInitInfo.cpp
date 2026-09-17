@@ -54,8 +54,6 @@
 #include "MMonsterKillQuestInfo.h"
 #include "ShrineInfoManager.h"
 
-#include "md5.h" //add by viva
-
 #ifdef OUTPUT_DEBUG
 	//#define	SAVE_TO_FILE_CONFIG
 	//#define SAVE_TO_FILE_INFO

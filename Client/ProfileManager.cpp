@@ -202,7 +202,7 @@ ProfileManager::InitProfiles()
 				continue;
 			}
 
-			sprintf(bmpFilename, "%s\\%s", sProfileDir.c_str(), sFilename.c_str());
+			snprintf(bmpFilename, sizeof(bmpFilename), "%s\\%s", sProfileDir.c_str(), sFilename.c_str());
 
 			//---------------------------------------------------------
 			// Read the bmp and turn it into a sprite.
@@ -250,13 +250,10 @@ ProfileManager::InitProfiles()
 
 			// filename.spk
 			int lenBmpFilename = strlen(bmpFilename);
-			strncpy(spkFilename, bmpFilename, lenBmpFilename-3);
-			spkFilename[lenBmpFilename-3] = '\0';
-			strcat(spkFilename, "spk");
+			snprintf(spkFilename, sizeof(spkFilename), "%.*sspk", lenBmpFilename-3, bmpFilename);
 
 			// filename.spki
-			strcpy(spkiFilename, spkFilename);
-			strcat(spkiFilename, "i");
+			snprintf(spkiFilename, sizeof(spkiFilename), "%si", spkFilename);
 
 			std::ofstream	spkFile(spkFilename, ios::binary);
 			std::ofstream	spkiFile(spkiFilename, ios::binary);
@@ -306,7 +303,7 @@ ProfileManager::DeleteProfiles()
 				continue;
 			}
 
-			sprintf(spkFilename, "%s\\%s", sProfileDir.c_str(), sFilename.c_str());
+			snprintf(spkFilename, sizeof(spkFilename), "%s\\%s", sProfileDir.c_str(), sFilename.c_str());
 			remove(spkFilename);
 		}
 	}
@@ -325,7 +322,7 @@ ProfileManager::DeleteProfiles()
 				continue;
 			}
 
-			sprintf(spkFilename, "%s\\%s", sProfileDir.c_str(), sFilename.c_str());
+			snprintf(spkFilename, sizeof(spkFilename), "%s\\%s", sProfileDir.c_str(), sFilename.c_str());
 			remove(spkFilename);
 		}
 	}
