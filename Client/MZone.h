@@ -264,7 +264,8 @@ class MZone {
 		//							 Effect
 		//
 		//--------------------------------------------------------------
-		bool		AddEffect(MEffect* pEffect, DWORD dwWaitCount = 0);	// Zone에 Effect 추가	
+		// Takes ownership on entry; destroys rejected effects, retains accepted ones.
+		bool		AddEffect(MEffect* pEffect, DWORD dwWaitCount = 0);
 		bool		RemoveEffect(TYPE_OBJECTID id);
 		void		UpdateEffects();				// Frame변화 (임시함수!!!)
 		// 2004, 8, 31, sobeit add start

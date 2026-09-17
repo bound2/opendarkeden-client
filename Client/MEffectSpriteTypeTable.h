@@ -90,19 +90,6 @@ class MActionEffectSpriteTypeTable : public ACTION_FRAMEID_TABLE {
 extern	EFFECTSPRITETYPE_TABLE*			g_pEffectSpriteTypeTable;
 extern	MActionEffectSpriteTypeTable*	g_pActionEffectSpriteTypeTable;
 
-#ifdef __SANITIZE_ADDRESS__
-// __asan_address_is_poisoned() and __asan_region_is_poisoned() below and in
-// MZone.cpp come from here. The compiler defines __SANITIZE_ADDRESS__ but does
-// not declare the interface, so without this the whole block fails with C3861.
-#include <sanitizer/asan_interface.h>
-
-// Shadow copies for corruption detection
-extern EFFECTSPRITETYPE_TABLE* g_pEffectSpriteTypeTable_shadow;
-extern EFFECTSPRITETYPETABLE_INFO* g_pEffectSpriteTypeTable_m_pTypeInfo_shadow;
-
-// Function to validate that g_pEffectSpriteTypeTable hasn't been corrupted
-extern void validate_effect_sprite_table_pointer(const char* location);
-#endif
 
 #endif
 

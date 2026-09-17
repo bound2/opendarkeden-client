@@ -1860,6 +1860,8 @@ Line 2375 validates `if (type >= g_pEffectSpriteTypeTable->GetSize()) return fal
 
 **Category:** maintainability  |  **Location:** `Client/MZone.cpp:3949`
 
+> ✅ **Fixed (2026-09-17):** removed the address-range tests, exception swallowing around dereferences, poison probes, canary reads and shadow-pointer machinery (including its initialization hooks). The remaining checks concern actual state: a supplied owned effect, an available loaded table, valid indices and zone coordinates. Ownership is explicit below. This does not claim reproduction or diagnosis of an earlier suspected use-after-free; real invalid accesses remain visible to ASan instead of being hidden by address guesses. Full Debug/ASan builds and CTest pass.
+
 Lines 3947-4081 include: `if (ptr_value < 0x1000)` wild-pointer tests (3950, 4028); `try { x = pNewEffect->GetX(); } catch (...)` at 3988-4000, which cannot catch the SIGSEGV a dangling dereference actually raises on Clang/GCC; `volatile bool table_valid = true;` at 4053 that is never set false, making the branch at 4077 unconditional; a canary read `test_frame_id = (*g_pEffectSpriteTypeTable)[0].FrameID;` at 4079 whose result is discarded; and at 4066-4073 `if (table_addr >= 0x632000000000ULL && table_addr <= 0x6320000FFFFFFULL)` with the comment "This looks like the SDL surface region that gets freed!" — an ASAN-specific magic address baked into shipping logic. Comments at 3960 and 4018 ("ROOT CAUSE FIX") show the real defect was never located.
 
 **Failure scenario:** The heuristics give no protection on a normal build (freed heap is usually still mapped and rarely at those addresses) while making the function 500 lines long and hiding the genuine bounds bug at 4118 in the noise. A contributor reading this cannot tell which checks are load-bearing.
@@ -1869,6 +1871,8 @@ Lines 3947-4081 include: `if (ptr_value < 0x1000)` wild-pointer tests (3950, 402
 #### 🟡 Medium -- MZone::AddEffect has an inconsistent ownership contract: four early-return-false paths leak the effect while eleven others delete it, and all callers assume the callee frees.
 
 **Category:** resource-leak  |  **Location:** `Client/MZone.cpp:3984`
+
+> ✅ **Fixed (2026-09-17):** `AddEffect` owns its argument through a local `unique_ptr` until one of three successful container insertions transfers it to the wait list or effect map. Every rejection and pre-transfer exception now destroys the effect. A ready wait-list node is erased before calling `AddEffect`, so failure cannot leave a freed pointer queued. The header documents the ownership contract. Audited all return/transfer paths and callers; executable-side regression guard verified by full Debug/ASan builds and CTest, without a claimed runtime reproduction.
 
 AddEffect deletes pNewEffect before returning false at lines 4009, 4022, 4030, 4039, 4071, 4121, 4138, 4167, 4173, 4215 and 4426, but returns false without deleting at 3944, 3952, 3984 and 3999 — the last two with the comment "Don't delete the effect". Callers uniformly rely on the delete-on-failure contract: Client/MAttackCreatureEffectGenerator.cpp:88-94 does `if (g_pZone->AddEffect(pEffect)) {...} else return false;` with no delete, and the same shape appears in MAttackZoneEffectGenerator.cpp:158, MFallingEffectGenerator.cpp:63, MRippleZoneEffectGenerator.cpp:84 and roughly twenty other generators.
 

@@ -272,13 +272,6 @@ InitInfomation()
 	if (g_pEffectSpriteTypeTable==NULL)
 	{
 		g_pEffectSpriteTypeTable = new EFFECTSPRITETYPE_TABLE;
-#ifdef __SANITIZE_ADDRESS__
-		// Update shadow copies for corruption detection
-		extern EFFECTSPRITETYPE_TABLE* g_pEffectSpriteTypeTable_shadow;
-		extern EFFECTSPRITETYPETABLE_INFO* g_pEffectSpriteTypeTable_m_pTypeInfo_shadow;
-		g_pEffectSpriteTypeTable_shadow = g_pEffectSpriteTypeTable;
-		g_pEffectSpriteTypeTable_m_pTypeInfo_shadow = g_pEffectSpriteTypeTable->GetInternalPointer();
-#endif
 	}
 
 	if (g_pActionEffectSpriteTypeTable==NULL)
@@ -304,13 +297,6 @@ InitInfomation()
 	if (g_pEffectSpriteTypeTable==NULL)
 	{
 		g_pEffectSpriteTypeTable = new EFFECTSPRITETYPE_TABLE;
-#ifdef __SANITIZE_ADDRESS__
-		// Update shadow copies for corruption detection
-		extern EFFECTSPRITETYPE_TABLE* g_pEffectSpriteTypeTable_shadow;
-		extern EFFECTSPRITETYPETABLE_INFO* g_pEffectSpriteTypeTable_m_pTypeInfo_shadow;
-		g_pEffectSpriteTypeTable_shadow = g_pEffectSpriteTypeTable;
-		g_pEffectSpriteTypeTable_m_pTypeInfo_shadow = g_pEffectSpriteTypeTable->GetInternalPointer();
-#endif
 	}
 
 	if (g_pCreatureSpriteTable==NULL)
@@ -860,15 +846,6 @@ InitInfomation()
 		         i, entry.FrameID, (int)entry.BltType);
 	}
 
-#ifdef __SANITIZE_ADDRESS__
-	// CRITICAL FIX: Update shadow copies after LoadFromFile reallocates m_pTypeInfo
-	// LoadFromFile calls Init() which reallocates the internal array
-	// Without updating shadows, corruption detection gives false positives
-	extern EFFECTSPRITETYPE_TABLE* g_pEffectSpriteTypeTable_shadow;
-	extern EFFECTSPRITETYPETABLE_INFO* g_pEffectSpriteTypeTable_m_pTypeInfo_shadow;
-	g_pEffectSpriteTypeTable_shadow = g_pEffectSpriteTypeTable;
-	g_pEffectSpriteTypeTable_m_pTypeInfo_shadow = g_pEffectSpriteTypeTable->GetInternalPointer();
-#endif
 
 	//------------------------------------------------
 	// Load

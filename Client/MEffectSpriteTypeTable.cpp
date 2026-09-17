@@ -11,53 +11,6 @@
 EFFECTSPRITETYPE_TABLE*			g_pEffectSpriteTypeTable = NULL;
 MActionEffectSpriteTypeTable*	g_pActionEffectSpriteTypeTable = NULL;
 
-// Memory protection: Store a copy of the pointer to detect corruption
-// If the pointer is corrupted, we can detect it by comparing with the shadow
-#ifdef __SANITIZE_ADDRESS__
-EFFECTSPRITETYPE_TABLE* g_pEffectSpriteTypeTable_shadow = NULL;
-EFFECTSPRITETYPETABLE_INFO* g_pEffectSpriteTypeTable_m_pTypeInfo_shadow = NULL;
-static uint64_t g_pEffectSpriteTypeTable_canary = 0xDEADBEEFCAFEBABEULL;
-
-void validate_effect_sprite_table_pointer(const char* location) {
-	if (g_pEffectSpriteTypeTable != g_pEffectSpriteTypeTable_shadow) {
-		fprintf(stderr, "[CORRUPTION] g_pEffectSpriteTypeTable corrupted at %s!\n", location);
-		fprintf(stderr, "[CORRUPTION] Expected: %p, Got: %p\n",
-		        g_pEffectSpriteTypeTable_shadow, g_pEffectSpriteTypeTable);
-		// Don't abort - let ASAN handle the crash with better diagnostics
-	}
-
-	// Check if m_pTypeInfo internal pointer is corrupted
-	if (g_pEffectSpriteTypeTable != NULL && g_pEffectSpriteTypeTable_shadow != NULL) {
-		EFFECTSPRITETYPETABLE_INFO* current_m_pTypeInfo = g_pEffectSpriteTypeTable->GetInternalPointer();
-		if (current_m_pTypeInfo != g_pEffectSpriteTypeTable_m_pTypeInfo_shadow) {
-			fprintf(stderr, "[CORRUPTION] g_pEffectSpriteTypeTable->m_pTypeInfo corrupted at %s!\n", location);
-			fprintf(stderr, "[CORRUPTION] Expected m_pTypeInfo: %p, Got: %p\n",
-			        g_pEffectSpriteTypeTable_m_pTypeInfo_shadow, current_m_pTypeInfo);
-		}
-
-		// Check if m_pTypeInfo points to freed SDL surface memory region
-		// SDL surfaces are typically allocated in specific memory ranges
-		uintptr_t ptr_addr = (uintptr_t)current_m_pTypeInfo;
-		// Check if it looks like a heap pointer that might be in a freed region
-		if (ptr_addr > 0x1000 && ptr_addr < 0x100000000ULL) {
-			// Use ASAN to check if the memory is poisoned
-			if (__asan_region_is_poisoned((void*)current_m_pTypeInfo, sizeof(EFFECTSPRITETYPETABLE_INFO))) {
-				fprintf(stderr, "[CORRUPTION] m_pTypeInfo points to poisoned/freed memory at %s!\n", location);
-				fprintf(stderr, "[CORRUPTION] m_pTypeInfo=%p\n", current_m_pTypeInfo);
-			}
-		}
-	}
-
-	if (g_pEffectSpriteTypeTable_canary != 0xDEADBEEFCAFEBABEULL) {
-		fprintf(stderr, "[CORRUPTION] Canary corrupted at %s!\n", location);
-		fprintf(stderr, "[CORRUPTION] Canary value: 0x%llx\n", g_pEffectSpriteTypeTable_canary);
-	}
-}
-
-#define VALIDATE_TABLE() validate_effect_sprite_table_pointer(__FUNCTION__)
-#else
-#define VALIDATE_TABLE() do {} while(0)
-#endif
 
 //----------------------------------------------------------------------
 //
