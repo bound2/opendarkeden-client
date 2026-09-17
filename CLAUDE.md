@@ -171,8 +171,8 @@ cd build/tests && ctest -C Debug --output-on-failure
 
 Add `-DUSE_ASAN=ON` in a separate tree for the sanitized run. `BUILD_TESTS` defaults
 to `OFF`, so a tree configured without it generates no test target at all. Current
-baseline: **674 tests, 297,466 checks, 0 failed** in both Windows trees, and
-**674 tests, 297,465 checks, 0 failed** on Linux (GCC, Clang, and GCC with
+baseline: **675 tests, 297,471 checks, 0 failed** in both Windows trees, and
+**675 tests, 297,470 checks, 0 failed** on Linux (GCC, Clang, and GCC with
 `-DUSE_ASAN=ON -DUSE_UBSAN=ON`, where UBSan reports nothing) and on macOS
 (Apple Clang, with and without ASan and UBSan); the one-check
 difference is a platform-conditional test, not a failure. (The non-Windows

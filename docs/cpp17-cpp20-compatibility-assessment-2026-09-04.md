@@ -692,6 +692,30 @@ there would only respell the same two tokens. Everything executable-side
 `GCSkillToTileOK` handlers, `Client/LeakMemoryDumper.*`,
 `Client/DebugInfo.h`, `VS_UI/src/Imm/IFCErrors.h`) is a later slice.
 
+**Source-location third slice (2026-09-17):** the executable-side
+forwarders the second slice left. Most of that list turned out not to
+be forwarders, or not to be code: `MEffectGeneratorTable.cpp`'s and
+`DebugInfo.h`'s mentions are commented out; `LeakMemoryDumper.h`'s
+`DEBUG_NEW` places `__FILE__` and `__LINE__` into a tracked
+`operator new` under `ENABLE_LEAK_TRACKER`, where a `source_location`
+cannot be defaulted in a placement-new, and stays; `IFCErrors.h`'s
+`IFC_SET_ERROR` has no user. What remained were six bug reports that
+formatted `[%s,%d]` from `__FILE__` and `__LINE__` by hand - three in
+`PacketFunction.cpp`, three in the `GCSkillToTileOK` handlers - and
+they call a new `SendBugReportAt(site, fmt, ...)` in the wire layer,
+which writes the same `[file,line] ` prefix from a `DiagnosticSite`
+captured at the call (two of `PacketFunction.cpp`'s printed the file
+alone and gain the line). `SendBugReport` and it share one bounded
+core - the prefix goes into the same 256-byte buffer ahead of the
+caller's text, so the cut lands where it did - and the text the server
+receives is unchanged. `tests/unit/test_bug_report_message.cpp` pins the
+prefix for an explicit site and for the defaulted one against the test
+file's own `__FILE__` and `__LINE__`. `MCreature.cpp`'s 28,
+`VS_UI_GameCommon.cpp`'s 11 and `CSpriteSurface_Adapter.cpp`'s three
+`__LINE__` prints put their own location into a literal, the shape the
+second slice left alone in `SocketOutputStream.cpp`, and stay. That
+closes priority 1.
+
 **Container-helper status (2026-09-05):** the first priority-2 slice is
 implemented. Twelve membership and line-trimming sites in library code -
 `PacketIDSet`, `GCTimeLimitItemInfo`, `GCNPCAskVariable`, `Properties`,
