@@ -2,6 +2,7 @@
 #include "CDirectInput.h"
 #include "DXLibBackend.h"
 #include "DXInputHost.h"
+#include "DXInputEvents.h"
 #include <SDL.h>
 #include <vector>
 #include <limits>
@@ -45,7 +46,9 @@ void Wheel(int amount)
 	SDL_Event event{};
 	event.type = SDL_MOUSEWHEEL;
 	event.wheel.y = amount;
-	CHECK_EQ(1, SDL_PushEvent(&event));
+	// sdl2-compat converts pushed wheel events through SDL3, losing the integer
+	// delta, and cannot push text events. Feed the actual post-poll dispatcher.
+	DXInput::ProcessEvent(event);
 }
 }
 
@@ -150,7 +153,7 @@ TEST(InputAdapter, LargeWheelDeltasAreSummedBeforeNarrowing)
 	if (events.size() == 1) CHECK_EQ(CSDLInput::WHEELDOWN, events[0].kind);
 }
 
-TEST(InputAdapter, EventPumpDeliversActivationAndTextThroughTheInstalledHost)
+TEST(InputAdapter, EventDispatcherDeliversActivationAndTextThroughTheInstalledHost)
 {
 	Session session;
 	activated = false; keyValue = 0; textValue.clear(); editValue.clear();
@@ -166,20 +169,39 @@ TEST(InputAdapter, EventPumpDeliversActivationAndTextThroughTheInstalledHost)
 	});
 	SDL_Event event{};
 	event.type = SDL_WINDOWEVENT; event.window.event = SDL_WINDOWEVENT_FOCUS_GAINED;
-	CHECK_EQ(1, SDL_PushEvent(&event));
+	DXInput::ProcessEvent(event);
 	event = {}; event.type = SDL_KEYDOWN; event.key.keysym.sym = SDLK_LEFT;
-	CHECK_EQ(1, SDL_PushEvent(&event));
+	DXInput::ProcessEvent(event);
 	event = {}; event.type = SDL_TEXTINPUT; std::memcpy(event.text.text, "hello", 6);
-	CHECK_EQ(1, SDL_PushEvent(&event));
+	DXInput::ProcessEvent(event);
 	event = {}; event.type = SDL_TEXTEDITING; std::memcpy(event.edit.text, "abc", 4);
 	event.edit.start = 1; event.edit.length = 2;
-	CHECK_EQ(1, SDL_PushEvent(&event));
+	DXInput::ProcessEvent(event);
 	session.input.UpdateInput();
 	CHECK(activated); CHECK_EQ(0x25, keyValue);
 	CHECK(textValue == "hello"); CHECK(editValue == "abc");
 	CHECK_EQ(1, editStart); CHECK_EQ(2, editLength);
 
 	DXInput::SetHost({}); // A standalone consumer can omit application callbacks.
-	CHECK_EQ(1, SDL_PushEvent(&event));
+	DXInput::ProcessEvent(event);
 	session.input.UpdateInput();
+}
+
+TEST(InputAdapter, EventPumpDispatchesQueuedControlKeys)
+{
+	Session session;
+	keyValue = 0;
+	DXInput::SetHost({
+		.hasTextFocus = []() { return true; },
+		.keyDown = [](unsigned int key) { keyValue = key; }
+	});
+	SDL_Event event{};
+	event.type = SDL_KEYDOWN;
+	event.key.state = SDL_PRESSED;
+	event.key.keysym.sym = SDLK_LEFT;
+	event.key.keysym.scancode = SDL_SCANCODE_LEFT;
+	CHECK_EQ(1, SDL_PushEvent(&event));
+	CHECK_EQ(0, keyValue);
+	session.input.UpdateInput();
+	CHECK_EQ(0x25, keyValue);
 }
