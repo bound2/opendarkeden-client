@@ -2,6 +2,7 @@
 // MStopZoneEffectGenerator.cpp
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
+#include "DebugLog.h"
 #include "MStopZoneEffectGenerator.h"
 #include "MEffect.h"
 #include "MTopView.h"
@@ -10,10 +11,6 @@
 #include "MEffectSpriteTypeTable.h"
 #include "MEventManager.h"
 #include "SkillDef.h"
-
-//#include "DebugInfo.h"
-//#define	new			DEBUG_NEW
-//#define	delete		DEBUG_DELETE
 
 //----------------------------------------------------------------------
 // Global

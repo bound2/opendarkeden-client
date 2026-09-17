@@ -78,9 +78,6 @@ class MEffect;
 #include "SpriteLib/SP.h"
 #include "FR.h"
 //#include "2D.h"
-#include "CSpriteTexturePartManager.h"
-#include "CTexturePartManager.h"
-#include "CShadowPartManager.h"
 #include "DrawTextNode.h"
 #include "DrawItemNameNode.h"
 #include "COrderedList.h"
@@ -615,22 +612,6 @@ class MTopView : public MRequestMode {
 		CFilter					m_ImageObjectFilter;
 
 		//------------------------------------------------------
-		//
-		//               Texture PartManager
-		//
-		//------------------------------------------------------
-		// Texture PartManager
-//		CSpriteTexturePartManager*	m_pScreenEffectTextureManager;
-//		CNormalSpriteTexturePartManager*	m_pImageObjectTextureManager;
-//		CTexturePartManager*		m_pAlphaEffectTextureManager;
-//		CShadowPartManager*			m_pImageObjectShadowManager;
-//		CShadowPartManager*			m_pAddonShadowManager;
-//		CShadowPartManager*			m_pCreatureShadowManager;
-//		CShadowPartManager*			m_pOustersShadowManager;
-//		CShadowPartManager*			m_pEffectShadowManager;
-
-
-		//------------------------------------------------------
 		// Zone마다 독립적으로 Load된 것들에 대한 정보
 		//------------------------------------------------------
 		CSpriteFilePositionArray*	m_pTileSFPArrayLargeZone;
@@ -733,10 +714,6 @@ class MTopView : public MRequestMode {
 		//CTexturePack				m_CreatureTPK;
 		//CTexturePack				m_ShadowTPK;	// for test
 
-		// CD3DTextureEffect removed (SDL2); 유일한 사용처(DrawCreatureShadow.cpp,
-		// MTopView.cpp, MTopViewDraw.inl)는 모두 이미 주석 처리되었거나
-		// 정의되지 않는 __3D_IMAGE_OBJECT__로 감싸인 죽은 코드임
-		//CD3DTextureEffect			m_TextureEffect;
 		
 		//------------------------------------------------------
 		// 출력할 String을 기억..

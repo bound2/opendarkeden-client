@@ -2,6 +2,7 @@
 // MHelicopterManager.cpp
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
+#include "DebugLog.h"
 #include "MHelicopterManager.h"
 #include "MChaseEffect.h"
 #include "MZone.h"

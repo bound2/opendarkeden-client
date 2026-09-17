@@ -91,10 +91,8 @@ class CPartManager {
 		//-------------------------------------------------------
 		// Init/Release
 		//-------------------------------------------------------
-		// Release() stays non-virtual on purpose: several subclasses
-		// (CShadowPartManager and the texture managers) shadow it with a
-		// Release() that must NOT run when the base re-initializes -
-		// their Clear() relies on Init() preserving their own tables.
+		// Release() stays non-virtual so re-initializing the base does not
+		// invoke a derived cleanup of tables outside the data slots.
 		// Subclasses that hold resources in the data slots free them in
 		// OnReleaseData() below, which Release() calls per slot no matter
 		// which path entered it (a re-Init included).

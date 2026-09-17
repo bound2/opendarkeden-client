@@ -1,4 +1,4 @@
-﻿//#define __3D_IMAGE_OBJECT__					// by sonee
+﻿
 
 //----------------------------------------------------------------------
 // MTopView.cpp
@@ -341,10 +341,6 @@ MTopView::MTopView()
 	m_DarkBits = 0;
 
 
-	// imageobject texture manager
-#ifdef __3D_IMAGE_OBJECT__
-//	m_pImageObjectTextureManager = NULL;
-#endif
 
 
 
@@ -595,9 +591,6 @@ MTopView::Release()
 		DEBUG_ADD("MTV-Rel-TileRenderer");
 	}
 
-#ifdef __3D_IMAGE_OBJECT__
-	SAFE_DELETE( m_pImageObjectTextureManager );
-#endif
 
 	DEBUG_ADD("MTV-Rel-StartRelTex");
 
@@ -1960,13 +1953,7 @@ MTopView::InitSprites()
 
 	}
 
-	//-----------------------------------------------------------
-	// ImageObject TextureManager
-	//-----------------------------------------------------------
 
-#ifdef __3D_IMAGE_OBJECT__
-//		
-#endif
 
 
 //	UI_DrawProgress(10);
@@ -15907,48 +15894,6 @@ MTopView::DrawImageObject(POINT* pPoint, MImageObject* pImageObject)
 				{
 					//if (DarkBits==0)
 					//{
-#ifdef __3D_IMAGE_OBJECT__
-					if (true)
-					{
-						m_pSurface->Unlock();
-
-						// Texture 설정
-						CSpriteSurface* pSurface = m_pImageObjectTextureManager->GetTexture(spriteID);
-
-						if( pSurface != NULL )
-						{
-							// CDirect3D::GetDevice()->SetTexture() removed (SDL2)
-
-
-							// CDirect3D::GetDevice()->SetTextureStageState() removed (SDL2)
-
-							// CDirect3D::GetDevice()->SetRenderState() removed (SDL2)
-
-							// CDirect3D::GetDevice()->SetRenderState() removed (SDL2)
-
-							// CDirect3D::GetDevice()->BeginScene() removed (SDL2)
-
-							RECT rect;
-
-							rect.left = pPoint->x;
-							rect.top = pPoint->y;
-							rect.right = rect.left + m_pImageObjectTextureManager->GetWidth( spriteID );
-							rect.bottom = rect.top + m_pImageObjectTextureManager->GetHeight( spriteID );
-
-							m_TextureEffect.DrawEffect2D( &rect );
-
-							// CDirect3D::GetDevice()->EndScene() removed (SDL2)
-
-							// CDirect3D::GetDevice()->SetTextureStageState() removed (SDL2)
-
-							// CDirect3D::GetDevice()->SetRenderState() removed (SDL2)
-
-							// CDirect3D::GetDevice()->SetRenderState() removed (SDL2)
-
-							m_pSurface->Lock();
-						}
-					}					
-#else
 					#if defined(OUTPUT_DEBUG) && defined(_DEBUG)
 						if (g_pSDLInput->KeyDown(DIK_A) && 
 							(g_pSDLInput->KeyDown(DIK_LCONTROL) || g_pSDLInput->KeyDown(DIK_RCONTROL)))
@@ -15961,82 +15906,16 @@ MTopView::DrawImageObject(POINT* pPoint, MImageObject* pImageObject)
 							m_pSurface->BltSpriteAlphaFilter(pPoint, 
 														&m_ImageObjectSPK[ spriteID ]);							
 						}						
-#endif
 
-					// Texture만들어서 반투명 하기... 
-					/*
-					if (true)
-					{
-						m_pSurface->Unlock();
-
-						// Texture 설정
-						CSpriteSurface* pSurface = m_pImageObjectTextureManager->GetTexture(spriteID);
-						// CDirect3D::GetDevice()->SetTexture() removed (SDL2)
-
-
-						// 좌표 설정
-						m_SpriteVertices[0].sx = pPoint->x;
-						m_SpriteVertices[0].sy = pPoint->y;
-						m_SpriteVertices[1].sx = pPoint->x,m_pImageObjectTextureManager->GetWidth(spriteID);
-						m_SpriteVertices[1].sy = pPoint->y;
-						m_SpriteVertices[2].sx = pPoint->x;
-						m_SpriteVertices[2].sy = pPoint->y,m_pImageObjectTextureManager->GetHeight(spriteID);
-						m_SpriteVertices[3].sx = m_SpriteVertices[1].sx;
-						m_SpriteVertices[3].sy = m_SpriteVertices[2].sy;		
-
-						// 출력
-						// CDirect3D::GetDevice()->DrawPrimitive() removed (SDL2)
-
-
-						//// CDirect3D::GetDevice()->EndScene() removed (SDL2)
-
-						m_pSurface->Lock();	
-					}
-					else
-					{
-						m_pSurface->BltSpriteAlphaFilter(pPoint, 
-													&m_ImageObjectSPK[ spriteID ]);
-					}
-					*/
 				}
 				else
 				{
 					//if (DarkBits==0)
 					//{
-					#ifdef __3D_IMAGE_OBJECT__
-					if (true)
-					{
-						m_pSurface->Unlock();
-
-						// Texture 설정
-						CSpriteSurface* pSurface = m_pImageObjectTextureManager->GetTexture(spriteID);
-
-						if( pSurface != NULL )
-						{
-							// CDirect3D::GetDevice()->SetTexture() removed (SDL2)
-
-							// CDirect3D::GetDevice()->BeginScene() removed (SDL2)
-
-							RECT rect;
-
-							rect.left = pPoint->x;
-							rect.top = pPoint->y;
-							rect.right = rect.left + m_pImageObjectTextureManager->GetWidth( spriteID );
-							rect.bottom = rect.top + m_pImageObjectTextureManager->GetHeight( spriteID );
-
-							m_TextureEffect.DrawEffect2D( &rect );
-
-							// CDirect3D::GetDevice()->EndScene() removed (SDL2)
-
-							m_pSurface->Lock();
-						}
-					}					
-#else
 					if( pImageObject->IsHalf() )
 						m_pSurface->BltSpriteHalf(pPoint, &m_ImageObjectSPK[ spriteID ]);
 					else
 						m_pSurface->BltSprite(pPoint, &m_ImageObjectSPK[ spriteID ]);
-#endif
 				}
 				//*/
 
