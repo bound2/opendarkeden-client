@@ -692,6 +692,18 @@ there would only respell the same two tokens. Everything executable-side
 `GCSkillToTileOK` handlers, `Client/LeakMemoryDumper.*`,
 `Client/DebugInfo.h`, `VS_UI/src/Imm/IFCErrors.h`) is a later slice.
 
+**Source-location third slice (2026-09-17):** the executable-side
+forwarders the second slice left. Most of that list turned out not to
+be forwarders, or not to be code: `MEffectGeneratorTable.cpp`'s and
+`DebugInfo.h`'s mentions are commented out; `LeakMemoryDumper.h`'s
+`DEBUG_NEW` places `__FILE__` and `__LINE__` into a tracked
+`operator new` under `ENABLE_LEAK_TRACKER`, where a `source_location`
+cannot be defaulted in a placement-new, and stays; `IFCErrors.h`'s `IFC_SET_ERROR` has no call site (its one reference is another macro nothing expands). What remained were eighteen bug reports that formatted their site by hand - fifteen in `PacketFunction.cpp` (three as `[%s,%d]` from `__FILE__` and `__LINE__`, twelve as the function's name and `__LINE__`), three in the `GCSkillToTileOK` handlers as `[%s,%d]` - and they call a new `SendBugReportAt(site, fmt, ...)` in the wire layer,
+which writes the same `[file,line] ` prefix from a `DiagnosticSite`
+captured at the call (two of `PacketFunction.cpp`'s printed the file alone and gain the line; the twelve that printed the function's name print the file's instead, so one function reports one shape). `SendBugReport` and it share one bounded
+core - the prefix goes into the same 256-byte buffer ahead of the
+caller's text, so the cut lands where it did, and the "nothing usable, send nothing" rule reads the caller's text, not the prefix - and the text the server receives is unchanged where the shape was already `[file,line]`. `tests/unit/test_bug_report_message.cpp` pins the prefix for an explicit site and for the defaulted one against the test file's own `__FILE__` and `__LINE__`, the cut with the prefix in the count, and the short-text rule. What stays: `MCreature.cpp`'s 28 `DEBUG_ADD_FORMAT` lines and `CSpriteSurface_Adapter.cpp`'s three debug macros (one of them compiled) put `__LINE__` into the text of a log line whose header the logger already stamps with the file and line, so a capture would only respell a number the line carries twice; `VS_UI_GameCommon.cpp`'s 11 hand it to an inventory-log method whose body returns at once (nine) and to the UI message that reaches `SendBugReport` as a number, which no site can cross (two). With those left as text, every forwarder into a facility that records a location is converted, which is what priority 1 set out to do.
+
 **Container-helper status (2026-09-05):** the first priority-2 slice is
 implemented. Twelve membership and line-trimming sites in library code -
 `PacketIDSet`, `GCTimeLimitItemInfo`, `GCNPCAskVariable`, `Properties`,

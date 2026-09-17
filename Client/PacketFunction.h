@@ -13,6 +13,7 @@
 #include "MTypeDef.h"
 //#include "SkillDef.h"
 #include "Packet/Types/PacketItemDef.h"
+#include "Packet/WireHost.h"
 //#include "Packet/Types/ItemTypes.h"
 class MActionResult;
 class MCreature;
@@ -177,7 +178,6 @@ extern void		SetFadeEnd();
 
 extern void		AddOustersElemental( MCreature *pOwnerCreature, int creatureType, int status );
 
-extern void		SendBugReport(const char *bug, ...);
 extern void		SendCrashReport();
 
 extern BOOL GetMacAddressFromNetBIOS(LPBYTE lpMacAddress);

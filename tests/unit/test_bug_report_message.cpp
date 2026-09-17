@@ -245,3 +245,60 @@ TEST(BugReport, NoReportOutgrowsThePacketThatCarriesIt)
 		CHECK(ACGSayCarries(report));
 	}
 }
+
+//----------------------------------------------------------------------
+// A report at a site carries the site in front
+//----------------------------------------------------------------------
+TEST(BugReport, AReportAtASiteCarriesTheSiteInFront)
+{
+	CapturingTarget	target;
+	NoHost		restore;
+
+	s_pTarget = &target;
+	Wire::SetHost(&s_Host);
+
+	// An explicit site: the "[file,line] " the callers used to format.
+	SendBugReportAt(DiagnosticSite("Some.cpp", 42), "%d,%d", 7, 9);
+
+	CHECK_EQ(1, target.m_nSent);
+	CHECK(target.m_Message == PREFIX + "[Some.cpp,42] 7,9");
+
+	// The defaulted site is the caller's line, not the header's.
+	const int line = __LINE__ + 1;
+	SendBugReportAt(DiagnosticSite(), "%d", 10);
+
+	CHECK_EQ(2, target.m_nSent);
+	CHECK(target.m_Message == PREFIX + "[" + __FILE__ + "," + std::to_string(line) + "] 10");
+
+	// Nothing to format: nothing sent, as SendBugReport does.
+	SendBugReportAt(DiagnosticSite("Some.cpp", 42), NULL);
+	CHECK_EQ(2, target.m_nSent);
+}
+
+//----------------------------------------------------------------------
+// The cut counts the prefix, and the short-text rule reads the text
+//----------------------------------------------------------------------
+TEST(BugReport, AReportAtASiteIsCutWithThePrefixInTheCount)
+{
+	CapturingTarget	target;
+	NoHost		restore;
+
+	s_pTarget = &target;
+	Wire::SetHost(&s_Host);
+
+	// "[x,1] " is six bytes of the TEXT_MAX the message carries.
+	SendBugReportAt(DiagnosticSite("x", 1), "%s", TextOf(200).c_str());
+
+	CHECK_EQ(1, target.m_nSent);
+	CHECK_EQ(SAY_MESSAGE_MAX, (int)target.m_Message.size());
+	CHECK(target.m_Message == PREFIX + "[x,1] " + TextOf(TEXT_MAX - 6));
+	CHECK(ACGSayCarries(target.m_Message));
+
+	// A text of no characters or one is not sent, prefix or none.
+	SendBugReportAt(DiagnosticSite("x", 1), "");
+	SendBugReportAt(DiagnosticSite("x", 1), "x");
+	CHECK_EQ(1, target.m_nSent);
+	SendBugReportAt(DiagnosticSite("x", 1), "xy");
+	CHECK_EQ(2, target.m_nSent);
+	CHECK(target.m_Message == PREFIX + "[x,1] xy");
+}

@@ -29,6 +29,7 @@
 #include <string>
 
 #include "MonotonicClock.h"
+#include "Exception.h"
 
 class Player;
 class RequestServerPlayer;
@@ -180,5 +181,9 @@ private :
 // the host.
 //----------------------------------------------------------------------
 void	SendBugReport ( const char * bug , ... );
+
+// The same report with "[file,line] " in front, from a site captured
+// at the call.
+void	SendBugReportAt ( const DiagnosticSite & site , const char * bug , ... );
 
 #endif	// __WIREHOST_H__
