@@ -102,7 +102,6 @@ extern bool g_bZoneSafe;
 extern void	SetWatchMode( bool );
 extern bool g_bWatchMode;
 
-extern void	CheckTime();
 extern int g_MyCheckTime=0;
 extern int g_CheckErrorTime=0;
 extern BOOL g_MyFull;
@@ -6154,10 +6153,6 @@ CGameUpdate::Update(void)
 				return;
 			}
 
-			//------------------------------------------
-			// 1분마다 한번씩 보내는 packet
-			//------------------------------------------
-			CheckTime();
 //			CheckInvalidProcess();
 			//------------------------------------------
 			// 접속을 유지해야하는 경우에는 접속 유지..

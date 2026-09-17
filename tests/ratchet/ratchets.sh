@@ -1212,7 +1212,9 @@ fi
 # GameMain's hack check, which compares timeGetTime() against
 # GetTickCount() on purpose and would measure nothing on one clock.
 #----------------------------------------------------------------------
-R14_BASELINE=4
+# 2 on 2026-09-17: CheckTime returned before the purported hack check.
+# Remove that unreachable body and its two calls; only log-file naming remains.
+R14_BASELINE=2
 
 if [ ! -f tests/tools/count_tick_reads.pl ]; then
 	echo "FAIL R14: tests/tools/count_tick_reads.pl is missing"

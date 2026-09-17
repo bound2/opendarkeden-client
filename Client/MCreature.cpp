@@ -1524,6 +1524,8 @@ MCreature::RemoveEffectStatus(EFFECTSTATUS status)
 				{
 					type = (*g_pEffectSpriteTypeTable)[type].FemaleEffectSpriteType;
 				}
+				if (type >= g_pEffectSpriteTypeTable->GetSize() || m_bAttachEffect == NULL)
+					return false;
 				
 
 				if (m_bAttachEffect[type])
@@ -2385,6 +2387,8 @@ MCreature::AddEffectStatus(enum EFFECTSTATUS status, DWORD delayFrame)
 		{
 			type = (*g_pEffectSpriteTypeTable)[type].FemaleEffectSpriteType;
 		}
+		if (type >= g_pEffectSpriteTypeTable->GetSize() || m_bAttachEffect == NULL)
+			return false;
 
 //		//------------------------------------------------------------
 //		// EFFECTSTATUS_ARMAGEDDON

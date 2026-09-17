@@ -1778,6 +1778,8 @@ Client/CTypeTable.h:41-65 wraps the range test in all three accessors (`const op
 
 **Category:** security  |  **Location:** `Client/CGameUpdate.cpp:6443`
 
+> ✅ **Already fixed; reconciled 2026-09-17:** both clock/date sites use `SafeFormat::Format` with the actual array destination and typed arguments. The checked formatter bounds output and rejects incompatible format conversions; its library tests and the format-arity checker cover those contracts.
+
 `char str[80];` at 6435, then `sprintf(str, (*g_pGameStringTable)[STRING_DRAW_GAME_TIME].GetString(), hour, minute, second);` at 6443 and the same pattern for STRING_DRAW_GAME_DATE at 6457. g_pGameStringTable is loaded from a game data file (Client/MGameStringTable.cpp), so both the specifier list and the output length are controlled by that file, not by the code. Neither the argument count nor the resulting length is bounded.
 
 **Failure scenario:** A localizer (or a tampered data file) writes "%s %s %s" for the time string. sprintf reads three ints as pointers and dereferences them; a long literal prefix instead overflows str[80] on the stack. This runs every frame in the main draw loop.
@@ -1800,6 +1802,8 @@ CMakeLists.txt:609-618 removes Client/MissingGlobals.cpp, Client/GameHelpers.cpp
 
 **Category:** security  |  **Location:** `Client/GameMain.cpp:285`
 
+> ✅ **Fixed (2026-09-17):** both direct `LOG_ERROR` calls now pass exception text through a literal `%s`. The `DEBUG_ADD` path already uses a literal `%s` in its macro. Server-derived percent signs are data at all three sites. Executable-side regression guard verified by full Debug/ASan builds and existing automated checks.
+
 `LOG_ERROR( t.toString().c_str() );` at lines 285 and 287, and `DEBUG_ADD(t.toString().c_str())` at 436. LOG_ERROR expands to `log_write(LOG_LEVEL_ERROR, __FILE__, __LINE__, fmt, ##__VA_ARGS__)` (Client/DebugLog.h:71), so the first argument is consumed as a printf format with no variadic arguments supplied. The handler is the catch block for InvalidProtocolException raised by packet parsing, and the exception text embeds the offending packet's description.
 
 **Failure scenario:** A malformed packet whose type or payload string contains "%s" causes vsnprintf to read a non-existent vararg — an information disclosure from the stack at best, a crash at worst; "%n" is a write primitive on platforms that still honour it.
@@ -1809,6 +1813,8 @@ CMakeLists.txt:609-618 removes Client/MissingGlobals.cpp, Client/GameHelpers.cpp
 #### 🟡 Medium -- An MString object is passed through a variadic %s, and the string it names has already been freed one line earlier.
 
 **Category:** undefined-behavior  |  **Location:** `Client/GameMain.cpp:3663`
+
+> ✅ **Fixed (2026-09-17):** all three WAV-load failure paths log their bounded C-string filename and preserve the sound-table entry for later retries. The previous variadic `MString` use had already been replaced; the remaining destructive `Filename.Release()` calls are now gone. Same diagnostic on all platforms. Executable-side regression guard; no runtime reproduction is claimed.
 
 Lines 3661-3663: `(*g_pSoundTable)[soundID].Filename.Release();` followed by `DEBUG_ADD_FORMAT("[Error] Failed to Load WAV. id=%d, fn=%s", soundID, (*g_pSoundTable)[soundID].Filename );`. Filename is an MString (Client/MSoundTable.h:44). MString has a virtual destructor and a user-declared copy constructor (Client/MString.h:16-19), so it is not trivially copyable and passing it through `...` is undefined; MSVC warns C4840 and pushes the object bytes, Clang emits a call that traps. Independently, Release() (Client/MString.cpp:86-93) has already `delete[]`'d and NULLed m_pString, so even the intended value is gone.
 
@@ -1820,6 +1826,8 @@ Lines 3661-3663: `(*g_pSoundTable)[soundID].Filename.Release();` followed by `DE
 
 **Category:** memory-safety  |  **Location:** `Client/MCreature.cpp:2385`
 
+> ✅ **Fixed (2026-09-17):** both add and remove status paths recheck the remapped female sprite type before any table/attachment-array access, and reject a missing attachment array. The indices are unsigned `TYPE_EFFECTSPRITETYPE` values. Executable-side regression guard verified by full builds and source audit.
+
 Line 2375 validates `if (type >= g_pEffectSpriteTypeTable->GetSize()) return false;`. Line 2385 then overwrites it: `type = (*g_pEffectSpriteTypeTable)[type].FemaleEffectSpriteType;` with no re-validation. The new value is used at 2396 to index the same table (`(*g_pEffectSpriteTypeTable)[type].FrameID`), at 2408 to read `m_bAttachEffect[type]`, and at 2513 and 2556 to write `m_bAttachEffect[type] = true`. m_bAttachEffect is allocated as `new bool[(*g_pEffectSpriteTypeTable).GetSize()]` (Client/MCreature.cpp:701), so an out-of-range FemaleEffectSpriteType is an out-of-bounds heap write of one byte.
 
 **Failure scenario:** An effect-sprite table entry whose FemaleEffectSpriteType field exceeds the table size (a stale or hand-edited data file) causes a female creature gaining that status to write true past the end of m_bAttachEffect.
@@ -1829,6 +1837,8 @@ Line 2375 validates `if (type >= g_pEffectSpriteTypeTable->GetSize()) return fal
 #### 🟡 Medium -- Five sites call list::empty() and discard the result where the intent is clearly clear() — the pathfinding direction list is never cleared.
 
 **Category:** correctness  |  **Location:** `Client/MPlayer.cpp:10402`
+
+> ✅ **Fixed (2026-09-17):** the four standalone `empty()` calls in `MPlayer` and the one in `MFakeCreature` are now `clear()`. Movement-error recovery, blockage and destination resets discard their stale queued directions. The remaining `empty()` uses are queries in conditions. Executable-side regression guard verified by full builds and source audit.
 
 `m_listDirection.empty();` as a standalone statement, directly under the comment "길찾기 제거" (remove pathfinding). empty() is a const query; the list is untouched. The same mistake appears at MPlayer.cpp:6018, 10518 and 10805, and at Client/MFakeCreature.cpp:2003. At 10402 the surrounding code is the MoveOK-after-MoveError recovery path, which resets m_sX/m_sY, m_MoveCount and the destination fields — clearing the queued direction list is plainly part of that reset.
 
@@ -1870,6 +1880,8 @@ AddEffect deletes pNewEffect before returning false at lines 4009, 4022, 4030, 4
 
 **Category:** resource-leak  |  **Location:** `Client/PacketFunction.cpp:1574`
 
+> ✅ **Fixed (2026-09-17):** an invalid action ID or absent action table deletes the incoming `MActionResult` before returning. Valid requests retain their existing transfer to `MEffectTarget`, or execute-and-delete behavior when no effect phases exist. Executable-side regression guard verified by full builds and ownership-path audit.
+
 The function owns pActionResult: it deletes it on the ACTIONINFO_NULL path (1565-1567) and executes-then-deletes it on the normal path (1687-1693). The bounds-check path added at 1574-1577 (`if( nActionInfo >= g_pActionInfoTable->GetSize() ) { DEBUG_ADD_FORMAT(...); return; }`) returns without deleting. nActionInfo originates in action-result packets, so an unrecognised or malformed action id leaks the whole MActionResult node tree on every occurrence.
 
 **Failure scenario:** A server running a newer skill table sends an action id the client does not know. Every such packet leaks an MActionResult and its child nodes; a sustained mismatch leaks steadily for the whole session.
@@ -1880,6 +1892,8 @@ The function owns pActionResult: it deletes it on the ACTIONINFO_NULL path (1565
 
 **Category:** dead-code  |  **Location:** `Client/GameMain.cpp:461`
 
+> ✅ **Closed (2026-09-17):** removed `CheckTime`, its call/declaration and five timing variables used only by its unreachable body. Removed the impossible second zone-removal branch after `ReleaseGameObject` has cleared `g_pZone`; the earlier `RemovePlayer` still runs. R14 decreases from four to two calls, both log-file naming. Dead-code removal verified by full builds and ratchets.
+
 CheckTime() opens with a bare `return;` at line 461, so everything from 463 to 587 — the timeGetTime/GetTickCount drift comparison and the window-title process scan — is dead. The function is still called from the main loop. Separately, ReleaseGameObject sets `g_pZone = NULL;` at line 2030 and then tests `if (g_pZone!=NULL) { g_pZone->RemoveCreature(g_pPlayer->GetID()); }` at 2080-2083, which can never execute; the removal happens to be harmless only because RemovePlayer() already ran at 2028.
 
 **Failure scenario:** No runtime failure, but both blocks read as live logic. A contributor investigating the anti-cheat path, or the player-teardown ordering, will spend time on code that never runs — and the unreachable-code warning is buried among thousands of others.
@@ -1889,6 +1903,8 @@ CheckTime() opens with a bare `return;` at line 461, so everything from 463 to 5
 #### ⚪ Low -- Add_GDR_Ghost formats a size_t with %d, and reuses a 64-byte buffer whose earlier contents it depends on.
 
 **Category:** undefined-behavior  |  **Location:** `Client/GameMain.cpp:5852`
+
+> ✅ **Fixed (2026-09-17):** ghost position names use `%zu`; the zone, file data, XML nodes/coordinates and new creature are checked before use. Each record requires both coordinates inside the current zone, so a missing attribute cannot reuse the previous ghost's value. The file wrapper releases its buffer on every return. Executable-side regression guard verified by full builds; no runtime reproduction is claimed.
 
 `for( size_t GhostCount = 0; GhostCount < GhostMax; GhostCount++ ) { sprintf(szTempBuffer, "Position%d", GhostCount+1); ... }` at 5850-5853. GhostCount+1 is size_t (8 bytes on x64 Windows and Linux) passed to a %d that reads 4 — undefined and, on some ABIs, misaligning the rest of the varargs. The function also has no NULL check on `parser.parse((char *)GhostFile.GetFilePointer(), &computerTree)` at 5843, and does not check the result of `NewFakeCreature(...)` at 5868 before passing it to AddFakeCreature.
 

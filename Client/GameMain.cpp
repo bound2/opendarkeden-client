@@ -94,12 +94,7 @@ extern "C" void spritectl_window_to_game_coords(int* x, int* y);
 extern void	ExecuteLogout();
 extern BOOL g_MyFull;
 extern RECT g_GameRect;
-DWORD g_dSHGetTime = 0;
-DWORD g_dSHTimerTime = 0;
-DWORD g_dSHGetTime1 = 0;
-DWORD g_dSHCurrentTime = 0;
 
-int	  g_iSHFakeCount = 0;
 bool  g_bCheckHack = true;
 #define MAX_INVALID_PROCESS 20
 
@@ -285,9 +280,9 @@ UpdateSocketInput()
 				SendBugReport( "%s", t.toString().c_str() );
 		}
 
-		LOG_ERROR( t.toString().c_str() );
+		LOG_ERROR("%s", t.toString().c_str());
 		LOG_ERROR("[Error] UpdateSocketInput");			
-		LOG_ERROR(t.toString().c_str());
+		LOG_ERROR("%s", t.toString().c_str());
 		
 		//InitFail("Server와의 접속이 끊어졌습니다.");
 		SetMode( MODE_MAINMENU );
@@ -392,143 +387,6 @@ UpdateSocketOutput()
 	return true;
 }
 
-//---------------------------------------------------------------------------
-// Check Time
-//---------------------------------------------------------------------------
-// speedhack체크를 위해서 1분마다 한번씩 패킷을 보낸다.
-//---------------------------------------------------------------------------
-void
-CheckTime()
-{
-
-    return;
-	
-	if (g_pSocket!=NULL)
-	{
-		/*
-		static DWORD nextTime = g_CurrentTime + 60000;
-		
-		//------------------------------------------------------------------
-		// 1분 마다 한번씩 garbarge packet을 보낸다.
-		//------------------------------------------------------------------
-		if (g_CurrentTime > nextTime)		// 60 * 1000
-		{
-			CGVerifyTime _CGVerifyTime;
-			
-			g_pSocket->sendPacket( &_CGVerifyTime );					
-			
-			nextTime = timeGetTime() + 60000;//g_CurrentTime;
-			
-		}
-		*/
-		
-		
-		//以下开始加速的检查工作	
-		SYSTEMTIME curTime;
-		DWORD dTimer;
-		
-		GetLocalTime(&curTime);
-		dTimer = curTime.wHour*1000*60*60 + curTime.wMinute*1000*60 + curTime.wSecond*1000 + curTime.wMilliseconds;
-		
-		g_dSHCurrentTime = dTimer;
-		
-		static DWORD nextHackTime = g_dSHCurrentTime + 1000;
-		
-		if ( (g_dSHCurrentTime > nextHackTime) && g_bCheckHack)
-		{
-			//以下这段检测时间片
-			DWORD dCount,dCount1;
-			dCount = timeGetTime();
-			dCount1 = GetTickCount();
-			
-			if ((g_dSHGetTime > 0) && (g_dSHGetTime1 > 0))
-			{
-				if (std::abs((int)((dCount1 - g_dSHGetTime1) - (dTimer - g_dSHTimerTime))) > 70)
-					g_iSHFakeCount ++;
-				else if (std::abs((int)((dCount - g_dSHGetTime) - (dTimer - g_dSHTimerTime))) > 70)
-					g_iSHFakeCount ++;
-				else
-					g_iSHFakeCount = 0;
-				
-				if (g_iSHFakeCount > 4)
-				{
-					g_bCheckHack = false;
-//					MessageBox(g_hWnd,"您使用了不合适的外挂程序,与服务器断开连接!",NULL,MB_OK);
-//					ExecuteLogout();
-					g_bNeedUpdate = TRUE;
-					SetMode(MODE_QUIT);
-					g_ModeNext = MODE_QUIT;
-					g_bCheckHack = true;
-				}
-			}
-			
-			g_dSHGetTime = dCount;
-			g_dSHGetTime1 = dCount1;
-			g_dSHTimerTime = dTimer;
-
-			nextHackTime = g_dSHCurrentTime + 1000;
-
-#ifdef PLATFORM_WINDOWS
-			//以下这段检测非法进程 (Windows-specific anti-cheat check)
-			if (g_bCheckHack)
-			{
-				HWND hCurrentWindow;
-				char szText[255];
-				hCurrentWindow = GetWindow(g_hWnd,GW_HWNDFIRST);
-				while (hCurrentWindow != NULL)
-				{
-					if (GetWindowText(hCurrentWindow, szText, 255)>0)
-					{
-						int iLen = strlen(szText);
-						for (int j=0;j<iLen;j++)
-						{
-							if(isupper((unsigned char)szText[j]) != 0)
-								szText[j] = (char)tolower((unsigned char)szText[j]);
-						}
-
-						std::string strTemp = szText;
-
-						if( FindWindow("PROCEXPL", "") != NULL )
-						{
-								g_bCheckHack = false;
-								//yckou
-//								abort();
-//								MessageBox(g_hWnd,"您使用了不合适的外挂程序,将与服务器断开连接!",NULL,MB_OK);
-//								ExecuteLogout();
-								g_bNeedUpdate = TRUE;
-								SetMode(MODE_QUIT);
-								g_ModeNext = MODE_QUIT;
-								g_bCheckHack = true;
-						}
-
-						for (int i=0;i<MAX_INVALID_PROCESS;i++)
-						{
-							if ((strTemp.find(g_strBadProcessList[i]) != -1) &&
-								(strTemp.find("microsoft internet explorer") == -1) &&
-								(strTemp.find("myie") == -1) &&
-								(strTemp.find("dudu") == -1) &&
-								(strTemp.find("下载") == -1) )
-							{
-								g_bCheckHack = false;
-								//yckou
-//								abort();
-//								MessageBox(g_hWnd,"您使用了不合适的外挂程序,将与服务器断开连接!",NULL,MB_OK);
-//								ExecuteLogout();
-								g_bNeedUpdate = TRUE;
-								SetMode(MODE_QUIT);
-								g_ModeNext = MODE_QUIT;
-								g_bCheckHack = true;
-							}
-
-						}
-					}
-					hCurrentWindow = GetWindow(hCurrentWindow, GW_HWNDNEXT);
-				}
-			}
-#endif // PLATFORM_WINDOWS
-		}
-	}
-}
 
 bool ContainsIgnoreCase(const char* haystack, const char* needle) {
 	if (!haystack || !needle) return false;
@@ -2020,11 +1878,6 @@ ReleaseGameObject()
 	{
 		DEBUG_ADD("[ delete Player ]");
 		
-		if (g_pZone!=NULL)
-		{
-			g_pZone->RemoveCreature( g_pPlayer->GetID() );
-		}
-
 		delete g_pPlayer;
 		g_pPlayer = NULL;
 	}
@@ -3600,13 +3453,7 @@ PlaySound(TYPE_SOUNDID soundID, bool repeat, int x, int y)
 			//-----------------------------------------------------------
 			if (pBuffer==NULL)
 			{
-#ifdef PLATFORM_WINDOWS
 				DEBUG_ADD_FORMAT("[Error] Failed to Load WAV. id=%d, fn=%s", soundID, strFilename );
-#else
-				// MString debug output on non-Windows
-				printf("[Error] Failed to Load WAV. id=%d\n", soundID);
-#endif // PLATFORM_WINDOWS
-				(*g_pSoundTable)[soundID].Filename.Release();
 			}
 			else
 			//-----------------------------------------------------------
@@ -3791,12 +3638,7 @@ PlaySound(TYPE_SOUNDID soundID)
 		//-----------------------------------------------------------
 		if (pBuffer==NULL)
 		{
-#ifdef PLATFORM_WINDOWS
 			DEBUG_ADD_FORMAT("[Error] Failed to Load WAV. id=%d, fn=%s", soundID, strFilename );
-#else
-			printf("[Error] Failed to Load WAV. id=%d\n", soundID);
-#endif // PLATFORM_WINDOWS
-			(*g_pSoundTable)[soundID].Filename.Release();
 		}
 		//-----------------------------------------------------------
 		// Load에 성공 했으면...
@@ -3919,13 +3761,7 @@ void PlaySoundForce(TYPE_SOUNDID soundID)
 		//-----------------------------------------------------------
 		if (pBuffer==NULL)
 		{
-#ifdef PLATFORM_WINDOWS
 			DEBUG_ADD_FORMAT("[Error] Failed to Load WAV. id=%d, fn=%s", soundID, strFilename );
-#else
-			// MString debug output on non-Windows
-			printf("[Error] Failed to Load WAV. id=%d\n", soundID);
-#endif // PLATFORM_WINDOWS
-			(*g_pSoundTable)[soundID].Filename.Release();
 		}
 		//-----------------------------------------------------------
 		// Load에 성공 했으면...
@@ -5782,60 +5618,52 @@ GetMakeItemFitPosition(MItem* pItem, ITEM_CLASS itemClass, int itemType, POINT& 
 	return bFindPos;
 }
 // 2004, 03, 29 sobeit add start - 질드레 맵 고스트 추가
-void 
+void
 Add_GDR_Ghost(int ZoneID)
 {
-	if(1412 != ZoneID && 1413 != ZoneID) // 질드레 레어, 질드레 하드
+	if (g_pZone == NULL || (ZoneID != 1412 && ZoneID != 1413))
 		return;
-	CRarFile GhostFile;
-	GhostFile.SetRAR("data\\ui\\txt\\TutorialEtc.rpk", "darkeden");
-	if(!GhostFile.Open("ghostPos.xml"))
+	CRarFile ghostFile;
+	ghostFile.SetRAR("data\\ui\\txt\\TutorialEtc.rpk", "darkeden");
+	if (!ghostFile.Open("ghostPos.xml") || ghostFile.GetFilePointer() == NULL)
 		return;
 
-	XMLTree computerTree;
+	XMLTree tree;
 	XMLParser parser;
-	char szTempBuffer[64];
-	int MapX = 0, MapY = 0;
+	parser.parse(static_cast<char*>(ghostFile.GetFilePointer()), &tree);
 
-	snprintf(szTempBuffer, sizeof(szTempBuffer), "PositionList_%d", ZoneID);
-	parser.parse( (char *)GhostFile.GetFilePointer(), &computerTree );
-	
-	const XMLTree *pMapElement = computerTree.GetChild( szTempBuffer );
-	if( pMapElement != NULL )
+	char name[64];
+	snprintf(name, sizeof(name), "PositionList_%d", ZoneID);
+	const XMLTree* map = tree.GetChild(name);
+	if (map == NULL)
+		return;
+
+	for (size_t i = 0; i < map->GetChildCount(); ++i)
 	{
-		const size_t GhostMax =pMapElement->GetChildCount();
-		
-		for( size_t GhostCount = 0; GhostCount < GhostMax; GhostCount++ )
+		snprintf(name, sizeof(name), "Position%zu", i + 1);
+		const XMLTree* position = map->GetChild(name);
+		if (position == NULL)
+			continue;
+		const XMLAttribute* x = position->GetAttribute("x");
+		const XMLAttribute* y = position->GetAttribute("y");
+		if (x == NULL || y == NULL)
+			continue;
+		const int mapX = x->ToInt();
+		const int mapY = y->ToInt();
+		if (mapX < 0 || mapY < 0 || mapX >= g_pZone->GetWidth() || mapY >= g_pZone->GetHeight())
+			continue;
+
+		MFakeCreature* ghost = NewFakeCreature(CREATURETYPE_GHOST, mapX, mapY, rand() % 8);
+		if (ghost == NULL)
+			continue;
+		if (!g_pZone->AddFakeCreature(ghost))
 		{
-			snprintf(szTempBuffer, sizeof(szTempBuffer), "Position%d", (int)(GhostCount+1));
-			const XMLTree *pGhostPos = pMapElement->GetChild( szTempBuffer );
-			if( pGhostPos != NULL )
-			{
-				const XMLAttribute *pPosX = pGhostPos->GetAttribute( "x" );
-				if( pPosX != NULL )
-				{
-					MapX = pPosX->ToInt();
-				}
-				const XMLAttribute *pPosY = pGhostPos->GetAttribute( "y" );
-				if( pPosY != NULL )
-				{
-					MapY = pPosY->ToInt();
-				}
-
-				// create ghost
-				MFakeCreature *pFakeCreature = NewFakeCreature(CREATURETYPE_GHOST, MapX, MapY, rand()%8);
-
-				if (!g_pZone->AddFakeCreature( pFakeCreature ))
-				{
-					delete pFakeCreature;
-					continue;
-				}
-				pFakeCreature->SetZone(g_pZone);
-				pFakeCreature->SetFakeCreatureType(MFakeCreature::FAKE_CREATURE_GHOST);
-				pFakeCreature->SetMoveType(MCreature::CREATURE_FAKE_UNDERGROUND);
-				pFakeCreature->AddEffectStatus( (EFFECTSTATUS)(EFFECTSTATUS_GHOST_1+rand()%2), 0xFFFF );
-			}
+			delete ghost;
+			continue;
 		}
+		ghost->SetZone(g_pZone);
+		ghost->SetFakeCreatureType(MFakeCreature::FAKE_CREATURE_GHOST);
+		ghost->SetMoveType(MCreature::CREATURE_FAKE_UNDERGROUND);
+		ghost->AddEffectStatus(static_cast<EFFECTSTATUS>(EFFECTSTATUS_GHOST_1 + rand() % 2), 0xFFFF);
 	}
-	GhostFile.Release();
 }
