@@ -130,7 +130,7 @@ CSprite565::LoadFromFile(ifstream& file)
 	//---------------------------------
 	
 	m_Pixels = NULL;
-	m_Pixels = new WORD* [m_Height];	
+	m_Pixels = new WORD* [m_Height]{};
 	//m_Pixels = (WORD**)malloc(sizeof(WORD*)*m_Height);
 
 	WORD len;
