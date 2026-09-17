@@ -5,6 +5,7 @@
 #pragma warning(disable:4786)
 
 #include <math.h>
+#include <memory>
 #include "MZoneDef.h"
 #include "MSector.h"
 #include "MCreature.h"
@@ -4023,150 +4024,30 @@ MZone::GetItem(TYPE_OBJECTID id)
 bool
 MZone::AddEffect(MEffect* pNewEffect, DWORD dwWaitCount)
 {
-	DEBUG_ADD("AddEffect");
-
-	// Validate pNewEffect pointer before use
-	// This helps catch use-after-free errors earlier
-	if (pNewEffect == NULL) {
-		DEBUG_ADD_ERR("AddEffect: NULL pNewEffect pointer!");
+	// Callers transfer a live, exclusively owned effect on entry. Keep it owned
+	// locally until a zone container accepts it, including on exceptions.
+	std::unique_ptr<MEffect> effect(pNewEffect);
+	if (!effect)
 		return false;
-	}
 
-	// Check for obviously invalid pointers (wild pointers)
-	// This catches cases where pointer points to unmapped or redzone memory
-	uintptr_t ptr_value = (uintptr_t)pNewEffect;
-	if (ptr_value < 0x1000) {  // NULL or near-NULL pointer
-		DEBUG_ADD_ERR("AddEffect: Invalid pNewEffect pointer (near NULL)!");
-		return false;
-	}
-
-	// Try to safely validate the object
-	if (pNewEffect != NULL) {
-		// Log the pointer for debugging
-		DEBUG_ADD_FORMAT("AddEffect: pNewEffect=%p, dwWaitCount=%u", pNewEffect, dwWaitCount);
-
-		// NOTE: We don't try to dereference here because the object might be corrupted
-		// ASAN will catch actual use-after-free errors
-	}
-
-	if(dwWaitCount)
+	if (dwWaitCount)
 	{
-		m_listWaitEffect.push_back( pNewEffect );
+		m_listWaitEffect.push_back(pNewEffect);
+		effect.release();
 		return true;
 	}
 
-	// Use try-catch for any dereference that might fail
-	int x, y;
-	TYPE_FRAMEID frameID;
-
-	// Safely get position and frame ID with ASAN-friendly checks
-	// These dereferences might fail if pNewEffect is corrupted
-	// Use ASAN's __asan_region_is_poisoned to check if pointer is valid
-	// This helps detect use-after-free before dereferencing
-	#ifdef __SANITIZE_ADDRESS__
-	void* ptr_test = (void*)pNewEffect;
-	if (__asan_region_is_poisoned(ptr_test, sizeof(MEffect))) {
-		DEBUG_ADD_ERR("AddEffect: pNewEffect points to poisoned memory!");
-		DEBUG_ADD_FORMAT("AddEffect: pNewEffect=%p is in freed region", pNewEffect);
-		// Don't delete the effect since it's already freed
-		return false;
-	}
-	#endif
-
-	try {
-		x = pNewEffect->GetX();
-		y = pNewEffect->GetY();
-
-		// Get FrameID - this is where the crash happens (line 3938)
-		frameID = pNewEffect->GetFrameID();
-
-		DEBUG_ADD_FORMAT("AddEffect: Effect at (%d,%d), FrameID=%d", x, y, frameID);
-	} catch (...) {
-		DEBUG_ADD_ERR("AddEffect: Exception when accessing pNewEffect members!");
-		// Don't delete the effect since we can't trust the pointer
+	if (g_pEffectSpriteTypeTable == NULL ||
+		g_pEffectSpriteTypeTable->GetInternalPointer() == NULL ||
+		g_pEffectSpriteTypeTable->GetSize() == 0)
+	{
+		DEBUG_ADD_ERR("AddEffect: effect sprite table is unavailable");
 		return false;
 	}
 
-	// Use cached frameID to avoid multiple GetFrameID() calls
-	// This prevents multiple potential dereferences of a corrupted pointer
-
-	// SAFETY CHECK: Verify g_pEffectSpriteTypeTable is valid before use
-	// This protects against use-after-free where the table might have been corrupted
-	if (g_pEffectSpriteTypeTable == NULL) {
-		DEBUG_ADD_ERR("AddEffect: g_pEffectSpriteTypeTable is NULL!");
-		delete pNewEffect;
-		return false;
-	}
-
-	// Validate the table pointer hasn't been corrupted (ASAN builds only)
-	#ifdef __SANITIZE_ADDRESS__
-	validate_effect_sprite_table_pointer("MZone::AddEffect (entry)");
-	#endif
-
-	// ROOT CAUSE FIX: Check if m_pTypeInfo is NULL (happens after Release() but before delete)
-	// This can occur if there's a use-after-free of the table object
-	if (g_pEffectSpriteTypeTable->GetInternalPointer() == NULL) {
-		DEBUG_ADD_ERR("AddEffect: g_pEffectSpriteTypeTable->m_pTypeInfo is NULL! Table object may have been released.");
-		delete pNewEffect;
-		return false;
-	}
-
-	// Check if pointer looks obviously invalid (points to near-NULL address)
-	uintptr_t table_ptr = (uintptr_t)g_pEffectSpriteTypeTable;
-	if (table_ptr < 0x1000) {
-		DEBUG_ADD_FORMAT("AddEffect: g_pEffectSpriteTypeTable has invalid pointer=%p", g_pEffectSpriteTypeTable);
-		delete pNewEffect;
-		return false;
-	}
-
-	// ASAN check: verify g_pEffectSpriteTypeTable pointer is not poisoned
-	#ifdef __SANITIZE_ADDRESS__
-	if (__asan_region_is_poisoned((void*)g_pEffectSpriteTypeTable, sizeof(void*))) {
-		DEBUG_ADD_ERR("AddEffect: g_pEffectSpriteTypeTable pointer is poisoned!");
-		DEBUG_ADD_FORMAT("AddEffect: g_pEffectSpriteTypeTable=%p points to freed memory", g_pEffectSpriteTypeTable);
-		delete pNewEffect;
-		return false;
-	}
-	#endif
-
-	DEBUG_ADD_FORMAT("AddEffect: g_pEffectSpriteTypeTable=%p, checking frameID=%d", g_pEffectSpriteTypeTable, frameID);
-
-	// Validate that the global table pointer hasn't been corrupted
-	#ifdef __SANITIZE_ADDRESS__
-	validate_effect_sprite_table_pointer("MZone::AddEffect");
-	#endif
-
-	// CRITICAL: Try to safely detect if g_pEffectSpriteTypeTable points to corrupted memory
-	// Use a volatile read to avoid compiler optimization and catch SIGSEGV
-	volatile bool table_valid = true;
-	TYPE_FRAMEID test_frame_id = 0;
-
-	// Use signal handler to safely test if we can read from the table
-	// This is a best-effort check - might still crash if memory is truly corrupted
-	#if defined(__GNUC__) || defined(__clang__)
-		if (__builtin_expect(!table_valid, 0)) {
-			// This should never execute, but prevents optimization
-		}
-	#endif
-
-	// Check if the pointer address looks like heap memory (freed regions)
-	// If it points to the range where SDL surfaces were allocated, it's corrupted
-	uintptr_t table_addr = (uintptr_t)g_pEffectSpriteTypeTable;
-	if (table_addr >= 0x632000000000ULL && table_addr <= 0x6320000FFFFFFULL) {
-		// This looks like the SDL surface region that gets freed!
-		DEBUG_ADD_ERR("AddEffect: g_pEffectSpriteTypeTable points to SDL surface region!");
-		DEBUG_ADD_FORMAT("AddEffect: table_addr=%p is in freed SDL memory range", g_pEffectSpriteTypeTable);
-		delete pNewEffect;
-		return false;
-	}
-
-	// Attempt to safely read the first element to catch corruption early
-	// This might crash, but ASAN should give us a better stack trace
-	if (table_valid) {
-		// Force a volatile read to prevent optimization
-		test_frame_id = (*g_pEffectSpriteTypeTable)[0].FrameID;
-		(void)test_frame_id; // Suppress unused warning
-	}
+	const int x = pNewEffect->GetX();
+	const int y = pNewEffect->GetY();
+	const TYPE_FRAMEID frameID = pNewEffect->GetFrameID();
 
 	// Safe access with boundary checking
 	int tableSize = g_pEffectSpriteTypeTable->GetSize();
@@ -4214,7 +4095,6 @@ MZone::AddEffect(MEffect* pNewEffect, DWORD dwWaitCount)
 
 		if(pSector!=NULL && pSector->HasDarknessForbidden() == true )
 		{
-			delete pNewEffect;
 			return false;
 		}
 	}
@@ -4231,7 +4111,6 @@ MZone::AddEffect(MEffect* pNewEffect, DWORD dwWaitCount)
 				((MCorpse*)pItem)->GetCreature() != NULL &&
 				((MCorpse*)pItem)->GetCreature()->GetCreatureType() == 670 )
 			{
-				delete pNewEffect;
 				return false;
 			}
 		}		
@@ -4260,21 +4139,13 @@ MZone::AddEffect(MEffect* pNewEffect, DWORD dwWaitCount)
 
 				if( pEffect->GetX() + fix_x == x &&	pEffect->GetY() + fix_y == y )
 				{
-					delete pNewEffect;
 					return false;
 				}
 			} 
 			else if( pEffect->GetFrameID() == regenTowerTile && x == pEffect->GetX() && y == pEffect->GetY() )
 			{
-				delete pNewEffect;
 				return false;
 			}
-// 			// add by Coffee 藤속침쥣皐랬槻벎꼇콘굳페劍槻벎헌뇜
-// 			else if( pEffect->GetFrameID() == summonClay && x == pEffect->GetX() && y == pEffect->GetY() )
-// 			{
-// 				delete pNewEffect;
-// 				return false;
-// 			}
 			
 			iGroundEffect++;
 		}
@@ -4298,7 +4169,8 @@ MZone::AddEffect(MEffect* pNewEffect, DWORD dwWaitCount)
 			if (m_mapEffect.find( id )==m_mapEffect.end())
 			{
 				// list에 추가
-				m_mapEffect[id] = pNewEffect;				
+				m_mapEffect[id] = pNewEffect;
+				effect.release();
 
 				DEBUG_ADD("ChaseEffect");
 
@@ -4308,7 +4180,6 @@ MZone::AddEffect(MEffect* pNewEffect, DWORD dwWaitCount)
 
 		DEBUG_ADD("deleteEff");
 
-		delete pNewEffect;
 		
 		return false;
 	}
@@ -4497,6 +4368,7 @@ MZone::AddEffect(MEffect* pNewEffect, DWORD dwWaitCount)
 		{
 			// list에 추가
 			m_mapEffect[id] = pNewEffect;
+			effect.release();
 
 			// sector에 추가
 			MSector& sector = m_ppSector[y][x];
@@ -4519,7 +4391,6 @@ MZone::AddEffect(MEffect* pNewEffect, DWORD dwWaitCount)
 //	}
 
 	DEBUG_ADD("delEff");
-	delete pNewEffect;
 
 	DEBUG_ADD("reF");
 	return false;
@@ -6176,8 +6047,10 @@ MZone::UpdateWaitEffects()
 		MEffect*	pNode = *iWaitEffect;
 		if( !pNode->IsWaitFrame())
 		{
-			AddEffect( pNode );
 			iWaitEffect = m_listWaitEffect.erase(iWaitEffect);
+			// AddEffect owns the node now; the wait list must not retain it
+			// while rejection or an exception destroys it.
+			AddEffect( pNode );
 		}
 		else
 			iWaitEffect ++;
