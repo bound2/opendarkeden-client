@@ -26,6 +26,8 @@
 #include "AddonDef.h"
 #include "ServerInfo.h"
 #include "Packet/WireHost.h"
+#include "DXLib/DXInputHost.h"
+#include "../VS_UI/src/InputFocusManager.h"
 #include "PacketDef.h"
 #include "PacketHandlerRegistry.h"
 #include "VS_UI.h"
@@ -639,6 +641,16 @@ InitVolume()
 BOOL
 InitInput()
 {
+	DXInput::SetHost({
+		.mousePosition = [](int x, int y) { g_x = x; g_y = y; },
+		.activeApp = [](bool active) { g_bActiveApp = active ? TRUE : FALSE; },
+		.hasTextFocus = []() { return g_GetInputFocusManager().HasFocus(); },
+		.keyDown = [](unsigned int key) { g_GetInputFocusManager().HandleKeyDown(key); },
+		.textInput = [](const char* text) { g_GetInputFocusManager().HandleTextInput(text); },
+		.textEditing = [](const char* text, int start, int length) {
+			g_GetInputFocusManager().HandleTextEditing(text, start, length);
+		}
+	});
 	// Debug Message
 	DEBUG_ADD("[ InitGame ]  Input");
 

@@ -11,16 +11,12 @@
 
 #include "CDirectInput.h"
 #include "DXLibBackend.h"
-
-/* Cursor position globals the game reads directly; defined in Client. */
-extern int g_x, g_y;
+#include "DXInputHost.h"
 
 #define MSB		0x80
 
 /* Global instance */
 CSDLInput*	g_pSDLInput = NULL;
-
-/* Keep the original key name table - it's defined in the header */
 
 /*=============================================================================
  * SDL Backend Implementation
@@ -58,6 +54,8 @@ CSDLInput::~CSDLInput()
 /* Clear input state */
 void CSDLInput::Clear()
 {
+	m_mouse_z = 0;
+	(void)dxlib_input_get_mouse_wheel();
 	for (int i=0; i<256; i++)
 	{
 		m_key[i] = FALSE;
@@ -151,14 +149,13 @@ void CSDLInput::UpdateInput()
 	}
 
 	// Wheel: a delta since the last frame is all the game wants.
-	int old_z = m_mouse_z;
 	m_mouse_z = dxlib_input_get_mouse_wheel();
 
-	if (old_z != m_mouse_z) {
+	if (m_mouse_z != 0) {
 		if (m_fp_mouse_event_receiver) {
 			int cur_x, cur_y;
 			dxlib_input_get_mouse_pos(&cur_x, &cur_y);
-			m_fp_mouse_event_receiver(m_mouse_z > old_z ? WHEELUP : WHEELDOWN, cur_x, cur_y, m_mouse_z);
+			m_fp_mouse_event_receiver(m_mouse_z > 0 ? WHEELUP : WHEELDOWN, cur_x, cur_y, m_mouse_z);
 		}
 	}
 
@@ -216,16 +213,14 @@ void CSDLInput::UpdateInput()
 	}
 }
 
-/* Move the cursor to (x, y) if needed, then deliver the event there. The
- * receiver (CGameUpdate::DXMouseEvent) reads the position from the g_x/g_y
- * globals rather than its arguments, so those are set as well. */
+/* Move the cursor to (x, y) if needed, then deliver the event there.
+ * Publish the same position to the application before its event callback. */
 void CSDLInput::DispatchMouseAt(E_MOUSE_EVENT event, int x, int y)
 {
 	if (x != m_mouse_x || y != m_mouse_y) {
 		m_mouse_x = x;
 		m_mouse_y = y;
-		g_x = x;
-		g_y = y;
+		DXInput::SetMousePosition(x, y);
 		if (event != MOVE && m_fp_mouse_event_receiver) {
 			m_fp_mouse_event_receiver(MOVE, x, y, m_mouse_z);
 		}
@@ -266,6 +261,7 @@ int CSDLInput::GetMouseAcceleration(int value)
 /* Set mouse move limit */
 void CSDLInput::SetMouseMoveLimit(int x, int y)
 {
+	(void)dxlib_input_get_mouse_wheel();
 	m_mouse_x = 0;
 	m_mouse_y = 0;
 	m_mouse_z = 0;
