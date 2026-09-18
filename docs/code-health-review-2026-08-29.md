@@ -2470,6 +2470,8 @@ The original (VS_UI/src/hangul/FL2.cpp:38-82, now excluded from the build) answe
 
 #### 🟡 Medium -- The Chinese IME composition handler reads an unbounded IMM composition string into a 128-byte member buffer and terminates past its end.
 
+> ✅ **Removed** on branch `cleanup/review-legacy-ime` (2026-09-18). Deleted the excluded `VS_UI/src/hangul/Ci.cpp` and its obsolete CMake exclusion, as the recommendation permits. Its unchecked `ImmGetCompositionString` copy can no longer be revived by changing the source filter. `Ci_macOS.cpp` already supplies the compatibility class definitions on every supported SDL build, while SDL text events use the editor path. This removes dormant code rather than changing live input behavior; the separate Windows editor activation finding remains open. Full Debug/ASan builds and all nine CTests pass.
+
 **Category:** memory-safety  |  **Location:** `VS_UI/src/hangul/Ci.cpp:293`
 
 `m_composing_string` is `char[128]` (VS_UI/src/hangul/Ci.h:43). Lines 290-296: `if ((len = ImmGetCompositionString(m_hIMC, GCS_RESULTSTR, NULL, 0)) > 0) { ImmGetCompositionString(m_hIMC, GCS_RESULTSTR, m_composing_string, len); m_composing_string[len] = NULL; ... }` — `len` is the composition string's byte length as reported by the IME and is never compared against 128, so both the read-into and the terminator write can go out of bounds. This file is currently excluded from the build (CMakeLists.txt:194) in favour of the Ci_macOS.cpp stubs, so it is not live today, but it is the reference implementation anyone re-enabling Windows IME support will start from.
