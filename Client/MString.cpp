@@ -6,6 +6,7 @@
 #include <stdarg.h>
 #include <cstdint>
 #include <memory>
+#include <stdexcept>
 #include "MString.h"
 #include "DebugLog.h"
 
@@ -66,16 +67,17 @@ MString::~MString()
 //--------------------------------------------------------------------------
 // Init( len )
 //--------------------------------------------------------------------------
-// size만큼 memory확보
+// Allocate writable storage and leave the string empty.
 //--------------------------------------------------------------------------
 void	
 MString::Init(int len)
 {
+	if (len < 0)
+		throw std::invalid_argument("MString capacity must not be negative");
+	std::unique_ptr<char[]> replacement(new char[static_cast<size_t>(len) + 1]);
+	replacement[0] = '\0';
 	Release();
-
-	m_Length = 0;
-	m_pString = new char [len + 1];
-	m_pString[0] = NULL;
+	m_pString = replacement.release();
 }
 
 //--------------------------------------------------------------------------
@@ -100,26 +102,18 @@ MString::Release()
 void	
 MString::operator = (const char* str)
 {
-	if (m_pString!=NULL)
+	// The source may be our own buffer, including a suffix of it. Copy it
+	// before releasing the old allocation; allocation failure preserves it.
+	const size_t length = str != nullptr ? strlen(str) : 0;
+	std::unique_ptr<char[]> replacement;
+	if (length != 0)
 	{
-		delete [] m_pString;
-		m_pString = NULL;
+		replacement.reset(new char[length + 1]);
+		memcpy(replacement.get(), str, length + 1);
 	}
-
-	if (str==NULL)
-	{
-		m_Length = 0;
-	}
-	else
-	{
-		m_Length = strlen(str);
-
-		if (m_Length!=0)
-		{
-			m_pString = new char [m_Length + 1];
-			strcpy( m_pString, str );
-		}
-	}
+	delete [] m_pString;
+	m_pString = replacement.release();
+	m_Length = length;
 }
 
 //--------------------------------------------------------------------------
@@ -128,33 +122,17 @@ MString::operator = (const char* str)
 void
 MString::operator = (const MString& str)
 {
-	//--------------------------------
-	// 길이가 0인 경우..
-	//--------------------------------
-	if (str.m_Length==0)
+	if (this == &str)
+		return;
+	std::unique_ptr<char[]> replacement;
+	if (str.m_Length != 0)
 	{
-		if (m_pString!=NULL)
-		{
-			delete [] m_pString;			
-			m_pString	= NULL;
-			m_Length	= 0;			
-		}		
+		replacement.reset(new char[str.m_Length + 1]);
+		memcpy(replacement.get(), str.m_pString, str.m_Length + 1);
 	}
-	//--------------------------------
-	// 길이가 0 이상인 경우...
-	//--------------------------------
-	else
-	{
-		if (m_pString!=NULL)
-		{
-			delete [] m_pString;
-		}			
-		
-		m_Length = str.m_Length;
-		m_pString = new char [m_Length + 1];
-		
-		strcpy(m_pString, str.m_pString);
-	}
+	delete [] m_pString;
+	m_pString = replacement.release();
+	m_Length = str.m_Length;
 }
 
 //--------------------------------------------------------------------------
