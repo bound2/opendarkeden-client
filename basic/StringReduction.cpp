@@ -1,11 +1,5 @@
-//----------------------------------------------------------------------
-// UIUtilityFunctions.cpp - macOS UI utility functions
-//----------------------------------------------------------------------
-#include "../Client_PCH.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include "StringReduction.h"
 #include <string.h>
-#include <ctype.h>
 
 //----------------------------------------------------------------------
 // String Reduction Functions
@@ -102,59 +96,3 @@ void ReduceString3(char* pStr, int maxWidth)
         pStr[cutLen + 3] = '\0';
     }
 }
-
-//----------------------------------------------------------------------
-// Face Style
-//----------------------------------------------------------------------
-// UI_GetFaceStyle - Implemented in PacketFunction.cpp
-// int UI_GetFaceStyle(bool bMale, int index) { ... }
-
-//----------------------------------------------------------------------
-// Input Update Functions
-//----------------------------------------------------------------------
-// NOTE: UpdateInput() and UpdateMouse() are implemented in GameMain.cpp
-// Stub implementations removed to avoid duplicate symbols
-/*
-void UpdateInput()
-{
-    // Update DirectInput state (mouse buttons, keyboard, etc.)
-    if (g_pSDLInput) {
-        g_pSDLInput->UpdateInput();
-    }
-}
-
-void UpdateMouse()
-{
-    // Stub: SDL input system handles this
-}
-*/
-
-//----------------------------------------------------------------------
-// File I/O Helper
-//----------------------------------------------------------------------
-// NOTE: FileOpenBinary() is implemented in GameMain.cpp
-// Stub implementation removed to avoid duplicate symbol
-/*
-bool FileOpenBinary(const char* pFilename, std::ifstream& file)
-{
-    if (pFilename == NULL)
-        return false;
-
-    file.open(pFilename, std::ios::binary);
-    return file.is_open();
-}
-*/
-
-//----------------------------------------------------------------------
-// SPRITE_FILEPOSITION_NODE
-//----------------------------------------------------------------------
-// Methods already exist elsewhere - commenting out stubs
-// bool SPRITE_FILEPOSITION_NODE::LoadFromFile(std::ifstream& file)
-// {
-//     if (!file.is_open())
-//         return false;
-//     file.read((char*)&Position, sizeof(POINT));
-//     file.read((char*)&Width, sizeof(WORD));
-//     file.read((char*)&Height, sizeof(WORD));
-//     return file.good();
-// }

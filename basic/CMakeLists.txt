@@ -68,6 +68,7 @@ set(BASIC_SOURCES
 	# the one library all of them already link. It needs nothing but the
 	# C library.
 	SafeFormat.cpp
+	StringReduction.cpp
 	CMessageArray.cpp
 	ConfigFile.cpp
 	# The monotonic clock adapter (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md,
@@ -149,6 +150,7 @@ install(FILES
 	InputCodes.h
 	AudioTypes.h
 	SafeFormat.h
+	StringReduction.h
 	MonotonicClock.h
 	DESTINATION include/basic
 )
