@@ -420,6 +420,7 @@ public:
 		SetReverse(false);
 		m_bHeight = true;
 
+		m_button_width = gpC_global_resource->m_pC_scroll_bar_spk->GetWidth(C_GLOBAL_RESOURCE::SB_BUTTON);
 		m_button_height = gpC_global_resource->m_pC_scroll_bar_spk->GetHeight(C_GLOBAL_RESOURCE::SB_BUTTON);
 		m_tag_height = gpC_global_resource->m_pC_scroll_bar_spk->GetHeight(C_GLOBAL_RESOURCE::SB_TAG);
 

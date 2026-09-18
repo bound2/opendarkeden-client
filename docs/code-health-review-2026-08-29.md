@@ -2484,6 +2484,8 @@ The original (VS_UI/src/hangul/FL2.cpp:38-82, now excluded from the build) answe
 
 #### 🟡 Medium -- C_VS_UI_SCROLL_BAR's default constructor leaves m_button_width uninitialized, and it is read on every mouse move over a horizontal scroll bar.
 
+> ✅ **Fixed as a regression guard** on `fix/review-widget-draw-guards` (2026-09-18). The default constructor now initializes button width from the same sprite as the parameterized constructor. The report's horizontal failure scenario was not reproduced: the default constructor sets `m_bHeight = true`, and `SetSize` does not change orientation. The missing initialization is nevertheless corrected. This constructor still reaches the game's global sprite resource and remains within the UI exemption; full Debug/ASan builds and all nine CTests pass, without a live-server gate.
+
 **Category:** undefined-behavior  |  **Location:** `VS_UI/src/header/VS_UI_widget.h:432`
 
 The parameterized constructor sets `m_button_width = spk->GetWidth(...)` at line 406, but the default constructor (lines 413-436) initialises `m_button_height` and `m_tag_height` and omits `m_button_width` entirely. `MouseControl` reads it in the horizontal branch at lines 714 and 724 (`_x < x && _x > x-m_button_width`, `_x < x+w+m_button_width`).
@@ -2505,6 +2507,8 @@ The parameterized constructor sets `m_button_width = spk->GetWidth(...)` at line
 **Recommendation:** Clamp both ends in ScrollUp/ScrollDown (`m_pos = max(0, min(m_pos_max-1, ...))`), make `SetPosMax` reject/clamp non-positive values, and fix the call sites to compute `max(0, (int)size() - N)` before the subtraction.
 
 #### 🟡 Medium -- m_p_menu is indexed by the button's image index without the null/bounds check that the sibling branch three lines below applies.
+
+> ✅ **Fixed as a regression guard** on `fix/review-widget-draw-guards` (2026-09-18). A shared guard rejects a missing menu and negative or out-of-range row indices before layout or either pressed/unpressed drawing branch can index it. Null button pointers are rejected at entry. This renderer still reaches live game surfaces and resources and remains within the UI exemption; the source-path audit confirms the guard precedes every menu access, and full Debug/ASan builds plus all nine CTests pass. No live-server verification is required.
 
 **Category:** memory-safety  |  **Location:** `VS_UI/src/VS_UI_Dialog.cpp:569`
 
