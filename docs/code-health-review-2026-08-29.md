@@ -2490,6 +2490,8 @@ The parameterized constructor sets `m_button_width = spk->GetWidth(...)` at line
 
 #### 🟡 Medium -- ScrollUp/ScrollDown have no lower clamp, so a scroll bar whose pos_max is zero or negative produces a negative scroll position that leaks into list index arithmetic.
 
+> ✅ **Fixed** on branch `fix/review-scrollbar-range` (2026-09-18). The actual scrollbar position calculations moved into `basic/ScrollRange.h` before the fix. Position state is private, every update clamps both ends using widened arithmetic, and non-positive ranges stay at position zero. Forty container-size call sites now use checked item/position counts, retaining their existing visible-row offsets while checking before unsigned subtraction or narrowing. Both UI constructors use the checked range setter; all thumb drawing uses the same state without temporarily reversing it. `tests/unit/test_scroll_range.cpp` has nine tests covering normal and reverse buttons, empty/negative ranges, extreme deltas and counts, pixel geometry, and drawing/dragging agreement. Before the fix, the range tests returned negative indices (including -21 and -2), large deltas wrapped to -4, and reverse dragging selected the opposite endpoint. Full Windows Debug/ASan builds and all nine CTests pass. The default constructor's separate uninitialized button width remains tracked by its own finding.
+
 **Category:** correctness  |  **Location:** `VS_UI/src/header/VS_UI_widget.h:823`
 
 `ScrollDown` is `m_pos = min(m_pos_max-1, m_pos+pos)` (line 823) and the reverse branch of `ScrollUp` is the same (line 807) — neither applies the `max(0, ...)` clamp that `SetScrollPos` does (line 829). `m_pos_max` reaches non-positive values easily because callers compute it from unsigned sizes: `SetPosMax(m_vs_file_list.size()-12)` (VS_UI/src/VS_UI_ExtraDialog.cpp:2537, 2583, 2635) and `SetPosMax(...->size()-7)` (VS_UI/src/VS_UI_GameCommon.cpp:12388, 12401, 13556, 13563, 13570, 13577, 13584) underflow `size_t` when the list is shorter than the subtrahend and narrow to a negative `int`. The default constructor also sets `m_pos_max = -1` (line 419).
@@ -2551,6 +2553,8 @@ Lines 569, 571 and 576 do `m_p_menu[p_button->m_image_index].sz_menu_str...` wit
 **Recommendation:** Restore automatic registration/unregistration in `Window`'s constructor/destructor (guarding for a null manager), or at minimum make `~Window` call `gpC_window_manager->Unregister(this)` unconditionally and have `Unregister` null every cached `Window*` member including `m_pC_mouse_click_window`.
 
 #### ⚪ Low -- SetScrollPixel divides by (h - m_tag_height) with no guard against the two being equal.
+
+> ✅ **Fixed** with `fix/review-scrollbar-range` (2026-09-18). The shared pixel mapper returns position zero when the thumb fills/exceeds the bar, when thumb size is invalid, or when the range cannot scroll. Valid coordinates are widened and clamped before multiplication; reverse dragging agrees with reverse thumb drawing. The equal-size test terminated the unfixed unit binary with integer divide-by-zero (`0xC0000094`); the repaired suite also covers shorter/negative extents and extreme coordinates. Both UI orientations delegate their actual geometry to this mapper. `tests/unit/test_scroll_range.cpp`, full Debug/ASan builds, and all nine CTests verify the fix.
 
 **Category:** correctness  |  **Location:** `VS_UI/src/header/VS_UI_widget.h:835`
 

@@ -151,6 +151,7 @@ install(FILES
 	AudioTypes.h
 	SafeFormat.h
 	StringReduction.h
+	ScrollRange.h
 	MonotonicClock.h
 	DESTINATION include/basic
 )

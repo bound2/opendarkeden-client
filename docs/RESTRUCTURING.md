@@ -1106,6 +1106,14 @@ rounds settled* for the host rules). Test fixtures share
 
 ## Build and review follow-up (2026-09-18)
 
+The scrollbar's position calculations now live in `basic/ScrollRange.h`,
+inherited by the real UI widget. The move preserves the existing behavior;
+the following fix makes the state private, clamps updates, validates pixel
+geometry, and bounds container counts before subtraction and narrowing.
+Nine `test_scroll_range.cpp` tests own these contracts, including the
+reproduced negative positions and divide-by-zero. Sprite ownership, skin
+dimensions, and drawing stay in `VS_UI`.
+
 Source globs now trigger CMake regeneration when files are added or removed.
 The optional map viewer follows `BUILD_ENGINE`; the effect viewer no longer
 links an unused engine library. Hand-written CMake modules and Makefiles are
