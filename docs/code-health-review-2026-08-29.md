@@ -2176,6 +2176,8 @@ On non-Windows, `wsprintf` is defined as a static inline that calls `vsprintf(bu
 
 **Category:** memory-safety  |  **Location:** `Client/CMessageArray.cpp:158`
 
+> ✅ **Fixed (2026-09-18):** move `CMessageArray` into `basic` before fixing it. Reads reject invalid indices and absent storage; add/format/clear/advance operations tolerate an empty or released ring. Invalid dimensions leave an empty object, and allocation failure cleans temporary owners while preserving the old ring. Reinitialization safely accepts its own filename. Filename release was already corrected; tests now cover failed/successful opens, repeated release, reinitialization and bounded writes through every formatting path. Mutable access no longer lets callers replace the owned row pointer, and copying the owner is disabled.
+
 Release() deletes m_Filename (line 160) only when m_bLog is true and never nulls it, so GetFilename() (CMessageArray.h:50) and the OUTPUT_FILE_LOG reopen path (line 195) use a freed pointer. Conversely, if PLATFORM_OPEN fails in Init (line 114-119), m_bLog stays false and the m_Filename allocation from line 111 is leaked and then overwritten on the next Init. Separately, Add() (line 203), Clear() (line 450) and operator[] (line 429) dereference m_ppMessage with no NULL check, and operator[] computes `BYTE gap = m_Max - i` (line 424) — for i > m_Max the BYTE wraps to ~255 and line 429 indexes with a negative offset.
 
 **Failure scenario:** Init() is called with a log filename on a read-only directory: _open fails, m_bLog stays false, and every subsequent Init leaks the filename buffer. If the open succeeds, the second Release() (destructor after an explicit Release, or Init-then-destructor) reads m_Filename after free.
@@ -2239,6 +2241,8 @@ The original in VS_UI/src/hangul/FL2.cpp:38 walked the string counting DBCS lead
 #### ⚪ Low -- POSIX open() is called with O_CREAT but no mode argument, so the log file's permissions come from stack garbage.
 
 **Category:** portability  |  **Location:** `Client/CMessageArray.cpp:114`
+
+> ✅ **Already fixed; verified 2026-09-18:** every create/reopen passes `LogFileMode` (`_S_IREAD | _S_IWRITE` on Windows, `S_IRUSR | S_IWUSR` on POSIX). The message-ring extraction preserves those modes, and its POSIX regression test rejects group/other and set-ID permission bits on a newly created log. Reopen failure also disables subsequent log writes.
 
 `PLATFORM_OPEN` maps to `open` on non-Windows (line 31) and the call passes only two arguments: `m_LogFile = PLATFORM_OPEN(filename, _O_WRONLY | _O_TEXT | _O_CREAT | _O_TRUNC);`. open() with O_CREAT requires a third `mode_t` argument; omitting it is undefined behaviour and in practice takes whatever happens to be in the register/stack slot. The same defect appears at lines 195 and 248 in the OUTPUT_FILE_LOG reopen paths. The Windows `_open` mapping (line 26) has the same requirement for _O_CREAT.
 
@@ -2846,6 +2850,8 @@ basic/GL_import.h:10-51 declares FillRect, SetSurfaceInfo, Get_ColorkeyColor, GL
 #### ⚪ Low -- CMessageArray::operator[] truncates the ring-buffer offset into a BYTE and performs no bounds check on its index argument.
 
 **Category:** correctness  |  **Location:** `Client/CMessageArray.cpp:424`
+
+> ✅ **Fixed (2026-09-18):** ring offsets remain integers, use overflow-safe wrap arithmetic and reject indices outside `[0, GetSize())`. A 300-row ring filled with 650 numbered messages reproduced wrong ordering before the fix; the end-index test reproduced returning a live row instead of rejecting the index. Both now pass alongside empty/released-ring and extreme-index regression guards in `test_message_array.cpp`.
 
 Client/CMessageArray.cpp:424 computes `BYTE gap = m_Max - i;` where m_Max is an int member. For any array larger than 255 entries the subtraction wraps modulo 256 and the subsequent branch selection at lines 426-435 returns an unrelated message. The index `i` is never validated against [0, m_Max), and m_ppMessage is never checked for NULL, so calling operator[] before Init() dereferences a null pointer. The computed indices happen to stay inside [0, m_Max) given the branch conditions, so this is a wrong-data bug rather than an out-of-bounds one. It is latent today because every instantiation is small — Client/Client.h:84-88 defines MAX_DEBUGMESSAGE as 25 and the other four as 5, and Client/GameInit.cpp:1611-1628 uses those — but nothing in the class documents or enforces the 255 ceiling.
 

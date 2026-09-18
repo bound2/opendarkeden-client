@@ -178,7 +178,8 @@ check () {
 # The Ninja baseline stays 475; the platform difference is now two files.
 # 473: map record classes/header move to gamemodel; two executable files
 # retain screen geometry and live interaction actions (six out, two in).
-R1_BASELINE=473
+# 472: CMessageArray moves from the executable to basic.
+R1_BASELINE=472
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -215,7 +216,7 @@ elif [ -n "$BUILD_DIR" ] && [ -f "$BUILD_DIR/build.ninja" ]; then
 	# this branch existed the ratchet SKIPPED on every non-MSVC tree,
 	# which the port assessment listed as fail-open (area A). build.ninja
 	# is rewritten on every configure, so its mtime is the configure time.
-	R1_NINJA_BASELINE=471
+	R1_NINJA_BASELINE=470
 	R1_NINJA="$BUILD_DIR/build.ninja"
 	if [ CMakeLists.txt -nt "$R1_NINJA" ] || [ tests/arch/packetwire_files.txt -nt "$R1_NINJA" ] || [ tests/arch/gamemodel_files.txt -nt "$R1_NINJA" ]; then
 		echo "FAIL R1: $BUILD_DIR was configured before CMakeLists.txt or a library membership file last changed - reconfigure that tree first"
@@ -1480,7 +1481,8 @@ fi
 # debug dumps in MZone.cpp and MCreature.cpp, deleted with their blocks.
 #----------------------------------------------------------------------
 # 969 on 2026-09-17: delete the unused WinINet downloader and its one strcpy.
-R17_BASELINE=969
+# 966 on 2026-09-18: the message ring uses owned copies and bounded memmove.
+R17_BASELINE=966
 R17_FILES_FLOOR=500
 
 r17_members () {
