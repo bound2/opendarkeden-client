@@ -2,7 +2,7 @@
 // test_tarray.cpp
 //----------------------------------------------------------------------
 //
-// Tests for the TArray template in Client/framelib/TArray.h.
+// Tests for the shared TArray template in basic/TArray.h.
 //
 // TArray owns a raw DataType* and frees it in its destructor, so it needs
 // copy semantics that give each instance its own storage. These tests
@@ -12,7 +12,9 @@
 
 #include "test_framework.h"
 
-#include "TArray.h"
+#include "basic/TArray.h"
+#include "Client/framelib/TArray.h"
+#include "Client/SpriteLib/TArray.h"
 
 #include <cstdio>
 #include <cstring>

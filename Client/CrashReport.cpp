@@ -14,7 +14,7 @@
 #include <Windows.h>
 #include <imagehlp.h>
 #else
-#include "../../basic/Platform.h"
+#include "../basic/Platform.h"
 #endif
 #include "CrashReport.h"
 #include "Properties.h"

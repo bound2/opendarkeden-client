@@ -1123,6 +1123,11 @@ constructor and recoverable allocation failure. Tests cover storage churn,
 stale handles, callbacks that delete/replace themselves and ID exhaustion,
 alongside the existing monotonic-time tests.
 
+`TArray` now has one implementation in `basic`, with compatibility headers
+in SpriteLib and framelib. Its existing tests exercise all include paths.
+The unused `CDataTable` raw-object serializer is deleted, and 43 top-level
+client includes now name the actual relative path to `Platform.h`.
+
 The code-health review also records 18 previously completed fixes that still
 had open headings, with their current source/test evidence. These status
 corrections do not claim new runtime reproductions. Live-server verification

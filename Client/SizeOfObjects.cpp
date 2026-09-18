@@ -568,7 +568,6 @@ void SizeOfObjects()
 	fprintf(fp,"ClientConfig : %d\n",sizeof(ClientConfig) );
 	fprintf(fp,"CJpeg : %d\n",sizeof(CJpeg) );
 	fprintf(fp,"CGameUpdate : %d\n",sizeof(CGameUpdate) );
-//	fprintf(fp,"CDataTable : %d\n",sizeof(CDataTable) );
 	fprintf(fp,"CAVI : %d\n",sizeof(CAVI) );
 	fprintf(fp,"AppendPatchTable : %d\n",sizeof(AppendPatchTable) );
 	fprintf(fp,"AppendPatch : %d\n",sizeof(AppendPatch) );
