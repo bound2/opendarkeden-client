@@ -5,6 +5,7 @@
 #endif
 
 #include "u_window.h"
+#include <algorithm>
 #include <math.h>
 #include "VS_UI.h"
 #ifdef _WIN32
@@ -29,11 +30,9 @@ WindowManager *	gpC_window_manager; // App에서 할당한다.
 //-----------------------------------------------------------------------------
 Window::Window(int _x, int _y, int _w, int _h) : Rect(_x, _y, _w, _h)
 { 
-	assert(gpC_window_manager != NULL);
-
-	gpC_window_manager->Register(this);
-
 	Init();
+	if (gpC_window_manager != nullptr)
+		gpC_window_manager->Register(this);
 
 	//
 	// constructor/destructor에서는 pure virtual이 불가능하다. 왜그러는지는
@@ -61,15 +60,10 @@ Window::Window()
 //-----------------------------------------------------------------------------
 Window::~Window()
 {
-	//assert(gpC_window_manager != NULL);
-
-	//gpC_window_manager->Unregister(this);
-
-	//WindowEventReceiver(EVENT_WINDOW_DESTROY);
-
-//	gC_ci->.FinishImeRunning();
-//	gC_ci->.ClearCurrentIMEComposition();
-
+	// Derived fields (including attached editors) have already been destroyed.
+	// Detach without invoking focus, disappearance, or input callbacks.
+	if (m_manager != nullptr)
+		m_manager->ForgetWindow(this);
 }
 
 //-----------------------------------------------------------------------------
@@ -536,6 +530,8 @@ WindowManager::WindowManager()
 	m_pC_keyboard_control_window = NULL;
 	m_pC_mouse_focused_window = NULL;
 	m_pC_pushed_window = NULL;
+	m_current_mouse_x = 0;
+	m_current_mouse_y = 0;
 	m_old_origin_x = 0;
 	m_old_origin_y = 0;
 	m_res_x = 0;
@@ -552,7 +548,10 @@ WindowManager::WindowManager()
 //-----------------------------------------------------------------------------
 WindowManager::~WindowManager()
 {
-
+	for (Window* window : m_registered_windows)
+		window->m_manager = nullptr;
+	if (gpC_window_manager == this)
+		gpC_window_manager = nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -1496,7 +1495,8 @@ void WindowManager::KeyboardControl(UINT message, UINT key, long extra)
 //-----------------------------------------------------------------------------
 bool WindowManager::AlreadyRegistered(Window * p_window) const
 {
-	return Find(p_window);
+	return std::find(m_registered_windows.begin(), m_registered_windows.end(), p_window)
+		!= m_registered_windows.end();
 }
 
 //-----------------------------------------------------------------------------
@@ -1548,7 +1548,12 @@ void WindowManager::Register(Window * p_window)
 	if (p_window == NULL)
 		_Error(NULL_REF);
 
-	Add(p_window);
+	if (p_window->m_manager == this)
+		return;
+	if (p_window->m_manager != nullptr)
+		p_window->m_manager->Unregister(p_window);
+	m_registered_windows.push_back(p_window);
+	p_window->m_manager = this;
 }
 
 //-----------------------------------------------------------------------------
@@ -1561,11 +1566,38 @@ void WindowManager::Unregister(Window * p_window)
 	if (p_window == NULL)
 		_Error(NULL_REF);
 
-	if (Delete(p_window) == true)
-		DisappearWindow(p_window); // 현재상태는 확인할 필요없이 무조건 disappear.
+	if (p_window->m_manager != this || !AlreadyRegistered(p_window))
+		return;
+	m_registered_windows.remove(p_window);
+	DisappearWindow(p_window);
+	ForgetWindow(p_window);
+}
 
-	if (p_window == m_pC_pushed_window)
-		m_pC_pushed_window = NULL;
+void WindowManager::ForgetWindow(Window* window) noexcept
+{
+	// Erasure cannot allocate, and neither the dying window nor its editors
+	// receive callbacks. Explicit Unregister handles live disappearance first.
+	const bool reset_topmost = m_pC_topmost_window == window;
+	const bool reset_keyboard = m_pC_keyboard_control_window == window;
+	m_registered_windows.remove(window);
+	m_show_list.remove(window);
+	m_show_list_pinned_window.remove(window);
+	if (m_pC_mouse_focused_window == window) m_pC_mouse_focused_window = nullptr;
+	if (m_pC_keydown_window == window) m_pC_keydown_window = nullptr;
+	if (m_pC_pushed_window == window) m_pC_pushed_window = nullptr;
+	if (m_pC_keyboard_control_window == window) m_pC_keyboard_control_window = nullptr;
+	if (m_pC_topmost_window == window) m_pC_topmost_window = nullptr;
+	if (m_pC_mouse_click_window == window) m_pC_mouse_click_window = nullptr;
+	window->m_manager = nullptr;
+	if (reset_topmost)
+		SetNextTopmostWindow();
+	if (reset_keyboard)
+	{
+		if (m_pC_topmost_window != nullptr)
+			SetKeyboardControlWindow(m_pC_topmost_window);
+		else
+			SetNextKeyboardControlWindow();
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1599,10 +1631,11 @@ void g_RegisterWindow(Window * p_window)
 //-----------------------------------------------------------------------------
 void g_UnregisterWindow(Window * p_window)
 {
-	if (gpC_window_manager == NULL)
-		_ErrorStr("WindowManager not initialized.");
 	if (p_window == NULL)
 		_Error(NULL_REF);
 
-	gpC_window_manager->Unregister(p_window);
+	// Use the actual registration owner even if the global manager changed
+	// or was destroyed before the derived window's explicit cleanup.
+	if (p_window->m_manager != nullptr)
+		p_window->m_manager->Unregister(p_window);
 }	

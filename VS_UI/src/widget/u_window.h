@@ -141,9 +141,15 @@ enum MOUSE_STATE
 
 //
 //-----------------------------------------------------------------------------
+class WindowManager;
+
 class Window : public Rect, public PI_Visual
 {
 private:
+	friend class WindowManager;
+	friend void g_UnregisterWindow(Window * p_window);
+	WindowManager* m_manager = nullptr;
+
 	//
 	// m_bl_window_move_ready
 	//
@@ -210,6 +216,8 @@ public:
 	Window(int _x, int _y, int _w, int _h);
 	Window();
 	virtual ~Window();
+	Window(const Window&) = delete;
+	Window& operator=(const Window&) = delete;
 
 	virtual bool MouseControl(UINT message, int _x, int _y);
 	virtual void KeyboardControl(UINT message, UINT key, long extra);
@@ -327,9 +335,13 @@ public:
 //-----------------------------------------------------------------------------
 typedef std::list<Window *> List;
 
-class WindowManager : public SimpleDataList<Window *>
+class WindowManager
 {
 private:
+	friend class Window;
+	List m_registered_windows;
+	void ForgetWindow(Window* window) noexcept;
+
 	//
 	// handler
 	//
@@ -448,6 +460,8 @@ private:
 public:
 	WindowManager();
 	~WindowManager();
+	WindowManager(const WindowManager&) = delete;
+	WindowManager& operator=(const WindowManager&) = delete;
 
 	//
 	// Window register/Unregister
@@ -503,7 +517,6 @@ public:
 
 	int	ShowedWindowSize() const;
 	int	ShowedPinnedWindowSize() const { return m_show_list_pinned_window.size(); }
-	//int	RegisteredWindowSize() const { return m_window_buf_size; } // -> use 'Size()'
 	bool	GetShowState(Window * p_window) const;
 };
 
