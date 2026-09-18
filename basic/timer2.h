@@ -16,7 +16,8 @@
 #include "MonotonicClock.h"
 #include "Basics.h"
 
-#include <vector>
+#include <map>
+#include <optional>
 
 typedef long timer_id_t;
 
@@ -29,6 +30,8 @@ typedef long timer_id_t;
 class C_TIMER2
 {
 private:
+	// Test-only inspection of retained timer storage after repeated deletion.
+	friend struct Timer2TestAccess;
 	//
 	// One timer.
 	//
@@ -45,33 +48,24 @@ private:
 		MonotonicClock::TimePoint		tp_prev;		// reference time: last fire, or last reset
 		MonotonicClock::Duration		d_interval;	// how long between fires
 
-		//
-		// tid
-		//
-		//
-		timer_id_t		tid;
 		void				(*fp_proc)(void);	// method to execute
 	};
 
 	//
 	// Timer queue.
 	//
-	// A slot's index IS its tid and a deleted slot is never reused, so
-	// this only ever grows and every id stays valid for the life of the
-	// manager. It used to be a hand-grown realloc()'d array that grew by
-	// eight slots at a time, which cannot hold a type with a non-trivial
-	// default constructor; the vector grows by its own policy instead,
-	// still allocates nothing until the first Add(), and the
-	// allocation-failure return of INVALID_TID is preserved below.
+	// Keep storage only for live timers. IDs are never reused, so a stale
+	// handle cannot pause/delete a later timer. The ordered map preserves
+	// creation order while allowing callbacks to erase themselves or others.
 	//
-	std::vector<S_TIMERUNIT>	m_timer_queue;
-
-	void	Execute(S_TIMERUNIT *pS_timerunit);
+	// Some map implementations allocate a sentinel on construction. Delay
+	// that allocation until Add(), where allocation failure is recoverable.
+	std::optional<std::map<timer_id_t, S_TIMERUNIT>> m_timer_queue;
+	timer_id_t m_next_tid = 0; // INVALID_TID once the ID range is exhausted.
 
 	//
 	// The one place the "is this a live timer?" test lives. Returns NULL
-	// for an out-of-range id and for a deleted slot, which is exactly
-	// the pair of checks every mutator below used to spell out.
+	// for an unknown or deleted id.
 	//
 	S_TIMERUNIT *	Find(timer_id_t tid);
 

@@ -36,6 +36,15 @@
 
 #include "MonotonicClock.h"
 #include "timer2.h"
+#include <limits>
+
+struct Timer2TestAccess {
+	static size_t RetainedEntries(const C_TIMER2& timer) {
+		return timer.m_timer_queue ? timer.m_timer_queue->size() : 0;
+	}
+	static bool HasStorage(const C_TIMER2& timer) { return timer.m_timer_queue.has_value(); }
+	static void SetNextId(C_TIMER2& timer, timer_id_t next) { timer.m_next_tid = next; }
+};
 
 namespace {
 
@@ -314,6 +323,60 @@ TEST(Timer2, OutOfRangeIdsAreIgnoredByEveryEntryPoint)
 	CHECK_EQ(1, g_n_fires_a);
 }
 
+TEST(Timer2, DeletedTimersDoNotAccumulateBehindALiveTimer)
+{
+	C_TIMER2 timer;
+	CHECK(!Timer2TestAccess::HasStorage(timer));
+	timer_id_t survivor = timer.Add(100, &FireA);
+	CHECK(survivor != INVALID_TID);
+	for (int i = 0; i < 2048; ++i) {
+		timer_id_t temporary = timer.Add(100, &FireB);
+		CHECK(temporary != INVALID_TID);
+		CHECK(timer.Delete(temporary));
+	}
+	CHECK_EQ(1, Timer2TestAccess::RetainedEntries(timer));
+	CHECK(timer.Delete(survivor));
+	CHECK_EQ(0, Timer2TestAccess::RetainedEntries(timer));
+	CHECK(!Timer2TestAccess::HasStorage(timer));
+}
+
+TEST(Timer2, ADeletedIdCannotChangeATimerAddedLater)
+{
+	MonotonicClock::ScopedTestSource guard(&FakeNow);
+	ResetFires();
+	SetNow(0);
+	C_TIMER2 timer;
+	timer_id_t first = timer.Add(100, &FireA);
+	const timer_id_t stale = first;
+	CHECK(timer.Delete(first));
+	timer_id_t second = timer.Add(100, &FireB);
+	CHECK(second != stale);
+	timer.Continue(second);
+	SetNow(99);
+	timer_id_t staleCopy = stale;
+	CHECK(!timer.Delete(staleCopy));
+	timer.Pause(stale); timer.ResetSpeed(stale, 1000);
+	timer.Continue(stale); timer.Refresh(stale);
+	SetNow(100);
+	timer.Execute();
+	CHECK_EQ(0, g_n_fires_a);
+	CHECK_EQ(1, g_n_fires_b);
+}
+
+TEST(Timer2, IdExhaustionFailsWithoutWrappingOrReusingDeletedIds)
+{
+	C_TIMER2 timer;
+	const timer_id_t maximum = (std::numeric_limits<timer_id_t>::max)();
+	Timer2TestAccess::SetNextId(timer, maximum - 1);
+	timer_id_t penultimate = timer.Add(100, &FireA);
+	timer_id_t last = timer.Add(100, &FireB);
+	CHECK_EQ(maximum - 1, penultimate); CHECK_EQ(maximum, last);
+	CHECK_EQ(INVALID_TID, timer.Add(100, &FireB));
+	CHECK(timer.Delete(last)); CHECK(timer.Delete(penultimate));
+	CHECK_EQ(INVALID_TID, timer.Add(100, &FireB));
+	CHECK_EQ(0, Timer2TestAccess::RetainedEntries(timer));
+}
+
 TEST(Timer2, TimersAreIndependentOfEachOther)
 {
 	MonotonicClock::ScopedTestSource guard(&FakeNow);
@@ -485,6 +548,15 @@ DeleteOtherDuringFire()
 	g_p_reentrant_timer->Delete(g_tid_other);
 }
 
+timer_id_t g_tid_self = INVALID_TID;
+void DeleteSelfAndReplaceDuringFire()
+{
+	g_n_fires_a++;
+	CHECK(g_p_reentrant_timer->Delete(g_tid_self));
+	g_tid_other = g_p_reentrant_timer->Add(100, &FireB);
+	g_p_reentrant_timer->Continue(g_tid_other);
+}
+
 } // anonymous namespace
 
 TEST(Timer2, ACallbackMayAddTimersAndTheyStartPausedInThatSamePass)
@@ -561,5 +633,28 @@ TEST(Timer2, ACallbackMayDeleteAnotherTimerBeforeItFiresInThatPass)
 	CHECK_EQ(2, g_n_fires_a);
 	CHECK_EQ(0, g_n_fires_b);
 
+	g_p_reentrant_timer = NULL;
+}
+
+TEST(Timer2, ACallbackMayDeleteItselfAndAddAReplacement)
+{
+	MonotonicClock::ScopedTestSource guard(&FakeNow);
+	ResetFires();
+	SetNow(0);
+	C_TIMER2 timer;
+	g_p_reentrant_timer = &timer;
+	g_tid_self = timer.Add(100, &DeleteSelfAndReplaceDuringFire);
+	timer.Continue(g_tid_self);
+	SetNow(100);
+	timer.Execute();
+	CHECK_EQ(INVALID_TID, g_tid_self);
+	CHECK_EQ(1, g_n_fires_a); CHECK_EQ(0, g_n_fires_b);
+	CHECK_EQ(1, Timer2TestAccess::RetainedEntries(timer));
+	SetNow(199);
+	timer.Execute();
+	CHECK_EQ(0, g_n_fires_b);
+	SetNow(200);
+	timer.Execute();
+	CHECK_EQ(1, g_n_fires_a); CHECK_EQ(1, g_n_fires_b);
 	g_p_reentrant_timer = NULL;
 }

@@ -1116,6 +1116,13 @@ including VS_UI and newly added test sources. The manual list of test files
 needing wire macros is gone; a consumer compiled without source-specific
 defines guards the contract and reproduced both missing-definition failures.
 
+The timer-manager follow-up keeps only live callbacks, releases deleted
+storage, and preserves unique IDs so stale handles cannot target replacements.
+Storage is allocated inside `Add`, preserving an allocation-free global
+constructor and recoverable allocation failure. Tests cover storage churn,
+stale handles, callbacks that delete/replace themselves and ID exhaustion,
+alongside the existing monotonic-time tests.
+
 The code-health review also records 18 previously completed fixes that still
 had open headings, with their current source/test evidence. These status
 corrections do not claim new runtime reproductions. Live-server verification
