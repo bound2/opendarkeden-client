@@ -93,6 +93,15 @@ target_include_directories(user_option_tests PRIVATE ${CMAKE_SOURCE_DIR}/Client)
 target_link_libraries(user_option_tests PRIVATE test_framework VS_UI basic)
 add_test(NAME user_option_tests COMMAND user_option_tests)
 
+# Link real UI components as their dependencies become independently testable.
+add_executable(ui_tests
+	framework/test_main.cpp
+	ui/test_button.cpp
+	ui/test_event_button.cpp
+)
+target_link_libraries(ui_tests PRIVATE test_framework VS_UI basic)
+add_test(NAME ui_tests COMMAND ui_tests)
+
 #----------------------------------------------------------------------
 # Shrink-only ratchets (tests/ratchet/ratchets.sh) - fails when a debt
 # metric rises AND when it falls unrecorded (tighten the baseline in

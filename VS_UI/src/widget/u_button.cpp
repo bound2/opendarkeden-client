@@ -168,8 +168,8 @@ Button::Button(int _x, int _y, int _w, int _h, id_t id, Exec * pC_exec_handler, 
 }
 
 Button::Button()
+	: m_pC_exec_handler(NULL), m_id(0), m_click_option(RUN_WHEN_PUSHUP)
 {
-
 }
 
 //-----------------------------------------------------------------------------

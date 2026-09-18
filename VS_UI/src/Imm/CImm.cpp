@@ -11,6 +11,12 @@
 
 extern CSoundPartManager*		g_pSoundManager;
 
+#ifdef PLATFORM_WINDOWS
+// Keep the device pointer with its implementation so standalone UI components
+// can link their real feedback adapter without pulling in the game UI loop.
+CImm *gpC_Imm = NULL;
+#endif
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////

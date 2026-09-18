@@ -94,15 +94,11 @@ public:
 
 public:
 	C_VS_UI_EVENT_BUTTON(int _x, int _y, int _w, int _h, id_t id, Exec * pC_exec_handler, int image_index=-1, int millisec = 10) : 
-									EventButton(_x, _y, _w, _h, id, pC_exec_handler)
+									EventButton(_x, _y, _w, _h, id, pC_exec_handler),
+									m_image_index(image_index == -1 ? static_cast<int>(id) : image_index)
 	{
 		Init();
 		m_interval_timer.SetIntervalMillis(millisec);
-
-		if (m_image_index == -1) // default
-			m_image_index = id;
-		else
-			m_image_index = image_index;
 	}
 
 	void	Init()
