@@ -11,13 +11,7 @@
 
 #include "Basics.h"
 #include "DLL.h"
-/* The stale Client/DXLib.h duplicate this path used to disambiguate
-   against is deleted (2026-08-31); the explicit path stays because it
-   must come before GL_import.h: GL_import.h declares a SetSurfaceInfo()
-   overload that takes a DDSURFACEDESC2*, a type DXLib/CDirectDraw.h
-   defines. */
 #include "DXLib/DXLib.h"
-#include "GL_import.h"
 #include "timer2.h"
 #ifdef PLATFORM_WINDOWS
 #include "unicorn.h"

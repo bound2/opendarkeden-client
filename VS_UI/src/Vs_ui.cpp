@@ -1837,26 +1837,6 @@ if(gbl_info_show)
 	if(!IsRunningProgress())
 		g_descriptor_manager.Show();
 
-#ifndef _LIB
-	if (gpC_press_button)
-	{
-		Rect rect(gpC_press_button->x, gpC_press_button->y-20, 80, 20);
-
-		if (gpC_base->m_p_DDSurface_back->Lock())
-		{
-			S_SURFACEINFO	surfaceinfo;
-			SetSurfaceInfo(&surfaceinfo, gpC_base->m_p_DDSurface_back->GetDDSD());
-
-			FillRect(&surfaceinfo, &rect, YELLOW);
-
-			gpC_base->m_p_DDSurface_back->Unlock();
-		}	
-
-		char buf[100];
-		sprintf(buf, "%dx%d", gpC_press_button->x, gpC_press_button->y);
-		g_Print(rect.x+7, rect.y+2, buf);
-	}
-#endif
 #ifdef OUTPUT_DEBUG
 //	DEBUG_ADD("[C_VS_UI] Show OK");
 #endif
