@@ -224,6 +224,10 @@ endif()
 if(MSVC)
     add_compile_options($<$<COMPILE_LANGUAGE:C,CXX>:/MP>)
 
+    # Source and narrow string literals use UTF-8, including files with a BOM.
+    # The Windows ANSI code page must not change compiled resource bytes.
+    add_compile_options($<$<COMPILE_LANGUAGE:C,CXX>:/utf-8>)
+
     message(STATUS "Parallel compilation: /MP (per-project, all targets)")
 
     # Strict conformance. /permissive- turns off the MSVC extensions that
@@ -236,6 +240,7 @@ if(MSVC)
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/Zc:__cplusplus>)
 
     message(STATUS "Conformance: /permissive- /Zc:__cplusplus (all C++ targets)")
+    message(STATUS "Source and execution encoding: UTF-8 (all C/C++ targets)")
 endif()
 
 # Find SDL2 (needed for engine and DXLib)

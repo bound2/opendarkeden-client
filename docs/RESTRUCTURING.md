@@ -1132,6 +1132,11 @@ The unused GL import and TGA/IMG interfaces are deleted, together with their
 abandoned UI drawing comments. VS_UI uses the existing SDL surface helper;
 it no longer imports declarations from the missing legacy graphics DLL.
 
+MSVC compiles every C/C++ target with UTF-8 source and execution encoding.
+The source-encoding CTest checks the repository's C/C++ files, and the unit
+suite compares narrow literals from BOM and non-BOM sources with explicit
+UTF-8 bytes. Existing UTF-8 BOMs are supported; they do not change literal bytes.
+
 The code-health review also records 18 previously completed fixes that still
 had open headings, with their current source/test evidence. These status
 corrections do not claim new runtime reproductions. Live-server verification

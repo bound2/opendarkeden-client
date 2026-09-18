@@ -136,6 +136,16 @@ else()
 	message(STATUS "perl not found: the arch_includes test is not registered")
 endif()
 
+# Source bytes must match the UTF-8 compiler contract on every platform.
+if(PERL_EXECUTABLE)
+	add_test(
+		NAME source_encoding
+		COMMAND ${PERL_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_source_encoding.pl
+	)
+else()
+	message(STATUS "perl not found: the source_encoding test is not registered")
+endif()
+
 #----------------------------------------------------------------------
 # Format-arity audit (tests/tools/check_format_arity.pl) - the check the
 # checked formatter cannot make for itself.
