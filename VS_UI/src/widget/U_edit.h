@@ -66,7 +66,8 @@ public:
     void EraseCharacterBegin();
     void HomeCursor() { SetCursor(0); }
     void EndCursor() { SetCursor(m_TextLen); }
-    void SetByteLimit(int limit) { m_Limit = limit; }
+    // Legacy name: the limit counts characters, clamped to fixed storage.
+    void SetByteLimit(int limit);
     void InsertMark(unsigned short mark);
     void KeyboardControl(unsigned int message, unsigned int key, long extra);
 

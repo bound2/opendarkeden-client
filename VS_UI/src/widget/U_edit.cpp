@@ -1,6 +1,7 @@
 #include "U_edit.h"
 #include "../InputFocusManager.h"
 #include "../header/UISafeText.h"
+#include <algorithm>
 
 // ============================================================================
 // UTF-8 <-> UTF-32 Conversion (from textbox_demo.c)
@@ -68,8 +69,14 @@ bool LineEditor::IsAcquire() const
 // Insert UTF-32 text at cursor position
 void LineEditor::InsertText(const uint32_t* text, int len)
 {
-	if (len <= 0) return;
-	if (m_TextLen + len > m_Limit) return;
+	const int limit = std::clamp(m_Limit, 0, MAX_TEXT - 1);
+	if (text == nullptr || len <= 0 || m_TextLen < 0 || m_TextLen > limit ||
+		m_CursorPos < 0 || m_CursorPos > m_TextLen || len > limit - m_TextLen)
+		return;
+
+	// Snapshot before shifting: callers may insert a slice of m_Text itself.
+	uint32_t insertion[MAX_TEXT];
+	memcpy(insertion, text, static_cast<size_t>(len) * sizeof(uint32_t));
 
 	// Move existing text to make room
 	memmove(&m_Text[m_CursorPos + len],
@@ -77,7 +84,7 @@ void LineEditor::InsertText(const uint32_t* text, int len)
 	        (m_TextLen - m_CursorPos) * sizeof(uint32_t));
 
 	// Insert new text
-	memcpy(&m_Text[m_CursorPos], text, len * sizeof(uint32_t));
+	memcpy(&m_Text[m_CursorPos], insertion, static_cast<size_t>(len) * sizeof(uint32_t));
 
 	m_CursorPos += len;
 	m_TextLen += len;
@@ -122,10 +129,8 @@ void LineEditor::Backspace()
 // Move cursor by delta characters
 void LineEditor::MoveCursor(int delta)
 {
-	int newPos = m_CursorPos + delta;
-	if (newPos < 0) newPos = 0;
-	if (newPos > m_TextLen) newPos = m_TextLen;
-	m_CursorPos = newPos;
+	const int64_t newPos = static_cast<int64_t>(m_CursorPos) + delta;
+	m_CursorPos = static_cast<int>(std::clamp<int64_t>(newPos, 0, m_TextLen));
 }
 
 // Set cursor to absolute position
@@ -209,9 +214,12 @@ void LineEditor::AddString(const char* pStr)
 	uint32_t utf32[MAX_TEXT];
 	int len = (int)UISafeText::Utf8ToUtf32(pStr, utf32, MAX_TEXT);
 
-	if (m_TextLen + len <= m_Limit) {
-		InsertText(utf32, len);
-	}
+	InsertText(utf32, len);
+}
+
+void LineEditor::SetByteLimit(int limit)
+{
+	m_Limit = std::clamp(limit, 0, MAX_TEXT - 1);
 }
 
 // Legacy: Clear all text
