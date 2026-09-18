@@ -3014,7 +3014,7 @@ void	C_VS_UI_FILE_DIALOG::Run(id_t id)
 			{
 				m_filename = Basic::DialogDirectoryPath(m_directories.paths[m_directories.current]);
 				m_filename += m_vs_file_list[m_select];
-				gpC_base->SendMessage(UI_CLOSE_FILE_DIALOG, m_mode, 0,(void *) m_filename.c_str());
+				gpC_base->SendTextMessage(UI_CLOSE_FILE_DIALOG, m_mode, 0, m_filename);
 			} 
 			else
 				gpC_base->SendMessage(UI_CLOSE_FILE_DIALOG, m_mode, 0, NULL);
@@ -3031,7 +3031,7 @@ void	C_VS_UI_FILE_DIALOG::Run(id_t id)
 					multiple_filename += ";";
 				}
 				multiple_filename.erase(multiple_filename.end()-1, multiple_filename.end());	
-				gpC_base->SendMessage(UI_CLOSE_FILE_DIALOG, m_mode, 0, (void *) multiple_filename.c_str());
+				gpC_base->SendTextMessage(UI_CLOSE_FILE_DIALOG, m_mode, 0, multiple_filename);
 				
 			} else
 				gpC_base->SendMessage(UI_CLOSE_FILE_DIALOG, m_mode, 0, NULL);

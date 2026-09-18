@@ -2,8 +2,10 @@
 #define __VS_UI_UI_RESULT_RECEIVER_H__
 
 #include "Typedef.h"
-#include "SimpleDataList.h"
 #include "VS_UI_UIMessage.h"
+#include <deque>
+#include <optional>
+#include <string>
 
 
 //
@@ -20,18 +22,7 @@ struct MESSAGE
 	intptr_t			left;
 	intptr_t			right;
 	void *			void_ptr;
-};
-
-//-----------------------------------------------------------------------------
-// C_MESSAGE_QUEUE 
-//
-// 
-//-----------------------------------------------------------------------------
-class C_MESSAGE_QUEUE : public SimpleDataList<MESSAGE *>
-{
-public:
-	C_MESSAGE_QUEUE();
-	~C_MESSAGE_QUEUE();
+	std::optional<std::string> text;
 };
 
 /*-----------------------------------------------------------------------------
@@ -44,15 +35,20 @@ public:
 class C_VS_UI_UI_RESULT_RECEIVER
 {
 private:
-	C_MESSAGE_QUEUE			m_message_queue;
+	std::deque<MESSAGE> m_message_queue;
 
 	void (*m_fp_result_receiver)(DWORD, intptr_t, intptr_t, void *);
 
 public:
 	C_VS_UI_UI_RESULT_RECEIVER();
 	~C_VS_UI_UI_RESULT_RECEIVER();
+	C_VS_UI_UI_RESULT_RECEIVER(const C_VS_UI_UI_RESULT_RECEIVER&) = delete;
+	C_VS_UI_UI_RESULT_RECEIVER& operator=(const C_VS_UI_UI_RESULT_RECEIVER&) = delete;
 
 	void _SendMessage(DWORD message, intptr_t left = 0, intptr_t right = 0, void *void_ptr = NULL);
+	// Own a copy until dispatch finishes. The callback borrows void_ptr and
+	// must neither retain nor delete it. Raw _SendMessage payloads stay borrowed.
+	void _SendTextMessage(DWORD message, intptr_t left, intptr_t right, std::string text);
 	void	_DispatchMessage();
 
 /*-----------------------------------------------------------------------------
@@ -61,7 +57,7 @@ public:
 	void SetResultReceiver(void (*fp)(DWORD, intptr_t, intptr_t, void *));
 
 #ifndef _LIB
-	int	GetMessageSize() const { return m_message_queue.Size(); }
+	int	GetMessageSize() const { return static_cast<int>(m_message_queue.size()); }
 #endif
 };
 

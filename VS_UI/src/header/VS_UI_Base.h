@@ -311,6 +311,7 @@ public:
 	void	Init(CSpriteSurface *surface, void (*fp)(DWORD, intptr_t, intptr_t, void *));
 	void	DispatchMessage();
 	void	SendMessage(DWORD message, intptr_t left = 0, intptr_t right = 0, void *void_ptr = NULL);
+	void SendTextMessage(DWORD message, intptr_t left, intptr_t right, std::string text);
 //	void	SelectFont(font_id_t id);
 
 #ifndef _LIB
