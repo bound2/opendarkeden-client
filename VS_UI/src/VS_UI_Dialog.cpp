@@ -487,9 +487,11 @@ void C_VS_UI_DIALOG::ShowButtonDescription(C_VS_UI_EVENT_BUTTON * p_button)
 //-----------------------------------------------------------------------------
 void C_VS_UI_DIALOG::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 {
+	if (p_button == nullptr)
+		return;
 	int i;
 
-	// Menu button과 그냥 Button을 다르게 처리. 
+	// Command buttons use sprite indices; menu buttons use menu row indices.
 	if (p_button->GetID() == DIALOG_EXECID_OK ||
 		 p_button->GetID() == DIALOG_EXECID_CANCEL ||
 		 p_button->GetID() == DIALOG_EXECID_FRIEND_BLACK
@@ -520,7 +522,11 @@ void C_VS_UI_DIALOG::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 //			gpC_global_resource->m_pC_assemble_box_etc_spk->Blt(p_button->x+1, p_button->y+1, p_button->m_image_index+2);
 	}
 	else
-	{	
+	{
+		// Validate before every menu-row access, including the pressed branch.
+		if (m_p_menu == nullptr || p_button->m_image_index < 0 ||
+			static_cast<UINT>(p_button->m_image_index) >= m_menu_count)
+			return;
 		if (m_menu_rect.w != 0 && m_menu_rect.h != 0)
 		{
 			PrintInfo * p_pi;
