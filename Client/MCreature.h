@@ -115,10 +115,20 @@ class MCreature : public MObject, public MStatus {
 		
 		void* operator new( size_t size )
 		{
-			return g_CreatureMemoryPool.Alloc();
+			return g_CreatureMemoryPool.Alloc(size);
 		}
 
-		void  operator delete( void *pmem )
+		void* operator new(size_t size, std::align_val_t alignment)
+		{
+			return g_CreatureMemoryPool.Alloc(size, static_cast<size_t>(alignment));
+		}
+
+		void operator delete(void* pmem, std::align_val_t) noexcept
+		{
+			g_CreatureMemoryPool.Free(pmem);
+		}
+
+		void operator delete( void *pmem ) noexcept
 		{
 			g_CreatureMemoryPool.Free( pmem );
 		}

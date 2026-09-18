@@ -1,54 +1,39 @@
-/********************************************************************
-created:	2003/12/05
-created:	5:12:2003   13:20
-filename: 	MemoryPool.h
-file ext:	h
-author:		sonee
+#pragma once
 
-purpose:	memory pool
-			고정된 크기를 빈번하게 new/delete 하는 경우 메모리 풀을 사용하면
-			메모리 단편화를 줄일 수 있다.
+#include <cstddef>
+#include <memory>
+#include <new>
+#include <unordered_map>
+#include <vector>
 
-			메모리 leak 현상을 막을 수 있다.
-
-			Debug 모드인 경우에는 메모리가 MEMORY_POOL_GARBAGE 값으로
-			채워진다.
-*********************************************************************/
-
-#pragma		once
-
+// Single-threaded object storage. Larger objects and extended alignments use
+// separately owned allocations. The pool must outlive its objects; destruction
+// releases any remaining raw allocations.
 class MemoryPool
 {
-public :
-	MemoryPool( int BlockSize, int BlockCount );
+public:
+	MemoryPool(std::size_t blockSize, std::size_t blockCount);
 	~MemoryPool();
+	MemoryPool(const MemoryPool&) = delete;
+	MemoryPool& operator=(const MemoryPool&) = delete;
 
-	void*					Alloc();
-	void					Free( void *pMem );
+	void* Alloc();
+	void* Alloc(std::size_t size, std::size_t alignment = __STDCPP_DEFAULT_NEW_ALIGNMENT__);
+	// Null is a no-op. Other pointers must be an exact, live allocation from
+	// this pool; a rejected free leaves all allocations unchanged.
+	bool Free(void* memory) noexcept;
+	bool IsPtrInPool(void* memory) const noexcept;
+	bool IsAvailablePtr(void* memory) const noexcept;
 
-	bool					IsPtrInPool( void *pMem );				// MemoryPool에 해당 Ptr 이 있는가.
-	bool					IsAvailablePtr( void *pMem );			// 해당 포인터의 유효성
+private:
+	struct Chunk;
+	struct FreeSlot { FreeSlot* next; };
+	Chunk* FindChunk(void* memory, std::size_t& index) const noexcept;
 
-private :
-	class CBlock
-	{
-	public :
-		CBlock				*m_pPrev;
-		int					m_leftBlocks;
-		unsigned char		*m_pNextBlock;
-	};
-
-	class CFreeBlock												// Free 된 값은 단지 포인터만 필요하므로.
-	{
-	public :
-		CFreeBlock			*m_pPrev;
-	};
-
-	CBlock					*m_pCurrentBlock;
-	CFreeBlock				*m_pFreeBlockList;
-
-	int						m_BlockSize;
-	int						m_BlockCount;
-
+	std::size_t m_blockSize;
+	std::size_t m_blockCount;
+	std::size_t m_stride;
+	std::vector<std::unique_ptr<Chunk>> m_chunks;
+	std::unordered_map<void*, std::size_t> m_largeAllocations;
+	FreeSlot* m_free = nullptr;
 };
-

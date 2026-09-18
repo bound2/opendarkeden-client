@@ -1,131 +1,153 @@
 #include "MemoryPool.h"
-#include <cstddef>
-#include <new>
+#include <cstdint>
+#include <limits>
+#include <stdexcept>
 
-MemoryPool::MemoryPool( int BlockSize, int BlockCount )
-: m_pCurrentBlock ( NULL ), m_pFreeBlockList( NULL ), m_BlockSize( BlockSize ), m_BlockCount( BlockCount )
+namespace {
+
+constexpr std::size_t DefaultAlignment = __STDCPP_DEFAULT_NEW_ALIGNMENT__;
+
+std::size_t RoundSize(std::size_t size, std::size_t alignment)
 {
-	if( BlockSize < sizeof( void* ) )
+	if (size > (std::numeric_limits<std::size_t>::max)() - (alignment - 1))
+		throw std::bad_alloc();
+	return (size + alignment - 1) & ~(alignment - 1);
+}
+
+struct DeleteChunk
+{
+	void operator()(std::byte* memory) const noexcept
 	{
-		// -_- 포인터 크기보다 작으면 문제가 생길 것같은데-_-;
-		m_BlockSize = sizeof( void* );
+		::operator delete(memory, std::align_val_t(DefaultAlignment));
 	}
+};
+
+} // namespace
+
+struct MemoryPool::Chunk
+{
+	Chunk(std::size_t bytes, std::size_t count)
+		: memory(static_cast<std::byte*>(::operator new(bytes, std::align_val_t(DefaultAlignment)))),
+		  live(count, false)
+	{
+	}
+
+	std::unique_ptr<std::byte, DeleteChunk> memory;
+	std::vector<bool> live;
+	std::size_t issued = 0;
+};
+
+MemoryPool::MemoryPool(std::size_t blockSize, std::size_t blockCount)
+	: m_blockSize(blockSize), m_blockCount(blockCount), m_stride(0)
+{
+	if (blockSize == 0 || blockCount == 0 ||
+		blockCount > (std::numeric_limits<std::size_t>::max)() / blockSize)
+		throw std::invalid_argument("Invalid memory pool dimensions");
+	m_stride = RoundSize(blockSize < sizeof(FreeSlot) ? sizeof(FreeSlot) : blockSize, DefaultAlignment);
+	if (blockCount > (std::numeric_limits<std::size_t>::max)() / m_stride)
+		throw std::invalid_argument("Memory pool chunk size overflows");
 }
 
 MemoryPool::~MemoryPool()
 {
-	while( m_pCurrentBlock != NULL )
-	{
-		CBlock *pPrev = m_pCurrentBlock->m_pPrev;
-
-		// Alloc() takes these chunks from ::operator new, so they have to go
-		// back through ::operator delete. Pairing them with free() is
-		// undefined behaviour.
-		::operator delete( m_pCurrentBlock );
-
-		m_pCurrentBlock = pPrev;
-	}
+	for (const auto& allocation : m_largeAllocations)
+		::operator delete(allocation.first, std::align_val_t(allocation.second));
 }
 
-void*		MemoryPool::Alloc()
+void* MemoryPool::Alloc()
 {
-	void *pMem;
-
-	if( m_pFreeBlockList != NULL )					// FreeList 에 남아있는것이 있다면, 그 메모리 주소를 리턴.
-	{
-		pMem = m_pFreeBlockList;
-
-		m_pFreeBlockList = m_pFreeBlockList->m_pPrev;
-		return pMem;
-	}
-
-	if( m_pCurrentBlock == NULL || m_pCurrentBlock->m_leftBlocks <= 0 )
-	{
-		// The pool has not been allocated yet, or every block handed out by the
-		// current chunk is in use: allocate a new chunk and link the previous
-		// one behind it.
-		// ::operator new throws std::bad_alloc on failure and never returns
-		// NULL, so there is no null pointer to test for here. These pools back
-		// a throwing operator new (see MCreature::operator new), which must not
-		// hand a null block back to its caller either.
-		CBlock *pPool = (CBlock*)( ::operator new( sizeof(CBlock) + ( m_BlockSize * m_BlockCount )) );
-
-#ifdef _DEBUG
-//		memset( (unsigned char*)(pPool) + sizeof( CBlock ), MEMORY_POOL_GARBAGE, m_BlockSize * m_BlockCount );
-#endif
-		pPool->m_pPrev = m_pCurrentBlock;
-		pPool->m_leftBlocks = m_BlockCount;
-		pPool->m_pNextBlock = reinterpret_cast<unsigned char*>( (pPool + 1) );
-
-		m_pCurrentBlock = pPool;
-	}	
-
-	pMem = m_pCurrentBlock->m_pNextBlock;
-	m_pCurrentBlock->m_pNextBlock += m_BlockSize;
-	m_pCurrentBlock->m_leftBlocks --;
-
-	return pMem;
+	return Alloc(m_blockSize);
 }
 
-void		MemoryPool::Free( void *pMem )
+void* MemoryPool::Alloc(std::size_t size, std::size_t alignment)
 {
-#ifdef _DEBUG
-//	memset( pMem, MEMORY_POOL_GARBAGE, m_BlockSize );
-#endif
-	CFreeBlock *pBlock = reinterpret_cast<CFreeBlock*>(pMem);
-
-	pBlock->m_pPrev = m_pFreeBlockList;
-	m_pFreeBlockList = pBlock;
-}
-
-bool		MemoryPool::IsPtrInPool( void *pMem )
-{
-	CBlock *pCurBlock = m_pCurrentBlock;
-	
-	while( pCurBlock != NULL )
+	if (alignment == 0 || (alignment & (alignment - 1)) != 0)
+		throw std::invalid_argument("Memory pool alignment must be a power of two");
+	if (size == 0)
+		size = 1;
+	if (size > m_blockSize || alignment > DefaultAlignment)
 	{
-        if( ( (unsigned char*)(pCurBlock) + sizeof( CBlock ) ) <= pMem && 
-			( (unsigned char*)(pCurBlock) + sizeof( CBlock ) + m_BlockSize * m_BlockCount ) > pMem )
-			return true;
-
-		pCurBlock = pCurBlock->m_pPrev;
-	}
-	return false;
-}
-
-//----------------------------------------------------------------------------------
-//
-// 할당된 메모리안에 있으면서, FreeList 에 없으면 -_- 유효한 메모리이다.
-//
-//----------------------------------------------------------------------------------
-bool		MemoryPool::IsAvailablePtr( void *pMem )
-{
-	CBlock *pCurBlock = m_pCurrentBlock;
-
-	bool bIsInPool = false;
-	
-	while( pCurBlock != NULL )
-	{
-		if( ( (unsigned char*)(pCurBlock) + sizeof( CBlock ) <= pMem ) &&
-			( (unsigned char*)(pCurBlock) + sizeof( CBlock ) + m_BlockSize * m_BlockCount > pMem ) )
+		if (alignment < DefaultAlignment)
+			alignment = DefaultAlignment;
+		void* memory = ::operator new(RoundSize(size, alignment), std::align_val_t(alignment));
+		try
 		{
-			bIsInPool = true;
-			break;
+			m_largeAllocations.emplace(memory, alignment);
 		}
-
-		pCurBlock = pCurBlock->m_pPrev;
+		catch (...)
+		{
+			::operator delete(memory, std::align_val_t(alignment));
+			throw;
+		}
+		return memory;
 	}
-	if( !bIsInPool ) return false;
-	
-	CFreeBlock *pFreeBlock = m_pFreeBlockList;
-	
-	while( pFreeBlock != NULL )
+
+	if (m_free != nullptr)
 	{
-		if( pFreeBlock <= pMem && (pFreeBlock + m_BlockSize * m_BlockCount) > pMem )
-			return false;
-
-		pFreeBlock = pFreeBlock->m_pPrev;
+		FreeSlot* memory = m_free;
+		m_free = memory->next;
+		std::size_t index = 0;
+		FindChunk(memory, index)->live[index] = true;
+		return memory;
 	}
 
+	if (m_chunks.empty() || m_chunks.back()->issued == m_blockCount)
+		m_chunks.push_back(std::make_unique<Chunk>(m_stride * m_blockCount, m_blockCount));
+	Chunk& chunk = *m_chunks.back();
+	const std::size_t index = chunk.issued++;
+	chunk.live[index] = true;
+	return chunk.memory.get() + index * m_stride;
+}
+
+MemoryPool::Chunk* MemoryPool::FindChunk(void* memory, std::size_t& index) const noexcept
+{
+	const auto address = reinterpret_cast<std::uintptr_t>(memory);
+	for (const auto& chunk : m_chunks)
+	{
+		const auto begin = reinterpret_cast<std::uintptr_t>(chunk->memory.get());
+		if (address < begin)
+			continue;
+		const auto offset = address - begin;
+		if (offset < chunk->issued * m_stride && offset % m_stride == 0)
+		{
+			index = offset / m_stride;
+			return chunk.get();
+		}
+	}
+	return nullptr;
+}
+
+bool MemoryPool::Free(void* memory) noexcept
+{
+	if (memory == nullptr)
+		return true;
+	std::size_t index = 0;
+	if (Chunk* chunk = FindChunk(memory, index))
+	{
+		if (!chunk->live[index])
+			return false;
+		chunk->live[index] = false;
+		m_free = ::new (memory) FreeSlot{m_free};
+		return true;
+	}
+	const auto found = m_largeAllocations.find(memory);
+	if (found == m_largeAllocations.end())
+		return false;
+	const std::size_t alignment = found->second;
+	m_largeAllocations.erase(found);
+	::operator delete(memory, std::align_val_t(alignment));
 	return true;
+}
+
+bool MemoryPool::IsPtrInPool(void* memory) const noexcept
+{
+	std::size_t index = 0;
+	if (const Chunk* chunk = FindChunk(memory, index))
+		return chunk->live[index];
+	return m_largeAllocations.find(memory) != m_largeAllocations.end();
+}
+
+bool MemoryPool::IsAvailablePtr(void* memory) const noexcept
+{
+	return IsPtrInPool(memory);
 }
