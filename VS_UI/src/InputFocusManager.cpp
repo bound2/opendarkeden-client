@@ -1,6 +1,6 @@
 #include "InputFocusManager.h"
 #include "widget/U_edit.h"
-#include <stdio.h>
+#include <SDL.h>
 
 InputFocusManager::InputFocusManager()
 	: m_focusedEditor(NULL)
@@ -21,13 +21,19 @@ InputFocusManager& g_GetInputFocusManager()
 
 void InputFocusManager::SetFocusedEditor(LineEditorVisual* editor)
 {
+	if (m_focusedEditor == editor)
+		return;
+	if (m_focusedEditor != nullptr) {
+		m_focusedEditor->m_Editor.Unacquire();
+		m_focusedEditor->m_bAcquired = false;
+	}
 	m_focusedEditor = editor;
-
-	// Debug logging
-	if (editor) {
-		printf("InputFocusManager: Set focused editor to %p\n", (void*)editor);
+	if (editor != nullptr) {
+		editor->m_Editor.Acquire();
+		editor->m_bAcquired = true;
+		SDL_StartTextInput();
 	} else {
-		printf("InputFocusManager: Cleared focused editor\n");
+		SDL_StopTextInput();
 	}
 }
 

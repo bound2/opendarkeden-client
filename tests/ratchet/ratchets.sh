@@ -383,7 +383,9 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 # GCStashList::setStashItem from a live Item*) were deleted rather than
 # grandfathered.
 #----------------------------------------------------------------------
-R4_BASELINE=21
+# 20: editor rendering uses the common TextService-backed printer. Its direct
+# g_pLast/g_pBack declarations disappear; the printer still reaches game state.
+R4_BASELINE=20
 
 lib_members () {
 	# The directory trees minus the files CMake excludes from the

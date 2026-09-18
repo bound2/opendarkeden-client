@@ -2516,6 +2516,8 @@ Lines 569, 571 and 576 do `m_p_menu[p_button->m_image_index].sz_menu_str...` wit
 
 #### 🟡 Medium -- Two different platform macros gate the same SDL-vs-Win32 decision, so the Windows build takes the legacy IME path whose implementation was removed from the build.
 
+> ✅ **Fixed** on branch `fix/review-editor-sdl-focus` (2026-09-18). InputFocusManager owns acquisition and SDL text-input activation on every supported platform. Switching editors deactivates the previous owner; releasing an inactive editor cannot stop the current one, and destroying the focused editor stops text input. The duplicate login edit dispatcher and inert Window-to-native-IME branch are removed: SDL text, composition and editing keys arrive through the existing DXInput host once. Rendering uses the same field-font, width and horizontal-scroll path everywhere, through the TextService-backed compatibility printer. Tests reproduced Windows acquisition, focus-switch and destruction defects plus incorrect preedit cancellation/double commits. Full Debug/ASan builds and all nine CTests pass; focused Linux ASan/UBSan tests pass with SDL's dummy video driver.
+
 **Category:** maintainability  |  **Location:** `VS_UI/src/VS_UI_Title.cpp:4644`
 
 `C_VS_UI_LOGIN::KeyboardControl` branches on `#ifndef PLATFORM_WINDOWS` (line 4644) to route SDL text input, while `LineEditorVisual` branches on `#ifdef PLATFORM_MACOS` for the same purpose (VS_UI/src/widget/U_edit.cpp:363, 390, 499). `PLATFORM_MACOS` is defined by CMakeLists.txt only under `if(NOT WIN32)` (line 364-366) and `PLATFORM_WINDOWS` is defined by basic/Platform.h:37 on Windows, so on the Windows SDL build both files take their 'legacy Windows' branch: `LineEditorVisual::Acquire()` never calls `SDL_StartTextInput()`, `Show()` uses the legacy `g_Print` path instead of TextService, and the login screen delegates to `Window::KeyboardControl` -> the CI IME classes, whose real implementations (VS_UI/src/hangul/Ci.cpp, FL2.cpp) are excluded from the build by CMakeLists.txt:193-196 and replaced by the no-op stubs in Ci_macOS.cpp.
@@ -2537,6 +2539,8 @@ Lines 569, 571 and 576 do `m_p_menu[p_button->m_image_index].sz_menu_str...` wit
 **Recommendation:** Initialize the three members in the default constructor (`m_pC_exec_handler = NULL; m_id = 0; m_click_option = RUN_WHEN_PUSHUP;`), or delete the default constructor since nothing uses it.
 
 #### 🟡 Medium -- SetAbsWidth writes a member nothing reads, while the width actually used for layout is hardcoded to 100 pixels forever.
+
+> ✅ **Fixed** on branch `fix/review-editor-sdl-focus` (2026-09-18). The unused second width and abandoned font-atlas members are deleted. `SetAbsWidth` maintains one nonnegative width used by rendering and `ReachSizeOfBox`; the latter retains its existing twelve-pixels-per-character estimate. Both platforms use the configured field font and horizontal scrolling in `Show`. A direct editor test reproduced the ignored width and covers negative widths. Full Debug/ASan builds and all nine CTests pass.
 
 **Category:** correctness  |  **Location:** `VS_UI/src/widget/U_edit.cpp:418`
 

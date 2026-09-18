@@ -4194,75 +4194,8 @@ void C_VS_UI_LOGIN::SendNewUserToClient()
 -----------------------------------------------------------------------------*/
 void C_VS_UI_LOGIN::KeyboardControl(UINT message, UINT key, long extra)
 {
-
-	//bool focus_end = false;
-	//if (message == WM_KEYDOWN && key == VK_RETURN)
-	//	focus_end = NextFocus();
-
-	//gpC_base->SelectFont(FONT_SLAYER);
-
-	//if (key != VK_RETURN)
-	//	gC_font.KeyInput(message, key, extra);
-
-//	if(message == WM_CHAR && m_bFirst)
-//	{
-//		m_bFirst = false;
-//		return;
-//	}
-
-
-	// On macOS/SDL2, bypass the Windows IME system
-#ifndef PLATFORM_WINDOWS
-	// Committed text (SDL_TEXTINPUT) is not handled here: the SDL backend
-	// hands it to InputFocusManager, which calls LineEditor::HandleTextInput()
-	// with the UTF-8 buffer as a const char*. It must not be carried in
-	// `extra`, which is a `long` and truncates a pointer on LLP64.
-	if (message == WM_TEXTEDITING) {
-		// SDL_TEXTEDITING event (IME composition in progress)
-		int start = (int)key;
-		int length = (int)extra;
-		if (m_lev_id.IsAcquire()) {
-			m_lev_id.m_Editor.HandleTextEditing("", start, length);
-		} else if (m_lev_password.IsAcquire()) {
-			m_lev_password.m_Editor.HandleTextEditing("", start, length);
-		}
-	} else if (message == WM_KEYDOWN) {
-		// Control keys
-		LineEditor* pEditor = NULL;
-		if (m_lev_id.IsAcquire()) {
-			pEditor = &m_lev_id.m_Editor;
-		} else if (m_lev_password.IsAcquire()) {
-			pEditor = &m_lev_password.m_Editor;
-		}
-
-		if (pEditor) {
-			switch (key) {
-			case VK_BACK:
-				pEditor->Backspace();
-				break;
-			case VK_LEFT:
-				pEditor->MoveCursor(-1);
-				break;
-			case VK_RIGHT:
-				pEditor->MoveCursor(1);
-				break;
-			case VK_HOME:
-				pEditor->SetCursor(0);
-				break;
-			case VK_END:
-				pEditor->SetCursor(pEditor->GetTextLen());
-				break;
-			case VK_DELETE:
-				pEditor->DeleteChar(pEditor->GetCursorPos());
-				break;
-			}
-		}
-	}
-	// Note: We don't call Window::KeyboardControl for SDL platforms
-#else
-	Window::KeyboardControl(message, key, extra);
-#endif
-
+	// SDL text, preedit and editor control keys are delivered once through
+	// InputFocusManager. This window handles only dialog-level actions.
 	switch (message)
 	{
 		case WM_KEYDOWN:

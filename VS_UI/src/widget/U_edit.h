@@ -12,7 +12,7 @@
 #include "../../../basic/BasicData.h"
 
 /**
- * LineEditor - Simplified Windows IMM (Input Method Manager) replacement for macOS
+ * LineEditor - UTF-32 editing state used by SDL text input on every platform.
  * This provides basic text editing functionality with UTF-32 support for SDL text input
  */
 
@@ -88,18 +88,10 @@ public:
     int m_X;
     int m_Y;
     int m_AbsWidth;
-    int m_MaxWidth;
     bool m_bPasswordMode;
     bool m_bAcquired;
     PrintInfo m_PrintInfo;
     unsigned long m_CursorColor;
-
-#ifdef PLATFORM_POSIX
-    // Font Atlas rendering system
-    void* m_GlyphCache;      // CGlyphCache* (void* to avoid header dependency)
-    void* m_Layout;          // CTextLayout* (void* to avoid header dependency)
-    bool m_LayoutDirty;      // Flag to rebuild layout
-#endif
 
     LineEditorVisual();
     ~LineEditorVisual();
