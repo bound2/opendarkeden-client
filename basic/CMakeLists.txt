@@ -69,6 +69,7 @@ set(BASIC_SOURCES
 	# C library.
 	SafeFormat.cpp
 	StringReduction.cpp
+	MemoryPool.cpp
 	CMessageArray.cpp
 	ConfigFile.cpp
 	# The monotonic clock adapter (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md,
@@ -151,6 +152,7 @@ install(FILES
 	AudioTypes.h
 	SafeFormat.h
 	StringReduction.h
+	MemoryPool.h
 	ScrollRange.h
 	MonotonicClock.h
 	DESTINATION include/basic
