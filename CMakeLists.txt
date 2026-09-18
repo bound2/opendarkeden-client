@@ -508,12 +508,12 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		# Note: u_window.cpp is now cross-platform compatible
 	endif()
 
-	# Exclude native Win32 GDI/IME implementations superseded by their SDL-backend
-	# replacements (Ci_macOS.cpp, Client/RenderingFunctions.cpp). USE_SDL_BACKEND is
+	# Exclude native Win32 GDI code superseded by Client/RenderingFunctions.cpp.
+	# The excluded IMM implementation Ci.cpp was deleted; Ci_macOS.cpp supplies
+	# the compatibility classes used with SDL text input. USE_SDL_BACKEND is
 	# forced ON above for all platforms including WIN32 ("Windows native support
 	# removed"), so these must be excluded regardless of platform, not just NOT WIN32.
 	if(USE_SDL_BACKEND)
-		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/hangul/Ci\\.cpp")
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/hangul/FL2\\.cpp")
 	endif()
 
