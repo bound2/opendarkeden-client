@@ -1486,7 +1486,8 @@ fi
 # 963 later that day: three dead formatting lines left with GL drawing blocks.
 # 961: three file-dialog copies consolidate into one label helper.
 # 958: the label helper and both file-dialog title copies use owned text.
-R17_BASELINE=958
+# 952: owned file-dialog paths replace six raw directory copies/appends.
+R17_BASELINE=952
 R17_FILES_FLOOR=500
 
 r17_members () {

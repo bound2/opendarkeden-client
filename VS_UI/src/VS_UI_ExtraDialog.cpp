@@ -2396,7 +2396,6 @@ C_VS_UI_FILE_DIALOG::C_VS_UI_FILE_DIALOG(MODE Mode)
 	m_show_long_name = 1000;
 
 
-	mp_open_current_directory = NULL;
 	m_p_image_spk=NULL;
 	m_p_icon_spk=NULL;
 
@@ -2463,14 +2462,7 @@ C_VS_UI_FILE_DIALOG::~C_VS_UI_FILE_DIALOG()
 	DeleteNew(m_pC_scroll_bar);
 	DeleteNew(m_pC_button_group);
 
-	if (mp_open_current_directory)
-	{
-		assert(mi_open_drive_count > 0);
-		for (int i = 0; i < mi_open_drive_count; i++)
-			delete []mp_open_current_directory[i];
-		delete []mp_open_current_directory;
-		mi_open_drive_count = 0;
-	}
+
 }
 
 
@@ -2485,7 +2477,6 @@ void C_VS_UI_FILE_DIALOG::Start(const char *type)
 	PI_Processor::Start();
 	m_pC_button_group->Init();
 
-	int i;
 	m_filter = Basic::SplitDialogFilters(type);
 
 	m_filename = "";
@@ -2499,70 +2490,13 @@ void C_VS_UI_FILE_DIALOG::Start(const char *type)
 //	AttrPin(true);
 	gpC_window_manager->AppearWindow(this);
 
-	if(mp_open_current_directory == NULL)
+	if (m_directories.paths.empty())
 	{
-		// System에 부착된 모든 drive를 읽는다.
-		DWORD drives = GetLogicalDrives();
-		
-		// 각 bit를 검사하여 존재하는 drive buffer를 만든다.
-		DWORD index = 1;
-		char	find_drive_name = 'a'; // a, b, c, d ... 소문자로...
-		char	find_drive_name_buf[sizeof(DWORD)*8];
-		memset(find_drive_name_buf, 0, sizeof(DWORD)*8);
-		
-//		if (mp_open_current_directory)
-//		{
-//			assert(mi_open_drive_count > 0);
-//			for (i = 0; i < mi_open_drive_count; i++)
-//				delete []mp_open_current_directory[i];
-//			delete []mp_open_current_directory;
-//			mi_open_drive_count = 0;
-//		}
-		mi_open_drive_count = 0;
-		assert(mi_open_drive_count == 0);
-		
-		for (i = 0; i < sizeof(DWORD)*8; i++)
-		{
-			if (drives & index)
-			{
-				find_drive_name_buf[mi_open_drive_count] = find_drive_name;
-				mi_open_drive_count++;
-			}
-			
-			index <<= 1;
-			find_drive_name++;
-		}
-
-		mp_open_current_directory = new char *[mi_open_drive_count];
-		CheckMemAlloc(mp_open_current_directory);
-		
-		for (i = 0; i < mi_open_drive_count; i++)
-		{
-			char *buf = new char[MAX_PATH];
-			CheckMemAlloc(buf);
-			memset(buf, 0, MAX_PATH);
-			buf[0] = find_drive_name_buf[i];
-			strcat(buf, ":\\*.*");
-			mp_open_current_directory[i] = buf;
-		}
-		
-		// Window가 만들어지면서 directory를 초기화 시킨다.
-		char temp[MAX_PATH];
-		DWORD char_count = GetCurrentDirectory(MAX_PATH, temp);
-		assert(char_count > 0);
-		
-		for (i = 0; i < mi_open_drive_count; i++)
-		{
-			if (mp_open_current_directory[i][0] == tolower((unsigned char)temp[0]))
-			{
-				mi_open_drive_index = i;
-				mp_open_current_directory[i][0] = '\0';
-				strcat(mp_open_current_directory[i], temp);
-				mp_open_current_directory[i][0] = (char)tolower((unsigned char)mp_open_current_directory[i][0]);
-			}
-		}
+		std::error_code error;
+		const auto current = std::filesystem::current_path(error);
+		m_directories = Basic::MakeDialogDirectories(GetLogicalDrives(), error ? "" : current.string());
 	}
-	RefreshFileList(mp_open_current_directory[mi_open_drive_index]);
+	RefreshFileList(m_directories.paths[m_directories.current]);
 	m_pC_scroll_bar->SetItemCount(m_vs_file_list.size(), m_scroll_max);
 }
 
@@ -2574,6 +2508,7 @@ void C_VS_UI_FILE_DIALOG::Start(const char *type)
 
 bool C_VS_UI_FILE_DIALOG::MouseControl(UINT message, int _x, int _y)
 {
+	if (m_directories.current >= m_directories.paths.size()) return true;
 	static bool LB_SCROLL_DOWN = false;
 	
 	Window::MouseControl(message, _x, _y);
@@ -2602,17 +2537,16 @@ bool C_VS_UI_FILE_DIALOG::MouseControl(UINT message, int _x, int _y)
 	case M_LB_DOUBLECLICK :		
 		if(m_bl_open_drive)		// Select From Drive Box
 		{
-			if(_x>51&&_y>54&&_x<350&&_y<54+m_string_gap*mi_open_drive_count) 
+			if(_x>51&&_y>54&&_x<350&&_y<54+m_string_gap*m_directories.paths.size())
 			{
-				int temp=mi_open_drive_index;
 				
-				mi_open_drive_index = (_y - (37+m_string_gap))/m_string_gap;
+				const int nextDrive = (_y - (37+m_string_gap))/m_string_gap;
+				if (nextDrive < 0 || static_cast<size_t>(nextDrive) >= m_directories.paths.size()) break;
+				m_directories.current = nextDrive;
 				
-				RefreshFileList(mp_open_current_directory[mi_open_drive_index]);
+				RefreshFileList(m_directories.paths[m_directories.current]);
 				m_pC_scroll_bar->SetItemCount(m_vs_file_list.size(), m_scroll_max);
 				
-				if(!m_vs_file_list.size()) 
-					ChangeDir((char *)"\\..", mp_open_current_directory[temp]);
 				
 				m_bl_open_drive = false;
 			} else
@@ -2643,14 +2577,7 @@ bool C_VS_UI_FILE_DIALOG::MouseControl(UINT message, int _x, int _y)
 				{
 					if(m_vs_file_list_attr[m_select] & FILE_ATTRIBUTE_DIRECTORY) // 디렉토리일 경우 해당디렉토리로 옮김
 					{
-						char name[200];
-						strcpy(name, mp_open_current_directory[mi_open_drive_index]);					
-						ChangeDir((char *)m_vs_file_list[m_select].c_str(), mp_open_current_directory[mi_open_drive_index]);					
-
-						if(m_vs_file_list.empty() && strlen(name) > 3)
-						{
-							ChangeDir((char *)"\\..", mp_open_current_directory[mi_open_drive_index]);
-						}
+						ChangeDir(m_vs_file_list[m_select].c_str(), m_directories.paths[m_directories.current]);
 						m_filename = "";
 						m_select_file_num.clear();
 						m_select = -1;
@@ -2716,7 +2643,7 @@ bool C_VS_UI_FILE_DIALOG::MouseControl(UINT message, int _x, int _y)
 
 		if(m_bl_open_drive)
 		{
-			if( _x > 51 && _y > 54 && _x < 350 && _y < 54 +m_string_gap*mi_open_drive_count)
+			if( _x > 51 && _y > 54 && _x < 350 && _y < 54 +m_string_gap*m_directories.paths.size())
 			{
 				int mi_open_drive = (_y - (37+m_string_gap))/m_string_gap;
 				mi_open_drive++;				
@@ -2748,8 +2675,7 @@ bool C_VS_UI_FILE_DIALOG::MouseControl(UINT message, int _x, int _y)
 				POINT destPoint={0,0};
 				std::string filename;
 				
-				filename+=mp_open_current_directory[mi_open_drive_index];
-				filename.erase(filename.size()-3,3);
+				filename = Basic::DialogDirectoryPath(m_directories.paths[m_directories.current]);
 				filename+=m_vs_file_list[m_tempselect].c_str();							
 				
 				if(LoadImageToSurface(filename.c_str(), bmpSurface))
@@ -2820,6 +2746,7 @@ void	C_VS_UI_FILE_DIALOG::KeyboardControl(UINT message, UINT key, long extra)
 //-----------------------------------------------------------------------------
 void	C_VS_UI_FILE_DIALOG::Show()
 {
+	if (m_directories.current >= m_directories.paths.size()) return;
 	std::string title;
 	RECT rect;
 	// 600,133
@@ -2879,7 +2806,7 @@ void	C_VS_UI_FILE_DIALOG::Show()
 	g_FL2_GetDC();	
 	// 열린 폴더명의 길이가 길경우 잘라준다 
 	// 38자 이상 되지 않도록 한다. 
-	title = Basic::BuildDialogPathLabel(mp_open_current_directory[mi_open_drive_index], m_filter);
+	title = Basic::BuildDialogPathLabel(m_directories.paths[m_directories.current], m_filter);
 	const std::string folderName = Basic::ShortenDialogLabel(title);
 	
 	g_PrintColorStr(x+m_string_x, y+37, folderName.c_str(), gpC_base->m_desc_menu_pi, RGB_WHITE);
@@ -2915,23 +2842,23 @@ void	C_VS_UI_FILE_DIALOG::Show()
 	// Drive List 출력
 	//drive 선택 open 되어있으면
 	if(m_bl_open_drive) {
-		SetRect(&rect, x+m_string_x-5,y+37+m_string_gap-3, x+m_string_x-5 + 350, y+37+m_string_gap-3+m_string_gap*mi_open_drive_count);
+		SetRect(&rect, x+m_string_x-5,y+37+m_string_gap-3, x+m_string_x-5 + 350, y+37+m_string_gap-3+m_string_gap*m_directories.paths.size());
 		
 		DrawAlphaBox(&rect, 100, 100,100, 20);
 		gpC_global_resource->DrawOutBox(rect.left,rect.top,rect.right-rect.left,rect.bottom-rect.top);		
 
 		if(gpC_base->m_p_DDSurface_back->Lock())
 		{
-			for(int i = 0; i < mi_open_drive_count; i++)	{
-				char ch=*mp_open_current_directory[i];
-				if(ch=='a'||ch=='A'||i==mi_open_drive_count-1) 	m_p_icon_spk->BltLocked(x+m_string_x,y+37+(i+1)*m_string_gap,CDDRIVE_ID);
+			for(int i = 0; i < m_directories.paths.size(); i++)	{
+				char ch=m_directories.paths[i][0];
+				if(ch=='a'||ch=='A'||i==m_directories.paths.size()-1) 	m_p_icon_spk->BltLocked(x+m_string_x,y+37+(i+1)*m_string_gap,CDDRIVE_ID);
 				else m_p_icon_spk->BltLocked(x+m_string_x,y+37+(i+1)*m_string_gap,HDDRIVE_ID);
 			}
 			gpC_base->m_p_DDSurface_back->Unlock();
 		}
 		g_FL2_GetDC();
-		for(int i = 0; i < mi_open_drive_count; i++)	{
-			std::string filename = Basic::BuildDialogPathLabel(mp_open_current_directory[i], m_filter);
+		for(int i = 0; i < m_directories.paths.size(); i++)	{
+			std::string filename = Basic::BuildDialogPathLabel(m_directories.paths[i], m_filter);
 			filename = Basic::ShortenDialogLabel(filename);
 			g_PrintColorStr(x+m_string_x+17, y+37+(i+1)*m_string_gap, filename.c_str(), gpC_base->m_desc_menu_pi, RGB_WHITE);
 		}
@@ -2945,7 +2872,7 @@ void	C_VS_UI_FILE_DIALOG::Show()
 		std::string title;
 		if(STAY_FOLDER==0)
 		{				// 현재 열린 폴더
-			title = Basic::BuildDialogPathLabel(mp_open_current_directory[mi_open_drive_index], m_filter);
+			title = Basic::BuildDialogPathLabel(m_directories.paths[m_directories.current], m_filter);
 			if(title.size()>38)
 			{	
 				SetRect(&rect, x+m_string_x+10,y+45,x+m_string_x+9*title.size(),y+68);
@@ -2954,9 +2881,9 @@ void	C_VS_UI_FILE_DIALOG::Show()
 				g_PrintColorStr(x+m_string_x+15, y+49, title.c_str(), gpC_base->m_desc_menu_pi, RGB_WHITE);
 			}
 		}
-		else if(STAY_FOLDER!=-1&&m_bl_open_drive&&STAY_FOLDER!=0xfffffffe)	
+		else if(m_bl_open_drive && STAY_FOLDER > 0 && static_cast<size_t>(STAY_FOLDER) <= m_directories.paths.size())
 		{		// 드라이브 리스트 중 			
-			title = Basic::BuildDialogPathLabel(mp_open_current_directory[STAY_FOLDER-1], m_filter);
+			title = Basic::BuildDialogPathLabel(m_directories.paths[STAY_FOLDER-1], m_filter);
 			if(title.size()>38)
 			{	
 				SetRect(&rect, x+m_string_x+17,y+35+(STAY_FOLDER)*m_string_gap,x+m_string_x+17+9*title.size(),y+39+(STAY_FOLDER)*m_string_gap+18);
@@ -3043,57 +2970,6 @@ bool	C_VS_UI_FILE_DIALOG::IsPixel(int _x, int _y)
 	return IsInRect(_x, _y);
 }
 
-//---------------------------------------------------------------------------
-// 세미콜론으로 구분된 문자 뽑아내기
-// GetFileNameInString 함수를 사용하고 나서 반환된 값은 반드시 delete 해주세요.
-// usage>
-// char *name=GetFileNameInString(str,2);
-// MessageBox(NULL,name,name,MB_OK);
-// delete name;
-
-// 파일이름에서 파일의 총 갯수
-static int GetSizeFileInString(char *str)
-{
-	if(str==NULL||strlen(str)<=1)
-		return 0;
-	
-	int nFile=1,i;
-	
-	for(i=0;i<strlen(str);i++)
-	{
-		if(str[i]==';') nFile++;
-	}
-	
-	return nFile;
-}
-
-// 해당 번호에 대한 파일 추출
-static const std::string GetFileNameInString(char *str,int n)
-{
-	if(str==NULL||strlen(str)<=1) return NULL;
-	int len=strlen(str),i,PassSemi=0;
-	char *start,*end;
-	for(i=0;i<len;i++)
-	{
-		if(str[i]==';') PassSemi++;	
-		else if(n==PassSemi)	
-		{
-			start=&str[i];
-			break;
-		}
-	}
-	if(GetSizeFileInString(str)<=n+1)	end=&str[len];
-	else 
-		end=strstr(start,";");	
-	
-	char name[512];
-	memset(name,0,end-start+1);
-	memcpy(name,start,end-start);name[end-start]='\0';
-
-	return std::string(name);
-}
-
-
 //-----------------------------------------------------------------------------
 // C_VS_UI_FILE_DIALOG::Run
 //
@@ -3130,10 +3006,13 @@ void	C_VS_UI_FILE_DIALOG::Run(id_t id)
 		//
 		if( m_mode == MODE_PROFILE_SELECT )
 		{
-			if(m_select != -1 && m_select >= m_pC_scroll_bar->GetScrollPos() && m_select < m_pC_scroll_bar->GetScrollPos()+m_scroll_max)
+			if(m_directories.current < m_directories.paths.size() && m_select >= 0 &&
+				static_cast<size_t>(m_select) < m_vs_file_list.size() &&
+				static_cast<size_t>(m_select) < m_vs_file_list_attr.size() &&
+				!(m_vs_file_list_attr[m_select] & FILE_ATTRIBUTE_DIRECTORY) &&
+				m_select >= m_pC_scroll_bar->GetScrollPos() && m_select < m_pC_scroll_bar->GetScrollPos()+m_scroll_max)
 			{
-				m_filename = mp_open_current_directory[mi_open_drive_index];
-				m_filename.erase(m_filename.end()-3, m_filename.end());
+				m_filename = Basic::DialogDirectoryPath(m_directories.paths[m_directories.current]);
 				m_filename += m_vs_file_list[m_select];
 				gpC_base->SendMessage(UI_CLOSE_FILE_DIALOG, m_mode, 0,(void *) m_filename.c_str());
 			} 
@@ -3154,13 +3033,6 @@ void	C_VS_UI_FILE_DIALOG::Run(id_t id)
 				multiple_filename.erase(multiple_filename.end()-1, multiple_filename.end());	
 				gpC_base->SendMessage(UI_CLOSE_FILE_DIALOG, m_mode, 0, (void *) multiple_filename.c_str());
 				
-				// 디버깅하려고 넣은 코드입니다.
-				//for(i=0;i<IsNumFileInString((char*)multiple_filename.c_str());i++)
-				//{
-				//	char *name=GetFileNameInString((char*)multiple_filename.c_str(),i);
-				//	MessageBox(NULL,name,"Result",MB_OK);				
-				//	delete name;
-				//}
 			} else
 				gpC_base->SendMessage(UI_CLOSE_FILE_DIALOG, m_mode, 0, NULL);
 		}
@@ -3214,27 +3086,24 @@ void	C_VS_UI_FILE_DIALOG::Finish()
   holds a great many files, so it is run only when the list has to be
   refreshed.
 
-  Refreshes the directory obtained from GetCurrentDirectory().
+  Refreshes the selected owned directory path.
 -----------------------------------------------------------------------------*/
-void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
+void C_VS_UI_FILE_DIALOG::RefreshFileList(std::string& sz_dirname)
 {
 	std::string			sz_filename;
-	int					n;
 
 	Basic::NormalizeDialogSearchPath(sz_dirname);
 
 	m_vs_file_list.clear();
 	m_vs_file_list_attr.clear();
 	
-	// The buffer above is a search pattern, "<dir>\*.*"; ListDirectory wants
+	// The owned string is a search pattern, "<dir>\*.*"; ListDirectory wants
 	// the directory and the pattern apart. Three characters come off, not
 	// four, so the '\' is kept and a drive root stays the absolute "C:\".
 	// The pattern is "*", not "*.*": the '.' is a literal to the helper.
-	std::string							sz_directory(sz_dirname);
+	const std::string sz_directory = Basic::DialogDirectoryPath(sz_dirname);
 	std::vector<Basic::SDirectoryEntry>	v_entries;
 	std::vector<Basic::SDirectoryEntry>	v_listed;
-
-	sz_directory.erase(sz_directory.size() - 3);
 
 	// directory_iterator does not return "..", and ".." is the entry the
 	// user clicks to go up, so it is synthesised - first, where
@@ -3272,12 +3141,6 @@ void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
 			if (sz_entry_name[0] == '.' &&
 				 sz_entry_name[1] == '\0') continue;
 
-		n = strlen(sz_entry_name);
-		if (dw_attributes & FILE_ATTRIBUTE_DIRECTORY)
-		{
-			n += 1; // + '\'
-		}
-
 		if (dw_attributes & FILE_ATTRIBUTE_DIRECTORY)
 		{
 			sz_filename = "\\";
@@ -3300,6 +3163,9 @@ void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
 
 	m_pC_scroll_bar->SetScrollPos(0);
 	m_select = -1;
+	m_tempselect = -1;
+	m_select_file_num.clear();
+	m_flag_preview_image = false;
 
 }
 
@@ -3307,36 +3173,16 @@ void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
 - ChangeDir
 -
 -----------------------------------------------------------------------------*/
-void C_VS_UI_FILE_DIALOG::ChangeDir(char *sz_cur_dirname, char *sz_pathname)
+void C_VS_UI_FILE_DIALOG::ChangeDir(const char* sz_cur_dirname, std::string& sz_pathname)
 {
 	Basic::ChangeDialogSearchPath(sz_cur_dirname, sz_pathname);
-	RefreshFileList(mp_open_current_directory[mi_open_drive_index]);
+	RefreshFileList(m_directories.paths[m_directories.current]);
 	//if(m_vs_file_list.size()<=0)
 
 	m_select = -1;
 	m_tempselect = -1;
 
 	EMPTY_MOVE;
-}
-
-/*-----------------------------------------------------------------------------
-- 
-- \.. 를 검색한다.
------------------------------------------------------------------------------*/
-bool C_VS_UI_FILE_DIALOG::GetParentDir(char *sz_name)
-{
-	assert(sz_name);
-
-	int n = strlen(sz_name);
-
-	if (sz_name[0] != '\\') return false; // not dir!
-	if (n != 3) return false;
-
-	for (int i = 1; i < n; i++) // from 1
-		if (sz_name[i] != '.')
-			return false;
-
-	return true;
 }
 
 int		C_VS_UI_FILE_DIALOG::GetMode()

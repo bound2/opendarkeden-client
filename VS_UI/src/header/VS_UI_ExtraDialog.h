@@ -14,6 +14,7 @@
 #include "VS_UI_GameCommon.h"
 #include "VS_UI_Dialog.h"
 #include "VS_UI_DESC.h"
+#include "FileDialogListing.h"
 
 //-----------------------------------------------------------------------------
 // class C_VS_UI_DESC_DIALOG
@@ -132,9 +133,7 @@ private:
 	//DWORD	m_stay_openfolder;
 	DWORD	m_show_long_name;
 	
-	char **mp_open_current_directory;
-	int  mi_open_drive_count;
-	int  mi_open_drive_index;
+	Basic::DialogDirectories m_directories;
 	int m_mode;
 	CSpriteSurface m_temp_face;
 
@@ -145,11 +144,6 @@ public:
 		MODE_PROFILE_SELECT,
 		MODE_SENDFILE_SELECT,
 	};
-
-	// 해당 번호에 대한 파일 추출
-	static const std::string GetFileNameInString(char *str,int n);
-	// 파일이름에서 파일의 총 갯수
-	static int GetSizeFileInString(char *str);
 
 	C_VS_UI_FILE_DIALOG(MODE Mode = MODE_PROFILE_SELECT);
 	~C_VS_UI_FILE_DIALOG();
@@ -164,9 +158,8 @@ public:
 	bool	MouseControl(UINT message, int _x, int _y);
 	void	KeyboardControl(UINT message, UINT key, long extra);
 
-	void	RefreshFileList(char *sz_dirname);
-	void	ChangeDir(char *sz_cur_dirname, char *sz_pathname);
-	bool	GetParentDir(char *sz_name);
+	void	RefreshFileList(std::string& sz_dirname);
+	void	ChangeDir(const char* sz_cur_dirname, std::string& sz_pathname);
 
 	const char *	GetFileName()	{ if(m_filename.empty())return NULL; return m_filename.c_str(); }
 	void	Start(const char *type);
