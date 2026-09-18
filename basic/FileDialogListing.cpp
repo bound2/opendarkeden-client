@@ -11,6 +11,57 @@
 #include "FileDialogListing.h"
 #include "StringReduction.h"
 #include <cstring>
+#include <cassert>
+
+std::vector<std::string> Basic::SplitDialogFilters(const char* type)
+{
+	int nType, i;
+	for (i = 0, nType = 1; i < strlen(type); i++)
+		if (type[i] == ';') nType++;
+	std::vector<std::string> filters;
+	if (type != NULL)
+	{
+		const char* current = type;
+		filters.reserve(nType);
+		for (i = 0; i < nType; i++)
+		{
+			const char* end = i == nType - 1 ? &type[strlen(type)] : strstr(current, ";");
+			char name[30] = "";
+			memcpy(name, current, end - current);
+			name[end - current + 1] = '\0';
+			filters.insert(filters.begin() + i, name);
+			current = end + 1;
+		}
+	}
+	return filters;
+}
+
+void Basic::NormalizeDialogSearchPath(char* path)
+{
+	if (path[strlen(path) - 1] == '\\') path[strlen(path) - 1] = 0;
+	if (path[strlen(path) - 1] == '*') path[strlen(path) - 4] = 0;
+	strcat(path, "\\*.*");
+}
+
+void Basic::ChangeDialogSearchPath(const char* directory, char* path)
+{
+	assert(directory);
+	assert(path);
+	if (std::strcmp(directory, "\\..") == 0)
+	{
+		path[strlen(path) - 4] = 0;
+		int counter = 0;
+		while (path[strlen(path) - (++counter)] != '\\');
+		path[strlen(path) - counter] = 0;
+		strcat(path, "\\");
+	}
+	else if (strlen(path) + strlen(directory) + 1 <= MAX_PATH && directory[1] != '.')
+	{
+		path[strlen(path) - 4] = 0;
+		if (path[strlen(path) - 1] == '\\') path[strlen(path) - 1] = 0;
+		strcat(path, directory);
+	}
+}
 
 std::string Basic::BuildDialogPathLabel(const std::string& path,
 		const std::vector<std::string>& filters)

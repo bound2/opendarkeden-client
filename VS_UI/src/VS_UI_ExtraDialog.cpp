@@ -2485,40 +2485,9 @@ void C_VS_UI_FILE_DIALOG::Start(const char *type)
 	PI_Processor::Start();
 	m_pC_button_group->Init();
 
-	// type 에 몇가지의 파일 종류가 있는지 검색한다.
-	int nType,i;
+	int i;
+	m_filter = Basic::SplitDialogFilters(type);
 
-	for(i=0,nType=1;i<strlen(type);i++)
-		if(type[i]==';') nType++;
-
-	const char *p_type;
-	
-	if(type == NULL)
-		m_filter.clear();		
-	else
-	{
-		m_filter.clear();
-		p_type=type;
-		m_filter.reserve(nType);
-		for(i=0;i<nType;i++)
-		{
-			const char *p_type_end;
-			
-			if(i==nType-1)
-				p_type_end=&type[strlen(type)];
-			else
-				p_type_end=strstr(p_type,";");				
-				
-			char name[30]="";
-			
-			memcpy(name,p_type,p_type_end-p_type);
-			name[p_type_end-p_type+1]='\0';
-			m_filter.insert(m_filter.begin() + i, name);
-			p_type=p_type_end+1;
-		}
-		//m_filter = type;
-	}
-	
 	m_filename = "";
 	m_select_file_num.clear();
 
@@ -3252,13 +3221,7 @@ void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
 	std::string			sz_filename;
 	int					n;
 
-	// exception
-	if (sz_dirname[strlen(sz_dirname)-1] == '\\')
-		sz_dirname[strlen(sz_dirname)-1] = 0;
-	if (sz_dirname[strlen(sz_dirname)-1] == '*')
-		sz_dirname[strlen(sz_dirname)-4] = 0;
-
-	strcat(sz_dirname, "\\*.*");
+	Basic::NormalizeDialogSearchPath(sz_dirname);
 
 	m_vs_file_list.clear();
 	m_vs_file_list_attr.clear();
@@ -3346,42 +3309,7 @@ void C_VS_UI_FILE_DIALOG::RefreshFileList(char *sz_dirname)
 -----------------------------------------------------------------------------*/
 void C_VS_UI_FILE_DIALOG::ChangeDir(char *sz_cur_dirname, char *sz_pathname)
 {
-	assert(sz_cur_dirname);
-	assert(sz_pathname);
-
-	if (GetParentDir(sz_cur_dirname))
-	{ 
-		//
-		// delete dir name
-		//
-		sz_pathname[strlen(sz_pathname)-4] = 0;
-
-		int counter = 0;
-		while (sz_pathname[strlen(sz_pathname)-(++counter)] != '\\');
-
-		sz_pathname[strlen(sz_pathname)-counter] = 0;
-		strcat(sz_pathname, "\\");
-	}
-	else
-	{
-		//
-		// add dir name
-		// `directory name의 추가가 가능한가? 그렇지 않다면 아무일도 하지 않는다.
-		//
-		if ((strlen(sz_pathname) + strlen(sz_cur_dirname) + 1 <= MAX_PATH) &&
-			 sz_cur_dirname[1] != '.') // '.' = current dir -.-
-		{
-			sz_pathname[strlen(sz_pathname)-4] = 0;
-			if (sz_pathname[strlen(sz_pathname)-1] == '\\')
-				sz_pathname[strlen(sz_pathname)-1] = 0;
-
-			strcat(sz_pathname, sz_cur_dirname);
-		}
-	}
-
-//	int ret = SetCurrentDirectory(sz_pathname);
-//	if (!ret)
-//		SetCurrentDirectory("C:\\");
+	Basic::ChangeDialogSearchPath(sz_cur_dirname, sz_pathname);
 	RefreshFileList(mp_open_current_directory[mi_open_drive_index]);
 	//if(m_vs_file_list.size()<=0)
 

@@ -20,6 +20,10 @@
 
 namespace Basic {
 
+std::vector<std::string> SplitDialogFilters(const char* type);
+void NormalizeDialogSearchPath(char* path);
+void ChangeDialogSearchPath(const char* directory, char* path);
+
 // Replace a trailing search pattern with the configured suffix display;
 // paths without that pattern remain intact, including empty/short input.
 std::string BuildDialogPathLabel(const std::string& path,
