@@ -2248,6 +2248,8 @@ The original in VS_UI/src/hangul/FL2.cpp:38 walked the string counting DBCS lead
 
 **Category:** correctness  |  **Location:** `Client/TextSystem/TextBackendSDL.cpp:98`
 
+> ✅ **Already fixed; verified 2026-09-18:** the current file decodes strictly as UTF-8 and contains only ASCII. Its Windows font fallback comments are English. No source conversion remains necessary for this finding.
+
 `file -b` reports "ISO-8859 text" for this file alone out of every .c/.cpp/.h tracked by git; all 1900+ other sources are ASCII or UTF-8. The offending region is the comment block at lines 98-108, which is CP949-encoded Korean explaining the Windows font fallback list. Under MSVC without /utf-8 this produces C4819 warnings and is interpreted per the active code page, and any CP949 trail byte equal to 0x5C at end-of-line would splice the following line into the comment.
 
 **Failure scenario:** A contributor on a non-Korean Windows locale opens the file, their editor re-saves it in yet another encoding, and the comment degrades further; MSVC emits C4819 on every build.
@@ -2257,6 +2259,8 @@ The original in VS_UI/src/hangul/FL2.cpp:38 walked the string counting DBCS lead
 #### ⚪ Low -- The UTF-8 validator accepts overlong 3-byte forms and UTF-16 surrogates, and the decoder never validates continuation bytes.
 
 **Category:** correctness  |  **Location:** `Client/TextSystem/TextService.cpp:36`
+
+> ✅ **Fixed (2026-09-18):** validation and rendering now share the scalar decoder in `TextUtf8.h`. It rejects bad continuation bytes, overlong forms, surrogates and values above U+10FFFF; malformed input consumes one byte as U+FFFD so following ASCII survives. Three tests exercise scalar boundaries, exact-length truncated allocations and real text measurement. Two tests failed against the original functions before the fix. Legacy encoding selection is still tracked separately in finding 108.
 
 `IsValidUtf8` (lines 21-55) rejects overlong 2-byte forms (`c < 0xC2`, line 33) and out-of-range 4-byte leads (`c > 0xF4`, line 39), but applies no equivalent check for 3-byte sequences — it accepts 0xE0 0x80 0x80 (overlong NUL) and 0xED 0xA0 0x80 (a lone surrogate). `Utf8Decode` (lines 109-162) checks only the remaining byte count, never that continuation bytes carry the 0b10xxxxxx prefix, so invalid input silently yields wrong codepoints rather than U+FFFD. These codepoints are then handed to TTF_RenderUTF8_Blended via EncodeUtf8 (TextBackendSDL.cpp:310).
 
