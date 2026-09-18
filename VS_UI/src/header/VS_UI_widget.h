@@ -18,6 +18,7 @@
 #endif
 #include "VS_UI_mouse_pointer.h"
 #include "MonotonicClock.h"
+#include "ScrollRange.h"
 #include "../widget/u_button.h"  // For EventButton, Exec, Button classes
 
 // Stub definitions for non-Windows platforms (without Immersion library)
@@ -344,16 +345,14 @@ public:
 // 다른 spk를 사용하도록 설정할수 있으나, 스프라이트의 순서는 기본 spk와 같아야 한다.
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-class C_VS_UI_SCROLL_BAR : public Rect
+class C_VS_UI_SCROLL_BAR : public Rect, public Basic::ScrollRange
 {
 private:
 	C_SPRITE_PACK	*m_spk;
-	int				m_pos_max;
 	int				m_bar_plus, m_tag_plus, m_button_plus;
-	int				m_pos;
 	bool			m_tag_pushed, m_up_button_focused, m_down_button_focused, m_up_button_pushed, m_down_button_pushed;
 	int				m_tag_height, m_button_height, m_button_width;
-	bool			m_bl_reverse, m_bHeight;
+	bool			m_bHeight;
 
 
 public:
@@ -793,57 +792,12 @@ public:
 		m_tag_pushed = false;
 	}
 
-	void	ScrollUp(int pos = 1)
-	{
-		if(m_bl_reverse)
-		{
-			m_pos = min(m_pos_max-1, m_pos+pos);
-		}
-		else
-		{
-			m_pos = max(0, m_pos-pos);
-		}
-	}
-
-	void	ScrollDown(int pos = 1)
-	{
-		if(m_bl_reverse)
-		{
-			m_pos = max(0, m_pos-pos);
-		}
-		else
-		{
-			m_pos = min(m_pos_max-1, m_pos+pos);
-		}
-	}
-
-	void	SetScrollPos(int pos)
-	{
-		m_pos = max(0, min(m_pos_max-1, pos));
-	}
-
 	void	SetScrollPixel(int _pixel)
 	{
 		if(m_bHeight)
-			SetScrollPos((_pixel-y-m_tag_height/2)*m_pos_max/(h-m_tag_height));
+			SetPixelPosition(_pixel, y, h, m_tag_height);
 		else
-			SetScrollPos((_pixel-x-m_tag_height/2)*m_pos_max/(w-m_tag_height));
-	}
-
-	int		GetScrollPos()
-	{
-		return m_pos;
-	}
-
-	void	SetPosMax(int max)	//pos_max는 스크롤될 항목의 개수이다. 만약 한 화면에 5개의 항목이 나오고, 총 10개의 항목이 있다면 스크롤값은 0~5 까지 가지므로 pos_max == 6 이다. 
-	{
-		m_pos = 0;
-		m_pos_max = max;
-	}
-
-	void	SetReverse(bool bl_reverse)
-	{
-		m_bl_reverse = bl_reverse;
+			SetPixelPosition(_pixel, x, w, m_tag_height);
 	}
 };
 #endif
