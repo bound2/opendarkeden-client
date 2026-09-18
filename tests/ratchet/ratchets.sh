@@ -1484,7 +1484,9 @@ fi
 # 969 on 2026-09-17: delete the unused WinINet downloader and its one strcpy.
 # 966 on 2026-09-18: the message ring uses owned copies and bounded memmove.
 # 963 later that day: three dead formatting lines left with GL drawing blocks.
-R17_BASELINE=963
+# 961: three file-dialog copies consolidate into one label helper.
+# 958: the label helper and both file-dialog title copies use owned text.
+R17_BASELINE=958
 R17_FILES_FLOOR=500
 
 r17_members () {

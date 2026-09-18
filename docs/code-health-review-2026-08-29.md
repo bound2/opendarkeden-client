@@ -273,6 +273,8 @@ Ten defects in the `DarkEden` executable, found by running the client against a 
 | `CSpriteSurface::BltSpritePalEffect` an empty stub since the SDL port, over an effect table that was all NULL | every `BLT_SCREEN` skill effect drew nothing: the character swung and no lightning, slash or bolt appeared. Reported as "sword skill animations are broken" — Thunder Spark, Lightning Hand, Thunder Bolt, Thunder Storm and Wide Lightning among them. `Action.inf` and `EffectSpriteType.inf` put **118 of the 209 skills with effects** on this path, through 606 of the 2631 effect sprite types; the newer alpha-blend effects (Infinity Thunderbolt, for one) were the ones that showed. Confirmed fixed in play on 2026-09-04 | `6fd3f34` |
 ### Found by reading, not by running
 
+Open file-dialog follow-up (2026-09-18): `Start()` counts filters with `strlen(type)` before its null check and copies each suffix through `char[30]` with an off-by-one terminator. `MouseControl()` also copies the current directory into `char[200]`, while `RefreshFileList()`/`ChangeDir()` append search patterns into `MAX_PATH` storage and subtract lengths without complete validation. These are separate from the repaired display labels and remain to be hardened; the current live caller uses the fixed filter string `.bmp;.jpg`.
+
 Defects of the same weight as the ten above, kept out of that table because they do not meet its definition: each was found by reading during a remediation pass, and none has been observed in play.
 
 | Defect | Symptom | Commit |
@@ -2397,6 +2399,8 @@ Lines 97-107: the constructor body is `Init(); m_dw_millisec = millisec; if (m_i
 **Recommendation:** Build these with std::string (or strncat with a running remaining-length), and bounds-check `szGrade`'s length before the `strncat` at line 223.
 
 #### 🟠 High -- The file dialog strcpy's a filesystem path plus filter list into a 300-byte stack buffer with no length check.
+
+> ✅ **Fixed** on branch `fix/review-file-dialog-labels` (2026-09-18). Path/filter composition and 38-byte display shortening moved into `basic/FileDialogListing` before the fix, and all five folder/drive/hover label sites use the same helpers. The shortening buffer is now an owned string; only an actual trailing `*.*` pattern is removed, and filter separators are inserted without erasing from possibly empty strings. The dialog also renders its two string-table titles directly, eliminating its remaining 300-byte buffer. `tests/unit/test_file_dialog_labels.cpp` has five tests: empty-path composition threw `invalid string position` before the fix, and long path/filter composition then caused a stack-buffer termination (exit `0xC0000409`). The long-filename case is an additional regression guard. Normal search patterns, empty filter lists, and the legacy 38-byte output are pinned. Full Debug/ASan builds and all nine CTests pass; R17 falls from 963 to 958 across the move and fix. Directory navigation/storage and scroll positions are separate paths, not covered by this label fix.
 
 **Category:** memory-safety  |  **Location:** `VS_UI/src/VS_UI_ExtraDialog.cpp:2858`
 

@@ -9,6 +9,34 @@
 -----------------------------------------------------------------------------*/
 
 #include "FileDialogListing.h"
+#include "StringReduction.h"
+#include <cstring>
+
+std::string Basic::BuildDialogPathLabel(const std::string& path,
+		const std::vector<std::string>& filters)
+{
+	std::string title = path;
+	// Stored paths end in "*.*". Preserve the '*' before suffix filters,
+	// or remove the whole search pattern when there are no filters.
+	if (title.ends_with("*.*"))
+		title.resize(title.size() - (filters.empty() ? 3 : 2));
+	bool first = true;
+	for (const auto& filter : filters)
+	{
+		if (!first) title += ';';
+		title += filter;
+		first = false;
+	}
+	return title;
+}
+
+std::string Basic::ShortenDialogLabel(const std::string& label)
+{
+	std::string name = label;
+	ReduceString(name.data(), 38);
+	name.resize(std::strlen(name.c_str()));
+	return name;
+}
 
 namespace {
 
