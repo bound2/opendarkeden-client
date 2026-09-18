@@ -97,21 +97,10 @@ void GCRemoveFromGearHandler::execute ( GCRemoveFromGear * pPacket , Player * pP
 					ADDON_NULL,			//GEAR_SLAYER_SHOES,				// 신발
 			};
 		
-			//----------------------------------------------------------
-			// 왼손인데.. 왼손이 비었고 오른손에 양손 무기이면..
-			// 오른손을 없애야 한다.
-			//----------------------------------------------------------
-			if (slotID==MSlayerGear::GEAR_SLAYER_LEFTHAND)
-			{
-				const MItem* pLeftItem = g_pSlayerGear->GetItem( MSlayerGear::GEAR_SLAYER_LEFTHAND );
-				const MItem* pRightItem = g_pSlayerGear->GetItem( MSlayerGear::GEAR_SLAYER_RIGHTHAND );
-
-				if (pLeftItem==NULL 
-					&& pRightItem!=NULL && pRightItem->IsGearSlotTwoHand())
-				{
-					slotID = MSlayerGear::GEAR_SLAYER_RIGHTHAND;
-				}
-			}
+			// RemoveItem has already cleared both aliases of a two-hand item.
+			// Use the removed item to select its right-hand visual addon.
+			if (slotID == MSlayerGear::GEAR_SLAYER_LEFTHAND && pRemovedItem->IsGearSlotTwoHand())
+				slotID = MSlayerGear::GEAR_SLAYER_RIGHTHAND;
 
 			//----------------------------------------------------------
 			// 복장을 바꿔준다.
@@ -203,57 +192,22 @@ void GCRemoveFromGearHandler::execute ( GCRemoveFromGear * pPacket , Player * pP
 				g_pGameMessage->Add(str);
 			}
 
-			int addonSlot[] = 
-			{
-				ADDON_NULL,			//GEAR_VAMPIRE_NECKLACE,			// 목걸이
-				ADDON_COAT,			//GEAR_VAMPIRE_COAT,				// 상의
-				ADDON_NULL,			//GEAR_VAMPIRE_BRACELET1,			// 팔찌1
-				ADDON_NULL,			//GEAR_VAMPIRE_BRACELET2,			// 팔찌2
-				ADDON_NULL,			//GEAR_VAMPIRE_RING1,				// 반지1
-				ADDON_NULL,			//GEAR_VAMPIRE_RING2,				// 반지2
-				ADDON_NULL,			//GEAR_VAMPIRE_RING3,				// 반지3
-				ADDON_NULL,			//GEAR_VAMPIRE_RING4,				// 반지4
-				ADDON_NULL,			//GEAR_VAMPIRE_EARRING1,			// 귀걸이1
-				ADDON_NULL,			//GEAR_VAMPIRE_EARRING2,			// 귀걸이2
-				ADDON_NULL,			//GEAR_VAMPIRE_WEAPON1,				// 무기1
-				ADDON_NULL,			//GEAR_VAMPIRE_WEAPON2,				// 무기2
-				ADDON_NULL,			//GEAR_VAMPIRE_AMULET1,				// 아뮬렛1
-				ADDON_NULL,			//GEAR_VAMPIRE_AMULET2,				// 아뮬렛2
-				ADDON_NULL,			//GEAR_VAMPIRE_AMULET3,				// 아뮬렛3
-				ADDON_NULL,			//GEAR_VAMPIRE_AMULET4,				// 아뮬렛4
-			};
-
-			//----------------------------------------------------------
-			// 왼손인데.. 왼손이 비었고 오른손에 양손 무기이면..
-			// 오른손을 없애야 한다.
-			//----------------------------------------------------------
-			if (slotID==MVampireGear::GEAR_VAMPIRE_LEFTHAND)
-			{
-				const MItem* pLeftItem = g_pVampireGear->GetItem( MVampireGear::GEAR_VAMPIRE_LEFTHAND );
-				const MItem* pRightItem = g_pVampireGear->GetItem( MVampireGear::GEAR_VAMPIRE_RIGHTHAND );
-
-				if (pLeftItem==NULL 
-					&& pRightItem!=NULL && pRightItem->IsGearSlotTwoHand())
-				{
-					slotID = MVampireGear::GEAR_VAMPIRE_RIGHTHAND;
-				}
-			}
+			// RemoveItem has already cleared both aliases of a two-hand item.
+			// Use the removed item to select its right-hand visual addon.
+			if (slotID == MVampireGear::GEAR_VAMPIRE_LEFTHAND && pRemovedItem->IsGearSlotTwoHand())
+				slotID = MVampireGear::GEAR_VAMPIRE_RIGHTHAND;
 
 			//----------------------------------------------------------
 			// 복장을 바꿔준다.
 			//----------------------------------------------------------
-			// addonSlot maps a gear slot to the visual addon it drives,
-			// but slotID ranges over ALL of them: RemoveItem above
-			// bounds it to m_Size, which is
-			// MAX_GEAR_VAMPIRE (28), against sixteen entries here.
-			// Unequipping a ZAP, a PDA, a shoulder or a blood bible
-			// therefore read past a stack array and handed the result
-			// to RemoveAddon. Those slots drive no addon, which is what
-			// ADDON_NULL says, so that is the answer past the end.
-			const int nAddonSlots = (int)(sizeof(addonSlot) / sizeof(addonSlot[0]));
-			int addonSlotID = (slotID >= 0 && slotID < nAddonSlots)
-					? addonSlot[slotID]
-					: ADDON_NULL;
+			// Vampire coats and hands are the slots with visual addons.
+			int addonSlotID = ADDON_NULL;
+			switch (slotID)
+			{
+			case MVampireGear::GEAR_VAMPIRE_COAT: addonSlotID = ADDON_COAT; break;
+			case MVampireGear::GEAR_VAMPIRE_LEFTHAND: addonSlotID = ADDON_LEFTHAND; break;
+			case MVampireGear::GEAR_VAMPIRE_RIGHTHAND: addonSlotID = ADDON_RIGHTHAND; break;
+			}
 
 			if (addonSlotID != ADDON_NULL)
 			{
@@ -346,21 +300,10 @@ void GCRemoveFromGearHandler::execute ( GCRemoveFromGear * pPacket , Player * pP
 				ADDON_NULL,			//GEAR_OUSTERS_STONE4,			// 정령석4
 			};
 
-			//----------------------------------------------------------
-			// 왼손인데.. 왼손이 비었고 오른손에 양손 무기이면..
-			// 오른손을 없애야 한다.
-			//----------------------------------------------------------
-			if (slotID==MOustersGear::GEAR_OUSTERS_LEFTHAND)
-			{
-				const MItem* pLeftItem = g_pOustersGear->GetItem( MOustersGear::GEAR_OUSTERS_LEFTHAND );
-				const MItem* pRightItem = g_pOustersGear->GetItem( MOustersGear::GEAR_OUSTERS_RIGHTHAND );
-
-				if (pLeftItem==NULL 
-					&& pRightItem!=NULL && pRightItem->IsGearSlotTwoHand())
-				{
-					slotID = MOustersGear::GEAR_OUSTERS_RIGHTHAND;
-				}
-			}
+			// RemoveItem has already cleared both aliases of a two-hand item.
+			// Use the removed item to select its right-hand visual addon.
+			if (slotID == MOustersGear::GEAR_OUSTERS_LEFTHAND && pRemovedItem->IsGearSlotTwoHand())
+				slotID = MOustersGear::GEAR_OUSTERS_RIGHTHAND;
 
 			//----------------------------------------------------------
 			// 복장을 바꿔준다.
