@@ -500,6 +500,11 @@ Not a code phase — the standing rule this plan exists to enable, stated once:
   > instruction. Review-round repair commits are not exempt.
   - Owner: the hook.
 
+The creature allocator is now directly testable in `basic/MemoryPool`, with
+its four creature-specific pool instances retained in `Client/MemoryPool.cpp`.
+`tests/unit/test_memory_pool.cpp` owns the size, alignment, membership and
+reuse contracts; the move and the behavior change are separate commits.
+
 ---
 
 ## Phase 4 — Game-model extraction

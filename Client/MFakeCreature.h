@@ -139,10 +139,20 @@ class MFakeCreature : public MCreatureWear {
 
 		void* operator new( size_t size )
 		{
-			return g_FakeCreatureMemoryPool.Alloc();
+			return g_FakeCreatureMemoryPool.Alloc(size);
 		}
 
-		void operator delete( void* pmem )
+		void* operator new(size_t size, std::align_val_t alignment)
+		{
+			return g_FakeCreatureMemoryPool.Alloc(size, static_cast<size_t>(alignment));
+		}
+
+		void operator delete(void* pmem, std::align_val_t) noexcept
+		{
+			g_FakeCreatureMemoryPool.Free(pmem);
+		}
+
+		void operator delete( void* pmem ) noexcept
 		{
 			g_FakeCreatureMemoryPool.Free( pmem );
 		}
