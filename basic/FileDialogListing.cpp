@@ -11,6 +11,131 @@
 #include "FileDialogListing.h"
 #include "StringReduction.h"
 #include <cstring>
+#include <string_view>
+#include <utility>
+
+std::vector<std::string> Basic::SplitDialogFilters(const char* type)
+{
+	std::vector<std::string> filters;
+	if (!type) return filters;
+	const std::string_view text(type);
+	size_t start = 0;
+	for (;;)
+	{
+		const size_t end = text.find(';', start);
+		filters.emplace_back(text.substr(start, end == text.npos ? text.npos : end - start));
+		if (end == text.npos) break;
+		start = end + 1;
+	}
+	return filters;
+}
+
+namespace {
+char PathSeparator(const std::string& path)
+{
+	return (path.size() >= 2 && path[1] == ':') || path.starts_with('\\') ? '\\' : '/';
+}
+
+bool IsSeparator(char ch, char separator)
+{
+	return ch == '/' || (separator == '\\' && ch == '\\');
+}
+
+size_t RootLength(const std::string& path, char separator)
+{
+	if (path.size() >= 3 && path[1] == ':' && IsSeparator(path[2], separator)) return 3;
+	if (path.starts_with("\\\\"))
+	{
+		const bool extendedUnc = path.size() >= 8 && path.starts_with("\\\\?\\") &&
+			(path[4] == 'U' || path[4] == 'u') && (path[5] == 'N' || path[5] == 'n') &&
+			(path[6] == 'C' || path[6] == 'c') && IsSeparator(path[7], separator);
+		const size_t serverStart = extendedUnc ? 8 : 2;
+		const size_t serverEnd = path.find_first_of("\\/", serverStart);
+		if (serverEnd == path.npos) return path.size();
+		const size_t shareEnd = path.find_first_of("\\/", serverEnd + 1);
+		return shareEnd == path.npos ? path.size() : shareEnd + 1;
+	}
+	return !path.empty() && IsSeparator(path.front(), separator) ? 1 : 0;
+}
+} // namespace
+
+void Basic::NormalizeDialogSearchPath(std::string& path)
+{
+	if (path.ends_with("*.*")) path.resize(path.size() - 3);
+	if (path.empty()) path = ".";
+	const char separator = PathSeparator(path);
+	if (!IsSeparator(path.back(), separator)) path += separator;
+	path += "*.*";
+}
+
+std::string Basic::DialogDirectoryPath(std::string path)
+{
+	NormalizeDialogSearchPath(path);
+	path.resize(path.size() - 3);
+	return path;
+}
+
+void Basic::ChangeDialogSearchPath(const char* directory, std::string& path)
+{
+	// Copy before modifying path, since the argument can alias its storage.
+	const std::string entry = directory ? directory : "";
+	NormalizeDialogSearchPath(path);
+	if (entry.size() < 2 || entry.front() != '\\') return;
+	const std::string child = entry.substr(1);
+	if (child == ".") return;
+	std::string base = DialogDirectoryPath(path);
+	const char separator = PathSeparator(base);
+	if (child == "..")
+	{
+		const size_t root = RootLength(base, separator);
+		while (base.size() > root && IsSeparator(base.back(), separator)) base.pop_back();
+		if (base.size() > root)
+		{
+			const size_t parent = base.find_last_of(separator == '\\' ? "\\/" : "/");
+			if (parent == base.npos) base = ".";
+			else base.resize(parent < root ? root : parent);
+		}
+	}
+	else
+	{
+		if (child.find_first_of(separator == '\\' ? "\\/" : "/") != child.npos) return;
+		base += child;
+		base += separator;
+	}
+	NormalizeDialogSearchPath(base);
+	path = std::move(base);
+}
+
+Basic::DialogDirectories Basic::MakeDialogDirectories(DWORD driveMask, const std::string& currentPath)
+{
+	DialogDirectories result;
+	bool matched = false;
+	for (unsigned i = 0; i < 26; ++i)
+	{
+		if ((driveMask & (DWORD{1} << i)) == 0) continue;
+		std::string path(1, static_cast<char>('a' + i));
+		path += ":\\";
+		if (currentPath.size() >= 2 && currentPath[1] == ':' &&
+			(currentPath[0] == 'a' + i || currentPath[0] == 'A' + i))
+		{
+			path = currentPath;
+			result.current = result.paths.size();
+			matched = true;
+		}
+		if (!path.empty() && !IsSeparator(path.back(), PathSeparator(path))) path += PathSeparator(path);
+		NormalizeDialogSearchPath(path);
+		result.paths.push_back(std::move(path));
+	}
+	if (result.paths.empty() || (!matched && !currentPath.empty()))
+	{
+		std::string path = currentPath;
+		if (!path.empty() && !IsSeparator(path.back(), PathSeparator(path))) path += PathSeparator(path);
+		NormalizeDialogSearchPath(path);
+		result.current = result.paths.size();
+		result.paths.push_back(std::move(path));
+	}
+	return result;
+}
 
 std::string Basic::BuildDialogPathLabel(const std::string& path,
 		const std::vector<std::string>& filters)

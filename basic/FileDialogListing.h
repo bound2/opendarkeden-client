@@ -20,6 +20,24 @@
 
 namespace Basic {
 
+// Semicolon-separated suffixes: null means none; empty suffixes match all.
+std::vector<std::string> SplitDialogFilters(const char* type);
+// Search state always ends with a separator and "*.*"; empty input means '.'.
+void NormalizeDialogSearchPath(std::string& path);
+// Directory entries have the UI's leading '\\' marker. '..' stays inside
+// drive, native, and network-share roots; other entries are single names.
+void ChangeDialogSearchPath(const char* directory, std::string& path);
+std::string DialogDirectoryPath(std::string path);
+
+struct DialogDirectories
+{
+	std::vector<std::string> paths;
+	size_t current = 0;
+};
+
+// Always supplies a path and valid current index, even without drive letters.
+DialogDirectories MakeDialogDirectories(DWORD driveMask, const std::string& currentPath);
+
 // Replace a trailing search pattern with the configured suffix display;
 // paths without that pattern remain intact, including empty/short input.
 std::string BuildDialogPathLabel(const std::string& path,
