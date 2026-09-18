@@ -15,9 +15,6 @@
 
 namespace TextSystem {
 
-// Forward declaration of SDL backend factory
-TextBackend* CreateSDLTextBackend();
-
 // Transcodes input from fromEncoding to UTF-8, returning an empty string when
 // that code page is unavailable or the bytes are not valid in it. An empty
 // result is how NormalizeText below tells a wrong guess from a right one, so

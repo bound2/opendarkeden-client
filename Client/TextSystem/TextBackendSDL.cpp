@@ -1,6 +1,9 @@
 #include "TextBackend.h"
 
 #include <unordered_map>
+#include <list>
+#include <memory>
+#include <utility>
 #include <vector>
 #include <string>
 #include <stdint.h>
@@ -35,21 +38,27 @@ struct GlyphKeyHash {
 	}
 };
 
+using SpriteOwner = std::unique_ptr<spritectl_sprite_s, decltype(&spritectl_destroy_sprite)>;
+
+struct CachedGlyph {
+	Glyph glyph;
+	SpriteOwner sprite;
+	size_t pixelBytes;
+	std::list<GlyphKey>::iterator recent;
+
+	CachedGlyph(GlyphMetrics metrics, SpriteOwner owner, size_t bytes, std::list<GlyphKey>::iterator position)
+		: glyph{metrics, owner.get()}, sprite(std::move(owner)), pixelBytes(bytes), recent(position) {}
+};
+
 class TextBackendSDL : public TextBackend {
 public:
-	TextBackendSDL()
+	explicit TextBackendSDL(GlyphCacheLimits limits)
 		: m_initialized(false)
+		, m_limits(limits)
 	{}
 
 	~TextBackendSDL() override
 	{
-		for (auto& it : m_glyphs) {
-			Glyph& g = it.second;
-			if (g.handle) {
-				spritectl_destroy_sprite(reinterpret_cast<spritectl_sprite_t>(g.handle));
-				g.handle = NULL;
-			}
-		}
 		m_glyphs.clear();
 
 		for (size_t i = 0; i < m_fonts.size(); ++i) {
@@ -237,7 +246,8 @@ public:
 
 		auto it = m_glyphs.find(key);
 		if (it != m_glyphs.end()) {
-			return &it->second;
+			m_recent.splice(m_recent.begin(), m_recent, it->second.recent);
+			return &it->second.glyph;
 		}
 
 		// Get glyph metrics first
@@ -252,20 +262,19 @@ public:
 
 		// Render the glyph
 		std::string utf8 = EncodeUtf8(codepoint);
-		SDL_Color sdlColor = {color.r, color.g, color.b, color.a};
-		SDL_Surface* surface = TTF_RenderUTF8_Blended(ttf, utf8.c_str(), sdlColor);
+		// Coverage lives in the sprite; text opacity is applied at draw time.
+		SDL_Color sdlColor = {color.r, color.g, color.b, 255};
+		std::unique_ptr<SDL_Surface, decltype(&SDL_FreeSurface)> surface(
+			TTF_RenderUTF8_Blended(ttf, utf8.c_str(), sdlColor), SDL_FreeSurface);
 		if (!surface)
 			return NULL;
 
-		SDL_Surface* rgbaSurface = surface;
 		if (surface->format->format != SDL_PIXELFORMAT_RGBA32) {
-			rgbaSurface = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA32, 0);
-			SDL_FreeSurface(surface);
-			if (!rgbaSurface)
+			surface.reset(SDL_ConvertSurfaceFormat(surface.get(), SDL_PIXELFORMAT_RGBA32, 0));
+			if (!surface)
 				return NULL;
 		}
 
-		Glyph glyph;
 		GlyphMetrics metrics;
 
 		if (hasMetrics) {
@@ -283,29 +292,45 @@ public:
 		} else {
 			// Fallback: approximate metrics from surface
 			int ascent = TTF_FontAscent(ttf);
-			metrics.width = rgbaSurface->w;
-			metrics.height = rgbaSurface->h;
-			metrics.advance = rgbaSurface->w;
+			metrics.width = surface->w;
+			metrics.height = surface->h;
+			metrics.advance = surface->w;
 			metrics.bearingX = 0;
 			metrics.bearingY = ascent;  // Assume top-aligned
 		}
-		glyph.metrics = metrics;
-
-		size_t dataSize = rgbaSurface->pitch * rgbaSurface->h;
-		glyph.handle = reinterpret_cast<void*>(spritectl_create_sprite(
-			rgbaSurface->w,
-			rgbaSurface->h,
+		const size_t dataSize = static_cast<size_t>(surface->pitch) * surface->h;
+		if (m_limits.entries == 0 || dataSize > m_limits.pixelBytes)
+			return NULL;
+		SpriteOwner sprite(spritectl_create_sprite(
+			surface->w,
+			surface->h,
 			SPRITECTL_FORMAT_RGBA32,
-			rgbaSurface->pixels,
-			dataSize));
-
-		SDL_FreeSurface(rgbaSurface);
-
-		if (!glyph.handle)
+			surface->pixels,
+			dataSize), spritectl_destroy_sprite);
+		if (!sprite)
 			return NULL;
 
-		m_glyphs.emplace(key, glyph);
-		return &m_glyphs.find(key)->second;
+		while (m_glyphs.size() >= m_limits.entries || dataSize > m_limits.pixelBytes - m_pixelBytes) {
+			const auto cold = m_glyphs.find(m_recent.back());
+			m_pixelBytes -= cold->second.pixelBytes;
+			m_glyphs.erase(cold); // Owning sprite is released here.
+			m_recent.pop_back();
+		}
+		m_recent.push_front(key);
+		try {
+			it = m_glyphs.try_emplace(key, metrics, std::move(sprite), dataSize, m_recent.begin()).first;
+		} catch (...) {
+			m_recent.pop_front();
+			throw;
+		}
+		m_pixelBytes += dataSize;
+		++m_rasterizations;
+		return &it->second.glyph;
+	}
+
+	GlyphCacheStats GetGlyphCacheStats() const override
+	{
+		return {m_glyphs.size(), m_pixelBytes, m_rasterizations};
 	}
 
 	void DrawGlyph(RenderTarget& target, const Glyph& glyph, int x, int y, uint8_t alpha) override
@@ -317,8 +342,7 @@ public:
 		spritectl_surface_t surface = reinterpret_cast<spritectl_surface_t>(native);
 		spritectl_sprite_t sprite = reinterpret_cast<spritectl_sprite_t>(glyph.handle);
 
-		(void)alpha;
-		spritectl_blt_sprite(surface, x, y, sprite, SPRITECTL_BLT_NONE, 255);
+		spritectl_blt_sprite(surface, x, y, sprite, SPRITECTL_BLT_ALPHA, alpha);
 	}
 
 private:
@@ -360,14 +384,18 @@ private:
 
 private:
 	bool m_initialized;
+	GlyphCacheLimits m_limits;
+	size_t m_pixelBytes = 0;
+	size_t m_rasterizations = 0;
 	std::vector<TTF_Font*> m_fonts;
 	std::unordered_map<int, int> m_sizeToFontId;
-	std::unordered_map<GlyphKey, Glyph, GlyphKeyHash> m_glyphs;
+	std::list<GlyphKey> m_recent;
+	std::unordered_map<GlyphKey, CachedGlyph, GlyphKeyHash> m_glyphs;
 };
 
-TextBackend* CreateSDLTextBackend()
+TextBackend* CreateSDLTextBackend(GlyphCacheLimits limits)
 {
-	return new TextBackendSDL();
+	return new TextBackendSDL(limits);
 }
 
 } // namespace TextSystem
