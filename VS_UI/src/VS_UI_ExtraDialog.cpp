@@ -1516,12 +1516,18 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 
 			if(p_item->IsUniqueItem() || p_item->IsQuestItem())			// Unique Item?
 			{
-				WORD temp_color;
-				if(p_item->IsQuestItem() )
-					temp_color = CIndexSprite::ColorSet[g_pClientConfig->QuestItemColorSet+13][31];
-				else
-					temp_color = CIndexSprite::ColorSet[g_pClientConfig->UniqueItemColorSet+13][31];					
-				title_color = RGB(CSDLGraphics::Red(temp_color)<<3, CSDLGraphics::Green(temp_color)<<3, CSDLGraphics::Blue(temp_color)<<3);
+				// The old [base + 13][31] access crossed a 30-entry row.
+				// Name its actual row/gradation explicitly to preserve that color.
+				constexpr int titleSetOffset = 13 + 31 / MAX_COLORGRADATION;
+				constexpr int titleGradation = 31 % MAX_COLORGRADATION;
+				const int colorSet = p_item->IsQuestItem()
+					? g_pClientConfig->QuestItemColorSet : g_pClientConfig->UniqueItemColorSet;
+				title_color = RGB_YELLOW;
+				if (colorSet >= 0 && colorSet < MAX_COLORSET - titleSetOffset)
+				{
+					const WORD temp_color = CIndexSprite::ColorSet[colorSet + titleSetOffset][titleGradation];
+					title_color = RGB(CSDLGraphics::Red(temp_color)<<3, CSDLGraphics::Green(temp_color)<<3, CSDLGraphics::Blue(temp_color)<<3);
+				}
 			} else
 			if(p_item->GetItemOptionListCount() == 2 )			// Rare Item ? 
 			{

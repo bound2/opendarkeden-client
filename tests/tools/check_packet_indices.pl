@@ -77,7 +77,8 @@ my %RANGE_CHECKED = map { $_ => 1 } qw(
 
 # A rise means a new raw-container subscript. Read it, guard it, then
 # raise this line in the same commit.
-my $MAXIMUM_RAW = 13;
+# 12: the vampire addon lookup now switches on named gear enums.
+my $MAXIMUM_RAW = 12;
 
 my @sources;
 for my $dir ("$ROOT/Client/PacketHandler", "$ROOT/Client/Packet")
