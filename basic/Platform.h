@@ -24,10 +24,6 @@
    the way it does on Windows (port assessment, area B). */
 #include <assert.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* ============================================================================
  * Platform Detection
  * ============================================================================ */
@@ -532,6 +528,9 @@ typedef WORD			char_t;
 	   reaches one of the library's MessageBox calls (CSpritePalBase.cpp's
 	   SaveToFile, for one) never blocks on a dialog. Returns IDOK (1); the
 	   game's MessageBox calls do not branch on the answer off Windows. */
+	#ifdef __cplusplus
+	extern "C"
+	#endif
 	void platform_show_error(const char* title, const char* message);
 	static inline int MessageBox(void* hWnd, const char* lpText, const char* lpCaption, unsigned int uType) {
 		(void)hWnd; (void)uType;
@@ -1086,6 +1085,16 @@ typedef WORD			char_t;
 #endif /* PLATFORM_WINDOWS */
 
 /* ============================================================================
+ * Exported C API
+ * ============================================================================ */
+
+/* Dependencies above and compatibility helpers below keep their own language
+   linkage. Only the API implemented by PlatformSDL.cpp is exported as C. */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* ============================================================================
  * Time Functions
  * ============================================================================ */
 
@@ -1405,6 +1414,10 @@ int platform_init(void);
  * Call this at program shutdown
  */
 void platform_shutdown(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 /* ============================================================================
  * Windows Compatibility Macros
@@ -2151,10 +2164,6 @@ static inline void SetSurfaceInfo(S_SURFACEINFO* dest, const S_SURFACEINFO* src)
 #ifndef MAKELRESULT
 #define MAKELRESULT(l, h) ((LRESULT)(DWORD)MAKELONG(l, h))
 #endif
-#endif
-
-#ifdef __cplusplus
-}
 #endif
 
 /* min and max for the Windows code, off Windows.

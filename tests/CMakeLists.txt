@@ -45,6 +45,7 @@ file(GLOB UNIT_TEST_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/unit/*
 #----------------------------------------------------------------------
 add_executable(unit_tests
 	framework/test_main.cpp
+	support/platform_c_consumer.c
 	${UNIT_TEST_SOURCES}
 )
 
