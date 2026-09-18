@@ -1,32 +1,8 @@
 #include "U_edit.h"
-#include "../hangul/Ci.h"
 #include "../InputFocusManager.h"
 #include "../header/UISafeText.h"
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-
 #ifdef PLATFORM_POSIX
 #include <SDL.h>
-#include "../../../Client/TextSystem/TextService.h"
-#include "../../../Client/TextSystem/RenderTargetSpriteSurface.h"
-#include "../../../Client/SpriteLib/CSpriteSurface.h"
-#endif
-
-// Forward declare FL2 functions (defined in hangul/FL2.cpp)
-extern void g_Print(int x, int y, const char* sz_str, void* p_print_info);
-extern int g_GetStringWidth(const char* sz_str, void* hfont);
-extern int g_GetStringHeight(const char* sz_str, void* hfont);
-
-// External reference to global CI (for cursor blink state)
-extern CI* gC_ci;
-
-// External reference to back buffer surface (for spritectl blt)
-#ifdef PLATFORM_POSIX
-// External reference to SDL renderer
-extern SDL_Renderer* g_pSDLRenderer;
-extern CSpriteSurface* g_pBack;
-extern CSpriteSurface* g_pLast;  // UI renders to g_pLast, not g_pBack!
 #endif
 
 // ============================================================================
@@ -34,6 +10,8 @@ extern CSpriteSurface* g_pLast;  // UI renders to g_pLast, not g_pBack!
 // ============================================================================
 
 static int utf32_to_utf8(uint32_t c, char out[5]) {
+	if (c > 0x10FFFF || (c >= 0xD800 && c <= 0xDFFF))
+		c = 0xFFFD;
 	if (c < 0x80) {
 		out[0] = c;
 		out[1] = 0;
@@ -209,20 +187,22 @@ void LineEditor::EndComposition()
 }
 
 // Get text as UTF-8 string (for compatibility)
-const char* LineEditor::GetBuffer() const
+std::string LineEditor::GetBuffer() const
 {
-	static char utf8_buffer[MAX_TEXT * 4 + 1];  // Worst case: 4 bytes per UTF-32 char
-	int offset = 0;
+	std::string result;
 
-	for (int i = 0; i < m_TextLen && offset < (int)sizeof(utf8_buffer) - 4; i++) {
+	for (int i = 0; i < m_TextLen && i < MAX_TEXT; ++i) {
 		char buf[5];
 		int len = utf32_to_utf8(m_Text[i], buf);
-		memcpy(&utf8_buffer[offset], buf, len);
-		offset += len;
+		result.append(buf, len);
 	}
-	utf8_buffer[offset] = '\0';
+	return result;
+}
 
-	return utf8_buffer;
+const char* LineEditor::GetString() const
+{
+	m_LegacyText = GetBuffer();
+	return m_LegacyText.c_str();
 }
 
 // Legacy: Add UTF-8 string (converts to UTF-32 internally)
@@ -420,134 +400,28 @@ bool LineEditorVisual::ReachSizeOfBox() const
 }
 
 // Compatibility method: convert UTF-32 to wide string (char_t/UTF-16LE)
-const char_t* LineEditorVisual::GetStringWide() const
+std::basic_string<char_t> LineEditorVisual::GetStringWide() const
 {
-	static char_t wide_buffer[LineEditor::MAX_TEXT];
-	int wide_len = 0;
+	std::basic_string<char_t> result;
 
 	// Convert directly from UTF-32 (m_Text) to UTF-16 (char_t)
-	for (int i = 0; i < m_Editor.m_TextLen && wide_len < LineEditor::MAX_TEXT - 1; i++) {
+	for (int i = 0; i < m_Editor.m_TextLen && i < LineEditor::MAX_TEXT; ++i) {
 		uint32_t c = m_Editor.m_Text[i];
+		if (c > 0x10FFFF || (c >= 0xD800 && c <= 0xDFFF))
+			c = 0xFFFD;
 
 		// UTF-32 to UTF-16 conversion
 		if (c < 0x10000) {
 			// BMP character - single UTF-16 code unit
-			wide_buffer[wide_len++] = (char_t)c;
-		} else if (c < 0x10FFFF) {
+			result.push_back(static_cast<char_t>(c));
+		} else {
 			// Supplementary plane - surrogate pair
-			if (wide_len + 1 >= LineEditor::MAX_TEXT - 1) break;
-
 			c -= 0x10000;
-			wide_buffer[wide_len++] = (char_t)(0xD800 + (c >> 10));      // High surrogate
-			wide_buffer[wide_len++] = (char_t)(0xDC00 + (c & 0x3FF));    // Low surrogate
-		} else {
-			// Invalid Unicode - use replacement character
-			wide_buffer[wide_len++] = (char_t)0xFFFD;
+			result.push_back(static_cast<char_t>(0xD800 + (c >> 10)));
+			result.push_back(static_cast<char_t>(0xDC00 + (c & 0x3FF)));
 		}
 	}
-
-	wide_buffer[wide_len] = 0;
-
-	return wide_buffer;
-}
-
-void LineEditorVisual::Show() const
-{
-	// Get the text to display (as UTF-8)
-	const char* textToDisplay = m_Editor.GetBuffer();
-	std::string displayText;
-
-	// Password mode has always shown one asterisk per UTF-8 byte. Dynamic
-	// storage preserves that count for the editor's full 4,092-byte result.
-	if (m_bPasswordMode) {
-		displayText = UISafeText::MakePasswordMask(textToDisplay);
-		textToDisplay = displayText.c_str();
-	}
-
-#ifdef PLATFORM_POSIX
-	// Use TextService for unified rendering
-	extern CSpriteSurface* g_pLast;
-
-	// Build text style from PrintInfo
-	TextSystem::TextStyle style;
-	style.font = TextSystem::TextService::Get().GetFont(14);  // Default font size
-	style.align = TextSystem::TextAlign::Left;
-	style.lineSpacing = 0;
-	style.color = TextSystem::ColorFromRGB(m_PrintInfo.text_color);
-	style.color.a = 255;
-
-	// Create render target
-	TextSystem::SpriteSurfaceRenderTarget target(g_pLast);
-
-	// Render text
-	// Note: TextService::DrawLine expects baseline position, but it adds GetFontAscent() internally
-	// So we pass m_Y directly as the baseline position
-	TextSystem::TextService::Get().DrawLine(target, textToDisplay, m_X, m_Y, m_MaxWidth, style);
-
-	// Draw cursor if editor is acquired and cursor blink is on
-	if (m_Editor.m_bAcquired && gC_ci != NULL && gC_ci->GetCursorBlink()) {
-		// Calculate cursor X position using TextService
-		int cursorX = m_X;
-		if (m_Editor.m_CursorPos > 0) {
-			const char* fullText = textToDisplay;
-			const std::string cursorPrefix = UISafeText::Utf8Prefix(
-				fullText, (size_t)m_Editor.m_CursorPos);
-
-			// Measure text width using TextService
-			TextSystem::Metrics metrics = TextSystem::TextService::Get().MeasureText(cursorPrefix, style, 0);
-			cursorX = m_X + metrics.width;
-		}
-
-		// Draw cursor
-		PrintInfo cursorPI = m_PrintInfo;
-		cursorPI.text_color = m_CursorColor;
-
-		if (m_Editor.m_ComposingLen > 0) {
-			// During IME composition, show underline-style cursor
-			g_Print(cursorX, m_Y + 2, "_", &cursorPI);
-		} else {
-			// Normal block cursor
-			g_Print(cursorX, m_Y - 1, "▊", &cursorPI);
-		}
-	}
-#else
-	// Use the field's font and color for both text and caret. The default
-	// 16px font is too tall for the chat input and disagrees with its history.
-	PrintInfo printInfo = m_PrintInfo;
-	const std::string prefix = UISafeText::Utf8Prefix(
-		m_Editor.GetBuffer(), (size_t)m_Editor.m_CursorPos);
-	const size_t cursorByte = prefix.size();
-	std::string visibleText = textToDisplay;
-	size_t visibleCursor = cursorByte;
-	const int caretWidth = g_GetStringWidth("|", printInfo.hfont);
-	const int width = m_AbsWidth > caretWidth ? m_AbsWidth - caretWidth : 0;
-
-	// Scroll by complete UTF-8 characters until the caret fits, then trim
-	// the right edge. This affects display only; the editor keeps all input.
-	while (visibleCursor > 0 &&
-		g_GetStringWidth(visibleText.substr(0, visibleCursor).c_str(), printInfo.hfont) > width) {
-		const size_t first = UISafeText::Utf8Prefix(visibleText.c_str(), 1).size();
-		visibleText.erase(0, first);
-		visibleCursor -= first;
-	}
-	size_t end = visibleCursor;
-	while (end < visibleText.size()) {
-		const size_t next = end + UISafeText::Utf8Prefix(visibleText.c_str() + end, 1).size();
-		if (g_GetStringWidth(visibleText.substr(0, next).c_str(), printInfo.hfont) > width)
-			break;
-		end = next;
-	}
-	visibleText.resize(end);
-	g_Print(m_X, m_Y, visibleText.c_str(), &printInfo);
-
-	if (m_Editor.m_bAcquired && gC_ci != NULL && gC_ci->GetCursorBlink()) {
-		const int cursorX = m_X + g_GetStringWidth(
-			visibleText.substr(0, visibleCursor).c_str(), printInfo.hfont);
-		PrintInfo cursorPI = printInfo;
-		cursorPI.text_color = m_CursorColor;
-		g_Print(cursorX, m_Y, "|", &cursorPI);
-	}
-#endif
+	return result;
 }
 
 Point LineEditorVisual::GetPosition() const

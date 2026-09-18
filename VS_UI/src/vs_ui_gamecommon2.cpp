@@ -1527,8 +1527,8 @@ void	C_VS_UI_BULLETIN_BOARD::Run(id_t id)
 		{
 			char *psz_msg, *psz_from = NULL;
 
-			g_Convert_DBCS_Ascii2SingleByte(m_lev_message.GetStringWide(), m_lev_message.Size(), psz_msg);
-			//g_Convert_DBCS_Ascii2SingleByte(m_lev_from.GetStringWide(), m_lev_from.Size(), psz_from);
+			g_Convert_DBCS_Ascii2SingleByte(m_lev_message.GetStringWide().c_str(), m_lev_message.Size(), psz_msg);
+			//g_Convert_DBCS_Ascii2SingleByte(m_lev_from.GetStringWide().c_str(), m_lev_from.Size(), psz_from);
 			
 			psz_from = (char*)g_char_slot_ingame.sz_name.c_str();
 
@@ -9929,7 +9929,7 @@ void	C_VS_UI_PET_INFO::Run(id_t id)
 			if(m_AddName.Size())
 			{
 				char* szName;
-				g_Convert_DBCS_Ascii2SingleByte(m_AddName.GetStringWide(), m_AddName.Size(), szName);
+				g_Convert_DBCS_Ascii2SingleByte(m_AddName.GetStringWide().c_str(), m_AddName.Size(), szName);
 				if(szName != NULL)
 				{
 					m_PetInfo.NICK_NAME = szName;
@@ -11654,7 +11654,7 @@ C_VS_UI_SMS_MESSAGE::~C_VS_UI_SMS_MESSAGE()
 	if(m_lev_MyNum.Size()>0)
 	{
 		char *szMyNum;
-		g_Convert_DBCS_Ascii2SingleByte(m_lev_MyNum.GetStringWide(), m_lev_MyNum.Size(), szMyNum);
+		g_Convert_DBCS_Ascii2SingleByte(m_lev_MyNum.GetStringWide().c_str(), m_lev_MyNum.Size(), szMyNum);
 		m_szMyNum = m_szPhoneNum[m_bComboSelect[5]];
 		m_szMyNum += szMyNum;
 		gpC_vs_ui_window_manager->SetSMSMynum((char*)m_szMyNum.c_str());
@@ -11816,7 +11816,7 @@ void C_VS_UI_SMS_MESSAGE::Show()
 			g_PrintColorStr(m_ComboPos[i].cx-24+30, m_ComboPos[i].cy+1, m_szPhoneNum[m_bComboSelect[i]], gpC_base->m_chatting_pi, RGB_BLACK);
 		}
 		char szString[32];
-		wsprintf(szString, "%d/80 byte" , g_GetByteLenth(m_lev_SMSMessage.GetStringWide(),m_lev_SMSMessage.Size()));
+		wsprintf(szString, "%d/80 byte" , g_GetByteLenth(m_lev_SMSMessage.GetStringWide().c_str(),m_lev_SMSMessage.Size()));
 		g_PrintColorStr(szSMSMessagePos.cx + 30 , szSMSMessagePos.cy + 92, szString, gpC_base->m_chatting_pi, m_Color);
 //		if(g_char_slot_ingame.m_SMS_Charge)
 		{
@@ -12136,11 +12136,11 @@ void	C_VS_UI_SMS_MESSAGE::Run(id_t id)
 			for(i = 0; i< 5; i++)
 			{
 				szOtherNum[i] = NULL;
-				g_Convert_DBCS_Ascii2SingleByte(m_lev_OtherNum[i].GetStringWide(), m_lev_OtherNum[i].Size(), szOtherNum[i]);
+				g_Convert_DBCS_Ascii2SingleByte(m_lev_OtherNum[i].GetStringWide().c_str(), m_lev_OtherNum[i].Size(), szOtherNum[i]);
 			}
 			szSMSMessage = NULL;
-			g_Convert_DBCS_Ascii2SingleByte(m_lev_MyNum.GetStringWide(), m_lev_MyNum.Size(), szMyNum);
-			g_Convert_DBCS_Ascii2SingleByte(m_lev_SMSMessage.GetStringWide(), m_lev_SMSMessage.Size(), szSMSMessage);
+			g_Convert_DBCS_Ascii2SingleByte(m_lev_MyNum.GetStringWide().c_str(), m_lev_MyNum.Size(), szMyNum);
+			g_Convert_DBCS_Ascii2SingleByte(m_lev_SMSMessage.GetStringWide().c_str(), m_lev_SMSMessage.Size(), szSMSMessage);
 
 			if(szMyNum != NULL && szSMSMessage != NULL && ( szOtherNum[0] != NULL ||
 															szOtherNum[1] != NULL ||
@@ -13075,9 +13075,9 @@ void	C_VS_UI_SMS_RECORD::Run(id_t id)
 			szNum = NULL;
 			szID = NULL;
 			szName = NULL;
-			g_Convert_DBCS_Ascii2SingleByte(m_lev_AddName.GetStringWide(), m_lev_AddName.Size(), szName);
-			g_Convert_DBCS_Ascii2SingleByte(m_lev_AddID.GetStringWide(), m_lev_AddID.Size(), szID);
-			g_Convert_DBCS_Ascii2SingleByte(m_lev_AddNum.GetStringWide(), m_lev_AddNum.Size(), szNum);
+			g_Convert_DBCS_Ascii2SingleByte(m_lev_AddName.GetStringWide().c_str(), m_lev_AddName.Size(), szName);
+			g_Convert_DBCS_Ascii2SingleByte(m_lev_AddID.GetStringWide().c_str(), m_lev_AddID.Size(), szID);
+			g_Convert_DBCS_Ascii2SingleByte(m_lev_AddNum.GetStringWide().c_str(), m_lev_AddNum.Size(), szNum);
 
 			if(szID!= NULL && szName != NULL && szNum != NULL )
 			{
@@ -13885,7 +13885,7 @@ void	C_VS_UI_NAMING_CHANGE::Run(id_t id)
 		if(m_ChangeNick.Size()&& m_PenItem != NULL)
 		{
 			char* szName;
-			g_Convert_DBCS_Ascii2SingleByte(m_ChangeNick.GetStringWide(), m_ChangeNick.Size(), szName);
+			g_Convert_DBCS_Ascii2SingleByte(m_ChangeNick.GetStringWide().c_str(), m_ChangeNick.Size(), szName);
 			if(szName != NULL)
 			{
 				m_szEditName = szName;
@@ -17499,7 +17499,7 @@ void	C_VS_UI_PERSNALSHOP_MESSAGE::KeyboardControl(UINT message, UINT key, long e
 		case VK_RETURN :
 			{			
 				char *str=NULL;
-				g_Convert_DBCS_Ascii2SingleByte(m_lev_content.GetStringWide(),m_lev_content.Size(),str);
+				g_Convert_DBCS_Ascii2SingleByte(m_lev_content.GetStringWide().c_str(),m_lev_content.Size(),str);
 //				if(str != NULL && m_Status == INPUT_STATUS_NORMAL)
 //				{
 //					m_name = str;
@@ -17582,7 +17582,7 @@ void	C_VS_UI_PERSNALSHOP_MESSAGE::Run(id_t id)
 	case OK_ID :
 		{			
 			char *str=NULL;
-			g_Convert_DBCS_Ascii2SingleByte(m_lev_content.GetStringWide(),m_lev_content.Size(),str);
+			g_Convert_DBCS_Ascii2SingleByte(m_lev_content.GetStringWide().c_str(),m_lev_content.Size(),str);
 			
 			if(str != NULL)
 			{
@@ -17617,7 +17617,7 @@ void	C_VS_UI_PERSNALSHOP_MESSAGE::Process()
 //const char* C_VS_UI_PERSNALSHOP_MESSAGE::GetCurrentContent()
 //{
 //	char *str=NULL;
-//	g_Convert_DBCS_Ascii2SingleByte(m_lev_content.GetStringWide(),m_lev_content.Size(),str);
+//	g_Convert_DBCS_Ascii2SingleByte(m_lev_content.GetStringWide().c_str(),m_lev_content.Size(),str);
 //	if(str != NULL)
 //		m_lev_content = str;
 //	else
@@ -18118,7 +18118,7 @@ void	C_VS_UI_POWER_JJANG::Run(id_t id)
 			if(!m_GambleMode)
 			{
 				char* TempBuffer = NULL;
-				g_Convert_DBCS_Ascii2SingleByte(m_EditPhoneNumber.GetStringWide(), m_EditPhoneNumber.Size(), TempBuffer);
+				g_Convert_DBCS_Ascii2SingleByte(m_EditPhoneNumber.GetStringWide().c_str(), m_EditPhoneNumber.Size(), TempBuffer);
 				if(NULL != TempBuffer)
 				{
 					m_szMyPhoneNumber = TempBuffer;

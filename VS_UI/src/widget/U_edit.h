@@ -71,10 +71,14 @@ public:
     void KeyboardControl(unsigned int message, unsigned int key, long extra);
 
     // Get text as UTF-8 string (for compatibility)
-    const char* GetBuffer() const;  // Returns temporary UTF-8 buffer
-    const char* GetString() const { return GetBuffer(); }  // Alias for GetBuffer()
+    std::string GetBuffer() const;
+    // Legacy view: owned by this editor, valid until its next GetString call.
+    const char* GetString() const;
     int Size() const { return m_TextLen; }  // Character count
     int GetCursor() const { return m_CursorPos; }  // Cursor position
+
+private:
+    mutable std::string m_LegacyText;
 };
 
 class LineEditorVisual
@@ -114,8 +118,8 @@ public:
     }
     const char* GetString() const { return m_Editor.GetString(); }
 
-    // Compatibility method: return const char_t* (wide string) for old code
-    const char_t* GetStringWide() const;
+    // An owned UTF-16 result, including both units of supplementary scalars.
+    std::basic_string<char_t> GetStringWide() const;
 
     int Size() const { return m_Editor.Size(); }
     int GetCursor() const { return m_Editor.GetCursor(); }

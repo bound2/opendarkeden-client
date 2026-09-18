@@ -460,7 +460,7 @@ void C_VS_UI_CHAR_DELETE::Run(id_t id)
 				bool bl_match = false;
 
 				char * sz_typed = NULL;
-				int len = g_Convert_DBCS_Ascii2SingleByte(m_lev_name.GetStringWide(), m_lev_name.Size(), sz_typed);
+				int len = g_Convert_DBCS_Ascii2SingleByte(m_lev_name.GetStringWide().c_str(), m_lev_name.Size(), sz_typed);
 				if (sz_typed != NULL)
 				{
 					bl_match = (len > 0 && m_sz_target_name == sz_typed);
@@ -624,7 +624,7 @@ void C_VS_UI_NEWCHAR::SendNewCharacterToClient()
 //	DeleteNew(m_p_slot->sz_name);
 
 	char *sz_temp;
-	g_Convert_DBCS_Ascii2SingleByte(m_lev_name.GetStringWide(), m_lev_name.Size(), sz_temp);
+	g_Convert_DBCS_Ascii2SingleByte(m_lev_name.GetStringWide().c_str(), m_lev_name.Size(), sz_temp);
 
 	m_p_slot->sz_name = sz_temp;
 	DeleteNew(sz_temp);
@@ -1696,7 +1696,7 @@ void C_VS_UI_NEWCHAR::Run(id_t id)
 			{
 //				DeleteNew(m_p_slot->sz_name);
 				char *sz_temp;
-				g_Convert_DBCS_Ascii2SingleByte(m_lev_name.GetStringWide(), m_lev_name.Size(), sz_temp);
+				g_Convert_DBCS_Ascii2SingleByte(m_lev_name.GetStringWide().c_str(), m_lev_name.Size(), sz_temp);
 				m_p_slot->sz_name = sz_temp;
 				DeleteNew(sz_temp);
 				gpC_base->SendMessage(UI_NEWCHARACTER_CHECK, 0, 0, (void *)m_p_slot->sz_name.c_str());
@@ -3857,7 +3857,7 @@ void C_VS_UI_LOGIN::ChangeFocus()
 	else
 	{
 		char * p_temp = NULL;
-		g_Convert_DBCS_Ascii2SingleByte(m_lev_id.GetStringWide(), m_lev_id.Size(), p_temp);
+		g_Convert_DBCS_Ascii2SingleByte(m_lev_id.GetStringWide().c_str(), m_lev_id.Size(), p_temp);
 		if(p_temp == NULL)
 		{
 			m_lev_id_backup = "";
@@ -4151,8 +4151,8 @@ void C_VS_UI_LOGIN::SendLoginToClient()
 	S_login.sz_password = (char*)malloc(128);
 
 	// Convert from LineEditor (UTF-32/char_t) to single-byte char strings
-	g_Convert_DBCS_Ascii2SingleByte(m_lev_id.GetStringWide(), m_lev_id.Size(), S_login.sz_id);
-	g_Convert_DBCS_Ascii2SingleByte(m_lev_password.GetStringWide(), m_lev_password.Size(), S_login.sz_password);
+	g_Convert_DBCS_Ascii2SingleByte(m_lev_id.GetStringWide().c_str(), m_lev_id.Size(), S_login.sz_id);
+	g_Convert_DBCS_Ascii2SingleByte(m_lev_password.GetStringWide().c_str(), m_lev_password.Size(), S_login.sz_password);
 
 	// Safety check: ensure conversion succeeded before using the pointers
 	if (S_login.sz_id != NULL && S_login.sz_password != NULL) {
@@ -4182,8 +4182,8 @@ void C_VS_UI_LOGIN::SendNewUserToClient()
 	}
 
 	// Convert from LineEditor (UTF-32/char_t) to single-byte char strings
-	g_Convert_DBCS_Ascii2SingleByte(m_lev_id.GetStringWide(), m_lev_id.Size(), S_newuser.sz_id);
-	g_Convert_DBCS_Ascii2SingleByte(m_lev_password.GetStringWide(), m_lev_password.Size(), S_newuser.sz_password);
+	g_Convert_DBCS_Ascii2SingleByte(m_lev_id.GetStringWide().c_str(), m_lev_id.Size(), S_newuser.sz_id);
+	g_Convert_DBCS_Ascii2SingleByte(m_lev_password.GetStringWide().c_str(), m_lev_password.Size(), S_newuser.sz_password);
 
 	gpC_base->SendMessage(UI_RUN_NEWUSER_REGISTRATION, 0, 0, &S_newuser);
 }
