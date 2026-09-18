@@ -2570,6 +2570,8 @@ Lines 569, 571 and 576 do `m_p_menu[p_button->m_image_index].sz_menu_str...` wit
 
 #### ⚪ Low -- GetBuffer and GetStringWide return pointers to function-local static buffers, so two editors' text can never be held at once.
 
+> ✅ **Fixed** on branch `fix/review-editor-text-storage` (2026-09-18). Both getters return owned strings; the legacy `GetString()` view has storage belonging to its editor instead of a process-wide buffer. Wide-string callers consume their temporary's pointer in the same full expression. UTF-16 output holds every supplementary pair through U+10FFFF, and invalid scalar values become replacement characters in both encodings. `Show()` first moved unchanged into its own translation unit so the real editor can link into `ui_tests` without game rendering globals. Tests reproduced cross-editor overwrites, invalidation of saved results and the maximum-scalar/truncation defects; ordinary editing and invalid-scalar cases are regression guards. Full Debug/ASan builds and all nine CTests pass.
+
 **Category:** maintainability  |  **Location:** `VS_UI/src/widget/U_edit.cpp:240`
 
 `LineEditor::GetBuffer()` returns `static char utf8_buffer[MAX_TEXT*4+1]` (line 240) and `LineEditorVisual::GetStringWide()` returns `static char_t wide_buffer[LineEditor::MAX_TEXT]` (line 454). Both are declared `const` member functions that mutate shared state. `LineEditorVisual::Show()` already relies on subtle re-entrancy here, calling `GetBuffer()` at line 486 and again at line 568 while the first result is still nominally in scope.

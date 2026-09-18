@@ -32,7 +32,8 @@ extern CSpriteSurface* g_pLast;  // UI renders to g_pLast, not g_pBack!
 void LineEditorVisual::Show() const
 {
 	// Get the text to display (as UTF-8)
-	const char* textToDisplay = m_Editor.GetBuffer();
+	const std::string editorText = m_Editor.GetBuffer();
+	const char* textToDisplay = editorText.c_str();
 	std::string displayText;
 
 	// Password mode has always shown one asterisk per UTF-8 byte. Dynamic
@@ -93,7 +94,7 @@ void LineEditorVisual::Show() const
 	// 16px font is too tall for the chat input and disagrees with its history.
 	PrintInfo printInfo = m_PrintInfo;
 	const std::string prefix = UISafeText::Utf8Prefix(
-		m_Editor.GetBuffer(), (size_t)m_Editor.m_CursorPos);
+		editorText.c_str(), (size_t)m_Editor.m_CursorPos);
 	const size_t cursorByte = prefix.size();
 	std::string visibleText = textToDisplay;
 	size_t visibleCursor = cursorByte;

@@ -10,6 +10,8 @@
 // ============================================================================
 
 static int utf32_to_utf8(uint32_t c, char out[5]) {
+	if (c > 0x10FFFF || (c >= 0xD800 && c <= 0xDFFF))
+		c = 0xFFFD;
 	if (c < 0x80) {
 		out[0] = c;
 		out[1] = 0;
@@ -185,20 +187,22 @@ void LineEditor::EndComposition()
 }
 
 // Get text as UTF-8 string (for compatibility)
-const char* LineEditor::GetBuffer() const
+std::string LineEditor::GetBuffer() const
 {
-	static char utf8_buffer[MAX_TEXT * 4 + 1];  // Worst case: 4 bytes per UTF-32 char
-	int offset = 0;
+	std::string result;
 
-	for (int i = 0; i < m_TextLen && offset < (int)sizeof(utf8_buffer) - 4; i++) {
+	for (int i = 0; i < m_TextLen && i < MAX_TEXT; ++i) {
 		char buf[5];
 		int len = utf32_to_utf8(m_Text[i], buf);
-		memcpy(&utf8_buffer[offset], buf, len);
-		offset += len;
+		result.append(buf, len);
 	}
-	utf8_buffer[offset] = '\0';
+	return result;
+}
 
-	return utf8_buffer;
+const char* LineEditor::GetString() const
+{
+	m_LegacyText = GetBuffer();
+	return m_LegacyText.c_str();
 }
 
 // Legacy: Add UTF-8 string (converts to UTF-32 internally)
@@ -396,35 +400,28 @@ bool LineEditorVisual::ReachSizeOfBox() const
 }
 
 // Compatibility method: convert UTF-32 to wide string (char_t/UTF-16LE)
-const char_t* LineEditorVisual::GetStringWide() const
+std::basic_string<char_t> LineEditorVisual::GetStringWide() const
 {
-	static char_t wide_buffer[LineEditor::MAX_TEXT];
-	int wide_len = 0;
+	std::basic_string<char_t> result;
 
 	// Convert directly from UTF-32 (m_Text) to UTF-16 (char_t)
-	for (int i = 0; i < m_Editor.m_TextLen && wide_len < LineEditor::MAX_TEXT - 1; i++) {
+	for (int i = 0; i < m_Editor.m_TextLen && i < LineEditor::MAX_TEXT; ++i) {
 		uint32_t c = m_Editor.m_Text[i];
+		if (c > 0x10FFFF || (c >= 0xD800 && c <= 0xDFFF))
+			c = 0xFFFD;
 
 		// UTF-32 to UTF-16 conversion
 		if (c < 0x10000) {
 			// BMP character - single UTF-16 code unit
-			wide_buffer[wide_len++] = (char_t)c;
-		} else if (c < 0x10FFFF) {
-			// Supplementary plane - surrogate pair
-			if (wide_len + 1 >= LineEditor::MAX_TEXT - 1) break;
-
-			c -= 0x10000;
-			wide_buffer[wide_len++] = (char_t)(0xD800 + (c >> 10));      // High surrogate
-			wide_buffer[wide_len++] = (char_t)(0xDC00 + (c & 0x3FF));    // Low surrogate
+			result.push_back(static_cast<char_t>(c));
 		} else {
-			// Invalid Unicode - use replacement character
-			wide_buffer[wide_len++] = (char_t)0xFFFD;
+			// Supplementary plane - surrogate pair
+			c -= 0x10000;
+			result.push_back(static_cast<char_t>(0xD800 + (c >> 10)));
+			result.push_back(static_cast<char_t>(0xDC00 + (c & 0x3FF)));
 		}
 	}
-
-	wide_buffer[wide_len] = 0;
-
-	return wide_buffer;
+	return result;
 }
 
 Point LineEditorVisual::GetPosition() const
