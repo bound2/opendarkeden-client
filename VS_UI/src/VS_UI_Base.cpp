@@ -1,6 +1,7 @@
 ﻿// VS_UI_Base.cpp
 
 #include "Client_PCH.h"
+#include <utility>
 #define assert(e) ((void)(e))
 // Disabled assert for macOS
 #include "VS_UI_Base.h"
@@ -361,6 +362,11 @@ void Base::DispatchMessage()
 void Base::SendMessage(DWORD message, intptr_t left, intptr_t right, void * void_ptr)
 {
 	m_C_ui_result_receiver._SendMessage(message, left, right, void_ptr);
+}
+
+void Base::SendTextMessage(DWORD message, intptr_t left, intptr_t right, std::string text)
+{
+	m_C_ui_result_receiver._SendTextMessage(message, left, right, std::move(text));
 }
 
 //-----------------------------------------------------------------------------

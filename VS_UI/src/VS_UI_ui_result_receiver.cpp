@@ -3,6 +3,7 @@
 #include "Client_PCH.h"
 #include <assert.h>
 #include "VS_UI_ui_result_receiver.h"
+#include <utility>
 
 /*-----------------------------------------------------------------------------
 - C_VS_UI_UI_RESULT_RECEIVER
@@ -42,14 +43,14 @@ void C_VS_UI_UI_RESULT_RECEIVER::_SendMessage(DWORD message, intptr_t left, intp
 {
 	assert(message != INVALID_MESSAGE);
 
-	MESSAGE * msg = new MESSAGE;
+	m_message_queue.push_back({message, left, right, void_ptr, std::nullopt});
+}
 
-	msg->message = message;
-	msg->left = left;
-	msg->right = right;
-	msg->void_ptr = void_ptr;
-
-	m_message_queue.Add(msg);
+void C_VS_UI_UI_RESULT_RECEIVER::_SendTextMessage(
+	DWORD message, intptr_t left, intptr_t right, std::string text)
+{
+	assert(message != INVALID_MESSAGE);
+	m_message_queue.push_back({message, left, right, nullptr, std::move(text)});
 }
 
 /*-----------------------------------------------------------------------------
@@ -58,40 +59,13 @@ void C_VS_UI_UI_RESULT_RECEIVER::_SendMessage(DWORD message, intptr_t left, intp
 -----------------------------------------------------------------------------*/
 void C_VS_UI_UI_RESULT_RECEIVER::_DispatchMessage()
 {
-	if (m_fp_result_receiver != NULL)
-	{
-		if (m_message_queue.Size() > 0)
-		{
-			MESSAGE * data;
-			if (m_message_queue.Data(0, data))
-			{
-				m_fp_result_receiver(data->message, data->left, data->right, data->void_ptr);
-				delete data;
-				m_message_queue.Delete(data);
-			}
-		}
-	}
-}
+	if (m_fp_result_receiver == nullptr || m_message_queue.empty())
+		return;
 
-//-----------------------------------------------------------------------------
-// C_MESSAGE_QUEUE
-//
-// 
-//-----------------------------------------------------------------------------
-C_MESSAGE_QUEUE::C_MESSAGE_QUEUE()
-{
-
-}
-
-//-----------------------------------------------------------------------------
-// ~C_MESSAGE_QUEUE
-//
-// 
-//-----------------------------------------------------------------------------
-C_MESSAGE_QUEUE::~C_MESSAGE_QUEUE()
-{
-	MESSAGE * data;
-	for (int i=0; i < Size(); i++)
-		if (Data(i, data))
-			delete data;
+	// Consume before invoking application code: callbacks may dispatch again
+	// or throw. The local message keeps owned text alive through either path.
+	MESSAGE data = std::move(m_message_queue.front());
+	m_message_queue.pop_front();
+	m_fp_result_receiver(data.message, data.left, data.right,
+		data.text ? data.text->data() : data.void_ptr);
 }

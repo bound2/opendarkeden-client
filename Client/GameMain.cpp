@@ -2655,7 +2655,7 @@ LoadZone(int n)
 		g_pZoneTable->Get( g_pZone->GetID() )->CompetenceZone == false
 		)
 	{
-		gpC_base->SendMessage(UI_CHAT_RETURN, CLD_NORMAL, 0, (void*)"*command ghost on");
+		gpC_base->SendTextMessage(UI_CHAT_RETURN, CLD_NORMAL, 0, "*command ghost on");
 	}
 #endif
 	

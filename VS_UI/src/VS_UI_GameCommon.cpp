@@ -4398,26 +4398,9 @@ void C_VS_UI_CHATTING::KeyboardControl(UINT message, UINT key, long extra)
 			// 입력된 것이 없으면 무효이다.
 			if (m_lev_chatting.Size() > 0)
 			{
-				//
-				// sz_chat_str
-				//
-				// DBCS를 ASCII로 바꿀 때 사용하는 buf.
-				// 실제로 UI_CHAT_RETURN을 받을 때 chatting string이므로 메시지를 처리하고나서 반드시 DeleteNewArray를
-				// 해줘야 한다.
-				//
-				// UI에서 이 ptr을 관리하면 동기화문제인지몰라도 글자가 깨지는 경우가 있다. UI_CHAT_RETURN이
-				// 처리되지 않은 상태에서 g_Convert_DBCS_Ascii2SingleByte()가 실행되서 그런 것 같다.
-				//
-
-				char * sz_chat_str = NULL;
-				// Use UTF-8 directly instead of converting through UTF-16
-				// GetString() returns UTF-8 encoded string
-				const char* utf8_str = m_lev_chatting.GetString();
-				if (utf8_str) {
-					int len = static_cast<int>(strlen(utf8_str));
-					sz_chat_str = new char[len + 1];
-					strcpy(sz_chat_str, utf8_str);
-				}
+				// Keep the input owned locally until the queue copies the final line.
+				const std::string chat_text = m_lev_chatting.m_Editor.GetBuffer();
+				const char* sz_chat_str = chat_text.c_str();
 
 				// 타이핑 했던 문장 기억하기
 				if(m_history.size() == m_history_line)
@@ -4445,7 +4428,6 @@ void C_VS_UI_CHATTING::KeyboardControl(UINT message, UINT key, long extra)
 						{
 							Timer(true);
 							m_timer = TIMER_PAPERING;
-							delete [] sz_chat_str;
 							break;
 						}
 						else
@@ -4490,7 +4472,6 @@ void C_VS_UI_CHATTING::KeyboardControl(UINT message, UINT key, long extra)
 				{
 					Timer(true);
 					m_timer = TIMER_REP;
-					delete [] sz_chat_str;
 					break;
 				}
 				
@@ -4500,23 +4481,17 @@ void C_VS_UI_CHATTING::KeyboardControl(UINT message, UINT key, long extra)
 				}
 				m_rep_send_times.push_back(MonotonicClock::Now());
 				
-				char *pTempstr;
+				std::string queued_text = chat_text;
 				
 				int condition = CLD_NORMAL;
 				
 				if(m_bl_whisper_mode)
 				{
 					condition = CLD_WHISPER;
-					pTempstr = new char [strlen(sz_chat_str) + strlen(m_sz_whisper_backup.c_str()) +3];
-					strcpy(pTempstr, "/");
-					strcat(pTempstr, m_sz_whisper_backup.c_str());
-					strcat(pTempstr, " ");
-					strcat(pTempstr, sz_chat_str);
-					delete [] sz_chat_str;
+					queued_text = "/" + m_sz_whisper_backup + " " + chat_text;
 				}else
 				{
 					condition = m_chat_mode;
-					pTempstr = sz_chat_str;
 					if(condition == CLD_ZONECHAT)
 					{
 						if(strstr(g_char_slot_ingame.sz_name.c_str(), (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetString()) == NULL)
@@ -4529,11 +4504,12 @@ void C_VS_UI_CHATTING::KeyboardControl(UINT message, UINT key, long extra)
 				
 				
 				if(g_pUserOption->ChatWhite)
-					gpC_base->SendMessage(UI_CHAT_RETURN, condition, gpC_base->m_chatting_pi.text_color, pTempstr);	// by larosel
+					gpC_base->SendTextMessage(UI_CHAT_RETURN, condition, gpC_base->m_chatting_pi.text_color, queued_text);	// by larosel
 				else
-					gpC_base->SendMessage(UI_CHAT_RETURN, condition, g_pUserOption->ChattingColor, pTempstr);	// by larosel
+					gpC_base->SendTextMessage(UI_CHAT_RETURN, condition, g_pUserOption->ChattingColor, queued_text);	// by larosel
 				
-				if(pTempstr[0] == '/')AddWhisperID(pTempstr + 1);
+				if (!queued_text.empty() && queued_text[0] == '/')
+					AddWhisperID(queued_text.c_str() + 1);
 				
 				m_lev_chatting.EraseAll();
 				if(m_bl_whisper_mode)m_whisper_index = GetWhisperSize() -1;

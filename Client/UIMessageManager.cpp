@@ -2471,6 +2471,8 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 	//
 
 	DEBUG_ADD("[UI] UI_CHAT_RETURN");
+	if (void_ptr == nullptr)
+		return;
 
 	if (g_Mode!=MODE_GAME)
 	{
@@ -2480,7 +2482,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 	
 	DEBUG_ADD_FORMAT("[Original] %s", (char*)void_ptr );
 	
-	char* chatString = (char*)void_ptr; 
+	const char* chatString = static_cast<const char*>(void_ptr);
 //	g_pChatManager->RemoveCurse(chatString);
 	//-------------------------------------------------------------
 	// 파티 채팅인 경우
@@ -2587,7 +2589,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 
 			// server로 message 보내기
 			//g_Socket.Send(g_String);
-			char* strUI = chatString;
+			const char* strUI = chatString;
 
 			std::string strChat( strUI );
 			TruncateUtf8ToBytes( strChat, CHAT_MESSAGE_MAX_BYTES );
@@ -3218,10 +3220,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 												{
 													if(szTemp[strlen(szTemp)-1] == '\n')
 													szTemp[strlen(szTemp)-1] = '\0';
-													char *pszTemp = new char[strlen(szTemp)+1];
-													strcpy( pszTemp, szTemp );
-													
-													Execute_UI_CHAT_RETURN(left, right, (void *)pszTemp);
+													Execute_UI_CHAT_RETURN(left, right, szTemp);
 												}
 
 //												CGSay _CGSay;
@@ -3358,7 +3357,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 		}
 	}
 
-	DeleteNewArray(void_ptr);
+	// The queued message (or the synchronous caller) owns the input string.
 
 //	__BEGIN_HELP_EVENT
 		ExecuteHelpEvent( HELP_EVENT_CHAT );

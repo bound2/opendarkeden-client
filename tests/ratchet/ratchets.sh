@@ -1490,7 +1490,8 @@ fi
 # 958: the label helper and both file-dialog title copies use owned text.
 # 952: owned file-dialog paths replace six raw directory copies/appends.
 # 950: MString assignment copies into exact-size replacement allocations.
-R17_BASELINE=950
+# 944: owned queued chat text removes six raw string-copy lines.
+R17_BASELINE=944
 R17_FILES_FLOOR=500
 
 r17_members () {
