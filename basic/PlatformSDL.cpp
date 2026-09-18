@@ -10,6 +10,7 @@
 -----------------------------------------------------------------------------*/
 
 #include "Platform.h"
+#include "ConfigFile.h"
 
 /* Most of this file (time/thread/mutex/event/dynamic-library/keyboard/
    error-reporting/init-shutdown) is plain SDL2 calls that work identically
@@ -451,76 +452,13 @@ static void get_config_file_path(void) {
 int platform_config_get_string(const char* key, const char* value,
                                char* buffer, DWORD* size) {
 	get_config_file_path();
-
-	FILE* file = fopen(g_config_file_path, "r");
-	if (file == NULL) return 1;
-
-	char line[512];
-	char searchKey[256];
-	snprintf(searchKey, sizeof(searchKey), "%s.%s=", key, value);
-
-	int found = 0;
-	while (fgets(line, sizeof(line), file) != NULL) {
-		if (strncmp(line, searchKey, strlen(searchKey)) == 0) {
-			const char* val = line + strlen(searchKey);
-			/* Remove newline */
-			char* newline = strchr(const_cast<char*>(val), '\n');
-			if (newline) *newline = '\0';
-
-			size_t len = strlen(val) + 1;
-			if (len <= *size) {
-				memcpy(buffer, val, len);
-				*size = (DWORD)len;
-				found = 1;
-			}
-			break;
-		}
-	}
-
-	fclose(file);
-	return found ? 0 : 1;
+	return ConfigFile::GetString(g_config_file_path, key, value, buffer, size);
 }
 
 int platform_config_set_string(const char* key, const char* value,
                                const char* data) {
 	get_config_file_path();
-
-	/* Read existing content */
-	char* content = NULL;
-	long fileSize = 0;
-
-	FILE* file = fopen(g_config_file_path, "r");
-	if (file != NULL) {
-		fseek(file, 0, SEEK_END);
-		fileSize = ftell(file);
-		fseek(file, 0, SEEK_SET);
-
-		if (fileSize > 0) {
-			content = new char[fileSize + 1];
-			fread(content, 1, fileSize, file);
-			content[fileSize] = '\0';
-		}
-		fclose(file);
-	}
-
-	/* Open for writing */
-	file = fopen(g_config_file_path, "w");
-	if (file == NULL) {
-		if (content) delete[] content;
-		return 1;
-	}
-
-	/* Write existing content (if any) */
-	if (content != NULL) {
-		fputs(content, file);
-		delete[] content;
-	}
-
-	/* Append new key-value */
-	fprintf(file, "%s.%s=%s\n", key, value, data);
-	fclose(file);
-
-	return 0;
+	return ConfigFile::SetString(g_config_file_path, key, value, data);
 }
 #endif /* !PLATFORM_WINDOWS */
 
