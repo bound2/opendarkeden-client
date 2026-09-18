@@ -2594,7 +2594,7 @@ void C_VS_UI_FILE_DIALOG::Start(const char *type)
 		}
 	}
 	RefreshFileList(mp_open_current_directory[mi_open_drive_index]);
-	m_pC_scroll_bar->SetPosMax(m_vs_file_list.size()-12);
+	m_pC_scroll_bar->SetItemCount(m_vs_file_list.size(), m_scroll_max);
 }
 
 //-----------------------------------------------------------------------------
@@ -2640,7 +2640,7 @@ bool C_VS_UI_FILE_DIALOG::MouseControl(UINT message, int _x, int _y)
 				mi_open_drive_index = (_y - (37+m_string_gap))/m_string_gap;
 				
 				RefreshFileList(mp_open_current_directory[mi_open_drive_index]);
-				m_pC_scroll_bar->SetPosMax(m_vs_file_list.size()-12);
+				m_pC_scroll_bar->SetItemCount(m_vs_file_list.size(), m_scroll_max);
 				
 				if(!m_vs_file_list.size()) 
 					ChangeDir((char *)"\\..", mp_open_current_directory[temp]);
@@ -2692,7 +2692,7 @@ bool C_VS_UI_FILE_DIALOG::MouseControl(UINT message, int _x, int _y)
 						Run(OK_ID);
 					}
 					
-					m_pC_scroll_bar->SetPosMax(m_vs_file_list.size()-12);				
+					m_pC_scroll_bar->SetItemCount(m_vs_file_list.size(), m_scroll_max);
 				}
 				if(m_select!=-1&&m_mode!=MODE_PROFILE_SELECT)	// 프로필 모드가 아니면
 				{

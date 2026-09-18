@@ -382,7 +382,7 @@ public:
 			}
 		}
 
-		m_pos_max = pos_max;
+		SetPosMax(pos_max);
 		m_bar_plus = bar_plus;
 		m_tag_plus = tag_plus;
 		m_button_plus = button_plus;
@@ -392,14 +392,13 @@ public:
 		m_up_button_pushed = false;
 		m_down_button_pushed = false;
 		m_tag_pushed = false;
-		m_bl_reverse = bl_reverse;
+		SetReverse(bl_reverse);
 		m_bHeight = bHeight;
 
 		m_button_width = spk->GetWidth(C_GLOBAL_RESOURCE::SB_BUTTON);
 		m_button_height = spk->GetHeight(C_GLOBAL_RESOURCE::SB_BUTTON);
 		m_tag_height = spk->GetHeight(C_GLOBAL_RESOURCE::SB_TAG);
 
-		m_pos = 0;
 	}
 
 	C_VS_UI_SCROLL_BAR()
@@ -408,7 +407,7 @@ public:
 
 		Set(-1, -1, -1, -1);
 
-		m_pos_max = -1;
+		SetPosMax(0);
 		m_bar_plus = 6;
 		m_tag_plus = 6;
 		m_button_plus = 0;
@@ -418,13 +417,12 @@ public:
 		m_up_button_pushed = false;
 		m_down_button_pushed = false;
 		m_tag_pushed = false;
-		m_bl_reverse = false;
+		SetReverse(false);
 		m_bHeight = true;
 
 		m_button_height = gpC_global_resource->m_pC_scroll_bar_spk->GetHeight(C_GLOBAL_RESOURCE::SB_BUTTON);
 		m_tag_height = gpC_global_resource->m_pC_scroll_bar_spk->GetHeight(C_GLOBAL_RESOURCE::SB_TAG);
 
-		m_pos = 0;
 	}
 
 	~C_VS_UI_SCROLL_BAR()
@@ -503,20 +501,16 @@ public:
 						else
 							spk->BltLocked(_x+x+m_button_plus, _y+y+h, C_GLOBAL_RESOURCE::SB_BUTTON);
 					}
-					if(m_pos_max > 1)
+					if(CanScroll())
 					{
-						if(m_bl_reverse)
-							m_pos = (m_pos_max-1) - m_pos;
 						
 						if(m_tag_pushed)
 						{
 							spk->BltLocked(_x+x+m_tag_plus, min(_y+y+h-m_tag_height, max(_y+y, gpC_mouse_pointer->GetY()-m_tag_height/2)), C_GLOBAL_RESOURCE::SB_TAG);
 						}
 						else
-							spk->BltLocked(_x+x+m_tag_plus, _y+y+m_pos*(h-m_tag_height)/(m_pos_max-1), C_GLOBAL_RESOURCE::SB_TAG);
+							spk->BltLocked(_x+x+m_tag_plus, _y+y+GetThumbOffset(h, m_tag_height), C_GLOBAL_RESOURCE::SB_TAG);
 						
-						if(m_bl_reverse)
-							m_pos = (m_pos_max-1) - m_pos;
 					}
 				}
 				else
@@ -552,20 +546,16 @@ public:
 						else
 							spk->BltLocked(_x+x+w, _y+y+m_button_plus, C_GLOBAL_RESOURCE::SB_BUTTON);
 					}
-					if(m_pos_max > 1)
+					if(CanScroll())
 					{
-						if(m_bl_reverse)
-							m_pos = (m_pos_max-1) - m_pos;
 						
 						if(m_tag_pushed)
 						{
 							spk->BltLocked(min(_x+x+w-m_tag_height, max(_x+x, gpC_mouse_pointer->GetX()-m_tag_height/2)), _y+y+m_tag_plus, C_GLOBAL_RESOURCE::SB_TAG_WIDTH);
 						}
 						else
-							spk->BltLocked(_x+x+m_pos*(w-m_tag_height)/(m_pos_max-1), _y+y+m_tag_plus, C_GLOBAL_RESOURCE::SB_TAG_WIDTH);
+							spk->BltLocked(_x+x+GetThumbOffset(w, m_tag_height), _y+y+m_tag_plus, C_GLOBAL_RESOURCE::SB_TAG_WIDTH);
 						
-						if(m_bl_reverse)
-							m_pos = (m_pos_max-1) - m_pos;
 					}
 				}
 
@@ -601,14 +591,10 @@ public:
 					else
 						spk->BltLocked(_x+x+m_button_plus, _y+y+h, C_GLOBAL_RESOURCE::SB_BUTTON_HILIGHTED);
 				}
-				if(m_pos_max > 1)
+				if(CanScroll())
 				{
-					if(m_bl_reverse)
-						m_pos = (m_pos_max-1) - m_pos;
-					spk->BltLocked(_x+x, _y+y+m_pos*(h-m_tag_height)/(m_pos_max-1), C_GLOBAL_RESOURCE::SB_TAG);
+					spk->BltLocked(_x+x, _y+y+GetThumbOffset(h, m_tag_height), C_GLOBAL_RESOURCE::SB_TAG);
 					
-					if(m_bl_reverse)
-						m_pos = (m_pos_max-1) - m_pos;
 				}
 			}
 			gpC_base->m_p_DDSurface_back->Unlock();
@@ -647,14 +633,10 @@ public:
 				else
 					spk->BltLocked(_x+x+m_button_plus, _y+y+h, C_GLOBAL_RESOURCE::SB3_BUTTON_DOWN);
 				
-				if(m_pos_max > 1)
+				if(CanScroll())
 				{
-					if(m_bl_reverse)
-						m_pos = (m_pos_max-1) - m_pos;
-					spk->BltLocked(_x+x+m_tag_plus, _y+y+m_pos*(h-m_tag_height)/(m_pos_max-1), C_GLOBAL_RESOURCE::SB3_TAG);
+					spk->BltLocked(_x+x+m_tag_plus, _y+y+GetThumbOffset(h, m_tag_height), C_GLOBAL_RESOURCE::SB3_TAG);
 					
-					if(m_bl_reverse)
-						m_pos = (m_pos_max-1) - m_pos;
 				}
 			}
 			gpC_base->m_p_DDSurface_back->Unlock();

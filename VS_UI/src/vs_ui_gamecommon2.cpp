@@ -1059,7 +1059,7 @@ bool	C_VS_UI_ITEM_LIST::AddItem( ItemList pItem )
 
 	m_ItemList.push_back( pItem );
 
-	m_pC_scroll_bar->SetPosMax( m_ItemList.size() - 8 + 1);
+	m_pC_scroll_bar->SetItemCount(m_ItemList.size(), 8);
 
 	return true;
 }
@@ -1114,7 +1114,7 @@ bool	C_VS_UI_ITEM_LIST::DeleteItem( DWORD ID )
 		itr++;
 	}
 
-	m_pC_scroll_bar->SetPosMax( m_ItemList.size() - 8 + 1);
+	m_pC_scroll_bar->SetItemCount(m_ItemList.size(), 8);
 	m_pC_scroll_bar->SetScrollPos( 0 );
 
 	if(pDeleteItem != NULL)
@@ -5220,7 +5220,7 @@ bool	C_VS_UI_MAILBOX::MouseControl(UINT message, int _x, int _y)
 		case M_LEFTBUTTON_DOWN:
 		case M_LB_DOUBLECLICK:
 			m_currentTab = (TAB_ID)(m_currentTab - NEW_MAIL_ID);
-			m_pC_scroll_bar->SetPosMax(m_mail[m_currentTab].size()-(m_listCount-1));
+			m_pC_scroll_bar->SetItemCount(m_mail[m_currentTab].size(), m_listCount);
 			break;
 		}
 	}
@@ -5397,12 +5397,12 @@ void	C_VS_UI_MAILBOX::Run(id_t id)
 
 	case MAILTAB_ID:
 		m_currentTab = TAB_MAIL_ID;
-		m_pC_scroll_bar->SetPosMax(m_mail[m_currentTab].size()-(m_listCount-1));
+		m_pC_scroll_bar->SetItemCount(m_mail[m_currentTab].size(), m_listCount);
 		break;
 
 	case HELPTAB_ID:
 		m_currentTab = TAB_HELP_ID;
-		m_pC_scroll_bar->SetPosMax(m_mail[m_currentTab].size()-(m_listCount-1));
+		m_pC_scroll_bar->SetItemCount(m_mail[m_currentTab].size(), m_listCount);
 		break;
 
 	case MEMOTAB_ID:
@@ -11349,7 +11349,7 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 
 	if(parsing_data.size() > 15)
 	{
-			m_pC_scroll_bar->SetPosMax(parsing_data.size()-15);	
+			m_pC_scroll_bar->SetItemCount(parsing_data.size(), 16);
 	}
 	else
 	{
@@ -12340,7 +12340,7 @@ void	C_VS_UI_SMS_LIST::SetSMSList(void *pVoid)
 		itr++;
 	}
 
-	m_pC_scroll_bar->SetPosMax(m_Addresses.size()-4);
+	m_pC_scroll_bar->SetItemCount(m_Addresses.size(), 5);
 }
 
 void	C_VS_UI_SMS_LIST::AddList(DWORD element, char* name, char* id, char* num) 
@@ -12353,7 +12353,7 @@ void	C_VS_UI_SMS_LIST::AddList(DWORD element, char* name, char* id, char* num)
 
 	m_Addresses.push_back(_AddressUnit);
 
-	m_pC_scroll_bar->SetPosMax(m_Addresses.size());
+	m_pC_scroll_bar->SetPositionCount(m_Addresses.size());
 }
 void	C_VS_UI_SMS_LIST::DeleteList(int id)
 {
@@ -12370,7 +12370,7 @@ void	C_VS_UI_SMS_LIST::DeleteList(int id)
 		itr++;
 	}
 	DeleteNew(_AddressUnit);
-	m_pC_scroll_bar->SetPosMax(m_Addresses.size());
+	m_pC_scroll_bar->SetPositionCount(m_Addresses.size());
 }
 	
 //-----------------------------------------------------------------------------
@@ -13555,13 +13555,13 @@ void	C_VS_UI_NAMING::SetNameList(std::vector<C_VS_UI_NicknameInfo*> &_NamingList
 //			itr++;
 //		}
 //	}
-	m_pC_scroll_bar->SetPosMax(m_NameList.size());
+	m_pC_scroll_bar->SetPositionCount(m_NameList.size());
 }
 
 void	C_VS_UI_NAMING::AddNameList(C_VS_UI_NicknameInfo* Info) 
 {
 	m_NameList.push_back(Info);
-	m_pC_scroll_bar->SetPosMax(m_NameList.size());
+	m_pC_scroll_bar->SetPositionCount(m_NameList.size());
 }
 void	C_VS_UI_NAMING::DeleteNameList(int id)
 {
@@ -13578,7 +13578,7 @@ void	C_VS_UI_NAMING::DeleteNameList(int id)
 		itr++;
 	}
 	DeleteNew(_st_NAMES);
-	m_pC_scroll_bar->SetPosMax(m_NameList.size());
+	m_pC_scroll_bar->SetPositionCount(m_NameList.size());
 }
 void	C_VS_UI_NAMING::Change_Custom_Naming(int nID, char* szName)
 {
@@ -15343,12 +15343,12 @@ void	C_VS_UI_QUEST_LIST::Run(id_t id)
 		break;
 	case TAB1_ID:
 		m_TabID = 0;
-		m_pC_scroll_bar->SetPosMax(m_QuestListInfo[0].size());
+		m_pC_scroll_bar->SetPositionCount(m_QuestListInfo[0].size());
 		m_pC_scroll_bar->SetScrollPos(0);
 		break;
 	case TAB2_ID:
 		m_TabID = 1;
-		m_pC_scroll_bar->SetPosMax(m_QuestListInfo[1].size());
+		m_pC_scroll_bar->SetPositionCount(m_QuestListInfo[1].size());
 		m_pC_scroll_bar->SetScrollPos(0);
 		break;
 
@@ -15404,9 +15404,9 @@ void	C_VS_UI_QUEST_LIST::SetQuestListInfo(void* pVoid)
 	}
 
 	if(m_TabID == 0) // 진행 탭
-		m_pC_scroll_bar->SetPosMax(m_QuestListInfo[0].size());
+		m_pC_scroll_bar->SetPositionCount(m_QuestListInfo[0].size());
 	else if(m_TabID == 1) // 완료 탭
-		m_pC_scroll_bar->SetPosMax(m_QuestListInfo[1].size());
+		m_pC_scroll_bar->SetPositionCount(m_QuestListInfo[1].size());
 }
 //-----------------------------------------------------------------------------
 // C_VS_UI_QUEST_DETAIL::C_VS_UI_QUEST_DETAIL
@@ -16354,7 +16354,7 @@ void	C_VS_UI_QUEST_MISSION::SetQuestMissionInfo(std::vector<C_VS_UI_QUEST_MANAGE
 //		
 //		itr++;
 //	}
-	m_pC_scroll_bar->SetPosMax(m_QuestMissionInfo.size());
+	m_pC_scroll_bar->SetPositionCount(m_QuestMissionInfo.size());
 }
 
 //-----------------------------------------------------------------------------
@@ -16507,7 +16507,7 @@ void	C_VS_UI_QUEST_ITEM::Start(std::vector<MItem*>& Info)
 	AttrTopmost(false);	
 
 	m_QuestItemInfo = Info;
-	m_pC_scroll_bar->SetPosMax(m_QuestItemInfo.size()/2+1);
+	m_pC_scroll_bar->SetPositionCount(m_QuestItemInfo.size()/2+1);
 }
 
 void	C_VS_UI_QUEST_ITEM::Finish()
@@ -16993,7 +16993,7 @@ void	C_VS_UI_QUEST_ITEM::Process()
 void	C_VS_UI_QUEST_ITEM::SetQuestItemInfo(std::vector<MItem*>& Info)
 {
 	m_QuestItemInfo = Info;
-	m_pC_scroll_bar->SetPosMax(m_QuestItemInfo.size()/2+1);
+	m_pC_scroll_bar->SetPositionCount(m_QuestItemInfo.size()/2+1);
 }
 
 //-----------------------------------------------------------------------------
@@ -18191,7 +18191,7 @@ void	C_VS_UI_POWER_JJANG::SetItemList()
 		m_Powerjjang_ItemList.push_back(TempItem);
 	}
 	file.close();
-	m_pC_scroll_bar->SetPosMax(max(0, m_Powerjjang_ItemList.size()-2));
+	m_pC_scroll_bar->SetItemCount(m_Powerjjang_ItemList.size(), 3);
 }
 
 void	C_VS_UI_POWER_JJANG::PowerjjangGambleResult(BYTE bItemCode)
@@ -18199,7 +18199,7 @@ void	C_VS_UI_POWER_JJANG::PowerjjangGambleResult(BYTE bItemCode)
 //	m_GambleMode = 0;
 	m_SelectPos = bItemCode;
 
-	m_pC_scroll_bar->SetPosMax(max(0, m_Powerjjang_ItemList.size()-2));
+	m_pC_scroll_bar->SetItemCount(m_Powerjjang_ItemList.size(), 3);
 
 	int ScrPos = m_pC_scroll_bar->GetScrollPos();
 	if(m_SelectPos != ScrPos)

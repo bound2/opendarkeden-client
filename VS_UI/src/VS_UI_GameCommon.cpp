@@ -12219,7 +12219,7 @@ C_VS_UI_INFO::C_VS_UI_INFO()
 					level = level_temp;
 					m_skill_domain = (SKILLDOMAIN)i;
 					m_iDomain = BLADE_ID+i;
-					m_pC_skill_scroll_bar->SetPosMax(((*g_pSkillManager)[m_skill_domain].GetSkillStepList((SKILL_STEP)(SKILL_STEP_APPRENTICE)))->size()-7);
+					m_pC_skill_scroll_bar->SetItemCount(((*g_pSkillManager)[m_skill_domain].GetSkillStepList((SKILL_STEP)(SKILL_STEP_APPRENTICE)))->size(), 8);
 					//				m_pC_skill_scroll_bar->SetPosMax((*g_pSkillManager)[(SKILLDOMAIN)i].GetSize()-7);
 				}
 			}
@@ -12232,7 +12232,7 @@ C_VS_UI_INFO::C_VS_UI_INFO()
 		{
 			m_skill_domain = SKILLDOMAIN_VAMPIRE;
 			m_iDomain = POISON_ID;
-			m_pC_skill_scroll_bar->SetPosMax(((*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].GetSkillStepList((SKILL_STEP)(m_iDomain-POISON_ID+SKILL_STEP_VAMPIRE_POISON)))->size()-7);
+			m_pC_skill_scroll_bar->SetItemCount(((*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].GetSkillStepList((SKILL_STEP)(m_iDomain-POISON_ID+SKILL_STEP_VAMPIRE_POISON)))->size(), 8);
 
 			//m_iGrade = RITTER_ID;
 			m_iGrade = ((g_char_slot_ingame.GRADE-1)/5)+RITTER_ID;
@@ -13387,35 +13387,35 @@ void C_VS_UI_INFO::Run(id_t id)
 		m_skill_domain = SKILLDOMAIN_BLADE;
 		m_iDomain = BLADE_ID;
 		//			m_pC_skill_scroll_bar->SetPosMax((*g_pSkillManager)[SKILLDOMAIN_BLADE].GetSize()-7);
-		m_pC_skill_scroll_bar->SetPosMax(((*g_pSkillManager)[SKILLDOMAIN_BLADE].GetSkillStepList((SKILL_STEP)(SKILL_STEP_APPRENTICE)))->size()-7);
+		m_pC_skill_scroll_bar->SetItemCount(((*g_pSkillManager)[SKILLDOMAIN_BLADE].GetSkillStepList((SKILL_STEP)(SKILL_STEP_APPRENTICE)))->size(), 8);
 		break;
 		
 	case SWORD_ID:
 		m_skill_domain = SKILLDOMAIN_SWORD;
 		m_iDomain = SWORD_ID;
 		//			m_pC_skill_scroll_bar->SetPosMax((*g_pSkillManager)[SKILLDOMAIN_SWORD].GetSize()-7);
-		m_pC_skill_scroll_bar->SetPosMax(((*g_pSkillManager)[m_skill_domain].GetSkillStepList((SKILL_STEP)(SKILL_STEP_APPRENTICE)))->size()-7);
+		m_pC_skill_scroll_bar->SetItemCount(((*g_pSkillManager)[m_skill_domain].GetSkillStepList((SKILL_STEP)(SKILL_STEP_APPRENTICE)))->size(), 8);
 		break;
 		
 	case GUN_ID:
 		m_skill_domain = SKILLDOMAIN_GUN;
 		m_iDomain = GUN_ID;
 		//			m_pC_skill_scroll_bar->SetPosMax((*g_pSkillManager)[SKILLDOMAIN_GUN].GetSize()-7);
-		m_pC_skill_scroll_bar->SetPosMax(((*g_pSkillManager)[m_skill_domain].GetSkillStepList((SKILL_STEP)(SKILL_STEP_APPRENTICE)))->size()-7);
+		m_pC_skill_scroll_bar->SetItemCount(((*g_pSkillManager)[m_skill_domain].GetSkillStepList((SKILL_STEP)(SKILL_STEP_APPRENTICE)))->size(), 8);
 		break;
 		
 	case HEAL_ID:
 		m_skill_domain = SKILLDOMAIN_HEAL;
 		m_iDomain = HEAL_ID;
 		//			m_pC_skill_scroll_bar->SetPosMax((*g_pSkillManager)[SKILLDOMAIN_HEAL].GetSize()-7);
-		m_pC_skill_scroll_bar->SetPosMax(((*g_pSkillManager)[m_skill_domain].GetSkillStepList((SKILL_STEP)(SKILL_STEP_APPRENTICE)))->size()-7);
+		m_pC_skill_scroll_bar->SetItemCount(((*g_pSkillManager)[m_skill_domain].GetSkillStepList((SKILL_STEP)(SKILL_STEP_APPRENTICE)))->size(), 8);
 		break;
 		
 	case ENCHANT_ID:
 		m_skill_domain = SKILLDOMAIN_ENCHANT;
 		m_iDomain = ENCHANT_ID;
 		//			m_pC_skill_scroll_bar->SetPosMax((*g_pSkillManager)[SKILLDOMAIN_ENCHANT].GetSize()-7);
-		m_pC_skill_scroll_bar->SetPosMax(((*g_pSkillManager)[m_skill_domain].GetSkillStepList((SKILL_STEP)(SKILL_STEP_APPRENTICE)))->size()-7);
+		m_pC_skill_scroll_bar->SetItemCount(((*g_pSkillManager)[m_skill_domain].GetSkillStepList((SKILL_STEP)(SKILL_STEP_APPRENTICE)))->size(), 8);
 		break;
 		
 	case TOTAL_ID:
@@ -13425,38 +13425,38 @@ void C_VS_UI_INFO::Run(id_t id)
 	case POISON_ID:
 		m_skill_domain = SKILLDOMAIN_VAMPIRE;
 		m_iDomain = POISON_ID;
-		m_pC_skill_scroll_bar->SetPosMax(((*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].GetSkillStepList((SKILL_STEP)(m_iDomain-POISON_ID+SKILL_STEP_VAMPIRE_POISON)))->size()-7);
+		m_pC_skill_scroll_bar->SetItemCount(((*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].GetSkillStepList((SKILL_STEP)(m_iDomain-POISON_ID+SKILL_STEP_VAMPIRE_POISON)))->size(), 8);
 		break;
 		
 	case ACID_ID:
 		m_skill_domain = SKILLDOMAIN_VAMPIRE;
 		m_iDomain = ACID_ID;
-		m_pC_skill_scroll_bar->SetPosMax(((*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].GetSkillStepList((SKILL_STEP)(m_iDomain-POISON_ID+SKILL_STEP_VAMPIRE_POISON)))->size()-7);
+		m_pC_skill_scroll_bar->SetItemCount(((*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].GetSkillStepList((SKILL_STEP)(m_iDomain-POISON_ID+SKILL_STEP_VAMPIRE_POISON)))->size(), 8);
 		break;
 		
 	case CURSE_ID:
 		m_skill_domain = SKILLDOMAIN_VAMPIRE;
 		m_iDomain = CURSE_ID;
-		m_pC_skill_scroll_bar->SetPosMax(((*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].GetSkillStepList((SKILL_STEP)(m_iDomain-POISON_ID+SKILL_STEP_VAMPIRE_POISON)))->size()-7);
+		m_pC_skill_scroll_bar->SetItemCount(((*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].GetSkillStepList((SKILL_STEP)(m_iDomain-POISON_ID+SKILL_STEP_VAMPIRE_POISON)))->size(), 8);
 		break;
 		
 	case SUMMON_ID:
 		m_skill_domain = SKILLDOMAIN_VAMPIRE;
 		m_iDomain = SUMMON_ID;
-		m_pC_skill_scroll_bar->SetPosMax(((*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].GetSkillStepList((SKILL_STEP)(m_iDomain-POISON_ID+SKILL_STEP_VAMPIRE_POISON)))->size()-7);
+		m_pC_skill_scroll_bar->SetItemCount(((*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].GetSkillStepList((SKILL_STEP)(m_iDomain-POISON_ID+SKILL_STEP_VAMPIRE_POISON)))->size(), 8);
 		break;
 		
 	case BLOOD_ID:
 		m_skill_domain = SKILLDOMAIN_VAMPIRE;
 		m_iDomain = BLOOD_ID;
-		m_pC_skill_scroll_bar->SetPosMax(((*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].GetSkillStepList((SKILL_STEP)(m_iDomain-POISON_ID+SKILL_STEP_VAMPIRE_POISON)))->size()-7);
+		m_pC_skill_scroll_bar->SetItemCount(((*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].GetSkillStepList((SKILL_STEP)(m_iDomain-POISON_ID+SKILL_STEP_VAMPIRE_POISON)))->size(), 8);
 		break;
 		
 	case INNATE_ID:
 		m_skill_domain = SKILLDOMAIN_VAMPIRE;
 		m_iDomain = INNATE_ID;
 		// etc 땜빵
-		m_pC_skill_scroll_bar->SetPosMax(((*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].GetSkillStepList((SKILL_STEP)(m_iDomain-POISON_ID+SKILL_STEP_VAMPIRE_POISON)))->size()-7);
+		m_pC_skill_scroll_bar->SetItemCount(((*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].GetSkillStepList((SKILL_STEP)(m_iDomain-POISON_ID+SKILL_STEP_VAMPIRE_POISON)))->size(), 8);
 		break;
 		
 	case COMBAT_ID:
@@ -19936,7 +19936,7 @@ void C_VS_UI_INFO::Start(INFO_MODE	Info_Mode)
 					level = level_temp;
 					m_skill_domain = (SKILLDOMAIN)i;
 					m_iDomain = BLADE_ID+i;
-					m_pC_skill_scroll_bar->SetPosMax(((*g_pSkillManager)[m_skill_domain].GetSkillStepList((SKILL_STEP)(SKILL_STEP_APPRENTICE)))->size()-7);
+					m_pC_skill_scroll_bar->SetItemCount(((*g_pSkillManager)[m_skill_domain].GetSkillStepList((SKILL_STEP)(SKILL_STEP_APPRENTICE)))->size(), 8);
 					//				m_pC_skill_scroll_bar->SetPosMax((*g_pSkillManager)[(SKILLDOMAIN)i].GetSize()-7);
 				}
 			}
@@ -24582,7 +24582,7 @@ void C_VS_UI_TEAM_MEMBER_LIST::_Sort(int nSort)
 	else
 		return;
 	m_pC_scroll_bar->SetScrollPos(0);
-	m_pC_scroll_bar->SetPosMax(max(0,m_v_member_list.size()-1));
+	m_pC_scroll_bar->SetItemCount(m_v_member_list.size(), 2);
 	m_focus = -1;
 
 }
@@ -24737,7 +24737,7 @@ void	C_VS_UI_TEAM_MEMBER_LIST::AddMemberList(const TEAM_MEMBER_LIST &member_list
 	
 	// 스크롤바 세팅해주기
 	//m_pC_scroll_bar->SetPosMax(max(0, m_v_member_list.size() - 11 +1));
-	m_pC_scroll_bar->SetPosMax(max(0,m_v_member_list.size()-1));
+	m_pC_scroll_bar->SetItemCount(m_v_member_list.size(), 2);
 	m_pC_scroll_bar->SetScrollPos(0);
 	
 	SetAvailableRecall(bType); // 이게 0이 아니면 길원 리스트 볼때 내가 길마면 recall 을 해야한다.
