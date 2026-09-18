@@ -2362,6 +2362,8 @@ Lines 97-107: the constructor body is `Init(); m_dw_millisec = millisec; if (m_i
 
 #### 🟠 High -- sscanf with unbounded %s writes file-controlled text into two 40-byte stack buffers from a 255-byte input line.
 
+> ✅ **Fixed (2026-09-18)**: skin headers use owned string tokens, and point/rectangle rows use checked numeric extraction before appending. Tests linking the real SkinManager and CRarFile reproduced the long-key stack overwrite and malformed rows containing uninitialized coordinates. A failed reload preserves the previous skin; null/out-of-range numeric inputs have regression guards, and whitespace/comment rows are skipped. Seven parser tests exercise the real extracted-file path and coordinate readers.
+
 **Category:** memory-safety  |  **Location:** `VS_UI/src/SkinManager.cpp:82`
 
 `char szType[40],szKey[40]; sscanf( szLine+1, "%s %s", szKey, szType);` — `szLine` is `char szLine[256]` filled by `rarfile.GetString(szLine, 256)` (line 73), so either token can be up to ~254 bytes. `%s` has no width limit, so a long token overruns `szKey` (and then `szType`) on the stack. The skin data is loaded from a RAR resource pack (`LoadInformation`, lines 52-97), i.e. a redistributable file a user may install from a third party. The `sscanf` return value is also unchecked at lines 27, 37, 82, 112 and 134, so short lines leave POINT/RECT members uninitialized before they are pushed into `m_PointList`/`m_RectList`.

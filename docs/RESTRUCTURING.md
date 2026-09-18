@@ -1142,6 +1142,10 @@ Button tests cover default state, callback dispatch and event-button image
 selection. The Windows feedback pointer lives with its existing CImm adapter,
 so these tests link that adapter without the game UI loop or fake globals.
 
+The same UI target tests SkinManager through its actual CRarFile reader.
+Header tokens use owned strings, coordinate rows are checked before insertion,
+and rejected reloads preserve the last valid skin.
+
 The code-health review also records 18 previously completed fixes that still
 had open headings, with their current source/test evidence. These status
 corrections do not claim new runtime reproductions. Live-server verification

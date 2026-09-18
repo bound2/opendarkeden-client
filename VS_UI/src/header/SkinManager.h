@@ -51,8 +51,8 @@ public :
 	bool			LoadInformation(const char *szFileName);
 
 protected :
-	void			LoadPointList(int k, void *rar );
-	void			LoadRectList(int k, void *rar );
+	bool			LoadPointList(int k, void *rar );
+	bool			LoadRectList(int k, void *rar );
 };
 
 extern SkinManager *g_pSkinManager;
