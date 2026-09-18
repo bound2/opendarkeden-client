@@ -514,15 +514,10 @@ bool Window::MouseControl(UINT message, int _x, int _y)
 //-----------------------------------------------------------------------------
 void Window::KeyboardControl(UINT message, UINT key, long extra)
 {
-#ifdef PLATFORM_WINDOWS
-	gC_ci->IME_MessageProcessor(message, key, extra);
-#else
-	// On macOS/SDL2, the CI::IME_MessageProcessor is a stub
-	// Windows that need keyboard input should override this method
+	// SDL delivers text and editor control keys through InputFocusManager.
 	(void)message;
 	(void)key;
 	(void)extra;
-#endif
 }
 
 //-----------------------------------------------------------------------------

@@ -1,9 +1,6 @@
 #include "U_edit.h"
 #include "../InputFocusManager.h"
 #include "../header/UISafeText.h"
-#ifdef PLATFORM_POSIX
-#include <SDL.h>
-#endif
 
 // ============================================================================
 // UTF-8 <-> UTF-32 Conversion (from textbox_demo.c)
@@ -60,6 +57,7 @@ void LineEditor::Acquire()
 void LineEditor::Unacquire()
 {
 	m_bAcquired = false;
+	EndComposition();
 }
 
 bool LineEditor::IsAcquire() const
@@ -154,10 +152,11 @@ void LineEditor::HandleTextInput(const char* text)
 }
 
 // Handle SDL_TEXTEDITING event (IME composition in progress)
-void LineEditor::HandleTextEditing(const char* text, int start, int length)
+void LineEditor::HandleTextEditing(const char* text, int /*start*/, int /*length*/)
 {
-	if (length > 0) {
-		// Currently composing - store composition text
+	// SDL's start/length describe the selection, which can be empty while
+	// preedit text still exists. Only SDL_TEXTINPUT commits that text.
+	if (text != nullptr && text[0] != '\0') {
 		m_ComposingLen = (int)UISafeText::Utf8ToUtf32(text, m_Composing, MAX_TEXT);
 	} else {
 		// Composition ended
@@ -177,13 +176,10 @@ void LineEditor::UpdateComposition(const char* text, int start, int length)
 	HandleTextEditing(text, start, length);
 }
 
-// End IME composition (commit composed text)
+// Discard preedit state. Committed text arrives separately in HandleTextInput.
 void LineEditor::EndComposition()
 {
-	if (m_ComposingLen > 0) {
-		InsertText(m_Composing, m_ComposingLen);
-		m_ComposingLen = 0;
-	}
+	m_ComposingLen = 0;
 }
 
 // Get text as UTF-8 string (for compatibility)
@@ -301,7 +297,6 @@ LineEditorVisual::LineEditorVisual()
 	m_X = 0;
 	m_Y = 0;
 	m_AbsWidth = 100;
-	m_MaxWidth = 100;
 	m_bPasswordMode = false;
 	m_bAcquired = false;
 	m_PrintInfo.hfont = NULL;
@@ -310,16 +305,6 @@ LineEditorVisual::LineEditorVisual()
 	m_PrintInfo.bk_mode = 0;
 	m_PrintInfo.text_align = 0;
 	m_CursorColor = 0xFFFFFF;
-
-#ifdef PLATFORM_POSIX
-	m_GlyphCache = NULL;
-	m_Layout = NULL;
-	m_LayoutDirty = true;
-
-	// Try to initialize Font Atlas rendering system
-	// Note: We'll create the actual objects when needed (lazy initialization)
-	// For now, we'll use g_Print() as fallback
-#endif
 }
 
 LineEditorVisual::~LineEditorVisual()
@@ -332,16 +317,8 @@ LineEditorVisual::~LineEditorVisual()
 
 void LineEditorVisual::Acquire()
 {
-	// Register this editor as the focused editor
+	// The focus owner controls acquisition state and SDL text input together.
 	InputFocusManager::GetInstance().SetFocusedEditor(this);
-
-	m_Editor.Acquire();
-	m_bAcquired = true;
-
-#ifdef PLATFORM_POSIX
-	// Enable SDL text input on macOS
-	SDL_StartTextInput();
-#endif
 }
 
 void LineEditorVisual::Unacquire()
@@ -353,11 +330,6 @@ void LineEditorVisual::Unacquire()
 
 	m_Editor.Unacquire();
 	m_bAcquired = false;
-
-#ifdef PLATFORM_POSIX
-	// Disable SDL text input on macOS
-	SDL_StopTextInput();
-#endif
 }
 
 void LineEditorVisual::SetPosition(int x, int y)
@@ -368,7 +340,7 @@ void LineEditorVisual::SetPosition(int x, int y)
 
 void LineEditorVisual::SetAbsWidth(int width)
 {
-	m_AbsWidth = width;
+	m_AbsWidth = width > 0 ? width : 0;
 }
 
 void LineEditorVisual::SetPrintInfo(PrintInfo& info)
@@ -396,7 +368,7 @@ bool LineEditorVisual::ReachSizeOfBox() const
 	// Use a default font size since PrintInfo doesn't have a size field
 	const int DEFAULT_FONT_SIZE = 12;
 	int len = m_Editor.GetTextLen();
-	return (len * DEFAULT_FONT_SIZE) >= m_MaxWidth;
+	return (len * DEFAULT_FONT_SIZE) >= m_AbsWidth;
 }
 
 // Compatibility method: convert UTF-32 to wide string (char_t/UTF-16LE)
