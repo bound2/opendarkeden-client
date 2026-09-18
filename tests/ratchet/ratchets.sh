@@ -1487,7 +1487,8 @@ fi
 # 961: three file-dialog copies consolidate into one label helper.
 # 958: the label helper and both file-dialog title copies use owned text.
 # 952: owned file-dialog paths replace six raw directory copies/appends.
-R17_BASELINE=952
+# 950: MString assignment copies into exact-size replacement allocations.
+R17_BASELINE=950
 R17_FILES_FLOOR=500
 
 r17_members () {
