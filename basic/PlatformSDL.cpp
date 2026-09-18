@@ -11,6 +11,7 @@
 
 #include "Platform.h"
 #include "ConfigFile.h"
+#include <memory>
 
 /* Most of this file (time/thread/mutex/event/dynamic-library/keyboard/
    error-reporting/init-shutdown) is plain SDL2 calls that work identically
@@ -114,10 +115,28 @@ void platform_sleep(DWORD ms) {
    platform_event_s pointers, which are not interchangeable with those -
    so on Windows this needs a genuine
    native implementation instead of sharing the SDL one. */
+namespace {
+struct ThreadWrapperData {
+	platform_thread_func_t func;
+	void* param;
+	ThreadWrapperData(platform_thread_func_t callback, void* argument) : func(callback), param(argument) {}
+};
+}
+
 #ifdef PLATFORM_WINDOWS
 
+static DWORD WINAPI ThreadWrapper(void* data) {
+	std::unique_ptr<ThreadWrapperData> wrapper(static_cast<ThreadWrapperData*>(data));
+	return wrapper->func(wrapper->param);
+}
+
 platform_thread_t platform_thread_create(platform_thread_func_t func, void* param) {
-	return CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)func, param, 0, NULL);
+	if (!func) return nullptr;
+	auto wrapper = std::make_unique<ThreadWrapperData>(func, param);
+	const auto thread = CreateThread(NULL, 0, ThreadWrapper, wrapper.get(), 0, NULL);
+	// The started thread owns the data; a failed creation leaves it here.
+	if (thread) wrapper.release();
+	return thread;
 }
 
 int platform_thread_wait(platform_thread_t thread) {
@@ -147,24 +166,18 @@ void platform_event_close(platform_event_t event) {
 
 #else /* !PLATFORM_WINDOWS */
 
-struct ThreadWrapperData {
-	platform_thread_func_t func;
-	void* param;
-};
-
-int SDLCALL ThreadWrapper(void* data) {
-	ThreadWrapperData* wrapper = (ThreadWrapperData*)data;
+static int SDLCALL ThreadWrapper(void* data) {
+	std::unique_ptr<ThreadWrapperData> wrapper(static_cast<ThreadWrapperData*>(data));
 	wrapper->func(wrapper->param);
-	delete wrapper;
 	return 0;
 }
 
 platform_thread_t platform_thread_create(platform_thread_func_t func, void* param) {
-	ThreadWrapperData* wrapper = new ThreadWrapperData;
-	wrapper->func = func;
-	wrapper->param = param;
-
-	return SDL_CreateThread(ThreadWrapper, "thread", wrapper);
+	if (!func) return nullptr;
+	auto wrapper = std::make_unique<ThreadWrapperData>(func, param);
+	const auto thread = SDL_CreateThread(ThreadWrapper, "thread", wrapper.get());
+	if (thread) wrapper.release();
+	return thread;
 }
 
 int platform_thread_wait(platform_thread_t thread) {
