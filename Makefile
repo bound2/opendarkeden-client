@@ -5,7 +5,6 @@
 .PHONY: check-resources extract-resources clean-resources
 .PHONY: sprite-viewer creature-viewer item-viewer map-viewer zone-parser
 .PHONY: debug-asan debug-tsan run-asan run-tsan
-.PHONY: web web-desktop web-clean web-test
 
 # Default target
 all: debug
@@ -17,39 +16,31 @@ BUILD_DIR_DEBUG_ASAN = build/debug-asan
 BUILD_DIR_DEBUG_TSAN = build/debug-tsan
 BUILD_DIR_TESTS = build/tests
 BUILD_DIR_TESTS_ASAN = build/tests-asan
-BUILD_DIR_WEB = emscripten/build
-
-# Get the absolute path of the client directory
-CLIENT_DIR := $(shell pwd)
 
 # DarkEden data directory (can be overridden)
 DARKEDEN_DIR ?= DarkEden
 
-# Emscripten SDK directory
-EMSDK_DIR ?= $(HOME)/project/emsdk
-EMSDK_ENV = $(EMSDK_DIR)/emsdk_env.sh
+# Extra options for the initial CMake configure (for example the vcpkg toolchain).
+CMAKE_ARGS ?=
 
-# Number of parallel jobs
-NPROCS ?= 1
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Linux)
-	NPROCS := $(shell nproc)
-endif
-ifeq ($(UNAME_S),Darwin)
-	NPROCS := $(shell sysctl -n hw.ncpu)
+# GNU Make with a POSIX shell (including Git Bash). An explicit NPROCS wins.
+ifeq ($(OS),Windows_NT)
+NPROCS ?= $(or $(NUMBER_OF_PROCESSORS),1)
+else
+NPROCS ?= $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
 endif
 
 # Debug build
 debug:
 	@echo "Building Debug configuration..."
-	cmake -S . -B $(BUILD_DIR_DEBUG) -DCMAKE_BUILD_TYPE=Debug
-	cmake --build $(BUILD_DIR_DEBUG) -j$(NPROCS)
+	cmake -S . -B $(BUILD_DIR_DEBUG) -DCMAKE_BUILD_TYPE=Debug $(CMAKE_ARGS)
+	cmake --build $(BUILD_DIR_DEBUG) --config Debug -j$(NPROCS)
 
 # Release build
 release:
 	@echo "Building Release configuration..."
-	cmake -S . -B $(BUILD_DIR_RELEASE) -DCMAKE_BUILD_TYPE=Release
-	cmake --build $(BUILD_DIR_RELEASE) -j$(NPROCS)
+	cmake -S . -B $(BUILD_DIR_RELEASE) -DCMAKE_BUILD_TYPE=Release $(CMAKE_ARGS)
+	cmake --build $(BUILD_DIR_RELEASE) --config Release -j$(NPROCS)
 
 # ============================================================
 # Sanitizer Builds
@@ -58,14 +49,14 @@ release:
 # Debug build with AddressSanitizer
 debug-asan:
 	@echo "Building Debug with AddressSanitizer..."
-	cmake -S . -B $(BUILD_DIR_DEBUG_ASAN) -DCMAKE_BUILD_TYPE=Debug -DUSE_ASAN=ON
-	cmake --build $(BUILD_DIR_DEBUG_ASAN) -j$(NPROCS)
+	cmake -S . -B $(BUILD_DIR_DEBUG_ASAN) -DCMAKE_BUILD_TYPE=Debug -DUSE_ASAN=ON $(CMAKE_ARGS)
+	cmake --build $(BUILD_DIR_DEBUG_ASAN) --config Debug -j$(NPROCS)
 
 # Debug build with ThreadSanitizer
 debug-tsan:
 	@echo "Building Debug with ThreadSanitizer..."
-	cmake -S . -B $(BUILD_DIR_DEBUG_TSAN) -DCMAKE_BUILD_TYPE=Debug -DUSE_TSAN=ON
-	cmake --build $(BUILD_DIR_DEBUG_TSAN) -j$(NPROCS)
+	cmake -S . -B $(BUILD_DIR_DEBUG_TSAN) -DCMAKE_BUILD_TYPE=Debug -DUSE_TSAN=ON $(CMAKE_ARGS)
+	cmake --build $(BUILD_DIR_DEBUG_TSAN) --config Debug -j$(NPROCS)
 
 # Run with AddressSanitizer
 run-asan: debug-asan
@@ -84,22 +75,19 @@ run-tsan: debug-tsan
 # Run the unit tests for the static libraries
 test:
 	@echo "Building and running unit tests..."
-	cmake -S . -B $(BUILD_DIR_TESTS) -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON
-	cmake --build $(BUILD_DIR_TESTS) --target unit_tests -j$(NPROCS)
-	cd $(BUILD_DIR_TESTS) && ctest --output-on-failure
+	cmake -S . -B $(BUILD_DIR_TESTS) -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON $(CMAKE_ARGS)
+	cmake --build $(BUILD_DIR_TESTS) --config Debug --target unit_tests user_option_tests -j$(NPROCS)
+	ctest --test-dir $(BUILD_DIR_TESTS) -C Debug --output-on-failure
 
 # Run the unit tests under AddressSanitizer.
 # Memory-safety bugs usually produce garbage rather than a failed assertion,
-# so the sanitizer is what actually catches them. This target drives a
-# single-config generator, so it is for GCC and Clang. MSVC has its own
-# AddressSanitizer and CMakeLists.txt wires it up behind the same USE_ASAN
-# option, but it needs the Visual Studio generator and a --config argument;
-# see the AddressSanitizer section of README.md.
+# so the sanitizer is what actually catches them. MSVC also supports USE_ASAN;
+# see README.md for the required Visual Studio component and vcpkg toolchain.
 test-asan:
 	@echo "Building and running unit tests with AddressSanitizer..."
-	cmake -S . -B $(BUILD_DIR_TESTS_ASAN) -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON -DUSE_ASAN=ON
-	cmake --build $(BUILD_DIR_TESTS_ASAN) --target unit_tests -j$(NPROCS)
-	cd $(BUILD_DIR_TESTS_ASAN) && ctest --output-on-failure
+	cmake -S . -B $(BUILD_DIR_TESTS_ASAN) -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON -DUSE_ASAN=ON $(CMAKE_ARGS)
+	cmake --build $(BUILD_DIR_TESTS_ASAN) --config Debug --target unit_tests user_option_tests -j$(NPROCS)
+	ctest --test-dir $(BUILD_DIR_TESTS_ASAN) -C Debug --output-on-failure
 
 # Code formatting
 fmt:
@@ -118,7 +106,6 @@ clean:
 	rm -rf build/release
 	rm -rf build/debug-asan
 	rm -rf build/debug-tsan
-	$(MAKE) web-clean
 	@echo "Clean complete"
 
 # ============================================================
@@ -141,7 +128,7 @@ check-resources: extract-resources
 	@echo "Validating resource files..."
 	@if [ ! -f build/debug/bin/resource_validator ]; then \
 		echo "Resource validator not built, building..."; \
-		cmake --build build/debug --target resource_validator -j$(NPROCS); \
+		cmake --build build/debug --config Debug --target resource_validator -j$(NPROCS); \
 	fi
 	@build/debug/bin/resource_validator $(INF_FILE)
 
@@ -175,79 +162,6 @@ item-viewer: build/debug/bin/item_viewer
 zone-parser: build/debug/bin/zone_parser
 	@echo "Zone parser built: build/debug/bin/zone_parser"
 
-# ============================================================
-# Web Demo (Emscripten)
-# ============================================================
-
-# Desktop test first (catch 90% of errors before Emscripten build)
-web-desktop:
-	@echo "======================================"
-	@echo "Desktop Test (Before Emscripten)"
-	@echo "======================================"
-	@echo ""
-	@if ! pkg-config --exists sdl2; then \
-		echo "ERROR: SDL2 not found. Install with: brew install sdl2 sdl2_image (macOS)"; \
-		exit 1; \
-	fi
-	@if ! pkg-config --exists SDL2_image; then \
-		echo "ERROR: SDL2_image not found. Install with: brew install sdl2_image (macOS)"; \
-		exit 1; \
-	fi
-	@$(MAKE) -C emscripten test_desktop.sh
-	@echo ""
-	@echo "======================================"
-	@echo "Desktop Build Successful!"
-	@echo "======================================"
-	@echo ""
-	@echo "To test: emscripten/demo_test DarkEden/Data/Map/adam_c.map DarkEden/Data/Image/tile.spk"
-
-# Web demo build (Emscripten)
-web:
-	@echo "======================================"
-	@echo "Building Web Demo with Emscripten"
-	@echo "======================================"
-	@echo ""
-	@if [ ! -f "$(EMSDK_ENV)" ]; then \
-		echo "ERROR: Emscripten SDK not found at $(EMSDK_DIR)!"; \
-		echo "Install from: https://emscripten.org/docs/getting_started/downloads.html"; \
-		echo "Or override with: make web EMSDK_DIR=/path/to/emsdk"; \
-		exit 1; \
-	fi
-	@mkdir -p $(BUILD_DIR_WEB)
-	@echo "Activating Emscripten environment..."
-	@. $(EMSDK_ENV) > /dev/null 2>&1; \
-	cd $(BUILD_DIR_WEB) && \
-	emcmake cmake $(CLIENT_DIR)/emscripten && \
-	echo "Building with Emscripten..." && \
-	emmake make -j$(NPROCS)
-	@echo ""
-	@echo "======================================"
-	@echo "Web Demo Build Complete!"
-	@echo "======================================"
-	@echo ""
-	@echo "Output files:"
-	@echo "  $(BUILD_DIR_WEB)/DarkEdenWebDemo.html"
-	@echo "  $(BUILD_DIR_WEB)/DarkEdenWebDemo.js"
-	@echo "  $(BUILD_DIR_WEB)/DarkEdenWebDemo.wasm"
-	@echo ""
-	@echo "Total size: ~1.1MB (excellent for web!)"
-	@echo ""
-	@echo "To test in browser:"
-	@echo "  cd $(BUILD_DIR_WEB)"
-	@echo "  emrun --browser chrome DarkEdenWebDemo.html"
-
-# Clean web demo build
-web-clean:
-	@echo "Cleaning web demo build..."
-	@rm -rf $(BUILD_DIR_WEB)
-	@rm -f emscripten/demo_test
-	@echo "Web demo clean complete"
-
-# Test web demo in browser
-web-test: web
-	@echo "Launching web demo in browser..."
-	@. $(EMSDK_ENV) > /dev/null 2>&1 && cd $(BUILD_DIR_WEB) && emrun --browser chrome DarkEdenWebDemo.html
-
 # Show help
 help:
 	@echo "OpenDarkEden Client - Available targets:"
@@ -257,17 +171,12 @@ help:
 	@echo "  make release       - Build release version (optimized)"
 	@echo "  make debug-asan     - Build with AddressSanitizer (memory errors)"
 	@echo "  make debug-tsan     - Build with ThreadSanitizer (race conditions)"
-	@echo "  make test          - Run tests (TODO)"
+	@echo "  make test          - Build and run all registered tests"
+	@echo "  make test-asan     - Run all tests with AddressSanitizer"
 	@echo "  make fmt           - Format code (TODO)"
 	@echo "  make fmt-check     - Check code formatting (TODO)"
 	@echo "  make clean         - Clean build directories"
 	@echo "  make help          - Show this help message"
-	@echo ""
-	@echo "Web Demo (Emscripten):"
-	@echo "  make web-desktop   - Test demo on desktop BEFORE Emscripten build"
-	@echo "  make web           - Build WebAssembly demo for browser"
-	@echo "  make web-test      - Build and launch web demo in browser"
-	@echo "  make web-clean     - Clean web demo build"
 	@echo ""
 	@echo "Resource Management:"
 	@echo "  make check-resources        - Validate all resource files"
@@ -283,13 +192,14 @@ help:
 	@echo ""
 	@echo "Resource Management Options:"
 	@echo "  DARKEDEN_DIR=<path>  - Specify DarkEden data directory (default: DarkEden)"
+	@echo "  CMAKE_ARGS=<flags>  - Extra CMake configure options (such as the toolchain)"
+	@echo "  NPROCS=<count>      - Override the parallel build job count"
 	@echo ""
 	@echo "Build directories:"
 	@echo "  Debug:   $(BUILD_DIR_DEBUG)"
 	@echo "  Release: $(BUILD_DIR_RELEASE)"
 	@echo "  ASAN:    $(BUILD_DIR_DEBUG_ASAN)"
 	@echo "  TSAN:    $(BUILD_DIR_DEBUG_TSAN)"
-	@echo "  Web:    $(BUILD_DIR_WEB)"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make                      # Build debug"
@@ -301,12 +211,6 @@ help:
 	@echo "  make sprite-viewer        # Build and use sprite viewer"
 	@echo "  make check-resources DARKEDEN_DIR=/path/to/game  # Custom data dir"
 	@echo ""
-	@echo "Web Demo Workflow:"
-	@echo "  make web-desktop          # Test on desktop first (recommended)"
-	@echo "  make web                  # Build for WebAssembly"
-	@echo "  make web-test             # Launch in browser"
-	@echo ""
 	@echo "Running with sanitizers:"
 	@echo "  build/debug-asan/bin/DarkEden 0000000001    # Run ASAN build"
 	@echo "  build/debug-tsan/bin/DarkEden 0000000001    # Run TSAN build"
-

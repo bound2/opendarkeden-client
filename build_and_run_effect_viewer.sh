@@ -1,55 +1,37 @@
-#!/bin/bash
-# Effect Viewer - Build and Run Script
-# Compiles effect_viewer with ASan and runs it
-
-set -e  # Exit on error
+#!/usr/bin/env bash
+# Build the effect viewer with ASan, then run it from the game data directory.
+# For a fresh Windows tree, set CMAKE_TOOLCHAIN_FILE as described in README.md.
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BUILD_DIR="$SCRIPT_DIR/build/debug-asan"
-DATA_DIR="$SCRIPT_DIR/../DarkEden"
-
-echo "========================================"
-echo "Effect Viewer - Build and Run Script"
-echo "========================================"
-echo ""
-
-# Create build directory
-mkdir -p "$BUILD_DIR"
 cd "$SCRIPT_DIR"
-
-# Configure CMake if needed
-if [ ! -f "$BUILD_DIR/CMakeCache.txt" ]; then
-    echo "[1/4] Configuring CMake with ASan..."
-    cmake -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE=Debug -DUSE_ASAN=ON
-else
-    echo "[1/4] CMake already configured"
+BUILD_DIR="${BUILD_DIR:-$SCRIPT_DIR/build/debug-asan}"
+DATA_DIR="${DARKEDEN_DIR:-$SCRIPT_DIR/DarkEden}"
+JOBS="${NPROCS:-${NUMBER_OF_PROCESSORS:-}}"
+if [ -z "$JOBS" ]; then
+    JOBS="$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)"
 fi
-echo ""
 
-# Build effect_viewer
-echo "[2/4] Building effect_viewer..."
-cmake --build "$BUILD_DIR" --target effect_viewer -- -j$(sysctl -n hw.ncpu)
-echo ""
+# Reconfigure reused trees too, so USE_ASAN is never silently left off.
+cmake -S "$SCRIPT_DIR" -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE=Debug -DUSE_ASAN=ON
+cmake --build "$BUILD_DIR" --config Debug --target effect_viewer --parallel "$JOBS"
+BUILD_DIR="$(cd "$BUILD_DIR" && pwd)"
 
-# Check for DarkEden data
-echo "[3/4] Checking for game data..."
-if [ ! -d "$DATA_DIR" ]; then
-    echo "WARNING: DarkEden data directory not found at: $DATA_DIR"
-    echo "Creating directory structure..."
-    mkdir -p "$DATA_DIR/Data/Image"
-    echo ""
-    echo "⚠️  You need to copy game data to: $DATA_DIR"
-    echo "   Required files in Data/Image/:"
-    echo "   - Effect.efpk or EffectAlpha.efpk"
-    echo "   - Effect.aspk"
-    echo "   - Effect.ppk or EffectAlpha.ppk"
-    echo "   - etc."
-    echo ""
+if [ ! -d "$DATA_DIR/Data/Image" ]; then
+    echo "Game images not found at: $DATA_DIR/Data/Image" >&2
+    echo "Set DARKEDEN_DIR to the directory containing Data/." >&2
+    exit 1
 fi
-echo ""
 
-# Run effect_viewer
-echo "[4/4] Running effect_viewer..."
-echo "========================================"
-cd "$DATA_DIR"
-exec "$BUILD_DIR/bin/effect_viewer" "$@"
+# Visual Studio puts executables under the selected configuration; Ninja does not.
+for VIEWER in "$BUILD_DIR/bin/Debug/effect_viewer.exe" \
+              "$BUILD_DIR/bin/Debug/effect_viewer" \
+              "$BUILD_DIR/bin/effect_viewer.exe" \
+              "$BUILD_DIR/bin/effect_viewer"; do
+    if [ -f "$VIEWER" ]; then
+        cd "$DATA_DIR"
+        exec "$VIEWER" "$@"
+    fi
+done
+echo "effect_viewer executable not found under $BUILD_DIR/bin" >&2
+exit 1

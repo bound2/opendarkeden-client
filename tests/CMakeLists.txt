@@ -26,7 +26,7 @@ target_include_directories(test_framework PUBLIC
 # Test sources are globbed so adding a test only means adding a file to
 # unit/, matching how the rest of this project collects sources.
 #----------------------------------------------------------------------
-file(GLOB UNIT_TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/unit/*.cpp)
+file(GLOB UNIT_TEST_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/unit/*.cpp)
 
 #----------------------------------------------------------------------
 # There is no stubs/ directory any more (docs/RESTRUCTURING.md task

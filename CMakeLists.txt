@@ -240,29 +240,10 @@ if(MSVC)
 endif()
 
 # Find SDL2 (needed for engine and DXLib)
-# Skip for Emscripten - it uses -s USE_SDL=2 linker flags instead
 if(BUILD_ENGINE OR USE_SDL_BACKEND OR NOT WIN32)
-	if(EMSCRIPTEN)
-		# Emscripten provides SDL2 through its port system
-		message(STATUS "Emscripten build: SDL2 will be provided through linker flags")
-		# Add linker flags globally for all executables
-		add_link_options("-sUSE_SDL=2" "-sUSE_SDL_IMAGE=2" "-sUSE_SDL_TTF=2")
-		# Create interface targets for compatibility with empty link libraries
-		add_library(SDL2_interface INTERFACE IMPORTED)
-		add_library(SDL2_image_interface INTERFACE IMPORTED)
-		add_library(SDL2_ttf_interface INTERFACE IMPORTED)
-		add_library(SDL2main_interface INTERFACE IMPORTED)
-
-		# Create aliases for compatibility
-		add_library(SDL2::SDL2 ALIAS SDL2_interface)
-		add_library(SDL2::SDL2main ALIAS SDL2main_interface)
-		add_library(SDL2_image::SDL2_image ALIAS SDL2_image_interface)
-		add_library(SDL2_ttf::SDL2_ttf ALIAS SDL2_ttf_interface)
-	else()
-		find_package(SDL2 REQUIRED)
-		find_package(SDL2_image REQUIRED)
-		find_package(SDL2_ttf REQUIRED)
-	endif()
+	find_package(SDL2 REQUIRED)
+	find_package(SDL2_image REQUIRED)
+	find_package(SDL2_ttf REQUIRED)
 endif()
 
 # Find iconv library (needed for MString.cpp/TextService.cpp). On Windows
@@ -433,12 +414,10 @@ target_compile_definitions(gamemodel PRIVATE ${DARKEDEN_PLATFORM_DEFINITIONS})
 # iconv for MString's GBK -> UTF-8 conversion, carried PUBLIC so every
 # consumer resolves it.
 target_link_libraries(gamemodel PUBLIC basic packetwire framelib)
-if(NOT EMSCRIPTEN)
-	if(Iconv_FOUND)
-		target_link_libraries(gamemodel PUBLIC Iconv::Iconv)
-	else()
-		target_link_libraries(gamemodel PUBLIC iconv)
-	endif()
+if(Iconv_FOUND)
+	target_link_libraries(gamemodel PUBLIC Iconv::Iconv)
+else()
+	target_link_libraries(gamemodel PUBLIC iconv)
 endif()
 
 message(STATUS "gamemodel library: ${_gamemodel_count} sources from tests/arch/gamemodel_files.txt")
@@ -510,7 +489,7 @@ endif()
 # ============================================================
 if(USE_SDL_BACKEND OR NOT WIN32)
 	# VS_UI source files
-	file(GLOB_RECURSE VS_UI_SRC_SOURCES
+	file(GLOB_RECURSE VS_UI_SRC_SOURCES CONFIGURE_DEPENDS
 		VS_UI/src/*.cpp
 		VS_UI/*.cpp  # Include VS_UI root directory for RarFile.cpp
 	)
@@ -760,37 +739,40 @@ set_target_properties(creature_viewer PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
 
-# Map Viewer - browse zone maps with pan/zoom (C++ version using Client/SpriteLib)
-add_executable(map_viewer
-	tools/viewers/map_viewer/main.cpp
-	tools/viewers/map_viewer/zoneloader.cpp
-	Client/TileRenderer.cpp
-)
+# The map loader uses tools/engine/sprite/zone.c.
+if(BUILD_ENGINE)
+	# Map Viewer - browse zone maps with pan/zoom (C++ version using Client/SpriteLib)
+	add_executable(map_viewer
+		tools/viewers/map_viewer/main.cpp
+		tools/viewers/map_viewer/zoneloader.cpp
+		Client/TileRenderer.cpp
+	)
 
-target_include_directories(map_viewer PRIVATE
-	${CMAKE_CURRENT_SOURCE_DIR}
-	${CMAKE_CURRENT_SOURCE_DIR}/Client
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
-	${CMAKE_CURRENT_SOURCE_DIR}/tools/engine/sprite/include
-)
+	target_include_directories(map_viewer PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}/Client
+		${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
+		${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
+		${CMAKE_CURRENT_SOURCE_DIR}/tools/engine/sprite/include
+	)
 
-target_link_libraries(map_viewer PRIVATE
-	sprite
-	SpriteLib
-	dxlib
-	basic
-	SDL2::SDL2
-)
+	target_link_libraries(map_viewer PRIVATE
+		sprite
+		SpriteLib
+		dxlib
+		basic
+		SDL2::SDL2
+	)
 
-# See sprite_viewer above for why this is needed on Windows.
-if(WIN32)
-	target_link_libraries(map_viewer PRIVATE SDL2::SDL2main)
+	# See sprite_viewer above for why this is needed on Windows.
+	if(WIN32)
+		target_link_libraries(map_viewer PRIVATE SDL2::SDL2main)
+	endif()
+
+	set_target_properties(map_viewer PROPERTIES
+		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+	)
 endif()
-
-set_target_properties(map_viewer PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-)
 
 # Effect Viewer - test and debug effect system
 add_executable(effect_viewer
@@ -816,7 +798,6 @@ target_include_directories(effect_viewer PRIVATE
 )
 
 target_link_libraries(effect_viewer PRIVATE
-	sprite
 	SpriteLib
 	framelib
 	dxlib
@@ -841,17 +822,9 @@ if(USE_UBSAN AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 	target_link_options(effect_viewer PRIVATE -fno-sanitize=vptr)
 endif()
 
-# Set output directory for effect_viewer
-# Use CMAKE_BINARY_DIR to avoid nesting (build/debug-asan/bin/)
-if(CMAKE_BUILD_TYPE STREQUAL "debug-asan")
-	set_target_properties(effect_viewer PROPERTIES
-		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-	)
-else()
-	set_target_properties(effect_viewer PROPERTIES
-		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-	)
-endif()
+set_target_properties(effect_viewer PROPERTIES
+	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+)
 
 
 # Examples (always built if backend is enabled)
@@ -863,10 +836,10 @@ endif()
 # Dark Eden Client Executable
 if(USE_SDL_BACKEND OR NOT WIN32)
 	# Collect remaining Client source files (excluding those already in VS_UI)
-	file(GLOB CLIENT_MAIN_SOURCES
+	file(GLOB CLIENT_MAIN_SOURCES CONFIGURE_DEPENDS
 		Client/*.cpp
 		Client/Packet/*.cpp
-		Client/Packet/**/*.cpp
+		Client/Packet/*/*.cpp
 		# The packet handlers (task 2.4): executable-side, bound by
 		# Client/PacketHandlerRegistry.cpp; the wire classes they handle
 		# are in packetwire.
@@ -1082,13 +1055,11 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		)
 	endif()
 
-	# Link iconv library (not needed for Emscripten - has stub implementations)
-	if(NOT EMSCRIPTEN)
-		if(Iconv_FOUND)
-			target_link_libraries(DarkEden PRIVATE Iconv::Iconv)
-		else()
-			target_link_libraries(DarkEden PRIVATE iconv)
-		endif()
+	# Link iconv library
+	if(Iconv_FOUND)
+		target_link_libraries(DarkEden PRIVATE Iconv::Iconv)
+	else()
+		target_link_libraries(DarkEden PRIVATE iconv)
 	endif()
 
 	# Link JPEG library if available

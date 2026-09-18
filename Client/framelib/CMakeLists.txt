@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 # FrameLib - Frame/Sprite animation library
 
 # Collect source files
-file(GLOB FRAMELIB_SOURCES *.cpp)
+file(GLOB FRAMELIB_SOURCES CONFIGURE_DEPENDS *.cpp)
 
 # Remove precompiled header source
 list(FILTER FRAMELIB_SOURCES EXCLUDE REGEX ".*_PCH\\.cpp")
