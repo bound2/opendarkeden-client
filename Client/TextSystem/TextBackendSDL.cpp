@@ -133,6 +133,21 @@ public:
 			"/System/Library/Fonts/Hiragino Sans GB.ttc",
 			"/System/Library/Fonts/PingFang.ttc",
 			"/System/Library/Fonts/Helvetica.ttc",
+#elif defined(PLATFORM_ANDROID)
+			// Android: Noto Sans CJK has been the system CJK font since
+			// 5.0, though vendor images split it per region or keep the
+			// older DroidSansFallback instead; Roboto is on every image
+			// and is the Latin-only last resort. Nothing outside
+			// /system/fonts is readable from an app.
+			"/system/fonts/NotoSansCJK-Regular.ttc",
+			"/system/fonts/NotoSansSC-Regular.otf",
+			"/system/fonts/NotoSansKR-Regular.otf",
+			"/system/fonts/DroidSansFallback.ttf",
+			"/system/fonts/Roboto-Regular.ttf",
+#elif defined(PLATFORM_IOS)
+			// iOS keeps its system fonts in an asset catalog SDL_ttf
+			// cannot open, so only the Data/Font entries above can load
+			// there: the data tree has to ship a font.
 #else
 			// Linux: the Noto CJK package where Debian, Ubuntu and Fedora put
 			// it, then DejaVu, which nearly every distribution installs and

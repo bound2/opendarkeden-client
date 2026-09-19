@@ -1,0 +1,19 @@
+// The Android app: one module, app/, which builds the game's native
+// library through the repository's own CMakeLists.txt and wraps it in
+// SDL's Java activity. See android/README.md.
+pluginManagement {
+	repositories {
+		google()
+		mavenCentral()
+		gradlePluginPortal()
+	}
+}
+dependencyResolutionManagement {
+	repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+	repositories {
+		google()
+		mavenCentral()
+	}
+}
+rootProject.name = "DarkEden"
+include ':app'

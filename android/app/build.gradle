@@ -1,0 +1,85 @@
+// The game as an Android app. The native side is the repository's own
+// CMake build, driven by the Android Gradle plugin with the NDK
+// toolchain (the same configure the `android` preset in
+// CMakePresets.json runs by hand); the Java side is SDL's activity
+// classes, copied by tools/android/build-deps.sh beside the libraries
+// it builds. Nothing here is specific to this machine: the NDK comes
+// from the SDK manager, the libraries from that script.
+plugins {
+	id 'com.android.application'
+}
+
+// The repository root, two levels up: CMakeLists.txt, and the
+// build/android tree tools/android/build-deps.sh fills.
+def repoRoot = rootProject.file('..').canonicalFile
+
+android {
+	namespace 'org.opendarkeden.client'
+	compileSdk 34
+
+	// r27c, the release tools/android/build-deps.sh was verified with;
+	// -PndkVersion=... overrides it for a machine with another r27.
+	ndkVersion project.hasProperty('ndkVersion') ? project.ndkVersion : '27.2.12479018'
+
+	defaultConfig {
+		applicationId 'org.opendarkeden.client'
+		// 28: bionic's iconv, which the string code needs, arrived in
+		// API 28 (tools/android/build-deps.sh says the same).
+		minSdk 28
+		targetSdk 34
+		versionCode 1
+		versionName '1.0.0'
+
+		ndk {
+			// One ABI until the game runs on a device; build-deps.sh
+			// takes the ABI as its argument, so adding armeabi-v7a or
+			// x86_64 here means running it once more for each.
+			abiFilters 'arm64-v8a'
+		}
+
+		externalNativeBuild {
+			cmake {
+				// The same cache as the android preset: no tests (an
+				// executable the APK cannot run), no engine tools, and
+				// the API the libraries were built against.
+				arguments '-DBUILD_TESTS=OFF', '-DBUILD_ENGINE=OFF', '-DANDROID_PLATFORM=android-28'
+				targets 'DarkEden'
+			}
+		}
+	}
+
+	externalNativeBuild {
+		cmake {
+			path file("${repoRoot}/CMakeLists.txt")
+			// The SDK manager's CMake; CMakeLists.txt asks for 3.21.
+			version '3.22.1'
+		}
+	}
+
+	sourceSets {
+		main {
+			// org.libsdl.app: SDLActivity and its helpers, from the SDL
+			// source tree the script unpacked.
+			java.srcDirs += ["${repoRoot}/build/android/java"]
+			// libSDL2.so and the three satellites, per ABI. libmain.so
+			// comes from the CMake build above and needs no listing.
+			jniLibs.srcDirs += ["${repoRoot}/build/android/jniLibs"]
+		}
+	}
+
+	buildTypes {
+		release {
+			minifyEnabled false
+		}
+	}
+
+	packaging {
+		jniLibs {
+			// The CMake build links the four shared libraries by their
+			// imported targets, and the plugin may package what a
+			// target links as well as what jniLibs lists; the same file
+			// from both is not a conflict.
+			pickFirsts += ['**/libSDL2.so', '**/libSDL2_image.so', '**/libSDL2_ttf.so', '**/libSDL2_mixer.so']
+		}
+	}
+}

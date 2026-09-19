@@ -451,11 +451,27 @@ static char g_config_file_path[PATH_MAX] = {0};
 static void get_config_file_path(void) {
 	if (g_config_file_path[0] != '\0') return; /* Already computed */
 
-	/* Get executable directory */
 	char exeDir[PATH_MAX];
+#ifdef PLATFORM_MOBILE
+	/* No executable directory to write beside on a phone: on Android
+	   /proc/self/exe is the system's app_process under /system/bin, and
+	   on iOS the bundle is read-only and signed. SDL_GetPrefPath is the
+	   per-app writable directory on both (the app's internal files
+	   directory on Android, Library/Application Support on iOS),
+	   created on demand, with the trailing separator this path wants. */
+	char* pref = SDL_GetPrefPath("opendarkeden", "DarkEden");
+	if (pref != NULL) {
+		snprintf(exeDir, sizeof(exeDir), "%s", pref);
+		SDL_free(pref);
+	} else {
+		snprintf(exeDir, sizeof(exeDir), "%s", "./");
+	}
+#else
+	/* Get executable directory */
 	if (platform_get_executable_dir(exeDir, sizeof(exeDir)) != 0) {
 		snprintf(exeDir, sizeof(exeDir), "%s", "./");
 	}
+#endif
 
 	/* Use config file in executable directory */
 	snprintf(g_config_file_path, sizeof(g_config_file_path),

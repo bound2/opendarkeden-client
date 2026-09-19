@@ -243,6 +243,26 @@ if(MSVC)
     message(STATUS "Source and execution encoding: UTF-8 (all C/C++ targets)")
 endif()
 
+# Android has no package manager the build can ask for SDL2: the five
+# libraries the desktop takes from vcpkg, apt or Homebrew are built
+# from source by tools/android/build-deps.sh into one prefix per ABI,
+# and that prefix joins the find root here, so every find_package below
+# and in the subdirectories resolves against it unchanged. The NDK
+# toolchain confines every find to CMAKE_FIND_ROOT_PATH (its *_MODE_*
+# variables are ONLY), which is why the prefix goes on that list and
+# not on CMAKE_PREFIX_PATH. Checked before the first find_package so
+# the failure names the script and not a missing SDL2Config.cmake.
+# docs/android-port-2026-09-19.md has the whole shape.
+if(ANDROID)
+	set(DARKEDEN_ANDROID_DEPS "${CMAKE_SOURCE_DIR}/build/android/deps/${ANDROID_ABI}"
+		CACHE PATH "Android: the install prefix tools/android/build-deps.sh produced for this ABI")
+	if(NOT IS_DIRECTORY "${DARKEDEN_ANDROID_DEPS}/lib/cmake/SDL2")
+		message(FATAL_ERROR "No Android libraries under ${DARKEDEN_ANDROID_DEPS}; run tools/android/build-deps.sh ${ANDROID_ABI} first (or point DARKEDEN_ANDROID_DEPS at its prefix)")
+	endif()
+	list(APPEND CMAKE_FIND_ROOT_PATH "${DARKEDEN_ANDROID_DEPS}")
+	message(STATUS "Android libraries: ${DARKEDEN_ANDROID_DEPS}")
+endif()
+
 # Find SDL2 (needed for engine and DXLib)
 if(BUILD_ENGINE OR USE_SDL_BACKEND OR NOT WIN32)
 	find_package(SDL2 REQUIRED)
@@ -475,7 +495,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	message(STATUS "TextSystem library will be built from ${TEXTSYSTEM_SOURCES}")
 endif()
 
-if(BUILD_ENGINE)
+if(BUILD_ENGINE AND NOT ANDROID)
 	add_subdirectory(tools/engine/sprite)
 endif()
 
@@ -625,6 +645,11 @@ endif()
 # ============================================================
 # Resource Management Tools
 # ============================================================
+# Not on Android: they are desktop command-line programs that read a
+# data tree beside them, and an Android executable is nothing the APK
+# can carry or run. The block ends after effect_viewer.
+if(NOT ANDROID)
+
 
 # Resource Validator - checks all resource files for integrity
 add_executable(resource_validator
@@ -829,6 +854,8 @@ set_target_properties(effect_viewer PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
 
+endif() # NOT ANDROID: the resource management and viewing tools
+
 
 # Examples (always built if backend is enabled)
 # Examples directory removed during cleanup
@@ -966,6 +993,23 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# subsystem app (not console/main).
 	if(WIN32)
 		add_executable(DarkEden WIN32 ${CLIENT_MAIN_SOURCES})
+	elseif(ANDROID)
+		# An Android app is a Java process: SDLActivity (the SDL Java
+		# class the Gradle project under android/ subclasses) loads
+		# libSDL2.so and then libmain.so, and calls the SDL_main it finds
+		# in the second. <SDL_main.h>, which SDLMain.cpp includes, spells
+		# main() as SDL_main on this platform, so the same file is the
+		# entry point here as on Linux and macOS; the only difference is
+		# the shape of the binary. The NDK links shared libraries with
+		# --no-undefined, so this is as complete a link check as an
+		# executable would be. log and android: the logcat bridge in
+		# SDLMain.cpp, and the JNI the SDL headers' inline helpers reach.
+		add_library(DarkEden SHARED ${CLIENT_MAIN_SOURCES})
+		set_target_properties(DarkEden PROPERTIES
+			OUTPUT_NAME main
+			LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+		)
+		target_link_libraries(DarkEden PRIVATE log android)
 	else()
 		add_executable(DarkEden ${CLIENT_MAIN_SOURCES})
 	endif()
@@ -1131,6 +1175,9 @@ message(STATUS "  Build Tests:      ${BUILD_TESTS}")
 message(STATUS "  Use SDL Backend:  ${USE_SDL_BACKEND}")
 message(STATUS "  Build Engine:     ${BUILD_ENGINE}")
 message(STATUS "  C++ Standard:     ${CMAKE_CXX_STANDARD}")
+if(ANDROID)
+	message(STATUS "  Android ABI:      ${ANDROID_ABI} (API ${ANDROID_PLATFORM}), libraries from ${DARKEDEN_ANDROID_DEPS}")
+endif()
 if(APPLE)
 	message(STATUS "  macOS bundle:     ${DARKEDEN_MACOS_BUNDLE}")
 endif()

@@ -5,20 +5,29 @@
 // connects dxlib's graphics wrapper to the SpriteLib back buffer.
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
+#include "ClientMain.h"
 #include "DXLib/CDirectDraw.h"
 #include "SpriteLib/CSpriteSurface.h"
 
 extern CSpriteSurface* g_pBack;
 
+// Set by the lifecycle watch in SDLMain.cpp between
+// SDL_APP_WILLENTERBACKGROUND and SDL_APP_DIDENTERFOREGROUND: a mobile
+// OS kills a process that touches its window while it is in the
+// background, so the frame is composed as usual and not presented.
+// Atomic because the watch runs on the thread that raised the event -
+// the Java UI thread on Android - not the game's.
+std::atomic<bool> g_bPresentSuspended(false);
+
 //----------------------------------------------------------------------
 // Flip
 //----------------------------------------------------------------------
-// 한 프레임을 화면에 보여준다. g_pBack(게임이 매 프레임 그려넣는 백버퍼)을
-// SDL2 렌더러에 올린 뒤 present한다.
+// Shows one frame: uploads g_pBack (the back buffer the game draws into
+// every frame) to the SDL2 renderer and presents it.
 //----------------------------------------------------------------------
 void CSDLGraphics::Flip()
 {
-	if (m_pSDLRenderer == NULL)
+	if (m_pSDLRenderer == NULL || g_bPresentSuspended.load())
 	{
 		return;
 	}

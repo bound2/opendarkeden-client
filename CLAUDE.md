@@ -9,7 +9,12 @@ is the working brief for an agent in this repo.
 
 ## Build
 
-Windows + MSVC is the live path. There are two Debug trees and neither subsumes the
+Windows + MSVC is the live path. Linux and macOS build and test through the presets
+(`CMakePresets.json`); Android builds the game as `libmain.so` for the NDK through the
+`android` preset and the Gradle project under `android/`, with its libraries built
+from source by `tools/android/build-deps.sh` - `docs/android-port-2026-09-19.md`
+is the brief, and ratchet R18 holds the mobile macros to the sites listed there.
+There are two Windows Debug trees and neither subsumes the
 other, because `/RTC1` and `/fsanitize=address` are mutually exclusive:
 
 | Tree | Flags | Catches |

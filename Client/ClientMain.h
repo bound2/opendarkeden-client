@@ -21,6 +21,14 @@
 #ifndef __CLIENT_MAIN_H__
 #define __CLIENT_MAIN_H__
 
+#include <atomic>
+
 int ClientMain(char* lpCmdLine, int nCmdShow);
+
+// True between SDL_APP_WILLENTERBACKGROUND and SDL_APP_DIDENTERFOREGROUND
+// on Android and iOS (never set on a desktop, where SDL raises neither);
+// CSDLGraphics::Flip presents nothing while it holds. Defined in
+// CSDLGraphicsFlip.cpp, set by the event watch SDLMain.cpp installs.
+extern std::atomic<bool> g_bPresentSuspended;
 
 #endif // __CLIENT_MAIN_H__

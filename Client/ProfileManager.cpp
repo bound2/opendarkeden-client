@@ -8,7 +8,9 @@
 #else
 #include <unistd.h>
 #include <sys/stat.h>
-#include <sys/dir.h>
+// Not <sys/dir.h>: the BSD spelling of <dirent.h>, which glibc and
+// Darwin keep and bionic does not, and nothing here used it - the
+// directory walks are DirectoryListing.h's (below).
 #endif
 #include "CDirectDraw.h"
 #include "CSpritePack.h"

@@ -1,0 +1,8 @@
+# Gradle and Android Studio output; local.properties carries the machine's SDK path.
+.gradle/
+build/
+app/build/
+app/.cxx/
+local.properties
+*.iml
+.idea/
