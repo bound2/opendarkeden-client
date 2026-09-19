@@ -233,7 +233,29 @@ neither and cannot host one. In order of how soon each would bite:
    a phone; the xBRZ upscaler's factor is chosen from the pixel size and
    a 2400x1080 screen asks for 3x on the CPU every frame. It may need
    to default off on mobile.
-7. **iOS.** Every iOS branch above has been written and never compiled;
+7. **iOS.** The same model as Android, decided 2026-09-19 with the repo
+   owner: a small store app that downloads the game data on its first
+   launch into its own storage, the way Old School RuneScape does on
+   both platforms (its store app is small and fetches the game cache
+   with a progress screen on first run). Apple allows it: an app may
+   download content after install, only not executable code, and the
+   store's cellular size limit applies to the app itself, not to what
+   it downloads. What the native side needs is already there - the
+   data-root search looks under `SDL_GetPrefPath`, which is
+   Library/Application Support, the right home for a re-downloadable
+   tree (it should carry the do-not-back-up attribute, since iCloud
+   would otherwise back up 1.8 GB). What is missing is the iOS
+   counterpart of `BootstrapActivity` and `AssetInstaller`: Android's
+   is Java, and iOS gets a Swift or Objective-C one over `URLSession`
+   (resumable, background-capable) plus an unzip - Foundation has none,
+   so libz with minizip, or a vendored unzipper - with the same
+   contract: `Data/`, `UserSet/` and `darkeden-assets.version` holding
+   the release tag under the app's storage, the pinned URL and SHA-256.
+   It runs before SDL's main, as a view controller shown by the app
+   delegate before `SDL_UIKitRunApp`, or as a first screen the C++ side
+   waits on. None of it can be written honestly from here: it needs
+   Xcode to compile, and nothing else in this document has been
+   compiled for iOS either. Every iOS branch above has been written and never compiled;
    nobody here has a Mac, and an iOS build needs Xcode, a bundle, signing
    and an SDL built for iOS, none of which is here. What it gets from
    this slice is the detection, the paths, the lifecycle watch and the
