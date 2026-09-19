@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- SDL's android-project manifest, trimmed to what the game needs. The
-     activity attributes are the ones SDLActivity documents: the
-     configChanges list keeps a rotation or a keyboard from recreating
-     the activity (and with it the native side), singleTask keeps one
-     game per device, landscape is what the 800x600 frame is. INTERNET
-     is the game server; nothing else is asked for - the data tree goes
-     under the app's own external files directory, which needs no
-     storage permission. -->
+<!-- SDL's android-project manifest, trimmed to what the game needs, with
+     a launcher activity in front. BootstrapActivity is what the icon
+     opens: it installs the game data on the first launch (a download of
+     the assets release into the app's own storage, which needs no
+     storage permission) and starts DarkEdenActivity, SDL's, which is not
+     exported and has no launcher entry. The SDL activity's attributes
+     are the ones SDLActivity documents: the configChanges list keeps a
+     rotation or a keyboard from recreating the activity (and with it the
+     native side), singleTask keeps one game per device, landscape is
+     what the 800x600 frame is. INTERNET is the download and the game
+     server. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
 	<uses-feature android:glEsVersion="0x00020000" android:required="true" />
@@ -22,6 +25,18 @@
 		android:usesCleartextTraffic="true">
 
 		<activity
+			android:name=".BootstrapActivity"
+			android:label="@string/app_name"
+			android:configChanges="orientation|screenLayout|screenSize|keyboardHidden"
+			android:screenOrientation="sensorLandscape"
+			android:exported="true">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+
+		<activity
 			android:name=".DarkEdenActivity"
 			android:label="@string/app_name"
 			android:alwaysRetainTaskState="true"
@@ -29,12 +44,7 @@
 			android:configChanges="layoutDirection|locale|orientation|uiMode|screenLayout|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
 			android:screenOrientation="sensorLandscape"
 			android:preferMinimalPostProcessing="true"
-			android:exported="true">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-				<category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
-		</activity>
+			android:exported="false" />
 	</application>
 
 </manifest>

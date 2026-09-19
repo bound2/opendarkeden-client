@@ -41,22 +41,12 @@ cd android
 gradle assembleDebug        # or open android/ in Android Studio
 ```
 
-The first build runs `tools/android/fetch-assets.sh` (the `fetchAssets`
-task), which downloads the assets release - `darkeden-assets-v2.zip`,
-862 MB, from https://github.com/bound2/opendarkeden-client/releases/tag/assets-v2 -
-into `build/android/src`, checks it against the release's SHA-256,
-unpacks `Data/` and `UserSet/` (1.8 GB) under `build/android/assets` and
-writes the manifest beside them. Later builds see the manifest and skip
-the fetch; delete `build/android/assets` to fetch again, or run the
-script by hand with another release tag. On Windows run the script under
-Git Bash before Gradle.
-
-The plugin then configures `../CMakeLists.txt` for the NDK with the same
-cache the `android` preset uses (`BUILD_TESTS=OFF`, `BUILD_ENGINE=OFF`,
-API 28), builds the `DarkEden` target - `libmain.so`, the game as a shared
-library - and packages it with the SDL libraries, `DarkEdenActivity` and
-the data tree as the APK's assets. The APK is
-`app/build/outputs/apk/debug/app-debug.apk`, about 965 MB (the tree deflates to a little more than the release zip).
+The plugin configures `../CMakeLists.txt` for the NDK with the same cache
+the `android` preset uses (`BUILD_TESTS=OFF`, `BUILD_ENGINE=OFF`, API 28),
+builds the `DarkEden` target - `libmain.so`, the game as a shared library -
+and packages it with the SDL libraries, `BootstrapActivity` and
+`DarkEdenActivity`. The APK is `app/build/outputs/apk/debug/app-debug.apk`,
+about 18 MB: the game data is not in it.
 
 To build only the native library, without the SDK, from the repository
 root:
@@ -75,25 +65,33 @@ cmake --build --preset android      # build/presets/android/bin/libmain.so
 adb install app/build/outputs/apk/debug/app-debug.apk
 ```
 
-The APK cannot be read in place - the game opens its files by path after
-changing into the data root, and an APK's assets are zip entries - so the
-first launch copies the tree out of the package into the app's internal
-files directory, guided by the manifest (`basic/BundledAssets.h`; the
-Android asset manager cannot list subdirectories, which is why the list
-ships with the tree). It is 1.8 GB and takes a while on a phone; the
-window is black meanwhile and logcat reports every hundredth file. A
-marker file holding the release tag is written last, so a later launch
-returns at once, an interrupted copy is redone, and an upgrade whose
-manifest names another tag copies again. The device needs about three
-times the tree's size free during the install: the APK, the copy, and
-the package manager's own staging.
+The data tree is not in the repository or the APK; it is a release of the
+repository (`assets-v2`, one 862 MB zip holding `Data/` and an empty
+`UserSet/`, 1.8 GB unpacked). The icon opens `BootstrapActivity`, which on
+the first launch downloads that zip into the app's cache, checks it
+against the SHA-256 pinned in `AssetInstaller.java`, unpacks it into the
+app's internal files directory and writes a marker holding the release
+tag, with a progress bar throughout and a retry button on a failure; the
+download resumes from where it stopped. Every later launch finds the
+marker and starts the game at once. Bumping the release is the four
+constants at the top of `AssetInstaller.java`, and the next launch fetches
+it. The device needs about 2.7 GB free during the install (the zip and
+the tree), 1.8 GB after; the zip is deleted once unpacked. The same class
+runs on a desktop JVM, which is how it was verified against the real
+release without a device:
+
+```bash
+javac -d /tmp/ai app/src/main/java/org/opendarkeden/client/AssetInstaller.java
+java -cp /tmp/ai org.opendarkeden.client.AssetInstaller /tmp/darkeden
+```
 
 The game then looks for `Data/Info/FileDef.inf` under the app's external
 files directory first and its internal one second (`Client/Client.cpp`,
 the data-root search), and runs from the first that has it, writing
 `UserSet/`, `Log/` and the profile directory beside it. The external
-directory comes first so a tree pushed by hand overrides the bundled one
-during development:
+directory comes first, and the bootstrap treats a tree there as
+installed, so a tree pushed by hand overrides the download during
+development:
 
 ```bash
 adb push Data /sdcard/Android/data/org.opendarkeden.client/files/Data

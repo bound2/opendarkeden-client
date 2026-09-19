@@ -1518,15 +1518,15 @@ fi
 # mobile ones the same way, so a branch on "is this a phone" stays
 # where a phone actually differs - where its data and config live
 # (Client.cpp, PlatformSDL.cpp is in basic and uncounted), the logcat
-# bridge, the orientation hint and the bundled-asset install
-# (SDLMain.cpp), the font list (TextBackendSDL.cpp) - and does not
-# spread into the game logic, where PLATFORM_POSIX is the right test
-# and a touch interface is a design, not an #ifdef. Counted by
-# count_identifier.pl over the same members as R13, minus basic/.
-# R18 = 9 as of 2026-09-19 (8 in the first slice, 9 with the asset
-# install's call site).
+# bridge and the orientation hint (SDLMain.cpp), the font list
+# (TextBackendSDL.cpp) - and does not spread into the game logic, where
+# PLATFORM_POSIX is the right test and a touch interface is a design,
+# not an #ifdef. Counted by count_identifier.pl over the same members
+# as R13, minus basic/. R18 = 8 as of 2026-09-19. (The game data's
+# install is Java, in android/, and adds no site: it runs before the
+# native side starts.)
 #----------------------------------------------------------------------
-R18_BASELINE=9
+R18_BASELINE=8
 
 if [ ! -f tests/tools/count_identifier.pl ]; then
 	echo "FAIL R18: tests/tools/count_identifier.pl is missing"
