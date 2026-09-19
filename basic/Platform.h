@@ -3,7 +3,7 @@
 	Platform.h
 
 	Cross-platform abstraction layer for Dark Eden client.
-	Provides unified API for Windows, Linux, and macOS.
+	Provides unified API for Windows, Linux, macOS, Android and iOS.
 
 	Original Windows API dependencies are abstracted here.
 
@@ -40,13 +40,39 @@
 	#ifndef PLATFORM_WINDOWS
 		#define PLATFORM_WINDOWS
 	#endif
+#elif defined(__ANDROID__)
+	/* Android is Linux underneath - bionic defines __linux__, the
+	   sockets, files, paths and threads are the same API, and every
+	   PLATFORM_LINUX branch in the tree (the executable-directory
+	   lookup, dirname, mkdir) holds there too - so it keeps PLATFORM_LINUX
+	   and adds PLATFORM_ANDROID for the few things that differ: where
+	   the data and the config file live and where the system fonts are.
+	   Tested before __linux__ because the NDK defines both.
+	   (docs/android-port-2026-09-19.md) */
+	#ifndef PLATFORM_LINUX
+		#define PLATFORM_LINUX
+	#endif
+	#ifndef PLATFORM_ANDROID
+		#define PLATFORM_ANDROID
+	#endif
 #elif defined(__linux__)
 	#ifndef PLATFORM_LINUX
 		#define PLATFORM_LINUX
 	#endif
 #elif defined(__APPLE__)
 	#include <TargetConditionals.h>
-	#if TARGET_OS_MAC
+	/* TARGET_OS_MAC is 1 on every Apple platform, iOS included; only
+	   TARGET_OS_IPHONE (1 on iOS, iPadOS, tvOS and their simulators)
+	   tells the phone from the desktop, so it is tested first. iOS is
+	   not PLATFORM_MACOS: the desktop branches it would inherit -
+	   _NSGetExecutablePath, the /System/Library/Fonts list, the
+	   application-bundle data search - are the ones that do not hold
+	   there. */
+	#if TARGET_OS_IPHONE
+		#ifndef PLATFORM_IOS
+			#define PLATFORM_IOS
+		#endif
+	#elif TARGET_OS_MAC
 		#ifndef PLATFORM_MACOS
 			#define PLATFORM_MACOS
 		#endif
@@ -55,11 +81,24 @@
 	#define PLATFORM_UNKNOWN
 #endif
 
+/* PLATFORM_MOBILE: Android and iOS as one. What they share is what
+   separates them from the three desktops: no working directory of the
+   process's own to find the data under, no executable directory to
+   write beside, a touch screen in place of the mouse, and an app
+   lifecycle (background, foreground, terminate) delivered as SDL
+   events. Test this, not PLATFORM_ANDROID or PLATFORM_IOS, for anything
+   that is not actually specific to one of them. */
+#if defined(PLATFORM_ANDROID) || defined(PLATFORM_IOS)
+	#ifndef PLATFORM_MOBILE
+		#define PLATFORM_MOBILE
+	#endif
+#endif
+
 /* PLATFORM_POSIX: the non-Windows platforms as one. Sockets, files,
    paths and threads are the same BSD/POSIX API on Linux and macOS, and
    most of the tree only ever needs "not Windows". Test this, not
    PLATFORM_MACOS, for anything that is not actually Darwin-specific. */
-#if defined(PLATFORM_LINUX) || defined(PLATFORM_MACOS) || defined(__unix__)
+#if defined(PLATFORM_LINUX) || defined(PLATFORM_MACOS) || defined(PLATFORM_IOS) || defined(__unix__)
 	#ifndef PLATFORM_POSIX
 		#define PLATFORM_POSIX
 	#endif

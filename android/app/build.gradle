@@ -1,0 +1,135 @@
+// The game as an Android app. The native side is the repository's own
+// CMake build, driven by the Android Gradle plugin with the NDK
+// toolchain (the same configure the `android` preset in
+// CMakePresets.json runs by hand); the Java side is SDL's activity
+// classes, copied by tools/android/build-deps.sh beside the libraries
+// it builds. Nothing here is specific to this machine: the NDK comes
+// from the SDK manager, the libraries from that script.
+plugins {
+	id 'com.android.application'
+}
+
+// The repository root, two levels up: CMakeLists.txt, and the
+// build/android tree tools/android/build-deps.sh fills.
+def repoRoot = rootProject.file('..').canonicalFile
+
+// The version, from the command line: tools/android/build-apk.sh passes
+// -PdarkedenVersion=<version> (the release tag without its v), and the
+// code, which Android compares as an integer to decide what is an
+// upgrade, follows from it as major * 1000000 + minor * 1000 + patch
+// unless -PdarkedenVersionCode overrides. A build with neither is
+// 0.0.0, code 1: a developer's install that any release replaces.
+def darkedenVersion = project.hasProperty('darkedenVersion') ? project.darkedenVersion : '0.0.0'
+def darkedenVersionCode
+if (project.hasProperty('darkedenVersionCode')) {
+	darkedenVersionCode = project.darkedenVersionCode.toInteger()
+} else {
+	def m = darkedenVersion =~ /^(\d+)\.(\d+)\.(\d+)/
+	darkedenVersionCode = m ? Math.max(1, m[0][1].toInteger() * 1000000 + m[0][2].toInteger() * 1000 + m[0][3].toInteger()) : 1
+}
+
+// Release signing, from the environment: a keystore in
+// ANDROID_KEYSTORE_FILE with ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS
+// and ANDROID_KEY_PASSWORD. Without one, the release build is signed
+// with the debug key so it still installs, but the debug key is a
+// machine's own (CI makes a fresh one every run), and Android refuses
+// an upgrade signed with another key than the installed app - the
+// user has to uninstall, and with it the downloaded data. A real
+// keystore, kept as the repository's secrets, is what makes one
+// release upgrade the last (android/README.md, "Releases").
+def keystoreFile = System.getenv('ANDROID_KEYSTORE_FILE')
+
+android {
+	namespace 'org.opendarkeden.client'
+	compileSdk 34
+
+	// r27c, the release tools/android/build-deps.sh was verified with;
+	// -PndkVersion=... overrides it for a machine with another r27.
+	ndkVersion project.hasProperty('ndkVersion') ? project.ndkVersion : '27.2.12479018'
+
+	defaultConfig {
+		applicationId 'org.opendarkeden.client'
+		// 28: bionic's iconv, which the string code needs, arrived in
+		// API 28 (tools/android/build-deps.sh says the same).
+		minSdk 28
+		targetSdk 34
+		versionCode darkedenVersionCode
+		versionName darkedenVersion
+
+		ndk {
+			// One ABI until the game runs on a device; build-deps.sh
+			// takes the ABI as its argument, so adding armeabi-v7a or
+			// x86_64 here means running it once more for each.
+			abiFilters 'arm64-v8a'
+		}
+
+		externalNativeBuild {
+			cmake {
+				// The same cache as the android preset: no tests (an
+				// executable the APK cannot run), no engine tools, and
+				// the API the libraries were built against.
+				arguments '-DBUILD_TESTS=OFF', '-DBUILD_ENGINE=OFF', '-DANDROID_PLATFORM=android-28'
+				targets 'DarkEden'
+			}
+		}
+	}
+
+	externalNativeBuild {
+		cmake {
+			path file("${repoRoot}/CMakeLists.txt")
+			// The SDK manager's CMake; CMakeLists.txt asks for 3.21.
+			version '3.22.1'
+		}
+	}
+
+	sourceSets {
+		main {
+			// org.libsdl.app: SDLActivity and its helpers, from the SDL
+			// source tree the script unpacked.
+			java.srcDirs += ["${repoRoot}/build/android/java"]
+			// libSDL2.so and the three satellites, per ABI. libmain.so
+			// comes from the CMake build above and needs no listing.
+			jniLibs.srcDirs += ["${repoRoot}/build/android/jniLibs"]
+			// No assets: the game data is a release of the repository,
+			// downloaded on the first launch (AssetInstaller.java), not
+			// a gigabyte inside the APK.
+		}
+	}
+
+	signingConfigs {
+		if (keystoreFile) {
+			release {
+				storeFile file(keystoreFile)
+				storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+				keyAlias System.getenv('ANDROID_KEY_ALIAS')
+				keyPassword System.getenv('ANDROID_KEY_PASSWORD')
+			}
+		}
+	}
+
+	buildTypes {
+		release {
+			minifyEnabled false
+			signingConfig keystoreFile ? signingConfigs.release : signingConfigs.debug
+		}
+	}
+
+	compileOptions {
+		// The two Java classes use lambdas and java.nio.file; 17 is the
+		// plugin's own toolchain level and stops javac warning that the
+		// default (8) is obsolete.
+		sourceCompatibility JavaVersion.VERSION_17
+		targetCompatibility JavaVersion.VERSION_17
+	}
+
+	packaging {
+		jniLibs {
+			// The CMake build links the four shared libraries by their
+			// imported targets, and the plugin may package what a
+			// target links as well as what jniLibs lists; the same file
+			// from both is not a conflict.
+			pickFirsts += ['**/libSDL2.so', '**/libSDL2_image.so', '**/libSDL2_ttf.so', '**/libSDL2_mixer.so']
+		}
+	}
+}
+

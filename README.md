@@ -495,6 +495,23 @@ The Korean IME is SDL text input on every platform, sound is SDL_mixer, and the
 launcher arguments and `UserSet/Display.ini` go through the same code as on
 Windows; none of that has been watched on a Linux display yet.
 
+## Build on Android
+
+The game compiles and links for the NDK as a shared library, `libmain.so`,
+and `android/` is a Gradle project that wraps it in SDL's Java activity.
+`android/README.md` is the recipe: `tools/android/build-deps.sh` builds
+the SDL family and libjpeg-turbo for one ABI (there is no package manager
+to ask), the `android` preset or the Gradle project builds the game, and
+the app downloads the assets release on its first launch.
+`tools/android/build-apk.sh <version>` makes the release package,
+`darkeden-client-<version>-android-arm64.apk`, which the Android workflow
+attaches to a tagged release.
+`tools/ci/verify-android.sh` runs the native build the way
+`.github/workflows/android.yml` does. The state of the port - what is
+verified, what is not, and the touch interface it still needs - is
+`docs/android-port-2026-09-19.md`. iOS shares the platform detection, the
+data and config paths and the lifecycle handling, and has nothing else yet.
+
 ## Build on macOS
 
 The same tree, the same tests, Apple Clang. Nobody maintaining this fork has

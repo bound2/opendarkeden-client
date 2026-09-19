@@ -3065,6 +3065,44 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 			fprintf(stderr, "ClientMain: cannot determine the executable's directory; looking for the data under the working directory only\n");
 		}
 
+#ifdef PLATFORM_MOBILE
+		// A phone has neither: the working directory is "/" and the
+		// executable's directory is the system's (Android runs the game
+		// as libmain.so inside the APK; iOS keeps the bundle read-only
+		// and signed). The data lives in the app's own storage instead,
+		// which is writable, so UserSet/, Log/ and the profile directory
+		// go beside it as they do on the desktop. The desktop candidates
+		// above cannot qualify here and are replaced, not kept behind
+		// these, so a stray FileDef.inf under "/" is never chosen.
+		vCandidates.clear();
+#if defined(PLATFORM_ANDROID)
+		// External storage first: Android/data/<package>/files on the
+		// shared storage, which is what `adb push Data ...` and a file
+		// manager can reach without root; the internal files directory
+		// second, for an install that copies its data there.
+		if (SDL_AndroidGetExternalStoragePath() != NULL)
+			vCandidates.push_back(SDL_AndroidGetExternalStoragePath());
+		if (SDL_AndroidGetInternalStoragePath() != NULL)
+			vCandidates.push_back(SDL_AndroidGetInternalStoragePath());
+#elif defined(PLATFORM_IOS)
+		// The writable per-app directory first (Library/Application
+		// Support, where Xcode or file sharing can place the tree),
+		// then the bundle's own resources, which work for reading only.
+		// Untested: nobody here has a Mac (CLAUDE.md), and this branch
+		// has never been compiled.
+		if (char* szPref = SDL_GetPrefPath("opendarkeden", "DarkEden"))
+		{
+			vCandidates.push_back(szPref);
+			SDL_free(szPref);
+		}
+		if (char* szBundle = SDL_GetBasePath())
+		{
+			vCandidates.push_back(szBundle);
+			SDL_free(szBundle);
+		}
+#endif
+#endif
+
 		const std::string sRoot = Basic::FindDataRoot(vCandidates, FILE_INFO_FILEDEF);
 		if (sRoot.empty())
 		{

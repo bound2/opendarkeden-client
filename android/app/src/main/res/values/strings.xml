@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">Dark Eden</string>
+	<string name="bootstrap_preparing">Preparing to download the game data (%1$d MB, once)</string>
+	<string name="bootstrap_failed">The game data could not be installed.\n%1$s</string>
+	<string name="bootstrap_retry">Try again</string>
+</resources>

@@ -1508,6 +1508,38 @@ else
 fi
 
 #----------------------------------------------------------------------
+# R18 - mobile platform macros spelled outside basic/Platform.h.
+#
+# The Android port (docs/android-port-2026-09-19.md) added
+# PLATFORM_ANDROID, PLATFORM_IOS and PLATFORM_MOBILE to Platform.h the
+# way R13's slice added PLATFORM_LINUX and PLATFORM_POSIX: the header
+# reads them off the compiler builtins and everything else tests them.
+# R13 holds the desktop spellings at their one site; this holds the
+# mobile ones the same way, so a branch on "is this a phone" stays
+# where a phone actually differs - where its data and config live
+# (Client.cpp, PlatformSDL.cpp is in basic and uncounted), the logcat
+# bridge and the orientation hint (SDLMain.cpp), the font list
+# (TextBackendSDL.cpp) - and does not spread into the game logic, where
+# PLATFORM_POSIX is the right test and a touch interface is a design,
+# not an #ifdef. Counted by count_identifier.pl over the same members
+# as R13, minus basic/. R18 = 8 as of 2026-09-19. (The game data's
+# install is Java, in android/, and adds no site: it runs before the
+# native side starts.)
+#----------------------------------------------------------------------
+R18_BASELINE=8
+
+if [ ! -f tests/tools/count_identifier.pl ]; then
+	echo "FAIL R18: tests/tools/count_identifier.pl is missing"
+	FAIL=1
+elif [ "$(r13_cxx_members_outside_basic | wc -l)" -eq 0 ]; then
+	echo "FAIL R18: no sources enumerated - a zero here would measure nothing"
+	FAIL=1
+else
+	R18=$(r13_cxx_members_outside_basic | sort -u | perl tests/tools/count_identifier.pl 'PLATFORM_ANDROID|PLATFORM_IOS|PLATFORM_MOBILE')
+	check "R18 (mobile platform macros spelled outside basic/Platform.h)" "$R18" "$R18_BASELINE"
+fi
+
+#----------------------------------------------------------------------
 # R6 was here for exactly one slice, and retired by doing its job.
 #
 # Task 5.1 stubbed SendBugReport in tests/stubs/client_globals.cpp so
