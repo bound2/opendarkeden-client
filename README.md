@@ -501,8 +501,9 @@ The game compiles and links for the NDK as a shared library, `libmain.so`,
 and `android/` is a Gradle project that wraps it in SDL's Java activity.
 `android/README.md` is the recipe: `tools/android/build-deps.sh` builds
 the SDL family and libjpeg-turbo for one ABI (there is no package manager
-to ask), the `android` preset or the Gradle project builds the game, and
-the data tree goes under the app's external files directory by `adb push`.
+to ask), `tools/android/fetch-assets.sh` turns the assets release into the
+APK's assets, the `android` preset or the Gradle project builds the game,
+and the first launch copies the data tree out of the package.
 `tools/ci/verify-android.sh` runs the native build the way
 `.github/workflows/android.yml` does. The state of the port - what is
 verified, what is not, and the touch interface it still needs - is

@@ -30,6 +30,7 @@
 #ifndef PLATFORM_WINDOWS
 
 #include "ClientMain.h"
+#include "BundledAssets.h"
 
 #include <SDL.h>
 #include <SDL_main.h>
@@ -182,6 +183,41 @@ int main(int argc, char* argv[])
 	}
 
 	SDL_AddEventWatch(AppLifecycleWatch, NULL);
+
+#ifdef PLATFORM_ANDROID
+	// The data tree ships inside the APK (android/, from
+	// tools/android/fetch-assets.sh) and is copied to the app's internal
+	// files directory on the first launch, or the first after an
+	// upgrade that changed it; every later launch finds the marker and
+	// returns at once (basic/BundledAssets.h). ClientMain's data-root
+	// search then finds Data/Info/FileDef.inf there. A failure is not
+	// fatal here: the search goes on to external storage, where a tree
+	// pushed by hand may be, and says on stderr - logcat - what it
+	// tried. The copy is about a gigabyte and takes a while on a phone;
+	// the window is black meanwhile and logcat shows the progress.
+	if (const char* pInternal = SDL_AndroidGetInternalStoragePath())
+	{
+		struct SProgress
+		{
+			static void Report(size_t nDone, size_t nTotal, const char* pPath, void*)
+			{
+				if (nDone % 100 == 0)
+					fprintf(stderr, "bundled assets: %zu of %zu files, at %s\n", nDone, nTotal, pPath);
+			}
+		};
+
+		const Basic::SBundledAssetsResult Result = Basic::InstallBundledAssets(
+			"", "darkeden-assets.manifest", pInternal, SProgress::Report, NULL);
+
+		if (!Result.sError.empty())
+			fprintf(stderr, "bundled assets: not installed: %s\n", Result.sError.c_str());
+		else if (Result.bAlreadyCurrent)
+			fprintf(stderr, "bundled assets: %s already installed under %s\n", Result.sVersion.c_str(), pInternal);
+		else
+			fprintf(stderr, "bundled assets: installed %s under %s (%zu files, %zu new directories)\n",
+				Result.sVersion.c_str(), pInternal, Result.nFiles, Result.nDirectories);
+	}
+#endif
 
 	const int result = ClientMain(&commandLine[0], 1);
 

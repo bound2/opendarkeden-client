@@ -77,6 +77,12 @@ set(BASIC_SOURCES
 	# and lives here already; the UI timers that follow are in VS_UI and
 	# in the executable, both of which link basic.
 	MonotonicClock.cpp
+	# The bundled data tree's first-launch install
+	# (docs/android-port-2026-09-19.md, "Bundled assets"). Here rather
+	# than in the executable so the manifest parser and the copy have a
+	# unit test; the caller is SDLMain.cpp on Android, and the source
+	# reads go through SDL_RWFromFile, which basic links already.
+	BundledAssets.cpp
 )
 
 # Platform-specific sources

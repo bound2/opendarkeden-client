@@ -41,11 +41,22 @@ cd android
 gradle assembleDebug        # or open android/ in Android Studio
 ```
 
-The plugin configures `../CMakeLists.txt` for the NDK with the same cache
-the `android` preset uses (`BUILD_TESTS=OFF`, `BUILD_ENGINE=OFF`, API 28),
-builds the `DarkEden` target - `libmain.so`, the game as a shared library -
-and packages it with the SDL libraries and `DarkEdenActivity`. The APK is
-`app/build/outputs/apk/debug/app-debug.apk`.
+The first build runs `tools/android/fetch-assets.sh` (the `fetchAssets`
+task), which downloads the assets release - `darkeden-assets-v2.zip`,
+862 MB, from https://github.com/bound2/opendarkeden-client/releases/tag/assets-v2 -
+into `build/android/src`, checks it against the release's SHA-256,
+unpacks `Data/` and `UserSet/` (1.8 GB) under `build/android/assets` and
+writes the manifest beside them. Later builds see the manifest and skip
+the fetch; delete `build/android/assets` to fetch again, or run the
+script by hand with another release tag. On Windows run the script under
+Git Bash before Gradle.
+
+The plugin then configures `../CMakeLists.txt` for the NDK with the same
+cache the `android` preset uses (`BUILD_TESTS=OFF`, `BUILD_ENGINE=OFF`,
+API 28), builds the `DarkEden` target - `libmain.so`, the game as a shared
+library - and packages it with the SDL libraries, `DarkEdenActivity` and
+the data tree as the APK's assets. The APK is
+`app/build/outputs/apk/debug/app-debug.apk`, about 965 MB (the tree deflates to a little more than the release zip).
 
 To build only the native library, without the SDK, from the repository
 root:
@@ -58,23 +69,39 @@ cmake --build --preset android      # build/presets/android/bin/libmain.so
 `tools/ci/verify-android.sh` runs both steps the way
 `.github/workflows/android.yml` does.
 
-## 3. Install the data
-
-The game looks for `Data/Info/FileDef.inf` under the app's external files
-directory first, then its internal one (`Client/Client.cpp`, the data-root
-search), and runs from the first that has it; it writes `UserSet/`, `Log/`
-and the profile directory beside the data, as on the desktop, so the data
-must go somewhere writable. After the first install:
+## 3. Install and first launch
 
 ```bash
 adb install app/build/outputs/apk/debug/app-debug.apk
+```
+
+The APK cannot be read in place - the game opens its files by path after
+changing into the data root, and an APK's assets are zip entries - so the
+first launch copies the tree out of the package into the app's internal
+files directory, guided by the manifest (`basic/BundledAssets.h`; the
+Android asset manager cannot list subdirectories, which is why the list
+ships with the tree). It is 1.8 GB and takes a while on a phone; the
+window is black meanwhile and logcat reports every hundredth file. A
+marker file holding the release tag is written last, so a later launch
+returns at once, an interrupted copy is redone, and an upgrade whose
+manifest names another tag copies again. The device needs about three
+times the tree's size free during the install: the APK, the copy, and
+the package manager's own staging.
+
+The game then looks for `Data/Info/FileDef.inf` under the app's external
+files directory first and its internal one second (`Client/Client.cpp`,
+the data-root search), and runs from the first that has it, writing
+`UserSet/`, `Log/` and the profile directory beside it. The external
+directory comes first so a tree pushed by hand overrides the bundled one
+during development:
+
+```bash
 adb push Data /sdcard/Android/data/org.opendarkeden.client/files/Data
 ```
 
-The tree is large; the push takes a while. Whatever the game would have
-printed to a terminal goes to the system log under the tag `DarkEden`
-(`Client/SDLMain.cpp`, the logcat bridge), so a start that shows nothing
-is read with:
+Whatever the game would have printed to a terminal goes to the system
+log under the tag `DarkEden` (`Client/SDLMain.cpp`, the logcat bridge),
+so a start that shows nothing is read with:
 
 ```bash
 adb logcat -s DarkEden SDL

@@ -97,6 +97,50 @@ drains it on a thread into the system log under the tag `DarkEden`, so a
 start that shows nothing is `adb logcat -s DarkEden SDL` away instead of
 invisible.
 
+### Bundled assets
+
+The data tree is not in the repository; it is a release of it
+(`assets-v2`: one 862 MB zip, `Data/` and an empty `UserSet/`, 1.8 GB
+unpacked, 2,020 files in 10 directories). The APK carries it, and the
+first launch copies it out:
+
+- **`tools/android/fetch-assets.sh`** downloads the zip, checks it
+  against the release's SHA-256, unpacks it under
+  `build/android/assets` and writes `darkeden-assets.manifest` beside
+  it: a header, `version <tag>`, `dir <path>` per directory,
+  `file <size> <path>` per file, size first because the tree has names
+  with spaces, sorted so the same tree gives the same manifest. The
+  Gradle project runs it when the manifest is missing and packages the
+  directory as the APK's assets.
+- **`basic/BundledAssets.cpp`** does the copy on the device. An APK's
+  assets are zip entries readable only through the asset manager, and
+  the game opens its files by path after changing into the data root,
+  so the tree has to be on the file system; the asset manager can list
+  a directory's files but not its subdirectories, so the native side
+  needs the manifest. Every source is read through `SDL_RWFromFile`,
+  which on Android reads an asset for a relative path and a file for a
+  directory-rooted one elsewhere, so the unit test
+  (`tests/unit/test_bundled_assets.cpp`, 8 tests) runs the same code
+  over a scratch directory: the copy, the marker written last, the
+  no-op second launch, the version bump that overwrites, the size
+  mismatch that fails without a marker, the interrupted copy that is
+  redone because the old marker goes first, and the malformed and
+  path-escaping manifests that are rejected before anything is written.
+  In `basic` for that reason: the caller is the executable's entry
+  point, and only a library gets a test.
+- **`Client/SDLMain.cpp`** calls it on Android after `SDL_Init`, into
+  `SDL_AndroidGetInternalStoragePath()`, reporting progress and the
+  outcome to logcat; a failure is not fatal, the data-root search goes
+  on to external storage, where a tree pushed by hand may be, and the
+  external directory is searched first so that tree overrides the
+  bundled one during development. The copy takes a while on a phone and
+  the window is black meanwhile; a progress screen is touch-interface
+  work.
+- What it costs: the APK is about 965 MB (2,018 files, the release zip deflated once more), and the device
+  holds the package and the copy both, so about three times the tree
+  during the install. Play Store distribution would need Play Asset
+  Delivery instead of a fat APK; sideloading does not care.
+
 ### The build
 
 - **`tools/android/build-deps.sh`** builds SDL2 (2.30.11), SDL2_image
@@ -140,7 +184,9 @@ All measured on 2026-09-19 in a Linux container (Ubuntu 24.04, x86-64,
 | `tools/android/build-deps.sh arm64-v8a` | five libraries built and installed, about two minutes |
 | `cmake --preset android` | configures; every `find_package` resolves against the prefix |
 | `cmake --build --preset android` | **1,162 translation units, 1 error, 41 warnings**; `bin/libmain.so` links |
-| `gradle assembleDebug` in `android/` | **`app-debug.apk`, 18 MB**: `libmain.so` (16 MB, Debug), the four SDL libraries, the SDL Java classes and `DarkEdenActivity` in three dex files |
+| `gradle assembleDebug` in `android/` | **`app-debug.apk`**: `libmain.so` (16 MB, Debug), the four SDL libraries, the SDL Java classes and `DarkEdenActivity` in three dex files - 18 MB before the assets, **965 MB** with the 2,018-file data tree under `assets/` and its manifest |
+| `tools/android/fetch-assets.sh` | 862 MB zip verified against the release's SHA-256, 1.8 GB unpacked, two Windows leftovers dropped (a `.lnk` and a "copy" of ServerInfo.inf, both with non-ASCII names Gradle could not hash under a non-UTF-8 locale) |
+| `unit_tests` after the extractor | 828 tests, 657,069 checks, 0 failed (8 new); ratchets R13 = 1, R18 = 9 |
 | `tools/ci/verify-linux.sh linux` after the changes | build, 9 ctest entries green; `unit_tests` 820 tests, 657,003 checks, 0 failed; ratchets R13 = 1 and R18 = 8 |
 
 The one error was the whole port's source delta beyond the mobile
@@ -170,11 +216,13 @@ neither and cannot host one. In order of how soon each would bite:
 
 1. **Startup.** Whether `SDLActivity` finds `SDL_main` in `libmain.so`
    (it should: `<SDL_main.h>` renames `main` and declares it with C
-   linkage), whether the data-root search finds a pushed tree, whether
-   the fonts listed exist on the device at hand.
-2. **Installing the APK.** The build is verified; `adb install` and the
-   data push are not, and neither is the size of the data tree against a
-   phone's storage.
+   linkage), whether the asset copy completes and the data-root search
+   then finds the tree, whether the fonts listed exist on the device at
+   hand.
+2. **Installing the APK.** The build is verified; `adb install` of a
+   package this size is not, nor the copy's duration on a real device,
+   nor whether the asset manager streams a compressed 10 MB sprite pack
+   without complaint (it should: `AAsset_read` inflates as it goes).
 3. **Login and gameplay.** Unverified off Windows on any platform (the
    port assessment's area F, still open); a phone inherits that, and a
    failure there is far easier to chase on Linux first.

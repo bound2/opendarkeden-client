@@ -64,6 +64,11 @@ android {
 			// libSDL2.so and the three satellites, per ABI. libmain.so
 			// comes from the CMake build above and needs no listing.
 			jniLibs.srcDirs += ["${repoRoot}/build/android/jniLibs"]
+			// The game data: Data/, UserSet/ and the manifest that
+			// tools/android/fetch-assets.sh wrote from the assets
+			// release. Copied out of the APK to the app's internal
+			// storage on first launch (basic/BundledAssets.h).
+			assets.srcDirs += ["${repoRoot}/build/android/assets"]
 		}
 	}
 
@@ -74,6 +79,9 @@ android {
 	}
 
 	packaging {
+		// Android's default loader path for a large APK: nothing to
+		// change, but the assets make this APK about a gigabyte, so the
+		// install itself is the slow step on a device.
 		jniLibs {
 			// The CMake build links the four shared libraries by their
 			// imported targets, and the plugin may package what a
@@ -82,4 +90,24 @@ android {
 			pickFirsts += ['**/libSDL2.so', '**/libSDL2_image.so', '**/libSDL2_ttf.so', '**/libSDL2_mixer.so']
 		}
 	}
+}
+
+// The assets release, fetched once. The script leaves the manifest as its
+// last step, so its absence means the tree is missing or incomplete and
+// the script runs; its presence means the tree is there and nothing
+// runs (delete build/android/assets to fetch again, or run the script
+// with another tag by hand). A machine without bash runs the script
+// under Git Bash first and never reaches this task's exec.
+def assetsManifest = file("${repoRoot}/build/android/assets/darkeden-assets.manifest")
+
+tasks.register('fetchAssets', Exec) {
+	description 'Downloads the assets release and unpacks it under build/android/assets'
+	workingDir repoRoot
+	commandLine 'bash', 'tools/android/fetch-assets.sh'
+	onlyIf { !assetsManifest.exists() }
+	outputs.file assetsManifest
+}
+
+tasks.named('preBuild') {
+	dependsOn 'fetchAssets'
 }
