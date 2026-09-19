@@ -503,6 +503,9 @@ and `android/` is a Gradle project that wraps it in SDL's Java activity.
 the SDL family and libjpeg-turbo for one ABI (there is no package manager
 to ask), the `android` preset or the Gradle project builds the game, and
 the app downloads the assets release on its first launch.
+`tools/android/build-apk.sh <version>` makes the release package,
+`darkeden-client-<version>-android-arm64.apk`, which the Android workflow
+attaches to a tagged release.
 `tools/ci/verify-android.sh` runs the native build the way
 `.github/workflows/android.yml` does. The state of the port - what is
 verified, what is not, and the touch interface it still needs - is

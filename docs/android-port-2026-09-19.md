@@ -167,6 +167,17 @@ want - so the app fetches it:
   the libraries (built when missing), the preset's configure and build,
   and a check that `bin/libmain.so` exists, on every push and pull
   request, so the port cannot rot the way the macOS path did.
+- **`tools/android/build-apk.sh <version>`** and the workflow's `apk`
+  job: the release package, `darkeden-client-<version>-android-arm64.apk`
+  with a `.sha256` beside it, the naming the other platforms' packages
+  use. The job uploads it as the run's artifact on every push and pull
+  request and, on a `v*` tag, attaches it to that tag's release (the
+  owner's, which created the tag) or creates a draft one. Signing comes
+  from a keystore in the repository's secrets when set, and from the
+  debug key otherwise, which installs but cannot upgrade an install
+  signed with another key; `android/README.md` says how to make the
+  keystore, and it is the one thing a real release needs that this
+  branch cannot supply.
 
 ## Measured state
 
@@ -179,6 +190,7 @@ All measured on 2026-09-19 in a Linux container (Ubuntu 24.04, x86-64,
 | `cmake --preset android` | configures; every `find_package` resolves against the prefix |
 | `cmake --build --preset android` | **1,162 translation units, 1 error, 41 warnings**; `bin/libmain.so` links |
 | `gradle assembleDebug` in `android/` | **`app-debug.apk`, 18 MB**: `libmain.so` (16 MB, Debug), the four SDL libraries, the SDL Java classes, `BootstrapActivity` and `DarkEdenActivity` in three dex files; no data |
+| `tools/android/build-apk.sh` | `darkeden-client-0.0.5-android-arm64.apk`, 13 MB, `versionCode` 5, launcher `BootstrapActivity` (aapt), signature verified by `apksigner` both with a throwaway keystore and with the debug-key fallback; the `.sha256` beside it |
 | `AssetInstaller` on the desktop JVM against the real release | full run: 862 MB downloaded, SHA-256 matched, 2,018 files unpacked (1.8 GB), the two Windows leftovers skipped by name, marker written, zip deleted; a second run returns at once; a run started with the first 500 MB already in the cache resumed at 58% through GitHub's redirect with the Range header honoured and finished with the same tree |
 | `tools/ci/verify-linux.sh linux` after the changes | build, 9 ctest entries green; `unit_tests` 820 tests, 657,003 checks, 0 failed; ratchets R13 = 1 and R18 = 8 |
 

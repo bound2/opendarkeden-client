@@ -10,8 +10,10 @@ this file is the recipe.
 ## Prerequisites
 
 - Android Studio, or the SDK command-line tools, with **SDK Platform 34**,
-  **NDK 27.2.12479018** (r27c; `-PndkVersion=...` picks another 27) and
-  **CMake 3.22.1** installed through the SDK manager.
+  **build-tools 34.0.0**, **NDK 27.2.12479018** (r27c; `-PndkVersion=...`
+  picks another 27) and **CMake 3.22.1** installed through the SDK
+  manager, and a JDK 17 or later. The Gradle wrapper (`gradlew`) fetches
+  Gradle 8.14.3 itself.
 - `cmake` (3.21 or later), `ninja`, `curl` and `tar` on the path, for the
   library build below.
 - The game data (`Data/`), which is not in this repository.
@@ -38,7 +40,7 @@ argument, plus that name in `abiFilters`.
 
 ```bash
 cd android
-gradle assembleDebug        # or open android/ in Android Studio
+./gradlew assembleDebug     # or open android/ in Android Studio
 ```
 
 The plugin configures `../CMakeLists.txt` for the NDK with the same cache
@@ -117,3 +119,53 @@ raise. The UI is anchored to the 800x600 frame, scaled to the screen with
 pillarboxes, so hit targets on a phone are small; a tablet is the
 realistic device until the touch interface exists. The port document has
 the list.
+
+## Releases
+
+The other platforms' packages are `darkeden-client-<version>-<os>-<arch>`
+with a `SHA256SUMS.txt`; Android's is
+`darkeden-client-<version>-android-arm64.apk` with its own `.sha256`
+beside it, and `tools/android/build-apk.sh <version>` makes it:
+
+```bash
+export ANDROID_HOME=$HOME/Android/Sdk
+export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/27.2.12479018
+tools/android/build-apk.sh 0.0.5        # build/android/dist/darkeden-client-0.0.5-android-arm64.apk
+```
+
+It runs the release build through the wrapper with the version passed
+in (the app reports it as `versionName`; the `versionCode` Android
+compares for upgrades is major * 1000000 + minor * 1000 + patch), copies
+the APK under the release name, writes the checksum and checks the
+signature with the SDK's `apksigner`.
+
+`.github/workflows/android.yml` runs the same script in its `apk` job on
+every push and pull request, uploads the result as the run's artifact
+(the way the macOS packages reach a release today), and on a `v*` tag
+attaches the APK and its checksum to that tag's release - the release
+the owner created, which is what created the tag - or, for a tag pushed
+without one, creates a draft release holding them. The version is the
+tag without its `v`; a run that is not a tag builds `0.0.0-<sha>`, which
+any release replaces. The release notes and `SHA256SUMS.txt` stay the
+owner's, as for the other platforms; the `.sha256` file carries the
+line to append.
+
+**Signing.** Android refuses to upgrade an installed app with a package
+signed by another key: the user has to uninstall, and with it the 1.8 GB
+of downloaded data. A release build signs with the keystore named by
+`ANDROID_KEYSTORE_FILE` (with `ANDROID_KEYSTORE_PASSWORD`,
+`ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD`); without one it signs
+with the debug key, which still installs but is the machine's own - CI
+makes a fresh one every run - so two such packages cannot upgrade each
+other. For releases that upgrade in place, make a keystore once and keep
+it as the repository's secrets, which the workflow reads:
+
+```bash
+keytool -genkeypair -v -keystore darkeden-release.keystore -alias darkeden \
+  -keyalg RSA -keysize 2048 -validity 10000
+base64 -w0 darkeden-release.keystore     # -> secret ANDROID_KEYSTORE_BASE64
+# plus ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS (darkeden), ANDROID_KEY_PASSWORD
+```
+
+Keep the keystore itself somewhere safe: a lost key means every user
+reinstalls once.
