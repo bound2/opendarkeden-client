@@ -25,6 +25,10 @@
 #include "MZone.h"
 #include "MHelpMessageManager.h"
 #include <map>
+#include <memory>
+#include "HelpLayout.h"
+
+class HelpImageCache;
 
 #include "SXml.h"
 #include "MInventory.h"
@@ -964,19 +968,11 @@ public:
 	{
 		m_pC_button_group->CancelPushState();		
 	}
-	void	HelpDescPasing();
-	void    LoadCustomstr(char * customstrfilename);
-	void	DrawImg(int m_width, int m_height ,const char * filename,const char * pos, int linecnt);
-//
-	std::vector<std::string>	parsing_data;	
-	std::vector<std::string>	custom_strting;
-	std::vector<std::string>	jpg_file;
-	CDirectDrawSurface*		GetJpgFileLoading(std::string filename) { return  m_jpgData[filename];}
-	void	LoadHelpJpg(std::string filename);
-	void    ClearHelpJpg();
-protected:
-	typedef std::map<std::string , CDirectDrawSurface*> JPGIMG_MAP;
-	JPGIMG_MAP m_jpgData;
+private:
+	void HelpDescPasing();
+	void DrawImg(const HelpLayout::Image& image);
+	HelpLayout::Document m_layout;
+	std::unique_ptr<HelpImageCache> m_images;
 };
 
 class C_VS_UI_SMS_MESSAGE : public Window, public Exec, public ButtonVisual

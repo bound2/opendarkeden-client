@@ -81,9 +81,12 @@ The first install can compile libraries from source and take a while. Existing
 classic-mode build trees keep their old dependency setup; use the presets below
 to validate the pinned manifest without changing those trees.
 
+Existing classic-mode installs need SDL_image's JPEG feature for help artwork:
+`vcpkg install sdl2-image[libjpeg-turbo]:x64-windows --classic --recurse`.
+
 | Package | Used for |
 | --- | --- |
-| `sdl2`, `sdl2-image`, `sdl2-ttf` | rendering, sprites, text (required) |
+| `sdl2`, `sdl2-image[libjpeg-turbo]`, `sdl2-ttf` | rendering, sprites, help JPEGs, text (required) |
 | `sdl2-mixer` | sound and music |
 | `libiconv` | shared resource and legacy text conversion in `basic/TextEncoding.cpp` |
 | `libjpeg-turbo` | JPG load/save in `UtilityFunction.cpp` |
