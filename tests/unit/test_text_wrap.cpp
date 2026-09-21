@@ -79,3 +79,31 @@ TEST(TextWrap, ReadsOnlyTheSuppliedSpanAndOwnsItsRows)
 	CHECK(literalRows.front() == "Zbc");
 	CHECK(literalRows.back() == "def");
 }
+
+TEST(TextWrap, ChatRowsPreserveSpacesAndCanKeepEmbeddedLineBreaks)
+{
+	const TextSystem::Utf8WrapOptions chat{.skipSeamSpace = false, .splitNewlines = false};
+	CHECK((TextSystem::WrapUtf8Lines("ab  cd", 2, chat) ==
+		std::vector<std::string>{"ab", "  ", "cd"}));
+	CHECK((TextSystem::WrapUtf8Lines("ab\ncd\r\nef", 4, chat) ==
+		std::vector<std::string>{"ab\nc", "d\r\ne", "f"}));
+	const std::string text = "\xEA\xB0\x80 \xF0\x9F\x99\x82  Z";
+	for (size_t budget = 4; budget <= 255; ++budget) {
+		std::string joined;
+		for (const auto& row : TextSystem::WrapUtf8Lines(text, budget, chat)) {
+			CHECK(row.size() <= budget);
+			CHECK(TextSystem::IsValidUtf8(row.data(), row.size()));
+			joined += row;
+		}
+		CHECK(joined == text);
+	}
+}
+
+TEST(TextWrap, PersonalAndTreeRowsKeepSpacesAroundExplicitLineBreaks)
+{
+	const TextSystem::Utf8WrapOptions tree{.skipSeamSpace = false};
+	CHECK((TextSystem::WrapUtf8Lines("ab \n cd\n", 2, tree) ==
+		std::vector<std::string>{"ab", " ", " c", "d"}));
+	CHECK((TextSystem::WrapUtf8Lines("\n\xF0\x9F\x99\x82\n\n", 4, tree) ==
+		std::vector<std::string>{"", "\xF0\x9F\x99\x82", ""}));
+}

@@ -1100,7 +1100,11 @@ rounds settled* for the host rules). Test fixtures share
   > with owned strings instead of temporary writes into borrowed text. Width
   > comes from the widest actual row. `test_text_wrap.cpp` owns splitting and
   > lifetime contracts; the two game-global UI callbacks remain regression
-  > guards. The other wrapping callers still need migration.
+  > guards. Creature chat and personal-shop signs also use the splitter,
+  > with explicit policies preserving chat spaces and ordinary-chat newlines.
+  > The row writer clips decorated tree names on scalar boundaries within
+  > their allocated capacity. Personal-shop signs accept read-only input.
+  > Other UI wrapping callers still need migration.
   - Owner: the `unit_tests` link line, `test_textservice_normalize.cpp` and
     `test_glyph_cache.cpp` for repeated work, ownership, eviction and bounds.
 

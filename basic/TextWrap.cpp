@@ -3,12 +3,13 @@
 
 namespace TextSystem {
 
-std::vector<std::string> WrapUtf8Lines(std::string_view text, size_t maxBytes)
+std::vector<std::string> WrapUtf8Lines(std::string_view text, size_t maxBytes,
+	Utf8WrapOptions options)
 {
 	std::vector<std::string> rows;
 	if (maxBytes == 0) return rows;
 	while (!text.empty()) {
-		const size_t newline = text.find_first_of("\r\n");
+		const size_t newline = options.splitNewlines ? text.find_first_of("\r\n") : std::string_view::npos;
 		auto line = text.substr(0, newline);
 		if (line.empty()) rows.emplace_back();
 		while (!line.empty()) {
@@ -20,7 +21,7 @@ std::vector<std::string> WrapUtf8Lines(std::string_view text, size_t maxBytes)
 			}
 			rows.emplace_back(line.substr(0, cut));
 			line.remove_prefix(cut);
-			if (!line.empty() && line.front() == ' ') line.remove_prefix(1);
+			if (options.skipSeamSpace && !line.empty() && line.front() == ' ') line.remove_prefix(1);
 		}
 		if (newline == std::string_view::npos) break;
 		size_t consumed = newline + 1;

@@ -26,6 +26,7 @@
 #include "RaceType.h"
 #include "MemoryPool.h"
 #include "NicknameInfo.h"
+#include <string_view>
 class MItem;
 
 //----------------------------------------------------------------------
@@ -409,7 +410,7 @@ class MCreature : public MObject, public MStatus {
 		// Chatting String
 		//------------------------------------------------------
 		void		SetChatString(const char *str, COLORREF color = RGB(255, 255, 255));
-		void		SetPersnalString(char *str, COLORREF color = RGB(255, 255, 255));
+		void		SetPersnalString(const char *str, COLORREF color = RGB(255, 255, 255));
 		const char*	GetChatString(BYTE i);
 		void		ClearChatString();
 		void		FadeChatString();
@@ -1192,6 +1193,9 @@ class MCreature : public MObject, public MStatus {
 		bool					m_Input_Chat_Flag;
 
 		bool					m_IsSkipMotorStand;
+
+	private :
+		void AppendChatRow(std::string_view text);
 
 };
 
