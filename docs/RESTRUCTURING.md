@@ -219,7 +219,8 @@ movable until a task proves otherwise and adds it here with a reason.
 Compiler warnings also have a shared target policy and a clean-build budget
 checker in `tools/ci/check-warnings.pl` ([operation](../tools/ci/warnings.md)).
 The generated target-option inventory and parser fixtures own the mechanism;
-the initial platform counts are being recorded for the verification presets.
+measured budgets cover all ten CI preset/architecture combinations. Every
+increase fails, and a decrease requires tightening the committed budget.
 
 `tests/ratchet/ratchets.sh` (ctest `ratchets`) holds the baselines inline
 and fails the suite when a count **rises** or drops unrecorded, so
