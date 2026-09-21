@@ -88,7 +88,6 @@ add_test(NAME unit_tests COMMAND unit_tests)
 add_executable(user_option_tests
 	framework/test_main.cpp
 	support/test_user_option.cpp
-	${CMAKE_SOURCE_DIR}/Client/UserOption.cpp
 )
 target_include_directories(user_option_tests PRIVATE ${CMAKE_SOURCE_DIR}/Client)
 target_link_libraries(user_option_tests PRIVATE test_framework VS_UI basic)

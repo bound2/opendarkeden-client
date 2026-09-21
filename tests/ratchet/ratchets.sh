@@ -180,7 +180,9 @@ check () {
 # retain screen geometry and live interaction actions (six out, two in).
 # 472: CMessageArray moves from the executable to basic.
 # 471: the three string-reduction functions move into basic.
-R1_BASELINE=471
+# 470: UserOption.cpp moves byte-for-byte into VS_UI, so its existing test
+# links the same library object as the game rather than recompiling the source.
+R1_BASELINE=470
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -217,7 +219,7 @@ elif [ -n "$BUILD_DIR" ] && [ -f "$BUILD_DIR/build.ninja" ]; then
 	# this branch existed the ratchet SKIPPED on every non-MSVC tree,
 	# which the port assessment listed as fail-open (area A). build.ninja
 	# is rewritten on every configure, so its mtime is the configure time.
-	R1_NINJA_BASELINE=469
+	R1_NINJA_BASELINE=468
 	R1_NINJA="$BUILD_DIR/build.ninja"
 	if [ CMakeLists.txt -nt "$R1_NINJA" ] || [ tests/arch/packetwire_files.txt -nt "$R1_NINJA" ] || [ tests/arch/gamemodel_files.txt -nt "$R1_NINJA" ]; then
 		echo "FAIL R1: $BUILD_DIR was configured before CMakeLists.txt or a library membership file last changed - reconfigure that tree first"
@@ -385,7 +387,10 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 #----------------------------------------------------------------------
 # 20: editor rendering uses the common TextService-backed printer. Its direct
 # g_pLast/g_pBack declarations disappear; the printer still reaches game state.
-R4_BASELINE=20
+# 10: UserOption.cpp and g_pUserOption move into VS_UI. Ten existing UI files
+# now resolve their only previously executable-owned global in the library;
+# this is ownership reclassification, not extraction of those ten files.
+R4_BASELINE=10
 
 lib_members () {
 	# The directory trees minus the files CMake excludes from the
