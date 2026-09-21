@@ -142,3 +142,84 @@ TEST(GlyphCache, ZeroBudgetsAndInvalidFontsDoNotRetainSprites)
 		CHECK_EQ(0, backend.value->GetGlyphCacheStats().pixelBytes);
 	}
 }
+
+TEST(GlyphCache, RepeatedNonBmpMeasurementAndColorsReuseMetrics)
+{
+	Backend backend;
+	constexpr uint32_t smile = 0x1F600;
+	GlyphMetrics expected{};
+	CHECK(backend.value->GetGlyphMetrics(backend.font, smile, expected));
+	for (int i = 0; i < 12; ++i) {
+		GlyphMetrics measured{};
+		CHECK(backend.value->GetGlyphMetrics(backend.font, smile, measured));
+		CHECK_EQ(expected.advance, measured.advance);
+		CHECK_EQ(expected.width, measured.width);
+		const auto* glyph = backend.value->GetGlyph(backend.font, smile, ColorFromRGB(i));
+		CHECK(glyph != nullptr);
+		if (glyph) CHECK_EQ(expected.advance, glyph->metrics.advance);
+	}
+	const auto stats = backend.value->GetGlyphCacheStats();
+	CHECK_EQ(1, stats.metricEntries);
+	CHECK_EQ(1, stats.metricLookups);
+	CHECK_EQ(1, stats.metricRasterizations);
+}
+
+TEST(GlyphCache, MetricEntriesHaveAnIndependentBoundAndKeepRecentHits)
+{
+	Backend backend({1, 1024 * 1024, 2});
+	GlyphMetrics metrics{};
+	CHECK(backend.value->GetGlyphMetrics(backend.font, 'A', metrics));
+	CHECK(backend.value->GetGlyphMetrics(backend.font, 'B', metrics));
+	CHECK(backend.value->GetGlyphMetrics(backend.font, 'A', metrics));
+	CHECK(backend.value->GetGlyphMetrics(backend.font, 'C', metrics));
+	CHECK(backend.value->GetGlyphMetrics(backend.font, 'A', metrics));
+	CHECK_EQ(2, backend.value->GetGlyphCacheStats().metricEntries);
+	CHECK_EQ(3, backend.value->GetGlyphCacheStats().metricLookups);
+	CHECK(backend.value->GetGlyphMetrics(backend.font, 'B', metrics));
+	CHECK_EQ(4, backend.value->GetGlyphCacheStats().metricLookups);
+	CHECK_EQ(2, backend.value->GetGlyphCacheStats().metricEntries);
+}
+
+TEST(GlyphCache, MetricKeysSeparateFontsAndZeroBudgetRetainsNothing)
+{
+	Backend backend;
+	FontDesc larger;
+	larger.size = 32;
+	const auto second = backend.value->AcquireFont(larger);
+	CHECK(second.IsValid());
+	GlyphMetrics firstMetrics{}, secondMetrics{};
+	CHECK(backend.value->GetGlyphMetrics(backend.font, 'W', firstMetrics));
+	CHECK(backend.value->GetGlyphMetrics(second, 'W', secondMetrics));
+	CHECK(secondMetrics.advance > firstMetrics.advance);
+	CHECK_EQ(2, backend.value->GetGlyphCacheStats().metricEntries);
+	CHECK(backend.value->GetGlyphMetrics(backend.font, 'W', firstMetrics));
+	CHECK_EQ(2, backend.value->GetGlyphCacheStats().metricLookups);
+	CHECK(!backend.value->GetGlyphMetrics(FontHandle{}, 'W', firstMetrics));
+	CHECK_EQ(2, backend.value->GetGlyphCacheStats().metricLookups);
+
+	Backend disabled({1, 1024 * 1024, 0});
+	for (int i = 0; i < 2; ++i)
+		CHECK(disabled.value->GetGlyphMetrics(disabled.font, 'W', firstMetrics));
+	CHECK_EQ(0, disabled.value->GetGlyphCacheStats().metricEntries);
+	CHECK_EQ(2, disabled.value->GetGlyphCacheStats().metricLookups);
+}
+
+TEST(GlyphCache, DrawingFirstSeedsMetricsWithoutAnExtraFallbackRasterization)
+{
+	Backend backend;
+	const auto* glyph = backend.value->GetGlyph(backend.font, 0x1F600, ColorFromRGB(0xFFFFFF));
+	CHECK(glyph != nullptr);
+	if (!glyph) return;
+	const auto expected = glyph->metrics;
+	GlyphMetrics measured{};
+	CHECK(backend.value->GetGlyphMetrics(backend.font, 0x1F600, measured));
+	CHECK_EQ(expected.width, measured.width);
+	CHECK_EQ(expected.height, measured.height);
+	CHECK_EQ(expected.advance, measured.advance);
+	CHECK_EQ(expected.bearingX, measured.bearingX);
+	CHECK_EQ(expected.bearingY, measured.bearingY);
+	const auto stats = backend.value->GetGlyphCacheStats();
+	CHECK_EQ(1, stats.metricLookups);
+	CHECK_EQ(0, stats.metricRasterizations);
+	CHECK_EQ(1, stats.rasterizations);
+}

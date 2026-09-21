@@ -3,6 +3,10 @@
 
 #include <algorithm>
 #include <cstring>
+#include <list>
+#include <new>
+#include <string_view>
+#include <unordered_map>
 
 #ifdef USE_SDL_BACKEND
 #include <SDL.h>
@@ -14,6 +18,78 @@
 #endif
 
 namespace TextSystem {
+
+namespace {
+struct NormalizedEntry {
+	std::string input;
+	std::string output;
+	size_t bytes = 0;
+};
+
+struct NormalizationCache {
+	NormalizationCacheLimits limits;
+	NormalizationCacheStats stats;
+	std::list<NormalizedEntry> recent;
+	// Keys borrow immutable strings owned by recent, never caller buffers.
+	std::unordered_map<std::string_view, std::list<NormalizedEntry>::iterator> positions;
+
+	void Remember(const std::string& input, const std::string& output)
+	{
+		if (limits.entries == 0 || input.size() >= limits.storageBytes ||
+			output.size() >= limits.storageBytes - input.size())
+			return;
+		try {
+			recent.push_front({input, output});
+		} catch (const std::bad_alloc&) {
+			return; // Optional caching must not discard a successfully normalized line.
+		}
+		auto& entry = recent.front();
+		// Count owned string capacity, including terminators. Entry limits bound
+		// list/map metadata separately. Subtraction keeps even huge limits safe.
+		if (entry.input.capacity() >= limits.storageBytes ||
+			entry.output.capacity() >= limits.storageBytes - entry.input.capacity() - 1) {
+			recent.pop_front();
+			return;
+		}
+		entry.bytes = entry.input.capacity() + entry.output.capacity() + 2;
+		while (positions.size() >= limits.entries ||
+			entry.bytes > limits.storageBytes - stats.storageBytes) {
+			const auto& cold = recent.back();
+			positions.erase(std::string_view(cold.input));
+			stats.storageBytes -= cold.bytes;
+			recent.pop_back();
+		}
+		try {
+			if (!positions.emplace(std::string_view(entry.input), recent.begin()).second) {
+				recent.pop_front();
+				return;
+			}
+		} catch (const std::bad_alloc&) {
+			recent.pop_front();
+			return;
+		}
+		stats.storageBytes += entry.bytes;
+	}
+};
+
+thread_local NormalizationCache normalizationCache;
+}
+
+void TextService::ResetNormalizationCache(NormalizationCacheLimits limits)
+{
+	// Destroy borrowed keys before their owning strings.
+	decltype(normalizationCache.positions){}.swap(normalizationCache.positions);
+	normalizationCache.recent.clear();
+	normalizationCache.stats = {};
+	normalizationCache.limits = limits;
+}
+
+NormalizationCacheStats TextService::GetNormalizationCacheStats()
+{
+	auto stats = normalizationCache.stats;
+	stats.entries = normalizationCache.positions.size();
+	return stats;
+}
 
 // Transcodes input from fromEncoding to UTF-8, returning an empty string when
 // that code page is unavailable or the bytes are not valid in it. An empty
@@ -60,8 +136,8 @@ static std::string ConvertEncoding(const std::string& input, const char* fromEnc
 #endif
 }
 
-// Public static method for encoding normalization
-std::string TextService::NormalizeText(const std::string& text)
+// The existing normalization policy, evaluated only on a cache miss.
+static std::string NormalizeUncached(const std::string& text)
 {
 	if (text.empty())
 		return text;
@@ -78,6 +154,21 @@ std::string TextService::NormalizeText(const std::string& text)
 	}
 
 	return text;
+}
+
+std::string TextService::NormalizeText(const std::string& text)
+{
+	auto& cache = normalizationCache;
+	const auto found = cache.positions.find(std::string_view(text));
+	if (found != cache.positions.end()) {
+		cache.recent.splice(cache.recent.begin(), cache.recent, found->second);
+		++cache.stats.hits;
+		return found->second->output;
+	}
+	++cache.stats.computations;
+	std::string normalized = NormalizeUncached(text);
+	cache.Remember(text, normalized);
+	return normalized;
 }
 
 TextService::TextService()

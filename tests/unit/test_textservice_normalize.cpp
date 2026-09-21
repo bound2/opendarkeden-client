@@ -43,6 +43,21 @@ std::string Normalize(const std::string& in)
 	return TextSystem::TextService::NormalizeText(in);
 }
 
+struct CacheScope {
+	explicit CacheScope(TextSystem::NormalizationCacheLimits limits = {})
+	{
+		TextSystem::TextService::ResetNormalizationCache(limits);
+	}
+	~CacheScope() { TextSystem::TextService::ResetNormalizationCache(); }
+};
+
+class EmptyTarget : public TextSystem::RenderTarget {
+public:
+	void* GetNative(TextSystem::NativeTargetType) const override { return nullptr; }
+	int GetWidth() const override { return 200; }
+	int GetHeight() const override { return 40; }
+};
+
 } // namespace
 
 //----------------------------------------------------------------------
@@ -99,4 +114,86 @@ TEST(TextServiceNormalize, MixedAsciiAndCp949Converts)
 	const std::string want  = std::string("[") + UTF8_HAN + "] %d";
 
 	CHECK(want == Normalize(mixed));
+}
+
+TEST(TextServiceNormalize, RepeatedLabelsAndRejectedInputAreComputedOnce)
+{
+	CacheScope cache;
+	const std::string label = std::string("[") + CP949_GRUBER + "]";
+	const std::string expected = std::string("[") + UTF8_GRUBER + "]";
+	// A1 starts an incomplete double-byte sequence in every candidate codec.
+	// 81 is a valid C1 control in glibc's EUC-KR, so it is not a portable
+	// rejected-input fixture for the existing normalization policy.
+	const std::string malformed("\xA1");
+	for (int i = 0; i < 20; ++i) {
+		CHECK(expected == Normalize(label));
+		CHECK(malformed == Normalize(malformed));
+	}
+	const auto stats = TextSystem::TextService::GetNormalizationCacheStats();
+	CHECK_EQ(2, stats.computations);
+	CHECK_EQ(38, stats.hits);
+	CHECK_EQ(2, stats.entries);
+}
+
+TEST(TextServiceNormalize, CacheKeysOwnAllBytesAndEvictTheLeastRecentLabel)
+{
+	CacheScope cache({2, 4096});
+	std::string first("a\0b", 3), second("a\0c", 3);
+	CHECK(first == Normalize(first));
+	CHECK(second == Normalize(second));
+	CHECK(first == Normalize(first));
+	CHECK(std::string("third") == Normalize("third"));
+	first[2] = 'z';
+	CHECK(std::string("a\0b", 3) == Normalize(std::string("a\0b", 3)));
+	CHECK_EQ(3, TextSystem::TextService::GetNormalizationCacheStats().computations);
+	CHECK(second == Normalize(second));
+	CHECK_EQ(4, TextSystem::TextService::GetNormalizationCacheStats().computations);
+	CHECK_EQ(2, TextSystem::TextService::GetNormalizationCacheStats().entries);
+}
+
+TEST(TextServiceNormalize, RetainedStorageIsBoundedAndOversizedInputsBypassCache)
+{
+	CacheScope cache({32, 96});
+	for (int i = 0; i < 20; ++i) {
+		const std::string input(40, static_cast<char>('a' + i));
+		CHECK(input == Normalize(input));
+		const auto stats = TextSystem::TextService::GetNormalizationCacheStats();
+		CHECK(stats.entries <= 32);
+		CHECK(stats.storageBytes <= 96);
+	}
+	TextSystem::TextService::ResetNormalizationCache({32, 96});
+	CHECK(std::string("hot") == Normalize("hot"));
+	const std::string huge(10000, 'x');
+	CHECK(huge == Normalize(huge));
+	CHECK(std::string("hot") == Normalize("hot"));
+	CHECK_EQ(2, TextSystem::TextService::GetNormalizationCacheStats().computations);
+	CHECK_EQ(1, TextSystem::TextService::GetNormalizationCacheStats().entries);
+	CHECK_EQ(1, TextSystem::TextService::GetNormalizationCacheStats().hits);
+	TextSystem::TextService::ResetNormalizationCache({0, 96});
+	CHECK(std::string("same") == Normalize("same"));
+	CHECK(std::string("same") == Normalize("same"));
+	CHECK_EQ(2, TextSystem::TextService::GetNormalizationCacheStats().computations);
+	CHECK_EQ(0, TextSystem::TextService::GetNormalizationCacheStats().entries);
+}
+
+TEST(TextServiceNormalize, MeasurementWrappingAndDrawingShareNormalizedLabels)
+{
+	CacheScope cache;
+	auto& service = TextSystem::TextService::Get();
+	const auto style = service.GetDefaultStyle();
+	CHECK(style.font.IsValid());
+	EmptyTarget target;
+	const std::string label = std::string("[") + CP949_GRUBER + "]";
+	const std::string expected = std::string("[") + UTF8_GRUBER + "]";
+	for (int i = 0; i < 3; ++i) {
+		const auto metrics = service.MeasureText(label, style);
+		CHECK(metrics.width > 0);
+		CHECK(metrics.height > 0);
+		const auto lines = service.WrapText(label, style, 0);
+		CHECK_EQ(1, lines.size());
+		if (!lines.empty()) CHECK(expected == lines.front());
+		service.DrawLine(target, label, 0, 0, 0, style);
+	}
+	CHECK_EQ(1, TextSystem::TextService::GetNormalizationCacheStats().computations);
+	CHECK_EQ(8, TextSystem::TextService::GetNormalizationCacheStats().hits);
 }

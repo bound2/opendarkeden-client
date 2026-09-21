@@ -15,6 +15,8 @@ struct Glyph {
 struct GlyphCacheLimits {
 	size_t entries = 4096;
 	size_t pixelBytes = 8 * 1024 * 1024;
+	// Metric metadata is shared across bitmap colors and has its own bound.
+	size_t metricEntries = 4096;
 };
 
 struct GlyphCacheStats {
@@ -22,6 +24,10 @@ struct GlyphCacheStats {
 	size_t pixelBytes = 0;
 	// Successful cache fills, including recreations after eviction.
 	size_t rasterizations = 0;
+	size_t metricEntries = 0;
+	// Actual metric queries and additional white-surface fallback renders.
+	size_t metricLookups = 0;
+	size_t metricRasterizations = 0;
 };
 
 class TextBackend {
