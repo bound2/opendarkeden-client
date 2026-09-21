@@ -88,7 +88,6 @@ add_test(NAME unit_tests COMMAND unit_tests)
 add_executable(user_option_tests
 	framework/test_main.cpp
 	support/test_user_option.cpp
-	${CMAKE_SOURCE_DIR}/Client/UserOption.cpp
 )
 target_include_directories(user_option_tests PRIVATE ${CMAKE_SOURCE_DIR}/Client)
 target_link_libraries(user_option_tests PRIVATE test_framework VS_UI basic)
@@ -148,6 +147,22 @@ if(PERL_EXECUTABLE)
 	)
 else()
 	message(STATUS "perl not found: the arch_includes test is not registered")
+endif()
+
+if(MSVC AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	set(warning_compiler_style CLANG_CL)
+elseif(MSVC)
+	set(warning_compiler_style MSVC)
+else()
+	set(warning_compiler_style GNU)
+endif()
+add_test(NAME warning_policy COMMAND ${CMAKE_COMMAND}
+	"-DPOLICY_FILE=${CMAKE_BINARY_DIR}/warning-policy-$<CONFIG>-CXX.txt"
+	"-DCOMPILER_STYLE=${warning_compiler_style}"
+	-P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_warning_policy.cmake)
+if(PERL_EXECUTABLE)
+	add_test(NAME warning_budget_parser COMMAND ${PERL_EXECUTABLE}
+		${CMAKE_CURRENT_SOURCE_DIR}/tools/test_warning_budget.pl)
 endif()
 
 # Source bytes must match the UTF-8 compiler contract on every platform.

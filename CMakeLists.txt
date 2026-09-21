@@ -243,6 +243,28 @@ if(MSVC)
     message(STATUS "Source and execution encoding: UTF-8 (all C/C++ targets)")
 endif()
 
+# One warning policy reaches every compiled target, including new subdirectories.
+# CMake already defaults MSVC to /W3; the extra level-1 warnings make pointer
+# truncation/extension and undefined preprocessor conditions explicit.
+add_library(project_warnings INTERFACE)
+if(MSVC AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    # clang-cl accepts the MSVC /w1xxxx flags but does not enable the matching
+    # diagnostics. Forward Clang options explicitly through its CL driver.
+    target_compile_options(project_warnings INTERFACE
+        "$<$<COMPILE_LANGUAGE:C,CXX>:/clang:-Wall;/clang:-Wextra;/clang:-Wundef>")
+elseif(MSVC)
+    target_compile_options(project_warnings INTERFACE
+        $<$<COMPILE_LANGUAGE:C,CXX>:/W3>
+        $<$<COMPILE_LANGUAGE:C,CXX>:/w14311>
+        $<$<COMPILE_LANGUAGE:C,CXX>:/w14312>
+        $<$<COMPILE_LANGUAGE:C,CXX>:/w14668>)
+else()
+    target_compile_options(project_warnings INTERFACE
+        "$<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-Wall;-Wextra;-Wundef>"
+        "$<$<COMPILE_LANG_AND_ID:CXX,GNU,Clang,AppleClang>:-Wall;-Wextra;-Wundef>")
+endif()
+link_libraries(project_warnings)
+
 # Find SDL2 (needed for engine and DXLib)
 if(BUILD_ENGINE OR USE_SDL_BACKEND OR NOT WIN32)
 	find_package(SDL2 REQUIRED)
@@ -1123,6 +1145,28 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 
 	message(STATUS "DarkEden executable will be built from remaining Client files (VS_UI compiled separately)")
 endif()
+
+# Generate the actual, transitive options of every compiled target for CTest.
+# Inspect after all subdirectories/targets exist, rather than maintaining a list
+# that could silently omit the next library or executable.
+function(collect_warning_policy directory)
+    get_property(targets DIRECTORY "${directory}" PROPERTY BUILDSYSTEM_TARGETS)
+    foreach(target IN LISTS targets)
+        get_target_property(kind ${target} TYPE)
+        if(kind MATCHES "^(EXECUTABLE|STATIC_LIBRARY|SHARED_LIBRARY|MODULE_LIBRARY|OBJECT_LIBRARY)$")
+            set_property(GLOBAL APPEND_STRING PROPERTY WARNING_POLICY_CONTENT
+                "${target}: $<JOIN:$<TARGET_PROPERTY:${target},COMPILE_OPTIONS>, >\n")
+        endif()
+    endforeach()
+    get_property(children DIRECTORY "${directory}" PROPERTY SUBDIRECTORIES)
+    foreach(child IN LISTS children)
+        collect_warning_policy("${child}")
+    endforeach()
+endfunction()
+collect_warning_policy("${CMAKE_SOURCE_DIR}")
+get_property(warning_policy_content GLOBAL PROPERTY WARNING_POLICY_CONTENT)
+file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/warning-policy-$<CONFIG>-$<COMPILE_LANGUAGE>.txt"
+    CONTENT "${warning_policy_content}" TARGET project_warnings)
 
 # Print configuration summary
 message(STATUS "")

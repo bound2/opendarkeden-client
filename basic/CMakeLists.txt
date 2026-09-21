@@ -117,16 +117,11 @@ if(WIN32 AND NOT USE_SDL_BACKEND)
 		winmm
 	)
 
-	# Disable specific warnings for MSVC
-	if(MSVC)
-		target_compile_options(basic PRIVATE /W3)
-	endif()
 endif()
 
-# Compiler flags
+# This library deliberately carries MSVC pragmas in its portable sources.
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 	target_compile_options(basic PRIVATE
-		-Wall
 		-Wno-unknown-pragmas
 	)
 endif()

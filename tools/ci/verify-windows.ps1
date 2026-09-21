@@ -61,10 +61,13 @@ try {
 	Invoke-LoggedCMake -Arguments @('--preset', $ConfigurePreset,
 		"-DBASH_EXECUTABLE=$bashExe", "-DPERL_EXECUTABLE=$perlExe") -LogPath "$logDir/configure.log"
 
-	$requiredTests = @('unit_tests', 'ratchets', 'arch_includes', 'format_arity', 'packet_indices', 'wire_inventory_fresh')
+	$requiredTests = @('unit_tests', 'user_option_tests', 'ui_tests', 'ratchets', 'arch_includes',
+		'source_encoding', 'warning_policy', 'warning_budget_parser', 'format_arity', 'packet_indices', 'wire_inventory_fresh')
+	$warningFailures = @()
 	foreach ($preset in $BuildPresets) {
 		Write-Host "Building all targets: $preset (log: $logDir/$preset-build.log)"
-		Invoke-LoggedCMake -Arguments @('--build', '--preset', $preset) -LogPath "$logDir/$preset-build.log"
+		# A complete rebuild is required to compare the warning population.
+		Invoke-LoggedCMake -Arguments @('--build', '--preset', $preset, '--clean-first') -LogPath "$logDir/$preset-build.log"
 		$inventory = ctest --preset $preset --show-only=json-v1
 		if ($LASTEXITCODE -ne 0) { throw "Cannot list tests: $preset" }
 		$testNames = @(($inventory | ConvertFrom-Json).tests | ForEach-Object { $_.name })
@@ -73,7 +76,19 @@ try {
 		}
 		ctest --preset $preset --output-junit "$logDir/$preset-tests.xml"
 		if ($LASTEXITCODE -ne 0) { throw "Tests failed: $preset" }
+		try {
+			# PowerShell 5 must not turn Perl's diagnostic stderr into an early
+			# terminating error: collect every requested configuration first.
+			$ErrorActionPreference = 'Continue'
+			& $perlExe tools/ci/check-warnings.pl --log "$logDir/$preset-build.log" `
+				--profile "$preset-x64" --baseline tools/ci/warning-baselines.json `
+				--report "$logDir/$preset-warnings.json"
+			$warningExit = $LASTEXITCODE
+		}
+		finally { $ErrorActionPreference = 'Stop' }
+		if ($warningExit -ne 0) { $warningFailures += $preset }
 	}
+	if ($warningFailures.Count -gt 0) { throw "Warning budgets failed: $($warningFailures -join ', ')" }
 }
 finally {
 	Pop-Location
