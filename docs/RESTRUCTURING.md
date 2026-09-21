@@ -1272,6 +1272,14 @@ in SpriteLib and framelib. Its existing tests exercise all include paths.
 The unused `CDataTable` raw-object serializer is deleted, and 43 top-level
 client includes now name the actual relative path to `Platform.h`.
 
+The indexed-sprite 555/565 loaders now share checked header and row decoding.
+Complete rejected sprites leave the following packed record readable, while
+truncation leaves an empty object and failed stream. Encoded counts, decoded
+width and palette indices are validated before publication; conversion changes
+only fixed colors. `test_index_sprite_loading.cpp` owns these contracts and
+empty-sprite release state. Offline real-art validation and rejection logging
+remain separate review follow-ups.
+
 The unused GL import and TGA/IMG interfaces are deleted, together with their
 abandoned UI drawing comments. VS_UI uses the existing SDL surface helper;
 it no longer imports declarations from the missing legacy graphics DLL.

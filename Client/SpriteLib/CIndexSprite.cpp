@@ -5,6 +5,9 @@
 #include "CSprite.h"
 #include "CSpriteSurface.h"
 #include "CIndexSprite.h"
+#include <memory>
+#include <span>
+#include <vector>
 
 #ifdef SPRITELIB_BACKEND_SDL
 #include "SpriteLibBackend.h"
@@ -510,17 +513,72 @@ CIndexSprite::Release()
 #endif
 	if (m_Pixels!=NULL)
 	{
-		m_bInit		= false;
-
 		for (int i=0; i<m_Height; i++)
 			delete [] m_Pixels[i];
 			
 		delete [] m_Pixels;
-
-		m_Pixels	= NULL;
-		m_Width		= 0;
-		m_Height	= 0;		
 	}
+	m_Pixels = nullptr;
+	m_Width = m_Height = 0;
+	m_bInit = false;
+}
+
+bool CIndexSprite::LoadPixels(std::ifstream& file, bool convertTo555)
+{
+	Release();
+	WORD width = 0, height = 0;
+	if (!file.read(reinterpret_cast<char*>(&width), sizeof(width)) ||
+		!file.read(reinterpret_cast<char*>(&height), sizeof(height))) return false;
+	if (width == 0 || height == 0) {
+		m_Width = width;
+		m_Height = height;
+		m_bInit = true;
+		return true;
+	}
+
+	std::vector<std::unique_ptr<WORD[]>> rows(height);
+	std::vector<std::size_t> lengths(height);
+	// Consume complete records before rejecting their contents, so the next
+	// sprite remains readable in a pack. Truncation retains the stream failure.
+	for (WORD y = 0; y < height; ++y) {
+		WORD length = 0;
+		if (!file.read(reinterpret_cast<char*>(&length), sizeof(length))) return false;
+		lengths[y] = length;
+		if (!length) continue;
+		rows[y] = std::make_unique<WORD[]>(length);
+		if (!file.read(reinterpret_cast<char*>(rows[y].get()), length * sizeof(WORD))) return false;
+	}
+	for (WORD y = 0; y < height; ++y) {
+		const std::span<WORD> line(rows[y].get(), lengths[y]);
+		if (line.empty()) return false;
+		std::size_t offset = 1, pixels = 0;
+		for (int run = 0; run < line[0]; ++run) {
+			if (line.size() - offset < 2) return false;
+			const WORD transparent = line[offset++], indexed = line[offset++];
+			if (transparent > width - pixels) return false;
+			pixels += transparent;
+			if (indexed > width - pixels || indexed > line.size() - offset) return false;
+			for (WORD i = 0; i < indexed; ++i)
+				if ((line[offset + i] & 0xff) >= MAX_COLORGRADATION) return false;
+			offset += indexed;
+			pixels += indexed;
+			if (offset >= line.size()) return false;
+			const WORD colored = line[offset++];
+			if (colored > width - pixels || colored > line.size() - offset) return false;
+			if (convertTo555)
+				for (WORD i = 0; i < colored; ++i)
+					line[offset + i] = ColorDraw::Convert565to555(line[offset + i]);
+			offset += colored;
+			pixels += colored;
+		}
+	}
+	auto pointers = std::make_unique<WORD*[]>(height);
+	for (WORD y = 0; y < height; ++y) pointers[y] = rows[y].release();
+	m_Pixels = pointers.release();
+	m_Width = width;
+	m_Height = height;
+	m_bInit = true;
+	return true;
 }
 
 

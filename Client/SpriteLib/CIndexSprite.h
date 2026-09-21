@@ -254,6 +254,9 @@ class CIndexSprite {
 		static BYTE		ColorToGradation[MAX_COLOR_TO_GRADATION];			// R+G+B의 값으로 Gradation값을 얻어낸다.
 
 	protected :
+		// Consume complete rows before validation; reject to an empty sprite.
+		bool LoadPixels(std::ifstream& file, bool convertTo555);
+
 		WORD			m_Width;		// 가로 pixel수
 		WORD			m_Height;		// 세로 pixel수		
 		WORD**			m_Pixels;		// pixels
