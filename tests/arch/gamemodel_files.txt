@@ -37,6 +37,10 @@ Client/DrawTypeDef.h
 Client/MGameStringTable.cpp
 Client/MGameStringTable.h
 
+# Owning tokenizer used by application command parsers.
+Client/CToken.cpp
+Client/CToken.h
+
 # Sound table
 Client/MSoundTable.cpp
 Client/MSoundTable.h

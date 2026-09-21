@@ -185,7 +185,8 @@ check () {
 # 469: the corrected SXml implementation moves unchanged into VS_UI; its
 # older duplicate is removed and ui_tests links the production parser.
 # 468: the help-message loader moves unchanged into VS_UI for parser tests.
-R1_BASELINE=468
+# 467: CToken moves byte-identically into gamemodel for reset/lifetime tests.
+R1_BASELINE=467
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -222,7 +223,7 @@ elif [ -n "$BUILD_DIR" ] && [ -f "$BUILD_DIR/build.ninja" ]; then
 	# this branch existed the ratchet SKIPPED on every non-MSVC tree,
 	# which the port assessment listed as fail-open (area A). build.ninja
 	# is rewritten on every configure, so its mtime is the configure time.
-	R1_NINJA_BASELINE=466
+	R1_NINJA_BASELINE=465
 	R1_NINJA="$BUILD_DIR/build.ninja"
 	if [ CMakeLists.txt -nt "$R1_NINJA" ] || [ tests/arch/packetwire_files.txt -nt "$R1_NINJA" ] || [ tests/arch/gamemodel_files.txt -nt "$R1_NINJA" ]; then
 		echo "FAIL R1: $BUILD_DIR was configured before CMakeLists.txt or a library membership file last changed - reconfigure that tree first"
@@ -1502,7 +1503,8 @@ fi
 # 944: owned queued chat text removes six raw string-copy lines.
 # 587: bound 355 narrow wsprintf calls, bound the wide trace command, and
 # remove the unused CMP3 string formatter. R18 prevents raw wsprintf returning.
-R17_BASELINE=587
+# 586: CToken copies an owned replacement by its measured length.
+R17_BASELINE=586
 R17_FILES_FLOOR=500
 
 r17_members () {
