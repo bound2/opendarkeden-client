@@ -2373,6 +2373,8 @@ The original in VS_UI/src/hangul/FL2.cpp:38 walked the string counting DBCS lead
 
 #### 🔴 Critical -- _Multiline_Info_Show writes a NUL terminator at a fixed offset into the caller's buffer before checking that the remaining string is that long, walking past the end of the buffer.
 
+> **Current implementation (2026-09-21):** the multiline tooltip callbacks use owned `TextWrap` rows and never modify the supplied string. Sizing measures those same complete rows, including the widest row. The paragraph below records the earlier in-place repair; the wrapping findings track the remaining callers.
+
 **Category:** memory-safety  |  **Location:** `VS_UI/src/VS_UI_Description.cpp:3696`
 
 In the loop at lines 3688-3708, `char_temp = cur[CurrentPos - check]; cur[CurrentPos - check] = '\0';` executes before the `if(strlen(cur) < CurrentPos-check) break;` guard on line 3702. `cur` advances by ~`CurrentPos` (36) bytes per iteration and the loop runs `strlen/right + 1` times, so the final iteration writes at an offset beyond the string's end. The only caller is VS_UI/src/vs_ui_gamecommon2.cpp:15919 passing `szMissionPopupString`, a `static char[512]` (line 15853), with `right=36`. Line 3686 additionally does `strcpy(sz_temp, cur)` into a `char sz_temp[4048]` (line 3682) that is never read afterwards — a dead, unbounded copy. The function also mutates the caller's buffer in place while notionally just rendering it.
@@ -2506,6 +2508,8 @@ In `utf8_to_utf32` (lines 35-60) the multi-byte branches consume continuation by
 **Recommendation:** Rewrite as a table- or explicit-step decoder that checks for `\0` and for `0x80` continuation bits before each consumption, with each `s++` on its own statement. Add a NULL guard to `HandleTextEditing`.
 
 #### 🟡 Medium -- The SDL replacement for g_PossibleStringCut has different semantics from the original its ~40 call sites were written against.
+
+> **Tooltip follow-up (2026-09-21):** `_Multiline_Info_Calculator` and `_Multiline_Info_Show` now share owned rows from `basic/TextWrap`, normalize the complete input before splitting and measure the widest rendered row. No temporary NUL is written into the caller's text. Five library tests cover complete UTF-8 scalars, progress at narrow columns, spaces, explicit line breaks, empty input and bounded/read-only input lifetimes. The UI wiring is a regression guard; the other live wrapping callers and the old predicate remain open under this finding and its duplicate above.
 
 **Category:** correctness  |  **Location:** `Client/RenderingFunctions.cpp:313`
 

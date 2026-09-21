@@ -69,6 +69,7 @@ set(BASIC_SOURCES
 	# C library.
 	SafeFormat.cpp
 	StringReduction.cpp
+	TextWrap.cpp
 	TextEncoding.cpp
 	ResourceText.cpp
 	MemoryPool.cpp
