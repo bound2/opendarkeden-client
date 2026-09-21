@@ -212,6 +212,11 @@ Shrink it when a task extracts a seam, and record the removal here.
 `user_option_tests` links that library object and exercises the real settings
 reader/writer together with `KeyAccelerator`; persistence fixes are test-first.
 
+`SlayerPortalData` parses the portal resource independently of the dialog.
+`test_portal_data.cpp` links the production reader and covers truncation, field
+and count bounds, little-endian unaligned input and atomic replacement. The
+dialog's sprite coordinates, zone filtering and navigation remain UI exemptions.
+
 Everything else under `Client/*.cpp` and `Client/Packet/**` is presumed
 movable until a task proves otherwise and adds it here with a reason.
 
