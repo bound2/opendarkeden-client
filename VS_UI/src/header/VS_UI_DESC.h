@@ -3,8 +3,9 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "VS_UI_util.h"
-//#include "VS_UI_GameCommon.h"
 #include "../../RarFile.h"
+#include <memory>
+#include <string_view>
 #include <vector>
 
 #ifndef _VS_UI_DESC_H_
@@ -23,7 +24,9 @@ class C_VS_UI_DESC
 {
 private:
 	std::vector<DESC_SPRITE>	m_Sprite;
-	int							m_desc_size;
+	std::vector<std::unique_ptr<CSpritePack>> m_descPictures;
+	CSprite* GetDescSprite(int pack, int number) const;
+	bool LoadDescText(std::string_view text, int row, int col, bool title, int coreZap, bool tags);
 	PrintInfo					m_pi;
 	COLORREF					m_color;
 
@@ -43,18 +46,17 @@ protected:
 	int							fontx;
 	int							m_desc_y_distance;
 
-	std::vector<std::string>			m_ori_string;
 	std::vector<std::string>			m_rep_string;
 
 	std::string						m_desc_title;
 
-	// description을 출력한다
+	// Draw the description.
 	void	ShowDesc(int x = 0, int y = 0);
 
-	// description을 불러온다
+	// Load the description.
 	bool	LoadDesc(const char *szFilename, int row, int col, bool bl_title = false, int CoreZapID = -1);
 	bool	LoadDescFromString(const char *szString, int row, int col, bool bl_title = false, int CoreZapID = -1);
-	// description의 출력좌표를 정한다. 
+	// Set the description's drawing position.
 	void	SetDesc(int dx, int dy, COLORREF color = BLACK, PrintInfo &pi = gpC_base->m_desc_msg_pi)
 	{
 		m_desc_x = dx;
@@ -63,7 +65,7 @@ protected:
 		SetDescPi(pi);
 	}
 
-	void	SetDescTitle(const char* str)	{ m_desc_title = str; }
+	void	SetDescTitle(const char* str)	{ m_desc_title = str ? str : ""; }
 
 	void	SetDescTitle(int dx, int dy, COLORREF color = RGB_WHITE, PrintInfo &pi = gpC_base->m_desc_menu_pi)
 	{
@@ -79,16 +81,13 @@ protected:
 
 	COLORREF	GetDescColor()				{ return m_color; }
 	PrintInfo	SetDescPi()					{ return m_pi; }
-	//
-	void	SetSprite(int pack, int num, int line);
-
 	// scroll
 	void	ScrollDescUp()					{ if(m_desc_scroll > 0)m_desc_scroll--; }
-	void	ScrollDescDown()				{ if(m_desc_scroll  + m_desc_col < GetDescSize() )m_desc_scroll++; }
-	void	SetDescScrollPos(int pos)		{ m_desc_scroll = pos; }
+	void	ScrollDescDown()				{ if(m_desc_col > 0 && m_desc_col < GetDescSize() - m_desc_scroll)m_desc_scroll++; }
+	void	SetDescScrollPos(int pos)		{ m_desc_scroll = pos < 0 ? 0 : (pos > GetDescSize() ? GetDescSize() : pos); }
 	int		GetDescScrollPos()				{ return m_desc_scroll; }
-	int		GetDescPage()					{ return (m_desc.size()+m_desc_col-1)/m_desc_col; }
-	int		GetDescSize()					{ return m_desc.size(); }
+	int		GetDescPage()					{ return m_desc.empty() || m_desc_col <= 0 ? 0 : 1 + (GetDescSize() - 1) / m_desc_col; }
+	int		GetDescSize()					{ return static_cast<int>(m_desc.size()); }
 	int		GetDescCol()					{ return m_desc_col; }
 
 public:

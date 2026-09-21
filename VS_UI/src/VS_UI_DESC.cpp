@@ -1,724 +1,235 @@
-﻿// VS_UI_DESC.cpp: implementation of the C_VS_UI_DESC class.
-//
-//////////////////////////////////////////////////////////////////////
-
+// Owned descriptor text and validated resource images.
 #include "Client_PCH.h"
-#include <assert.h>
-#define assert(e) ((void)(e))
-// Disabled assert for macOS
 #include "VS_UI_ExtraDialog.h"
-//#include "VS_UI_DESC.h" // ?? 이상-_-a
 #include "VS_UI_filepath.h"
-#include <algorithm>
-extern RECT g_GameRect;
-#define dSTRING_LEN 2048 
+#include "DescriptorText.h"
+#include "TextWrap.h"
+#include "ResourceText.h"
+#include "TextSystem/TextService.h"
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+#include <algorithm>
+#include <limits>
+#include <memory>
+
+extern RECT g_GameRect;
+
+namespace {
+constexpr size_t MaxDescriptionSprites = 1024;
+
+CSprite* CheckedSprite(CSpritePack* pack, int number)
+{
+	if (!pack || number < 0 || static_cast<unsigned>(number) >= pack->GetSize()) return nullptr;
+	auto& sprite = (*pack)[static_cast<WORD>(number)];
+	return sprite.IsInit() && sprite.GetWidth() > 0 && sprite.GetHeight() > 0 ? &sprite : nullptr;
+}
+
+void PrintDescription(long long x, long long y, const char* text, PrintInfo& info, COLORREF color)
+{
+	if (x < (std::numeric_limits<int>::min)() || x > (std::numeric_limits<int>::max)() ||
+		y < (std::numeric_limits<int>::min)() || y > (std::numeric_limits<int>::max)()) return;
+	g_PrintColorStr(static_cast<int>(x), static_cast<int>(y), text, info, color);
+}
+}
 
 C_VS_UI_DESC::C_VS_UI_DESC()
 {
-	m_desc_col = 0;
-	m_desc_row = 0;
-	m_desc_scroll = 0;
+	m_desc_col = m_desc_row = m_desc_scroll = 0;
+	m_desc_x = m_desc_y = m_desc_title_x = m_desc_title_y = 0;
 	m_desc_y_distance = 18;
-	fontx  = 6;
+	fontx = 6;
 	m_color = BLACK;
 	m_pi = gpC_base->m_dialog_msg_pi;
-	m_desc_size = 0;
-	m_delimiter_pack = 0;
-	m_delimiter_sprite = 0;
+	m_title_color = RGB_WHITE;
+	m_title_pi = gpC_base->m_desc_menu_pi;
+	m_delimiter_pack = m_delimiter_sprite = 0;
 }
 
 C_VS_UI_DESC::~C_VS_UI_DESC()
 {
-	if(!m_pC_inpicture.empty())
-	{		
-		// by sigi - delete 안하다니.. 미오.. - -;
-		std::vector<CSpritePack *>::iterator iPic = m_pC_inpicture.begin();
-		while (iPic != m_pC_inpicture.end())
-		{
-			delete *iPic;
-
-			iPic++;
-		}
-
-		m_pC_inpicture.clear();		
-		
-//		DeleteNew(m_pC_inpicture);
-	}
-
+	for (auto* picture : m_pC_inpicture) delete picture;
 }
 
-//-----------------------------------------------------------------------------
-// C_VS_UI_DESC::ShowDesc
-//
-//
-//-----------------------------------------------------------------------------
+CSprite* C_VS_UI_DESC::GetDescSprite(int pack, int number) const
+{
+	if (pack < 0) return nullptr;
+	const auto index = static_cast<size_t>(pack);
+	if (index < m_pC_inpicture.size()) return CheckedSprite(m_pC_inpicture[index], number);
+	const auto loaded = index - m_pC_inpicture.size();
+	return loaded < m_descPictures.size() ? CheckedSprite(m_descPictures[loaded].get(), number) : nullptr;
+}
+
 void C_VS_UI_DESC::ShowDesc(int x, int y)
 {
-	int i;
-	int delimeter_x;
-	if(m_pC_inpicture.empty() || m_Sprite.empty())
-		delimeter_x = 0;
-	else
-	{
-
-		if(m_delimiter_pack < m_pC_inpicture.size())
-			delimeter_x = (*m_pC_inpicture[m_delimiter_pack])[m_delimiter_sprite].GetWidth() + PICTURE_INDENT;
-		
-		for(i = 0; i < m_Sprite.size(); i++)
-		{
-			if(m_Sprite[i].pack_num < m_pC_inpicture.size())
-			{
-				Rect rect(0, 0, (*m_pC_inpicture[m_Sprite[i].pack_num])[m_Sprite[i].sprite_num].GetWidth(), (*m_pC_inpicture[m_Sprite[i].pack_num])[m_Sprite[i].sprite_num].GetHeight());
-				int blt_y = (m_Sprite[i].pos - m_desc_scroll)*m_desc_y_distance;
-
-				// 크리스마스 트리용 하드코딩
-				if(m_Sprite[i].pos == -300)
-				{
-					blt_y = (0 - m_desc_scroll)*m_desc_y_distance;
-				}
-				
-				if(blt_y < 0)//상단 cliping
-				{
-					if(blt_y + rect.h > 0)
-					{
-						rect.y -=blt_y;
-						rect.h += blt_y;
-					}
-					else
-					{
-						rect.h = 0;
-					}
-				}
-				
-				if(blt_y + rect.h > m_desc_col*m_desc_y_distance)//하단 cliping
-				{
-					if(blt_y < m_desc_col*m_desc_y_distance)
-					{
-						rect.h = m_desc_col*m_desc_y_distance - blt_y;
-					}
-					else
-					{
-						rect.h = 0;
-					}
-				}
-				if (gpC_base->m_p_DDSurface_back->Lock())
-				{
-					S_SURFACEINFO surface_info;
-					gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surface_info);
-
-					RECT rt;
-					rt.left = max(-(m_desc_x+x), rect.x);
-					rt.top = max(-(m_desc_y + blt_y+y), rect.y);
-					rt.right = min((int)(rect.x+rect.w), (int)g_GameRect.right-m_desc_x);
-					rt.bottom = min((int)(rect.y+rect.h), (int)g_GameRect.bottom-(m_desc_y + blt_y));
-					
-					if(rt.left < rt.right && rt.top < rt.bottom)
-					{
-						WORD * p_dest = (WORD *)surface_info.p_surface+m_desc_x+x+rt.left;
-						p_dest = (WORD *)((BYTE *)p_dest+((m_desc_y + blt_y+y)+rt.top)*surface_info.pitch);
-						// 크리스마스 트리용 하드코딩
-						if(m_Sprite[i].pos == -300)
-						{
-							p_dest += 200;
-						}
-						
-						(*m_pC_inpicture[m_Sprite[i].pack_num])[m_Sprite[i].sprite_num].BltClipWidth(p_dest, surface_info.pitch, &rt);
-					}
-					gpC_base->m_p_DDSurface_back->Unlock();
-				}
+	if (m_desc_col <= 0 || m_desc_y_distance <= 0) return;
+	const auto viewTop = static_cast<long long>(m_desc_y) + y;
+	const auto viewBottom = viewTop + static_cast<long long>(m_desc_col) * m_desc_y_distance;
+	int delimiterX = 0;
+	if (!m_Sprite.empty()) {
+		if (auto* delimiter = GetDescSprite(m_delimiter_pack, m_delimiter_sprite))
+			delimiterX = delimiter->GetWidth() + PICTURE_INDENT;
+	}
+	for (const auto& picture : m_Sprite) {
+		auto* sprite = GetDescSprite(picture.pack_num, picture.sprite_num);
+		if (!sprite) continue;
+		// The Christmas tree is top-aligned with an extra 200-pixel x offset.
+		const bool tree = picture.pos == -300;
+		const auto left = static_cast<long long>(m_desc_x) + x + (tree ? 200 : 0);
+		const auto top = viewTop + (static_cast<long long>(tree ? 0 : picture.pos) - m_desc_scroll) * m_desc_y_distance;
+		if (!gpC_base->m_p_DDSurface_back->Lock()) continue;
+		S_SURFACEINFO surface{};
+		gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surface);
+		if (surface.p_surface && surface.width > 0 && surface.height > 0 &&
+			surface.pitch > 0 && surface.pitch <= (std::numeric_limits<WORD>::max)() &&
+			surface.pitch % sizeof(WORD) == 0 &&
+			static_cast<long long>(surface.pitch) >= static_cast<long long>(surface.width) * sizeof(WORD)) {
+			const auto right = (std::min)(static_cast<long long>(surface.width), static_cast<long long>(g_GameRect.right));
+			const auto bottom = (std::min)(static_cast<long long>(surface.height), static_cast<long long>(g_GameRect.bottom));
+			const auto clipLeft = (std::max)(0LL, -left);
+			const auto clipTop = (std::max)({0LL, -top, viewTop - top});
+			const auto clipRight = (std::min)(static_cast<long long>(sprite->GetWidth()), right - left);
+			const auto clipBottom = (std::min)({static_cast<long long>(sprite->GetHeight()), bottom - top, viewBottom - top});
+			if (clipLeft < clipRight && clipTop < clipBottom) {
+				RECT source{static_cast<LONG>(clipLeft), static_cast<LONG>(clipTop),
+					static_cast<LONG>(clipRight), static_cast<LONG>(clipBottom)};
+				const size_t offset = static_cast<size_t>(top + clipTop) * static_cast<size_t>(surface.pitch) +
+					static_cast<size_t>(left + clipLeft) * sizeof(WORD);
+				auto* destination = reinterpret_cast<WORD*>(static_cast<BYTE*>(surface.p_surface) + offset);
+				sprite->BltClipWidth(destination, static_cast<WORD>(surface.pitch), &source);
 			}
 		}
+		gpC_base->m_p_DDSurface_back->Unlock();
 	}
-
-	g_FL2_GetDC();
-
-	// title
-	if(!m_desc_title.empty())
-	{
-		/*if(m_desc_title.size()>110)
-		{
-			static int scroll_x_str=0;
-			static bool rightscroll=true;
-			int len,scroll;
-			char sz_temp[200]="";
-			if(g_PossibleStringCut(m_desc_title.c_str(),scroll_x_str))
-				scroll=scroll_x_str;
-			else
-				scroll=scroll_x_str+1;
-			static int count=0;
-
-			if(rightscroll==true)
-			{
-				count++;
-				if(count>50){
-					scroll_x_str++;count=0;}
-
-				if(m_desc_title.size()-scroll > 110)
-				{
-					// 오른쪽으로 스크롤 상태
-					len=110;
-					if(!g_PossibleStringCut(m_desc_title.c_str(),scroll+len))
-						len-=1;
-					if(m_desc_title.size()<scroll+len)
-						len=m_desc_title.size()-scroll;
-					memcpy(sz_temp,m_desc_title.c_str()+scroll,len);
-					sz_temp[len]='\0';
-				} else
-				;//	rightscroll=false;
-			} /*else
-			{
-				// 왼쪽으로 스크롤 상태
-				if(scroll<0)
-				{
-					scroll=0;
-					rightscroll=true;
-				} else
-				{
-					len=110;
-					if(!g_PossibleStringCut(m_desc_title.c_str()+scroll+len))
-				}
-			}
-			
-			memcpy(sz_temp,m_desc_title.c_str()+scroll_x_str,len);
-			
-			g_PrintColorStr(m_desc_title_x+x, m_desc_title_y+y, m_desc_title.c_str(), m_title_pi, m_title_color);
-		} else*/
-			g_PrintColorStr(m_desc_title_x+x, m_desc_title_y+y, m_desc_title.c_str(), m_title_pi, m_title_color);
+	if (!g_FL2_GetDC()) return;
+	if (!m_desc_title.empty())
+		PrintDescription(static_cast<long long>(m_desc_title_x) + x, static_cast<long long>(m_desc_title_y) + y,
+			m_desc_title.c_str(), m_title_pi, m_title_color);
+	const auto first = static_cast<size_t>(m_desc_scroll);
+	const auto end = (std::min)(m_desc.size(), first + static_cast<size_t>(m_desc_col));
+	for (size_t i = first; i < end; ++i) {
+		const auto& row = m_desc[i];
+		const bool tab = !row.empty() && row.front() == '\t';
+		PrintDescription(static_cast<long long>(m_desc_x) + x + (tab ? delimiterX : 0),
+			viewTop + static_cast<long long>(i - first) * m_desc_y_distance,
+			row.c_str() + (tab ? 1 : 0), m_pi, m_color);
 	}
-
-	// 내용
-	char *p_temp;
-	for(i=m_desc_scroll; i<m_desc_col+m_desc_scroll && i<m_desc.size();i++)
-	{
-		p_temp = (char *)m_desc[i].c_str();
-		if(p_temp[0] == '\t')
-			g_PrintColorStr(m_desc_x+x + delimeter_x, m_desc_y+y + m_desc_y_distance*(i - m_desc_scroll), p_temp+1, m_pi, m_color);
-		else
-			g_PrintColorStr(m_desc_x+x, m_desc_y+y + m_desc_y_distance*(i - m_desc_scroll), p_temp, m_pi, m_color);
-	}
-
 	g_FL2_ReleaseDC();
 }
 
-////////////////////////////////////////////////////////////////////////
-// C_VS_UI_DESC::LoadDesc
-// txt로 된 description파일을 불러온다.
-////////////////////////////////////////////////////////////////////////
-bool	C_VS_UI_DESC::LoadDesc(const char *szFilename, int row, int col, bool bl_title, int CoreZapID)
+bool C_VS_UI_DESC::LoadDesc(const char* filename, int row, int col, bool title, int coreZap)
 {
-	if(!m_pack_file.IsSet())return false;
-
-	m_desc_scroll = 0;
-	m_desc.clear();
-	assert(szFilename);
-
-	m_desc_row = row; m_desc_col = col;
-	m_Sprite.clear();
-
-	if(!m_pack_file.Open(szFilename))
-		return false;
-
-	bool indent = false;
-	//상단 문자열 삽입
-
-	int check, w=0, h=0, w2=0, pack = 0;
-
-	if(m_ori_string.empty() && !m_rep_string.empty())
-	{
-		for(int i = 0; i < (int)m_rep_string.size(); i++)
-		{
-			if(m_rep_string[i][0] == '%')
-			{
-				SetSprite(0, atoi(m_rep_string[i].c_str()+1), 0);
-				w2 = ((*m_pC_inpicture[m_Sprite[0].pack_num])[m_Sprite[0].sprite_num].GetWidth() + PICTURE_INDENT -1)/ fontx-1;
-				h =  ((*m_pC_inpicture[m_Sprite[0].pack_num])[m_Sprite[0].sprite_num].GetHeight()-1)/ m_desc_y_distance +1;
-				m_rep_string.erase(m_rep_string.begin() + i);
-				i--;
-			}
-		}
-
-		m_desc.insert(m_desc.begin(), m_rep_string.begin(), m_rep_string.end());
-		indent = true;
-	}
-
-	char szLine[dSTRING_LEN]; 
-	char temp[dSTRING_LEN];
-	ZeroMemory(szLine, dSTRING_LEN);
-
-	if(!m_Sprite.empty())
-	{
-	}
-
-	while(m_pack_file.GetString(szLine, dSTRING_LEN))
-	{
-		std::string temp_string;
-
-		temp_string = szLine;
-
-		bool string_replaced = false;
-		for(int i = 0; i < m_ori_string.size(); i++)//문자열 대체
-		{
-			int re = temp_string.find(m_ori_string[i]);
-			if(re != -1)
-			{
-				if(m_rep_string[i] == "%delete")break;
-				int re = m_rep_string[i].find("\n");
-				if(re != -1)
-				{
-					char sz_temp_1[512], sz_temp_2[512];
-					strcpy(sz_temp_1, m_rep_string[i].c_str());
-					strcpy(sz_temp_2, sz_temp_1+re+1);
-					sz_temp_1[re] = '\0';
-					m_desc.push_back(sz_temp_1);
-					m_desc.push_back(sz_temp_2);
-					string_replaced = true;
-					break;
-				}
-				else
-					temp_string.replace(temp_string.begin()+re, temp_string.begin() + re + m_ori_string[i].size(), m_rep_string[i].begin(), m_rep_string[i].end());
-			}
-		}
-		if(string_replaced) continue;
-
-		if(temp_string[0] == '&')//팩번호
-		{
-			pack = atoi(temp_string.c_str()+1);
-			continue;
-		}
-
-		if(temp_string[0] == '(')//팩번호
-		{
-			m_delimiter_pack = atoi(temp_string.c_str()+1);
-			continue;
-		}
-
-		if(temp_string[0] == ')')//팩번호
-		{
-			m_delimiter_sprite = atoi(temp_string.c_str()+1);
-			continue;
-		}
-
-		if(temp_string[0] == '%')//그림삽입 그림 태그
-		{
-			int spr_id = atoi(temp_string.c_str()+1);
-
-			if(m_ori_string.empty() && !m_rep_string.empty())//item인경우
-			{
-				// 2004, 7, 6 sobeit modify start - 코어잽 이미지도 보여주기 위하여~ -_- 여기 코드가 무지 이상함..
-				int HasCoreZap = (CoreZapID==-1)?0:1;
-
-				CSpritePack *temp = new CSpritePack;
-				temp->Init( 1 + HasCoreZap );		// 임시로 1개만 loading.. - -;;
-				
-				bool re = temp->LoadFromFileData( 0, spr_id, SPK_ITEM, SPKI_ITEM );
-				assert(re);
-
-				if(HasCoreZap)
-				{
-					bool re = temp->LoadFromFileData( 1, CoreZapID, SPK_ITEM, SPKI_ITEM );
-					assert(re);
-				}
-			
-				m_pC_inpicture.push_back(temp);
-
-				// 크리스마스 트리용 하드 코딩
-				if(spr_id == 371)
-					SetSprite(m_pC_inpicture.size()-1, 0, -300);
-				else
-					SetSprite(m_pC_inpicture.size()-1, 0, 0);
-				
-				if(HasCoreZap)
-					SetSprite(m_pC_inpicture.size()-1, 1, 0);
-				// 2004, 7, 6 sobeit modify end 
-				
-		
-
-				w2 = 0;
-				h = ((*m_pC_inpicture[m_pC_inpicture.size()-1])[0].GetHeight() -1)/ m_desc_y_distance +1 - m_rep_string.size();
-			}
-			else//item이 아닌경우
-			{
-				while(h > 0)	// 그림이 겹치지 않게한다
-				{
-					h--;
-					m_desc.push_back("");
-				};
-
-				int pos = m_desc.size();	//그림위치 조정
-				if(bl_title)
-				{
-					int offset = 1;
-					for(int i = 1; i < (int)m_desc.size() && !strcmp(m_desc[i].c_str(),""); i++, offset++);
-					pos -= offset;
-				}
-
-				SetSprite(pack, spr_id, pos);
-				if(pack < m_pC_inpicture.size())
-				{
-					w2 = ((*m_pC_inpicture[pack])[spr_id].GetWidth() + PICTURE_INDENT -1)/ fontx-1;
-					h = ((*m_pC_inpicture[pack])[spr_id].GetHeight() -1)/ m_desc_y_distance +1;
-				}
-			}
-			continue;
-		}
-
-		strcpy(szLine, temp_string.c_str());
-
-		if(szLine[0] == '\t')
-		{
-			w2 = 0;
-			m_desc.push_back(szLine);
-			indent = true;
-		}
-		else
-		{
-			if(h > 0 && w2 == 0)	// tab문자열이 아닌것이 그림에 겹치지 않게 조정
-			{
-				while(h>0)
-				{
-					h--;
-					m_desc.push_back("");
-				}
-			}
-			else if(indent)		// tab문자열과 일반 문자열은 한 줄 띄움
-			{
-				m_desc.push_back("");
-				indent = false;
-			}
-
-			int w3 = strchr(szLine, ':') - szLine + 2;
-			if(w3 < 0)w3 = 0;
-			if(w3 > row/2)w3 = 0;
-//			else w3 = 8;
-			bool loop = false;
-
-			while(1)
-			{
-
-				if(!g_PossibleStringCut(szLine, row -w2 -(loop?w3:0)))check = 1; else check=0;
-				
-				strcpy(temp, szLine);
-
-				if(h > 0 || w3 && loop)
-				{
-					memset(szLine, (int)' ', dSTRING_LEN);
-					strcpy(szLine+w2+(loop?w3:0), temp);
-					szLine[row -check] = '\0';
-				}
-				else
-					szLine[row -w2 -(loop?w3:0) -check] = '\0';
-
-				m_desc.push_back(szLine);
-
-				if(strlen(temp) <= row -check -w2 - (loop?w3:0))
-				{
-					if(h > 0)
-						if(--h == 0)w2 = 0;
-					break;
-				}
-				if(temp[row -check -w2 - (loop?w3:0)] == ' ')strcpy(szLine, temp+row -check -w2 -(loop?w3:0) +1);
-				else strcpy(szLine, temp+row -check -w2 -(loop?w3:0));
-
-				loop = true;
-
-				if(h > 0)
-					if(--h == 0)w2 = 0;
-			}
-		}
-
-		ZeroMemory(szLine, dSTRING_LEN);
-		
-	}
-	while(h > 0)
-	{
-		h--;
-		m_desc.push_back(" ");
-	}
-
-	m_pack_file.Release();
-
-	if(bl_title)	// 상단의 첫줄을 타이틀로
-	{
-		m_desc_title = m_desc[0];
-		m_desc.erase(m_desc.begin());
-	}
-
-//	if(m_desc.size())###@@@
-	if(!m_desc.empty())
-	{
-		while(!m_desc.empty() && m_desc.front() == "")
-			m_desc.erase(m_desc.begin());
-		while(!m_desc.empty() && m_desc.back() == "")
-			m_desc.pop_back();
-	}
-
-	return TRUE;
-
+	if (!m_pack_file.OpenText(filename)) return false;
+	struct CloseReader {
+		CRarFile& reader;
+		~CloseReader() { reader.Release(); }
+	} close{m_pack_file};
+	return LoadDescText(std::string_view(m_pack_file.GetFilePointer(), m_pack_file.GetRemainingSize()),
+		row, col, title, coreZap, true);
 }
 
-////////////////////////////////////////////////////////////////////////
-// C_VS_UI_DESC::SetSprite
-// DESC안의 Sprite를 세팅한다
-////////////////////////////////////////////////////////////////////////
-void	C_VS_UI_DESC::SetSprite(int pack, int num, int line)				
+bool C_VS_UI_DESC::LoadDescFromString(const char* text, int row, int col, bool title, int coreZap)
 {
-	DESC_SPRITE temp;
-	temp.pack_num = pack;
-	temp.sprite_num = num;
-	temp.pos = line;
-	m_Sprite.push_back(temp);
+	if (!text || std::string_view(text).size() > ResourceText::MaxFileBytes) return false;
+	return LoadDescText(TextSystem::TextService::NormalizeText(text), row, col, title, coreZap, false);
 }
 
-
-////////////////////////////////////////////////////////////////////////
-// C_VS_UI_DESC::LoadDesc
-// memory에서 직접 세팅 - by sobeit
-////////////////////////////////////////////////////////////////////////
-bool	C_VS_UI_DESC::LoadDescFromString(const char *szString, int row, int col, bool bl_title, int CoreZapID)
+bool C_VS_UI_DESC::LoadDescText(std::string_view text, int row, int col, bool title, int coreZap, bool tags)
 {
-	if(szString == NULL)
-		return false;
+	if (row <= 0 || col <= 0 || fontx <= 0 || m_desc_y_distance <= 0 || coreZap < -1 ||
+		text.size() > ResourceText::MaxFileBytes || text.find('\0') != std::string_view::npos ||
+		m_pC_inpicture.size() > MaxDescriptionSprites) return false;
+	DescriptorText::Layout layout(static_cast<size_t>(row));
+	std::vector<DESC_SPRITE> pictures;
+	std::vector<size_t> relativePictures;
+	std::vector<std::unique_ptr<CSpritePack>> loaded;
+	int pack = 0, delimiterPack = 0, delimiterSprite = 0;
+	bool delimiterSpecified = false;
+	auto getSprite = [&](int packIndex, int spriteIndex) -> CSprite* {
+		if (packIndex < 0) return nullptr;
+		const auto index = static_cast<size_t>(packIndex);
+		if (index < m_pC_inpicture.size()) return CheckedSprite(m_pC_inpicture[index], spriteIndex);
+		const auto local = index - m_pC_inpicture.size();
+		return local < loaded.size() ? CheckedSprite(loaded[local].get(), spriteIndex) : nullptr;
+	};
+	auto addPicture = [&](int packIndex, int spriteIndex, int position, bool relative) {
+		if (pictures.size() >= MaxDescriptionSprites || !getSprite(packIndex, spriteIndex)) return false;
+		if (relative) relativePictures.push_back(pictures.size());
+		pictures.push_back({packIndex, spriteIndex, position});
+		return true;
+	};
+	auto heightRows = [&](const CSprite& sprite) {
+		return (static_cast<size_t>(sprite.GetHeight()) - 1) / static_cast<size_t>(m_desc_y_distance) + 1;
+	};
+	auto insetColumns = [&](const CSprite& sprite) {
+		const auto width = (static_cast<size_t>(sprite.GetWidth()) + PICTURE_INDENT - 1) / static_cast<size_t>(fontx);
+		return width > 0 ? width - 1 : 0;
+	};
+
+	CSprite* headerPicture = nullptr;
+	size_t headerRows = 0;
+	for (const auto& source : m_rep_string) {
+		const auto header = TextSystem::TextService::NormalizeText(source);
+		if (header.find('\0') != std::string::npos) return false;
+		if (!header.empty() && header.front() == '%') {
+			int spriteIndex = 0;
+			if (!DescriptorText::ReadIndex(std::string_view(header).substr(1), spriteIndex) ||
+				!addPicture(0, spriteIndex, 0, false)) return false;
+			if (!headerPicture) headerPicture = getSprite(0, spriteIndex);
+		} else {
+			if (!layout.AppendHeader(header)) return false;
+			++headerRows;
+		}
+	}
+	if (headerPicture && !layout.BeginImage(insetColumns(*headerPicture), heightRows(*headerPicture))) return false;
+
+	while (!text.empty()) {
+		const auto line = TextSystem::NextUtf8Line(text, text.size(), {.skipSeamSpace = false});
+		text.remove_prefix(line.consumed);
+		if (tags && !line.text.empty() &&
+			(line.text.front() == '&' || line.text.front() == '(' || line.text.front() == ')' || line.text.front() == '%')) {
+			int index = 0;
+			if (!DescriptorText::ReadIndex(std::string_view(line.text).substr(1), index)) return false;
+			switch (line.text.front()) {
+			case '&': pack = index; break;
+			case '(': delimiterPack = index; delimiterSpecified = true; break;
+			case ')': delimiterSprite = index; delimiterSpecified = true; break;
+			case '%':
+				if (headerRows != 0) {
+					if (loaded.size() >= MaxDescriptionSprites) return false;
+					auto picture = std::make_unique<CSpritePack>();
+					picture->Init(coreZap == -1 ? 1 : 2);
+					if (!picture->LoadFromFileData(0, index, SPK_ITEM, SPKI_ITEM) ||
+						(coreZap != -1 && !picture->LoadFromFileData(1, coreZap, SPK_ITEM, SPKI_ITEM))) return false;
+					const auto packIndex = static_cast<int>(m_pC_inpicture.size() + loaded.size());
+					loaded.push_back(std::move(picture));
+					if (!addPicture(packIndex, 0, index == 371 ? -300 : 0, false) ||
+						(coreZap != -1 && !addPicture(packIndex, 1, 0, false))) return false;
+					const auto height = heightRows(*getSprite(packIndex, 0));
+					if (!layout.BeginImage(0, height > headerRows ? height - headerRows : 0)) return false;
+				} else {
+					auto* picture = getSprite(pack, index);
+					if (!picture || !layout.BeginImage(insetColumns(*picture), heightRows(*picture)) ||
+						!addPicture(pack, index, static_cast<int>(layout.RowCount()), true)) return false;
+				}
+				break;
+			}
+		} else if (!layout.AppendLine(line.text)) {
+			return false;
+		}
+	}
+	if (delimiterSpecified && !getSprite(delimiterPack, delimiterSprite)) return false;
+	std::vector<std::string> rows;
+	std::string newTitle = m_desc_title;
+	size_t removedRows = 0;
+	if (!layout.Complete(title, rows, newTitle, &removedRows)) return false;
+	for (const auto index : relativePictures) pictures[index].pos -= static_cast<int>(removedRows);
+	m_desc = std::move(rows);
+	m_desc_title = std::move(newTitle);
+	m_Sprite = std::move(pictures);
+	m_descPictures = std::move(loaded);
+	m_desc_row = row;
+	m_desc_col = col;
 	m_desc_scroll = 0;
-	m_desc.clear();
-
-	m_desc_row = row; m_desc_col = col;
-	m_Sprite.clear();
-
-	bool indent = false;
-	//상단 문자열 삽입
-
-	int check, w=0, h=0, w2=0, pack = 0;
-
-	if(m_ori_string.empty() && !m_rep_string.empty())
-	{
-		for(int i = 0; i < (int)m_rep_string.size(); i++)
-		{
-			if(m_rep_string[i][0] == '%')
-			{
-				SetSprite(0, atoi(m_rep_string[i].c_str()+1), 0);
-				w2 = ((*m_pC_inpicture[m_Sprite[0].pack_num])[m_Sprite[0].sprite_num].GetWidth() + PICTURE_INDENT -1)/ fontx-1;
-				h =  ((*m_pC_inpicture[m_Sprite[0].pack_num])[m_Sprite[0].sprite_num].GetHeight()-1)/ m_desc_y_distance +1;
-				m_rep_string.erase(m_rep_string.begin() + i);
-				i--;
-			}
-		}
-
-		m_desc.insert(m_desc.begin(), m_rep_string.begin(), m_rep_string.end());
-		indent = true;
-	}
-
-	char szLine[dSTRING_LEN]; 
-	char temp[dSTRING_LEN];
-	ZeroMemory(szLine, dSTRING_LEN);
-
-	if(!m_Sprite.empty())
-	{
-	}
-
-//	while(m_pack_file.GetString(szLine, dSTRING_LEN))
-	{
-		std::string temp_string;
-
-		temp_string = szString;
-
-		for(int i = 0; i < m_ori_string.size(); i++)//문자열 대체
-		{
-			int re = temp_string.find(m_ori_string[i]);
-			if(re != -1)
-			{
-				if(m_rep_string[i] == "%delete")break;
-				int re = m_rep_string[i].find("\n");
-				if(re != -1)
-				{
-					char sz_temp_1[512], sz_temp_2[512];
-					strcpy(sz_temp_1, m_rep_string[i].c_str());
-					strcpy(sz_temp_2, sz_temp_1+re+1);
-					sz_temp_1[re] = '\0';
-					m_desc.push_back(sz_temp_1);
-					m_desc.push_back(sz_temp_2);
-					break;
-				}
-				else
-					temp_string.replace(temp_string.begin()+re, temp_string.begin() + re + m_ori_string[i].size(), m_rep_string[i].begin(), m_rep_string[i].end());
-			}
-		}
-//		if(i != m_ori_string.size())continue;
-//
-//		if(temp_string[0] == '&')//팩번호
-//		{
-//			pack = atoi(temp_string.c_str()+1);
-//			continue;
-//		}
-//
-//		if(temp_string[0] == '(')//팩번호
-//		{
-//			m_delimiter_pack = atoi(temp_string.c_str()+1);
-//			continue;
-//		}
-//
-//		if(temp_string[0] == ')')//팩번호
-//		{
-//			m_delimiter_sprite = atoi(temp_string.c_str()+1);
-//			continue;
-//		}
-//
-//		if(temp_string[0] == '%')//그림삽입 그림 태그
-//		{
-//			int spr_id = atoi(temp_string.c_str()+1);
-//
-//			if(m_ori_string.empty() && !m_rep_string.empty())//item인경우
-//			{
-//				// 2004, 7, 6 sobeit modify start - 코어잽 이미지도 보여주기 위하여~ -_- 여기 코드가 무지 이상함..
-//				int HasCoreZap = (CoreZapID==-1)?0:1;
-//
-//				CSpritePack *temp = new CSpritePack;
-//				temp->Init( 1 + HasCoreZap );		// 임시로 1개만 loading.. - -;;
-//				
-//				bool re = temp->LoadFromFileData( 0, spr_id, SPK_ITEM, SPKI_ITEM );
-//				assert(re);
-//
-//				if(HasCoreZap)
-//				{
-//					bool re = temp->LoadFromFileData( 1, CoreZapID, SPK_ITEM, SPKI_ITEM );
-//					assert(re);
-//				}
-//			
-//				m_pC_inpicture.push_back(temp);
-//
-//				// 크리스마스 트리용 하드 코딩
-//				if(spr_id == 371)
-//					SetSprite(m_pC_inpicture.size()-1, 0, -300);
-//				else
-//					SetSprite(m_pC_inpicture.size()-1, 0, 0);
-//				
-//				if(HasCoreZap)
-//					SetSprite(m_pC_inpicture.size()-1, 1, 0);
-//				// 2004, 7, 6 sobeit modify end 
-//				
-//		
-//
-//				w2 = 0;
-//				h = ((*m_pC_inpicture[m_pC_inpicture.size()-1])[0].GetHeight() -1)/ m_desc_y_distance +1 - m_rep_string.size();
-//			}
-//			else//item이 아닌경우
-//			{
-//				while(h > 0)	// 그림이 겹치지 않게한다
-//				{
-//					h--;
-//					m_desc.push_back("");
-//				};
-//
-//				int pos = m_desc.size();	//그림위치 조정
-//				if(bl_title)
-//				{
-//					for(i = 1; !strcmp(m_desc[i].c_str(),""); i++);
-//					pos -= i;
-//				}
-//
-//				SetSprite(pack, spr_id, pos);
-//				if(pack < m_pC_inpicture.size())
-//				{
-//					w2 = ((*m_pC_inpicture[pack])[spr_id].GetWidth() + PICTURE_INDENT -1)/ fontx-1;
-//					h = ((*m_pC_inpicture[pack])[spr_id].GetHeight() -1)/ m_desc_y_distance +1;
-//				}
-//			}
-//			continue;
-//		}
-
-		strcpy(szLine, temp_string.c_str());
-
-		if(szLine[0] == '\t')
-		{
-			w2 = 0;
-			m_desc.push_back(szLine);
-			indent = true;
-		}
-		else
-		{
-			if(h > 0 && w2 == 0)	// tab문자열이 아닌것이 그림에 겹치지 않게 조정
-			{
-				while(h>0)
-				{
-					h--;
-					m_desc.push_back("");
-				}
-			}
-			else if(indent)		// tab문자열과 일반 문자열은 한 줄 띄움
-			{
-				m_desc.push_back("");
-				indent = false;
-			}
-
-			int w3 = strchr(szLine, ':') - szLine + 2;
-			if(w3 < 0)w3 = 0;
-			if(w3 > row/2)w3 = 0;
-//			else w3 = 8;
-			bool loop = false;
-
-			while(1)
-			{
-
-				if(!g_PossibleStringCut(szLine, row -w2 -(loop?w3:0)))check = 1; else check=0;
-				
-				strcpy(temp, szLine);
-
-				if(h > 0 || w3 && loop)
-				{
-					memset(szLine, (int)' ', dSTRING_LEN);
-					strcpy(szLine+w2+(loop?w3:0), temp);
-					szLine[row -check] = '\0';
-				}
-				else
-					szLine[row -w2 -(loop?w3:0) -check] = '\0';
-
-				m_desc.push_back(szLine);
-
-				if(strlen(temp) <= row -check -w2 - (loop?w3:0))
-				{
-					if(h > 0)
-						if(--h == 0)w2 = 0;
-					break;
-				}
-				if(temp[row -check -w2 - (loop?w3:0)] == ' ')strcpy(szLine, temp+row -check -w2 -(loop?w3:0) +1);
-				else strcpy(szLine, temp+row -check -w2 -(loop?w3:0));
-
-				loop = true;
-
-				if(h > 0)
-					if(--h == 0)w2 = 0;
-			}
-		}
-
-		ZeroMemory(szLine, dSTRING_LEN);
-		
-	}
-	while(h > 0)
-	{
-		h--;
-		m_desc.push_back(" ");
-	}
-
-	m_pack_file.Release();
-
-	if(bl_title)	// 상단의 첫줄을 타이틀로
-	{
-		m_desc_title = m_desc[0];
-		m_desc.erase(m_desc.begin());
-	}
-
-//	if(m_desc.size())###@@@
-	if(!m_desc.empty())
-	{
-		while(!m_desc.empty() && m_desc.front() == "")
-			m_desc.erase(m_desc.begin());
-		while(!m_desc.empty() && m_desc.back() == "")
-			m_desc.pop_back();
-	}
-
-	return TRUE;
-
+	m_delimiter_pack = delimiterPack;
+	m_delimiter_sprite = delimiterSprite;
+	return true;
 }

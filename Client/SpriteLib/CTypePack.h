@@ -27,6 +27,29 @@ using std::ofstream;
 #include "../../basic/ColorDraw.h"
 #include <cstdint>
 
+namespace CTypePackDetail {
+inline bool OpenIndexedEntry(int fileID, LPCTSTR packFilename, LPCTSTR indexFilename,
+	std::ifstream& dataFile)
+{
+	if (fileID < 0 || !packFilename || !indexFilename) return false;
+	dataFile.open(packFilename, std::ios::binary | std::ios::ate);
+	if (!dataFile) return false;
+	const auto dataSize = dataFile.tellg();
+	if (dataSize <= std::streampos(2)) return false;
+	std::ifstream indexFile(indexFilename, std::ios::binary);
+	std::uint16_t count = 0;
+	if (!indexFile.read(reinterpret_cast<char*>(&count), sizeof count) || fileID >= count)
+		return false;
+	const auto indexOffset = std::streamoff(2) + std::streamoff(fileID) * 4;
+	std::int32_t offset = 0;
+	if (!indexFile.seekg(indexOffset) ||
+		!indexFile.read(reinterpret_cast<char*>(&offset), sizeof offset) ||
+		offset < 2 || std::streampos(offset) >= dataSize)
+		return false;
+	return static_cast<bool>(dataFile.seekg(static_cast<std::streamoff>(offset)));
+}
+} // namespace CTypePackDetail
+
 template <class Type>
 class CTypePack
 {
@@ -402,48 +425,11 @@ bool CTypePack<Type>::ReleasePart(COrderedList<TYPE_SPRITEID> list)
 template <class Type>
 bool CTypePack<Type>::LoadFromFileData(int dataID, int fileID, LPCTSTR packFilename, LPCTSTR indexFilename)
 {
-	if (dataID < 0 || dataID >= m_Size)
-	{
+	if (!m_pData || dataID < 0 || dataID >= m_Size) return false;
+	std::ifstream dataFile;
+	if (!CTypePackDetail::OpenIndexedEntry(fileID, packFilename, indexFilename, dataFile))
 		return false;
-	}
-
-	std::ifstream dataFile(packFilename, std::ios::binary);
-	
-	if (!dataFile.is_open())
-	{
-		return false;
-	}
-	
-	std::ifstream indexFile(indexFilename, std::ios::binary);
-	
-	if (!indexFile.is_open())
-	{
-		return false;
-	}
-	
-	//-------------------------------------------------------------------
-	// index의 개수를 체크한다. fileID가 있는지..?
-	//-------------------------------------------------------------------
-	TYPE_SPRITEID num;
-	indexFile.read((char*)&num, sizeof(WORD));
-	
-	if (fileID >= num)
-	{
-		return false;
-	}
-	
-	//-------------------------------------------------------------------
-	// load할 data의 file pointer를 읽는다.
-	//-------------------------------------------------------------------
-int32_t fp = 0;	
-	indexFile.seekg( 2 + fileID*4 );		// 2(num) + spriteID * (4 bytes)
-indexFile.read((char*)&fp, 4);
-	
-dataFile.seekg(static_cast<std::streamoff>(fp));	
-	
-	m_pData[dataID].LoadFromFile( dataFile );
-	
-	return true;
+	return m_pData[dataID].LoadFromFile(dataFile);
 }
 
 // CTypePack2
@@ -941,48 +927,11 @@ bool CTypePack2<TypeBase, Type1, Type2>::ReleasePart(COrderedList<TYPE_SPRITEID>
 template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileData(int dataID, int fileID, LPCTSTR packFilename, LPCTSTR indexFilename)
 {
-	if (dataID < 0 || dataID >= m_Size)
-	{
+	if (!m_pData || dataID < 0 || dataID >= m_Size) return false;
+	std::ifstream dataFile;
+	if (!CTypePackDetail::OpenIndexedEntry(fileID, packFilename, indexFilename, dataFile))
 		return false;
-	}
-
-	std::ifstream dataFile(packFilename, std::ios::binary);
-	
-	if (!dataFile.is_open())
-	{
-		return false;
-	}
-	
-	std::ifstream indexFile(indexFilename, std::ios::binary);
-	
-	if (!indexFile.is_open())
-	{
-		return false;
-	}
-	
-	//-------------------------------------------------------------------
-	// index의 개수를 체크한다. fileID가 있는지..?
-	//-------------------------------------------------------------------
-	TYPE_SPRITEID num;
-	indexFile.read((char*)&num, sizeof(WORD));
-	
-	if (fileID >= num)
-	{
-		return false;
-	}
-	
-	//-------------------------------------------------------------------
-	// load할 data의 file pointer를 읽는다.
-	//-------------------------------------------------------------------
-int32_t fp = 0;	
-	indexFile.seekg( 2 + fileID*4 );		// 2(num) + spriteID * (4 bytes)
-indexFile.read((char*)&fp, 4);
-	
-dataFile.seekg(static_cast<std::streamoff>(fp));	
-	
-	m_pData[dataID].LoadFromFile( dataFile );
-	
-	return true;
+	return m_pData[dataID].LoadFromFile(dataFile);
 }
 
 #endif

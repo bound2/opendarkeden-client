@@ -25,6 +25,8 @@
 extern RECT g_GameRect;
 #include "DirectoryListing.h"
 #include "FileDialogListing.h"
+#include "DescriptorText.h"
+#include "TextWrap.h"
 #include <algorithm>
 #include <filesystem>
 #include <vector>
@@ -1866,20 +1868,18 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 				char sz_buf1 [50];
 				MItem* p_AddItem = (MItem*)void_ptr2;
 			
-				// 코어잽의 ItemDescription.spk 에서의 인덱스를 얻어오자
-				std::string AddedFileName;
+				// Read a complete, decoded sprite tag from the core-zap description.
+				std::string AddedFileName = p_AddItem->GetEName();
 				std::string temp_string;
-				AddedFileName += p_AddItem->GetEName();
 				AddedFileName += ".txt";
-		
-				m_pack_file.Open(AddedFileName.c_str());
-				m_pack_file.GetString(sz_buf1, 50);
-				temp_string = sz_buf1;
+				if (m_pack_file.OpenText(AddedFileName.c_str())) {
+					const std::string_view text(m_pack_file.GetFilePointer(), m_pack_file.GetRemainingSize());
+					const auto first = TextSystem::NextUtf8Line(text, text.size(), {.skipSeamSpace = false});
+					if (!first.text.empty() && first.text.front() == '%')
+						DescriptorText::ReadIndex(std::string_view(first.text).substr(1), corezapID);
+					m_pack_file.Release();
+				}
 
-				corezapID = atoi(temp_string.c_str()+1);
-				// 코어잽의 ItemDescription.spk 에서의 인덱스를 얻어오자
-		
-				//corezapID = 
 				if(p_AddItem->GetItemClass() == ITEM_CLASS_CORE_ZAP && p_AddItem->GetItemType()>=0 && p_AddItem->GetItemType()<=3)
 				{
 					const std::list<TYPE_ITEM_OPTION> &optionList=p_item->GetItemOptionList();
@@ -2115,17 +2115,8 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 
 	}
 
-//	if(sprID != -1)
-//		SetSprite(0, sprID, 0);
-
 	if(LoadDesc(filename.c_str(), 60, 17, bl_title,corezapID)==false)Run(CLOSE_ID);
 
-//	if(m_ori_string.empty() && !m_rep_string.empty())
-//	{
-//		m_desc.insert(m_desc.begin(), m_rep_string.begin(), m_rep_string.end());
-//	}
-
-	m_ori_string.clear();
 	m_rep_string.clear();
 
 
