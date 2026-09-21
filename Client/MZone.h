@@ -64,10 +64,7 @@ class CSpriteSetManager;
 
 #include <fstream>
 
-struct UI_PORTAL_FLAG
-{
-	int zone_id, x, y, portal_x, portal_y;
-};
+#include "PortalFlag.h"
 typedef std::list<UI_PORTAL_FLAG> UI_PORTAL_LIST;
 typedef std::vector<UI_PORTAL_LIST> UI_PORTAL_VECTOR;
 

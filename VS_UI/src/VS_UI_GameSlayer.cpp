@@ -12,6 +12,9 @@
 #include "ExperienceTable.h"
 #include "MGameStringTable.h"
 #include "SafeFormat.h"
+#include "SlayerPortalData.h"
+#include "DebugLog.h"
+#include <unordered_set>
 #include "UserInformation.h"
 #include "MZoneTable.h"
 #include "SystemAvailabilities.h"
@@ -2204,48 +2207,28 @@ C_VS_UI_SLAYER_PORTAL::C_VS_UI_SLAYER_PORTAL()
 	}
 	flag_file.close();
 #else
-	UI_PORTAL_FLAG temp_flag;
 	CRarFile flag_file;
 	flag_file.SetRAR(RPK_TUTORIAL_ETC, RPK_PASSWORD);
-
-	flag_file.Open(INF_SLAYER_PORTAL);
-	int map_max = *(int *)flag_file.Read(sizeof(int));
-	assert(map_max == MAP_MAX);
-	for(int j = 0; j < MAP_MAX; j++)
+	SlayerPortalData portal_data;
+	static_assert(std::tuple_size_v<SlayerPortalData> == MAP_MAX);
+	if (!flag_file.Open(INF_SLAYER_PORTAL) || !ReadSlayerPortalData(flag_file, portal_data))
 	{
-		int size;
-		size = *((int *)(flag_file.Read(sizeof(int))));
-		assert(size != 0);
-		for(int i = 0; i < size; i++)
+		LOG_WARN("Could not load valid portal data: %s", INF_SLAYER_PORTAL);
+		return;
+	}
+	for (int j = 0; j < MAP_MAX; ++j)
+	{
+		std::unordered_set<int> zone_ids;
+		for (const auto& flag : portal_data[j])
 		{
-			temp_flag.zone_id = *((int *)flag_file.Read(sizeof(int)));
-			temp_flag.x = *((int *)flag_file.Read(sizeof(int)));
-			temp_flag.y = *((int *)flag_file.Read(sizeof(int)));
-			temp_flag.portal_x = *((int *)flag_file.Read(sizeof(int)));
-			temp_flag.portal_y = *((int *)flag_file.Read(sizeof(int)));
-			assert(temp_flag.zone_id >= 0);
-			assert(temp_flag.x >= 0);
-			assert(temp_flag.x >= 0);
-			assert(temp_flag.portal_x >= 0 && temp_flag.portal_x < 256);
-			assert(temp_flag.portal_y >= 0 && temp_flag.portal_y < 256);
-
-			if( g_pSystemAvailableManager->ZoneFiltering( temp_flag.zone_id ) )
-				m_flag[j].push_back(temp_flag);
-			
-			bool bExist=false;
-			
-			std::vector<int>::iterator itr = m_zoneidList[j].begin();
-			std::vector<int>::iterator enditr = m_zoneidList[j].end();
-
-			while( itr != enditr )
-			{
-				if( *itr == temp_flag.zone_id )
-					bExist = true;
-				itr++;
-			}
-
-			if( !bExist )
-				m_zoneidList[j].push_back( temp_flag.zone_id );
+			// Keep all zones for map navigation, including filtered destinations.
+			if (zone_ids.insert(flag.zone_id).second)
+				m_zoneidList[j].push_back(flag.zone_id);
+			// Positions outside the map cannot be displayed or selected safely.
+			if (flag.x >= m_map_spk.GetWidth(j) || flag.y >= m_map_spk.GetHeight(j))
+				continue;
+			if (g_pSystemAvailableManager->ZoneFiltering(flag.zone_id))
+				m_flag[j].push_back(flag);
 		}
 	}
 #endif
@@ -2503,7 +2486,9 @@ bool	C_VS_UI_SLAYER_PORTAL::MouseControl(UINT message, int _x, int _y)
 				static S_DEFAULT_HELP_STRING flag_string;
 				static char flag_temp[50];
 
-				flag_string.sz_main_str = g_pZoneTable->Get(m_flag[m_map][flag].zone_id)->Name.GetString();
+				auto* zone = g_pZoneTable->Get(static_cast<TYPE_ZONEID>(m_flag[m_map][flag].zone_id));
+				if (!zone) break;
+				flag_string.sz_main_str = zone->Name.GetString();
 				flag_string.sz_sub_str = flag_temp;
 				SafeFormat::Format(flag_temp, GetGameString(UI_STRING_MESSAGE_ZONEINFO_XY), m_flag[m_map][flag].portal_x, m_flag[m_map][flag].portal_y);
 
@@ -2576,7 +2561,7 @@ int		C_VS_UI_SLAYER_PORTAL::GetNext(int map, bool bLeft)
 		
 	}
 	if( bLeft )
-		return (map+1)&MAP_MAX;
+		return (map+1)%MAP_MAX;
 	
 	return (map-1+MAP_MAX)%MAP_MAX;
 }

@@ -320,6 +320,20 @@ The same audit found that all three races tried to redirect a two-hand removal b
 
 ### Caveats
 
+**Portal-resource follow-up (2026-09-21):** the Slayer portal's binary reader
+was separated from its game-coupled dialog, then ASan reproduced its null
+dereference with the final coordinate truncated by one byte. `SlayerPortalData`
+now checks the six-map little-endian format, nonempty counts capped at 65536 per
+map and bounded by remaining bytes, unsigned-16 zone IDs, nonnegative screen
+positions and destination coordinates below 256. Extra bytes are rejected;
+failure preserves both the prior data and reader cursor. Seven real-library
+tests cover every truncated prefix, bad fields/counts, the count limit, missing
+data, repeated loads and unaligned input. The dialog checks opens, logs rejected
+files, skips positions outside its map sprite and retains filtered zones for
+navigation. UI regression guards also replace the all-filtered navigation
+fallback's bitwise `&` with modulo and check a zone-name lookup before use.
+Archive extraction remains open.
+
 - **`CAlphaSprite555` and `CIndexSprite555` still desynchronise the stream on rejection.** They share the defect fixed in `CSprite555` but have no `m_bLoading` flag; restructuring them is a follow-up.
 - **The 555 fixes are latent in this build.** `ColorDraw::Is565()` returns a hardcoded `true`, and the 555 sprite variants are only constructed on the false branch, so the `CSprite555` family and `Convert565to555` fixes have no runtime effect today. They matter if a 5:5:5 surface is ever supported again.
 - **Not validated against real game art.** The sprite validation matches what the encoder in `SetPixel` guarantees, but only running the client against actual `.spr` data proves no shipped asset trips it. The failure mode would be artwork silently vanishing. Note also that a rejected sprite is dropped with no log line and an ignored return value, so there is no signal when it happens.
