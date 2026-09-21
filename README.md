@@ -377,6 +377,11 @@ The parser rejects truncated documents, unsupported DTDs, files over 16 MiB,
 nesting beyond 64 levels, or more than 100,000 elements and attributes per
 document. A rejected document leaves the existing tree intact.
 
+Chat tips, popup files and help-message resources use the same resource encoding
+policy, with a UTF-8 BOM overriding the pack default. Help-message reloads keep
+the previous collection if a document is incomplete or invalid; saves use UTF-8
+with a BOM so they can be read under any configured pack encoding.
+
 ### Toggle xBRZ rendering
 
 Open **Options > Graphics** and use **xBRZ smoothing**, immediately below the FPS

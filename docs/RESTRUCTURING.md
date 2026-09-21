@@ -1077,10 +1077,10 @@ rounds settled* for the host rules). Test fixtures share
   > loader; popups test the open result before reading. Other plain-text
   > callers and retirement of the renderer fallback remain open under
   > the encoding finding.
-  > Help-loader preparation: `MHelpMessageManager.cpp` now lives in `VS_UI`
-  > with its bytes unchanged. `test_help_messages.cpp` links the production
-  > message constructor; parser bounds, decoding and constructor recursion
-  > are the next test-first work.
+  > Help messages also load through the shared decoder. Their implementation
+  > moved unchanged into `VS_UI` before the parser fix. `test_help_messages.cpp`
+  > owns complete-record publication, numeric/race bounds, default singleton
+  > loading, long legacy-encoded fields and UTF-8 saves with a BOM.
   - Owner: the `unit_tests` link line, `test_textservice_normalize.cpp` and
     `test_glyph_cache.cpp` for repeated work, ownership, eviction and bounds.
 
