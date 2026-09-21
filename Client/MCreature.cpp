@@ -14,6 +14,9 @@
 #include "MEffectStatusTable.h"
 #include "Fl2.h"
 #include "ClientConfig.h"
+#include "TextService.h"
+#include "TextUtf8.h"
+#include "TextWrap.h"
 #include "ServerInfo.h"
 #include "DebugInfo.h"
 #include "SkillDef.h"
@@ -4892,115 +4895,52 @@ MCreature::ClearChatString()
 		if( m_PersnalMessage.empty() )
 			SetPersnalString( (*g_pGameStringTable)[UI_STRING_MESSAGE_PERSNAL_DEFAULT_MESSGE].GetString() );
 		else
-			SetPersnalString( (char*)m_PersnalMessage.c_str(), g_pUserOption->ChattingColor );
+			SetPersnalString( m_PersnalMessage.c_str(), g_pUserOption->ChattingColor );
 	}
 }
 
-void		
-MCreature::SetPersnalString(char *str, COLORREF color)
+// All supported configurations allocate at least four data bytes per row.
+// Keep storage clipping separate from the splitter's layout budget: even a
+// decorated tree name is copied only through a complete UTF-8 scalar.
+void MCreature::AppendChatRow(std::string_view text)
 {
-	if (str==NULL)
+	if (g_pClientConfig->MAX_CHATSTRINGLENGTH_PLUS1 <= 0 || g_pClientConfig->MAX_CHATSTRING <= 0)
+		return;
+	const size_t capacity = static_cast<size_t>(g_pClientConfig->MAX_CHATSTRINGLENGTH_PLUS1);
+	const size_t count = TextSystem::Utf8PrefixBytes(text, capacity - 1);
+	char* const destination = m_ChatString[m_ChatStringCurrent];
+	if (count != 0) memcpy(destination, text.data(), count);
+	destination[count] = '\0';
+	if (++m_ChatStringCurrent == g_pClientConfig->MAX_CHATSTRING) m_ChatStringCurrent = 0;
+}
+
+void
+MCreature::SetPersnalString(const char* input, COLORREF color)
+{
+	if (input == NULL)
 	{
 		DEBUG_ADD("[SetPersnalString] str == NULL");
 		return;
 	}
 
-	DEBUG_ADD_FORMAT("[SetPersnalString] %s", str);
-
-//if(CurPernalShop() == 0 )
+	// Copy before clearing rows; the supplied sign can belong to the creature.
+	const std::string text = TextSystem::TextService::NormalizeText(input);
+	DEBUG_ADD_FORMAT("[SetPersnalString] %s", text.c_str());
 	ClearChatString();
-
-	int startIndex = 0,
-		endIndex = 0;
-
 	m_NextChatFadeTime = MonotonicClock::TimePoint();
 	SetInputChatting(false);
 
-	DEBUG_ADD("[SetPersnalString] before while");
-	int len = strlen(str);
-	while (endIndex < len)
-	{
-		endIndex = startIndex + g_pClientConfig->MAX_CHATSTRING_LENGTH;
+	const size_t column = static_cast<size_t>(max(0, g_pClientConfig->MAX_CHATSTRING_LENGTH));
+	for (const auto& row : TextSystem::WrapUtf8Lines(text, column, {.skipSeamSpace = false}))
+		AppendChatRow(row);
 
-		// Hard-coded for the Christmas tree
-		bool bTree = false;
-		char *find = strchr(str+startIndex, '\n');
-		if(find != NULL)
-		{
-			// The distance to the newline is server-supplied and unbounded,
-			// but a chat row only holds MAX_CHATSTRING_LENGTH characters, so
-			// the newline cut is only honoured when it fits -- an over-long
-			// line falls back to the normal fixed-width wrap below without
-			// mutating the buffer.
-			int lineLen = (int)(find - (str+startIndex));
-			if (lineLen <= g_pClientConfig->MAX_CHATSTRING_LENGTH)
-			{
-				*find = '\0';
-				endIndex = startIndex + lineLen;
-				bTree = true;
-			}
-		}
-
-		// if len is not even long enough to cut...
-		if (endIndex >= len)
-		{
-			endIndex = len;
-
-			// Copy what is left of the string.
-			snprintf(m_ChatString[m_ChatStringCurrent], g_pClientConfig->MAX_CHATSTRINGLENGTH_PLUS1, "%s", str+startIndex);
-		}
-		else
-		{
-			// g_pClientConfig->MAX_CHATSTRING_LENGTH개를 짜를 수 없는가?
-			if (!g_PossibleStringCut(str, endIndex))
-			{
-				endIndex --;
-			}			
-			
-			// startIndex ~ endIndex-1 까지 strcpy
-			char	*pSource=str+startIndex, 
-					*pDest	=m_ChatString[m_ChatStringCurrent];
-			for (int i=startIndex; i<endIndex; i++)
-			{
-				*pDest++ = *pSource++;
-			}
-			*pDest = NULL;
-
-			if(bTree)
-			{
-				endIndex++;
-			}
-		}
-
-		// 다음 줄..
-		m_ChatStringCurrent++;
-		if (m_ChatStringCurrent==g_pClientConfig->MAX_CHATSTRING) m_ChatStringCurrent=0;
-
-		// index를 바꾼다.
-		startIndex = endIndex;
-	}
-	
-	// 채팅 String이 Delay될 시간을 지정해준다.	
-//	m_NextChatFadeTime = g_CurrentTime + g_pClientConfig->DELAY_CHATSTRING_KEEP;
-//	m_NextChatFadeTime = g_CurrentTime + 0xFFFFFFFF;
-
-	// 채팅 색깔
-//	m_ChatColor = RGB(50, 50, 200);//RGB_WHITE;//0xFFFF;
-//	m_OriChatColor = m_ChatColor;
-	
 	m_ChatColor = color;
 	m_OriChatColor |= 0xFF000000;
-//BYTE b = (m_OriChatColor & 0xFF000000) >> 24;
 	m_ChatTime = g_CurrentFrame;
 
-//	if(CurPernalShop() == 0 )
-//		ClearChatString();
-
 	DEBUG_ADD("[SetPersnalString] Excute ok");
-	for(int i = 0; i < m_ChatStringCurrent; i++)
-	{
+	for (int i = 0; i < m_ChatStringCurrent; i++)
 		DEBUG_ADD_FORMAT("%s", m_ChatString[i]);
-	}
 	DEBUG_ADD("[SetPersnalString] Excute ok 2");
 }
 //----------------------------------------------------------------------
@@ -5017,9 +4957,8 @@ MCreature::SetChatString(const char *input, COLORREF color)
 		return;
 	}
 
-	// The Christmas-tree path splits the text in place. Keep that legacy
-	// parsing local instead of requiring every caller to supply writable text.
-	std::string mutableString(input);
+	// Normalize complete input before any byte cuts, and keep tree parsing local.
+	std::string mutableString = TextSystem::TextService::NormalizeText(input);
 	char* str = mutableString.data();
 
 //	if(CurPernalShop() == 1)
@@ -5036,21 +4975,7 @@ MCreature::SetChatString(const char *input, COLORREF color)
 
 
 
-	int startIndex = 0,
-		endIndex = 0;
-
-//	size_t cur = -1;
-//	std::string temp;
-//	temp = str;;
-//	
-//	while((cur= temp.find("\n")) != -1)
-//	{
-//		temp.replace(temp.begin() + cur , temp.begin() + cur+2, "\0");
-//	}
-//
-//	str = (char*)temp.c_str();
-
-	// 크리스마스 트리용 하드코딩
+	// Christmas-tree recipient, message and sender fields.
 	char *szTreeFrom = NULL;
 	if( GetCreatureType() == 482 || GetCreatureType() == 650 )
 	{
@@ -5068,13 +4993,7 @@ MCreature::SetChatString(const char *input, COLORREF color)
 			
 			*find = '\0';
 			
-			// str is the server-supplied chat line and the row is only
-			// MAX_CHATSTRINGLENGTH_PLUS1 bytes, so the copy must be bounded.
-			snprintf(m_ChatString[m_ChatStringCurrent],
-					g_pClientConfig->MAX_CHATSTRINGLENGTH_PLUS1, "Dear. %s", str);
-
-			m_ChatStringCurrent++;
-			if (m_ChatStringCurrent==g_pClientConfig->MAX_CHATSTRING) m_ChatStringCurrent=0;
+			AppendChatRow(std::string("Dear. ") + str);
 
 			str = find+1;
 		}
@@ -5092,7 +5011,6 @@ MCreature::SetChatString(const char *input, COLORREF color)
 	}    
 	
 
-	int len = strlen(str);
 	
 	if(strstr(str, "배철숩니다") != NULL)
 	{
@@ -5116,70 +5034,12 @@ MCreature::SetChatString(const char *input, COLORREF color)
 	}
 
 
-	// 한 문장의 String을 적절한 길이로 잘라준다~~
-	DEBUG_ADD("[SetChatString] before while");
-	while (endIndex < len)
-	{
-		endIndex = startIndex + g_pClientConfig->MAX_CHATSTRING_LENGTH;
-
-		// Hard-coded for the Christmas tree
-		bool bTree = false;
-		if(GetCreatureType() == 482 || GetCreatureType() == 650 )
-		{
-			char *find = strchr(str+startIndex, '\n');
-			if(find != NULL)
-			{
-				// Same bound as SetPersnalString: the newline cut is only
-				// honoured when the line fits in a chat row; an over-long
-				// line falls back to the fixed-width wrap below.
-				int lineLen = (int)(find - (str+startIndex));
-				if (lineLen <= g_pClientConfig->MAX_CHATSTRING_LENGTH)
-				{
-					*find = '\0';
-					endIndex = startIndex + lineLen;
-					bTree = true;
-				}
-			}
-		}
-		
-		// if len is not even long enough to cut...
-		if (endIndex >= len)
-		{
-			endIndex = len;
-
-			// Copy what is left of the string.
-			snprintf(m_ChatString[m_ChatStringCurrent], g_pClientConfig->MAX_CHATSTRINGLENGTH_PLUS1, "%s", str+startIndex);
-		}
-		else
-		{
-			// g_pClientConfig->MAX_CHATSTRING_LENGTH개를 짜를 수 없는가?
-			if (!g_PossibleStringCut(str, endIndex))
-			{
-				endIndex --;
-			}			
-			
-			// startIndex ~ endIndex-1 까지 strcpy
-			char	*pSource=str+startIndex, 
-					*pDest	=m_ChatString[m_ChatStringCurrent];
-			for (int i=startIndex; i<endIndex; i++)
-			{
-				*pDest++ = *pSource++;
-			}
-			*pDest = NULL;
-
-			if(bTree)
-			{
-				endIndex++;
-			}
-		}
-
-		// 다음 줄..
-		m_ChatStringCurrent++;
-		if (m_ChatStringCurrent==g_pClientConfig->MAX_CHATSTRING) m_ChatStringCurrent=0;
-
-		// index를 바꾼다.
-		startIndex = endIndex;
-	}
+	const size_t column = static_cast<size_t>(max(0, g_pClientConfig->MAX_CHATSTRING_LENGTH));
+	const bool isTree = GetCreatureType() == 482 || GetCreatureType() == 650;
+	// Ordinary chat keeps embedded newlines as before; tree messages split them.
+	for (const auto& row : TextSystem::WrapUtf8Lines(str, column,
+		{.skipSeamSpace = false, .splitNewlines = isTree}))
+		AppendChatRow(row);
 	DEBUG_ADD("[SetChatString] while ok");
 
 	// Hard-coded for the Christmas tree
@@ -5187,22 +5047,9 @@ MCreature::SetChatString(const char *input, COLORREF color)
 	{
 		DEBUG_ADD("[SetChatString] Tree code");
 
-		// szTreeFrom is server-supplied and unbounded, so both the staging
-		// buffer and the copy into the 21-byte chat row must be bounded --
-		// this is the same overflow class the wrap loop above guards against.
-		int len = (int)strlen(szTreeFrom) + 6;
-
-		char szTemp[512];
-		int pad = max(g_pClientConfig->MAX_CHATSTRING_LENGTH - len, 0);
-		memset(szTemp, ' ', pad);
-		snprintf(szTemp + pad, sizeof(szTemp) - pad, "From. %s", szTreeFrom);
-
-		snprintf(m_ChatString[m_ChatStringCurrent],
-				g_pClientConfig->MAX_CHATSTRINGLENGTH_PLUS1, "%s", szTemp);
-
-		// next line..
-		m_ChatStringCurrent++;
-		if (m_ChatStringCurrent==g_pClientConfig->MAX_CHATSTRING) m_ChatStringCurrent=0;
+		std::string sender = std::string("From. ") + szTreeFrom;
+		if (sender.size() < column) sender.insert(0, column - sender.size(), ' ');
+		AppendChatRow(sender);
 
 		DEBUG_ADD("[SetChatString] Tree code ok");
 	}
