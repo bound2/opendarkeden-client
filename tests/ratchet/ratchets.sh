@@ -390,7 +390,10 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 # 10: UserOption.cpp and g_pUserOption move into VS_UI. Ten existing UI files
 # now resolve their only previously executable-owned global in the library;
 # this is ownership reclassification, not extraction of those ten files.
-R4_BASELINE=10
+# 11: force text mode when scanning source, including GameCommon's embedded
+# NUL bytes. GNU grep had omitted that file; BSD grep already counted it.
+# This corrects the measurement, not a new library-to-executable dependency.
+R4_BASELINE=11
 
 lib_members () {
 	# The directory trees minus the files CMake excludes from the
@@ -422,8 +425,8 @@ lib_members () {
 lib_defs () {
 	lib_members | sort -u | while read -r f; do
 		[ -f "$f" ] || continue
-		grep -oE '^[A-Za-z_][A-Za-z0-9_:<>]*[[:space:]]*\*?[[:space:]]*g_p[A-Z]\w*[[:space:]]*(=|;)' "$f" \
-			| grep -oE '\bg_p[A-Z]\w*'
+		grep -aoE '^[A-Za-z_][A-Za-z0-9_:<>]*[[:space:]]*\*?[[:space:]]*g_p[A-Z]\w*[[:space:]]*(=|;)' "$f" \
+			| grep -aoE '\bg_p[A-Z]\w*'
 	done | sort -u
 }
 R4=$(defs=$(lib_defs); lib_members | sort -u | while read -r f; do
@@ -436,8 +439,8 @@ R4=$(defs=$(lib_defs); lib_members | sort -u | while read -r f; do
 	# rewording a comment; task 5.3 hit it again and fixed the
 	# measurement instead. Line-based, so the same blindness R5
 	# documents applies: a reference inside a /* */ block still counts.
-	refs=$(grep -vE '^[[:space:]]*(//|\*|/\*)' "$f" \
-		| grep -oE '\bg_p[A-Z]\w*' | sort -u)
+	refs=$(grep -avE '^[[:space:]]*(//|\*|/\*)' "$f" \
+		| grep -aoE '\bg_p[A-Z]\w*' | sort -u)
 	[ -n "$refs" ] || continue
 	if [ -n "$(comm -23 <(echo "$refs") <(echo "$defs"))" ]; then
 		echo "$f"
