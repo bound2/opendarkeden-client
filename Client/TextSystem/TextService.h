@@ -8,6 +8,18 @@
 
 namespace TextSystem {
 
+struct NormalizationCacheLimits {
+	size_t entries = 1024;
+	size_t storageBytes = 1024 * 1024;
+};
+
+struct NormalizationCacheStats {
+	size_t entries = 0;
+	size_t storageBytes = 0;
+	size_t computations = 0;
+	size_t hits = 0;
+};
+
 class TextService {
 public:
 	static TextService& Get();
@@ -38,6 +50,10 @@ public:
 
 	// Encoding normalization: converts CP949/EUC-KR/other encodings to UTF-8
 	static std::string NormalizeText(const std::string& text);
+	// The cache is local to the calling thread. Reset also clears counters and
+	// must accompany any future change to the legacy encoding policy.
+	static void ResetNormalizationCache(NormalizationCacheLimits limits = {});
+	static NormalizationCacheStats GetNormalizationCacheStats();
 
 private:
 	TextService();

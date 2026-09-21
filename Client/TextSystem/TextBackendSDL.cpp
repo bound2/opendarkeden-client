@@ -50,6 +50,29 @@ struct CachedGlyph {
 		: glyph{metrics, owner.get()}, sprite(std::move(owner)), pixelBytes(bytes), recent(position) {}
 };
 
+struct MetricKey {
+	int fontId;
+	uint32_t codepoint;
+	bool operator==(const MetricKey& other) const
+	{
+		return fontId == other.fontId && codepoint == other.codepoint;
+	}
+};
+
+struct MetricKeyHash {
+	size_t operator()(const MetricKey& key) const
+	{
+		return (static_cast<size_t>(key.fontId) * 1315423911u) ^
+			(static_cast<size_t>(key.codepoint) * 2654435761u);
+	}
+};
+
+struct CachedMetrics {
+	GlyphMetrics metrics;
+	bool valid;
+	std::list<MetricKey>::iterator recent;
+};
+
 class TextBackendSDL : public TextBackend {
 public:
 	explicit TextBackendSDL(GlyphCacheLimits limits)
@@ -194,6 +217,12 @@ public:
 		if (!ttf)
 			return false;
 
+		const MetricKey key{font.id, codepoint};
+		if (const auto* cached = FindMetrics(key)) {
+			if (cached->valid) outMetrics = cached->metrics;
+			return cached->valid;
+		}
+		++m_metricLookups;
 		int minx = 0, maxx = 0, miny = 0, maxy = 0, advance = 0;
 		bool ok = false;
 
@@ -207,9 +236,12 @@ public:
 			// Fallback: approximate metrics using rendered surface
 			std::string utf8 = EncodeUtf8(codepoint);
 			SDL_Color white = {255, 255, 255, 255};
+			++m_metricRasterizations;
 			SDL_Surface* surf = TTF_RenderUTF8_Blended(ttf, utf8.c_str(), white);
-			if (!surf)
+			if (!surf) {
+				CacheMetrics(key, {}, false);
 				return false;
+			}
 			minx = 0;
 			maxx = surf->w;
 			miny = -TTF_FontAscent(ttf);  // Assume top-aligned
@@ -226,6 +258,7 @@ public:
 		// miny is usually negative (distance above baseline)
 		// ascent is the distance from baseline to top of font bounding box
 		outMetrics.bearingY = TTF_FontAscent(ttf) + miny;
+		CacheMetrics(key, outMetrics, true);
 		return true;
 	}
 
@@ -250,11 +283,21 @@ public:
 			return &it->second.glyph;
 		}
 
-		// Get glyph metrics first
+		// Metrics are independent of text color. If measurement has not filled
+		// them yet, the surface needed for this bitmap also supplies the fallback;
+		// do not rasterize a separate white surface just to obtain its dimensions.
+		const MetricKey metricKey{font.id, codepoint};
+		const auto* cachedMetrics = FindMetrics(metricKey);
+		if (cachedMetrics && !cachedMetrics->valid)
+			return NULL;
+		GlyphMetrics metrics{};
+		if (cachedMetrics)
+			metrics = cachedMetrics->metrics;
 		int minx = 0, maxx = 0, miny = 0, maxy = 0, advance = 0;
 		bool hasMetrics = false;
 
-		if (codepoint <= 0xFFFF) {
+		if (!cachedMetrics) ++m_metricLookups;
+		if (!cachedMetrics && codepoint <= 0xFFFF) {
 			if (TTF_GlyphMetrics(ttf, static_cast<Uint16>(codepoint), &minx, &maxx, &miny, &maxy, &advance) == 0) {
 				hasMetrics = true;
 			}
@@ -275,9 +318,7 @@ public:
 				return NULL;
 		}
 
-		GlyphMetrics metrics;
-
-		if (hasMetrics) {
+		if (!cachedMetrics && hasMetrics) {
 			int ascent = TTF_FontAscent(ttf);
 			metrics.width = maxx - minx;
 			metrics.height = maxy - miny;
@@ -289,15 +330,18 @@ public:
 			// Since miny is negative (above baseline), surface_top = baseline - miny = baseline + |miny|
 			// So bearingY = ascent + miny
 			metrics.bearingY = ascent + miny;
-		} else {
-			// Fallback: approximate metrics from surface
+		} else if (!cachedMetrics) {
+			// Use the same fallback geometry as GetGlyphMetrics. Line placement
+			// uses the font's line height; advance remains the rendered width.
 			int ascent = TTF_FontAscent(ttf);
 			metrics.width = surface->w;
-			metrics.height = surface->h;
+			metrics.height = ascent + TTF_FontDescent(ttf);
 			metrics.advance = surface->w;
 			metrics.bearingX = 0;
-			metrics.bearingY = ascent;  // Assume top-aligned
+			metrics.bearingY = 0;
 		}
+		if (!cachedMetrics)
+			CacheMetrics(metricKey, metrics, true);
 		const size_t dataSize = static_cast<size_t>(surface->pitch) * surface->h;
 		if (m_limits.entries == 0 || dataSize > m_limits.pixelBytes)
 			return NULL;
@@ -330,7 +374,8 @@ public:
 
 	GlyphCacheStats GetGlyphCacheStats() const override
 	{
-		return {m_glyphs.size(), m_pixelBytes, m_rasterizations};
+		return {m_glyphs.size(), m_pixelBytes, m_rasterizations, m_metrics.size(),
+			m_metricLookups, m_metricRasterizations};
 	}
 
 	void DrawGlyph(RenderTarget& target, const Glyph& glyph, int x, int y, uint8_t alpha) override
@@ -346,6 +391,30 @@ public:
 	}
 
 private:
+	const CachedMetrics* FindMetrics(const MetricKey& key)
+	{
+		const auto found = m_metrics.find(key);
+		if (found == m_metrics.end()) return nullptr;
+		m_recentMetrics.splice(m_recentMetrics.begin(), m_recentMetrics, found->second.recent);
+		return &found->second;
+	}
+
+	void CacheMetrics(const MetricKey& key, GlyphMetrics metrics, bool valid)
+	{
+		if (m_limits.metricEntries == 0) return;
+		while (m_metrics.size() >= m_limits.metricEntries) {
+			m_metrics.erase(m_recentMetrics.back());
+			m_recentMetrics.pop_back();
+		}
+		m_recentMetrics.push_front(key);
+		try {
+			m_metrics.emplace(key, CachedMetrics{metrics, valid, m_recentMetrics.begin()});
+		} catch (...) {
+			m_recentMetrics.pop_front();
+			throw;
+		}
+	}
+
 	TTF_Font* GetFont(FontHandle handle) const
 	{
 		if (handle.id < 0 || handle.id >= static_cast<int>(m_fonts.size()))
@@ -387,10 +456,14 @@ private:
 	GlyphCacheLimits m_limits;
 	size_t m_pixelBytes = 0;
 	size_t m_rasterizations = 0;
+	size_t m_metricLookups = 0;
+	size_t m_metricRasterizations = 0;
 	std::vector<TTF_Font*> m_fonts;
 	std::unordered_map<int, int> m_sizeToFontId;
 	std::list<GlyphKey> m_recent;
 	std::unordered_map<GlyphKey, CachedGlyph, GlyphKeyHash> m_glyphs;
+	std::list<MetricKey> m_recentMetrics;
+	std::unordered_map<MetricKey, CachedMetrics, MetricKeyHash> m_metrics;
 };
 
 TextBackend* CreateSDLTextBackend(GlyphCacheLimits limits)

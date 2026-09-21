@@ -1042,7 +1042,14 @@ rounds settled* for the host rules). Test fixtures share
   > bounds; a queued key also verifies the polling loop. Wheel/text fixtures
   > enter after polling because SDL2 compatibility libraries can discard or
   > reject synthetic versions of those events during SDL3 conversion.
-  - Owner: the `unit_tests` link line.
+  > **Text-cache follow-up (2026-09-21):** normalization retains at most
+  > 1,024 entries and 1 MiB of owned string capacity per calling thread;
+  > oversized text bypasses the cache. Glyph metrics have an independent
+  > 4,096-entry bound and are shared across bitmap colors. Diagnostic counters
+  > expose actual normalization and metric work. Encoding selection and
+  > load-time conversion remain tracked by the code-health encoding finding.
+  - Owner: the `unit_tests` link line, `test_textservice_normalize.cpp` and
+    `test_glyph_cache.cpp` for repeated work, ownership, eviction and bounds.
 
 - [x] **5.4 Format-string audit** (code-health C19/C20/C22: `sprintf`
   sites whose format is a `Data/Info/String.inf` entry).
