@@ -3,6 +3,8 @@
 #include <fstream>
 #include <iterator>
 #include <string>
+#include <cstring>
+#include <new>
 #include "UserOption.h"
 #include "KeyAccelerator.h"
 
@@ -28,6 +30,85 @@ struct SettingsFixture {
         file.write(contents.data(), contents.size());
     }
 };
+}
+
+TEST(UserOption, EntireBackupIdIsInitialized)
+{
+    alignas(UserOption) unsigned char storage[sizeof(UserOption)];
+    std::memset(storage, 0x1A, sizeof storage);
+    auto* options = new (storage) UserOption;
+    for (char byte : options->BackupID) CHECK_EQ(0, byte);
+    options->~UserOption();
+}
+
+TEST(UserOption, LegacyIdFieldDoesNotSerializeAdjacentMembers)
+{
+    SettingsFixture fixture;
+    UserOption options;
+    std::memcpy(options.BackupID, "abcdefghij", sizeof options.BackupID);
+    options.UseEnterChat = 0x1A;
+    options.UseXbrz = FALSE;
+    options.SaveToFile(fixture.path.string().c_str());
+    const auto bytes = fixture.Read();
+    const auto id = bytes.find("abcdefghij");
+    CHECK(id != std::string::npos);
+    if (id == std::string::npos) return;
+    CHECK(std::string("abcdefghij") + std::string(5, '\0') == bytes.substr(id, 15));
+    UserOption loaded;
+    CHECK(loaded.LoadFromFile(fixture.path.string().c_str()));
+    CHECK(std::string("abcdefghij") == loaded.BackupID);
+    CHECK_EQ(options.UseEnterChat, loaded.UseEnterChat);
+    CHECK_EQ(FALSE, loaded.UseXbrz);
+}
+
+TEST(UserOption, LegacyPaddingAndCrLfRemainReadable)
+{
+    SettingsFixture fixture;
+    UserOption options;
+    std::memcpy(options.BackupID, "abcdefghij", sizeof options.BackupID);
+    options.UseEnterChat = TRUE;
+    options.UseXbrz = FALSE;
+    options.SaveToFile(fixture.path.string().c_str());
+    auto bytes = fixture.Read();
+    const auto id = bytes.find("abcdefghij");
+    CHECK(id != std::string::npos);
+    if (id == std::string::npos) return;
+    // Ignore the old writer's trailing padding/adjacent-member bytes.
+    bytes.replace(id + 11, 4, std::string(4, '\x7F'));
+    for (size_t i = 0; i < bytes.size(); ++i) {
+        if (bytes[i] == '\n' && (i == 0 || bytes[i - 1] != '\r')) {
+            bytes.insert(i, 1, '\r');
+            ++i;
+        }
+    }
+    fixture.Write(bytes);
+    UserOption loaded;
+    CHECK(loaded.LoadFromFile(fixture.path.string().c_str()));
+    CHECK(std::string("abcdefghij") == loaded.BackupID);
+    CHECK_EQ(TRUE, loaded.UseEnterChat);
+    CHECK_EQ(FALSE, loaded.UseXbrz);
+}
+
+TEST(UserOption, DiskIdIsBoundedAndTruncatedFieldIsRejected)
+{
+    SettingsFixture fixture;
+    UserOption options;
+    std::memcpy(options.BackupID, "abcdefghij", sizeof options.BackupID);
+    options.UseEnterChat = TRUE;
+    options.SaveToFile(fixture.path.string().c_str());
+    auto bytes = fixture.Read();
+    const auto id = bytes.find("abcdefghij");
+    CHECK(id != std::string::npos);
+    if (id == std::string::npos) return;
+    bytes.replace(id, 15, "abcdefghijklmno");
+    fixture.Write(bytes);
+    UserOption loaded;
+    CHECK(loaded.LoadFromFile(fixture.path.string().c_str()));
+    CHECK(std::string("abcdefghij") == loaded.BackupID);
+    CHECK_EQ(TRUE, loaded.UseEnterChat);
+    bytes.resize(id + 14);
+    fixture.Write(bytes);
+    CHECK(!loaded.LoadFromFile(fixture.path.string().c_str()));
 }
 
 TEST(UserOption, XbrzDefaultsOnAndBothChoicesSurviveReload)

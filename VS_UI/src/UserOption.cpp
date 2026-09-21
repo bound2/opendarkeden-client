@@ -9,6 +9,7 @@
 #include <DInput.h>
 #endif
 #include <cstdio>
+#include <cstring>
 
 
 //----------------------------------------------------------------------
@@ -48,7 +49,7 @@ UserOption::UserOption()
 	DrawChatBoxOutline	= TRUE;
 
 	//new interface
-	BackupID[0]			= '\0';
+	std::memset(BackupID, 0, sizeof BackupID);
 	UseEnterChat		= FALSE;
 	UseMouseSpeed		= FALSE;
 	MouseSpeedValue		= 50;
@@ -98,6 +99,7 @@ UserOption::SaveToFile(const char* filename)
 {
 	// std::ofstream file(filename, ios::binary);	
 	FILE* file = fopen(filename, "w");
+	if (file == NULL) return;
 
 	DWORD flag = 0;
 	fwrite((void*)&flag, 1, 4, file);
@@ -128,7 +130,12 @@ UserOption::SaveToFile(const char* filename)
 	fprintf(file, "%d	DrawChatBoxOutline\n", DrawChatBoxOutline);
 
 	// new interface
-	fwrite((const void*)BackupID, 15, 1, file);
+	// The legacy disk field is 15 bytes; BackupID is only 11. Pad the
+	// field explicitly rather than reading padding and UseEnterChat.
+	char backupField[15] = {};
+	for (size_t i = 0; i < sizeof BackupID - 1 && BackupID[i] != '\0'; ++i)
+		backupField[i] = BackupID[i];
+	fwrite(backupField, sizeof backupField, 1, file);
 	fprintf(file, "%d	UseEnterChat\n", UseEnterChat);
 	fprintf(file, "%d	MouseSpeedValue\n", MouseSpeedValue);
 	fprintf(file, "%d	PlayYellSound\n", PlayYellSound);
@@ -204,7 +211,13 @@ UserOption::LoadFromFile(const char* filename)
 	fscanf(file, "%d	%s\n", &DrawChatBoxOutline, ignore);
 
 	// new interface
-	fread((void*)BackupID, 15, 1, file);
+	char backupField[15] = {};
+	if (fread(backupField, 1, sizeof backupField, file) != sizeof backupField) {
+		fclose(file);
+		return false;
+	}
+	std::memcpy(BackupID, backupField, sizeof BackupID - 1);
+	BackupID[sizeof BackupID - 1] = '\0';
 	fscanf(file, "%d %s\n", &UseEnterChat, ignore);
 	fscanf(file, "%d %s\n", &MouseSpeedValue, ignore);
 	fscanf(file, "%d %s\n", &PlayYellSound, ignore);
