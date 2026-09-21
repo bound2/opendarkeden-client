@@ -22,7 +22,7 @@
       "-Wignored-qualifiers" : 136,
       "-Wimplicit-fallthrough=" : 9,
       "-Wint-to-pointer-cast" : 2,
-      "-Wmisleading-indentation" : 25,
+      "-Wmisleading-indentation" : 23,
       "-Wmismatched-new-delete" : 1,
       "-Wmissing-field-initializers" : 9,
       "-Woverflow" : 1,
@@ -74,7 +74,7 @@
       "-Wint-to-void-pointer-cast" : 2,
       "-Wlogical-op-parentheses" : 511,
       "-Wmacro-redefined" : 24,
-      "-Wmisleading-indentation" : 16,
+      "-Wmisleading-indentation" : 14,
       "-Wmismatched-new-delete" : 1,
       "-Wmissing-braces" : 19,
       "-Wmissing-declarations" : 1,
@@ -132,7 +132,7 @@
       "-Wignored-qualifiers" : 136,
       "-Wimplicit-fallthrough=" : 9,
       "-Wint-to-pointer-cast" : 2,
-      "-Wmisleading-indentation" : 25,
+      "-Wmisleading-indentation" : 23,
       "-Wmismatched-new-delete" : 1,
       "-Wmissing-field-initializers" : 9,
       "-Wnonnull-compare" : 1,
@@ -411,7 +411,7 @@
       "C4146" : 1,
       "C4150" : 1,
       "C4244" : 490,
-      "C4267" : 587,
+      "C4267" : 582,
       "C4273" : 11,
       "C4297" : 228,
       "C4305" : 1,
@@ -422,7 +422,7 @@
       "C4668" : 1,
       "C4834" : 1,
       "C4858" : 2,
-      "C4996" : 560,
+      "C4996" : 556,
       "LNK-LOCAL-IMPORT" : 15
    },
    "windows-debug-x64" : {
@@ -436,7 +436,7 @@
       "C4146" : 1,
       "C4150" : 1,
       "C4244" : 490,
-      "C4267" : 587,
+      "C4267" : 582,
       "C4273" : 11,
       "C4297" : 228,
       "C4305" : 1,
@@ -447,7 +447,7 @@
       "C4668" : 1,
       "C4834" : 1,
       "C4858" : 2,
-      "C4996" : 560,
+      "C4996" : 556,
       "LNK-LOCAL-IMPORT" : 15
    },
    "windows-release-x64" : {
@@ -461,7 +461,7 @@
       "C4146" : 1,
       "C4150" : 1,
       "C4244" : 490,
-      "C4267" : 587,
+      "C4267" : 582,
       "C4273" : 11,
       "C4305" : 1,
       "C4309" : 1,
@@ -471,7 +471,7 @@
       "C4668" : 1,
       "C4834" : 1,
       "C4858" : 2,
-      "C4996" : 561,
+      "C4996" : 557,
       "LNK-LOCAL-IMPORT" : 15
    }
 }

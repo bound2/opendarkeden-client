@@ -78,6 +78,9 @@ public:
 	std::vector<std::string> *GetList(char *filter = NULL);
 
 	char* GetFilePointer(){return m_file_pointer;};
+	size_t GetRemainingSize() const {
+		return m_file_pointer ? static_cast<size_t>(m_size - (m_file_pointer - m_data)) : 0;
+	}
 };
 
 #endif

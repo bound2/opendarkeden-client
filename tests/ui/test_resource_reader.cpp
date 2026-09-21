@@ -31,6 +31,7 @@ TEST(ResourceReader, RejectedReadsPreserveTheCursorAndDestination)
 	CRarFile reader;
 	CHECK(reader.Open(ReaderFile::path));
 	char* start = reader.GetFilePointer();
+	CHECK_EQ(3, reader.GetRemainingSize());
 	CHECK(reader.Read(4) == nullptr);
 	CHECK(reader.GetFilePointer() == start);
 	// Restore the fixture before checking another rejected request on the old
@@ -50,6 +51,7 @@ TEST(ResourceReader, RejectedReadsPreserveTheCursorAndDestination)
 	CHECK(reader.GetFilePointer() == start);
 	CHECK(reader.Read(output, 3) != nullptr);
 	CHECK(std::string(output, 3) == "abc");
+	CHECK_EQ(0, reader.GetRemainingSize());
 	CHECK(reader.IsEOF());
 	CHECK(reader.Read(1) == nullptr);
 }
