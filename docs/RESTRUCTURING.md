@@ -1042,6 +1042,9 @@ rounds settled* for the host rules). Test fixtures share
   > bounds; a queued key also verifies the polling loop. Wheel/text fixtures
   > enter after polling because SDL2 compatibility libraries can discard or
   > reject synthetic versions of those events during SDL3 conversion.
+  > The strict UTF-8 decoder/validator is shared from `basic/TextUtf8.h`,
+  > so resource codecs and byte-boundary helpers need no rendering dependency.
+  > `test_text_utf8.cpp` owns its scalar validation and truncated-input rules.
   > **Text-cache follow-up (2026-09-21):** normalization retains at most
   > 1,024 entries and 1 MiB of owned string capacity per calling thread;
   > oversized text bypasses the cache. Glyph metrics have an independent

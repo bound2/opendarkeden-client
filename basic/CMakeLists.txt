@@ -146,6 +146,7 @@ install(FILES
 	InputCodes.h
 	AudioTypes.h
 	SafeFormat.h
+	TextUtf8.h
 	StringReduction.h
 	MemoryPool.h
 	ScrollRange.h
