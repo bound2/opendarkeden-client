@@ -1070,8 +1070,11 @@ rounds settled* for the host rules). Test fixtures share
   > declarations/BOMs before the pack default. The parser builds temporary
   > trees before appending, with per-document size/depth/node limits; owned
   > strings replace fixed stack buffers. Wide conversion queries its UTF-8
-  > capacity and XML saves escape markup. Plain-text ingress and renderer
-  > fallback retirement remain separate work under the encoding finding.
+  > capacity and XML saves escape markup. `CRarFile::OpenText` provides a
+  > bounded, once-per-file decoding path and UTF-8-safe line clipping;
+  > `test_resource_reader.cpp` owns its bounds, cursor and buffer-lifetime
+  > contracts. Migrating plain-text callers and retiring the renderer
+  > fallback remain separate work under the encoding finding.
   - Owner: the `unit_tests` link line, `test_textservice_normalize.cpp` and
     `test_glyph_cache.cpp` for repeated work, ownership, eviction and bounds.
 

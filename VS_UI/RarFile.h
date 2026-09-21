@@ -10,7 +10,7 @@
 #ifdef PLATFORM_WINDOWS
 #include <windows.h>
 #else
-#include "../../basic/Platform.h"
+#include "Platform.h"
 #endif
 #include <string>
 #include <vector>
@@ -21,9 +21,8 @@
 /**
  * CRarFile - Cross-platform file reader that works with extracted RAR content
  *
- * RAR files are mapped to directories with the same name:
- * - Data/Info/infodata.rpk  → Data/Info/infodata/
- * - Data/Ui/txt/Item.rpk    → Data/Ui/txt/Item/
+ * Files are read beside the named archive: Data/Info/infodata.rpk selects
+ * Data/Info/. Archive decompression is not implemented here.
  *
  * This avoids dependency on unrar library and improves cross-platform compatibility
  */
@@ -38,6 +37,8 @@ private:
 	char *m_data;
 	char *m_file_pointer;
 	int m_size;
+	bool m_text = false;
+	bool OpenLimited(const char* filename, bool text);
 
 public:
 	// Constructor
@@ -46,6 +47,8 @@ public:
 
 	// Destructor
 	~CRarFile();
+	CRarFile(const CRarFile&) = delete;
+	CRarFile& operator=(const CRarFile&) = delete;
 
 	// Release resources
 	void Release();
@@ -53,10 +56,14 @@ public:
 	// Set RAR file path (converted to directory path)
 	void SetRAR(const char *rar_filename, const char *pass);
 
-	// Open a file from the extracted directory
+	// Open raw bytes from the extracted directory. Failed opens close old data.
 	bool Open(const char *in_filename);
+	// Decode once using the resource page or UTF-8 BOM, with a 16 MiB input cap.
+	// GetString then clips only at UTF-8 scalar boundaries, consuming each line.
+	bool OpenText(const char *in_filename);
 
-	// Read data
+	// Exact reads reject negative/oversized requests without changing the cursor
+	// or destination. The caller supplies at least size writable destination bytes.
 	char*	Read(char *buf, int size);
 	char*	Read(int size);
 	bool	GetString(char* buf, int size);
@@ -67,7 +74,7 @@ public:
 	// Check if EOF
 	bool	IsEOF(int plus = 0);
 
-	// Get file list (stub for compatibility)
+	// Caller owns the returned list, even when empty. Archive listing is a stub.
 	std::vector<std::string> *GetList(char *filter = NULL);
 
 	char* GetFilePointer(){return m_file_pointer;};

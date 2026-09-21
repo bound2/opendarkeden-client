@@ -5,6 +5,9 @@
 #include "RarFile.h"
 #pragma warning(disable:4786)
 #include <algorithm>
+#include <limits>
+#include <memory>
+#include "ResourceText.h"
 
 //////////////////////////////////////////////////////////////////////
 // Error Reporting Macro (cross-platform)
@@ -30,6 +33,7 @@ CRarFile::CRarFile()
 	m_file_pointer = NULL;
 	m_data = NULL;
 	m_size = 0;
+	m_text = false;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -62,6 +66,7 @@ void CRarFile::Release()
 		m_file_pointer = NULL;
 	}
 	m_size = 0;
+	m_text = false;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -70,6 +75,7 @@ void CRarFile::Release()
 //////////////////////////////////////////////////////////////////////
 void CRarFile::SetRAR(const char *rar_filename, const char *pass)
 {
+	Release();
 	if (rar_filename == NULL || rar_filename[0] == '\0')
 	{
 		m_rar_filename = "";
@@ -79,7 +85,7 @@ void CRarFile::SetRAR(const char *rar_filename, const char *pass)
 	}
 
 	m_rar_filename = rar_filename;
-	m_password = pass;  // Store password but don't use it (not needed for extracted files)
+	m_password = pass ? pass : "";  // Unused for extracted files.
 
 	// Use the directory containing the .rpk/.rar file as the base directory,
 	// since the game data ships with archive contents extracted flat next to
@@ -100,20 +106,30 @@ void CRarFile::SetRAR(const char *rar_filename, const char *pass)
 //////////////////////////////////////////////////////////////////////
 bool CRarFile::Open(const char *in_filename)
 {
+	return OpenLimited(in_filename, false);
+}
+
+bool CRarFile::OpenText(const char* filename)
+{
+	return OpenLimited(filename, true);
+}
+
+bool CRarFile::OpenLimited(const char* in_filename, bool text)
+{
+	Release();
 	if (in_filename == NULL || in_filename[0] == '\0')
 	{
 		RARFILE_ERROR("Open called with NULL or empty filename");
 		return false;
 	}
 
-	Release();
-
 	// Build full path by combining base directory with filename
 	std::string fullPath = m_base_dir + in_filename;
 
 	// Open the file
-	FILE* file = fopen(fullPath.c_str(), "rb");
-	if (file == NULL)
+	const auto closeFile = [](FILE* value) { fclose(value); };
+	std::unique_ptr<FILE, decltype(closeFile)> file(fopen(fullPath.c_str(), "rb"), closeFile);
+	if (!file)
 	{
 		// Log detailed error information
 		char errorMsg[512];
@@ -125,31 +141,30 @@ bool CRarFile::Open(const char *in_filename)
 	}
 
 	// Get file size
-	fseek(file, 0, SEEK_END);
-	long fileSize = ftell(file);
-	fseek(file, 0, SEEK_SET);
-
-	if (fileSize <= 0)
+	if (fseek(file.get(), 0, SEEK_END) != 0) return false;
+	const long fileSize = ftell(file.get());
+	const size_t limit = text ? ResourceText::MaxFileBytes :
+		static_cast<size_t>((std::numeric_limits<int>::max)() - 1);
+	if (fileSize < 0 || static_cast<size_t>(fileSize) > limit ||
+		fseek(file.get(), 0, SEEK_SET) != 0)
 	{
 		char errorMsg[256];
 		snprintf(errorMsg, sizeof(errorMsg),
 				"File has invalid size: %s (size=%ld)", fullPath.c_str(), fileSize);
 		RARFILE_ERROR(errorMsg);
-		fclose(file);
 		return false;
 	}
 
 	// Allocate buffer and read entire file
-	m_data = (char*)malloc(fileSize + 1);
-	if (m_data == NULL)
+	std::unique_ptr<char, decltype(&free)> data(
+		static_cast<char*>(malloc(static_cast<size_t>(fileSize) + 1)), &free);
+	if (!data)
 	{
 		RARFILE_ERROR("Memory allocation failed for file data");
-		fclose(file);
 		return false;
 	}
 
-	size_t bytesRead = fread(m_data, 1, fileSize, file);
-	fclose(file);
+	size_t bytesRead = fread(data.get(), 1, static_cast<size_t>(fileSize), file.get());
 
 	if (bytesRead != (size_t)fileSize) {
 		char errorMsg[256];
@@ -157,14 +172,25 @@ bool CRarFile::Open(const char *in_filename)
 				"Read size mismatch: %s (expected=%ld, actual=%zu)",
 				fullPath.c_str(), fileSize, bytesRead);
 		RARFILE_ERROR(errorMsg);
-		free(m_data);
-		m_data = NULL;
 		return false;
 	}
 
+	if (text) {
+		std::string decoded;
+		if (!ResourceText::Decode(std::string_view(data.get(), bytesRead), decoded) ||
+			decoded.size() > static_cast<size_t>((std::numeric_limits<int>::max)() - 1)) return false;
+		std::unique_ptr<char, decltype(&free)> utf8(
+			static_cast<char*>(malloc(decoded.size() + 1)), &free);
+		if (!utf8) return false;
+		memcpy(utf8.get(), decoded.data(), decoded.size());
+		bytesRead = decoded.size();
+		data = std::move(utf8);
+	}
+	m_data = data.release();
 	m_size = (int)bytesRead;
 	m_data[m_size] = '\0';  // Null-terminate for string operations
 	m_file_pointer = m_data;
+	m_text = text;
 
 	return true;
 }
@@ -175,7 +201,8 @@ bool CRarFile::Open(const char *in_filename)
 //////////////////////////////////////////////////////////////////////
 char* CRarFile::Read(char *buf, int size)
 {
-	if(m_file_pointer == NULL || IsEOF())
+	if (!buf || size < 0 || m_file_pointer == NULL || IsEOF() ||
+		size > m_size - (m_file_pointer - m_data))
 		return NULL;
 
 	memcpy(buf, m_file_pointer, size);
@@ -190,7 +217,8 @@ char* CRarFile::Read(char *buf, int size)
 //////////////////////////////////////////////////////////////////////
 char* CRarFile::Read(int size)
 {
-	if(m_file_pointer == NULL || IsEOF())
+	if (size < 0 || m_file_pointer == NULL || IsEOF() ||
+		size > m_size - (m_file_pointer - m_data))
 		return NULL;
 
 	char* re = (char*)m_file_pointer;
@@ -214,7 +242,7 @@ bool CRarFile::GetString(char* buf, int size)
 	}
 
 	// Find current position in data
-	long currentPos = m_file_pointer - m_data;
+	const auto currentPos = m_file_pointer - m_data;
 	if (currentPos >= m_size)
 	{
 		buf[0] = '\0';
@@ -245,6 +273,10 @@ bool CRarFile::GetString(char* buf, int size)
 	int copyLength = lineLength;
 	if (copyLength >= size)
 		copyLength = size - 1;
+	if (m_text) {
+		while (copyLength > 0 && copyLength < lineLength &&
+			(static_cast<unsigned char>(lineStart[copyLength]) & 0xC0) == 0x80) --copyLength;
+	}
 
 	memcpy(buf, lineStart, copyLength);
 	buf[copyLength] = '\0';
@@ -263,11 +295,10 @@ bool CRarFile::GetString(char* buf, int size)
 //////////////////////////////////////////////////////////////////////
 bool CRarFile::IsEOF(int plus)
 {
-	if (m_file_pointer == NULL)
+	if (m_file_pointer == NULL || plus < 0)
 		return true;
 
-	long currentPos = m_file_pointer - m_data;
-	return (currentPos + plus >= m_size);
+	return plus >= m_size - (m_file_pointer - m_data);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -276,7 +307,7 @@ bool CRarFile::IsEOF(int plus)
 //////////////////////////////////////////////////////////////////////
 std::vector<std::string> *CRarFile::GetList(char *filter)
 {
-	// Stub: Return empty list
-	static std::vector<std::string> emptyList;
-	return &emptyList;
+	// The tutorial owns and deletes this list after the reader has gone away.
+	// Archive enumeration remains unimplemented, but its ownership is real.
+	return new std::vector<std::string>;
 }
