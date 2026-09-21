@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string_view>
 
 namespace TextSystem {
 
@@ -60,6 +61,23 @@ inline bool IsValidUtf8(const char* data, size_t len)
 		offset += consumed;
 	}
 	return true;
+}
+
+// Largest prefix within a byte budget that keeps every complete UTF-8 scalar.
+// Malformed input follows Utf8Decode's one-byte progress rule; this helper
+// neither validates nor transcodes the input. Embedded NUL is an ordinary byte.
+inline size_t Utf8PrefixBytes(std::string_view text, size_t maxBytes)
+{
+	const size_t limit = maxBytes < text.size() ? maxBytes : text.size();
+	size_t offset = 0;
+	while (offset < limit) {
+		const size_t remaining = text.size() - offset;
+		int consumed = 0;
+		Utf8Decode(text.data() + offset, static_cast<int>(remaining < 4 ? remaining : 4), &consumed);
+		if (static_cast<size_t>(consumed) > limit - offset) break;
+		offset += static_cast<size_t>(consumed);
+	}
+	return offset;
 }
 
 } // namespace TextSystem

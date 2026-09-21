@@ -1091,6 +1091,10 @@ rounds settled* for the host rules). Test fixtures share
   > moved unchanged into `VS_UI` before the parser fix. `test_help_messages.cpp`
   > owns complete-record publication, numeric/race bounds, default singleton
   > loading, long legacy-encoded fields and UTF-8 saves with a BOM.
+  > `TextUtf8.h` also owns the scalar-boundary prefix operation used by resource
+  > line clipping and all three in-place string reducers. Their byte/storage
+  > bounds and valid UTF-8 output are tested independently; the old wrapping
+  > predicate and caller loops remain follow-up work under findings 116/135.
   - Owner: the `unit_tests` link line, `test_textservice_normalize.cpp` and
     `test_glyph_cache.cpp` for repeated work, ownership, eviction and bounds.
 

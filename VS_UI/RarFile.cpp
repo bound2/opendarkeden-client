@@ -8,6 +8,7 @@
 #include <limits>
 #include <memory>
 #include "ResourceText.h"
+#include "TextUtf8.h"
 
 //////////////////////////////////////////////////////////////////////
 // Error Reporting Macro (cross-platform)
@@ -274,8 +275,9 @@ bool CRarFile::GetString(char* buf, int size)
 	if (copyLength >= size)
 		copyLength = size - 1;
 	if (m_text) {
-		while (copyLength > 0 && copyLength < lineLength &&
-			(static_cast<unsigned char>(lineStart[copyLength]) & 0xC0) == 0x80) --copyLength;
+		copyLength = static_cast<int>(TextSystem::Utf8PrefixBytes(
+			std::string_view(lineStart, static_cast<size_t>(lineLength)),
+			static_cast<size_t>(copyLength)));
 	}
 
 	memcpy(buf, lineStart, copyLength);

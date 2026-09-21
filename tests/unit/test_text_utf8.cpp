@@ -3,6 +3,7 @@
 #include "TextService.h"
 #include <string>
 #include <vector>
+#include <limits>
 
 TEST(TextUtf8, RejectsOverlongSurrogateAndOutOfRangeScalars)
 {
@@ -61,4 +62,34 @@ TEST(TextUtf8, AcceptsScalarBoundariesAndNeverReadsPastTruncations)
 			CHECK_EQ(1, used);
 		}
 	}
+}
+
+TEST(TextUtf8, PrefixBudgetKeepsTwoThreeAndFourByteScalars)
+{
+	const std::string text = "a\xC3\xA9\xEA\xB0\x80\xF0\x9F\x99\x82Z";
+	const size_t expected[] = {0, 1, 1, 3, 3, 3, 6, 6, 6, 6, 10, 11};
+	for (size_t budget = 0; budget < sizeof(expected) / sizeof(expected[0]); ++budget) {
+		const size_t size = TextSystem::Utf8PrefixBytes(text, budget);
+		CHECK_EQ(expected[budget], size);
+		CHECK(TextSystem::IsValidUtf8(text.data(), size));
+	}
+	CHECK_EQ(text.size(), TextSystem::Utf8PrefixBytes(text, std::numeric_limits<size_t>::max()));
+	CHECK_EQ(0, TextSystem::Utf8PrefixBytes({}, 123));
+}
+
+TEST(TextUtf8, PrefixHandlesMalformedTailsAndEmbeddedNulsWithinTheSpan)
+{
+	for (const std::string bytes : {"\xC0\x80", "\xE0\x80\x80", "\xED\xA0\x80",
+		"\xF4\x90\x80\x80", "\xE1\x80", "\xFF" "A"}) {
+		// None contains a complete valid multibyte scalar. Each damaged byte
+		// remains individually consumable, including the truncated final byte.
+		std::vector<char> exact(bytes.begin(), bytes.end());
+		for (size_t budget = 0; budget <= exact.size(); ++budget)
+			CHECK_EQ(budget, TextSystem::Utf8PrefixBytes(
+				std::string_view(exact.data(), exact.size()), budget));
+	}
+	const std::string nul("\0\xC3\xA9", 3);
+	CHECK_EQ(1, TextSystem::Utf8PrefixBytes(nul, 1));
+	CHECK_EQ(1, TextSystem::Utf8PrefixBytes(nul, 2));
+	CHECK_EQ(3, TextSystem::Utf8PrefixBytes(nul, 3));
 }

@@ -1,5 +1,6 @@
 #include "test_framework.h"
 #include "StringReduction.h"
+#include "TextUtf8.h"
 
 #include <cstring>
 #include <limits>
@@ -77,5 +78,39 @@ TEST(StringReduction, DanglingHighByteDoesNotScanPastTerminator)
 		reduce(text.get(), 36);
 		CHECK_EQ(0x81, static_cast<unsigned char>(text[0]));
 		CHECK_EQ('\0', text[1]);
+	}
+}
+
+TEST(StringReduction, TruncationPreservesCompleteUtf8Scalars)
+{
+	const std::string text = "a\xC3\xA9\xF0\x9F\x99\x82Z";
+	const std::string expected[] = {
+		text, "a", "a", "...", "a...", "a...", "a\xC3\xA9...", "a\xC3\xA9...", text
+	};
+	for (const auto reduce : reducers) {
+		for (int limit = 0; limit <= 8; ++limit) {
+			auto copy = std::make_unique<char[]>(text.size() + 1);
+			std::memcpy(copy.get(), text.c_str(), text.size() + 1);
+			reduce(copy.get(), limit);
+			CHECK(std::string(copy.get()) == expected[limit]);
+			CHECK(TextSystem::IsValidUtf8(copy.get(), std::strlen(copy.get())));
+		}
+	}
+}
+
+TEST(StringReduction, MultibyteFirstScalarsAndSmallLimitsCannotSplitCharacters)
+{
+	const std::string text = "\xEA\xB0\x80\xEB\x82\x98\xEB\x8B\xA4";
+	const std::string expected[] = {
+		text, "", "", "...", "...", "...", "\xEA\xB0\x80...",
+		"\xEA\xB0\x80...", "\xEA\xB0\x80...", text
+	};
+	for (const auto reduce : reducers) {
+		for (int limit = 0; limit <= 9; ++limit) {
+			std::string storage = text;
+			reduce(storage.data(), limit);
+			CHECK(std::string(storage.c_str()) == expected[limit]);
+			CHECK(TextSystem::IsValidUtf8(storage.c_str(), std::strlen(storage.c_str())));
+		}
 	}
 }
