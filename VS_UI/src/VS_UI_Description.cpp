@@ -18,6 +18,8 @@
 #include "MGameStringTable.h"
 #include "SafeFormat.h"
 #include "UISafeText.h"
+#include "TextService.h"
+#include "TextWrap.h"
 #include "MZoneTable.h"
 #include "MTimeItemManager.h"
 #include "SystemAvailabilities.h"
@@ -3335,55 +3337,14 @@ void _BloodBible_Description_Calculator(void (*fp_show)(Rect, void *, long, long
 
 
 //-----------------------------------------------------------------------------
-// g_CountMultilineRows
-//
-// Counts the rows _Multiline_Info_Show will actually paint for pString at a
-// column of nColumn bytes. It repeats that function's walk step for step - the
-// same g_PossibleStringCut test, the same "cut = nColumn - check", the same
-// skip of a space at the seam, the same termination - so the height computed
-// by _Multiline_Info_Calculator and the rows drawn by Show cannot disagree.
-// Show is the reference: if its loop changes, this has to change with it.
-//
-// Only reads pString. Show's temporary NUL is written after it has decided
-// where to cut and is restored before the next pass, so it never influences
-// any of the decisions reproduced here.
+// Both tooltip passes use owned rows from the same splitter. Normalize the
+// complete input before splitting, while legacy direct callers still exist.
 //-----------------------------------------------------------------------------
-static int g_CountMultilineRows(const char * pString, int nColumn)
+static std::vector<std::string> BuildMultilineInfoRows(const char* text, long column)
 {
-	if(NULL == pString || nColumn <= 0)
-		return 0;
-
-	const char *	cur		= pString;
-	int				nRows	= 0;
-
-	for(;;)
-	{
-		int remain = (int)strlen(cur);
-
-		if(remain <= nColumn) // what is left fits on one line - no cut needed
-		{
-			if(remain > 0)
-				nRows++;
-			break;
-		}
-
-		int check;
-		if(g_PossibleStringCut(cur, nColumn))
-			check = 0;
-		else
-			check = 1;
-
-		int cut = nColumn - check;
-		if(cut <= 0) // cutting here would not advance - give up rather than spin
-			break;
-
-		nRows++;
-
-		cur += cut;
-		if(*cur == ' ')cur++;
-	}
-
-	return nRows;
+	if (text == nullptr || column <= 0) return {};
+	return TextSystem::WrapUtf8Lines(TextSystem::TextService::NormalizeText(text),
+		static_cast<size_t>(column));
 }
 
 //-----------------------------------------------------------------------------
@@ -3398,45 +3359,11 @@ void _Multiline_Info_Calculator(void (*fp_show)(Rect, void *, long, long), int x
 
 	//////////////////////////////// start calculation
 	
-	int line_count = 0;
-
-	if(right != 0)
-	{
-		if(NULL != void_ptr)
-		{	
-			//
-			// Ask for the row count _Multiline_Info_Show will actually paint
-			// instead of strlen/right + 1. Show advances one byte less than the
-			// column whenever g_PossibleStringCut refuses the seam, so the old
-			// estimate could size the box one row short and leave the last row
-			// painting below the tooltip background.
-			//
-			line_count = g_CountMultilineRows((const char *)void_ptr, (int)right);
-
-			//
-			// Measure the width of one full column. The copy is bounded by the
-			// string that is really there and by the scratch buffer, so neither a
-			// string shorter than the column nor a column wider than the buffer
-			// can read or write past an end. The result stays NUL terminated.
-			//
-			char szTempBuf[128] = {0,};
-			size_t nLen  = strlen((const char *)void_ptr);
-			size_t nCopy = (right > 0) ? (size_t)right : 0;
-			if(nCopy > nLen)
-				nCopy = nLen;
-			if(nCopy > sizeof(szTempBuf)-1)
-				nCopy = sizeof(szTempBuf)-1;
-			memcpy(szTempBuf, void_ptr, nCopy);
-			szTempBuf[nCopy] = '\0';
-			rect.w = g_GetStringWidth((const char *)szTempBuf, gpC_base->m_item_name_pi.hfont);
-		}
-		else
-			rect.w = g_GetStringWidth((const char *)void_ptr, gpC_base->m_item_name_pi.hfont);
-	}
-	else
-		rect.w = g_GetStringWidth((const char *)void_ptr, gpC_base->m_item_name_pi.hfont);
-
-	rect.h = (line_count)*NORMAL_FONT_Y_GAP;
+	const auto rows = BuildMultilineInfoRows(static_cast<const char*>(void_ptr), right);
+	rect.w = 0;
+	for (const auto& row : rows)
+		rect.w = max(rect.w, g_GetStringWidth(row.c_str(), gpC_base->m_item_name_pi.hfont));
+	rect.h = static_cast<int>(rows.size()) * NORMAL_FONT_Y_GAP;
 
 	rect.w += SIDE_GAP;
 	rect.h += SIDE_GAP;
@@ -3480,51 +3407,11 @@ void	_Multiline_Info_Show(Rect rect, void * void_ptr, long left, long right)
 
 	if(left == 0)left = RGB_WHITE;
 
-	int CurrentPos = right;
-
-	char *cur = (char*)void_ptr;
-	char char_temp;
-
-	//
-	// Walk the string one rendered line at a time, bounded by what is actually left
-	// of it rather than by a precomputed line count. The cut position is only ever
-	// overwritten with a NUL once we know a character really lives there, so the
-	// trailing chunk no longer terminates past the end of the caller's buffer.
-	// CurrentPos of zero would leave no room to advance, so it renders nothing.
-	//
-	while(CurrentPos > 0)
+	const auto rows = BuildMultilineInfoRows(static_cast<const char*>(void_ptr), right);
+	for (const auto& row : rows)
 	{
-		int remain = (int)strlen(cur);
-
-		if(remain <= CurrentPos) // what is left fits on one line - no cut needed
-		{
-			if(remain > 0)
-			{
-				g_PrintColorStr(px, py, cur, gpC_base->m_item_name_pi, left);
-				py += NORMAL_FONT_Y_GAP;
-			}
-			break;
-		}
-
-		int check;
-		if(g_PossibleStringCut(cur, CurrentPos))
-			check = 0;
-		else
-			check = 1;
-
-		int cut = CurrentPos - check;
-		if(cut <= 0) // cutting here would not advance - give up rather than spin
-			break;
-
-		char_temp = cur[cut];
-		cur[cut] = '\0';
-
-		g_PrintColorStr(px, py, cur, gpC_base->m_item_name_pi, left);
+		g_PrintColorStr(px, py, row.c_str(), gpC_base->m_item_name_pi, left);
 		py += NORMAL_FONT_Y_GAP;
-
-		cur += cut;
-		*cur = char_temp;
-		if(*cur == ' ')cur++;
 	}
 }
 //-----------------------------------------------------------------------------

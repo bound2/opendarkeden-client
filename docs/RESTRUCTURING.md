@@ -1095,6 +1095,12 @@ rounds settled* for the host rules). Test fixtures share
   > line clipping and all three in-place string reducers. Their byte/storage
   > bounds and valid UTF-8 output are tested independently; the old wrapping
   > predicate and caller loops remain follow-up work under findings 116/135.
+  > Multiline tooltip sizing and drawing now share `basic/TextWrap` rows:
+  > complete UTF-8 scalars, explicit newlines and progress at narrow columns,
+  > with owned strings instead of temporary writes into borrowed text. Width
+  > comes from the widest actual row. `test_text_wrap.cpp` owns splitting and
+  > lifetime contracts; the two game-global UI callbacks remain regression
+  > guards. The other wrapping callers still need migration.
   - Owner: the `unit_tests` link line, `test_textservice_normalize.cpp` and
     `test_glyph_cache.cpp` for repeated work, ownership, eviction and bounds.
 
