@@ -21,6 +21,7 @@
 #include "MItemOptionTable.h"
 #include "MGameStringTable.h"
 #include "SafeFormat.h"
+#include "HelpMarkup.h"
 #include "KeyAccelerator.h"
 #include "ClientConfig.h"
 #include "MTimeItemManager.h"
@@ -10442,14 +10443,14 @@ void C_VS_UI_HELPDESC::Show()
 			tagstr = str ;
 			if(isfont)// 태크에 "#"이 있을경우
 			{
-				tempappend = findkey(tagstr.c_str(),"a");
-				tempcolor = findkey(tagstr.c_str(),"color");
+				tempappend = HelpMarkup::Attribute(tagstr, "a");
+				tempcolor = HelpMarkup::Attribute(tagstr, "color");
 			}
 			else // 태그에 "<" 이 포함되어있을경우
 			{
 				
-				tempspk = findkey( tagstr.c_str(), "file" );     					 // spk 값을 얻어온다.
-				tempPos = findkey( tagstr.c_str(), "pos" );							 // pos 값을 얻어온다
+				tempspk = HelpMarkup::Attribute(tagstr, "file" );
+				tempPos = HelpMarkup::Attribute(tagstr, "pos" );
 				tempspk += ".jpg";
 				
 				CDirectDrawSurface *pSurface = GetJpgFileLoading(tempspk);
@@ -10559,13 +10560,13 @@ void C_VS_UI_HELPDESC::Show()
 			tagstr = str ;
 			if(isfont)// 태크에 "#"이 있을경우
 			{
-				tempappend = findkey(tagstr.c_str(),"a");
-				tempcolor = findkey(tagstr.c_str(),"color");
+				tempappend = HelpMarkup::Attribute(tagstr, "a");
+				tempcolor = HelpMarkup::Attribute(tagstr, "color");
 			}
 			else // 태그에 "<" 이 포함되어있을경우
 			{
-//				tempspk = findkey( tagstr.c_str(), "file" );     					 // spk 값을 얻어온다.
-//				tempPos = findkey( tagstr.c_str(), "pos" );							 // pos 값을 얻어온다
+//				tempspk = HelpMarkup::Attribute(tagstr, "file" );
+//				tempPos = HelpMarkup::Attribute(tagstr, "pos" );
 //				tempspk += ".jpg";
 //				
 //				CDirectDrawSurface *pSurface = GetJpgFileLoading(tempspk);
@@ -10633,14 +10634,14 @@ void C_VS_UI_HELPDESC::Show()
 			tagstr = str ;
 			if(isfont)// 태크에 "#"이 있을경우
 			{
-				tempappend = findkey(tagstr.c_str(),"a");
-				tempcolor = findkey(tagstr.c_str(),"color");
+				tempappend = HelpMarkup::Attribute(tagstr, "a");
+				tempcolor = HelpMarkup::Attribute(tagstr, "color");
 			}
 			else // 태그에 "<" 이 포함되어있을경우
 			{
 				
-				tempspk = findkey( tagstr.c_str(), "file" );     					 // spk 값을 얻어온다.
-				tempPos = findkey( tagstr.c_str(), "pos" );							 // pos 값을 얻어온다
+				tempspk = HelpMarkup::Attribute(tagstr, "file" );
+				tempPos = HelpMarkup::Attribute(tagstr, "pos" );
 				tempspk += ".jpg";
 				
 				CDirectDrawSurface *pSurface = GetJpgFileLoading(tempspk);
@@ -11209,7 +11210,7 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 			if(isfont) // 폰트(색상) 태그 일경우
 			{
 				parsing_data.push_back(tempstr.c_str());
-				tempappend = findkey(tempstr.c_str(),"a"); // 적용된 색상을 이어쓰기한다
+				tempappend = HelpMarkup::Attribute(tempstr, "a");
 				linecnt = 1;
 			}
 			else // 이미지 출력태그일경우
@@ -11222,9 +11223,9 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 				}
 
 				parsing_data.push_back(tempstr.c_str());        // 이곳은 태그 전체 라인을 저장한다
-				tempspk = findkey( tempstr.c_str(), "file" );    // 태그값의 스프라이트 네임 찾기
-				tempPos = findkey( tempstr.c_str(), "pos" );	// 태그의 이미지 위치를 추출
-				//tempindex = findkey( tempstr.c_str(), "index" ); // spk 의 인덱스를 찾는다
+				tempspk = HelpMarkup::Attribute(tempstr, "file" );
+				tempPos = HelpMarkup::Attribute(tempstr, "pos" );
+				//tempindex = HelpMarkup::Attribute(tempstr, "index" );
 				tempstr = "";
 			
 //				CJpeg jpg;
@@ -11357,24 +11358,7 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 	}
 }
 
-char* C_VS_UI_HELPDESC::findkey(const char* tagstr, const char* keyword)
-{
-	if(tagstr == NULL) return NULL;
-	
-	const char *s = strstr(tagstr, keyword );
-	if(s == NULL )
-		return NULL;
-	
-	static char Buffer[512];  // 변수를 static  으로 해야한다 메모리 침범을 막기위해서 (중요하다)
-	memset( Buffer, 0, 512 );
-	
-	const char *start = strstr( s, "'" );
-	start++;
-	const char *end = strstr( start,"'" );
-	
-	memcpy( Buffer, start, end-start);
-	return Buffer;
-}
+
 
 
 

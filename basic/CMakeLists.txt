@@ -70,6 +70,7 @@ set(BASIC_SOURCES
 	SafeFormat.cpp
 	StringReduction.cpp
 	TextWrap.cpp
+	HelpMarkup.cpp
 	TextEncoding.cpp
 	ResourceText.cpp
 	MemoryPool.cpp

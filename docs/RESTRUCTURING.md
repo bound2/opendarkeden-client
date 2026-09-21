@@ -1110,6 +1110,11 @@ rounds settled* for the host rules). Test fixtures share
   > policies. Their fixed scratch buffers are gone; zero glyph widths and
   > narrow columns still advance safely. The unused personal-shop text loop
   > is removed. The descriptor and rich-help parsers still need migration.
+  > Rich-help attribute lookup now uses `basic/HelpMarkup` in both layout
+  > and rendering. `test_help_markup.cpp` owns exact-name matching, bounded
+  > quoted values and result lifetime; missing quotes no longer reach pointer
+  > arithmetic or a fixed scratch array. Image/layout validation and the
+  > remaining descriptor/help wrapping loops are still open.
   - Owner: the `unit_tests` link line, `test_textservice_normalize.cpp` and
     `test_glyph_cache.cpp` for repeated work, ownership, eviction and bounds.
 
