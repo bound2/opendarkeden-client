@@ -19,6 +19,17 @@ MHelpMessage::MHelpMessage() : m_messageType(MESSAGETYPE_NORMAL)
 }
 MHelpMessage::~MHelpMessage() = default;
 
+bool MHelpMessage::IsEligible(int race, int level, long long attributes) const
+{
+	if (race < 0 || race >= RACE_MAX) return false;
+	const bool slayer = race == RACE_SLAYER;
+	const int minimum = slayer ? m_iAttrLow[race] : m_iLevelLow[race];
+	const int maximum = slayer ? m_iAttrMax[race] : m_iLevelMax[race];
+	if (minimum == -1) return true;
+	const long long value = slayer ? attributes : level;
+	return minimum >= 0 && value >= minimum && value <= maximum;
+}
+
 namespace {
 constexpr int MaxEntries = 65536;
 constexpr std::string_view LevelTag = "[==Level 조건표==]";

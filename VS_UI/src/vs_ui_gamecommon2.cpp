@@ -5439,38 +5439,10 @@ void	C_VS_UI_MAILBOX::AddHelpMail(DWORD id, bool open)
 	const MHelpMessage& message = MHelpMessageManager::Instance().getMessage(id);
 
 	
-	// 조건 체크
-	switch(g_eRaceInterface)
-	{
-		case RACE_SLAYER: // 능력치 합으로 체크
-			if(message.m_iAttrLow[RACE_SLAYER] != -1)
-			{
-				int Attr_sum = g_char_slot_ingame.STR_CUR + g_char_slot_ingame.DEX_CUR + g_char_slot_ingame.INT_CUR;
-				if(Attr_sum < message.m_iAttrLow[RACE_SLAYER] || Attr_sum > message.m_iAttrLow[RACE_SLAYER])
-					return;
-			}
-//			if(message.m_iLevelLow[RACE_SLAYER] != -1) // 레벨로 체크
-//			{
-//				int Lead_Lev = max(g_char_slot_ingame.DOMAIN_SWORD, max(g_char_slot_ingame.DOMAIN_BLADE, max(g_char_slot_ingame.DOMAIN_GUN, max(g_char_slot_ingame.DOMAIN_HEAL, g_char_slot_ingame.DOMAIN_ENCHANT))));
-//				if(Lead_Lev < message.m_iAttrLow[RACE_SLAYER] || Lead_Lev > message.m_iLevelMax[RACE_SLAYER])
-//					return;
-//			}
-			break;
-		case RACE_VAMPIRE: // 레벨로 체크
-			if(message.m_iLevelLow[RACE_VAMPIRE] != -1)
-			{
-				if(g_char_slot_ingame.level < message.m_iLevelLow[RACE_VAMPIRE] || g_char_slot_ingame.level > message.m_iLevelMax[RACE_VAMPIRE])
-					return;
-			}
-			break;
-		case RACE_OUSTERS: // 레벨로 체크
-			if(message.m_iLevelLow[RACE_OUSTERS] != -1)
-			{
-				if(g_char_slot_ingame.level < message.m_iLevelLow[RACE_OUSTERS] || g_char_slot_ingame.level > message.m_iLevelMax[RACE_OUSTERS])
-					return;
-			}
-			break;
-	}
+	// Validate the race and its inclusive eligibility interval before array access.
+	const long long attributes = static_cast<long long>(g_char_slot_ingame.STR_CUR) +
+		g_char_slot_ingame.DEX_CUR + g_char_slot_ingame.INT_CUR;
+	if (!message.IsEligible(g_eRaceInterface, g_char_slot_ingame.level, attributes)) return;
 
 	int nSender = message.m_iSender[g_eRaceInterface];
 	int nMaxSenderSize = MHelpMessageManager::Instance().getSenderSize();
