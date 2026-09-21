@@ -1,6 +1,7 @@
 ﻿// VS_UI_Storage.cpp
 
 #include "Client_PCH.h"
+#include "SafeFormat.h"
 
 #pragma warning(disable:4786)
 
@@ -608,7 +609,7 @@ void C_VS_UI_STORAGE::Show()
 	COLORREF markColor = RGB(220, 220, 220);//RGB(140, 140, 255);
 	for(int i = 0; i < len; i++)
 	{
-		wsprintf(sz_temp, "%d", num[i]);
+		SafeFormat::Format(sz_temp, "%d", num[i]);
 		g_PrintColorStr(rect[i].left, rect[i].top, sz_temp, gpC_base->m_item_desc_pi, markColor);	
 	}
 
@@ -624,7 +625,7 @@ void C_VS_UI_STORAGE::Show()
 		else
 		{
 			char money_buf[512];
-			wsprintf(money_buf, "%d", m_pStorage->GetMoneyManager()->GetMoney());
+			SafeFormat::Format(money_buf, "%d", m_pStorage->GetMoneyManager()->GetMoney());
 			std::string sstr = money_buf;
 			for(int j = 3; j <= 13; j += 4)
 				if(sstr.size() > j)sstr.insert(sstr.size()-j, ",");

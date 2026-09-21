@@ -16,7 +16,6 @@ private:
 	bool m_bLoop;
 	DWORD	m_oldVolume;
 
-	void MinsFromSecs(DWORD dwLength, LPSTR lpszReturn);
 	DWORD GetStatus(DWORD dwFlag);
 //	enum MP3_STATUS
 //	{
@@ -52,9 +51,7 @@ public:
 	DWORD Pause();
 	DWORD Stop();
 	DWORD TotalLength();
-	DWORD TotalLength(LPSTR lpszReturn);
 	DWORD CurrentLength();
-	DWORD CurrentLength(LPSTR lpszReturn);
 	DWORD StatusMode();
 	void GetErrorString(DWORD dwErrCode, LPSTR lpszErrString, UINT cchErrString);
 	bool IsReady();

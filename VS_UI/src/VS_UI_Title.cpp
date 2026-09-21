@@ -3007,23 +3007,23 @@ void C_VS_UI_CHAR_MANAGER::Show()
 			if(m_p_slot->Race != RACE_SLAYER)
 			{
 				px = g_PrintColorStr(29, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_LEVEL].GetString(), gpC_base->m_chatting_pi, RGB(160, 160, 160));
-				wsprintf(str, "%d", m_p_slot->level);
+				SafeFormat::Format(str, "%d", m_p_slot->level);
 				g_PrintColorStr(px, py, str, gpC_base->m_chatting_pi, RGB(160, 160, 160));
 				py+=16;
 			}
 
 			px = g_PrintColorStr(29, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_STR_PURE].GetString(),gpC_base->m_chatting_pi, RGB(160, 160, 160));
-			wsprintf(str, "%d", m_p_slot->STR_PURE);
+			SafeFormat::Format(str, "%d", m_p_slot->STR_PURE);
 			g_PrintColorStr(px, py, str, gpC_base->m_chatting_pi, RGB(160, 160, 160));
 			py+=16;
 
 			px = g_PrintColorStr(29, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_DEX_PURE].GetString(), gpC_base->m_chatting_pi, RGB(160, 160, 160));
-			wsprintf(str, "%d", m_p_slot->DEX_PURE);
+			SafeFormat::Format(str, "%d", m_p_slot->DEX_PURE);
 			g_PrintColorStr(px, py, str, gpC_base->m_chatting_pi, RGB(160, 160, 160));
 			py+=16;
 
 			px = g_PrintColorStr(29, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_INT_PURE].GetString(), gpC_base->m_chatting_pi, RGB(160, 160, 160));
-			wsprintf(str, "%d", m_p_slot->INT_PURE);
+			SafeFormat::Format(str, "%d", m_p_slot->INT_PURE);
 			g_PrintColorStr(px, py, str, gpC_base->m_chatting_pi, RGB(160, 160, 160));
 			py+=16;
 
@@ -3046,34 +3046,34 @@ void C_VS_UI_CHAR_MANAGER::Show()
 					};
 					
 					px = g_PrintColorStr(29, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_SWORD_LEVEL].GetString(), gpC_base->m_chatting_pi, RGB(160, 160, 160));
-					wsprintf(str, "%d", m_p_slot->DOMAIN_SWORD);
+					SafeFormat::Format(str, "%d", m_p_slot->DOMAIN_SWORD);
 					g_PrintColorStr(px, py, str, gpC_base->m_chatting_pi, RGB(160, 160, 160));
 					py+=16;
 					
 					px = g_PrintColorStr(29, py, 	(*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_BLADE_LEVEL].GetString(), gpC_base->m_chatting_pi, RGB(160, 160, 160));
-					wsprintf(str, "%d", m_p_slot->DOMAIN_BLADE);
+					SafeFormat::Format(str, "%d", m_p_slot->DOMAIN_BLADE);
 					g_PrintColorStr(px, py, str, gpC_base->m_chatting_pi, RGB(160, 160, 160));
 					py+=16;
 					
 					px = g_PrintColorStr(29, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_GUN_LEVEL].GetString(),gpC_base->m_chatting_pi, RGB(160, 160, 160));
-					wsprintf(str, "%d", m_p_slot->DOMAIN_GUN);
+					SafeFormat::Format(str, "%d", m_p_slot->DOMAIN_GUN);
 					g_PrintColorStr(px, py, str, gpC_base->m_chatting_pi, RGB(160, 160, 160));
 					py+=16;
 					
 					px = g_PrintColorStr(29, py, 	(*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_HEAL_LEVEL].GetString(),gpC_base->m_chatting_pi, RGB(160, 160, 160));
-					wsprintf(str, "%d", m_p_slot->DOMAIN_HEAL);
+					SafeFormat::Format(str, "%d", m_p_slot->DOMAIN_HEAL);
 					g_PrintColorStr(px, py, str, gpC_base->m_chatting_pi, RGB(160, 160, 160));
 					py+=16;
 					
 					px = g_PrintColorStr(29, py, 	(*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_ENCHANT_LEVEL].GetString(),gpC_base->m_chatting_pi, RGB(160, 160, 160));
-					wsprintf(str, "%d", m_p_slot->DOMAIN_ENCHANT);
+					SafeFormat::Format(str, "%d", m_p_slot->DOMAIN_ENCHANT);
 					g_PrintColorStr(px, py, str, gpC_base->m_chatting_pi, RGB(160, 160, 160));
 					py+=16;
 					
 					std::string sstr;
 					
 					// 숫자사이에 ,넣기
-					wsprintf(str, "%d", m_p_slot->FAME);
+					SafeFormat::Format(str, "%d", m_p_slot->FAME);
 					sstr = str;
 					for(unsigned int i = 3; i <= 13; i += 4)
 						if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
@@ -3086,7 +3086,7 @@ void C_VS_UI_CHAR_MANAGER::Show()
 						{
 							px= g_PrintColorStr(29,py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_GRADE].GetString(),gpC_base->m_chatting_pi, RGB(160,160,160));
 							char tempstr[100];
-							wsprintf(tempstr,"%s [%d]",grade[(m_p_slot->GRADE-1)/5],m_p_slot->GRADE);
+							SafeFormat::Format(tempstr,"%s [%d]",grade[(m_p_slot->GRADE-1)/5],m_p_slot->GRADE);
 							//g_PrintColorStr(px,py,grade[(m_p_slot->GRADE-1)/5], gpC_base->m_chatting_pi, RGB(160,160,160));
 							g_PrintColorStr(px,py,tempstr, gpC_base->m_chatting_pi, RGB(160,160,160));
 							py+=16;
@@ -3120,7 +3120,7 @@ void C_VS_UI_CHAR_MANAGER::Show()
 					{
 						px= g_PrintColorStr(29,py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_GRADE].GetString(),gpC_base->m_chatting_pi, RGB(160,160,160));
 						char tempstr[100];
-						wsprintf(tempstr,"%s [%d]",grade[(m_p_slot->GRADE-1)/5],m_p_slot->GRADE);
+						SafeFormat::Format(tempstr,"%s [%d]",grade[(m_p_slot->GRADE-1)/5],m_p_slot->GRADE);
 						g_PrintColorStr(px,py,tempstr, gpC_base->m_chatting_pi, RGB(160,160,160));
 						py+=16;
 					}			
@@ -3134,7 +3134,7 @@ void C_VS_UI_CHAR_MANAGER::Show()
 					
 					px = g_PrintColorStr( 29, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_FAME].GetString(), gpC_base->m_chatting_pi, RGB(160,160,160) );
 					char tempstr[200];
-					wsprintf(tempstr, "%d", m_p_slot->FAME );
+					SafeFormat::Format(tempstr, "%d", m_p_slot->FAME );
 					std::string sstr = tempstr;
 					for(unsigned int i = 3; i <= 13; i += 4)
 						if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");

@@ -1819,7 +1819,7 @@ if(gbl_info_show)
 					char zonename[20];
 					SafeFormat::Format(xy, GetGameString(UI_STRING_MESSAGE_ZONEINFO_XY), info->zoneX, info->zoneY);
 					party_string.sz_sub_str = xy;
-					wsprintf(zonename, "%s", g_pZoneTable->Get(info->zoneID)->Name.GetString());
+					SafeFormat::Format(zonename, "%s", g_pZoneTable->Get(info->zoneID)->Name.GetString());
 					party_string.sz_main_str2 = zonename;
 					g_descriptor_manager.Set(DID_HELP, _x, _y, (void *)&party_string,0,0);
 				}

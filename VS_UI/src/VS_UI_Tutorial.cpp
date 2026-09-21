@@ -1,6 +1,7 @@
 // VS_UI_Tutorial.cpp by larosel
 
 #include "Client_PCH.h"
+#include "SafeFormat.h"
 #include "VS_UI_filepath.h"
 //#include "VS_UI_GameCommon.h"
 #include "VS_UI_mouse_pointer.h"
@@ -573,7 +574,7 @@ void C_VS_UI_BOOK::Show()
 		SetDesc(x+m_char_x[page], y+m_char_y);
 		SetDescScrollPos(m_col*(m_page_cur+page));
 		ShowDesc();
-		wsprintf(temp,"%d/%d", m_page_cur+page+1, m_page_max);
+		SafeFormat::Format(temp,"%d/%d", m_page_cur+page+1, m_page_max);
 		g_PrintColorStr(x + m_page_x[page], y + m_page_y, temp, gpC_base->m_chatting_pi, RGB_BLACK);
 	}
 	
@@ -1720,7 +1721,7 @@ bool C_VS_UI_COMPUTER::OpenTree(int &index, std::vector<C_TREE_BASE> &tree)
 					filename += ".txt";
 
 					char sz_temp[100];
-					wsprintf(sz_temp, "%s", pItem->GetName());
+					SafeFormat::Format(sz_temp, "%s", pItem->GetName());
 					m_second_title_string = "( ";
 					m_second_title_string += +pItem->GetEName();
 					m_second_title_string += " )";

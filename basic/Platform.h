@@ -1992,32 +1992,11 @@ typedef long long __int64;
 #define _atoi64(x) atoll(x)
 #endif
 
-/* wsprintf for POSIX, with the Win32 wsprintfA contract: never more than
-   1024 bytes including the terminator, and the length written returned
-   rather than vsnprintf's would-have-been length. This used to be an
-   unbounded vsprintf. The cap is Win32's, not a promise about the
-   callers: the tree's wsprintf sites use buffers from 32 bytes up (a
-   char szString[32] in vs_ui_gamecommon2.cpp, several char szTemp[256]),
-   so a long format still overruns a short buffer here exactly as it
-   does on Windows - the sites themselves are the remaining risk. */
 #ifndef PLATFORM_WINDOWS
 #include <stdio.h>
 #include <stdarg.h>
 #include <unistd.h>
 #include <stdlib.h>
-static inline int wsprintf(char* buf, const char* fmt, ...) {
-	va_list args;
-	va_start(args, fmt);
-	int result = vsnprintf(buf, 1024, fmt, args);
-	va_end(args);
-	if (result < 0) {
-		if (buf != NULL)
-			buf[0] = '\0';
-		return 0;
-	}
-	return result >= 1024 ? 1023 : result;
-}
-
 /* Windows file attribute bits, the Win32 values */
 #define FILE_ATTRIBUTE_DIRECTORY (0x00000010)
 #define FILE_ATTRIBUTE_NORMAL    (0x00000080)

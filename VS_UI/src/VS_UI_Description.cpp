@@ -322,7 +322,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				break;
 
 			default:
-				wsprintf(sz_buf, "");
+				SafeFormat::Format(sz_buf, "");
 				break;
 			}
 			
@@ -2358,7 +2358,7 @@ void	_SkillTree_Description_Show(Rect rect, void * void_ptr, long left, long rig
 				if(exp == max_exp)exp_percent = 100;
 
 				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_EXP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				wsprintf(sz_buf, "%d", exp_percent);
+				SafeFormat::Format(sz_buf, "%d", exp_percent);
 				strcat(sz_buf, "%");
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 				py += SMALL_FONT_Y_GAP;

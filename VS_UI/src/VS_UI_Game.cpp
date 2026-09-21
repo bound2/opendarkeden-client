@@ -1,6 +1,7 @@
 ﻿// VS_UI_Game.cpp
 
 #include "Client_PCH.h"
+#include "SafeFormat.h"
 #include "VS_UI_Game.h"
 #include "VS_UI_filepath.h"
 #include "VS_UI_Message.h"
@@ -640,9 +641,9 @@ void C_VS_UI_GAME::ChangeToSlayerInterface()
 	m_pC_tribe_interface = new C_VS_UI_SLAYER;
 
 	char sz_filename[512],sz_filename2[512],sz_filename3[512];
-	wsprintf(sz_filename, "UserSet\\%s.set", g_char_slot_ingame.sz_name.c_str());
-	wsprintf(sz_filename2,"UserSet\\%s-%d.set", g_char_slot_ingame.sz_name.c_str(),g_pUserInformation->WorldID);
-	wsprintf(sz_filename3,"UserSet\\%s-%d-%d.set", g_char_slot_ingame.sz_name.c_str(),g_Dimension,g_pUserInformation->WorldID);
+	SafeFormat::Format(sz_filename, "UserSet\\%s.set", g_char_slot_ingame.sz_name.c_str());
+	SafeFormat::Format(sz_filename2,"UserSet\\%s-%d.set", g_char_slot_ingame.sz_name.c_str(),g_pUserInformation->WorldID);
+	SafeFormat::Format(sz_filename3,"UserSet\\%s-%d-%d.set", g_char_slot_ingame.sz_name.c_str(),g_Dimension,g_pUserInformation->WorldID);
 		
 	ifstream file(sz_filename3, ios::binary);
 	
@@ -710,9 +711,9 @@ void C_VS_UI_GAME::ChangeToVampireInterface()
 	char sz_filename[512];
 	char sz_filename2[512];
 	char sz_filename3[512];
-	wsprintf(sz_filename, "UserSet\\%s.set", g_char_slot_ingame.sz_name.c_str());
-	wsprintf(sz_filename2, "UserSet\\%s-%d.set", g_char_slot_ingame.sz_name.c_str(),g_pUserInformation->WorldID);
-	wsprintf(sz_filename3, "UserSet\\%s-%d-%d.set", g_char_slot_ingame.sz_name.c_str(),g_Dimension,g_pUserInformation->WorldID);
+	SafeFormat::Format(sz_filename, "UserSet\\%s.set", g_char_slot_ingame.sz_name.c_str());
+	SafeFormat::Format(sz_filename2, "UserSet\\%s-%d.set", g_char_slot_ingame.sz_name.c_str(),g_pUserInformation->WorldID);
+	SafeFormat::Format(sz_filename3, "UserSet\\%s-%d-%d.set", g_char_slot_ingame.sz_name.c_str(),g_Dimension,g_pUserInformation->WorldID);
 	
 	ifstream file(sz_filename3, ios::binary);
 	
@@ -1005,7 +1006,7 @@ C_VS_UI_GAME::~C_VS_UI_GAME()
 	
 	// window_set file saving
 	char sz_filename[512];
-	wsprintf(sz_filename, "UserSet\\%s-%d-%d.set", g_char_slot_ingame.sz_name.c_str(),
+	SafeFormat::Format(sz_filename, "UserSet\\%s-%d-%d.set", g_char_slot_ingame.sz_name.c_str(),
 		g_Dimension,g_pUserInformation->WorldID);
 
 	
@@ -5674,9 +5675,9 @@ void C_VS_UI_GAME::ChangeToOustersInterface()
 	char sz_filename[512];
 	char sz_filename2[512];
 	char sz_filename3[512];
-	wsprintf(sz_filename, "UserSet\\%s.set", g_char_slot_ingame.sz_name.c_str());
-	wsprintf(sz_filename2, "UserSet\\%s-%d.set", g_char_slot_ingame.sz_name.c_str(),g_pUserInformation->WorldID);
-	wsprintf(sz_filename3, "UserSet\\%s-%d-%d.set", g_char_slot_ingame.sz_name.c_str(),g_Dimension,g_pUserInformation->WorldID);
+	SafeFormat::Format(sz_filename, "UserSet\\%s.set", g_char_slot_ingame.sz_name.c_str());
+	SafeFormat::Format(sz_filename2, "UserSet\\%s-%d.set", g_char_slot_ingame.sz_name.c_str(),g_pUserInformation->WorldID);
+	SafeFormat::Format(sz_filename3, "UserSet\\%s-%d-%d.set", g_char_slot_ingame.sz_name.c_str(),g_Dimension,g_pUserInformation->WorldID);
 	
 	ifstream file(sz_filename3, ios::binary);
 	

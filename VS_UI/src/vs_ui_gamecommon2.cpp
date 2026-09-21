@@ -234,7 +234,7 @@ void g_StartOustersDownSkill( int _x, int _y , int PriceRaito)
 	int DownPrice = int ( float((*g_pSkillInfoTable)[g_CurrentSkillID].LevelUpPoint) * pow(g_char_slot_ingame.level, 1.3 ) * 200.0f   ) * PriceRaito;
 	if(0 == DownPrice)
 		DownPrice = 1000000; // 백만원
-	wsprintf(szCost,"%d", DownPrice);
+	SafeFormat::Format(szCost,"%d", DownPrice);
 	
 	std::string sstr = szCost;
 	for(int i = 3; i <= 13; i += 4)
@@ -489,7 +489,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 	}
 
 	char tempstr[256];
-	wsprintf(tempstr,"<%d/%d>",m_ItemList.empty()?0:m_CurrentItem+1, m_ItemList.size());
+	SafeFormat::Format(tempstr,"<%d/%d>",m_ItemList.empty()?0:m_CurrentItem+1, m_ItemList.size());
 	int len = g_GetStringWidth(tempstr, gpC_base->m_chatting_pi.hfont);	
 	g_PrintColorStr(rect.x+rect.w/2 - len/2,y+162, tempstr, gpC_base->m_chatting_pi, RGB_WHITE);
 	
@@ -587,7 +587,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 			snprintf(sz_buf, sizeof(sz_buf), "%s", GetGameString(UI_STRING_MESSAGE_ITEM_CLASS_SR));
 			break;			
 		default:
-			wsprintf(sz_buf, "");
+			SafeFormat::Format(sz_buf, "");
 			break;
 		}
 		
@@ -2574,7 +2574,7 @@ void	C_VS_UI_MIXING_FORGE::Show()
 	COLORREF markColor = RGB(220, 220, 220);//RGB(140, 140, 255);
 	for(int i = 0; i < vNum.size(); i++)
 	{
-		wsprintf(sz_num, "%d", vNum[i]);
+		SafeFormat::Format(sz_num, "%d", vNum[i]);
 		g_PrintColorStr(vNumRect[i].left, vNumRect[i].top, sz_num, gpC_base->m_item_desc_pi, markColor);
 	}
 	g_FL2_ReleaseDC();
@@ -3252,23 +3252,23 @@ C_VS_UI_REMOVE_OPTION::C_VS_UI_REMOVE_OPTION(const MItem * pItem, const MItem *p
 		if( optionInfo.Part == ITEMOPTION_TABLE::PART_DURABILITY )
 		{
 			if( Point > 0 )
-				wsprintf(temp," +%d", Point);
+				SafeFormat::Format(temp," +%d", Point);
 			else
-				wsprintf(temp," %d", Point);
+				SafeFormat::Format(temp," %d", Point);
 		} else
 		if( optionInfo.Part >= ITEMOPTION_TABLE::PART_STR_TO_DEX &&
 			optionInfo.Part <= ITEMOPTION_TABLE::PART_INT_TO_DEX)
 		{
 			if( Point > 0)
-				wsprintf(temp," +%d%", Point);
+				SafeFormat::Format(temp," +%d%%", Point);
 			else
-				wsprintf(temp," %d%", Point);
+				SafeFormat::Format(temp," %d%%", Point);
 		} else
 		{
 			if( Point+100 > 0)
-				wsprintf(temp," +%d", Point + 100 );
+				SafeFormat::Format(temp," +%d", Point + 100 );
 			else
-				wsprintf(temp," %d", Point + 100 );
+				SafeFormat::Format(temp," %d", Point + 100 );
 		}
 		m_str_option[i] += temp;
 	}
@@ -7272,24 +7272,24 @@ void	C_VS_UI_ARROW_TILE::Show()
 			if( m_Player.Status == PLAYER_STATUS_DIE || m_Player.Status == PLAYER_STATUS_FINISH )
 			{
 				const long long ll_millisec = (m_Player.EndTime - m_Player.StartTime).count();
-				wsprintf(szTemp,"%5d.%2d",(int)(ll_millisec/1000),
+				SafeFormat::Format(szTemp,"%5d.%2d",(int)(ll_millisec/1000),
 					(int)((ll_millisec%1000)/10));
 				g_PrintColorStrOut(x+80,y+53,szTemp, gpC_base->m_item_name_pi, RGB_WHITE, RGB_BLACK);
 			} else
 			{
 				const long long ll_millisec = (MonotonicClock::Now() - m_Player.StartTime).count();
-				wsprintf(szTemp,"%5d.%2d",(int)(ll_millisec/1000),
+				SafeFormat::Format(szTemp,"%5d.%2d",(int)(ll_millisec/1000),
 					(int)((ll_millisec%1000)/10));
 				g_PrintColorStrOut(x+80,y+53,szTemp, gpC_base->m_item_name_pi, RGB_WHITE, RGB_BLACK);
 			}
 		}
 
 		// 최고 기록표시		
-		wsprintf(szTemp, "%s Best Score : %s %d.%d",g_pUserInformation->WorldName.GetString(),
+		SafeFormat::Format(szTemp, "%s Best Score : %s %d.%d",g_pUserInformation->WorldName.GetString(),
 			m_topName.c_str(), m_topScore/100, (m_topScore%100));
 		g_PrintColorStrOut(x+120, y+20, szTemp,gpC_base->m_item_name_pi, RGB_WHITE,RGB_BLACK);
 
-		wsprintf(szTemp,"#%d",m_GameCode);
+		SafeFormat::Format(szTemp,"#%d",m_GameCode);
 		g_PrintColorStr(x+10,y+160,szTemp,gpC_base->m_item_desc_pi,RGB_WHITE);
 		g_FL2_ReleaseDC();
 	}
@@ -8178,7 +8178,7 @@ void	C_VS_UI_CRAZY_MINE::Show()
 	{
 		char szTemp[256];
 		
-		wsprintf(szTemp, "%s Best Score : %s %d.%d",g_pUserInformation->WorldName.GetString(),
+		SafeFormat::Format(szTemp, "%s Best Score : %s %d.%d",g_pUserInformation->WorldName.GetString(),
 			m_topName.c_str(), m_topScore/100, m_topScore%100 );
 		g_PrintColorStrOut(x+20, y+10, szTemp,gpC_base->m_item_desc_pi, RGB_WHITE,RGB_BLACK);				
 		m_pC_button_group->ShowDescription();
@@ -8189,7 +8189,7 @@ void	C_VS_UI_CRAZY_MINE::Show()
 		if( m_bStart )
 		{
 			const long long ll_millisec = (MonotonicClock::Now() - m_StartTime).count();
-			wsprintf(szTemp,"%5d.%2d",(int)(ll_millisec/1000),(int)((ll_millisec%1000)/10));
+			SafeFormat::Format(szTemp,"%5d.%2d",(int)(ll_millisec/1000),(int)((ll_millisec%1000)/10));
 			g_PrintColorStr(x+49,y+34,szTemp, gpC_base->m_item_desc_pi, RGB_WHITE);
 		}
 		
@@ -8228,12 +8228,12 @@ void	C_VS_UI_CRAZY_MINE::Show()
 
 		if ( m_bSuccess ) 
 		{
-			wsprintf(szTemp,"Success!");
+			SafeFormat::Format(szTemp,"Success!");
 			g_PrintColorStrOut(x+180, y+170, szTemp,gpC_base->m_item_name_pi, RGB_WHITE,RGB_BLACK);				
 		} 
 		else if ( m_bDead )
 		{
-			wsprintf(szTemp,"Dead!");
+			SafeFormat::Format(szTemp,"Dead!");
 			g_PrintColorStrOut(x+180, y+170, szTemp,gpC_base->m_item_name_pi, RGB_WHITE,RGB_RED);				
 		}
 
@@ -9272,7 +9272,7 @@ bool	C_VS_UI_STATUS_CTF::MouseControl(UINT message, int _x, int _y)
 			if( _x > rectRemainTime.left && _x < rectRemainTime.right && _y > rectRemainTime.top && _y < rectRemainTime.bottom )
 			{
 				const DWORD RemainTime = RemainingMillis();
-				wsprintf( szBuffer,"%s : %d:%d:%d",(*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_LEFT_TIME].GetString() ,
+				SafeFormat::Format( szBuffer,"%s : %d:%d:%d",(*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_LEFT_TIME].GetString() ,
 					((RemainTime/1000)/60)/60, ((RemainTime/1000)/60)%60,(RemainTime/1000)%60);
 
 				g_descriptor_manager.Set(DID_INFO, x+_x, y+_y, (void *)szBuffer,0,0);
@@ -9372,14 +9372,14 @@ void	C_VS_UI_STATUS_CTF::Show()
 			RemainTime = 0;
 		
 		int time = ((RemainTime/1000)/60)%60;
-		if( time < 10 )	wsprintf(min,"0%d",time);
-		else wsprintf(min,"%d",time);
+		if( time < 10 )	SafeFormat::Format(min,"0%d",time);
+		else SafeFormat::Format(min,"%d",time);
 		
 		time = (RemainTime/1000)%60;
-		if( time < 10 )	wsprintf(sec,"0%d",time);
-		else wsprintf(sec,"%d",time);		
+		if( time < 10 )	SafeFormat::Format(sec,"0%d",time);
+		else SafeFormat::Format(sec,"%d",time);
 
-		wsprintf( szBuffer, "%d:%s:%s",(RemainTime/1000)/60/60,min,sec);
+		SafeFormat::Format( szBuffer, "%d:%s:%s",(RemainTime/1000)/60/60,min,sec);
 		g_PrintColorStr(
 			x+rectRemainTime.left+(rectRemainTime.right - rectRemainTime.left)/2 - g_GetStringWidth( szBuffer, gpC_base->m_chatting_pi.hfont )/2,
 			y+rectRemainTime.top+(rectRemainTime.bottom - rectRemainTime.top)/2 - g_GetStringHeight( szBuffer, gpC_base->m_chatting_pi.hfont)/2, 
@@ -9387,7 +9387,7 @@ void	C_VS_UI_STATUS_CTF::Show()
 
 		for( i =0 ; i< 3; i++ )
 		{
-			wsprintf( szBuffer, "%d",m_num_flag[i]);
+			SafeFormat::Format( szBuffer, "%d",m_num_flag[i]);
 			if( m_num_flag[i] == topscore )
 			{
 				g_PrintColorStr(
@@ -11393,12 +11393,12 @@ C_VS_UI_SMS_MESSAGE::C_VS_UI_SMS_MESSAGE()
 	
 	for(i = 0; i<6; i++)
 		m_bComboSelect[i] = 0;
-	wsprintf(m_szPhoneNum[0], "010");
-	wsprintf(m_szPhoneNum[1], "011");
-	wsprintf(m_szPhoneNum[2], "016");
-	wsprintf(m_szPhoneNum[3], "017");
-	wsprintf(m_szPhoneNum[4], "018");
-	wsprintf(m_szPhoneNum[5], "019");
+	SafeFormat::Format(m_szPhoneNum[0], "010");
+	SafeFormat::Format(m_szPhoneNum[1], "011");
+	SafeFormat::Format(m_szPhoneNum[2], "016");
+	SafeFormat::Format(m_szPhoneNum[3], "017");
+	SafeFormat::Format(m_szPhoneNum[4], "018");
+	SafeFormat::Format(m_szPhoneNum[5], "019");
 
 	m_pC_button_group = new ButtonGroup(this);
 	m_SubWindow = false;
@@ -11816,11 +11816,11 @@ void C_VS_UI_SMS_MESSAGE::Show()
 			g_PrintColorStr(m_ComboPos[i].cx-24+30, m_ComboPos[i].cy+1, m_szPhoneNum[m_bComboSelect[i]], gpC_base->m_chatting_pi, RGB_BLACK);
 		}
 		char szString[32];
-		wsprintf(szString, "%d/80 byte" , g_GetByteLenth(m_lev_SMSMessage.GetStringWide().c_str(),m_lev_SMSMessage.Size()));
+		SafeFormat::Format(szString, "%d/80 byte" , g_GetByteLenth(m_lev_SMSMessage.GetStringWide().c_str(),m_lev_SMSMessage.Size()));
 		g_PrintColorStr(szSMSMessagePos.cx + 30 , szSMSMessagePos.cy + 92, szString, gpC_base->m_chatting_pi, m_Color);
 //		if(g_char_slot_ingame.m_SMS_Charge)
 		{
-			wsprintf(szString,"%d",/*(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEFT_NUM].GetString(),*/g_char_slot_ingame.m_SMS_Charge);
+			SafeFormat::Format(szString,"%d",/*(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEFT_NUM].GetString(),*/g_char_slot_ingame.m_SMS_Charge);
 			g_PrintColorStr(x+m_ChargePos.cx, y+m_ChargePos.cy, szString, gpC_base->m_item_desc_pi, RGB_YELLOW);
 		}
 		g_FL2_ReleaseDC();
@@ -12421,7 +12421,7 @@ void C_VS_UI_SMS_LIST::Show()
 				// Three std::string address-book fields into a 32-byte buffer.
 				// None of them is length limited where it is stored, and a
 				// name in CP949 reaches 32 bytes in sixteen characters.
-				wsprintf(szString, "%d" , i+1);
+				SafeFormat::Format(szString, "%d" , i+1);
 				g_PrintColorStr(m_Main.cx+12, m_Main.cy+27 + (i-ScrPos)*17, szString, gpC_base->m_chatting_pi, RGB_BLACK);
 				snprintf(szString, sizeof(szString), "%s" , TempInfo->CharacterName.c_str());
 				g_PrintColorStr(m_Main.cx+30, m_Main.cy+27 + (i-ScrPos)*17, szString, gpC_base->m_chatting_pi, RGB_BLACK);
@@ -12673,12 +12673,12 @@ C_VS_UI_SMS_RECORD::C_VS_UI_SMS_RECORD()
 	
 //	AttrTopmost(true);
 	AttrKeyboardControl(true);
-	wsprintf(m_szPhoneNum[0], "010");
-	wsprintf(m_szPhoneNum[1], "011");
-	wsprintf(m_szPhoneNum[2], "016");
-	wsprintf(m_szPhoneNum[3], "017");
-	wsprintf(m_szPhoneNum[4], "018");
-	wsprintf(m_szPhoneNum[5], "019");
+	SafeFormat::Format(m_szPhoneNum[0], "010");
+	SafeFormat::Format(m_szPhoneNum[1], "011");
+	SafeFormat::Format(m_szPhoneNum[2], "016");
+	SafeFormat::Format(m_szPhoneNum[3], "017");
+	SafeFormat::Format(m_szPhoneNum[4], "018");
+	SafeFormat::Format(m_szPhoneNum[5], "019");
 	m_bComboList = -1;
 	m_bComboSelect = 0;
 	m_pC_button_group = new ButtonGroup(this);
@@ -17877,10 +17877,10 @@ void	C_VS_UI_POWER_JJANG::Show()
 		g_PrintColorStr(x+26, y+92 , (*g_pGameStringTable)[UI_STRING_POWER_JJANG_NUMBER_1].GetString(), gpC_base->m_chatting_pi, RGB_GRAY);
 		g_PrintColorStr(x+30, y+107 , (*g_pGameStringTable)[UI_STRING_POWER_JJANG_NUMBER_2].GetString(), gpC_base->m_chatting_pi, RGB_GRAY);
 	
-		wsprintf(szString, "%d", g_char_slot_ingame.m_Powerjjang_Point);
+		SafeFormat::Format(szString, "%d", g_char_slot_ingame.m_Powerjjang_Point);
 		g_PrintColorStr(x+175, y+132 , szString, gpC_base->m_money_pi, RGB_WHITE);
 
-		wsprintf(szString, "%d", m_AvailablePoint);
+		SafeFormat::Format(szString, "%d", m_AvailablePoint);
 		g_PrintColorStr(x+175, y+162 , szString, gpC_base->m_money_pi, RGB_WHITE);
 
 		m_pC_button_group->ShowDescription();
@@ -19012,7 +19012,7 @@ void C_VS_UI_INVENTORY_SUB::Show()
 	for(int i = 0; i < len; i++)
 	{
 		
-		wsprintf(sz_temp, "%d", num[i]);
+		SafeFormat::Format(sz_temp, "%d", num[i]);
 		g_PrintColorStr(rect[i].left, rect[i].top, sz_temp, gpC_base->m_item_desc_pi, markColor);	
 		
 	}

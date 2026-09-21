@@ -163,7 +163,7 @@ void C_VS_UI_EDIT_DIALOG::Start()
 	m_bl_down_focused = false;
 
 	char sz_temp[10];	// by sigi (원래는 2였당 - -;)
-	wsprintf(sz_temp, "%d", m_default_val);
+	SafeFormat::Format(sz_temp, "%d", m_default_val);
 	m_lev_value.AddString(sz_temp);
 
 //	m_lev_value.AddString("1");
@@ -309,7 +309,7 @@ void	C_VS_UI_EDIT_DIALOG::ScrollButton(bool up)
 	}
 
 	char sz_new_str[50];
-	wsprintf(sz_new_str, "%d", cur_val);
+	SafeFormat::Format(sz_new_str, "%d", cur_val);
 	m_lev_value.AddString(sz_new_str);
 
 	DeleteNewArray(p_temp);
@@ -349,7 +349,7 @@ void	C_VS_UI_EDIT_DIALOG::KeyboardControl(UINT message, UINT key, long extra)
 	if(GetValue() > m_max_val)
 	{
 		m_lev_value.EraseAll();
-		wsprintf(num, "%d", m_max_val);
+		SafeFormat::Format(num, "%d", m_max_val);
 		m_lev_value.AddString(num);
 	}
 	if (message == WM_KEYDOWN)
@@ -1574,7 +1574,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			e_name+=p_item->GetEName();
 			e_name+=" )";
 
-			wsprintf(sz_temp, "%s %s",h_name.c_str(),e_name.c_str());			
+			SafeFormat::Format(sz_temp, "%s %s",h_name.c_str(),e_name.c_str());
 			// 이름이 너무 길면 줄여주자.	ReduceString2 는 뒤쪽에 "..." 찍어주기~ 	by sonee
 			ReduceString2(sz_temp,55);			
 			SetDescTitle(sz_temp);
@@ -2053,7 +2053,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 //				p_item->GetItemClass() != ITEM_CLASS_EVENT_ETC
 //				&& p_item->GetItemClass() != ITEM_CLASS_EVENT_TREE)
 			{
-				wsprintf(sz_temp, "%d", g_pPriceManager->GetItemPrice(p_item, MPriceManager::NPC_TO_PC));
+				SafeFormat::Format(sz_temp, "%d", g_pPriceManager->GetItemPrice(p_item, MPriceManager::NPC_TO_PC));
 				std::string sstr = sz_temp;
 				for(int i = 3; i <= 13; i += 4)
 					if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
@@ -2092,7 +2092,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			m_pC_inpicture.push_back(temp);
 
 			char sz_temp[10] = "%";
-			wsprintf(sz_temp +1, "%d", 0);
+			SafeFormat::Format(sz_temp + 1, sizeof sz_temp - 1, "%d", 0);
 			m_rep_string.push_back(sz_temp);
 
 			title_pi = gpC_base->m_desc_menu_pi;

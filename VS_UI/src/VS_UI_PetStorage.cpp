@@ -1,6 +1,7 @@
 ﻿ // VS_UI_Storage.cpp
 
 #include "Client_PCH.h"
+#include "SafeFormat.h"
 
 #pragma warning(disable:4786)
 
@@ -1253,7 +1254,7 @@ void C_VS_UI_PERSNALSHOP::Show()
 	COLORREF markColor = RGB(220, 220, 220);//RGB(140, 140, 255);
 	for(int i = 0; i < len; i++)
 	{
-		wsprintf(sz_temp, "%d", num[i]);
+		SafeFormat::Format(sz_temp, "%d", num[i]);
 		g_PrintColorStr(rect[i].left, rect[i].top, sz_temp, gpC_base->m_item_desc_pi, markColor);	
 	}
 

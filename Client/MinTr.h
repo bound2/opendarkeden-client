@@ -12,6 +12,7 @@
 #include <string.h>
 #endif
 #include <stdio.h>
+#include <cwchar>
 /* 
    이 값이 1이면 MinTrace가 적용되고
    0으로 하면 Visual C 의 기본 TRACE가 사용된다.
@@ -379,8 +380,9 @@ inline void _CmdMinTraceW(int nCmd, LPCWSTR p)
     HWND hWnd = ::FindWindow (g_pszMinTraceClassName, g_pszMinTraceTitle); 
     if (hWnd)
     {  
-		_TCHAR buf[1024];
-		wsprintf(buf, _T("%8d,%s"), nCmd, p);
+		_TCHAR buf[1024] = {};
+		std::swprintf(buf, sizeof buf / sizeof buf[0], L"%8d,%ls", nCmd, p ? p : L"");
+		buf[sizeof buf / sizeof buf[0] - 1] = L'\0';
         cd.dwData = MIN_UNICOD | MIN_CMD;
         cd.cbData = (wcslen(buf)+1)*sizeof(_TCHAR);
         cd.lpData = (void *)&buf;
