@@ -5885,7 +5885,7 @@ void C_VS_UI_CHATTING::Process()
 		CRarFile pack_file;
 		pack_file.SetRAR(RPK_HELP, RPK_PASSWORD);
 		
-		bool re = pack_file.Open("commoningame.txt");
+		bool re = pack_file.OpenText("commoningame.txt");
 		//		assert(re);
 		
 		while(pack_file.GetString(szLine, dSTRING_LEN))
@@ -5901,15 +5901,15 @@ void C_VS_UI_CHATTING::Process()
 		switch(g_eRaceInterface)
 		{
 		case RACE_SLAYER:
-			re = pack_file.Open("slayeringame.txt");
+			re = pack_file.OpenText("slayeringame.txt");
 			break;
 
 		case RACE_VAMPIRE:
-			re = pack_file.Open("vampireingame.txt");
+			re = pack_file.OpenText("vampireingame.txt");
 			break;
 
 		case RACE_OUSTERS:
-			re = pack_file.Open("oustersingame.txt");
+			re = pack_file.OpenText("oustersingame.txt");
 			break;			
 		}
 		
@@ -32233,11 +32233,10 @@ C_VS_UI_POPUP_MESSAGE::C_VS_UI_POPUP_MESSAGE(const char *str, POPUP_TYPE type)
 		if( window_x == -1) window_x = 500;
 		if( window_y == -1) window_y = 400;
 		PackFile.SetRAR(RPK_TUTORIAL_ETC, RPK_PASSWORD);
-		if(PackFile.IsSet())
+		if(PackFile.OpenText(str))
 		{
 			char temp[4096];
 			ZeroMemory(temp,4096);
-			PackFile.Open(str);
 			PackFile.GetString(temp,4096);
 			m_Str = temp;
 			
@@ -32255,11 +32254,10 @@ C_VS_UI_POPUP_MESSAGE::C_VS_UI_POPUP_MESSAGE(const char *str, POPUP_TYPE type)
 		AttrTopmost(true);
 		
 		PackFile.SetRAR(RPK_TUTORIAL_ETC, RPK_PASSWORD);
-		if(PackFile.IsSet())
+		if(PackFile.OpenText(str))
 		{
 			char temp[4096];
 			ZeroMemory(temp,4096);
-			PackFile.Open(str);
 			PackFile.GetString(temp,4096);
 			m_Str = temp;
 			
