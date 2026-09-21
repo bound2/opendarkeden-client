@@ -127,7 +127,8 @@ bool CRarFile::OpenLimited(const char* in_filename, bool text)
 	std::string fullPath = m_base_dir + in_filename;
 
 	// Open the file
-	std::unique_ptr<FILE, decltype(&fclose)> file(fopen(fullPath.c_str(), "rb"), &fclose);
+	const auto closeFile = [](FILE* value) { fclose(value); };
+	std::unique_ptr<FILE, decltype(closeFile)> file(fopen(fullPath.c_str(), "rb"), closeFile);
 	if (!file)
 	{
 		// Log detailed error information
