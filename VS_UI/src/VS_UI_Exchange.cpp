@@ -1,6 +1,7 @@
 ﻿// VS_UI_Exchange.cpp
 
 #include "Client_PCH.h"
+#include "SafeFormat.h"
 #define assert(e) ((void)(e))
 // Disabled assert for macOS
 
@@ -1358,7 +1359,7 @@ void	C_VS_UI_EXCHANGE::Show()
 	COLORREF markColor = RGB(220, 220, 220);//RGB(140, 140, 255);
 	for(int i = 0; i < vNum.size(); i++)
 	{
-		wsprintf(sz_num, "%d", vNum[i]);
+		SafeFormat::Format(sz_num, "%d", vNum[i]);
 		g_PrintColorStr(vNumRect[i].left, vNumRect[i].top, sz_num, gpC_base->m_item_desc_pi, markColor);
 	}
 
@@ -1376,7 +1377,7 @@ void	C_VS_UI_EXCHANGE::Show()
 		}
 		else
 		{
-			wsprintf(money_buf, "%d", g_pMoneyManager->GetMoney());
+			SafeFormat::Format(money_buf, "%d", g_pMoneyManager->GetMoney());
 			std::string sstr = money_buf;
 			for(int i = 3; i <= 13; i += 4)
 				if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
@@ -1404,7 +1405,7 @@ void	C_VS_UI_EXCHANGE::Show()
 		}
 		else
 		{
-			wsprintf(money_buf, "%d", g_pTradeManager->GetMyMoneyManager()->GetMoney());
+			SafeFormat::Format(money_buf, "%d", g_pTradeManager->GetMyMoneyManager()->GetMoney());
 			std::string sstr = money_buf;
 			for(int i = 3; i <= 13; i += 4)
 				if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
@@ -1432,7 +1433,7 @@ void	C_VS_UI_EXCHANGE::Show()
 		}
 		else
 		{
-			wsprintf(money_buf, "%d", g_pTradeManager->GetOtherMoneyManager()->GetMoney());
+			SafeFormat::Format(money_buf, "%d", g_pTradeManager->GetOtherMoneyManager()->GetMoney());
 			std::string sstr = money_buf;
 			for(int i = 3; i <= 13; i += 4)
 				if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");

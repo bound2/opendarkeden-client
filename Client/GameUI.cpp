@@ -4079,11 +4079,11 @@ void		UI_RunQuestList(GCSelectQuestID *pPacket)
 
 				if( selectType == 0 )
 				{
-					wsprintf(tempstr,"%4d%s",ID,(*g_pGameStringTable)[STRING_MESSAGE_YES_I_SEE].GetString() );		
+					SafeFormat::Format(tempstr,"%4d%s",ID,(*g_pGameStringTable)[STRING_MESSAGE_YES_I_SEE].GetString() );
 					g_pPCTalkBox->AddString( tempstr );				
 				} else
 				{
-					wsprintf(tempstr,"%4d",ID);
+					SafeFormat::Format(tempstr,"%4d",ID);
 					
 					switch( mkq->GetGameType() )
 					{
@@ -4104,7 +4104,7 @@ void		UI_RunQuestList(GCSelectQuestID *pPacket)
 //					(*g_pGameStringTable)[STRING_MESSAGE_CANCEL_QUEST_VAMPIRE].GetString() );		
 //				g_pPCTalkBox->AddString( tempstr );	
 
-		wsprintf(tempstr,"9999%s",(*g_pGameStringTable)[UI_STRING_MESSAGE_CANCEL_SELECT_QUEST].GetString() );
+		SafeFormat::Format(tempstr,"9999%s",(*g_pGameStringTable)[UI_STRING_MESSAGE_CANCEL_SELECT_QUEST].GetString() );
 		g_pPCTalkBox->AddString( tempstr );
 	} else
 	{
@@ -4154,7 +4154,7 @@ void		UI_RunQuestList(GCSelectQuestID *pPacket)
 				switch(mkq->GetType() )
 				{
 				case QUEST_INFO_MONSTER_KILL :
-					wsprintf(str,"%4d%s %d%s %s%s",ID,mkq->GetName(), mkq->GetGoal(), (*g_pGameStringTable)[UI_STRING_MESSAGE_NUMBER_OF_ANIMALS].GetString(),(*g_pGameStringTable)[UI_STRING_MESSAGE_TIME_LIMIT].GetString(),timestr);			
+					SafeFormat::Format(str,"%4d%s %d%s %s%s",ID,mkq->GetName(), mkq->GetGoal(), (*g_pGameStringTable)[UI_STRING_MESSAGE_NUMBER_OF_ANIMALS].GetString(),(*g_pGameStringTable)[UI_STRING_MESSAGE_TIME_LIMIT].GetString(),timestr);
 					break;			
 				default :
 					break;

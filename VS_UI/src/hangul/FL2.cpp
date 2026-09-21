@@ -1,6 +1,7 @@
 ﻿// FL2.cpp
 
 #include "Client_PCH.h"
+#include "SafeFormat.h"
 
 #include "Fl2.h"
 #include "VS_UI_Base.h"
@@ -556,7 +557,7 @@ int g_PrintColorStrShadow(int x, int y, const char * sz_str, PrintInfo &pi, COLO
 std::string g_GetNumberString(int number)
 {
 	char sz_temp[20];
-	wsprintf(sz_temp, "%d", number);
+	SafeFormat::Format(sz_temp, "%d", number);
 	std::string sstr = sz_temp;
 	for(int i = 3; i <= 13; i += 4)
 		if((int)sstr.size() > i)sstr.insert(sstr.size()-i, ",");
@@ -575,7 +576,7 @@ std::string g_GetStringByMoney(DWORD dwMoney)
 		TempMoney = dwMoney / 100000000;
 		if(TempMoney)
 		{
-			wsprintf(TempBuffer, "%d억", TempMoney);
+			SafeFormat::Format(TempBuffer, "%d억", TempMoney);
 			sstr+= TempBuffer;
 		}
 	}
@@ -584,7 +585,7 @@ std::string g_GetStringByMoney(DWORD dwMoney)
 		TempMoney = (dwMoney%100000000) / 10000;
 		if(TempMoney)
 		{
-			wsprintf(TempBuffer, "%d만", TempMoney);
+			SafeFormat::Format(TempBuffer, "%d만", TempMoney);
 			sstr+= TempBuffer;
 		}
 	}
@@ -592,7 +593,7 @@ std::string g_GetStringByMoney(DWORD dwMoney)
 	TempMoney = (dwMoney%10000);
 	if(TempMoney || 0 == dwMoney)
 	{
-		wsprintf(TempBuffer, "%d", TempMoney);
+		SafeFormat::Format(TempBuffer, "%d", TempMoney);
 		sstr+= TempBuffer;
 	}
 

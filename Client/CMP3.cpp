@@ -464,16 +464,6 @@ DWORD CMP3::TotalLength()
 }
 
 
-// 전체 길이를 mm:ss 형식의 문자열과 함께 밀리초단위로 반환
-DWORD CMP3::TotalLength(LPSTR lpszReturn)
-{
-  DWORD dwResult;
-
-	dwResult = TotalLength();
-	MinsFromSecs(dwResult, lpszReturn);
-	return dwResult;
-}
-
 	
 // 재생 위치를 밀리초단위로 반환
 DWORD CMP3::CurrentLength()
@@ -483,18 +473,6 @@ DWORD CMP3::CurrentLength()
 	dwResult = GetStatus(MCI_STATUS_POSITION);
 	return dwResult;
 }
-
-
-// 재생 위치를 mm:ss 형식의 문자열과 함께 밀리초단위로 반환
-DWORD CMP3::CurrentLength(LPSTR lpszReturn)
-{
-  DWORD dwResult;
-
-	dwResult = CurrentLength();
-	MinsFromSecs(dwResult, lpszReturn);
-	return dwResult;
-}
-
 
 // 전달받은 Flag에 따른 Player의 상태 값을 반환
 DWORD CMP3::GetStatus(DWORD dwFlag)
@@ -507,23 +485,6 @@ DWORD CMP3::GetStatus(DWORD dwFlag)
 
 	return mciStatusParms.dwReturn;
 }
-
-
-// 전달 받은 밀리초를 mm:ss 형식의 문자열로 변환해서 반환
-void CMP3::MinsFromSecs(DWORD dwLength, LPSTR lpszReturn)
-{
-  double dMilliSeconds;
-  int    iMinutes, iSeconds;
-
-	dMilliSeconds = (double)dwLength / 1000 / 60;
-	iMinutes      = (int)dMilliSeconds;
-	dMilliSeconds -= iMinutes;
-	iSeconds      = (int)(dMilliSeconds * 60);
-
-	wsprintf(lpszReturn, "%.2d:%.2d", iMinutes, iSeconds);
-	return;
-}
-
 
 // 전달 받은 코드에 해당하는 에러 메시지를 반환
 void CMP3::GetErrorString(DWORD dwErrCode, LPSTR lpszErrString, UINT cchErrString)
@@ -697,22 +658,12 @@ DWORD CMP3::TotalLength()
 	return 0;
 }
 
-DWORD CMP3::TotalLength(LPSTR lpszReturn)
-{
-	if (lpszReturn) lpszReturn[0] = '\0';
-	return 0;
-}
 
 DWORD CMP3::CurrentLength()
 {
 	return 0;
 }
 
-DWORD CMP3::CurrentLength(LPSTR lpszReturn)
-{
-	if (lpszReturn) lpszReturn[0] = '\0';
-	return 0;
-}
 
 DWORD CMP3::GetStatus(DWORD dwFlag)
 {
@@ -720,11 +671,6 @@ DWORD CMP3::GetStatus(DWORD dwFlag)
 	return 0;
 }
 
-void CMP3::MinsFromSecs(DWORD dwLength, LPSTR lpszReturn)
-{
-	if (lpszReturn) lpszReturn[0] = '\0';
-	(void)dwLength;
-}
 
 void CMP3::GetErrorString(DWORD dwErrCode, LPSTR lpszErrString, UINT cchErrString)
 {

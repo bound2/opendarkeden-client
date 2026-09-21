@@ -2154,7 +2154,7 @@ The counting loop (lines 41-54) stops at `len < maxWidth`, so `len` is the *actu
 >
 > **Deliberately left in this file:** the `"%d %s"` / `"%s +%d"` family fed by game-string-table entries and the `strcat` chains beside them. Those are the C19/C20/C22 data-file-format class, and bounding the `sprintf` without also bounding the adjacent `strcat(sz_buf, "%")` would leave a one-byte overflow reachable exactly on truncation — a fix that makes things worse. Also left: `char pPartName[20]` filled by `strcpy` from a data table whose index is itself unchecked, same class.
 >
-> Same-class sites outside that change's scope and still open: `VS_UI_ExtraDialog.cpp:1511` (`wsprintf` of two `std::string`s into `char[200]`) and `:2858` (`strcpy` of a title into `char[300]`).
+> The `VS_UI_ExtraDialog.cpp` two-string message now uses the bounded formatter (2026-09-21). The separate title `strcpy` into `char[300]` remains outside that change.
 
 #### 🟠 High -- utf8_to_utf32 dereferences continuation bytes without checking the NUL terminator, reading past the end of the input buffer.
 
@@ -2173,6 +2173,8 @@ The decoder tests only the lead byte and then unconditionally consumes 1-3 more 
 > **One deliberate divergence:** malformed input is dropped rather than emitting U+FFFD, which is what the original did for an unusable lead byte. This decoder fills an *edit buffer* whose contents are echoed to the user and sent to the server, and a replacement character silently typed into someone's chat line is worse than a byte that never arrives. `TextService::Utf8Decode`, which is a *rendering* decoder, correctly does emit U+FFFD — the two want opposite answers.
 
 #### 🟡 Medium -- The wsprintf shim turns a length-capped Win32 API into an unbounded vsprintf at 646 call sites.
+
+> ✅ **Fixed (2026-09-21):** delete the POSIX shim and replace the remaining 355 narrow calls with `SafeFormat::Format`, whose array overload derives the actual destination capacity. The one pointer slice supplies its remaining capacity explicitly. The wide trace command uses capacity-bounded `swprintf` and explicit termination; unused CMP3 string-formatting overloads are removed. The caller audit removes 21 `void*` casts that would hide string arguments from the typed formatter. Existing `SafeFormat` bounds/type tests own the formatter; UI calls are regression guards under the named exemption, with full builds and source checks. R18 rejects raw identifiers, including aliases, across C/C++ sources and headers.
 
 **Category:** portability  |  **Location:** `basic/Platform.h:1864`
 
@@ -2744,6 +2746,8 @@ basic/Platform.h:1845-1856 defines `#define max(a, b) (((a) > (b)) ? (a) : (b))`
 **Recommendation:** Remove the min/max macros and use std::min/std::max (or clearly-named DE_MIN/DE_MAX) at the handful of call sites that need them; rename or scope the other single-word macros.
 
 #### 🟡 Medium -- The non-Windows wsprintf stub uses unbounded vsprintf, replacing a Win32 function whose documented contract caps output at 1024 characters.
+
+> ✅ **Fixed (2026-09-21):** delete the POSIX shim and replace the remaining 355 narrow calls with `SafeFormat::Format`, whose array overload derives the actual destination capacity. The one pointer slice supplies its remaining capacity explicitly. The wide trace command uses capacity-bounded `swprintf` and explicit termination; unused CMP3 string-formatting overloads are removed. The caller audit removes 21 `void*` casts that would hide string arguments from the typed formatter. Existing `SafeFormat` bounds/type tests own the formatter; UI calls are regression guards under the named exemption, with full builds and source checks. R18 rejects raw identifiers, including aliases, across C/C++ sources and headers.
 
 **Category:** memory-safety  |  **Location:** `basic/Platform.h:1871`
 

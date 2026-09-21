@@ -1531,7 +1531,7 @@ void C_VS_UI_OUSTERS_QUICKITEM::Show()
 	g_FL2_GetDC();
 	for(i = 0; i < len; i++)
 	{
-		wsprintf(sz_temp, "%d", num[i]);
+		SafeFormat::Format(sz_temp, "%d", num[i]);
 		g_PrintColorStr(rect[i].left, rect[i].top, sz_temp, gpC_base->m_item_desc_pi, markColor);	
 //		g_Print(rect.left, rect.top, sz_temp, &gpC_base->m_item_desc_pi);	
 	}

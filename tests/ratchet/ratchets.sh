@@ -716,7 +716,9 @@ check "R7 (data-file format strings passed to printf)" "$R7" "$R7_BASELINE"
 # measurement, taken during the fourth slice's review round to find out
 # how much R7 was missing - the number that showed the closure claim was
 # wrong.
-R8_BASELINE=43
+# 40: removing the wsprintf shim removes its declaration and vararg forward;
+# the wide MinTrace command now uses an explicit wide literal instead of _T().
+R8_BASELINE=40
 
 for d in Client VS_UI; do
 	if [ ! -d "$d" ]; then
@@ -1445,10 +1447,6 @@ fi
 # because VS_UI_GameCommon.cpp carries NUL bytes and a plain grep
 # stops at the first one (CLAUDE.md, Traps).
 #
-# Excluded on purpose: the non-Windows wsprintf shim's own definition
-# in basic/Platform.h (a definition, not a call; it forwards to
-# vsnprintf with a fixed 1024, whatever the buffer holds, which
-# Platform.h says at length), matched by "int wsprintf(" and dropped.
 # What it cannot see: vsprintf (11 live lines, the vararg forwarders in
 # Client/MinTr.h and the two DebugInfo.cpp, into fixed buffers - the
 # \b in the pattern rejects the leading v, as it rejects the l of
@@ -1499,7 +1497,9 @@ fi
 # 952: owned file-dialog paths replace six raw directory copies/appends.
 # 950: MString assignment copies into exact-size replacement allocations.
 # 944: owned queued chat text removes six raw string-copy lines.
-R17_BASELINE=944
+# 587: bound 355 narrow wsprintf calls, bound the wide trace command, and
+# remove the unused CMP3 string formatter. R18 prevents raw wsprintf returning.
+R17_BASELINE=587
 R17_FILES_FLOOR=500
 
 r17_members () {
@@ -1511,8 +1511,23 @@ if [ "$(r17_members | wc -l)" -lt "$R17_FILES_FLOOR" ]; then
 	FAIL=1
 else
 	R17=$(r17_members | sort -u | tr '\n' '\0' | xargs -0 grep -haE '\b(sprintf|wsprintf|strcpy|strcat)\s*\(' \
-		| sed -e 's://.*::' | grep -aE '\b(sprintf|wsprintf|strcpy|strcat)\s*\(' | grep -avE '\bint\s+wsprintf\s*\(' | wc -l)
+		| sed -e 's://.*::' | grep -aE '\b(sprintf|wsprintf|strcpy|strcat)\s*\(' | wc -l)
 	check "R17 (unbounded format/copy lines outside the packet tree)" "$R17" "$R17_BASELINE"
+fi
+
+#----------------------------------------------------------------------
+# R18 - raw wsprintf identifiers. The POSIX shim is gone; every former
+# caller supplies a real destination capacity through SafeFormat or swprintf.
+# Unlike R17's line count, this masks comments/literals and catches aliases
+# such as &wsprintfA too. The counter pins its source inventory and self-tests
+# its lexer before reporting a number. Token-pasted names remain outside this
+# source check; the full POSIX build has no compatibility declaration either.
+#----------------------------------------------------------------------
+if R18=$(perl tests/tools/count_wsprintf.pl); then
+	check "R18 (raw wsprintf identifiers)" "$R18" 0
+else
+	echo "FAIL R18: wsprintf source counter failed"
+	FAIL=1
 fi
 
 #----------------------------------------------------------------------

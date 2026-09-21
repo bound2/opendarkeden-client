@@ -1088,7 +1088,7 @@ void C_VS_UI_SLAYER_QUICKITEM::Show()
 	g_FL2_GetDC();
 	for(i = 0; i < len; i++)
 	{
-		wsprintf(sz_temp, "%d", num[i]);
+		SafeFormat::Format(sz_temp, "%d", num[i]);
 		g_PrintColorStr(rect[i].left, rect[i].top, sz_temp, gpC_base->m_item_desc_pi, markColor);	
 //		g_Print(rect.left, rect.top, sz_temp, &gpC_base->m_item_desc_pi);	
 	}
@@ -1732,22 +1732,22 @@ void C_VS_UI_SLAYER::Show()
 				g_FL2_GetDC();
 				
 				g_PrintColorStrShadow(x+str_x, y+bar_y+bar_gap*0, (*g_pGameStringTable)[UI_STRING_MESSAGE_ENG_STR].GetString(), gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
-				wsprintf(sz_temp, "%d", g_char_slot_ingame.STR_CUR);
+				SafeFormat::Format(sz_temp, "%d", g_char_slot_ingame.STR_CUR);
 				g_PrintColorStrShadow(x+num_x, y+bar_y+bar_gap*0, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
 				
 				g_PrintColorStrShadow(x+str_x, y+bar_y+bar_gap*1, (*g_pGameStringTable)[UI_STRING_MESSAGE_ENG_DEX].GetString(), gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
-				wsprintf(sz_temp, "%d", g_char_slot_ingame.DEX_CUR);
+				SafeFormat::Format(sz_temp, "%d", g_char_slot_ingame.DEX_CUR);
 				g_PrintColorStrShadow(x+num_x, y+bar_y+bar_gap*1, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
 				
 				g_PrintColorStrShadow(x+str_x, y+bar_y+bar_gap*2, (*g_pGameStringTable)[UI_STRING_MESSAGE_ENG_INT].GetString(), gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
-				wsprintf(sz_temp, "%d", g_char_slot_ingame.INT_CUR);
+				SafeFormat::Format(sz_temp, "%d", g_char_slot_ingame.INT_CUR);
 				g_PrintColorStrShadow(x+num_x, y+bar_y+bar_gap*2, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
 
 				for(int i = 0; i < 3; i++)
 				{
 					g_PrintColorStrShadow(x+str_x, y+bar_y+bar_gap*(3+i), domain_string[domain[i]-SKILLDOMAIN_BLADE], gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
 					const int domain_level = (*g_pSkillManager)[domain[i]].GetDomainLevel();
-					wsprintf(sz_temp, "%d", domain_level);
+					SafeFormat::Format(sz_temp, "%d", domain_level);
 					g_PrintColorStrShadow(x+num_x, y+bar_y+bar_gap*(3+i), sz_temp, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
 				}				
 			}
