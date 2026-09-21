@@ -1097,6 +1097,10 @@ rounds settled* for the host rules). Test fixtures share
   > `test_mail_template.cpp` and `test_master_commands.cpp` own these parser,
   > encoding, lifetime and failure contracts; UI dispatch remains a regression
   > guard. Renderer fallback retirement still requires the ingress audit.
+  > The obsolete `g_PossibleStringCut` declaration and SDL definition are now
+  > removed after all compiled callers migrated. Shared UTF-8 prefix and row
+  > helpers, descriptor/help layout tests and builds without the old symbol
+  > own this contract; the excluded native GDI source retains its old code.
   > Help messages also load through the shared decoder. Their implementation
   > moved unchanged into `VS_UI` before the parser fix. `test_help_messages.cpp`
   > owns complete-record publication, numeric/race bounds, default singleton

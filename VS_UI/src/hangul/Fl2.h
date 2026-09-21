@@ -50,7 +50,6 @@ int	g_ConvertAscii2DBCS(const char * p_ascii, int ascii_len, char_t * &p_new_buf
 void	g_Print(int x, int y, const char * sz_str, PrintInfo * p_print_info=NULL);
 int		g_GetStringWidth(const char * sz_str, void* hfont=NULL);
 int		g_GetStringHeight(const char * sz_str, void* hfont=NULL);
-bool	g_PossibleStringCut(const char * sz_str, int position);
 bool	g_FL2_GetDC();
 bool	g_FL2_ReleaseDC();
 int g_PrintColorStr(int x, int y, const char * sz_str, PrintInfo &pi, COLORREF str_rgb);
