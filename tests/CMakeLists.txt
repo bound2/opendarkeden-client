@@ -102,6 +102,7 @@ add_executable(ui_tests
 	ui/test_xml.cpp
 	ui/test_resource_reader.cpp
 	ui/test_help_messages.cpp
+	ui/test_portal_data.cpp
 	ui/test_line_editor.cpp
 	ui/test_editor_focus.cpp
 	ui/test_ui_message_receiver.cpp

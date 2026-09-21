@@ -12,6 +12,7 @@
 #include "ExperienceTable.h"
 #include "MGameStringTable.h"
 #include "SafeFormat.h"
+#include "SlayerPortalData.h"
 #include "UserInformation.h"
 #include "MZoneTable.h"
 #include "SystemAvailabilities.h"
@@ -2204,31 +2205,16 @@ C_VS_UI_SLAYER_PORTAL::C_VS_UI_SLAYER_PORTAL()
 	}
 	flag_file.close();
 #else
-	UI_PORTAL_FLAG temp_flag;
 	CRarFile flag_file;
 	flag_file.SetRAR(RPK_TUTORIAL_ETC, RPK_PASSWORD);
-
 	flag_file.Open(INF_SLAYER_PORTAL);
-	int map_max = *(int *)flag_file.Read(sizeof(int));
-	assert(map_max == MAP_MAX);
-	for(int j = 0; j < MAP_MAX; j++)
+	SlayerPortalData portal_data;
+	static_assert(std::tuple_size_v<SlayerPortalData> == MAP_MAX);
+	ReadSlayerPortalData(flag_file, portal_data);
+	for (int j = 0; j < MAP_MAX; ++j)
 	{
-		int size;
-		size = *((int *)(flag_file.Read(sizeof(int))));
-		assert(size != 0);
-		for(int i = 0; i < size; i++)
+		for (const auto& temp_flag : portal_data[j])
 		{
-			temp_flag.zone_id = *((int *)flag_file.Read(sizeof(int)));
-			temp_flag.x = *((int *)flag_file.Read(sizeof(int)));
-			temp_flag.y = *((int *)flag_file.Read(sizeof(int)));
-			temp_flag.portal_x = *((int *)flag_file.Read(sizeof(int)));
-			temp_flag.portal_y = *((int *)flag_file.Read(sizeof(int)));
-			assert(temp_flag.zone_id >= 0);
-			assert(temp_flag.x >= 0);
-			assert(temp_flag.x >= 0);
-			assert(temp_flag.portal_x >= 0 && temp_flag.portal_x < 256);
-			assert(temp_flag.portal_y >= 0 && temp_flag.portal_y < 256);
-
 			if( g_pSystemAvailableManager->ZoneFiltering( temp_flag.zone_id ) )
 				m_flag[j].push_back(temp_flag);
 			
