@@ -10,7 +10,7 @@
 #ifdef PLATFORM_WINDOWS
 #include <windows.h>
 #else
-#include "../basic/Platform.h"
+#include "Platform.h"
 #endif
 #include <string>
 #include <vector>
