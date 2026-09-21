@@ -6,7 +6,7 @@ namespace {
 bool Space(char c) { return c == ' ' || c == '\t' || c == '\r' || c == '\n'; }
 }
 
-bool Decode(std::string_view bytes, std::string& output, bool xml)
+bool Decode(std::string_view bytes, std::string& output, bool xml, TextEncoding::InvalidInput invalid)
 {
 	if (bytes.size() > MaxFileBytes) return false;
 	auto encoding = TextEncoding::GetResourceEncoding();
@@ -50,7 +50,7 @@ bool Decode(std::string_view bytes, std::string& output, bool xml)
 		}
 	}
 	return TextEncoding::Convert(bytes, encoding, TextEncoding::Encoding::Utf8,
-		output, TextEncoding::InvalidInput::Replace);
+		output, invalid);
 }
 
 } // namespace ResourceText

@@ -27,6 +27,7 @@
 #include "ClientFunction.h"
 #include "MGameStringTable.h"
 #include "SafeFormat.h"
+#include "MasterCommands.h"
 #include "MItemOptionTable.h"
 #include "CToken.h"
 #include "UserOption.h"
@@ -3169,7 +3170,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 
 						case SYMBOL_MASTER_COMMAND:
 						{
-							static std::vector<std::string> vMasterCommand;
+							unsigned commandNumber = 0;
 							static std::string	strTempCommand;
 
 							char *pMessage = str;
@@ -3198,47 +3199,19 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 								strTempCommand = "*warp 8000 75 77";
 								pMessage = const_cast<char*>(strTempCommand.c_str());
 							}
-							else if(strlen(str) > 4 && strncmp(str, "*mc", 3) == 0 && isdigit((unsigned char)str[4]))
+							else if (MasterCommands::Invocation(str, commandNumber))
 							{
-//								if(vMasterCommand.empty())
-								{
-									std::string filename = "MasterCommand";
-									filename += str[4];
-									filename += ".txt";
-									if(!_access(filename.c_str(), 0))
-									{
-										FILE *fp;
-
-										fp = fopen(filename.c_str(), "rt");
-
-										if(fp != NULL)
-										{
-											char szTemp[512];
-											while(fgets(szTemp, 512, fp))
-											{
-												if( strlen(szTemp) > 0 )
-												{
-													if(szTemp[strlen(szTemp)-1] == '\n')
-													szTemp[strlen(szTemp)-1] = '\0';
-													Execute_UI_CHAT_RETURN(left, right, szTemp);
-												}
-
-//												CGSay _CGSay;
-//												_CGSay.setMessage( szTemp );	//pWansungString );
-//												_CGSay.setColor( right );
-//												g_pSocket->sendPacket( &_CGSay );
-											}
-										}
-										else
-										{
-											DEBUG_ADD("[Master Command] File pointer is NULL.");
-										}
-									}
-									else
-									{
-										DEBUG_ADD("[Master Command] File access is Denied.");
-									}
+								MasterCommands::Limits limits;
+								limits.maxCommandBytes = CHAT_MESSAGE_MAX_BYTES;
+								std::vector<std::string> commands;
+								if (MasterCommands::Load(commandNumber, ".", commands, limits)) {
+									for (auto& command : commands)
+										Execute_UI_CHAT_RETURN(left, right, command.data());
+								} else {
+									DEBUG_ADD("[Master Command] Rejected missing, malformed, cyclic or excessive command files.");
 								}
+								// This is a local macro selector; only its validated leaf commands dispatch.
+								break;
 							}
 							else if(strlen(str) >= 5 && strncmp(str, "*C2G", 4) == 0 )
 							{

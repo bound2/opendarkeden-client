@@ -1507,7 +1507,8 @@ fi
 # 584: team introduction and billing dialog wrap owned rows without strcpy.
 # 570: descriptors own their rows and remove the unused replacement buffers.
 # 569: rich-help layout removes the unused substitution loop's dead strcpy.
-R17_BASELINE=569
+# 568: the mail-template notice date uses checked formatting.
+R17_BASELINE=568
 R17_FILES_FLOOR=500
 
 r17_members () {
