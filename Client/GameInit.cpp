@@ -20,6 +20,7 @@
 #include <arpa/inet.h>
 #endif
 #include "DebugLog.h"
+#include "TextEncoding.h"
 #include "DirectoryListing.h"
 #include "Client.h"
 #include "GameObject.h"
@@ -1493,7 +1494,11 @@ InitGame()
 #endif
 
 	g_pFileDef = new Properties;
+	g_pFileDef->setProperty("RESOURCE_TEXT_ENCODING", "CP949");
 	g_pFileDef->load("Data/Info/FileDef.inf");
+	const auto resourceEncoding = g_pFileDef->getProperty("RESOURCE_TEXT_ENCODING");
+	if (!TextEncoding::SetResourceEncoding(resourceEncoding))
+		throw Error("Unsupported RESOURCE_TEXT_ENCODING in Data/Info/FileDef.inf");
 
 	//---------------------------------------------------------------------
 	// Profiler

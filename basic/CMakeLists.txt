@@ -69,6 +69,7 @@ set(BASIC_SOURCES
 	# C library.
 	SafeFormat.cpp
 	StringReduction.cpp
+	TextEncoding.cpp
 	MemoryPool.cpp
 	CMessageArray.cpp
 	ConfigFile.cpp
@@ -86,6 +87,7 @@ message(STATUS "Basic: Compiling PlatformSDL.cpp")
 
 # Create static library
 add_library(basic STATIC ${BASIC_SOURCES})
+target_link_libraries(basic PUBLIC Iconv::Iconv)
 
 # Platform.h is public, so its backend selection must reach every consumer.
 if(USE_SDL_BACKEND OR NOT WIN32)
@@ -147,6 +149,7 @@ install(FILES
 	AudioTypes.h
 	SafeFormat.h
 	TextUtf8.h
+	TextEncoding.h
 	StringReduction.h
 	MemoryPool.h
 	ScrollRange.h

@@ -99,15 +99,12 @@ class MString {
 		bool		operator != (const MString& str)	{ return strcmp(m_pString, str.m_pString)!=0; }
 
 		//----------------------------------------------------
-		// File I/O
+		// File I/O: resource encoding on disk, UTF-8 in memory.
+		// Malformed loaded bytes become U+FFFD. Saves reject text that cannot
+		// be represented in the declared resource encoding.
 		//----------------------------------------------------
 		virtual void	SaveToFile(std::ofstream& file);
 		virtual void	LoadFromFile(std::ifstream& file);
-
-		//----------------------------------------------------
-		// Internal
-		//----------------------------------------------------
-		void			ConvertToUTF8IfNeeded();	// NOTE: Now a no-op - resource files should be UTF-8
 
 	protected :
 		size_t	m_Length;

@@ -5,8 +5,9 @@
 // Tests for TextService::NormalizeText in Client/TextSystem/TextService.cpp.
 //
 // TextService's layout and drawing paths call this function before decoding
-// UTF-8. MString::LoadFromFile has a separate platform-dependent conversion;
-// these tests do not exercise that loader. Two properties must hold here:
+// UTF-8. MString::LoadFromFile now uses the shared codec with a declared
+// resource encoding; these tests cover the remaining renderer fallback.
+// Two properties must hold here:
 //
 //   - text that is already valid UTF-8 comes back untouched, or a table that
 //     has been converted ahead of time would be decoded a second time;

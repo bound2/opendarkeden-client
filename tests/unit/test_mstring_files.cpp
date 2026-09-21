@@ -1,5 +1,6 @@
 #include "test_framework.h"
 #include "MString.h"
+#include "TextEncoding.h"
 #include <algorithm>
 #include <cstdio>
 #include <cstdint>
@@ -12,6 +13,10 @@
 namespace {
 constexpr const char* path = "mstring_file_test.bin";
 struct Fixture { ~Fixture() { std::remove(path); } };
+struct ResourceEncodingScope {
+	TextEncoding::Encoding saved = TextEncoding::GetResourceEncoding();
+	~ResourceEncodingScope() { TextEncoding::SetResourceEncoding(saved); }
+};
 
 std::vector<char> Record(std::uint32_t length, const std::string& text = {})
 {
@@ -120,4 +125,133 @@ TEST(MStringFiles, AReadExceptionAlsoPreservesThePreviousValue)
 	CHECK(threw);
 	CHECK_EQ(4, value.GetLength());
 	CHECK(Is(value, "kept"));
+}
+
+TEST(MStringFiles, Cp949ResourceRecordsDecodeOnceAndRoundTripTheirBytes)
+{
+	Fixture fixture;
+	const std::string encoded("\xC7\xD1\0\xC7\xD1", 5);
+	const std::string utf8("\xED\x95\x9C\0\xED\x95\x9C", 7);
+	Write(Record(5, encoded));
+	MString value;
+	{
+		std::ifstream in(path, std::ios::binary);
+		value.LoadFromFile(in);
+		CHECK(bool(in));
+	}
+	CHECK_EQ(utf8.size(), value.GetLength());
+	CHECK(std::string(value.GetString(), value.GetLength()) == utf8);
+	{
+		std::ofstream out(path, std::ios::binary | std::ios::trunc);
+		value.SaveToFile(out);
+		CHECK(bool(out));
+	}
+	std::ifstream in(path, std::ios::binary);
+	const std::vector<char> bytes((std::istreambuf_iterator<char>(in)), {});
+	CHECK(bytes == Record(5, encoded));
+}
+
+TEST(MStringFiles, Utf8ValuesAreEncodedToTheResourceCodePageOnSave)
+{
+	Fixture fixture;
+	{
+		std::ofstream out(path, std::ios::binary | std::ios::trunc);
+		MString value("\xED\x95\x9C");
+		value.SaveToFile(out);
+		CHECK(bool(out));
+	}
+	std::ifstream in(path, std::ios::binary);
+	const std::vector<char> bytes((std::istreambuf_iterator<char>(in)), {});
+	CHECK(bytes == Record(2, "\xC7\xD1"));
+}
+
+TEST(MStringFiles, WriterRejectsUnreadableRecordsBeforeWritingThePrefix)
+{
+	Fixture fixture;
+	for (const auto& text : {std::string(65537, 'a'), std::string("\xF0\x9F\x98\x80")}) {
+		std::ofstream out(path, std::ios::binary | std::ios::trunc);
+		MString value(text.c_str());
+		value.SaveToFile(out);
+		CHECK(out.fail());
+		out.clear();
+		CHECK_EQ(0, out.tellp());
+	}
+}
+
+TEST(MStringFiles, ResourcePolicyControlsBothDirectionsIncludingUtf8Packs)
+{
+	Fixture fixture;
+	ResourceEncodingScope scope;
+	struct Vector { TextEncoding::Encoding encoding; const char* bytes; const char* utf8; };
+	const Vector vectors[] = {
+		{TextEncoding::Encoding::Gbk, "\xC4\xE3\xBA\xC3", "\xE4\xBD\xA0\xE5\xA5\xBD"},
+		{TextEncoding::Encoding::Big5, "\xA7\x41\xA6\x6E", "\xE4\xBD\xA0\xE5\xA5\xBD"},
+		{TextEncoding::Encoding::Utf8, "\xF0\x9F\x98\x80", "\xF0\x9F\x98\x80"}
+	};
+	for (const auto& v : vectors) {
+		CHECK(TextEncoding::SetResourceEncoding(v.encoding));
+		const auto record = Record(static_cast<std::uint32_t>(std::strlen(v.bytes)), v.bytes);
+		Write(record);
+		MString value;
+		{
+			std::ifstream in(path, std::ios::binary);
+			value.LoadFromFile(in);
+			CHECK(bool(in));
+		}
+		CHECK(Is(value, v.utf8));
+		{
+			std::ofstream out(path, std::ios::binary | std::ios::trunc);
+			value.SaveToFile(out);
+			CHECK(bool(out));
+		}
+		std::ifstream in(path, std::ios::binary);
+		const std::vector<char> bytes((std::istreambuf_iterator<char>(in)), {});
+		CHECK(bytes == record);
+	}
+}
+
+TEST(MStringFiles, DamagedResourceTextDoesNotDiscardLaterTextOrMisalignRecords)
+{
+	Fixture fixture;
+	auto bytes = Record(5, "\xC7\xD1\xFF!\xA1");
+	const auto next = Record(3, "end");
+	bytes.insert(bytes.end(), next.begin(), next.end());
+	Write(bytes);
+	std::ifstream in(path, std::ios::binary);
+	MString value;
+	value.LoadFromFile(in);
+	CHECK(bool(in));
+	CHECK(Is(value, "\xED\x95\x9C\xEF\xBF\xBD!\xEF\xBF\xBD"));
+	CHECK_EQ(9, in.tellg());
+	value.LoadFromFile(in);
+	CHECK(bool(in));
+	CHECK(Is(value, "end"));
+	CHECK_EQ(bytes.size(), in.tellg());
+}
+
+TEST(MStringFiles, EncodedRecordLimitAllowsUtf8ExpansionInMemory)
+{
+	Fixture fixture;
+	std::string korean, utf8;
+	for (size_t i = 0; i < 32768; ++i) {
+		korean += "\xC7\xD1";
+		utf8 += "\xED\x95\x9C";
+	}
+	Write(Record(65536, korean));
+	MString value;
+	{
+		std::ifstream in(path, std::ios::binary);
+		value.LoadFromFile(in);
+		CHECK(bool(in));
+	}
+	CHECK_EQ(98304, value.GetLength());
+	CHECK(Is(value, utf8.c_str()));
+	{
+		std::ofstream out(path, std::ios::binary | std::ios::trunc);
+		value.SaveToFile(out);
+		CHECK(bool(out));
+	}
+	std::ifstream in(path, std::ios::binary);
+	const std::vector<char> bytes((std::istreambuf_iterator<char>(in)), {});
+	CHECK(bytes == Record(65536, korean));
 }
