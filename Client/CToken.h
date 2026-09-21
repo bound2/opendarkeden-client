@@ -24,7 +24,8 @@ class CToken {
 		CToken(const CToken&) = delete;
 		CToken& operator=(const CToken&) = delete;
 
-		// set string
+		// Copy a new string, which may be a borrowed token or suffix of this
+		// instance's buffer. Passing NULL clears the current string.
 		void SetString(const char* str);
 
 		// 공백이 여러개 있을때 무시한다.

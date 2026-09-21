@@ -1503,7 +1503,8 @@ fi
 # 944: owned queued chat text removes six raw string-copy lines.
 # 587: bound 355 narrow wsprintf calls, bound the wide trace command, and
 # remove the unused CMP3 string formatter. R18 prevents raw wsprintf returning.
-R17_BASELINE=587
+# 586: CToken copies an owned replacement by its measured length.
+R17_BASELINE=586
 R17_FILES_FLOOR=500
 
 r17_members () {

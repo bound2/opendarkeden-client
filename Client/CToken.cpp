@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "CToken.h"
+#include <memory>
 
 
 //------------------------------------------------------------------------
@@ -34,7 +35,7 @@ CToken::~CToken()
 // Free the buffer.
 //
 // Both pointers have to be cleared, not just the one being freed. Release()
-// is called by ~CToken and again at the top of SetString(), and m_pCurrent
+// is called by ~CToken and when SetString() replaces the buffer, and m_pCurrent
 // points into the same allocation - so leaving either set makes the second
 // Release() a double free and makes any GetToken() in between write ('\0'
 // over the delimiter) into memory that is already back on the heap.
@@ -49,22 +50,23 @@ CToken::Release()
 }
 
 //------------------------------------------------------------------------
-// string을 다시 설정한다.
+// Replace the owned string, including text borrowed from the current buffer.
 //------------------------------------------------------------------------
 void
 CToken::SetString(const char *str)
 {
+	std::unique_ptr<char[]> replacement;
+	if (str != NULL)
+	{
+		const size_t size = strlen(str) + 1;
+		replacement = std::make_unique<char[]>(size);
+		memcpy(replacement.get(), str, size);
+	}
+	// Keep borrowed tokens alive until the copy completes. An allocation
+	// failure also leaves the previous string and iteration position intact.
 	Release();
-	  
-   if (str!=NULL)
-   {
-      // 메모리 잡기
-      m_pString = new char [strlen(str)+1];
-
-      strcpy(m_pString, str);
-
-      m_pCurrent = m_pString;
-   }
+	m_pString = replacement.release();
+	m_pCurrent = m_pString;
 }
 
 //------------------------------------------------------------------------

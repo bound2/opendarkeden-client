@@ -37,3 +37,57 @@ TEST(Token, RepeatedNullResetsClearBothOwnedAndCurrentPointers)
 	if (empty) CHECK(std::string(empty).empty());
 	CHECK(token.GetToken() == nullptr);
 }
+
+TEST(Token, ResetCanCopyATokenBorrowedFromItsOwnBuffer)
+{
+	CToken token("first second");
+	const char* first = token.GetToken();
+	CHECK(first != nullptr);
+	token.SetString(first);
+	const char* copied = token.GetToken();
+	CHECK(copied != nullptr);
+	if (copied) CHECK(std::string(copied) == "first");
+	CHECK(token.GetToken() == nullptr);
+}
+
+TEST(Token, ResetCanCopyAnInteriorTokenOrRemainingSuffix)
+{
+	CToken token("first second third");
+	CHECK(token.GetToken() != nullptr);
+	const char* second = token.GetToken();
+	CHECK(second != nullptr);
+	token.SetString(second);
+	const char* copied = token.GetToken();
+	CHECK(copied != nullptr);
+	if (copied) CHECK(std::string(copied) == "second");
+	token.SetString("skip   remaining text");
+	CHECK(token.GetToken() != nullptr);
+	const char* remaining = token.GetEnd();
+	CHECK(remaining != nullptr);
+	token.SetString(remaining ? remaining + 4 : nullptr);
+	const char* suffix = token.GetEnd();
+	CHECK(suffix != nullptr);
+	if (suffix) CHECK(std::string(suffix) == "ining text");
+}
+
+TEST(Token, RepeatedAliasedResetsPreserveLongTokensAndEmptyTerminators)
+{
+	const std::string text(4096, 'x');
+	CToken token(text.c_str());
+	for (int i = 0; i < 100; ++i) {
+		const char* borrowed = token.GetEnd();
+		CHECK(borrowed != nullptr);
+		token.SetString(borrowed);
+		const char* copied = token.GetToken();
+		CHECK(copied != nullptr);
+		if (copied) CHECK(std::string(copied) == text);
+		token.SetString(copied);
+	}
+	const char* borrowed = token.GetEnd();
+	CHECK(borrowed != nullptr);
+	token.SetString(borrowed ? borrowed + text.size() : nullptr);
+	const char* empty = token.GetEnd();
+	CHECK(empty != nullptr);
+	if (empty) CHECK(std::string(empty).empty());
+	CHECK(token.GetEnd() == nullptr);
+}

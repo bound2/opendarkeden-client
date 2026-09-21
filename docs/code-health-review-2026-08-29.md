@@ -2089,6 +2089,16 @@ The shim (lines 729-747) ignores CodePage entirely and does `lpMultiByteStr[i] =
 >
 > Reachability the finding does not state: `CToken` has three constructing uses in the tree, all locals in `UIMessageManager.cpp` (plus a `sizeof` in `SizeOfObjects.cpp`), none of which calls `SetString` twice or copies. The double free was latent, not live.
 
+> **Reset ownership follow-up (2026-09-21):** `CToken.cpp` moved byte-identically
+> into `gamemodel`, where the real implementation now has token/lifetime tests.
+> ASan then reproduced a separate heap-use-after-free: `SetString(GetToken())`
+> released the owned buffer before measuring/copying its borrowed token.
+> Replacement allocates and copies before releasing the old string. Five tests
+> cover normal parsing, repeated null/empty resets, borrowed first/interior
+> tokens, suffixes, long repeated resets and the empty terminator. Current game
+> callers still construct locals without resetting them; this remains a latent
+> API defect, reproduced in the library test rather than a live-server report.
+
 #### 🟠 High -- CTypeTable::operator[] bounds-checks only under _DEBUG, while m_Size is taken unvalidated from a data file and callers index by compile-time constants.
 
 **Category:** memory-safety  |  **Location:** `Client/CTypeTable.h:49`
@@ -2865,7 +2875,7 @@ Client/CPositionList.h:21 has `#include "../../basic/Platform.h"`, but CPosition
 
 #### 🟡 Medium -- CToken owns a raw char* with no copy constructor or assignment operator, and Release() frees without nulling, so SetString(NULL) after a real string double-frees.
 
-> ✅ **Verified resolved (2026-09-18)**: `CToken` deletes its copy constructor/assignment and `Release()` deletes then nulls both owned/current pointers. Repeated release after `SetString(NULL)` cannot free the old allocation again. Source/build verification only: this executable-side class is not linked by the unit suite.
+> ✅ **Verified resolved (2026-09-18; library coverage added 2026-09-21)**: `CToken` deletes its copy constructor/assignment and `Release()` deletes then nulls both owned/current pointers. Repeated release after `SetString(NULL)` cannot free the old allocation again. The implementation now belongs to `gamemodel`, and `test_token.cpp` links it directly. The self-aliasing reset defect was reproduced under ASan and fixed separately as described in the text/string finding above.
 
 **Category:** memory-safety  |  **Location:** `Client/CToken.cpp:39`
 
