@@ -2,9 +2,9 @@
 // test_text_service.cpp
 //----------------------------------------------------------------------
 //
-// Regression guards for the accept condition inside ConvertEncoding
-// (Client/TextSystem/TextService.cpp), which decides whether a candidate
-// code page "explains" a string.
+// Regression guards for the renderer's fallback through the shared codec
+// (basic/TextEncoding.cpp), which decides whether a candidate code page
+// "explains" a string. Resource-file loading declares its page separately.
 //
 // The defect these cover was that a conversion which stopped part way
 // through counted as a success, so NormalizeText took the converted prefix

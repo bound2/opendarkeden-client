@@ -85,7 +85,7 @@ to validate the pinned manifest without changing those trees.
 | --- | --- |
 | `sdl2`, `sdl2-image`, `sdl2-ttf` | rendering, sprites, text (required) |
 | `sdl2-mixer` | sound and music |
-| `libiconv` | encoding conversion in `MString.cpp` / `TextService.cpp` |
+| `libiconv` | shared resource and legacy text conversion in `basic/TextEncoding.cpp` |
 | `libjpeg-turbo` | JPG load/save in `UtilityFunction.cpp` |
 
 vcpkg can live anywhere — just point `-DCMAKE_TOOLCHAIN_FILE` at wherever you
@@ -352,6 +352,24 @@ same client built from this source against SDL2, and it links those libraries
 statically from `basic/`, `Client/DXLib`, `Client/SpriteLib` and
 `Client/framelib`. You do not need to copy any of them — only `Data/` and
 `UserSet/`.
+
+### Resource text encoding
+
+`MString` resource records decode to UTF-8 when loaded and encode back to the
+same configured code page when saved. The shipped Korean pack defaults to CP949.
+For a converted or regional pack, set its actual encoding in
+`Data/Info/FileDef.inf`, for example:
+
+```text
+RESOURCE_TEXT_ENCODING : UTF-8
+```
+
+Accepted values are `UTF-8`, `CP949`, `EUC-KR`, `GBK`, `GB2312`, and `BIG5`
+(case insensitive). The setting applies to the whole pack and is read before
+resource tables load; it does not change network text. Unknown names fail
+initialization. Damaged resource bytes display as replacement characters while
+later text remains readable. Saving fails if text cannot be represented in the
+selected encoding or its encoded record exceeds 65,536 bytes.
 
 ### Toggle xBRZ rendering
 

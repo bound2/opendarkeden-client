@@ -1042,12 +1042,25 @@ rounds settled* for the host rules). Test fixtures share
   > bounds; a queued key also verifies the polling loop. Wheel/text fixtures
   > enter after polling because SDL2 compatibility libraries can discard or
   > reject synthetic versions of those events during SDL3 conversion.
+  > The strict UTF-8 decoder/validator is shared from `basic/TextUtf8.h`,
+  > so resource codecs and byte-boundary helpers need no rendering dependency.
+  > `test_text_utf8.cpp` owns its scalar validation and truncated-input rules.
   > **Text-cache follow-up (2026-09-21):** normalization retains at most
   > 1,024 entries and 1 MiB of owned string capacity per calling thread;
   > oversized text bypasses the cache. Glyph metrics have an independent
   > 4,096-entry bound and are shared across bitmap colors. Diagnostic counters
-  > expose actual normalization and metric work. Encoding selection and
-  > load-time conversion remain tracked by the code-health encoding finding.
+  > expose actual normalization and metric work.
+  > **Resource-codec follow-up (2026-09-21):** `MString` now converts declared
+  > resource bytes to UTF-8 on load on every platform and encodes saves back
+  > to the configured page. `RESOURCE_TEXT_ENCODING` in `FileDef.inf` defaults
+  > to CP949 for the shipped pack. `basic/TextEncoding` also supplies the
+  > renderer's converter, with checked capacities and scoped iconv ownership.
+  > Damaged resource bytes become replacement characters without losing later
+  > text. Strict saves reject unrepresentable text before writing the prefix.
+  > `test_mstring_files.cpp` and `test_text_encoding.cpp` cover both directions,
+  > embedded NULs, record bounds and encoding selection. The renderer still
+  > guesses the encoding of legacy direct callers; migrating those ingress
+  > paths and retiring that fallback remain part of the encoding finding.
   - Owner: the `unit_tests` link line, `test_textservice_normalize.cpp` and
     `test_glyph_cache.cpp` for repeated work, ownership, eviction and bounds.
 

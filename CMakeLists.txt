@@ -272,13 +272,13 @@ if(BUILD_ENGINE OR USE_SDL_BACKEND OR NOT WIN32)
 	find_package(SDL2_ttf REQUIRED)
 endif()
 
-# Find iconv library (needed for MString.cpp/TextService.cpp). On Windows
+# Find iconv for basic/TextEncoding.cpp. On Windows
 # this isn't a system library - it comes from vcpkg - so it needs an actual
 # find_package() to resolve a full path; a bare target_link_libraries(iconv)
 # just passes the literal string "iconv" to the linker, which then can't
 # find iconv.lib in its default search paths (LNK1104) even though it's
 # right there in the vcpkg install.
-find_package(Iconv QUIET)
+find_package(Iconv REQUIRED)
 
 # Find JPEG library (needed for UtilityFunction.cpp)
 find_package(JPEG QUIET)
@@ -435,15 +435,9 @@ target_compile_definitions(gamemodel PRIVATE
 
 # packetwire for Properties (the file-definition table the string
 # table's language test reads); framelib for CAnimationFrame, the item
-# model's animation base (task 4.4 - its .cpp holds the constructor);
-# iconv for MString's GBK -> UTF-8 conversion, carried PUBLIC so every
-# consumer resolves it.
+# model's animation base (task 4.4 - its .cpp holds the constructor).
+# basic owns the shared text codec and publishes its iconv dependency.
 target_link_libraries(gamemodel PUBLIC basic packetwire framelib)
-if(Iconv_FOUND)
-	target_link_libraries(gamemodel PUBLIC Iconv::Iconv)
-else()
-	target_link_libraries(gamemodel PUBLIC iconv)
-endif()
 
 message(STATUS "gamemodel library: ${_gamemodel_count} sources from tests/arch/gamemodel_files.txt")
 
@@ -476,24 +470,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 
 	target_compile_definitions(TextSystem PRIVATE SPRITELIB_BACKEND_SDL USE_SDL_BACKEND)
 
-	# TextService::NormalizeText transcodes the shipped CP949 .inf data to the
-	# UTF-8 the text backend renders. It needs a real iconv to do it: SDL2 as
-	# vcpkg builds it has HAVE_ICONV undefined, so SDL_iconv resolves to SDL's
-	# own converter, which supports no legacy CJK code page and fails at open
-	# for every one of them. Without this, NormalizeText compiles, runs, and
-	# returns its input unchanged.
-	#
-	# PUBLIC so the test binary, which links TextSystem to cover NormalizeText,
-	# resolves iconv too.
-	if(Iconv_FOUND)
-		target_link_libraries(TextSystem PUBLIC Iconv::Iconv)
-		target_compile_definitions(TextSystem PRIVATE HAVE_REAL_ICONV)
-		message(STATUS "TextSystem: legacy code page conversion via iconv")
-	else()
-		message(WARNING
-			"TextSystem: iconv not found - CP949 game data will render as "
-			"replacement glyphs because NormalizeText cannot transcode it")
-	endif()
+	# Text encoding conversion is provided by basic through SpriteLib.
 	message(STATUS "TextSystem library will be built from ${TEXTSYSTEM_SOURCES}")
 endif()
 

@@ -1,5 +1,6 @@
 #include "TextService.h"
 #include "TextUtf8.h"
+#include "TextEncoding.h"
 
 #include <algorithm>
 #include <cstring>
@@ -10,11 +11,6 @@
 
 #ifdef USE_SDL_BACKEND
 #include <SDL.h>
-#endif
-
-#ifdef HAVE_REAL_ICONV
-#include <iconv.h>
-#include <vector>
 #endif
 
 namespace TextSystem {
@@ -91,51 +87,6 @@ NormalizationCacheStats TextService::GetNormalizationCacheStats()
 	return stats;
 }
 
-// Transcodes input from fromEncoding to UTF-8, returning an empty string when
-// that code page is unavailable or the bytes are not valid in it. An empty
-// result is how NormalizeText below tells a wrong guess from a right one, so
-// it must mean "this code page does not explain these bytes" and nothing else.
-//
-// This has to go through a real iconv rather than SDL_iconv. SDL falls back to
-// its own converter whenever it was built without HAVE_ICONV - which is how
-// vcpkg installs SDL2 - and that built-in converter only knows UTF-8, UTF-16,
-// UCS-2/4, Latin-1 and ASCII. Every legacy CJK code page asked for here fails
-// at open, so routing through SDL_iconv quietly made this whole function a
-// no-op on Windows: it returned its input unchanged for exactly the CP949 data
-// it exists to convert.
-static std::string ConvertEncoding(const std::string& input, const char* fromEncoding)
-{
-	if (input.empty())
-		return input;
-
-#ifdef HAVE_REAL_ICONV
-	iconv_t cd = iconv_open("UTF-8", fromEncoding);
-	if (cd == reinterpret_cast<iconv_t>(-1))
-		return std::string();
-
-	size_t inBytes  = input.size();
-	size_t outBytes = input.size() * 4 + 4;
-
-	std::vector<char> scratch(outBytes);
-	char* inBuf  = const_cast<char*>(input.data());
-	char* outBuf = &scratch[0];
-
-	const size_t res = iconv(cd, &inBuf, &inBytes, &outBuf, &outBytes);
-	iconv_close(cd);
-
-	// inBytes != 0 means iconv stopped early on a byte it could not map.
-	// Treating that as failure is what stops the first code page in the list
-	// from claiming input that belongs to a later one.
-	if (res == static_cast<size_t>(-1) || inBytes != 0)
-		return std::string();
-
-	return std::string(&scratch[0], scratch.size() - outBytes);
-#else
-	(void)fromEncoding;
-	return std::string();
-#endif
-}
-
 // The existing normalization policy, evaluated only on a cache miss.
 static std::string NormalizeUncached(const std::string& text)
 {
@@ -146,10 +97,12 @@ static std::string NormalizeUncached(const std::string& text)
 		return text;
 
 	// Try common encodings: Korean first, then Chinese, then fallback
-	const char* encodings[] = {"CP949", "EUC-KR", "GBK", "GB2312", "BIG5", NULL};
-	for (int i = 0; encodings[i] != NULL; ++i) {
-		std::string converted = ConvertEncoding(text, encodings[i]);
-		if (!converted.empty())
+	using TextEncoding::Encoding;
+	const Encoding encodings[] = {Encoding::Cp949, Encoding::EucKr, Encoding::Gbk,
+		Encoding::Gb2312, Encoding::Big5};
+	for (const auto encoding : encodings) {
+		std::string converted;
+		if (TextEncoding::Convert(text, encoding, Encoding::Utf8, converted))
 			return converted;
 	}
 
