@@ -71,6 +71,7 @@ set(BASIC_SOURCES
 	StringReduction.cpp
 	TextWrap.cpp
 	HelpMarkup.cpp
+	DescriptorText.cpp
 	TextEncoding.cpp
 	ResourceText.cpp
 	MemoryPool.cpp

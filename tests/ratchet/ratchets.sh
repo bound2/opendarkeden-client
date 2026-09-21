@@ -1505,7 +1505,8 @@ fi
 # remove the unused CMP3 string formatter. R18 prevents raw wsprintf returning.
 # 586: CToken copies an owned replacement by its measured length.
 # 584: team introduction and billing dialog wrap owned rows without strcpy.
-R17_BASELINE=584
+# 570: descriptors own their rows and remove the unused replacement buffers.
+R17_BASELINE=570
 R17_FILES_FLOOR=500
 
 r17_members () {
