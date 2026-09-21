@@ -212,6 +212,11 @@ movable until a task proves otherwise and adds it here with a reason.
 
 ## Ratchets (shrink-only)
 
+Compiler warnings also have a shared target policy and a clean-build budget
+checker in `tools/ci/check-warnings.pl` ([operation](../tools/ci/warnings.md)).
+The generated target-option inventory and parser fixtures own the mechanism;
+the initial platform counts are being recorded for the verification presets.
+
 `tests/ratchet/ratchets.sh` (ctest `ratchets`) holds the baselines inline
 and fails the suite when a count **rises** or drops unrecorded, so
 tightening lands in the same commit as the progress. Measurements are

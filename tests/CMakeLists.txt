@@ -150,6 +150,20 @@ else()
 	message(STATUS "perl not found: the arch_includes test is not registered")
 endif()
 
+if(MSVC)
+	set(warning_compiler_style MSVC)
+else()
+	set(warning_compiler_style GNU)
+endif()
+add_test(NAME warning_policy COMMAND ${CMAKE_COMMAND}
+	"-DPOLICY_FILE=${CMAKE_BINARY_DIR}/warning-policy-$<CONFIG>-CXX.txt"
+	"-DCOMPILER_STYLE=${warning_compiler_style}"
+	-P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_warning_policy.cmake)
+if(PERL_EXECUTABLE)
+	add_test(NAME warning_budget_parser COMMAND ${PERL_EXECUTABLE}
+		${CMAKE_CURRENT_SOURCE_DIR}/tools/test_warning_budget.pl)
+endif()
+
 # Source bytes must match the UTF-8 compiler contract on every platform.
 if(PERL_EXECUTABLE)
 	add_test(

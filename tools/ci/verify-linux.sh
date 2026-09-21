@@ -59,11 +59,12 @@ run () {
 }
 
 run configure cmake --preset "$preset"
-run build cmake --build --preset "$preset"
+# Warning budgets need the whole diagnostic population, also on local reruns.
+run build cmake --build --preset "$preset" --clean-first
 
 # The required tests, the same list verify-windows.ps1 asserts. A tree
 # that registered only unit_tests would otherwise go green.
-required="unit_tests ratchets arch_includes format_arity packet_indices wire_inventory_fresh"
+required="unit_tests user_option_tests ui_tests ratchets arch_includes source_encoding warning_policy warning_budget_parser format_arity packet_indices wire_inventory_fresh"
 inventory="$logdir/inventory.txt"
 if ! ctest --preset "$preset" --show-only > "$inventory" 2>&1; then
 	echo "-- cannot list the tests of $preset:" >&2
@@ -85,6 +86,10 @@ export ASAN_OPTIONS="detect_leaks=0:abort_on_error=1"
 export UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=1"
 
 run test ctest --preset "$preset"
+
+run warnings perl tools/ci/check-warnings.pl --log "$logdir/build.log" \
+	--profile "$preset-$(uname -m)" --baseline tools/ci/warning-baselines.json \
+	--report "$logdir/warnings.json"
 
 # The suite's own totals, which ctest prints only on failure: the line
 # CLAUDE.md's baseline is measured from.
