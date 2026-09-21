@@ -503,7 +503,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		# U_edit is now cross-platform (SDL-based), so don't exclude it
 		# Exclude problematic files in VS_UI root directory
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/DebugInfo\\.cpp")
-		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/SXml\\.cpp")
 		# Note: u_window.cpp is now cross-platform compatible
 	endif()
 

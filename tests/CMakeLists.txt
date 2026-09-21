@@ -99,6 +99,7 @@ add_executable(ui_tests
 	ui/test_button.cpp
 	ui/test_event_button.cpp
 	ui/test_skin_manager.cpp
+	ui/test_xml.cpp
 	ui/test_line_editor.cpp
 	ui/test_editor_focus.cpp
 	ui/test_ui_message_receiver.cpp
