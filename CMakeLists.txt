@@ -247,7 +247,12 @@ endif()
 # CMake already defaults MSVC to /W3; the extra level-1 warnings make pointer
 # truncation/extension and undefined preprocessor conditions explicit.
 add_library(project_warnings INTERFACE)
-if(MSVC)
+if(MSVC AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    # clang-cl accepts the MSVC /w1xxxx flags but does not enable the matching
+    # diagnostics. Forward Clang options explicitly through its CL driver.
+    target_compile_options(project_warnings INTERFACE
+        "$<$<COMPILE_LANGUAGE:C,CXX>:/clang:-Wall;/clang:-Wextra;/clang:-Wundef>")
+elseif(MSVC)
     target_compile_options(project_warnings INTERFACE
         $<$<COMPILE_LANGUAGE:C,CXX>:/W3>
         $<$<COMPILE_LANGUAGE:C,CXX>:/w14311>

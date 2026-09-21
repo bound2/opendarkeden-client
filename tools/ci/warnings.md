@@ -1,7 +1,8 @@
 # Compiler warning budgets
 
 `project_warnings` supplies `/W3 /w14311 /w14312 /w14668` on MSVC and
-`-Wall -Wextra -Wundef` on GCC/Clang to every compiled target. It does not
+`-Wall -Wextra -Wundef` on GCC/Clang to every compiled target (forwarded with
+`/clang:` when using clang-cl). It does not
 enable `-Werror`. The `warning_policy` CTest checks the generated transitive
 options for all targets in both C and C++ contexts; `warning_budget_parser`
 exercises the log parser and its rejection paths.
@@ -11,7 +12,9 @@ with `warning-baselines.json`. Each preset/architecture has its own budget.
 `warnings.json` in the uploaded diagnostics records both emitted warning lines
 and distinct diagnostics grouped by compiler warning ID. Repeated includes and
 MSBuild summaries count once per source coordinate and ID; linker/driver messages
-without a coordinate are distinguished by message. A count is a debt metric,
+without a coordinate are distinguished by message. Untagged Unix linker warnings
+are grouped as `LD`; source warnings without an ID are `UNTAGGED`, distinguished
+by coordinate and message. A count is a debt metric,
 not a promise that every individual warning is unchanged: replacing one warning
 with another of the same ID can leave the count unchanged.
 

@@ -40,16 +40,20 @@ is((run_check())[0], 0, 'PowerShell UTF-16 MSVC log accepted');
 is_deeply(read_report()->{counts}, {C4311 => 1, LNK4217 => 1}, 'duplicate header/summary diagnostics count once');
 is(read_report()->{warning_lines}, 3, 'raw warning lines are reported too');
 
-write_file('baseline.json', $json->encode({fixture => {'-Wundef' => 2, '-Wunused-variable' => 1}}));
+write_file('baseline.json', $json->encode({fixture => {'-Wundef' => 2, '-Wunused-variable' => 1, LD => 1, UNTAGGED => 1}}));
 my $clang = "[1/2] Building CXX object a.cpp.o\n" .
     "\e[1m/work/a.h:2:3: \e[0mwarning: 'X' is not defined [-Wundef]\n" .
     "/work/a.h:2:3: warning: 'X' is not defined [-Wundef]\n" .
     "/work/b.cpp:9:7: warning: unused variable 'x' [-Wunused-variable]\n" .
     "/work/a.h:5:3: warning: 'Y' is not defined [-Wundef]\n" .
-    "3 warnings generated.\n";
+    "3 warnings generated.\n" .
+    "/work/a.h:47: warning: macro redefined\n" .
+    "/work/a.h:47: warning: macro redefined\n" .
+    "ld: warning: ignoring duplicate libraries: 'lib/libbasic.a'\n" .
+    "ld: warning: ignoring duplicate libraries: 'lib/libbasic.a'\n";
 write_file('build.log', $clang);
 is((run_check())[0], 0, 'Clang colour and summary lines parsed');
-is_deeply(read_report()->{counts}, {'-Wundef' => 2, '-Wunused-variable' => 1}, 'locations distinguish warnings of the same kind');
+is_deeply(read_report()->{counts}, {'-Wundef' => 2, '-Wunused-variable' => 1, LD => 1, UNTAGGED => 1}, 'locations and untagged messages distinguish diagnostics');
 write_file('build.log', $clang . "/work/b.cpp:10:7: warning: unused variable 'y' [-Wunused-variable]\n");
 isnt((run_check())[0], 0, 'warning growth fails');
 write_file('build.log', $clang . "/work/c.cpp:1:1: warning: new problem [-Wconversion]\n");
@@ -57,8 +61,9 @@ isnt((run_check())[0], 0, 'new warning class fails');
 write_file('build.log', "[1/1] Building CXX object a.cpp.o\n/work/a.cpp:1:1: warning: macro [-Wundef]\n");
 isnt((run_check())[0], 0, 'unrecorded decrease fails');
 isnt((run_check('--profile', 'missing'))[0], 0, 'missing toolchain profile fails');
-write_file('build.log', $clang . "/work/z.cpp:7: warning: unfamiliar diagnostic syntax\n");
+write_file('build.log', $clang . "new-driver-format >>> warning: unfamiliar diagnostic syntax\n");
 isnt((run_check())[0], 0, 'unrecognised warning cannot disappear from count');
+is(scalar @{read_report()->{unparsed}}, 1, 'unrecognised diagnostic is retained in the report');
 write_file('build.log', '');
 isnt((run_check())[0], 0, 'empty log fails');
 write_file('build.log', "ninja: no work to do.\n");

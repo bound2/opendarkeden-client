@@ -47,6 +47,12 @@ for my $line (split /\r?\n/, $text) {
         ($location, $code, $message) = ($1, $2, $3);
     } elsif ($line =~ /^\s*(.*?)\bwarning:\s*(.*?)\s+\[(-W[^\]]+)\]\s*$/) {
         ($location, $message, $code) = ($1, $2, $3);
+    } elsif ($line =~ /^\s*((?:.*\/)?ld(?:\.lld)?):\s*warning:\s*(.+)$/) {
+        # Apple ld and GNU/lld can emit linker diagnostics without an ID.
+        ($location, $message, $code) = ($1, $2, 'LD');
+    } elsif ($line =~ /^\s*(.*:\d+(?::\d+)?:)\s*warning:\s*(.+)$/) {
+        # GCC's preprocessor emits some source warnings without a -W tag.
+        ($location, $message, $code) = ($1, $2, 'UNTAGGED');
     } else {
         push @unknown, $line;
         next;
@@ -57,7 +63,8 @@ for my $line (split /\r?\n/, $text) {
     # instantiated by several translation units. A linker/driver diagnostic
     # has no coordinate, so keep its message to distinguish affected symbols.
     my $key = "$location\0$code";
-    $key .= "\0$message" unless $location =~ /(?:\(\d+(?:,\d+)?\)|:\d+(?::\d+)?:)\z/;
+    $key .= "\0$message" if $code eq 'UNTAGGED' ||
+        $location !~ /(?:\(\d+(?:,\d+)?\)|:\d+(?::\d+)?:)\z/;
     ++$counts{$code} unless $seen{$key}++;
 }
 my $total = 0;
