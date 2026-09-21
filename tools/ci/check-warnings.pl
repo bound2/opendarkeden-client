@@ -59,6 +59,14 @@ for my $line (split /\r?\n/, $text) {
     }
     $location =~ s{\\}{/}g;
     $location =~ s/\s+$//;
+    # MSVC may name the caller (4217) or omit it (4286) for the same local
+    # symbol import. Count the symbol/defining-object/importing-object triple,
+    # so code generation changing that optional detail is not debt growth.
+    if ($code =~ /^LNK(?:4217|4286)$/ &&
+        $message =~ /^(symbol '.+?' defined in '.+?' is imported by '.+?')(?: in function .+)?$/) {
+        $code = 'LNK-LOCAL-IMPORT';
+        $message = $1;
+    }
     # A source coordinate identifies the diagnostic even if a template is
     # instantiated by several translation units. A linker/driver diagnostic
     # has no coordinate, so keep its message to distinguish affected symbols.

@@ -40,6 +40,24 @@ is((run_check())[0], 0, 'PowerShell UTF-16 MSVC log accepted');
 is_deeply(read_report()->{counts}, {C4311 => 1, LNK4217 => 1}, 'duplicate header/summary diagnostics count once');
 is(read_report()->{warning_lines}, 3, 'raw warning lines are reported too');
 
+write_file('baseline.json', $json->encode({fixture => {'LNK-LOCAL-IMPORT' => 2}}));
+my $import_a = "symbol 'method' defined in 'owner.obj' is imported by 'a.obj'";
+my $import_b = "symbol 'method' defined in 'owner.obj' is imported by 'b.obj'";
+my $imports = "MSBuild version 17.14\n" .
+    "LINK : warning LNK4217: $import_a in function 'caller'\n" .
+    "LINK : warning LNK4286: $import_a\n" .
+    "LINK : warning LNK4217: $import_b in function 'another caller'\n" .
+    "LINK : warning LNK4217: $import_a in function 'caller'\n";
+write_file('build.log', $imports);
+is((run_check())[0], 0, 'local-import diagnostic variants count by symbol and importing object');
+is_deeply(read_report()->{counts}, {'LNK-LOCAL-IMPORT' => 2}, 'variant and repeated-summary deduplication retains distinct importing objects');
+$imports =~ s/LNK4217/LNK4286/g;
+$imports =~ s/ in function '[^']*'//g;
+write_file('build.log', $imports);
+is((run_check())[0], 0, 'optional caller detail and warning ID do not change the local-import count');
+write_file('build.log', $imports . "LINK : warning LNK4286: symbol 'method' defined in 'owner.obj' is imported by 'c.obj'\n");
+isnt((run_check())[0], 0, 'a new local-import pair still grows the budget');
+
 write_file('baseline.json', $json->encode({fixture => {'-Wundef' => 2, '-Wunused-variable' => 1, LD => 1, UNTAGGED => 1}}));
 my $clang = "[1/2] Building CXX object a.cpp.o\n" .
     "\e[1m/work/a.h:2:3: \e[0mwarning: 'X' is not defined [-Wundef]\n" .

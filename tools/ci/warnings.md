@@ -18,6 +18,11 @@ by coordinate and message. A count is a debt metric,
 not a promise that every individual warning is unchanged: replacing one warning
 with another of the same ID can leave the count unchanged.
 
+MSVC's `LNK4217` and `LNK4286` describe the same local symbol import, with
+optional caller-function detail. They share the `LNK-LOCAL-IMPORT` budget,
+counted by symbol, defining object and importing object. Changing the emitted
+variant does not change the debt; an additional importing object still does.
+
 An increased count fails. A decrease also fails until the baseline is tightened
 in that change. An unrecognised warning syntax, failed/no-compilation log, or absent
 profile fails instead of silently returning zero. The parser cannot establish
