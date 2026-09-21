@@ -121,7 +121,10 @@ TEST(TextServiceNormalize, RepeatedLabelsAndRejectedInputAreComputedOnce)
 	CacheScope cache;
 	const std::string label = std::string("[") + CP949_GRUBER + "]";
 	const std::string expected = std::string("[") + UTF8_GRUBER + "]";
-	const std::string malformed("\x81");
+	// A1 starts an incomplete double-byte sequence in every candidate codec.
+	// 81 is a valid C1 control in glibc's EUC-KR, so it is not a portable
+	// rejected-input fixture for the existing normalization policy.
+	const std::string malformed("\xA1");
 	for (int i = 0; i < 20; ++i) {
 		CHECK(expected == Normalize(label));
 		CHECK(malformed == Normalize(malformed));
