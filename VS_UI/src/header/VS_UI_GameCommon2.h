@@ -967,7 +967,6 @@ public:
 	void	HelpDescPasing();
 	void    LoadCustomstr(char * customstrfilename);
 	void	DrawImg(int m_width, int m_height ,const char * filename,const char * pos, int linecnt);
-	char*   findkey(const char* tagstr, const char* keyword);
 //
 	std::vector<std::string>	parsing_data;	
 	std::vector<std::string>	custom_strting;
