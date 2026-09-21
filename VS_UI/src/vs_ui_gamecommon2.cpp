@@ -17413,51 +17413,6 @@ void	C_VS_UI_PERSNALSHOP_MESSAGE::Show()
 	{		
 		g_PrintColorStr(x+30, y+30, (*g_pGameStringTable)[UI_STRING_MESSAGE_PERSNALSHOP_MESSAGE].GetString(), gpC_base->m_chatting_pi, RGB_WHITE);
 		
-		std::string str;
-
-
-		int next=0;
-		char sz_string[512];
-
-		int print_x=30+x,vx;
-		int py = 40+y;
-		const int print_gap = 20;
-		const int char_width = g_GetStringWidth("a", gpC_base->m_chatting_pi.hfont);
-
-		vx = print_x;
-
-		while(str.size() > next)
-		{
-			// The remaining tail of str, which is unbounded; sz_string is 512
-			// bytes and only ever needs the part that fits on one line.
-			snprintf(sz_string, sizeof(sz_string), "%s", str.c_str()+next);
-			
-			char *sz_string2 = sz_string;
-			
-			while(*sz_string2 == ' ')		// 앞의 공백제거
-			{
-				sz_string2++;
-				next++;
-			}
-			
-			int cut_pos = (x+w-30 -vx)/char_width;
-			
-			if(!g_PossibleStringCut(sz_string2, cut_pos))
-				cut_pos--;
-			sz_string2[cut_pos] = NULL;
-			
-			char *return_char = NULL;
-			if((return_char = strchr(sz_string2, '\n')) != NULL)	// return 처리
-			{
-				cut_pos = return_char - sz_string2+1;
-				sz_string2[cut_pos-1] = NULL;
-			}
-						
-			g_PrintColorStr(vx, py, sz_string2, gpC_base->m_chatting_pi, RGB_WHITE);
-			next += cut_pos;
-			vx = print_x;
-			py += print_gap;
-		}
 		g_FL2_ReleaseDC();
 	}
 

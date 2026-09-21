@@ -32,9 +32,8 @@
 #define _P_NOWAIT 1
 #endif
 
-#ifdef PLATFORM_POSIX
 #include "TextSystem/TextService.h"
-#endif
+#include "TextWrap.h"
 
 #define LOGIN_ID_X 59 // 상대값
 #define LOGIN_ID_Y 49
@@ -6992,9 +6991,7 @@ void C_VS_UI_GO_BILING_PAGE::Show()
 	default :
 		str = "";
 	}
-	
-	int next=0;
-	char sz_string[512];
+
 	
 	int print_x=30+x,vx;
 	int py = 40+y;
@@ -7003,33 +7000,13 @@ void C_VS_UI_GO_BILING_PAGE::Show()
 	
 	vx = print_x;
 	
-	while(str.size() > next)
+	const auto text = TextSystem::TextService::NormalizeText(str);
+	const auto pixels = static_cast<long long>(x) + w - 30 - vx;
+	const size_t column = static_cast<size_t>(max(1LL, pixels / max(1, char_width)));
+	for (const auto& row : TextSystem::WrapUtf8Lines(text, column,
+		{.skipSeamSpace = false, .splitNewlines = true, .trimLeadingSpaces = true, .splitEscapedNewlines = false}))
 	{
-		strcpy(sz_string, str.c_str()+next);
-		
-		char *sz_string2 = sz_string;
-		
-		while(*sz_string2 == ' ')		// 앞의 공백제거
-		{
-			sz_string2++;
-			next++;
-		}
-		
-		int cut_pos = (x+w-30 -vx)/char_width;
-		
-		if(!g_PossibleStringCut(sz_string2, cut_pos))
-			cut_pos--;
-		sz_string2[cut_pos] = NULL;
-		
-		char *return_char = NULL;
-		if((return_char = strchr(sz_string2, '\n')) != NULL)	// return 처리
-		{
-			cut_pos = return_char - sz_string2+1;
-			sz_string2[cut_pos-1] = NULL;
-		}
-		
-		g_PrintColorStr(vx, py, sz_string2, gpC_base->m_chatting_pi, RGB_WHITE);
-		next += cut_pos;
+		g_PrintColorStr(vx, py, row.c_str(), gpC_base->m_chatting_pi, RGB_WHITE);
 		vx = print_x;
 		py += print_gap;
 	}

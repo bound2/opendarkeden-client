@@ -107,3 +107,74 @@ TEST(TextWrap, PersonalAndTreeRowsKeepSpacesAroundExplicitLineBreaks)
 	CHECK((TextSystem::WrapUtf8Lines("\n\xF0\x9F\x99\x82\n\n", 4, tree) ==
 		std::vector<std::string>{"", "\xF0\x9F\x99\x82", ""}));
 }
+
+TEST(TextWrap, NextRowOwnsTextAndReportsExactConsumptionForChangingColumns)
+{
+	const std::string text = "a\xEA\xB0\x80\xF0\x9F\x99\x82Z";
+	auto row = TextSystem::NextUtf8Line(text, 2);
+	CHECK(row.text == "a");
+	CHECK_EQ(1, row.consumed);
+	row = TextSystem::NextUtf8Line(std::string_view(text).substr(1), 1);
+	CHECK(row.text == "\xEA\xB0\x80");
+	CHECK_EQ(3, row.consumed);
+	row = TextSystem::NextUtf8Line(std::string_view(text).substr(4), 20);
+	CHECK(row.text == "\xF0\x9F\x99\x82Z");
+	CHECK_EQ(5, row.consumed);
+	CHECK_EQ(0, TextSystem::NextUtf8Line(text, 0).consumed);
+	CHECK_EQ(0, TextSystem::NextUtf8Line({}, 1).consumed);
+	row = TextSystem::NextUtf8Line(std::string("temporary"), 3);
+	CHECK(row.text == "tem");
+	CHECK_EQ(3, row.consumed);
+}
+
+TEST(TextWrap, DialogRowsTrimLeadingSpacesWithoutConfusingBlankLines)
+{
+	const TextSystem::Utf8WrapOptions dialog{.skipSeamSpace = false, .trimLeadingSpaces = true};
+	CHECK((TextSystem::WrapUtf8Lines("  ab   cd\n  \n ef", 2, dialog) ==
+		std::vector<std::string>{"ab", "cd", "", "ef"}));
+	const auto row = TextSystem::NextUtf8Line("   ab\r\nZ", 2, dialog);
+	CHECK(row.text == "ab");
+	CHECK_EQ(7, row.consumed);
+	const auto spaces = TextSystem::NextUtf8Line("   ", 2, dialog);
+	CHECK(spaces.text.empty());
+	CHECK_EQ(3, spaces.consumed);
+}
+
+TEST(TextWrap, EscapedNewlinesAreAtomicEvenAcrossAColumnBoundary)
+{
+	const TextSystem::Utf8WrapOptions escaped{.splitNewlines = false, .splitEscapedNewlines = true};
+	for (size_t budget = 1; budget <= 8; ++budget) {
+		CHECK((TextSystem::WrapUtf8Lines("a\\nb\\n\\n", budget, escaped) ==
+			std::vector<std::string>{"a", "b", ""}));
+	}
+	CHECK((TextSystem::WrapUtf8Lines("a\nb\\nC", 20, escaped) ==
+		std::vector<std::string>{"a\nb", "C"}));
+	CHECK((TextSystem::WrapUtf8Lines("a\\", 20, escaped) ==
+		std::vector<std::string>{"a\\"}));
+	const TextSystem::Utf8WrapOptions both{.splitEscapedNewlines = true};
+	CHECK((TextSystem::WrapUtf8Lines("a\\nb\r\nC", 20, both) ==
+		std::vector<std::string>{"a", "b", "C"}));
+}
+
+TEST(TextWrap, LongDialogTextHasNoFixedScratchLimit)
+{
+	const std::string text(4096, 'x');
+	const auto row = TextSystem::NextUtf8Line(text, 3000);
+	CHECK_EQ(3000, row.consumed);
+	CHECK(row.text == std::string(3000, 'x'));
+	CHECK((TextSystem::WrapUtf8Lines(text, 3000) ==
+		std::vector<std::string>{std::string(3000, 'x'), std::string(1096, 'x')}));
+	const char exact[] = {'x', '\\'};
+	const TextSystem::Utf8WrapOptions escaped{.splitEscapedNewlines = true};
+	const auto tail = TextSystem::NextUtf8Line(std::string_view(exact, 2), 2, escaped);
+	CHECK_EQ(2, tail.consumed);
+	CHECK(tail.text == "x\\");
+}
+
+TEST(TextWrap, LargeColumnsKeepManyShortExplicitRows)
+{
+	const std::string text(4096, '\n');
+	const auto rows = TextSystem::WrapUtf8Lines(text, std::numeric_limits<size_t>::max());
+	CHECK_EQ(text.size(), rows.size());
+	for (const auto& row : rows) CHECK(row.empty());
+}
