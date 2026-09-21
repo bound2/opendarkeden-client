@@ -3,6 +3,7 @@
 #include "Client_PCH.h"
 #include "VS_UI_GameCommon.h"
 #include "TextSystem/TextService.h"
+#include "TextWrap.h"
 #include "TextSystem/FontHandleUtil.h"
 #include "VS_UI_GameCommon2.h"
 #include "VS_UI_GlobalResource.h"
@@ -26508,7 +26509,6 @@ void C_VS_UI_TEAM_INFO::Show()
 		}
 		py += print_gap;
 		
-		int next = 0;
 		
 		snprintf(sz_string, sizeof(sz_string), "%s", GetGameString(UI_STRING_MESSAGE_TEAM_INFO_INTRODUCTION));//, m_ready_info.INTRODUCTION.c_str());
 		vx = g_PrintColorStr(print_x, py, sz_string, gpC_base->m_chatting_pi, RGB_BLACK);
@@ -26516,39 +26516,22 @@ void C_VS_UI_TEAM_INFO::Show()
 		
 		const int char_width = g_GetStringWidth("a", gpC_base->m_chatting_pi.hfont);
 		
-		while(m_ready_info.INTRODUCTION.size()>next && py < y+h-print_gap*2)
+		const auto text = TextSystem::TextService::NormalizeText(m_ready_info.INTRODUCTION);
+		std::string_view remaining(text);
+		while (!remaining.empty() && py < y+h-print_gap*2)
 		{
-			strcpy(sz_string, m_ready_info.INTRODUCTION.c_str()+next);
-			
-			char *sz_string2 = sz_string;
-			
-			while(*sz_string2 == ' ')		// 앞의 공백제거
+			const auto pixels = static_cast<long long>(x) + w - 30 - vx;
+			if (pixels <= 0 && vx != print_x)
 			{
-				sz_string2++;
-				next++;
+				vx = print_x;
+				py += print_gap;
+				continue;
 			}
-			
-			int cut_pos = (x+w-30 -vx)/char_width;
-			if(!g_PossibleStringCut(sz_string2, cut_pos))
-				cut_pos--;
-			// Never past what the window holds: the leading spaces were
-			// skipped in place, so cut_pos is measured from inside it.
-			{
-				const int remaining = (int)strlen(sz_string2);
-				if(cut_pos > remaining)
-					cut_pos = remaining;
-			}
-			sz_string2[cut_pos] = NULL;
-			
-			char *return_char = NULL;
-			if((return_char = strchr(sz_string2, '\n')) != NULL)	// return 처리
-			{
-				cut_pos = return_char - sz_string2+1;
-				sz_string2[cut_pos-1] = NULL;
-			}
-			
-			g_PrintColorStr(vx, py, sz_string2, gpC_base->m_chatting_pi, RGB_BLACK);
-			next += cut_pos;
+			const size_t column = static_cast<size_t>(max(1LL, pixels / max(1, char_width)));
+			const auto row = TextSystem::NextUtf8Line(remaining, column,
+				{.skipSeamSpace = false, .trimLeadingSpaces = true});
+			g_PrintColorStr(vx, py, row.text.c_str(), gpC_base->m_chatting_pi, RGB_BLACK);
+			remaining.remove_prefix(row.consumed);
 			vx = print_x;
 			gpC_base->m_p_DDSurface_back->HLine(print_x, py+line_gap, w - (print_x - x) -30, 0);
 			py += print_gap;
@@ -26600,7 +26583,6 @@ void C_VS_UI_TEAM_INFO::Show()
 			py += print_gap;
 		}
 		
-		int next = 0;
 		
 		if(m_scroll < 5)
 		{
@@ -30667,8 +30649,6 @@ void	C_VS_UI_BRING_FEE::Show()
 
 		str = (*g_pGameStringTable)[UI_STRING_MESSAGE_BRING_FEE_MSG].GetString();
 
-		int next=0;
-		char sz_string[512];
 
 		int print_x=30+x,vx;
 		int py = 40+y;
@@ -30677,46 +30657,13 @@ void	C_VS_UI_BRING_FEE::Show()
 
 		vx = print_x;
 
-		while(str.size() > next)
+		const auto text = TextSystem::TextService::NormalizeText(str);
+		const auto pixels = static_cast<long long>(x) + w - 30 - vx;
+		const size_t column = static_cast<size_t>(max(1LL, pixels / max(1, char_width)));
+		for (const auto& row : TextSystem::WrapUtf8Lines(text, column,
+			{.skipSeamSpace = false, .splitNewlines = true, .trimLeadingSpaces = true, .splitEscapedNewlines = false}))
 		{
-			// One window of the text per line, bounded by the buffer; the
-			// string-table entry it comes from has no length limit.
-			size_t copy_len = str.size() - next;
-			if(copy_len > sizeof(sz_string) - 1)
-				copy_len = sizeof(sz_string) - 1;
-			memcpy(sz_string, str.c_str()+next, copy_len);
-			sz_string[copy_len] = '\0';
-			
-			char *sz_string2 = sz_string;
-			
-			while(*sz_string2 == ' ')		// 앞의 공백제거
-			{
-				sz_string2++;
-				next++;
-			}
-			
-			int cut_pos = (x+w-30 -vx)/char_width;
-			
-			if(!g_PossibleStringCut(sz_string2, cut_pos))
-				cut_pos--;
-			// Never past what the window holds: the leading spaces were
-			// skipped in place, so cut_pos is measured from inside it.
-			{
-				const int remaining = (int)strlen(sz_string2);
-				if(cut_pos > remaining)
-					cut_pos = remaining;
-			}
-			sz_string2[cut_pos] = NULL;
-			
-			char *return_char = NULL;
-			if((return_char = strchr(sz_string2, '\n')) != NULL)	// return 처리
-			{
-				cut_pos = return_char - sz_string2+1;
-				sz_string2[cut_pos-1] = NULL;
-			}
-			
-			g_PrintColorStr(vx, py, sz_string2, gpC_base->m_chatting_pi, RGB_WHITE);
-			next += cut_pos;
+			g_PrintColorStr(vx, py, row.c_str(), gpC_base->m_chatting_pi, RGB_WHITE);
 			vx = print_x;
 			py += print_gap;
 		}
@@ -31956,8 +31903,6 @@ void	C_VS_UI_INPUT_NAME::Show()
 			break;
 		}		
 
-		int next=0;
-		char sz_string[512];
 
 		int print_x=30+x,vx;
 		int py = 40+y;
@@ -31966,46 +31911,13 @@ void	C_VS_UI_INPUT_NAME::Show()
 
 		vx = print_x;
 
-		while(str.size() > next)
+		const auto text = TextSystem::TextService::NormalizeText(str);
+		const auto pixels = static_cast<long long>(x) + w - 30 - vx;
+		const size_t column = static_cast<size_t>(max(1LL, pixels / max(1, char_width)));
+		for (const auto& row : TextSystem::WrapUtf8Lines(text, column,
+			{.skipSeamSpace = false, .splitNewlines = true, .trimLeadingSpaces = true, .splitEscapedNewlines = false}))
 		{
-			// One window of the text per line, bounded by the buffer; the
-			// string-table entry it comes from has no length limit.
-			size_t copy_len = str.size() - next;
-			if(copy_len > sizeof(sz_string) - 1)
-				copy_len = sizeof(sz_string) - 1;
-			memcpy(sz_string, str.c_str()+next, copy_len);
-			sz_string[copy_len] = '\0';
-			
-			char *sz_string2 = sz_string;
-			
-			while(*sz_string2 == ' ')		// 앞의 공백제거
-			{
-				sz_string2++;
-				next++;
-			}
-			
-			int cut_pos = (x+w-30 -vx)/char_width;
-			
-			if(!g_PossibleStringCut(sz_string2, cut_pos))
-				cut_pos--;
-			// Never past what the window holds: the leading spaces were
-			// skipped in place, so cut_pos is measured from inside it.
-			{
-				const int remaining = (int)strlen(sz_string2);
-				if(cut_pos > remaining)
-					cut_pos = remaining;
-			}
-			sz_string2[cut_pos] = NULL;
-			
-			char *return_char = NULL;
-			if((return_char = strchr(sz_string2, '\n')) != NULL)	// return 처리
-			{
-				cut_pos = return_char - sz_string2+1;
-				sz_string2[cut_pos-1] = NULL;
-			}
-						
-			g_PrintColorStr(vx, py, sz_string2, gpC_base->m_chatting_pi, RGB_WHITE);
-			next += cut_pos;
+			g_PrintColorStr(vx, py, row.c_str(), gpC_base->m_chatting_pi, RGB_WHITE);
 			vx = print_x;
 			py += print_gap;
 		}
@@ -32435,9 +32347,7 @@ void	C_VS_UI_POPUP_MESSAGE::Show()
 	
 	if(g_FL2_GetDC())
 	{	
-		int next=0;
-		char sz_string[2048];
-		ZeroMemory(sz_string, 2048);
+
 
 		int print_x=30+x,vx;
 		int py = 40+y;
@@ -32446,48 +32356,13 @@ void	C_VS_UI_POPUP_MESSAGE::Show()
 
 		vx = print_x;
 
-		while(m_Str.size() > next)
+		const auto text = TextSystem::TextService::NormalizeText(m_Str);
+		const auto pixels = static_cast<long long>(x) + w - 30 - vx;
+		const size_t column = static_cast<size_t>(max(1LL, pixels / max(1, char_width)));
+		for (const auto& row : TextSystem::WrapUtf8Lines(text, column,
+			{.skipSeamSpace = false, .splitNewlines = false, .trimLeadingSpaces = true, .splitEscapedNewlines = true}))
 		{
-			// One window of the text per line, bounded by the buffer: the
-			// old split copied a remainder of exactly 2048 bytes with strcpy,
-			// one byte past the end.
-			size_t copy_len = m_Str.size() - next;
-			if(copy_len > sizeof(sz_string) - 1)
-				copy_len = sizeof(sz_string) - 1;
-			memcpy(sz_string, m_Str.c_str()+next, copy_len);
-			sz_string[copy_len] = '\0';
-			
-			char *sz_string2 = sz_string;
-			
-			while(*sz_string2 == ' ')		// 앞의 공백제거
-			{
-				sz_string2++;
-				next++;
-			}
-			
-			int cut_pos = (x+w-30 -vx)/char_width;			
-			
-			if(!g_PossibleStringCut(sz_string2, cut_pos))
-				cut_pos--;
-			
-			// Never past what the window holds: the leading spaces were
-			// skipped in place, so cut_pos is measured from inside it.
-			{
-				const int remaining = (int)strlen(sz_string2);
-				if(cut_pos > remaining)
-					cut_pos = remaining;
-			}
-			sz_string2[cut_pos] = NULL;
-			
-			char *return_char = NULL;
-			if((return_char = strstr(sz_string2, "\\n")) != NULL)	// return 처리
-			{
-				cut_pos = return_char - sz_string2+2;
-				sz_string2[cut_pos-2] = NULL;
-			}
-						
-			g_PrintColorStr(vx, py, sz_string2, gpC_base->m_dialog_msg_pi, RGB_WHITE);
-			next += cut_pos;
+			g_PrintColorStr(vx, py, row.c_str(), gpC_base->m_dialog_msg_pi, RGB_WHITE);
 			vx = print_x;
 			py += print_gap;
 		}
@@ -33255,62 +33130,24 @@ void	C_VS_UI_QUEST_STATUS::ShowDesc(int strX,int strY,const char *str)
 	int vx = strX;
 	int py = strY;
 	int linenum = 0;
-	int next=0;
+
 	const int char_width = g_GetStringWidth("a", gpC_base->m_dialog_msg_pi.hfont);
 	const int print_gap = 14;
 
-	std::string sstr = str;
-	char sz_string[512] = {0,};
-	while(sstr.size() > next)
+
+	const auto text = TextSystem::TextService::NormalizeText(str ? str : "");
+	const auto pixels = static_cast<long long>(x) + w - 0 - vx;
+	const size_t column = static_cast<size_t>(max(1LL, pixels / max(1, char_width)));
+	for (const auto& row : TextSystem::WrapUtf8Lines(text, column,
+		{.skipSeamSpace = false, .splitNewlines = false, .trimLeadingSpaces = true, .splitEscapedNewlines = true}))
 	{
-		// One window of the text per line drawn. The window used to be
-		// 2047 bytes, or the whole remainder, into this 512-byte buffer -
-		// a stack overflow for any description over 511 bytes (found by
-		// Apple Clang's -Warray-bounds in the macOS port). A line is
-		// cut_pos characters, far fewer than the window holds.
-		size_t copy_len = sstr.size() - next;
-		if(copy_len > sizeof(sz_string) - 1)
-			copy_len = sizeof(sz_string) - 1;
-		memcpy(sz_string, sstr.c_str()+next, copy_len);
-		sz_string[copy_len] = '\0';
-		
-		char *sz_string2 = sz_string;
-		
-		while(*sz_string2 == ' ')		// 앞의 공백제거
-		{
-			sz_string2++;
-			next++;
-		}
-		
-		int cut_pos = (x+w -vx)/char_width;			
-		
-		if(!g_PossibleStringCut(sz_string2, cut_pos))
-			cut_pos--;
-		// Never past what the window holds: the leading spaces were
-		// skipped in place, so cut_pos is measured from inside it.
-		{
-			const int remaining = (int)strlen(sz_string2);
-			if(cut_pos > remaining)
-				cut_pos = remaining;
-		}
-		sz_string2[cut_pos] = NULL;
-		
-		char *return_char = NULL;
-		if((return_char = strstr(sz_string2, "\\n")) != NULL)	// return 처리
-		{
-			cut_pos = return_char - sz_string2+2;
-			sz_string2[cut_pos-2] = NULL;
-		}
-		
-		//g_PrintColorStr(vx, py, sz_string2, gpC_base->m_dialog_msg_pi, RGB_WHITE);
-		if(linenum == 0 && str != (*g_pGameStringTable)[UI_STRING_MESSAGE_NOT_IN_QUEST2].GetString() )
-			g_PrintColorStrOut( vx,py, sz_string2, gpC_base->m_chatting_pi, RGB_YELLOW, RGB_BLACK);
+		if (linenum == 0 && str != (*g_pGameStringTable)[UI_STRING_MESSAGE_NOT_IN_QUEST2].GetString())
+			g_PrintColorStrOut(vx, py, row.c_str(), gpC_base->m_chatting_pi, RGB_YELLOW, RGB_BLACK);
 		else
-			g_PrintColorStrOut( vx,py, sz_string2, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
-		next += cut_pos;
+			g_PrintColorStrOut(vx, py, row.c_str(), gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
+		++linenum;
 		vx = strX;
 		py += print_gap;
-		linenum++;
 	}
 }
 
@@ -34151,56 +33988,18 @@ void	C_VS_UI_LOTTERY_CARD::ShowDesc(int strX,int strY,const char *str)
 {
 	int vx = strX;
 	int py = strY;
-	int next=0;
+
 	const int char_width = g_GetStringWidth("a", gpC_base->m_dialog_msg_pi.hfont);
 	const int print_gap = 18;
 
-	std::string sstr = str;
-	char sz_string[512] = {0,};
-	while(sstr.size() > next)
+
+	const auto text = TextSystem::TextService::NormalizeText(str ? str : "");
+	const auto pixels = static_cast<long long>(x) + w - 5 - vx;
+	const size_t column = static_cast<size_t>(max(1LL, pixels / max(1, char_width)));
+	for (const auto& row : TextSystem::WrapUtf8Lines(text, column,
+		{.skipSeamSpace = false, .splitNewlines = false, .trimLeadingSpaces = true, .splitEscapedNewlines = true}))
 	{
-		// One window of the text per line drawn. The window used to be
-		// 2047 bytes, or the whole remainder, into this 512-byte buffer -
-		// a stack overflow for any description over 511 bytes (found by
-		// Apple Clang's -Warray-bounds in the macOS port). A line is
-		// cut_pos characters, far fewer than the window holds.
-		size_t copy_len = sstr.size() - next;
-		if(copy_len > sizeof(sz_string) - 1)
-			copy_len = sizeof(sz_string) - 1;
-		memcpy(sz_string, sstr.c_str()+next, copy_len);
-		sz_string[copy_len] = '\0';
-		
-		char *sz_string2 = sz_string;
-		
-		while(*sz_string2 == ' ')		// 앞의 공백제거
-		{
-			sz_string2++;
-			next++;
-		}
-		
-		int cut_pos = (x+w-5 -vx)/char_width;			
-		
-		if(!g_PossibleStringCut(sz_string2, cut_pos))
-			cut_pos--;
-		// Never past what the window holds: the leading spaces were
-		// skipped in place, so cut_pos is measured from inside it.
-		{
-			const int remaining = (int)strlen(sz_string2);
-			if(cut_pos > remaining)
-				cut_pos = remaining;
-		}
-		sz_string2[cut_pos] = NULL;
-		
-		char *return_char = NULL;
-		if((return_char = strstr(sz_string2, "\\n")) != NULL)	// return 처리
-		{
-			cut_pos = return_char - sz_string2+2;
-			sz_string2[cut_pos-2] = NULL;
-		}
-		
-		//g_PrintColorStr(vx, py, sz_string2, gpC_base->m_dialog_msg_pi, RGB_WHITE);
-		g_PrintColorStrOut( vx,py, sz_string2, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
-		next += cut_pos;
+		g_PrintColorStrOut(vx, py, row.c_str(), gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
 		vx = strX;
 		py += print_gap;
 	}

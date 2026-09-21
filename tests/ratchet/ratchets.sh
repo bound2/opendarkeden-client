@@ -1504,7 +1504,8 @@ fi
 # 587: bound 355 narrow wsprintf calls, bound the wide trace command, and
 # remove the unused CMP3 string formatter. R18 prevents raw wsprintf returning.
 # 586: CToken copies an owned replacement by its measured length.
-R17_BASELINE=586
+# 584: team introduction and billing dialog wrap owned rows without strcpy.
+R17_BASELINE=584
 R17_FILES_FLOOR=500
 
 r17_members () {
