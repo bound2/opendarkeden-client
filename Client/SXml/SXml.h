@@ -116,6 +116,8 @@ public:
 	XMLTree();
 	XMLTree( IN const string& name );
 	virtual ~XMLTree();
+	XMLTree(const XMLTree&) = delete;
+	XMLTree& operator=(const XMLTree&) = delete;
 
 public:
 	OUT const string& GetName() const;
@@ -145,6 +147,8 @@ public:
 
 private:
 	void Save(std::ofstream& file, size_t indent);
+	void AppendParsed(XMLTree& incoming, bool repeatedNames);
+	friend class XMLParser;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -204,6 +208,10 @@ public:
 //	void parseURL(const char* pURL);
 
 	/// \brief 인수로 넘겨지는 문자열을 XML 문서로 가정하고 파싱한다.
+	// Resource XML is decoded from its declaration (or the pack default) into
+	// UTF-8. Parse the complete document before appending nodes to the tree;
+	// rejected input leaves it unchanged. Limits: 16 MiB source, 64 levels,
+	// 100,000 elements plus attributes. DTDs/external entities are unsupported.
+	// Success returns the input terminator; failure returns nullptr.
 	char* parse(char* buffer, XMLTree *pTree, bool IsUseOnlyVector = false);
 };
-

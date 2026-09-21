@@ -1065,8 +1065,13 @@ rounds settled* for the host rules). Test fixtures share
   > `Client/SXml/SXml.cpp` moves byte-for-byte into `VS_UI`, replacing its
   > older duplicate. A compatibility header shares one declaration. All
   > platforms now link that parser from the library, and `test_xml.cpp`
-  > guards nested trees and the existing wide-conversion buffer limit.
-  > Parser bounds and resource decoding are subsequent test-first work.
+  > now reproduces and guards parser bounds, truncated documents, repeated
+  > quest names and UTF-8 save/load round trips. `ResourceText` decodes XML
+  > declarations/BOMs before the pack default. The parser builds temporary
+  > trees before appending, with per-document size/depth/node limits; owned
+  > strings replace fixed stack buffers. Wide conversion queries its UTF-8
+  > capacity and XML saves escape markup. Plain-text ingress and renderer
+  > fallback retirement remain separate work under the encoding finding.
   - Owner: the `unit_tests` link line, `test_textservice_normalize.cpp` and
     `test_glyph_cache.cpp` for repeated work, ownership, eviction and bounds.
 

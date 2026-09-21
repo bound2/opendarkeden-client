@@ -371,6 +371,12 @@ initialization. Damaged resource bytes display as replacement characters while
 later text remains readable. Saving fails if text cannot be represented in the
 selected encoding or its encoded record exceeds 65,536 bytes.
 
+XML resources honor their `encoding` declaration or UTF-8 BOM before the pack
+default. Their trees store UTF-8, and XML saves declare UTF-8 and escape markup.
+The parser rejects truncated documents, unsupported DTDs, files over 16 MiB,
+nesting beyond 64 levels, or more than 100,000 elements and attributes per
+document. A rejected document leaves the existing tree intact.
+
 ### Toggle xBRZ rendering
 
 Open **Options > Graphics** and use **xBRZ smoothing**, immediately below the FPS

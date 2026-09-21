@@ -70,6 +70,7 @@ set(BASIC_SOURCES
 	SafeFormat.cpp
 	StringReduction.cpp
 	TextEncoding.cpp
+	ResourceText.cpp
 	MemoryPool.cpp
 	CMessageArray.cpp
 	ConfigFile.cpp
@@ -150,6 +151,7 @@ install(FILES
 	SafeFormat.h
 	TextUtf8.h
 	TextEncoding.h
+	ResourceText.h
 	StringReduction.h
 	MemoryPool.h
 	ScrollRange.h
