@@ -11,6 +11,7 @@
 #include <string>
 #include <filesystem>
 #include <iterator>
+#include <limits>
 #include <stdexcept>
 
 namespace {
@@ -56,6 +57,66 @@ TEST(HelpMessages, ProductionMessageDefaultsLinkFromTheUiLibrary)
 		CHECK_EQ(0, message.m_strTitle[race].GetLength());
 		CHECK_EQ(0, message.m_strDetail[race].GetLength());
 	}
+}
+
+TEST(HelpMessages, SlayerEligibilityUsesBothInclusiveAttributeBounds)
+{
+	MHelpMessage message;
+	message.m_iAttrLow[RACE_SLAYER] = 100;
+	message.m_iAttrMax[RACE_SLAYER] = 200;
+	// Slayer level/domain limits are not used by help-mail eligibility.
+	message.m_iLevelLow[RACE_SLAYER] = 50;
+	message.m_iLevelMax[RACE_SLAYER] = 60;
+	message.m_iDomainLow[RACE_SLAYER] = 50;
+	message.m_iDomainMax[RACE_SLAYER] = 60;
+	CHECK(!message.IsEligible(RACE_SLAYER, 1, 99));
+	CHECK(message.IsEligible(RACE_SLAYER, 1, 100));
+	CHECK(message.IsEligible(RACE_SLAYER, 1, 150));
+	CHECK(message.IsEligible(RACE_SLAYER, 1, 200));
+	CHECK(!message.IsEligible(RACE_SLAYER, 1, 201));
+	CHECK(!message.IsEligible(RACE_SLAYER, 1, (std::numeric_limits<long long>::max)()));
+}
+
+TEST(HelpMessages, OtherRaceEligibilityUsesItsOwnLevelRange)
+{
+	MHelpMessage message;
+	for (int race : {RACE_VAMPIRE, RACE_OUSTERS}) {
+		message.m_iLevelLow[race] = 10 + race;
+		message.m_iLevelMax[race] = 20 + race;
+		message.m_iAttrLow[race] = 1000;
+		message.m_iAttrMax[race] = 2000;
+		CHECK(!message.IsEligible(race, 9 + race, 0));
+		CHECK(message.IsEligible(race, 10 + race, 0));
+		CHECK(message.IsEligible(race, 15 + race, 0));
+		CHECK(message.IsEligible(race, 20 + race, 0));
+		CHECK(!message.IsEligible(race, 21 + race, 0));
+	}
+}
+
+TEST(HelpMessages, DisabledLowerBoundDisablesTheWholeEligibilityInterval)
+{
+	MHelpMessage message;
+	for (int race = 0; race < RACE_MAX; ++race) {
+		CHECK(message.IsEligible(race, 0, 0));
+		message.m_iAttrMax[race] = 100;
+		message.m_iLevelMax[race] = 100;
+		CHECK(message.IsEligible(race, 200, 200));
+		CHECK(message.IsEligible(race, (std::numeric_limits<int>::max)(),
+			(std::numeric_limits<long long>::max)()));
+	}
+}
+
+TEST(HelpMessages, InvalidRaceAndReversedRangesRejectEligibility)
+{
+	MHelpMessage message;
+	for (int race : {-1, static_cast<int>(RACE_MAX), (std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)()})
+		CHECK(!message.IsEligible(race, 0, 0));
+	message.m_iAttrLow[RACE_SLAYER] = 200;
+	message.m_iAttrMax[RACE_SLAYER] = 100;
+	CHECK(!message.IsEligible(RACE_SLAYER, 0, 150));
+	message.m_iLevelLow[RACE_VAMPIRE] = 200;
+	message.m_iLevelMax[RACE_VAMPIRE] = 100;
+	CHECK(!message.IsEligible(RACE_VAMPIRE, 150, 0));
 }
 
 TEST(HelpMessages, LegacyStreamLoadsAllThreeRacePages)

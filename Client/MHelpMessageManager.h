@@ -20,6 +20,9 @@ public:
 	MString m_strDetail[RACE_MAX];
 	MHelpMessage();
 	virtual ~MHelpMessage();
+	// Slayers use total attributes; other races use level. A lower bound of -1
+	// disables its whole interval. Invalid races are rejected before indexing.
+	bool IsEligible(int race, int level, long long attributes) const;
 };
 
 class MHelpMessageManager {

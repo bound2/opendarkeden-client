@@ -1091,6 +1091,11 @@ rounds settled* for the host rules). Test fixtures share
   > moved unchanged into `VS_UI` before the parser fix. `test_help_messages.cpp`
   > owns complete-record publication, numeric/race bounds, default singleton
   > loading, long legacy-encoded fields and UTF-8 saves with a BOM.
+  > `MHelpMessage::IsEligible` also owns the mailbox's race-specific ranges:
+  > inclusive Slayer attribute bounds, vampire/ouster level bounds, and a
+  > disabled interval when its lower bound is -1. Four further tests guard
+  > those rules and invalid races; the mailbox widens its attribute sum before
+  > calling it and indexes message arrays only after eligibility succeeds.
   > `TextUtf8.h` also owns the scalar-boundary prefix operation used by resource
   > line clipping and all three in-place string reducers. Their byte/storage
   > bounds and valid UTF-8 output are tested independently; the old wrapping
