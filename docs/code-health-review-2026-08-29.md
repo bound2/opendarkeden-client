@@ -2165,6 +2165,13 @@ The counting loop (lines 41-54) stops at `len < maxWidth`, so `len` is the *actu
 >
 > **On-screen change:** `VS_UI_ExtraDialog.cpp:1513` calls `ReduceString2(sz_temp, 55)` with no length guard, so item-description titles of 53–55 bytes are today rendered as `<52 chars>...` with the ellipsis stamped past the string; they will now render in full, which is correct for a 55-wide field. The three call sites in `vs_ui_gamecommon2.cpp` all guard with `strlen > N` first and are unaffected.
 
+> **UTF-8 follow-up (2026-09-21):** all three reducers now use a shared scalar-
+> boundary prefix operation and one byte-budget contract. `ReduceString3` also
+> honors positive limits of one to three bytes; its older no-op behavior was
+> storage-safe but did not satisfy truncation. Existing exact-allocation and
+> guard-byte tests still pin the storage guarantee, and new two-, three- and
+> four-byte character fixtures reproduce and prevent malformed UTF-8 output.
+
 #### 🟠 High -- Quest titles and nicknames are sprintf'd into 64-byte stack buffers with no length limit; the length check is applied only afterwards.
 
 **Category:** memory-safety  |  **Location:** `VS_UI/src/vs_ui_gamecommon2.cpp:15453`
@@ -2251,6 +2258,16 @@ Line 226 does `file.read((char*)pTemp, m_Length)` with no subsequent `file.gcoun
 **Recommendation:** Check file.gcount() == m_Length after the read and fall back to the empty string on short reads; serialize an explicit uint32_t local rather than reading into the size_t member.
 
 #### 🟡 Medium -- g_PossibleStringCut was reimplemented with a different meaning for its second parameter while every caller kept passing the old one.
+
+> **UTF-8 prefix foundation (2026-09-21):** `TextSystem::Utf8PrefixBytes` in
+> `basic/TextUtf8.h` now returns a bounded prefix using the shared scalar
+> decoder. The three `ReduceString` variants use it and reserve space for their
+> ellipsis; limits below three bytes clip without splitting a character.
+> Two real-library tests reproduced 54 failed output/validity checks in the old
+> reducers, including `ReduceString3` ignoring limits of one to three bytes.
+> Decoded `CRarFile` line reads share the prefix helper. The pixel-width predicate
+> and its one-byte-backoff callers still need migration, so this finding remains
+> open; the helper does not guess encodings or repair malformed input.
 
 **Category:** correctness  |  **Location:** `Client/RenderingFunctions.cpp:313`
 
