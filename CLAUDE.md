@@ -226,10 +226,11 @@ and a `<SDL2/...>` include spelling breaks the Homebrew build - it is
   Visual Studio debugger, and launching it separately steals the stack trace and locks
   the build output. When a startup failure has to be bisected, ask — running it is
   sometimes the only way to see the exit code, and no test binary can reach that code.
-- **Half the shipped data is still packed.** `CRarFile` no longer reads `.rpk` archives
-  and needs their contents extracted flat beside them. `Data/ui/txt` and `Data/ui/xml`
-  are effectively empty at runtime, so quest data and chat help are absent; lookups
-  fail with `[RARFile ERROR]`.
+- **Packed resource reading is restored.** `CRarFile` first reads a loose override
+  beside its `.rpk`, then falls back to the password-protected archive. The pinned
+  static UnRAR dependency reads into bounded memory and never extracts to disk.
+  `GetList` returns owned regular-member names from that archive. Keep its notices
+  beside distributed binaries; see `third_party/unrar/README.md`.
 - **The 5:5:5 sprite paths are latent.** `ColorDraw::Is565()` returns a hardcoded
   `true`, so the `CSprite555` family is never constructed and fixes there have no
   runtime effect today.

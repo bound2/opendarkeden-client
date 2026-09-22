@@ -45,3 +45,11 @@ the preset (`macos-arm64`, `linux-x86_64`, etc.); Windows uses
 Review the counts before committing them. A toolchain upgrade that changes
 diagnostics needs a measured rebaseline and an explanation, rather than an
 automatic increase. Do not record an incremental build or a failed build.
+
+The 2026-09-22 packed-resource reader adds the pinned `darkeden_unrar` target
+under the same warning policy. Its initial Windows build adds ten C4996 sites
+in upstream code and 29 C4668 sites in Windows SDK `winioctl.h` reached by that
+target. These are measured from complete clean builds and recorded as the
+new dependency's initial diagnostic population. No compiler warnings or
+sanitizers are disabled for the dependency; later changes retain the same
+comparison against the recorded counts.

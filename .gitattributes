@@ -36,3 +36,10 @@ tools/git-hooks/* text eol=lf
 *.cpp whitespace=cr-at-eol
 *.h whitespace=cr-at-eol
 *.inl whitespace=cr-at-eol
+
+# Preserve vendored source endings and existing whitespace; README.md records
+# the one local patch. Our integration files remain ordinary reviewed text.
+third_party/unrar/* -text whitespace=-trailing-space,-space-before-tab
+third_party/unrar/CMakeLists.txt text eol=lf whitespace=blank-at-eol,blank-at-eof
+third_party/unrar/README.md text eol=lf whitespace=blank-at-eol,blank-at-eof
+tests/fixtures/rar/*.rar binary
