@@ -2200,7 +2200,9 @@ The counting loop (lines 41-54) stops at `len < maxWidth`, so `len` is the *actu
 >
 > **Deliberately left in this file:** the `"%d %s"` / `"%s +%d"` family fed by game-string-table entries and the `strcat` chains beside them. Those are the C19/C20/C22 data-file-format class, and bounding the `sprintf` without also bounding the adjacent `strcat(sz_buf, "%")` would leave a one-byte overflow reachable exactly on truncation — a fix that makes things worse. Also left: `char pPartName[20]` filled by `strcpy` from a data table whose index is itself unchecked, same class.
 >
-> The `VS_UI_ExtraDialog.cpp` two-string message now uses the bounded formatter (2026-09-21). The separate title `strcpy` into `char[300]` remains outside that change.
+> ✅ **Option-text residual fixed (2026-09-22):** the seven live 20-byte name copies use checked, owned names; direct pet and option-list name lookups use the same API. The table arrays are private, absent/invalid names yield an empty string, and race-specific MP/HP/EP substitution preserves the first-match behavior. Literal percentage formats and data-file-format suffix appends are bounded through their final write. Table loading validates complete counts, rows and part IDs before replacing existing data, and clears old names on smaller valid reloads. `test_gamemodel_tables.cpp` covers every truncated prefix, invalid counts/parts, later-row failure, following records and long UTF-8 names; initial tests reproduced 165 failed checks. UI integrations are regression guards.
+>
+> The `VS_UI_ExtraDialog.cpp` two-string message now uses the bounded formatter (2026-09-21). The separate title `strcpy` into `char[300]` was already removed by `7fccb4f3` (2026-09-18): the file dialog renders `GetGameString` directly, and its adjacent path labels use owned strings guarded by `test_file_dialog_labels.cpp`.
 
 #### 🟠 High -- utf8_to_utf32 dereferences continuation bytes without checking the NUL terminator, reading past the end of the input buffer.
 

@@ -1510,7 +1510,8 @@ fi
 # 570: descriptors own their rows and remove the unused replacement buffers.
 # 569: rich-help layout removes the unused substitution loop's dead strcpy.
 # 568: the mail-template notice date uses checked formatting.
-R17_BASELINE=568
+# 518: option-name formatting/copies are bounded; two obsolete option blocks removed.
+R17_BASELINE=518
 R17_FILES_FLOOR=500
 
 r17_members () {

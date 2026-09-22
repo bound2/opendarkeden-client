@@ -32,10 +32,12 @@
 #include "SystemAvailabilities.h"
 #include "MGameStringTable.h"
 #include "RankBonusTable.h"
+#include "TextEncoding.h"
 
 #include <cstdio>
 #include <cstring>
 #include <fstream>
+#include <limits>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -164,8 +166,8 @@ TEST(ItemOptionTable, LoadReadsPartNamesThenTheEntries)
 	RemoveScratch();
 
 	CHECK_EQ(2, table.GetSize());
-	CHECK(StrEq(table.ITEMOPTION_PARTNAME[1].GetString(), "Dexterity"));
-	CHECK(StrEq(table.ITEMOPTION_PARTENAME[0].GetString(), "E-Strength"));
+	CHECK(StrEq(table.GetPartName(1).c_str(), "Dexterity"));
+	CHECK(StrEq(table.GetPartEName(0).c_str(), "E-Strength"));
 	CHECK(StrEq(table[1].Name.GetString(), "Strong"));
 	CHECK_EQ(ITEMOPTION_TABLE::PART_DEX, table[1].Part);
 	CHECK_EQ(5, table[1].PlusPoint);
@@ -193,7 +195,7 @@ TEST(ItemOptionTable, RejectsMorePartNamesThanTheArraysHold)
 	// The oversized part list is refused as a whole: nothing is loaded
 	// rather than the last names written past the arrays.
 	CHECK_EQ(0, table.GetSize());
-	CHECK(table.ITEMOPTION_PARTNAME[0].GetString() == NULL);
+	CHECK(table.GetPartName(0).empty());
 }
 
 TEST(ItemOptionTable, RejectsANegativePartCount)
@@ -209,6 +211,67 @@ TEST(ItemOptionTable, RejectsANegativePartCount)
 	}
 	RemoveScratch();
 	CHECK_EQ(0, table.GetSize());
+}
+
+TEST(ItemOptionTable, IncompleteReloadPreservesNamesAndRows)
+{
+	Bytes original;
+	original.Int(1).Str("E-Old").Str("Old").Int(1);
+	AppendOptionInfo(original, "E-OldOption", "OldOption", 0, 7);
+	Bytes replacement;
+	replacement.Int(1).Str("E-New").Str("New").Int(1);
+	AppendOptionInfo(replacement, "E-NewOption", "NewOption", 0, 9);
+	for (size_t size = 0; size < replacement.data.size(); ++size)
+	{
+		ITEMOPTION_TABLE table;
+		WriteScratch(original);
+		{
+			std::ifstream in(kTempFile, std::ios::binary);
+			table.LoadFromFile(in);
+			CHECK(in.good());
+		}
+		Bytes prefix;
+		prefix.data.assign(replacement.data.begin(), replacement.data.begin() + size);
+		WriteScratch(prefix);
+		{
+			std::ifstream in(kTempFile, std::ios::binary);
+			table.LoadFromFile(in);
+			CHECK(in.fail());
+		}
+		CHECK_EQ(1, table.GetSize());
+		CHECK(StrEq(table.GetPartName(0).c_str(), "Old"));
+		CHECK(StrEq(table[0].Name.GetString(), "OldOption"));
+		CHECK_EQ(7, table[0].PlusPoint);
+	}
+	RemoveScratch();
+}
+
+TEST(ItemOptionTable, RejectsInvalidPartCountsAndRowParts)
+{
+	for (int count : {-1, static_cast<int>(ITEMOPTION_TABLE::MAX_PART) + 1})
+	{
+		Bytes bytes;
+		bytes.Int(count);
+		WriteScratch(bytes);
+		ITEMOPTION_TABLE table;
+		std::ifstream in(kTempFile, std::ios::binary);
+		table.LoadFromFile(in);
+		CHECK(in.fail());
+		CHECK_EQ(0, table.GetSize());
+	}
+	for (int part : {-1, static_cast<int>(ITEMOPTION_TABLE::MAX_PART)})
+	{
+		Bytes bytes;
+		bytes.Int(1).Str("E-Part").Str("Part").Int(1);
+		AppendOptionInfo(bytes, "E-Option", "Option", part, 1);
+		WriteScratch(bytes);
+		ITEMOPTION_TABLE table;
+		std::ifstream in(kTempFile, std::ios::binary);
+		table.LoadFromFile(in);
+		CHECK(in.fail());
+		CHECK_EQ(0, table.GetSize());
+	}
+	RemoveScratch();
 }
 
 //----------------------------------------------------------------------
@@ -398,6 +461,111 @@ TEST(GameStringTable, LanguageFileSelectsEnglishUnlessItSaysOtherwise)
 
 	WriteScratchText("; nothing but comments\n");
 	CHECK(UseEnglishTextFrom(kTempFile));
+	RemoveScratch();
+}
+
+TEST(ItemOptionTable, PartNamesAreOwnedBoundedAndPreserveRaceLabels)
+{
+	struct EncodingScope {
+		TextEncoding::Encoding saved = TextEncoding::GetResourceEncoding();
+		~EncodingScope() { TextEncoding::SetResourceEncoding(saved); }
+	} encoding;
+	CHECK(TextEncoding::SetResourceEncoding(TextEncoding::Encoding::Utf8));
+	const std::string longName = std::string(200, 'x') + "\xED\x9E\x98 MP / MP";
+	Bytes bytes;
+	bytes.Int(ITEMOPTION_TABLE::MAX_PART);
+	for (int i = 0; i < ITEMOPTION_TABLE::MAX_PART; ++i)
+		bytes.Str("English").Str(i == 0 ? longName.c_str() : "MP");
+	bytes.Int(0);
+	WriteScratch(bytes);
+	ITEMOPTION_TABLE table;
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		table.LoadFromFile(in);
+		CHECK(in.good());
+	}
+	CHECK(table.GetPartName(0) == longName);
+	CHECK(table.GetPartName(0, 'H') == std::string(200, 'x') + "\xED\x9E\x98 HP / MP");
+	CHECK(table.GetPartName(0, 'E') == std::string(200, 'x') + "\xED\x9E\x98 EP / MP");
+	CHECK(table.GetPartName(0, '?') == longName);
+	CHECK(table.GetPartName(ITEMOPTION_TABLE::MAX_PART - 1) == "MP");
+	CHECK(table.GetPartEName(ITEMOPTION_TABLE::MAX_PART - 1) == "English");
+	std::string copy = table.GetPartName(0);
+	copy[0] = 'z';
+	CHECK(table.GetPartName(0) == longName);
+	for (int part : {-1, static_cast<int>(ITEMOPTION_TABLE::MAX_PART),
+		(std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)()})
+	{
+		CHECK(table.GetPartName(part).empty());
+		CHECK(table.GetPartEName(part).empty());
+	}
+	RemoveScratch();
+}
+
+TEST(ItemOptionTable, SmallerReloadClearsUnusedNamesAndPreservesFollowingRecord)
+{
+	Bytes first;
+	first.Int(2).Str("E-Old").Str("Old").Str("E-Other").Str("Other").Int(1);
+	AppendOptionInfo(first, "E-Option", "Option", 1, 7);
+	WriteScratch(first);
+	ITEMOPTION_TABLE table;
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		table.LoadFromFile(in);
+		CHECK(in.good());
+	}
+	Bytes replacement;
+	replacement.Int(1).Str("E-New").Str("New").Int(0).Int(0x12345678);
+	WriteScratch(replacement);
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		table.LoadFromFile(in);
+		int sentinel = 0;
+		in.read(reinterpret_cast<char*>(&sentinel), sizeof sentinel);
+		CHECK(in.good());
+		CHECK_EQ(0x12345678, sentinel);
+	}
+	CHECK_EQ(0, table.GetSize());
+	CHECK(table.GetPartName(0) == "New");
+	CHECK(table.GetPartEName(0) == "E-New");
+	CHECK(table.GetPartName(1).empty());
+	CHECK(table.GetPartEName(1).empty());
+	RemoveScratch();
+}
+
+TEST(ItemOptionTable, FailedLaterRowsAndImpossibleCountsPreserveTheWholeTable)
+{
+	for (int count : {-1, 2, (std::numeric_limits<int>::max)()})
+	{
+		Bytes original;
+		original.Int(1).Str("E-Old").Str("Old").Int(1);
+		AppendOptionInfo(original, "E-OldOption", "OldOption", 0, 7);
+		WriteScratch(original);
+		ITEMOPTION_TABLE table;
+		{
+			std::ifstream in(kTempFile, std::ios::binary);
+			table.LoadFromFile(in);
+			CHECK(in.good());
+		}
+		Bytes invalid;
+		invalid.Int(1).Str("E-New").Str("New").Int(count);
+		if (count == 2)
+		{
+			AppendOptionInfo(invalid, "E-NewOption", "NewOption", 0, 9);
+			AppendOptionInfo(invalid, "E-BadOption", "BadOption", -1, 9);
+		}
+		WriteScratch(invalid);
+		{
+			std::ifstream in(kTempFile, std::ios::binary);
+			table.LoadFromFile(in);
+			CHECK(in.fail());
+		}
+		CHECK_EQ(1, table.GetSize());
+		CHECK(table.GetPartName(0) == "Old");
+		CHECK(table.GetPartEName(0) == "E-Old");
+		CHECK(StrEq(table[0].Name.GetString(), "OldOption"));
+		CHECK_EQ(7, table[0].PlusPoint);
+	}
 	RemoveScratch();
 }
 

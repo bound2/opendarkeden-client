@@ -1,6 +1,7 @@
 ﻿// VS_UI_ExtraDialog.cpp
 
 #include "Client_PCH.h"
+#include <cstring>
 #define assert(e) ((void)(e))
 // Disabled assert for macOS
 
@@ -1717,32 +1718,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 //			}
 			
 			// Add option
-			/*if (p_item->GetItemOptionListCount() != 0)
-			{
-				int option = p_item->GetItemOptionListCount();
-				ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[option];
-				
-				char pPartName[20];
-				strcpy(pPartName, ITEMOPTION_INFO::ITEMOPTION_PARTNAME[optionInfo.Part]); // Option이 적용되는 수치의 이름
-				if(p_item->IsVampireItem() && strstr(pPartName,"MP") != NULL)
-					*strstr(pPartName,"MP") = 'H';
 
-				BYTE PlusPoint	= optionInfo.PlusPoint; // 적용되는 수치
-				
-				if (pPartName)
-				{
-					if(!strcmp(pPartName, "Durability"))
-					{
-						sprintf(sz_temp, "\t옵션 : %s +%d", pPartName, PlusPoint-100);
-						strcat(sz_temp, "%");
-					}
-					else
-						sprintf(sz_temp, "\t옵션 : %s +%d", pPartName, PlusPoint);
-					
-					temp_string = sz_temp;
-					m_rep_string.push_back(temp_string);
-				}
-			}*/
 			BOOL fOptionCheck=FALSE;
 			if(!p_item->IsEmptyItemOptionList())
 			{				
@@ -1754,21 +1730,19 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 				while(itr != optionList.end() && *itr < g_pItemOptionTable->GetSize())
 				{
 					const ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
-					char pPartName[20];
-					strcpy(pPartName,g_pItemOptionTable->ITEMOPTION_PARTNAME[optionInfo.Part]);
-					if(p_item->IsVampireItem() && strstr(pPartName,"MP") != NULL)
-						*strstr(pPartName,"MP") = 'H';
-					
+					const std::string pPartName = g_pItemOptionTable->GetPartName(optionInfo.Part,
+						p_item->IsVampireItem() ? 'H' : 'M');
+
 					BYTE PlusPoint	= optionInfo.PlusPoint; // 적용되는 수치
 					
-					if (pPartName)
+					if (!pPartName.empty())
 					{
 						if(!fOptionCheck)
 						{
 							if(optionInfo.Part == g_pItemOptionTable->PART_DURABILITY)
 							{
 								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION), pPartName, PlusPoint-100);
-								strcat(sz_temp, "%");
+								SafeFormat::Format(sz_temp + std::strlen(sz_temp), sizeof(sz_temp) - std::strlen(sz_temp), "%%");
 							}
 							else
 							if(
@@ -1776,7 +1750,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 								optionInfo.Part <= ITEMOPTION_TABLE::PART_INT_TO_DEX)
 							{
 								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION), pPartName, PlusPoint);
-								strcat(sz_temp, "%");
+								SafeFormat::Format(sz_temp + std::strlen(sz_temp), sizeof(sz_temp) - std::strlen(sz_temp), "%%");
 							}
 							else
 								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION), pPartName, PlusPoint);
@@ -1786,7 +1760,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 							if(optionInfo.Part == g_pItemOptionTable->PART_DURABILITY)
 							{
 								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY), pPartName, PlusPoint-100);
-								strcat(sz_temp, "%");
+								SafeFormat::Format(sz_temp + std::strlen(sz_temp), sizeof(sz_temp) - std::strlen(sz_temp), "%%");
 							}
 							else
 							if(
@@ -1794,7 +1768,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 								optionInfo.Part <= ITEMOPTION_TABLE::PART_INT_TO_DEX)
 							{
 								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY), pPartName, PlusPoint);
-								strcat(sz_temp, "%");
+								SafeFormat::Format(sz_temp + std::strlen(sz_temp), sizeof(sz_temp) - std::strlen(sz_temp), "%%");
 							}
 							else
 								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY), pPartName, PlusPoint);							
@@ -1812,21 +1786,19 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 				while(itr != (*g_pItemTable)[p_item->GetItemClass()][p_item->GetItemType()].DefaultOptionList.end())
 				{
 					const ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
-					char pPartName[20];
-					strcpy(pPartName,g_pItemOptionTable->ITEMOPTION_PARTNAME[optionInfo.Part]);
-					if(p_item->IsVampireItem() && strstr(pPartName,"MP") != NULL)
-						*strstr(pPartName,"MP") = 'H';
-					
+					const std::string pPartName = g_pItemOptionTable->GetPartName(optionInfo.Part,
+						p_item->IsVampireItem() ? 'H' : 'M');
+
 					BYTE PlusPoint	= optionInfo.PlusPoint; // 적용되는 수치
 					
-					if (pPartName)
+					if (!pPartName.empty())
 					{
 						if(!fOptionCheck)
 						{
 							if(optionInfo.Part == g_pItemOptionTable->PART_DURABILITY)
 							{
 								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION), pPartName, PlusPoint-100);
-								strcat(sz_temp, "%");
+								SafeFormat::Format(sz_temp + std::strlen(sz_temp), sizeof(sz_temp) - std::strlen(sz_temp), "%%");
 							}
 							else
 							if(
@@ -1834,7 +1806,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 								optionInfo.Part <= ITEMOPTION_TABLE::PART_INT_TO_DEX)
 							{
 								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION), pPartName, PlusPoint);
-								strcat(sz_temp, "%");
+								SafeFormat::Format(sz_temp + std::strlen(sz_temp), sizeof(sz_temp) - std::strlen(sz_temp), "%%");
 							}
 							else
 								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION), pPartName, PlusPoint);
@@ -1844,7 +1816,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 							if(optionInfo.Part == g_pItemOptionTable->PART_DURABILITY)
 							{
 								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY), pPartName, PlusPoint-100);
-								strcat(sz_temp, "%");
+								SafeFormat::Format(sz_temp + std::strlen(sz_temp), sizeof(sz_temp) - std::strlen(sz_temp), "%%");
 							}
 							else
 							if(
@@ -1852,7 +1824,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 								optionInfo.Part <= ITEMOPTION_TABLE::PART_INT_TO_DEX)
 							{
 								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY), pPartName, PlusPoint);
-								strcat(sz_temp, "%");
+								SafeFormat::Format(sz_temp + std::strlen(sz_temp), sizeof(sz_temp) - std::strlen(sz_temp), "%%");
 							}
 							else
 								SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_OPTION_EMPTY), pPartName, PlusPoint);							

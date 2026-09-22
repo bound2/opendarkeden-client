@@ -12,6 +12,8 @@
 #include "MString.h"
 
 #include <fstream>
+#include <array>
+#include <string>
 
 //#define	MAX_PARTNAME_LENGTH		48
 #define UNIQUE_ITEM_COLOR		0xffff
@@ -112,12 +114,15 @@ public:
 		MAX_PART
 	};
 
-	// option part의 name string
-	MString ITEMOPTION_PARTNAME[MAX_PART];
-	MString ITEMOPTION_PARTENAME[MAX_PART];
-		
-
+	// Missing names and invalid part IDs produce an empty owned string.
+	// Mana labels replace only the first MP with HP/EP for the matching race.
+	std::string GetPartName(int part, char manaPrefix = 'M') const;
+	std::string GetPartEName(int part) const;
 	void	LoadFromFile(std::ifstream& file);
+
+private:
+	std::array<std::string, MAX_PART> ITEMOPTION_PARTNAME;
+	std::array<std::string, MAX_PART> ITEMOPTION_PARTENAME;
 };
 
 extern	ITEMOPTION_TABLE*		g_pItemOptionTable;

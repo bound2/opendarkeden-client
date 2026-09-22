@@ -738,14 +738,12 @@ void	C_VS_UI_ITEM_LIST::Show()
 				while(itr != optionList.end() && *itr < g_pItemOptionTable->GetSize())
 				{
 					const ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
-					char pPartName[20];
-					strcpy(pPartName,g_pItemOptionTable->ITEMOPTION_PARTNAME[optionInfo.Part].GetString());
-					if(pCurrentFocusItem->IsVampireItem() && strstr(pPartName,"MP") != NULL)
-						*strstr(pPartName,"MP") = 'H';
-					
+					const std::string pPartName = g_pItemOptionTable->GetPartName(optionInfo.Part,
+						pCurrentFocusItem->IsVampireItem() ? 'H' : 'M');
+
 					BYTE PlusPoint	= optionInfo.PlusPoint; // 적용되는 수치
 					
-					if (pPartName)
+					if (!pPartName.empty())
 					{
 						if(!fOptionCheck)
 						{
@@ -755,19 +753,17 @@ void	C_VS_UI_ITEM_LIST::Show()
 						
 						if(optionInfo.Part == ITEMOPTION_TABLE::PART_DURABILITY)
 						{
-							sprintf(sz_buf, "%s +%d", pPartName, PlusPoint-100);
-							strcat(sz_buf, "%");
+							SafeFormat::Format(sz_buf, "%s +%d%%", pPartName, PlusPoint-100);
 						}
 						else
 							if(
 								optionInfo.Part >= ITEMOPTION_TABLE::PART_STR_TO_DEX &&
 								optionInfo.Part <= ITEMOPTION_TABLE::PART_INT_TO_DEX)
 							{
-								sprintf(sz_buf, "%s %d", pPartName, PlusPoint);
-								strcat(sz_buf, "%");
+								SafeFormat::Format(sz_buf, "%s %d%%", pPartName, PlusPoint);
 							}
 							else
-								sprintf(sz_buf, "%s +%d", pPartName, PlusPoint);
+								SafeFormat::Format(sz_buf, "%s +%d", pPartName, PlusPoint);
 							g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_GOLD);//RGB_YELLOW);
 					}
 					strY += line_gap;
@@ -782,14 +778,12 @@ void	C_VS_UI_ITEM_LIST::Show()
 				while(itr != DefaultOptionList.end())
 				{
 					const ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
-					char pPartName[20];
-					strcpy(pPartName,g_pItemOptionTable->ITEMOPTION_PARTNAME[optionInfo.Part].GetString());
-					if(pCurrentFocusItem->IsVampireItem() && strstr(pPartName,"MP") != NULL)
-						*strstr(pPartName,"MP") = 'H';
-					
+					const std::string pPartName = g_pItemOptionTable->GetPartName(optionInfo.Part,
+						pCurrentFocusItem->IsVampireItem() ? 'H' : 'M');
+
 					BYTE PlusPoint	= optionInfo.PlusPoint; // 적용되는 수치
 					
-					if (pPartName)
+					if (!pPartName.empty())
 					{
 						if(!fOptionCheck)
 						{
@@ -798,19 +792,17 @@ void	C_VS_UI_ITEM_LIST::Show()
 						}
 						if(optionInfo.Part == ITEMOPTION_TABLE::PART_DURABILITY)
 						{
-							sprintf(sz_buf, "%s +%d", pPartName, PlusPoint-100);
-							strcat(sz_buf, "%");
+							SafeFormat::Format(sz_buf, "%s +%d%%", pPartName, PlusPoint-100);
 						}
 						else
 							if(
 								optionInfo.Part >= ITEMOPTION_TABLE::PART_STR_TO_DEX &&
 								optionInfo.Part <= ITEMOPTION_TABLE::PART_INT_TO_DEX)
 							{
-								sprintf(sz_buf, "%s %d", pPartName, PlusPoint);
-								strcat(sz_buf, "%");
+								SafeFormat::Format(sz_buf, "%s %d%%", pPartName, PlusPoint);
 							}
 							else
-								sprintf(sz_buf, "%s +%d", pPartName, PlusPoint);
+								SafeFormat::Format(sz_buf, "%s +%d", pPartName, PlusPoint);
 							g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_GOLD);//RGB_YELLOW);
 					}
 					strY += line_gap;
@@ -3236,15 +3228,15 @@ C_VS_UI_REMOVE_OPTION::C_VS_UI_REMOVE_OPTION(const MItem * pItem, const MItem *p
 
 	for(int i=0;itr!=optionList.end();itr++,i++)
 	{		
-		if(*itr > g_pItemOptionTable->GetSize() || i >= 2)
+		if(*itr >= g_pItemOptionTable->GetSize() || i >= 2)
 			break;
 
 		const ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
-		m_str_option[i] = g_pItemOptionTable->ITEMOPTION_PARTNAME[optionInfo.Part].GetString();
+		m_str_option[i] = g_pItemOptionTable->GetPartName(optionInfo.Part);
 
 		char temp[256] ={0,};
 		
-		int Point = optionInfo.PlusPoint - 100 ;
+		const long long Point = static_cast<long long>(optionInfo.PlusPoint) - 100;
 
 		if( optionInfo.Part == ITEMOPTION_TABLE::PART_DURABILITY )
 		{
@@ -10123,7 +10115,7 @@ void	C_VS_UI_PET_INFO::Show()
 		px = g_PrintColorStr(hp_x, str_y[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_ATTR].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
 		if(m_PetInfo.ATTR_VALUE > 0)
 		{
-			sprintf(sz_buf, "%s +%d", g_pItemOptionTable->ITEMOPTION_PARTNAME[m_PetInfo.ATTR].GetString(), m_PetInfo.ATTR_VALUE);				
+			SafeFormat::Format(sz_buf, "%s +%d", g_pItemOptionTable->GetPartName(m_PetInfo.ATTR), m_PetInfo.ATTR_VALUE);
 			g_PrintColorStr(px, str_y[0], sz_buf, gpC_base->m_item_desc_pi, RGB_GOLD);
 		}
 		else
@@ -10137,35 +10129,26 @@ void	C_VS_UI_PET_INFO::Show()
 		{
 			WORD itemOption = m_PetInfo.OPTION;
 			const ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[itemOption];
-			char pPartName[20];
-			strcpy(pPartName,g_pItemOptionTable->ITEMOPTION_PARTNAME[optionInfo.Part].GetString());
-			if(strstr(pPartName,"MP") != NULL)
-			{
-				if(g_eRaceInterface == RACE_VAMPIRE)
-					*strstr(pPartName,"MP") = 'H';
-				else if(g_eRaceInterface == RACE_OUSTERS)
-					*strstr(pPartName,"MP") = 'E';
-			}
-			
+			const std::string pPartName = g_pItemOptionTable->GetPartName(optionInfo.Part,
+				g_eRaceInterface == RACE_VAMPIRE ? 'H' : g_eRaceInterface == RACE_OUSTERS ? 'E' : 'M');
+
 			BYTE PlusPoint	= optionInfo.PlusPoint; // 적용되는 수치
 			
-			if (pPartName)
+			if (!pPartName.empty())
 			{
 				if(optionInfo.Part == ITEMOPTION_TABLE::PART_DURABILITY)
 				{
-					sprintf(sz_buf, "%s +%d", pPartName, PlusPoint-100);
-					strcat(sz_buf, "%");
+					SafeFormat::Format(sz_buf, "%s +%d%%", pPartName, PlusPoint-100);
 				}
 				else
 				if(
 					optionInfo.Part >= ITEMOPTION_TABLE::PART_STR_TO_DEX &&
 					optionInfo.Part <= ITEMOPTION_TABLE::PART_INT_TO_DEX)
 				{
-					sprintf(sz_buf, "%s %d", pPartName, PlusPoint);
-					strcat(sz_buf, "%");
+					SafeFormat::Format(sz_buf, "%s %d%%", pPartName, PlusPoint);
 				}
 				else
-					sprintf(sz_buf, "%s +%d", pPartName, PlusPoint);
+					SafeFormat::Format(sz_buf, "%s +%d", pPartName, PlusPoint);
 
 				g_PrintColorStr(px, str_y[1], sz_buf, gpC_base->m_chatting_pi, RGB_GOLD);//RGB_YELLOW);
 			}
