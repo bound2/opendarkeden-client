@@ -700,6 +700,8 @@ In the loop at lines 3688-3708, `char_temp = cur[CurrentPos - check]; cur[Curren
 
 > ✅ **Fixed** in `f0b8ae6` (branch `harden/network-input`) for this handler, matching the shop/gear/reload handlers. The broader delete-site audit and the hold-the-ID redesign remain open. Regression guard; the timing window was not reproduced.
 
+> ✅ **Deletion-lifetime residual closed (2026-09-22):** `MItem`'s virtual destructor now notifies its host, and the executable invalidates both primary and secondary tooltip pointers through the existing `UI_RemoveDescriptor` path. This covers direct deletes, container release and stack lifetimes without requiring each caller to remember UI cleanup. Shutdown releases the UI and item owners before clearing the host. ID-only resolution is superseded by destruction invalidation: locally created magazines can share ID zero, while destruction identifies the exact object. `test_item_lifetime.cpp` guards stack/base-pointer destruction, container cleanup, address reuse and absent hosts; these are destruction-contract regression guards, not a reproduction of the original rendering timing window. The executable's UI wiring is checked by source audit and full builds.
+
 ### C26. AddFormat/AddFormatVL run unbounded vsprintf into a fixed 4096-byte static buffer, with the format string loaded from a data file and the arguments supplied by the server.
 
 **Area:** Foundation Libraries  |  **Category:** memory-safety  |  **Location:** `Client/CMessageArray.cpp:333`
