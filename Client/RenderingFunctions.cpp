@@ -309,13 +309,6 @@ int g_GetStringHeight(const char* pStr, void* pFont)
 // String Manipulation
 //----------------------------------------------------------------------
 
-// Check if string can be cut at width
-bool g_PossibleStringCut(const char* pStr, int maxWidth)
-{
-    int width = g_GetStringWidth(pStr, NULL);
-    return width <= maxWidth;
-}
-
 int g_DBCSLen(const char_t* p_dbcs)
 {
 	if (p_dbcs == NULL)

@@ -2264,6 +2264,8 @@ Line 226 does `file.read((char*)pTemp, m_Length)` with no subsequent `file.gcoun
 
 #### 🟡 Medium -- g_PossibleStringCut was reimplemented with a different meaning for its second parameter while every caller kept passing the old one.
 
+> ✅ **Resolved by caller migration and API retirement (2026-09-21):** all compiled callers now use owned UTF-8 rows or bounded scalar prefixes through `TextWrap`, `DescriptorText`, `HelpLayout` and the string reducers. The mismatched pixel-width implementation and shared declaration are removed, so compiled code cannot accidentally call the old API. Existing library tests own scalar boundaries, row consumption, layout and capacity contracts; executable UI wiring remains a regression guard. Remaining textual mentions are in comments or the native GDI `FL2.cpp` excluded by the forced SDL build on every supported platform. Resource ingress and renderer encoding policy remain separate work under the encoding finding.
+
 > **UTF-8 prefix foundation (2026-09-21):** `TextSystem::Utf8PrefixBytes` in
 > `basic/TextUtf8.h` now returns a bounded prefix using the shared scalar
 > decoder. The three `ReduceString` variants use it and reserve space for their
@@ -2515,6 +2517,8 @@ In `utf8_to_utf32` (lines 35-60) the multi-byte branches consume continuation by
 **Recommendation:** Rewrite as a table- or explicit-step decoder that checks for `\0` and for `0x80` continuation bits before each consumption, with each `s++` on its own statement. Add a NULL guard to `HandleTextEditing`.
 
 #### 🟡 Medium -- The SDL replacement for g_PossibleStringCut has different semantics from the original its ~40 call sites were written against.
+
+> ✅ **Resolved by caller migration and API retirement (2026-09-21):** all compiled callers now use owned UTF-8 rows or bounded scalar prefixes through `TextWrap`, `DescriptorText`, `HelpLayout` and the string reducers. The mismatched pixel-width implementation and shared declaration are removed, so compiled code cannot accidentally call the old API. Existing library tests own scalar boundaries, row consumption, layout and capacity contracts; executable UI wiring remains a regression guard. Remaining textual mentions are in comments or the native GDI `FL2.cpp` excluded by the forced SDL build on every supported platform. Resource ingress and renderer encoding policy remain separate work under the encoding finding.
 
 > **Tooltip follow-up (2026-09-21):** `_Multiline_Info_Calculator` and `_Multiline_Info_Show` now share owned rows from `basic/TextWrap`, normalize the complete input before splitting and measure the widest rendered row. No temporary NUL is written into the caller's text. Five library tests cover complete UTF-8 scalars, progress at narrow columns, spaces, explicit line breaks, empty input and bounded/read-only input lifetimes. The UI wiring is a regression guard; the other live wrapping callers and the old predicate remain open under this finding and its duplicate above.
 
