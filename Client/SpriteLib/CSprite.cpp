@@ -4,6 +4,9 @@
 #include "Client_PCH.h"
 #include "CFilter.h"
 #include "CSprite.h"
+#include "SpriteScanline.h"
+#include <memory>
+#include <vector>
 
 
 //----------------------------------------------------------------------
@@ -132,6 +135,70 @@ CSprite::Release()
 	m_Height	= 0;
 
 	m_bInit		= false;
+}
+
+// Read complete rows before validating so a malformed complete record still
+// leaves the stream positioned at the next packed sprite.
+bool CSprite::LoadPixels(std::ifstream& file, bool convertTo555)
+{
+	if (m_bLoading) return false;
+	Release();
+	m_bLoading = true;
+	struct LoadingReset {
+		bool& flag;
+		~LoadingReset() { flag = false; }
+	} reset{m_bLoading};
+	try {
+		WORD width = 0, height = 0;
+		if (!file.read(reinterpret_cast<char*>(&width), sizeof(width)) ||
+			!file.read(reinterpret_cast<char*>(&height), sizeof(height))) return false;
+		if (width == 0 || height == 0) {
+			m_Width = width;
+			m_Height = height;
+			m_bInit = true;
+			return true;
+		}
+		std::vector<std::unique_ptr<WORD[]>> rows(height);
+		std::vector<size_t> lengths(height);
+		for (WORD y = 0; y < height; ++y) {
+			WORD length = 0;
+			if (!file.read(reinterpret_cast<char*>(&length), sizeof(length))) return false;
+			lengths[y] = length;
+			if (length == 0) continue;
+			rows[y] = std::make_unique<WORD[]>(length);
+			if (!file.read(reinterpret_cast<char*>(rows[y].get()), length * sizeof(WORD))) return false;
+		}
+		bool inclusiveWidth = false;
+		for (WORD y = 0; y < height; ++y) {
+			const std::span<const WORD> line(rows[y].get(), lengths[y]);
+			if (!ValidateSpriteScanline(line, width)) {
+				// Some shipped effect rows extend one column beyond their header width.
+				// Account for that single extra column in the published geometry;
+				// consumers must never draw beyond the width they were given.
+				if (width == 0xffff || !ValidateSpriteScanline(line, int(width) + 1)) return false;
+				inclusiveWidth = true;
+			}
+			if (convertTo555) {
+				WORD* row = rows[y].get();
+				size_t offset = 1;
+				for (unsigned run = 0; run < row[0]; ++run) {
+					const WORD colored = row[offset + 1];
+					offset += 2;
+					for (WORD pixel = 0; pixel < colored; ++pixel, ++offset)
+						row[offset] = ColorDraw::Convert565to555(row[offset]);
+				}
+			}
+		}
+		auto pointers = std::make_unique<WORD*[]>(height);
+		for (WORD y = 0; y < height; ++y) pointers[y] = rows[y].release();
+		m_Pixels = pointers.release();
+		m_Width = static_cast<WORD>(width + (inclusiveWidth ? 1 : 0));
+		m_Height = height;
+		m_bInit = true;
+		return true;
+	} catch (...) {
+		return false;
+	}
 }
 
 //----------------------------------------------------------------------

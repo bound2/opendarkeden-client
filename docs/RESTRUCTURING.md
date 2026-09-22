@@ -1265,6 +1265,18 @@ rounds settled* for the host rules). Test fixtures share
     plus full build, architecture and sanitizer checks. Broader asset-format
     auditing remains in the code-health review's caveats.
 
+- [x] **5.6 Pixel-sprite input validation.**
+  > **Status:** done (2026-09-22). `CSprite555` and `CSprite565` share the
+  > checked `CSprite::LoadPixels` implementation. Header and row reads must
+  > complete; encoded runs and cumulative pixel widths are validated before
+  > publication. A shipped one-column width discrepancy is normalized into the
+  > reported width; larger overruns and 16-bit width overflow are rejected.
+  > Complete malformed records consume every row before rejection,
+  > keeping the next packed sprite readable. Only color words convert to 555;
+  > padding survives. Truncation/exception paths clear data and loading state.
+  - Owner: `test_pixel_sprite_loading.cpp` and the existing 555 cursor tests,
+    exercised with the actual SpriteLib implementations under ASan.
+
 ## Build and review follow-up (2026-09-18)
 
 Table reads now expose const rows; `CTypeTable::GetMutable` and `Set` reject
