@@ -84,52 +84,37 @@ class CTypeTable {
 		void			LoadFromFile(const char *filename);
 		bool			LoadFromFile_NickNameString(std::ifstream& file);
 	protected :
-		// Entry counts at or below this are taken on trust; see
-		// IsEntryCountSane.
-		enum { MAX_UNMEASURED_ENTRIES = 65536 };
-
 		//-------------------------------------------------------
 		// Is an entry count read out of a file plausible?
 		//
 		// Every entry costs at least one byte on disk, so a count
 		// larger than what is left of the file cannot describe
-		// real entries however small Type is. Fails open: when the
-		// stream will not say how much is left, only the sign is
-		// judged, and a negative count is always rejected because
-		// new Type[negative] is undefined.
+		// real entries however small Type is. Nickname records also
+		// carry an index. Reject failed or unmeasurable input before
+		// allocation, including small counts and incomplete prefixes.
+		// This is a lower bound, not validation of each entry's body.
 		//-------------------------------------------------------
-		static bool	IsEntryCountSane(std::ifstream& file, int count)
+		static bool	IsEntryCountSane(std::ifstream& file, int count,
+			std::streamoff minimumBytesPerEntry = 1)
 		{
-			if (count < 0)
-				return false;
-
-			// No shipped table comes near this, and a count below it
-			// cannot ask for an allocation worth refusing. Nested
-			// tables run this once per outer entry, so the ordinary
-			// case must not pay for the seek below.
-			if (count <= MAX_UNMEASURED_ENTRIES)
-				return true;
-
-			if (!file.good())
+			if (!file.good() || count < 0 || minimumBytesPerEntry <= 0)
 				return false;
 
 			std::streamoff	cur = file.tellg();
 
 			if (cur < 0)
-				return true;
+				return false;
 
 			file.seekg(0, std::ios::end);
 
 			std::streamoff	end = file.tellg();
 
-			// put the stream back exactly where it was
-			file.clear();
+			if (!file.good() || end < cur)
+				return false;
+
+			// Preserve the next record's position without clearing an I/O failure.
 			file.seekg(cur, std::ios::beg);
-
-			if (end < cur)
-				return true;
-
-			return (std::streamoff)count <= end - cur;
+			return file.good() && count <= (end - cur) / minimumBytesPerEntry;
 		}
 
 		int			m_Size;					// number of Types held
@@ -241,7 +226,10 @@ CTypeTable<Type>::LoadFromFile(std::ifstream& file)
 
 	// the count is whatever the file says, and Init allocates from it
 	if (!IsEntryCountSane(file, numSize))
+	{
+		file.setstate(std::ios::failbit);
 		return;
+	}
 
 	// reallocate when the size differs from what is currently held
 	if (m_Size != numSize)
@@ -254,7 +242,7 @@ CTypeTable<Type>::LoadFromFile(std::ifstream& file)
 	}
 
 	// read each entry from the file
-	for (int i=0; i<m_Size; i++)
+	for (int i=0; i<m_Size && file.good(); i++)
 	{
 		if (i==700)
 		{
@@ -293,13 +281,15 @@ bool
 CTypeTable<Type>::LoadFromFile_NickNameString(std::ifstream& file)
 {
 	int numSize=0;
-	WORD wIndex;
 	// read the size
 	file.read((char*)&numSize, 4);
 
 	// the count is whatever the file says, and Init allocates from it
-	if (!IsEntryCountSane(file, numSize))
+	if (!IsEntryCountSane(file, numSize, sizeof(WORD) + 1))
+	{
+		file.setstate(std::ios::failbit);
 		return false;
+	}
 
 	// reallocate when the size differs from what is currently held
 	if (m_Size != numSize)
@@ -314,10 +304,17 @@ CTypeTable<Type>::LoadFromFile_NickNameString(std::ifstream& file)
 
 	for (int i=0; i<m_Size; i++)
 	{
-		file.read((char*)&wIndex, 2);
-		if(wIndex>=m_Size)
+		WORD wIndex = 0;
+		if (!file.read((char*)&wIndex, sizeof(wIndex)))
 			return false;
+		if (wIndex >= m_Size)
+		{
+			file.setstate(std::ios::failbit);
+			return false;
+		}
  		m_pTypeInfo[wIndex].LoadFromFile( file );
+		if (!file.good())
+			return false;
 	}
 	return true;
 }
