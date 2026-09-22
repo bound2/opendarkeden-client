@@ -99,6 +99,11 @@ MItem::MItem()
 
 MItem::~MItem()
 {
+	// Invalidate borrowed UI pointers for every ownership path. The callback
+	// may compare this address, but must not read the already destroyed subtype.
+	if (s_pHost != nullptr && s_pHost->ItemDestroyed != nullptr)
+		s_pHost->ItemDestroyed(this);
+
 	if (m_pName!=NULL)
 	{
 		delete [] m_pName;

@@ -2718,6 +2718,10 @@ void ReleaseAllObjects()
 
 	SAFE_DELETE(g_pFileDef);
 
+	// All game-owned items are gone. Do not call into UI globals from any
+	// subsequent static teardown; a later initialization installs the host again.
+	MItem::SetHost(nullptr);
+
 #ifdef DEBUG_INFO
 	ClearDebugInfo();
 #endif
@@ -2941,6 +2945,7 @@ static const MItemHost	s_ItemHost = {
 	.EmptyMagazineFor		= EmptyMagazineFor,
 	.UsePotionFromInventory	= UsePotionFromInventory,
 	.UsePetFromInventory	= UsePetFromInventory,
+	.ItemDestroyed			= [](MItem* item) noexcept { UI_RemoveDescriptor(item); },
 };
 
 //-----------------------------------------------------------------------------

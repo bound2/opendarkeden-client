@@ -1256,6 +1256,13 @@ owned-string access for UI callers and race-specific mana labels. Option
 formatting and percentage suffixes respect the output capacity.
 `test_gamemodel_tables.cpp` owns malformed-input, reload and name contracts.
 
+`MItem` destruction notifies its host to invalidate borrowed tooltip pointers
+for every owning container and direct deletion path. The executable connects
+that identity-only notification to `UI_RemoveDescriptor`, which clears either
+tooltip payload, and clears the host after shutdown releases the item owners.
+`test_item_lifetime.cpp` owns destruction, container and address-reuse contracts;
+the callback must not read the already destroyed subtype.
+
 `Player` no longer owns the unused transport hash table or key setters, and
 socket streams no longer expose no-op setters. Reconnect paths retain their
 connection packets; the separate per-field encryption and packet layouts are
