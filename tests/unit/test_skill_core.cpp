@@ -782,6 +782,135 @@ TEST(SkillDomain, AnExperienceLevelPastTheTableIsRefused)
 	std::remove(kTempFile);
 }
 
+TEST(SkillDomain, EveryTruncatedExperienceRowPreservesThePreviousValue)
+{
+	SkillWorld world;
+	const unsigned char seed[] = {3, 0, 0, 0, 77, 0, 0, 0, 88, 0, 0, 0};
+	const unsigned char replacement[] = {
+		3, 0, 0, 0, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x08
+	};
+	for (std::streamsize size = 0; size < static_cast<std::streamsize>(sizeof(replacement)); ++size) {
+		MSkillDomain domain;
+		{
+			std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+			out.write(reinterpret_cast<const char*>(seed), sizeof(seed));
+		}
+		{
+			std::ifstream in(kTempFile, std::ios::binary);
+			domain.LoadFromFileServerDomainInfo(in);
+			CHECK(in.good());
+		}
+		{
+			std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+			out.write(reinterpret_cast<const char*>(replacement), size);
+		}
+		{
+			std::ifstream in(kTempFile, std::ios::binary);
+			domain.LoadFromFileServerDomainInfo(in);
+			CHECK(in.fail());
+		}
+		CHECK_EQ(77, domain.GetExpInfo(3).GoalExp);
+		CHECK_EQ(88, domain.GetExpInfo(3).AccumExp);
+	}
+	std::remove(kTempFile);
+}
+
+TEST(SkillManager, InvalidExperienceCountsCannotPublishRows)
+{
+	SkillWorld world;
+	g_pSkillManager->Init();
+	const int seed[] = {1, SKILLDOMAIN_BLADE, 3, 77, 88};
+	for (int count : {-1, 60000}) {
+		{
+			std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+			out.write(reinterpret_cast<const char*>(seed), sizeof(seed));
+		}
+		{
+			std::ifstream in(kTempFile, std::ios::binary);
+			g_pSkillManager->LoadFromFileServerDomainInfo(in);
+			CHECK(in.good());
+		}
+		{
+			const int replacement[] = {count, SKILLDOMAIN_BLADE, 3, 100, 200};
+			std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+			out.write(reinterpret_cast<const char*>(replacement), sizeof(replacement));
+		}
+		{
+			std::ifstream in(kTempFile, std::ios::binary);
+			g_pSkillManager->LoadFromFileServerDomainInfo(in);
+			CHECK(in.fail());
+		}
+		const auto& info = (*g_pSkillManager)[SKILLDOMAIN_BLADE].GetExpInfo(3);
+		CHECK_EQ(77, info.GoalExp);
+		CHECK_EQ(88, info.AccumExp);
+	}
+	std::remove(kTempFile);
+}
+
+TEST(SkillManager, InvalidExperienceDomainLeavesTheStreamFailed)
+{
+	SkillWorld world;
+	g_pSkillManager->Init();
+	for (int domain : {-1, static_cast<int>(MAX_SKILLDOMAIN)}) {
+		{
+			const int record[] = {1, domain, 3, 100, 200};
+			std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+			out.write(reinterpret_cast<const char*>(record), sizeof(record));
+		}
+		{
+			std::ifstream in(kTempFile, std::ios::binary);
+			g_pSkillManager->LoadFromFileServerDomainInfo(in);
+			CHECK(in.fail());
+		}
+	}
+	std::remove(kTempFile);
+}
+
+TEST(SkillManager, TruncatedExperienceFilesPreserveRowsAndEmptyFilesPreserveTheNextRecord)
+{
+	SkillWorld world;
+	g_pSkillManager->Init();
+	const int seed[] = {1, SKILLDOMAIN_BLADE, 3, 77, 88};
+	const int replacement[] = {1, SKILLDOMAIN_BLADE, 3, 100, 200};
+	for (std::streamsize size = 0; size < static_cast<std::streamsize>(sizeof(replacement)); ++size) {
+		{
+			std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+			out.write(reinterpret_cast<const char*>(seed), sizeof(seed));
+		}
+		{
+			std::ifstream in(kTempFile, std::ios::binary);
+			g_pSkillManager->LoadFromFileServerDomainInfo(in);
+			CHECK(in.good());
+		}
+		{
+			std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+			out.write(reinterpret_cast<const char*>(replacement), size);
+		}
+		{
+			std::ifstream in(kTempFile, std::ios::binary);
+			g_pSkillManager->LoadFromFileServerDomainInfo(in);
+			CHECK(in.fail());
+		}
+		const auto& info = (*g_pSkillManager)[SKILLDOMAIN_BLADE].GetExpInfo(3);
+		CHECK_EQ(77, info.GoalExp);
+		CHECK_EQ(88, info.AccumExp);
+	}
+	{
+		const int empty = 0;
+		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
+		out.write(reinterpret_cast<const char*>(&empty), sizeof(empty));
+		out.put('\x7e');
+	}
+	{
+		std::ifstream in(kTempFile, std::ios::binary);
+		g_pSkillManager->LoadFromFileServerDomainInfo(in);
+		CHECK(in.good());
+		CHECK_EQ(0x7e, in.get());
+		CHECK_EQ(77, (*g_pSkillManager)[SKILLDOMAIN_BLADE].GetExpInfo(3).GoalExp);
+	}
+	std::remove(kTempFile);
+}
+
 TEST(SkillManager, InitSkillListRebuildsTheTreesAndKeepsTheDomainLevels)
 {
 	SkillWorld world;

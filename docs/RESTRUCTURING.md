@@ -1245,6 +1245,11 @@ also pins count, level, truncation and record-boundary handling for all ten
 experience loaders. The format checker parses the migrated built-in string
 setters and retains its site and resolution floors.
 
+Skill-domain experience loading also publishes only complete rows. The manager
+validates its record count and domain IDs, preserves failed stream state, and
+leaves existing experience unchanged when a count or row is truncated.
+`test_skill_core.cpp` owns these input and following-record contracts.
+
 The scrollbar's position calculations now live in `basic/ScrollRange.h`,
 inherited by the real UI widget. The move preserves the existing behavior;
 the following fix makes the state private, clamps updates, validates pixel
