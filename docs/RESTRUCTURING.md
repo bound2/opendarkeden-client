@@ -722,6 +722,16 @@ rounds settled* for the host rules). Test fixtures share
 
 ---
 
+- [ ] **4.7 Shrine-position loading:** shrine records and the row loop move
+  into `gamemodel` behind a line-reader callback.
+  > **Status:** in progress (extraction; malformed count/row handling and the
+  > uninitialized row number remain to fix). `ShrineInfoData.cpp` owns row
+  > parsing and table construction; `ShrineInfoManager.cpp` retains archive
+  > access and the process-owned table. The first slice preserves parser
+  > behavior and adds a real-library valid-input link proof. An absent reader
+  > fails without modifying the table.
+  - Owner: `gamemodel_files.txt`, M0–M2, and `test_regen_tower.cpp`.
+
 ## Phase 5 — Long tail
 
 - [x] **5.1 Split the debug facilities** so `DebugInfo.h`/`MinTr.h` stop

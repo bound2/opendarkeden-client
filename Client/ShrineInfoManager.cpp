@@ -6,19 +6,6 @@
 
 RegenTowerInfoManager *g_pRegenTowerInfoManager = NULL;
 
-void RegenTowerInfo::LoadFromLine(char *szLine)
-{
-	if( szLine == NULL )
-		return;
-
-	sscanf( szLine,"%d %d %d %d",&num, &zoneID,&x,&y);
-	owner = -1;
-}
-
-RegenTowerInfoManager::RegenTowerInfoManager()
-{
-}
-
 bool RegenTowerInfoManager::LoadRegenTowerInfo()
 {
 	CRarFile rarfile;
@@ -29,33 +16,13 @@ bool RegenTowerInfoManager::LoadRegenTowerInfo()
 	if( !rarfile.IsSet() )
 		return false;
 
-	char szLine[512];
-	bool bInit = false;
-	
-	while( rarfile.GetString( szLine, 512 ) )
-	{
-		if( szLine[0] == ';' )
-			continue;
-
-		if( szLine[0] == '*' && bInit == false )
-		{
-			int n;
-			sscanf(szLine+1,"%d",&n);
-
-			Init( n );
-			bInit = true;
-			continue;
+	const RegenTowerLineReader reader{
+		&rarfile,
+		[](void* context, char* line, int capacity) {
+			return static_cast<CRarFile*>(context)->GetString(line, capacity);
 		}
-		
-		if( strlen(szLine) <= 0 )
-			continue;
-		
-		int num;
-		sscanf(szLine,"%d",&num);
-
-		if( num >= 0 && num < GetSize() )
-			m_pTypeInfo[num].LoadFromLine( szLine );
-	}
+	};
+	const bool loaded = LoadRegenTowerInfoLines(reader);
 	rarfile.Release();
-	return true;
+	return loaded;
 }

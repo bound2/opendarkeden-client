@@ -21,15 +21,22 @@ public :
 	int		owner;
 };
 
+// Resource access stays with the executable; the table consumes its lines.
+struct RegenTowerLineReader {
+	void* context = nullptr;
+	bool (*GetString)(void*, char*, int) = nullptr;
+};
+
 class RegenTowerInfoManager : public CTypeTable< RegenTowerInfo >
 {
 public :	
 	RegenTowerInfoManager();
 
 	bool			LoadRegenTowerInfo();
+	bool			LoadRegenTowerInfoLines(const RegenTowerLineReader& reader);
 	
 private :
 };
 
-// Singleton pattern 인터페이스는 어디있는거야~~
+// Process-owned table; resource access stays in the executable.
 extern RegenTowerInfoManager *g_pRegenTowerInfoManager;
