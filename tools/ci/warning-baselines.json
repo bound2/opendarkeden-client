@@ -1,6 +1,6 @@
 {
    "linux-asan-x86_64" : {
-      "-Waddress" : 14,
+      "-Waddress" : 7,
       "-Wcatch-value=" : 19,
       "-Wchar-subscripts" : 22,
       "-Wclass-memaccess" : 2,
@@ -83,7 +83,6 @@
       "-Wnull-conversion" : 29,
       "-Woverloaded-virtual" : 12,
       "-Wparentheses" : 8,
-      "-Wpointer-bool-conversion" : 7,
       "-Wrange-loop-construct" : 1,
       "-Wreorder-ctor" : 1,
       "-Wself-assign" : 5,
@@ -109,7 +108,7 @@
       "-Wvisibility" : 1
    },
    "linux-x86_64" : {
-      "-Waddress" : 14,
+      "-Waddress" : 7,
       "-Wcatch-value=" : 19,
       "-Wchar-subscripts" : 22,
       "-Wclass-memaccess" : 2,
@@ -171,7 +170,7 @@
       "-Wdelete-non-abstract-non-virtual-dtor" : 49,
       "-Wdeprecated-anon-enum-enum-conversion" : 2,
       "-Wdeprecated-copy-with-user-provided-copy" : 4,
-      "-Wdeprecated-declarations" : 199,
+      "-Wdeprecated-declarations" : 182,
       "-Wdeprecated-enum-compare" : 3,
       "-Wenum-compare-switch" : 4,
       "-Wextern-initializer" : 6,
@@ -192,7 +191,6 @@
       "-Wnull-conversion" : 29,
       "-Woverloaded-virtual" : 12,
       "-Wparentheses" : 8,
-      "-Wpointer-bool-conversion" : 7,
       "-Wrange-loop-construct" : 1,
       "-Wreorder-ctor" : 1,
       "-Wself-assign" : 5,
@@ -230,7 +228,7 @@
       "-Wdelete-non-abstract-non-virtual-dtor" : 49,
       "-Wdeprecated-anon-enum-enum-conversion" : 2,
       "-Wdeprecated-copy-with-user-provided-copy" : 4,
-      "-Wdeprecated-declarations" : 199,
+      "-Wdeprecated-declarations" : 182,
       "-Wdeprecated-enum-compare" : 3,
       "-Wenum-compare-switch" : 4,
       "-Wextern-initializer" : 6,
@@ -251,7 +249,6 @@
       "-Wnull-conversion" : 29,
       "-Woverloaded-virtual" : 12,
       "-Wparentheses" : 8,
-      "-Wpointer-bool-conversion" : 7,
       "-Wrange-loop-construct" : 1,
       "-Wreorder-ctor" : 1,
       "-Wself-assign" : 5,
@@ -289,7 +286,7 @@
       "-Wdelete-non-abstract-non-virtual-dtor" : 49,
       "-Wdeprecated-anon-enum-enum-conversion" : 2,
       "-Wdeprecated-copy-with-user-provided-copy" : 4,
-      "-Wdeprecated-declarations" : 199,
+      "-Wdeprecated-declarations" : 182,
       "-Wdeprecated-enum-compare" : 3,
       "-Wenum-compare-switch" : 4,
       "-Wextern-initializer" : 6,
@@ -310,7 +307,6 @@
       "-Wnull-conversion" : 29,
       "-Woverloaded-virtual" : 12,
       "-Wparentheses" : 8,
-      "-Wpointer-bool-conversion" : 7,
       "-Wrange-loop-construct" : 1,
       "-Wreorder-ctor" : 1,
       "-Wself-assign" : 5,
@@ -348,7 +344,7 @@
       "-Wdelete-non-abstract-non-virtual-dtor" : 49,
       "-Wdeprecated-anon-enum-enum-conversion" : 2,
       "-Wdeprecated-copy-with-user-provided-copy" : 4,
-      "-Wdeprecated-declarations" : 199,
+      "-Wdeprecated-declarations" : 182,
       "-Wdeprecated-enum-compare" : 3,
       "-Wenum-compare-switch" : 4,
       "-Wextern-initializer" : 6,
@@ -369,7 +365,6 @@
       "-Wnull-conversion" : 29,
       "-Woverloaded-virtual" : 12,
       "-Wparentheses" : 8,
-      "-Wpointer-bool-conversion" : 7,
       "-Wrange-loop-construct" : 1,
       "-Wreorder-ctor" : 1,
       "-Wself-assign" : 5,
@@ -416,7 +411,7 @@
       "C4477" : 7,
       "C4668" : 1,
       "C4834" : 1,
-      "C4996" : 534,
+      "C4996" : 492,
       "LNK-LOCAL-IMPORT" : 15
    },
    "windows-debug-x64" : {
@@ -440,7 +435,7 @@
       "C4477" : 7,
       "C4668" : 1,
       "C4834" : 1,
-      "C4996" : 534,
+      "C4996" : 492,
       "LNK-LOCAL-IMPORT" : 15
    },
    "windows-release-x64" : {
@@ -463,7 +458,7 @@
       "C4477" : 7,
       "C4668" : 1,
       "C4834" : 1,
-      "C4996" : 535,
+      "C4996" : 493,
       "LNK-LOCAL-IMPORT" : 15
    }
 }
