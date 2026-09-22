@@ -1,7 +1,5 @@
 #pragma once
 
-#pragma warning(disable:4786)
-
 #include "CTypeTable.h"
 #include <vector>
 
@@ -18,8 +16,8 @@ public :
 	// The shrine minimap has exactly three rectangles, for zones 71..73.
 	bool	IsValid() const;
 
-	void	LoadFromFile(std::ifstream& file) { }
-	void	SaveToFile(std::ofstream& file) { }
+	void	LoadFromFile(std::ifstream&) { }
+	void	SaveToFile(std::ofstream&) { }
 	
 	int		num;
 	int		zoneID;	
