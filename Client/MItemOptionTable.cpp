@@ -3,6 +3,7 @@
 //--------------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "MItemOptionTable.h"
+#include <utility>
 
 //--------------------------------------------------------------------------
 // Global
@@ -168,21 +169,72 @@ ITEMOPTION_INFO::SaveToFile(std::ofstream& file)
 void
 ITEMOPTION_TABLE::LoadFromFile(std::ifstream& file)
 {
-	int size;
-
-	file.read((char *)&size, 4);
-	// The part names land in two arrays of MAX_PART entries, so a count
-	// the file declares beyond that would be written past them (a
-	// negative one is nonsense). The whole table is refused rather than
-	// just the names past the arrays: half a table is harder to notice
-	// than an empty one.
-	if (size < 0 || size > MAX_PART)
+	int size = 0;
+	file.read(reinterpret_cast<char*>(&size), 4);
+	if (!file.good())
 		return;
-	for(int i = 0; i < size; i++)
+	if (size < 0 || size > MAX_PART)
 	{
-		ITEMOPTION_PARTENAME[i].LoadFromFile(file);
-		ITEMOPTION_PARTNAME[i].LoadFromFile(file);
+		file.setstate(std::ios::failbit);
+		return;
 	}
 
-	CTypeTable<ITEMOPTION_INFO>::LoadFromFile(file);
+	ITEMOPTION_TABLE pending;
+	for(int i = 0; i < size; i++)
+	{
+		MString englishName, localName;
+		englishName.LoadFromFile(file);
+		localName.LoadFromFile(file);
+		if (!file.good())
+			return;
+		pending.ITEMOPTION_PARTENAME[i] = englishName.GetString() == nullptr ? "" : englishName.GetString();
+		pending.ITEMOPTION_PARTNAME[i] = localName.GetString() == nullptr ? "" : localName.GetString();
+	}
+
+	int count = 0;
+	file.read(reinterpret_cast<char*>(&count), 4);
+	// Two string prefixes and eleven integers are required even for empty names.
+	if (!IsEntryCountSane(file, count, 52))
+	{
+		file.setstate(std::ios::failbit);
+		return;
+	}
+	pending.Init(count);
+	for (int i = 0; i < count; ++i)
+	{
+		ITEMOPTION_INFO& row = *pending.GetMutable(i);
+		row.LoadFromFile(file);
+		if (!file.good())
+			return;
+		if (row.Part < 0 || row.Part >= MAX_PART)
+		{
+			file.setstate(std::ios::failbit);
+			return;
+		}
+	}
+
+	// Publish only after every name and row has been read and validated.
+	// Swaps cannot allocate, so even allocation failures leave the old table intact.
+	// Empty slots in a smaller valid reload replace the old part names too.
+	ITEMOPTION_PARTNAME.swap(pending.ITEMOPTION_PARTNAME);
+	ITEMOPTION_PARTENAME.swap(pending.ITEMOPTION_PARTENAME);
+	std::swap(m_Size, pending.m_Size);
+	std::swap(m_pTypeInfo, pending.m_pTypeInfo);
+}std::string ITEMOPTION_TABLE::GetPartName(int part, char manaPrefix) const
+{
+	if (part < 0 || part >= MAX_PART)
+		return {};
+	std::string result = ITEMOPTION_PARTNAME[part];
+	if (manaPrefix == 'H' || manaPrefix == 'E')
+	{
+		const size_t pos = result.find("MP");
+		if (pos != std::string::npos)
+			result[pos] = manaPrefix;
+	}
+	return result;
+}std::string ITEMOPTION_TABLE::GetPartEName(int part) const
+{
+	if (part < 0 || part >= MAX_PART)
+		return {};
+	return ITEMOPTION_PARTENAME[part];
 }

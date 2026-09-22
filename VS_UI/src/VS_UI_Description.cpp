@@ -369,7 +369,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				if(p_item->GetSilver() > 0/* && p_item->GetEnchantLevel()!=0xFFFF add by viva */)
 				{
 					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_ATTR].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					sprintf(sz_buf, "%s +%d", g_pItemOptionTable->ITEMOPTION_PARTNAME[p_item->GetEnchantLevel()].GetString(), p_item->GetSilver());				
+					SafeFormat::Format(sz_buf, "%s +%d", g_pItemOptionTable->GetPartName(p_item->GetEnchantLevel()), p_item->GetSilver());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}
@@ -427,7 +427,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 //				if(pPetItem->GetPetKeepedDay() > 0)
 //				{
 //					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_ATTR].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-//					sprintf(sz_buf, "%s +%d", g_pItemOptionTable->ITEMOPTION_PARTNAME[p_item->GetEnchantLevel()].GetString(), p_item->GetSilver());				
+//					SafeFormat::Format(sz_buf, "%s +%d", g_pItemOptionTable->GetPartName(p_item->GetEnchantLevel()), p_item->GetSilver());
 //					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 //					py += SMALL_FONT_Y_GAP;
 //				}
@@ -978,33 +978,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		// Add option
 		if(p_item->IsIdentified())
 		{			
-			/*if (p_item->GetItemOptionListCount() != 0)
-			{
-				int optionCount = p_item->GetItemOptionListCount();
-				ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[option];
-				
-				char pPartName[20];
-				strcpy(pPartName, ITEMOPTION_INFO::ITEMOPTION_PARTNAME[optionInfo.Part]);
-				if(p_item->IsVampireItem() && strstr(pPartName,"MP") != NULL)
-					*strstr(pPartName,"MP") = 'H';
-				
-				BYTE PlusPoint	= optionInfo.PlusPoint;
-				
-				if (pPartName)
-				{
-					fOptionCheck=TRUE;
-					vx = g_PrintColorStr(px, py, "옵션 : ", gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					if(optionInfo.Part == ITEMOPTION_INFO::PART_DURABILITY)
-					{
-						sprintf(sz_buf, "%s +%d", pPartName, PlusPoint-100);
-						strcat(sz_buf, "%");
-					}
-					else
-						sprintf(sz_buf, "%s +%d", pPartName, PlusPoint);
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GOLD);//RGB_YELLOW);
-				}
-				py += SMALL_FONT_Y_GAP;
-			}*/
+
 
 			BOOL fOptionCheck=FALSE;
 			if(!p_item->IsEmptyItemOptionList()&& p_item->GetItemClass() != ITEM_CLASS_CODE_SHEET )
@@ -1015,19 +989,12 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				while(itr != optionList.end() && *itr < g_pItemOptionTable->GetSize())
 				{
 					const ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
-					char pPartName[20];
-					strcpy(pPartName,g_pItemOptionTable->ITEMOPTION_PARTNAME[optionInfo.Part].GetString());
-					if(strstr(pPartName,"MP") != NULL)
-					{
-						if(g_eRaceInterface == RACE_VAMPIRE)
-							*strstr(pPartName,"MP") = 'H';
-						else if(g_eRaceInterface == RACE_OUSTERS)
-							*strstr(pPartName,"MP") = 'E';
-					}
-					
+					const std::string pPartName = g_pItemOptionTable->GetPartName(optionInfo.Part,
+						g_eRaceInterface == RACE_VAMPIRE ? 'H' : g_eRaceInterface == RACE_OUSTERS ? 'E' : 'M');
+
 					BYTE PlusPoint	= optionInfo.PlusPoint;
 					
-					if (pPartName)
+					if (!pPartName.empty())
 					{
 						if(!fOptionCheck)
 						{
@@ -1037,19 +1004,17 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 								
 						if(optionInfo.Part == ITEMOPTION_TABLE::PART_DURABILITY)
 						{
-							sprintf(sz_buf, "%s +%d", pPartName, PlusPoint-100);
-							strcat(sz_buf, "%");
+							SafeFormat::Format(sz_buf, "%s +%d%%", pPartName, PlusPoint-100);
 						}
 						else
 						if(
 							optionInfo.Part >= ITEMOPTION_TABLE::PART_STR_TO_DEX &&
 							optionInfo.Part <= ITEMOPTION_TABLE::PART_INT_TO_DEX)
 						{
-							sprintf(sz_buf, "%s %d", pPartName, PlusPoint);
-							strcat(sz_buf, "%");
+							SafeFormat::Format(sz_buf, "%s %d%%", pPartName, PlusPoint);
 						}
 						else
-							sprintf(sz_buf, "%s +%d", pPartName, PlusPoint);
+							SafeFormat::Format(sz_buf, "%s +%d", pPartName, PlusPoint);
 						g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GOLD);//RGB_YELLOW);
 					}
 					py += SMALL_FONT_Y_GAP;
@@ -1066,20 +1031,12 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				while(itr != DefaultOptionList.end())
 				{
 					const ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
-					char pPartName[20];
-					strcpy(pPartName,g_pItemOptionTable->ITEMOPTION_PARTNAME[optionInfo.Part].GetString());
-					
-					if(strstr(pPartName,"MP") != NULL)
-					{
-						if(p_item->IsVampireItem())
-							*strstr(pPartName,"MP") = 'H';
-						else if(p_item->IsOustersItem())
-							*strstr(pPartName,"MP") = 'E';
-					}
-					
+					const std::string pPartName = g_pItemOptionTable->GetPartName(optionInfo.Part,
+						p_item->IsVampireItem() ? 'H' : p_item->IsOustersItem() ? 'E' : 'M');
+
 					BYTE PlusPoint	= optionInfo.PlusPoint;
 					
-					if (pPartName)
+					if (!pPartName.empty())
 					{
 						if(!fOptionCheck)
 						{
@@ -1088,19 +1045,17 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 						}
 						if(optionInfo.Part == ITEMOPTION_TABLE::PART_DURABILITY)
 						{
-							sprintf(sz_buf, "%s +%d", pPartName, PlusPoint-100);
-							strcat(sz_buf, "%");
+							SafeFormat::Format(sz_buf, "%s +%d%%", pPartName, PlusPoint-100);
 						}
 						else
 						if(
 							optionInfo.Part >= ITEMOPTION_TABLE::PART_STR_TO_DEX &&
 							optionInfo.Part <= ITEMOPTION_TABLE::PART_INT_TO_DEX)
 						{
-							sprintf(sz_buf, "%s %d", pPartName, PlusPoint);
-							strcat(sz_buf, "%");
+							SafeFormat::Format(sz_buf, "%s %d%%", pPartName, PlusPoint);
 						}
 						else
-							sprintf(sz_buf, "%s +%d", pPartName, PlusPoint);
+							SafeFormat::Format(sz_buf, "%s +%d", pPartName, PlusPoint);
 						g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GOLD);//RGB_YELLOW);
 					}
 					py += SMALL_FONT_Y_GAP;
