@@ -186,7 +186,9 @@ check () {
 # older duplicate is removed and ui_tests links the production parser.
 # 468: the help-message loader moves unchanged into VS_UI for parser tests.
 # 467: CToken moves byte-identically into gamemodel for reset/lifetime tests.
-R1_BASELINE=467
+# 466: remove the empty Client_PCH.cpp; CMake now generates the PCH producer.
+# Count application sources, excluding only that generated target-specific file.
+R1_BASELINE=466
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -209,7 +211,7 @@ if [ -n "$R1_VCXPROJ" ]; then
 		echo "FAIL R1: $(dirname "$R1_VCXPROJ") was configured before CMakeLists.txt or a library membership file last changed - reconfigure that tree first"
 		FAIL=1
 	else
-		R1=$(grep -c "<ClCompile Include" "$R1_VCXPROJ")
+		R1=$(grep "<ClCompile Include" "$R1_VCXPROJ" | grep -vcE '[/\\]CMakeFiles[/\\]DarkEden\.dir[/\\]cmake_pch\.cxx"')
 		check "R1 (TUs in DarkEden.vcxproj: $R1_VCXPROJ)" "$R1" "$R1_BASELINE"
 	fi
 elif [ -n "$BUILD_DIR" ] && [ -f "$BUILD_DIR/build.ninja" ]; then
@@ -223,13 +225,13 @@ elif [ -n "$BUILD_DIR" ] && [ -f "$BUILD_DIR/build.ninja" ]; then
 	# this branch existed the ratchet SKIPPED on every non-MSVC tree,
 	# which the port assessment listed as fail-open (area A). build.ninja
 	# is rewritten on every configure, so its mtime is the configure time.
-	R1_NINJA_BASELINE=465
+	R1_NINJA_BASELINE=464
 	R1_NINJA="$BUILD_DIR/build.ninja"
 	if [ CMakeLists.txt -nt "$R1_NINJA" ] || [ tests/arch/packetwire_files.txt -nt "$R1_NINJA" ] || [ tests/arch/gamemodel_files.txt -nt "$R1_NINJA" ]; then
 		echo "FAIL R1: $BUILD_DIR was configured before CMakeLists.txt or a library membership file last changed - reconfigure that tree first"
 		FAIL=1
 	else
-		R1=$(grep -cE '^build CMakeFiles/DarkEden\.dir/.*\.(cpp|c)\.o:' "$R1_NINJA")
+		R1=$(grep -E '^build CMakeFiles/DarkEden\.dir/.*\.(cpp|c|cxx|cc)\.o:' "$R1_NINJA" | grep -vcE '^build CMakeFiles/DarkEden\.dir/cmake_pch\.cxx\.o:')
 		check "R1 (TUs in the DarkEden target of $R1_NINJA)" "$R1" "$R1_NINJA_BASELINE"
 	fi
 else

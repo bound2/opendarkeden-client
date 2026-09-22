@@ -2,8 +2,10 @@
 
 	Client_PCH.h
 
-	The one precompiled header for the game's translation units: the
-	executable, VS_UI, the packet layer and the game model. It replaces
+	The common header for the game's translation units: the executable,
+	VS_UI, the packet layer and the game model. CMake precompiles it
+	privately for DarkEden and VS_UI, using each target's own options;
+	the other libraries continue to include it normally. It replaces
 	the original VC6 precompiled header, and since 2026-09-08 it also
 	replaces the second copy that lived in VS_UI/ (that file is a
 	wrapper around this one now, keeping only VS_UI's warning pragmas).
