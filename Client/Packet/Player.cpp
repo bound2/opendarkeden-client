@@ -27,7 +27,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 Player::Player ()
-: pHashTable(NULL), m_pSocket(NULL), m_pInputStream(NULL), m_pOutputStream(NULL)
+: m_pSocket(NULL), m_pInputStream(NULL), m_pOutputStream(NULL)
 {
 	__BEGIN_TRY
 
@@ -43,12 +43,6 @@ Player::Player ()
 
 	Assert( m_pOutputStream == NULL );
 
-	// pHashTable is in the initialiser list now, so both constructors
-	// set it. This one used to be the only place it was written, and
-	// the socket constructor - which RequestServerPlayer forwards to,
-	// as the deleted RequestClientPlayer did - left it holding whatever
-	// the memory did, for delKey to delete[].
-
 	__END_CATCH
 }
 
@@ -59,7 +53,7 @@ Player::Player ()
 //
 //////////////////////////////////////////////////////////////////////
 Player::Player ( Socket * pSocket )
-: pHashTable(NULL), m_pSocket(pSocket), m_pInputStream(NULL), m_pOutputStream(NULL)
+: m_pSocket(pSocket), m_pInputStream(NULL), m_pOutputStream(NULL)
 {
 	__BEGIN_TRY
 		
@@ -87,14 +81,6 @@ Player::Player ( Socket * pSocket )
 Player::~Player () noexcept(false)
 {
 	__BEGIN_TRY
-
-	// delete the encryption table
-	// Nothing freed it, so a player that had been given a key leaked
-	// 512 bytes. Freed before the streams, which hold a pointer to it.
-	if ( pHashTable != NULL ) {
-		delete [] pHashTable;
-		pHashTable = NULL;
-	}
 
 	// delete socket input stream
 	if ( m_pInputStream != NULL ) {
@@ -332,39 +318,3 @@ std::string Player::toString () const
 
 	__END_CATCH
 }
-	//add by viva
-void Player::setKey(WORD EncryptKey, WORD HashKey) 
-{
-	// A second key used to leak the table the first one built.
-	if ( pHashTable != NULL )
-	{
-		delete [] pHashTable;
-	}
-
-	pHashTable = new BYTE[512];
-	BYTE key = (HashKey + 4658)&0x00FF;
-	for(int i = 0; i<512; i++)
-	{
-		key = (key+0xCC)^(key * 0x3)^key;
-		pHashTable[i] = key;
-	}
-
-	EncryptKey = EncryptKey % 512;
-	if( m_pInputStream != NULL)
-		m_pInputStream->setKey(EncryptKey, pHashTable);
-	if( m_pOutputStream != NULL)
-		m_pOutputStream->setKey(EncryptKey, pHashTable);
-}
-void Player::delKey() 
-{
-	if(pHashTable)
-	{
-		delete[] pHashTable;
-		pHashTable = NULL;
-	}
-	if( m_pInputStream != NULL)
-		m_pInputStream->setKey(0, NULL);
-	if( m_pOutputStream != NULL)
-		m_pOutputStream->setKey(0, NULL);
-}
-	//end

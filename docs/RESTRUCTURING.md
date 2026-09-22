@@ -1250,6 +1250,12 @@ validates its record count and domain IDs, preserves failed stream state, and
 leaves existing experience unchanged when a count or row is truncated.
 `test_skill_core.cpp` owns these input and following-record contracts.
 
+`Player` no longer owns the unused transport hash table or key setters, and
+socket streams no longer expose no-op setters. Reconnect paths retain their
+connection packets; the separate per-field encryption and packet layouts are
+unchanged. `test_player_base.cpp` owns the surviving player contracts, while
+`test_packet_goldens.cpp` pins the plain login and encrypted field bytes.
+
 The scrollbar's position calculations now live in `basic/ScrollRange.h`,
 inherited by the real UI widget. The move preserves the existing behavior;
 the following fix makes the state private, clamps updates, validates pixel

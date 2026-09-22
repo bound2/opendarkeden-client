@@ -28,6 +28,10 @@ class Packet;
 //
 // class SocketOutputStream
 //
+// The socket transport is unencrypted, including the CLLogin password.
+// Individual readEncrypt/writeEncrypt fields use the separate Encrypter.
+// Adding transport encryption requires a matching server protocol change.
+//
 //////////////////////////////////////////////////////////////////////
 
 class SocketOutputStream {
@@ -142,12 +146,6 @@ private :
 	uint m_Tail;
 	// 룐관埼죗
 	BYTE m_Sequence;
-public :
-
-	// There is no transport encryption on this stream -- see the same note in
-	// SocketInputStream.h. Everything this client sends, the login password
-	// included, goes out in cleartext.
-	void setKey(WORD /*EncryptKey*/, BYTE* /*HashTable*/) noexcept {}
 };
 
 #endif
