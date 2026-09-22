@@ -4,7 +4,10 @@
   "builtin-baseline": "114d9fe62faf35856b45cf55cb93b57028a45d63",
   "dependencies": [
     "sdl2",
-    "sdl2-image",
+    {
+      "name": "sdl2-image",
+      "features": ["libjpeg-turbo"]
+    },
     "sdl2-ttf",
     "sdl2-mixer",
     "libiconv",

@@ -21,7 +21,8 @@
 #include "MItemOptionTable.h"
 #include "MGameStringTable.h"
 #include "SafeFormat.h"
-#include "HelpMarkup.h"
+#include "HelpImageCache.h"
+#include "TextService.h"
 #include "KeyAccelerator.h"
 #include "ClientConfig.h"
 #include "MTimeItemManager.h"
@@ -39,7 +40,6 @@
 #ifdef PLATFORM_WINDOWS
 #include "TCHAR.H"
 #endif
-#include "CJpeg.h"
 #include "MFakeCreature.h"
 #include "MPlayer.h"
 
@@ -72,10 +72,6 @@ extern RECT g_GameRect;
 #define ITEM_ENAME_RARE_COLOR			RGB(15<<3,15<<3,31<<3)
 #define ITEM_DESC_RGB					RGB(192, 192, 255)
 
-#define MAXBUFFER						20480
-#define dSTRING_LEN						2048
-#define LIMITLINE						60
-#define LINEWIDTH						20
 
 
 extern CSDLInput*			g_pSDLInput;
@@ -10290,8 +10286,8 @@ bool	C_VS_UI_PET_INFO::IsPixel(int _x, int _y)
 C_VS_UI_HELPDESC::C_VS_UI_HELPDESC(const char *detail,const char *title,DWORD id)
 {	
 	m_helpindex = id;
-	m_title = title;
-	m_detail = detail;
+	m_title = TextSystem::TextService::NormalizeText(title ? title : "");
+	m_detail = detail ? detail : "";
 	int window_w = 500, window_h = 450;
 	Set(g_GameRect.right/2-window_w/2, g_GameRect.bottom/2-window_h/2, window_w, window_h);
 	int close_x = w-95, close_y = h-50;
@@ -10323,21 +10319,6 @@ C_VS_UI_HELPDESC::~C_VS_UI_HELPDESC()
 	DeleteNew(m_pC_scroll_bar);
 	DeleteNew(m_pC_button_group);
 	g_UnregisterWindow(this);
-	ClearHelpJpg();
-}
-
-void
-C_VS_UI_HELPDESC::ClearHelpJpg()
-{
-	JPGIMG_MAP::iterator itr = m_jpgData.begin();
-	JPGIMG_MAP::iterator endItr = m_jpgData.end();
-
-	for( ; itr != endItr; itr++ )
-	{
-		delete itr->second;
-	}
-
-	m_jpgData.clear();
 }
 
 void C_VS_UI_HELPDESC::Start()
@@ -10362,552 +10343,63 @@ void C_VS_UI_HELPDESC::Run(id_t id)
 		break;
 	}
 }
-/*
-void C_VS_UI_HELPDESC::Show()
-{
-	if(gpC_base->m_p_DDSurface_back->Lock())
-	{
-		gpC_global_resource->DrawDialogLocked2(x,y,w,h,GetAttributes()->alpha);
-		m_pC_button_group->Show();	
-		gpC_base->m_p_DDSurface_back->Unlock();
-	}
-	
-//	if(MHelpMessageManager::Instance().getMessageSize() == NULL) return;
-//	const MHelpMessage& message = MHelpMessageManager::Instance().getMessage(m_helpindex);
-	std::string content  = m_title;
-	
-	// m_title has no length cap of its own, so the buffer supplies the bound.
-	char buf[1024];
-	snprintf(buf, sizeof(buf), "제목 : %s", content.c_str());
-	g_PrintColorStr(x+30, y+10, buf , gpC_base->m_dialog_msg_pi, RGB_GOLD);
-	
-	int NullSizex,NullSizey;
-	std::string tempappend;
-	std::string tempspk;
-	std::string tempPos;
-	std::string tempindex; 
-	std::string tempcolor;
-	std::vector<std::string>::iterator itr = parsing_data.begin();
-	std::vector<std::string>::iterator EndItr = parsing_data.end();
-	const int char_width = g_GetStringWidth("a", gpC_base->m_dialog_msg_pi.hfont);
-	const int char_height = g_GetStringHeight("a", gpC_base->m_dialog_msg_pi.hfont);
-	
-	int line = 0;
-	int imgcnt = 0;
-	int linelimit = 15;
-	int  m_width,m_height;
-			
-	DWORD color;
-	
-	const char *isfont = NULL;
-	const char *istag  = NULL;
-	
-	while(itr!=EndItr)
-	{		
-
-		std::string str = *itr;
-		std::string tagstr;
-		istag = strstr(str.c_str(), "<");
-		isfont =  strstr(str.c_str(),"#");
-
-		if(istag)  // 첫번째 문자열이 '<'인경우
-		{
-			tagstr = str ;
-			if(isfont)// 태크에 "#"이 있을경우
-			{
-				tempappend = HelpMarkup::Attribute(tagstr, "a");
-				tempcolor = HelpMarkup::Attribute(tagstr, "color");
-			}
-			else // 태그에 "<" 이 포함되어있을경우
-			{
-				
-				tempspk = HelpMarkup::Attribute(tagstr, "file" );
-				tempPos = HelpMarkup::Attribute(tagstr, "pos" );
-				tempspk += ".jpg";
-				
-				CDirectDrawSurface *pSurface = GetJpgFileLoading(tempspk);
-				m_width = pSurface->GetWidth();										// 선택한 spk 의m_midth 를 얻어온다
-				m_height = pSurface->GetHeight();		
-				
-				NullSizex = (m_width/(char_width));									// 이미지에 필요란 공백 계산
-				NullSizey = (m_height/(char_height+5))+1;	
-				// 이미지에 필요한 라인을 계산
-				DrawImg(m_width, m_height, tempspk.c_str(), tempPos.c_str() , max(imgcnt,line));
-				imgcnt+=NullSizey;		
-				// Memdc 로..pasing 한 데이터를 가져와서 드로우 한다.
-			}
-		}
-		else 
-		{
-			// 만약 선택된 색갈이 있으면?
-			color = RGB_WHITE;
-			if(!tempcolor.empty())
-			{
-				_stscanf(tempcolor.c_str(),_T("%x"),&color);
-			}
-			
-			if(strcmp(tempappend.c_str(),"y") == 0) // 폰트 태크 다음줄을 이어쓰기한다
-			{
-				line --;
-				if(line < 0) line = 0;
-				tempappend = "";
-			}
-			
-			m_pC_scroll_bar->Show(x,y);
-			int scrollpos = m_pC_scroll_bar->GetScrollPos();
-			int top = line - scrollpos;
-			if(top >= 0)
-			{
-				g_PrintColorStr(x+30, y+40+(top*LINEWIDTH), itr->c_str() , gpC_base->m_dialog_msg_pi, color);
-			}
-			line++;
-		}
-		itr++;
-		
-		if((line) - m_pC_scroll_bar->GetScrollPos()  > (linelimit))
-		{
-			break;
-		}
-	}
-	m_pC_button_group->ShowDescription();
-
-	line = 0;
-	imgcnt = 0;
-	tempPos = "";
-	SHOW_WINDOW_ATTR;
-	
+namespace {
+constexpr int HelpLineHeight = 20;
+constexpr int HelpVisibleRows = 16;
 }
-*/
-
 
 void C_VS_UI_HELPDESC::Show()
 {
-	if(gpC_base->m_p_DDSurface_back->Lock())
-	{
-		gpC_global_resource->DrawDialogLocked2(x,y,w,h,GetAttributes()->alpha);
-		m_pC_button_group->Show();	
+	if (gpC_base->m_p_DDSurface_back->Lock()) {
+		gpC_global_resource->DrawDialogLocked2(x, y, w, h, GetAttributes()->alpha);
+		m_pC_button_group->Show();
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
-	
-	std::string content  = m_title;
-	
-	int NullSizex,NullSizey;
-	std::string tempappend;
-	std::string tempspk;
-	std::string tempPos;
-	std::string tempindex; 
-	std::string tempcolor;
-	
-	int line = 0;
-	int imgcnt = 0;
-	int linelimit = 15;
-	int  m_width,m_height;
-			
-	DWORD color;
-	
-	const char *isfont = NULL;
-	const char *istag  = NULL;
-
+	m_pC_scroll_bar->Show(x, y);
+	const size_t scroll = static_cast<size_t>(m_pC_scroll_bar->GetScrollPos());
 	g_FL2_GetDC();
-
-	// content is the help-message body and is not length limited on the way in.
-	char buf[1024];
-	snprintf(buf, sizeof(buf), "%s", content.c_str());
-	g_PrintColorStr(x+30, y+10, buf , gpC_base->m_dialog_msg_pi, RGB_GOLD);
-	
-	const int char_width = g_GetStringWidth("a", gpC_base->m_dialog_msg_pi.hfont);
-	const int char_height = g_GetStringHeight("a", gpC_base->m_dialog_msg_pi.hfont);
-	std::vector<std::string>::iterator itr = parsing_data.begin();
-	std::vector<std::string>::iterator EndItr = parsing_data.end();
-	while(itr!=EndItr)
-	{		
-
-		std::string str = *itr;
-		std::string tagstr;
-		istag = strstr(str.c_str(), "<");
-		isfont =  strstr(str.c_str(),"#");
-
-		if(istag)  // 첫번째 문자열이 '<'인경우
-		{
-			tagstr = str ;
-			if(isfont)// 태크에 "#"이 있을경우
-			{
-				tempappend = HelpMarkup::Attribute(tagstr, "a");
-				tempcolor = HelpMarkup::Attribute(tagstr, "color");
-			}
-			else // 태그에 "<" 이 포함되어있을경우
-			{
-//				tempspk = HelpMarkup::Attribute(tagstr, "file" );
-//				tempPos = HelpMarkup::Attribute(tagstr, "pos" );
-//				tempspk += ".jpg";
-//				
-//				CDirectDrawSurface *pSurface = GetJpgFileLoading(tempspk);
-//				m_width = pSurface->GetWidth();										// 선택한 spk 의m_midth 를 얻어온다
-//				m_height = pSurface->GetHeight();		
-//				
-//				NullSizex = (m_width/(char_width-1));									// 이미지에 필요란 공백 계산
-//				NullSizey = (m_height/(char_height+5))+1;	
-				// 이미지에 필요한 라인을 계산
-//				DrawImg(m_width, m_height, tempspk.c_str(), tempPos.c_str() , max(imgcnt,line));
-//				imgcnt+=NullSizey;		
-				// Memdc 로..pasing 한 데이터를 가져와서 드로우 한다.	
-			}
-		}
-		else 
-		{
-			// 만약 선택된 색갈이 있으면?
-			color = RGB_WHITE;
-			if(!tempcolor.empty())
-			{
-				_stscanf(tempcolor.c_str(),_T("%x"),&color);
-			}
-			
-			if(strcmp(tempappend.c_str(),"y") == 0) // 폰트 태크 다음줄을 이어쓰기한다
-			{
-				line --;
-				if(line < 0) line = 0;
-				tempappend = "";
-			}
-			m_pC_scroll_bar->Show(x,y);
-
-			int scrollpos = m_pC_scroll_bar->GetScrollPos();
-			int top = line - scrollpos;
-			if(top >= 0)
-			{
-				g_PrintColorStr(x+30, y+40+(top*LINEWIDTH), itr->c_str() , gpC_base->m_dialog_msg_pi, color);
-			}
-			line++;
-		}
-		itr++;
-		
-		if((line) - m_pC_scroll_bar->GetScrollPos()  > (linelimit))
-		{
-			break;
-		}
-		
+	g_PrintColorStr(x + 30, y + 10, m_title.c_str(), gpC_base->m_dialog_msg_pi, RGB_GOLD);
+	for (const auto& run : m_layout.text) {
+		if (run.row < scroll) continue;
+		if (run.row - scroll >= HelpVisibleRows) break;
+		g_PrintColorStr(x + 30, y + 40 + static_cast<int>(run.row - scroll) * HelpLineHeight,
+			run.text.c_str(), gpC_base->m_dialog_msg_pi, run.color);
 	}
 	g_FL2_ReleaseDC();
-
-	itr = parsing_data.begin();
-	EndItr = parsing_data.end();
-	line = 0;
-	imgcnt  = 0;
-
-	while(itr!=EndItr)
-	{		
-		
-		std::string str = *itr;
-		std::string tagstr;
-		istag = strstr(str.c_str(), "<");
-		isfont =  strstr(str.c_str(),"#");
-		
-		if(istag)  // 첫번째 문자열이 '<'인경우
-		{
-			tagstr = str ;
-			if(isfont)// 태크에 "#"이 있을경우
-			{
-				tempappend = HelpMarkup::Attribute(tagstr, "a");
-				tempcolor = HelpMarkup::Attribute(tagstr, "color");
-			}
-			else // 태그에 "<" 이 포함되어있을경우
-			{
-				
-				tempspk = HelpMarkup::Attribute(tagstr, "file" );
-				tempPos = HelpMarkup::Attribute(tagstr, "pos" );
-				tempspk += ".jpg";
-				
-				CDirectDrawSurface *pSurface = GetJpgFileLoading(tempspk);
-				m_width = pSurface->GetWidth();										// 선택한 spk 의m_midth 를 얻어온다
-				m_height = pSurface->GetHeight();		
-				
-				NullSizex = (m_width/(char_width-1));									// 이미지에 필요란 공백 계산
-				NullSizey = (m_height/(char_height+5))+1;	
-				// 이미지에 필요한 라인을 계산
-				DrawImg(m_width, m_height, tempspk.c_str(), tempPos.c_str() , max(imgcnt,line));
-				imgcnt+=NullSizey;		
-				// Memdc 로..pasing 한 데이터를 가져와서 드로우 한다.
-			}
-		}
-		else 
-		{
-			color = RGB_WHITE;
-			if(!tempcolor.empty())
-			{
-				_stscanf(tempcolor.c_str(),_T("%x"),&color);
-			}
-			
-			if(strcmp(tempappend.c_str(),"y") == 0) // 폰트 태크 다음줄을 이어쓰기한다
-			{
-				line --;
-				if(line < 0) line = 0;
-				tempappend = "";
-			}
-			m_pC_scroll_bar->Show(x,y);
-			
-			int scrollpos = m_pC_scroll_bar->GetScrollPos();
-			int top = line - scrollpos;
-			if(top >= 0)
-			{
-				//g_PrintColorStr(x+30, y+40+(top*LINEWIDTH), itr->c_str() , gpC_base->m_dialog_msg_pi, color);
-			}
-			line++;
-		}
-		itr++;
-		
-		if((line) - m_pC_scroll_bar->GetScrollPos()  > (linelimit))
-		{
-			break;
-		}
-		
-	}
-
+	for (const auto& image : m_layout.images) DrawImg(image);
 	m_pC_button_group->ShowDescription();
-	line = 0;
-	imgcnt = 0;
-	tempPos = "";
-	SHOW_WINDOW_ATTR;
-	
 }
 
-
-void  C_VS_UI_HELPDESC::DrawImg(int m_width, int m_height ,const char * filename,const char * pos, int linecnt)
+void C_VS_UI_HELPDESC::DrawImg(const HelpLayout::Image& image)
 {
-
-	int Pagewidth = 500;										// 현제 프리뷰에 출력될 x 싸이즈
-	int Pageheight = 500;										// 현제 프리뷰에 출력될 y 싸이즈
-	int blankwidth = 35;										// left 여백 싸이즈
-	int blankheight = 7;										// top 여백 싸이즈
-	int imagelinesize = 20;
-	
-	Rect rect;
-	if(strcmp("L",pos) == 0)			// 왼쪽정열일경우
-	{
-		rect.x = blankheight+20;        
-		rect.y = (linecnt*imagelinesize)+blankwidth-15;
+	auto* source = m_images ? m_images->Find(image.filename) : nullptr;
+	if (!source) return;
+	std::int64_t left = x;
+	switch (image.alignment) {
+	case HelpLayout::Alignment::Left:
+	case HelpLayout::Alignment::LeftBlock: left += 27; break;
+	case HelpLayout::Alignment::Right: left += static_cast<std::int64_t>(w) - image.width - 30; break;
+	case HelpLayout::Alignment::RightBlock: left += static_cast<std::int64_t>(w) - image.width - 33; break;
+	case HelpLayout::Alignment::Center: left += (static_cast<std::int64_t>(w) - image.width) / 2; break;
 	}
-	
-	if(strcmp("R",pos) == 0)			// 오른쪽정열일경우,
-	{
-		rect.x = Pagewidth-m_width-30 ; 
-		rect.y =(linecnt*imagelinesize) +blankwidth-15;
-	}
-
-	if(strcmp("LT",pos) == 0)			// ,왼쪽 전체 
-	{
-		rect.x = blankheight+20;        
-		rect.y = (linecnt*imagelinesize)+blankwidth-15;
-	}
-
-	if( strcmp("RT",pos)  == 0)		 //  오른쪽전체 
-	{
-		rect.x = Pagewidth-m_width+blankheight -40; 
-		rect.y  =(linecnt*imagelinesize) +blankwidth-15;
-	}
-	
-	if(strcmp("C",pos) == 0)		// 센터일경우 
-	{
-		rect.x = (Pagewidth-m_width)/2;  
-		rect.y = (linecnt*imagelinesize)+blankwidth+15;
-	}
-	Rect rectimg(0,0, m_width, m_height);
-	// 클리핑 처리 	
-	int top = rect.y - (m_pC_scroll_bar->GetScrollPos()*imagelinesize);
-
-	POINT p = { x + rect.x,  20 + y +top };
-	RECT r = {0, 0 , m_width, m_height};
-
-
-		CDirectDrawSurface *pSurface = GetJpgFileLoading(filename);
-		RECT re = {x ,  y+30 , x+ 500, y +400};
-		gpC_base->m_p_DDSurface_back->SetClip(&re);
-
-		// SDL backend: cast CDirectDrawSurface* to CSpriteSurface*
-		gpC_base->m_p_DDSurface_back->BltNoColorkey( &p, reinterpret_cast<CSpriteSurface*>(pSurface), &r );
-		// add by Sonic 2006.9.26
-		RECT clientrect = {0,0,800,600};
-		if(g_MyFull)
-		{
-			clientrect.right=1024;
-			clientrect.bottom=768;
-		}
-		// end
-		gpC_base->m_p_DDSurface_back->SetClip(&clientrect);
-
+	// Images and text share the same row origin and height, including centered art.
+	const std::int64_t top = static_cast<std::int64_t>(y) + 40 +
+		(static_cast<std::int64_t>(image.row) - m_pC_scroll_bar->GetScrollPos()) * HelpLineHeight;
+	auto* destination = gpC_base->m_p_DDSurface_back;
+	const auto clippedLeft = (std::max)({left, static_cast<std::int64_t>(x), std::int64_t{0}});
+	const auto clippedTop = (std::max)({top, static_cast<std::int64_t>(y) + 30, std::int64_t{0}});
+	const auto clippedRight = (std::min)({left + image.width, static_cast<std::int64_t>(x) + w,
+		static_cast<std::int64_t>(destination->GetWidth())});
+	const auto clippedBottom = (std::min)({top + image.height, static_cast<std::int64_t>(y) + 400,
+		static_cast<std::int64_t>(destination->GetHeight())});
+	if (clippedLeft >= clippedRight || clippedTop >= clippedBottom) return;
+	POINT point = {static_cast<LONG>(clippedLeft), static_cast<LONG>(clippedTop)};
+	RECT rect = {static_cast<LONG>(clippedLeft - left), static_cast<LONG>(clippedTop - top),
+		static_cast<LONG>(clippedRight - left), static_cast<LONG>(clippedBottom - top)};
+	// Source clipping keeps the viewport bounded without changing the caller's clip.
+	destination->BltNoColorkey(&point, source, &rect);
 }
 
-void C_VS_UI_HELPDESC::LoadHelpJpg(std::string filename)
-{
-
-	CJpeg jpg;
-	
-	std::string file_path;
-	file_path = _ROOT;
-	file_path += "\\spk\\";
-	file_path += filename;
-	
-	
-	CDirectDrawSurface *pHelpmsgSurface = new CDirectDrawSurface;
-	
-	bool bOpen = jpg.Open(file_path.c_str());
-	if(bOpen == true && jpg.GetWidth() > 0 && jpg.GetHeight() > 0 && jpg.GetHeight() > 0)
-	{		
-		CDirectDrawSurface *surface = pHelpmsgSurface;
-		const int bpp = jpg.GetBpp(), width = jpg.GetWidth(), height = jpg.GetHeight(), pitch = width*bpp;
-		
-		if (surface->InitOffsurface(width, height, DDSCAPS_SYSTEMMEMORY))
-		{
-			if (surface->Lock())
-			{
-				WORD *pSurface = (WORD *)surface->GetSurfacePointer();
-				unsigned char *pData = jpg.GetImage(), *pDataTemp;
-				WORD *pSurfaceTemp;
-				
-				int surfacePitch = surface->GetSurfacePitch();
-				
-				if (pSurface)
-				{
-					if (bpp == 1)
-					{
-						for (int y = 0; y < height; y++)
-						{
-							pDataTemp = pData;
-							pSurfaceTemp = pSurface;								
-							
-							for (int x = 0; x < width; x++)
-							{
-								BYTE temp_data = *pDataTemp++;	//p_data[y*(pitch)+x];
-								BYTE r = temp_data>>3;
-								BYTE g = r;
-								BYTE b = r;
-								
-								*pSurfaceTemp++ = CSDLGraphics::Color(r, g, b);
-							}
-							
-							pData = pData + pitch;
-							pSurface = (WORD*)((BYTE*)pSurface + surfacePitch);
-						}
-					}
-					else if (bpp == 3)
-					{
-						for (int y = 0; y < height; y++)
-						{
-							pDataTemp = pData;
-							pSurfaceTemp = pSurface;	
-							
-							for (int x = 0; x < width; x++)
-							{
-								//char *temp_data = &p_data[y*pitch+x*bpp];
-								BYTE r = *(pDataTemp+2) >> 3;		//temp_data[2]>>3;
-								BYTE g = *(pDataTemp+1) >> 3;	//temp_data[1]>>3;
-								BYTE b = *pDataTemp >> 3;	//temp_data[0]>>3;
-								
-								pDataTemp += bpp;
-								
-								*pSurfaceTemp++ = CSDLGraphics::Color(r, g, b);
-							}
-							
-							pData = pData + pitch;
-							pSurface = (WORD*)((BYTE*)pSurface + surfacePitch);
-						}
-					}
-					
-				}
-				surface->Unlock();
-			}
-		}
-	}
-	m_jpgData[filename] = pHelpmsgSurface;
-	jpg.Release();
-}
-
-/*
-bool C_VS_UI_HELPDESC::jpgdraw(const  char * filename)
-{
-	CJpeg jpg;
-	
-	std::string file_path;
-	file_path = _ROOT;
-	file_path += "\\HelpImg\\";
-	file_path += filename;
-
-	helpmsgSurface = new CDirectDrawSurface;
-	if(helpmsgSurface->GetSurface() != NULL)
-	{
-		return true;
-	}
-		
-	bool bOpen = jpg.Open(file_path.c_str());
-	if(bOpen == true && jpg.GetWidth() > 0 && jpg.GetHeight() > 0 && jpg.GetHeight() > 0)
-	{		
-		CDirectDrawSurface *surface = helpmsgSurface;
-		const int bpp = jpg.GetBpp(), width = jpg.GetWidth(), height = jpg.GetHeight(), pitch = width*bpp;
-		
-		if (surface->InitOffsurface(width, height, DDSCAPS_SYSTEMMEMORY))
-		{
-			if (surface->Lock())
-			{
-				WORD *pSurface = (WORD *)surface->GetSurfacePointer();
-				unsigned char *pData = jpg.GetImage(), *pDataTemp;
-				WORD *pSurfaceTemp;
-				
-				int surfacePitch = surface->GetSurfacePitch();
-				
-				if (pSurface)
-				{
-					if (bpp == 1)
-					{
-						for (register int y = 0; y < height; y++)
-						{
-							pDataTemp = pData;
-							pSurfaceTemp = pSurface;								
-							
-							for (register int x = 0; x < width; x++)
-							{
-								BYTE temp_data = *pDataTemp++;	//p_data[y*(pitch)+x];
-								BYTE r = temp_data>>3;
-								BYTE g = r;
-								BYTE b = r;
-								
-								*pSurfaceTemp++ = CSDLGraphics::Color(r, g, b);
-							}
-							
-							pData = pData + pitch;
-							pSurface = (WORD*)((BYTE*)pSurface + surfacePitch);
-						}
-					}
-					else if (bpp == 3)
-					{
-						for (register int y = 0; y < height; y++)
-						{
-							pDataTemp = pData;
-							pSurfaceTemp = pSurface;	
-							
-							for (register int x = 0; x < width; x++)
-							{
-								//char *temp_data = &p_data[y*pitch+x*bpp];
-								BYTE r = *(pDataTemp+2) >> 3;		//temp_data[2]>>3;
-								BYTE g = *(pDataTemp+1) >> 3;	//temp_data[1]>>3;
-								BYTE b = *pDataTemp >> 3;	//temp_data[0]>>3;
-								
-								pDataTemp += bpp;
-								
-								*pSurfaceTemp++ = CSDLGraphics::Color(r, g, b);
-							}
-							
-							pData = pData + pitch;
-							pSurface = (WORD*)((BYTE*)pSurface + surfacePitch);
-						}
-					}
-					
-				}
-				surface->Unlock();
-			}
-		}
-	}
-	jpg.Release();
-	return true;
-}
-*/
 void C_VS_UI_HELPDESC::Process()
 {
 	m_pC_button_group->Process();
@@ -11003,336 +10495,25 @@ bool C_VS_UI_HELPDESC::MouseControl(UINT message, int _x, int _y)
 	return true;
 }
 
-void C_VS_UI_HELPDESC::LoadCustomstr(char * customstrfilename)
-{
-	ifstream file(customstrfilename, ios::binary);
-	if(!file) return;
-	char sztemp[1024];
-	
-	while(file.getline(sztemp,1024))
-	{
-		int len = strlen(sztemp);				    	// 한라인의 길이를 구한다.
-		for(int i = len ; i >= 0; i--)					// 마지막라인의 마지막에 /r,/n 의 공백을 지워주기 위해서
-		{
-			if(sztemp[i] =='\r' || sztemp[i] =='\n')
-			{
-				sztemp[i] = '\0';
-				break;
-			}
-		}
-		custom_strting.push_back(sztemp);
-	}
-}
-
 void C_VS_UI_HELPDESC::HelpDescPasing()
 {
-	ClearHelpJpg();
-
-	const int char_width = g_GetStringWidth("a", gpC_base->m_dialog_msg_pi.hfont);
-	const int char_height = g_GetStringHeight("a", gpC_base->m_dialog_msg_pi.hfont);
-
-	char sztemp[MAXBUFFER];
-	int  m_width,m_height;
-	std::string szParsingData;
-	std::string tempstr;												// 스트링을 저장하는 함수
-	std::string tempspk;												// spk 변수
-	std::string tempPos;												// 이미지 위치 
-	std::string tempindex;												// spk 인텍스
-	std::string tempappend;												// 이어쓰기
-	char *pCur = NULL;													// 한라인을 읽어드려서 저장하는 변수
-	const char *istag = NULL;													//태크가 있는지 검사하는 변수
-	const char *isfont = NULL;												//태크가 있는지 검사하는 변수
-	
-	int NullSizex = 0,NullSizey = 0;
-	
-	size_t count = LIMITLINE;											
-	const size_t limitlinecnt = LIMITLINE;
-	size_t  appendtemp =0; 
-	int  appendtot = 0;
-	int  linecnt =-1;
-	int cur = 0;
-
-//	if(MHelpMessageManager::Instance().getMessageSize() == NULL) return;
-//	const MHelpMessage& message = MHelpMessageManager::Instance().getMessage(m_helpindex);
-//	std::string  content = 	message.m_strDetail[g_eRaceInterface];
-	std::string content  = m_detail;
-	
-	content +="\r\n";		// 마지막에 라인까지 검사를 하기위해서 
-	while(pCur != NULL || ((cur= content.find("\r\n")) != -1))
-	{
-		if(pCur == NULL)
-		{
-//			if(!content.empty())
-//			{
-			// cur is the offset of the next CRLF, so it is the length of the
-			// line about to be copied - a property of the help text, not of
-			// sztemp. Clamp it so an over-long line truncates rather than
-			// running off a 20 KB stack buffer.
-			int nCopy = cur;
-			if (nCopy < 0)
-				nCopy = 0;
-			else if (nCopy > MAXBUFFER - 1)
-				nCopy = MAXBUFFER - 1;
-
-			memset( sztemp, 0, MAXBUFFER );
-			memcpy( sztemp, content.c_str(), nCopy );
-			content.erase(0,cur+2);
-//			}
-		}
-		tempstr = sztemp;
-		istag = strstr(tempstr.c_str(),"<");  //이미지 태그일경우
-		isfont = strstr(tempstr.c_str(),"#"); // 텍스트 태그
-
-		int  num =0;
-		int start = 0;
-		int index = 0;
-		char* pch = NULL;
-		std::string digit,custom;										// 커스톰 스트링 저장 변수
-		pch = strchr(sztemp, '%');										// '%' 를 찾아서 그곳의 위치를 리턴한다.
-		szParsingData = sztemp;											// 한라인을 읽어와서 szpasingdata 에 저장한다.
-		
-		while (pch!=NULL)												// '%' 가 없을때 까지 while 동작
-		{
-			num = pch-(sztemp+start);									// % 나오기전까지의 길이를 구한다/
-			custom = "%";												// customstr "%" 으로 초기화해준다
-			int cnt = 0;
-			start += (num+1);											///%가나오기전까지의 길이를 계속더해준다.
-			while(sztemp[start+cnt] >= '0' && sztemp[start+cnt] <= '9') // 다음에 숫자가 아닐때 까지 더해준다/
-			{
-				digit += sztemp[start+cnt];		
-				custom += sztemp[start+cnt];
-				cnt++;
-			}
-			
-			if(custom_strting.size() > 0)
-			{
-				if(num >= 0)									// 이상하지만 empty 가 이상한값이 나와서 어쩔수 없이 size 로 처리했따 ㅡㅡ
-				{
-					if(custom_strting[num].size() < 2048)
-					{						
-						int pos = szParsingData.find( "%" );
-						if( pos != -1 )
-						{
-							szParsingData.replace( szParsingData.begin() + pos,
-								szParsingData.begin() + pos + cnt,
-								custom_strting[ num ] );
-						}						
-					}
-				}
-			}
-			
-			pch=strchr(sztemp+start,'%');                 
-			
-//			custom.erase();
-//			digit.erase();
-			custom.empty();
-			digit.empty();
-		}
-		
-/*		int  num =0;
-		int start = 0;
-		int index = 0;
-		szParsingData = sztemp;											// 한라인을 읽어와서 szpasingdata 에 저장한다.
-		int pos;
-
-		while( ( pos = szParsingData.find( "%" ) ) != -1 )				// '%' 가 없을떄까지 문자열을 찾아낸다
-		{
-			int cnt = 1;
-			strcpy(sztemp ,szParsingData.c_str());
-			while(sztemp[pos+cnt] >= '0' && sztemp[pos+cnt] <= '9') // 다음에 숫자가 아닐때 까지 더해준다/
-			cnt++;
-			char digit[100];
-			memset( digit, 0, 100 );
-			memcpy( digit, szParsingData.c_str() + pos + 1, cnt );
-			int num = atoi(digit);			
-			if(custom_strting.size() > 0)
-			{
-				if(num >= 0)									// 이상하지만 empty 가 이상한값이 나와서 어쩔수 없이 size 로 처리했따 ㅡㅡ
-				{
-					if(custom_strting[num].size() < 2048)
-					{						
-						int pos = szParsingData.find( "%" );
-						if( pos != -1 )
-						{
-							szParsingData.replace( szParsingData.begin() + pos,
-								szParsingData.begin() + pos + cnt,
-								custom_strting[ num ] );
-						}						
-					}
-				}
-			}
-		}
-*/
-		// The line with the custom strings substituted in. Substitution can
-		// make it longer than the line that was read, and nothing ties its
-		// length to MAXBUFFER.
-		snprintf(sztemp, sizeof(sztemp), "%s", szParsingData.c_str());
-		int len = strlen(sztemp);					// 한라인의 길이를 구한다.
-		for(int  i = len ; i >= 0; i--)					// 마지막라인의 마지막에 /r,/n 의 공백을 지워주기 위해서
-		{
-			if(sztemp[i] =='\r' || sztemp[i] =='\n')
-			{
-				sztemp[i] = '\0';
-				break;
-			}
-		}
-
-		if(istag)// 태그일경우
-		{
-			if(isfont) // 폰트(색상) 태그 일경우
-			{
-				parsing_data.push_back(tempstr.c_str());
-				tempappend = HelpMarkup::Attribute(tempstr, "a");
-				linecnt = 1;
-			}
-			else // 이미지 출력태그일경우
-			{
-				while(NullSizey > 0)						// 이곳은 이미지의 ysize 보다 텍스트가 작을떄
-				{											// 남은 ysize 만큼 공백라인을 넣어준다
-					NullSizey--;
-					parsing_data.push_back(" ");
-					if(NullSizey == 0) break;
-				}
-
-				parsing_data.push_back(tempstr.c_str());        // 이곳은 태그 전체 라인을 저장한다
-				tempspk = HelpMarkup::Attribute(tempstr, "file" );
-				tempPos = HelpMarkup::Attribute(tempstr, "pos" );
-				//tempindex = HelpMarkup::Attribute(tempstr, "index" );
-				tempstr = "";
-			
-//				CJpeg jpg;
-//				std::string file_path;
-//				file_path = _ROOT;
-//				file_path += "\\spk\\";
-//				file_path += tempspk; file_path+=".jpg";
-				tempspk +=".jpg";
-				LoadHelpJpg(tempspk);
-//				jpg.Open(file_path.c_str());
-				
-				CDirectDrawSurface *pJpgSurface = GetJpgFileLoading( tempspk );
-				m_width = pJpgSurface->GetWidth();										// 선택한 spk 의m_midth 를 얻어온다
-				m_height = pJpgSurface->GetHeight();	
-			//	m_width = m_SPK.GetWidth(atoi(tempindex.c_str()));										// 선택한 spk 의m_midth 를 얻어온다
-			//	m_height = m_SPK.GetHeight(atoi(tempindex.c_str()));									// 선택한 spk 의m_heigh 를 얻어온다
-				
-				NullSizex = (m_width/(char_width-1));									// 이미지에 필요란 공백 계산
-				NullSizey = (m_height/(char_height+5))+1;								// 이미지에 필요한 라인을 계산
-//				jpg.Release();
-				
-			}
-		}
-		else 
-		{
-			tempstr = "";
-			if(strcmp(tempPos.c_str(),"L") == 0) // 왼쪽에 이미지가 있는경우:우선앞에 sizex 의 공백을 넣은뒤 한줄에 찍을수 있는 길이를 제한한다
-			{
-				if(strcmp(tempappend.c_str(),"y") == 0 )
-				{
-					NullSizex = 0;
-				}
-				count = limitlinecnt - NullSizex;
-				while(NullSizex > 0)
-				{
-					NullSizex--;
-					if(gC_ci->IsChinese() == true)
-						tempstr += "  ";
-					else
-						tempstr += " ";
-				}
-			}
-
-			if(strcmp(tempPos.c_str(),"R") == 0) //오른쪽에 이미지가 있는경우:한줄에 찍을수있는 길이를 제한
-			{
-				count = limitlinecnt -NullSizex;
-			}
-
-			if(strcmp(tempPos.c_str(),"C") == 0 || strcmp(tempPos.c_str(),"RT") == 0 || strcmp(tempPos.c_str(),"LT") == 0)
-			{ // 중간 , 왼쪽 전체차지, 오른쪽 전체 차지 : size y 만큼만 공백라인을넣어준다
-				while(NullSizey > 0)
-				{
-					NullSizey--;
-					parsing_data.push_back(" ");
-				}
-			}
-
-			if(strcmp(tempappend.c_str(),"y") == 0 ) // 어펜드 모드냐?아니냐?
-			{
-				count = count - appendtemp;
-				while(appendtemp > 0)
-				{
-					appendtemp--;
-					if(gC_ci->IsChinese() == true)
-						tempstr += "  ";
-					else
-						tempstr += " ";
-				}
-				tempappend = "";
-				NullSizey++;
-			}
-
-			if(NullSizey > 0)						// 이미지 가 있다면 yszie 가 남아있을경우
-			{
-				NullSizex = (m_width/(char_width-1)); // 공백을 넣어서 줄어든  Nullsizex 크기를 셋팅해준다
-			}
-			else
-			{
-				tempPos = "";					 // 이미지의 ysize 의 공백라인이 끝나면 pos 태그를 클리어 해준다
-			}
-
-			if(pCur == NULL) // pCur 가 비어있을때
-			{
-				pCur = sztemp;  // pCur 에.. 한라인읽어드린 문자열을 저장한다.
-			}
-			
-			size_t linecount = strlen(pCur); // linecount 에 한라인의 총문자열 길이를 저장한다
-			size_t cutCount = count;         // 한글 2byte 중간에 깨지는 현상을 막기위해서 사용하는 변수
-			if(linecount < count)			//  문자열이 count 보다 작은경우
-			{
-				tempstr += pCur;			// 해당문자열을 저장한다
-				count -= linecount;			// count 는 다음문자열까지의 값을 가져와야 함으로 현제까지의 문자열길이를 뺴준다
-				pCur = NULL;		
-				count = limitlinecnt;
-			}
-			else
-			{
-				char szbuf[MAXBUFFER];    
-				if(g_PossibleStringCut(pCur, static_cast<int>(cutCount)) == false) // 마지막문자열을 조사해서 한글일경우 
-				{
-					cutCount--;  // 문자열의 숫자를 하나 줄여준다
-				}
-				memcpy(szbuf, pCur, cutCount);
-				szbuf[cutCount] = '\0';
-				tempstr += szbuf;
-				pCur += cutCount; 
-				count = limitlinecnt;
-			}
-			
-			appendtemp = tempstr.length(); // appen 모드일때 다음줄에 앞쪽에 공백을 넣키위해서
-			parsing_data.push_back(tempstr.c_str());
-			NullSizey--; // 이미지가 있을경우 한줄한줄 push_back 에 넣을떄 마다 한줄씩 뺴준다.
-			tempstr = "";
-		}
-	}
-	while(NullSizey > 0)						// 이곳은 이미지의 ysize 보다 텍스트가 작을떄
-	{											// 남은 ysize 만큼 공백라인을 넣어준다
-		NullSizey--;
-		parsing_data.push_back(" ");
-		if(NullSizey == 0) break;
-	}
-
-	if(parsing_data.size() > 15)
-	{
-			m_pC_scroll_bar->SetItemCount(parsing_data.size(), 16);
-	}
-	else
-	{
-			m_pC_scroll_bar->SetPosMax(1);
-	}
+	auto images = std::make_unique<HelpImageCache>(std::string(_ROOT) + "\\spk");
+	HelpLayout::Options options;
+	options.glyphWidth = (std::max)(1, g_GetStringWidth(" ", gpC_base->m_dialog_msg_pi.hfont));
+	options.lineHeight = HelpLineHeight;
+	options.indentScale = gC_ci->IsChinese() ? 2 : 1;
+	HelpLayout::Document layout;
+	const auto lookup = [&](std::string_view filename) {
+		auto* surface = images->Load(filename);
+		return surface ? HelpLayout::ImageSize{surface->GetWidth(), surface->GetHeight()}
+			: HelpLayout::ImageSize{};
+	};
+	if (!HelpLayout::Parse(TextSystem::TextService::NormalizeText(m_detail), options, lookup, layout)) return;
+	m_layout = std::move(layout);
+	m_images = std::move(images);
+	m_pC_scroll_bar->SetItemCount(m_layout.rowCount, HelpVisibleRows);
+	m_pC_scroll_bar->SetScrollPos(0);
 }
-
-
-
-
 
 //----------------------------------------------------------------------------
 // C_VS_UI_SMS_MESSAGE::C_VS_UI_SMS_MESSAGE

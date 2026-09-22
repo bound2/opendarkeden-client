@@ -1506,7 +1506,8 @@ fi
 # 586: CToken copies an owned replacement by its measured length.
 # 584: team introduction and billing dialog wrap owned rows without strcpy.
 # 570: descriptors own their rows and remove the unused replacement buffers.
-R17_BASELINE=570
+# 569: rich-help layout removes the unused substitution loop's dead strcpy.
+R17_BASELINE=569
 R17_FILES_FLOOR=500
 
 r17_members () {
