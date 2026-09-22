@@ -19,6 +19,8 @@
 #endif
 #include <algorithm>
 #include <vector>
+#include <memory>
+#include "DebugLog.h"
 
 using std::ifstream;
 using std::ios;
@@ -47,6 +49,39 @@ inline bool OpenIndexedEntry(int fileID, LPCTSTR packFilename, LPCTSTR indexFile
 		offset < 2 || std::streampos(offset) >= dataSize)
 		return false;
 	return static_cast<bool>(dataFile.seekg(static_cast<std::streamoff>(offset)));
+}
+inline bool ReadRunningIndex(const char* filename, std::ifstream& data,
+	std::vector<int>& offsets)
+{
+	if (!filename || !*filename) return false;
+	data.open(filename, std::ios::binary | std::ios::ate);
+	if (!data) return false;
+	const auto end = data.tellg();
+	std::uint16_t count = 0, dataCount = 0;
+	std::ifstream index(std::string(filename) + 'i', std::ios::binary);
+	if (!index.read(reinterpret_cast<char*>(&count), 2) ||
+		!data.seekg(0) || !data.read(reinterpret_cast<char*>(&dataCount), 2) ||
+		count != dataCount) return false;
+	offsets.resize(count);
+	for (auto& offset : offsets) {
+		std::int32_t value = 0;
+		if (!index.read(reinterpret_cast<char*>(&value), 4) || value < 2 ||
+			std::streampos(value) >= end) return false;
+		offset = value;
+	}
+	return true;
+}
+
+template<class Type> bool LoadElement(Type& value, std::ifstream& file,
+	const char* source, unsigned id)
+{
+	const auto offset = file.tellg();
+	try {
+		if (file && value.LoadFromFile(file) && file) return true;
+	} catch (...) {}
+	LOG_ERROR("Rejected pack element: source=%s id=%u offset=%lld",
+		source, id, static_cast<long long>(static_cast<std::streamoff>(offset)));
+	return false;
 }
 } // namespace CTypePackDetail
 
@@ -100,6 +135,8 @@ protected:
 	WORD			m_nLoadData;	// Loading 된 CSprite의 개수
 	std::ifstream *m_file;
 	int*			m_file_index;
+	std::vector<unsigned char> m_LoadState; // unread, accepted, rejected
+	std::string m_SourceFilename;
 };
 
 template <class Type>
@@ -122,6 +159,9 @@ CTypePack<Type>::~CTypePack()
 template <class Type>
 void CTypePack<Type>::Release()
 {
+	m_LoadState.clear();
+	m_SourceFilename.clear();
+	m_nLoadData = 0;
 	m_bRunningLoad = false;
 	
 	if(m_file != NULL)
@@ -147,14 +187,10 @@ void CTypePack<Type>::Release()
 template <class Type>
 void CTypePack<Type>::Init(WORD size)
 {
-	if(size == 0)
-		return;
-	
+	std::unique_ptr<Type[]> pending(size ? new Type[size] : nullptr);
 	Release();
-	
+	m_pData = pending.release();
 	m_Size = size;
-	
-	m_pData = new Type[size];
 }
 
 template <class Type>
@@ -176,19 +212,20 @@ Type &CTypePack<Type>::Get(WORD n)
 	if(m_pData == NULL || n >= m_Size)
 		return s_OutOfRange;
 
-	if(m_bRunningLoad && !m_pData[n].IsInit())
+	if (m_bRunningLoad && !m_pData[n].IsInit() && m_LoadState[n] != 2)
 	{
+		m_file->clear();
 		m_file->seekg(m_file_index[n]);
-		// file에 있는 Sprite들을 Load	
-		m_pData[n].LoadFromFile(*m_file);	// Sprite 읽어오기
-		if(++m_nLoadData >= m_Size)
-		{
+		const bool loaded = CTypePackDetail::LoadElement(m_pData[n], *m_file,
+			m_SourceFilename.c_str(), n);
+		if (m_LoadState[n] == 0) ++m_nLoadData;
+		m_LoadState[n] = loaded ? 1 : 2;
+		if (m_nLoadData >= m_Size) {
 			m_bRunningLoad = false;
-			m_file->close();
 			delete m_file;
-			m_file = NULL;
+			m_file = nullptr;
 			delete []m_file_index;
-			m_file_index = NULL;
+			m_file_index = nullptr;
 		}
 	}
 	
@@ -198,11 +235,11 @@ Type &CTypePack<Type>::Get(WORD n)
 template <class Type>
 bool CTypePack<Type>::LoadFromFile(LPCTSTR lpszFilename)
 {
+	if (!lpszFilename) return false;
 	std::ifstream file(lpszFilename, std::ios::binary);
-	bool re = LoadFromFile(file);
-	file.close();
-
-	return re;
+	const bool loaded = LoadFromFile(file);
+	if (!loaded) LOG_ERROR("Rejected pack file: source=%s", lpszFilename);
+	return loaded;
 }
 
 template <class Type>
@@ -226,20 +263,18 @@ bool CTypePack<Type>::SaveToFile(LPCTSTR lpszFilename)
 template <class Type>
 bool CTypePack<Type>::LoadFromFile(std::ifstream&file)
 {
-//	Release();
-
-	file.read((char *)&m_Size, 2);
-	
-	Init(m_Size);
-	
-	int i;
-
-	for(i = 0; i < m_Size; i++)
-	{
-		m_pData[i].LoadFromFile(file);
+	WORD count = 0;
+	if (!file.read(reinterpret_cast<char*>(&count), 2)) {
+		LOG_ERROR("Rejected pack header from stream");
+		return false;
 	}
-	
-	return true;
+	Init(count);
+	bool accepted = true;
+	for (unsigned i = 0; i < m_Size; ++i) {
+		if (!CTypePackDetail::LoadElement(m_pData[i], file, "<stream>", i)) accepted = false;
+		if (!file) break;
+	}
+	return accepted;
 }
 
 //----------------------------------------------------------------------
@@ -250,34 +285,29 @@ bool CTypePack<Type>::LoadFromFile(std::ifstream&file)
 template <class Type>
 bool CTypePack<Type>::LoadFromFileRunning(LPCTSTR lpszFilename)
 {
-	//인덱스 파일 로딩
-	std::string filename = lpszFilename;
-	filename += 'i';
-	std::ifstream indexFile(filename.c_str(), std::ios::binary);
-	indexFile.read((char *)&m_Size, 2); 
-	Init(m_Size);
-
-	if(m_file == NULL)
-	{
-		m_file = new std::ifstream;
+	try {
+		auto file = std::make_unique<std::ifstream>();
+		std::vector<int> offsets;
+		if (!CTypePackDetail::ReadRunningIndex(lpszFilename, *file, offsets)) {
+			LOG_ERROR("Rejected pack index: source=%s", lpszFilename ? lpszFilename : "<null>");
+			return false;
+		}
+		auto index = std::make_unique<int[]>(offsets.size());
+		std::copy(offsets.begin(), offsets.end(), index.get());
+		std::vector<unsigned char> states(offsets.size(), 0);
+		std::string source(lpszFilename);
+		Init(static_cast<WORD>(offsets.size()));
+		if (offsets.empty()) return true;
+		m_file = file.release();
+		m_file_index = index.release();
+		m_LoadState = std::move(states);
+		m_SourceFilename = std::move(source);
+		m_bRunningLoad = true;
+		return true;
+	} catch (...) {
+		LOG_ERROR("Cannot prepare pack: source=%s", lpszFilename ? lpszFilename : "<null>");
+		return false;
 	}
-	
-	m_file_index = new int[m_Size];
-	for (int i = 0; i < m_Size; i++)
-	{
-		indexFile.read((char*)&m_file_index[i], 4);
-	}
-	indexFile.close();
-	
-	// file에서 sprite 개수를 읽어온다.	
-	m_file->open(lpszFilename, std::ios::binary);
-	
-	m_file->read((char*)&m_Size, 2);
-	
-	m_bRunningLoad = true;
-	m_nLoadData = 0;
-	
-	return true;
 }
 
 template <class Type>
@@ -427,9 +457,12 @@ bool CTypePack<Type>::LoadFromFileData(int dataID, int fileID, LPCTSTR packFilen
 {
 	if (!m_pData || dataID < 0 || dataID >= m_Size) return false;
 	std::ifstream dataFile;
-	if (!CTypePackDetail::OpenIndexedEntry(fileID, packFilename, indexFilename, dataFile))
+	if (!CTypePackDetail::OpenIndexedEntry(fileID, packFilename, indexFilename, dataFile)) {
+		LOG_ERROR("Rejected indexed pack read: source=%s id=%d",
+			packFilename ? packFilename : "<null>", fileID);
 		return false;
-	return m_pData[dataID].LoadFromFile(dataFile);
+	}
+	return CTypePackDetail::LoadElement(m_pData[dataID], dataFile, packFilename, static_cast<unsigned>(fileID));
 }
 
 // CTypePack2
@@ -494,6 +527,8 @@ protected:
 	WORD			m_nLoadData;	// Loading 된 CSprite의 개수
 	std::ifstream *m_file;
 	int*			m_file_index;
+	std::vector<unsigned char> m_LoadState; // unread, accepted, rejected
+	std::string m_SourceFilename;
 	bool			m_bSecond;
 };
 
@@ -522,6 +557,9 @@ CTypePack2<TypeBase, Type1, Type2>::~CTypePack2()
 template <class TypeBase, class Type1, class Type2>
 void CTypePack2<TypeBase, Type1, Type2>::Release()
 {
+	m_LoadState.clear();
+	m_SourceFilename.clear();
+	m_nLoadData = 0;
 //	printf("DEBUG Release: this=%p, m_file=%p, m_bRunningLoad=%d\n", this, m_file, m_bRunningLoad);
 	m_bRunningLoad = false;
 
@@ -554,18 +592,18 @@ void CTypePack2<TypeBase, Type1, Type2>::Release()
 template <class TypeBase, class Type1, class Type2>
 void CTypePack2<TypeBase, Type1, Type2>::Init(WORD size)
 {
-	if(size == 0)
-		return;
-	
+	const bool second = ColorDraw::Is565();
+	std::unique_ptr<Type1[]> firstData;
+	std::unique_ptr<Type2[]> secondData;
+	if (size) {
+		if (second) secondData = std::make_unique<Type2[]>(size);
+		else firstData = std::make_unique<Type1[]>(size);
+	}
 	Release();
-	
+	m_bSecond = second;
+	m_pData = second ? static_cast<TypeBase*>(secondData.release()) :
+		static_cast<TypeBase*>(firstData.release());
 	m_Size = size;
-	m_bSecond = ColorDraw::Is565();
-
-	if( m_bSecond == true )
-		m_pData = new Type2[size];
-	else
-		m_pData = new Type1[size];
 }
 
 template <class TypeBase, class Type1, class Type2>
@@ -603,48 +641,20 @@ TypeBase &CTypePack2<TypeBase, Type1, Type2>::Get(WORD n)
 		return s_OutOfRangeFirst;
 	}
 
-	if(m_bRunningLoad && !m_pData[n].IsInit())
+	if (m_bRunningLoad && !m_pData[n].IsInit() && m_LoadState[n] != 2)
 	{
-		// Safety check: disable lazy loading if file pointer is invalid
-		if (m_file == NULL)
-		{
+		m_file->clear();
+		m_file->seekg(m_file_index[n]);
+		const bool loaded = CTypePackDetail::LoadElement(m_pData[n], *m_file,
+			m_SourceFilename.c_str(), n);
+		if (m_LoadState[n] == 0) ++m_nLoadData;
+		m_LoadState[n] = loaded ? 1 : 2;
+		if (m_nLoadData >= m_Size) {
 			m_bRunningLoad = false;
-			return m_pData[n];
-		}
-
-		// Debug: print object and file pointer info BEFORE using m_file
-//		printf("DEBUG Get[%d]: this=%p, m_file=%p, m_nLoadData=%d, m_Size=%d\n",
-//		       n, this, m_file, m_nLoadData, m_Size);
-
-		// Try to load sprite - use exception handler to detect file corruption
-		try {
-			// Check if file stream is valid before using it
-			if (!m_file->good())
-			{
-				printf("WARNING Get[%d]: this=%p, m_file=%p is not good(), disabling lazy loading\n",
-				       n, this, m_file);
-				m_bRunningLoad = false;
-				return m_pData[n];
-			}
-			m_file->seekg(m_file_index[n]);
-			m_pData[n].LoadFromFile(*m_file);	// Sprite 읽어오기
-		}
-		catch (...)
-		{
-			// File operation failed, disable lazy loading
-			printf("WARNING: Failed to load sprite %d from file, disabling lazy loading\n", n);
-			m_bRunningLoad = false;
-			return m_pData[n];
-		}
-
-		if(++m_nLoadData >= m_Size)
-		{
-			m_bRunningLoad = false;
-			m_file->close();
 			delete m_file;
-			m_file = NULL;
+			m_file = nullptr;
 			delete []m_file_index;
-			m_file_index = NULL;
+			m_file_index = nullptr;
 		}
 	}
 
@@ -654,11 +664,11 @@ TypeBase &CTypePack2<TypeBase, Type1, Type2>::Get(WORD n)
 template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFile(LPCTSTR lpszFilename)
 {
+	if (!lpszFilename) return false;
 	std::ifstream file(lpszFilename, std::ios::binary);
-	bool re = LoadFromFile(file);
-	file.close();
-
-	return re;
+	const bool loaded = LoadFromFile(file);
+	if (!loaded) LOG_ERROR("Rejected pack file: source=%s", lpszFilename);
+	return loaded;
 }
 
 template <class TypeBase, class Type1, class Type2>
@@ -682,20 +692,18 @@ bool CTypePack2<TypeBase, Type1, Type2>::SaveToFile(LPCTSTR lpszFilename)
 template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFile(std::ifstream&file)
 {
-//	Release();
-
-	file.read((char *)&m_Size, 2);
-	
-	Init(m_Size);
-	
-	int i;
-
-	for(i = 0; i < m_Size; i++)
-	{
-		m_pData[i].LoadFromFile(file);
+	WORD count = 0;
+	if (!file.read(reinterpret_cast<char*>(&count), 2)) {
+		LOG_ERROR("Rejected pack header from stream");
+		return false;
 	}
-	
-	return true;
+	Init(count);
+	bool accepted = true;
+	for (unsigned i = 0; i < m_Size; ++i) {
+		if (!CTypePackDetail::LoadElement(m_pData[i], file, "<stream>", i)) accepted = false;
+		if (!file) break;
+	}
+	return accepted;
 }
 
 //----------------------------------------------------------------------
@@ -706,79 +714,29 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFile(std::ifstream&file)
 template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileRunning(LPCTSTR lpszFilename)
 {
-	//인덱스 파일 로딩
-	std::string filename = lpszFilename;
-	filename += 'i';
-	std::ifstream indexFile(filename.c_str(), std::ios::binary);
-
-	// Check if index file opened successfully
-	if (!indexFile.is_open() || !indexFile.good())
-	{
-		printf("ERROR: Failed to open index file: %s\n", filename.c_str());
+	try {
+		auto file = std::make_unique<std::ifstream>();
+		std::vector<int> offsets;
+		if (!CTypePackDetail::ReadRunningIndex(lpszFilename, *file, offsets)) {
+			LOG_ERROR("Rejected pack index: source=%s", lpszFilename ? lpszFilename : "<null>");
+			return false;
+		}
+		auto index = std::make_unique<int[]>(offsets.size());
+		std::copy(offsets.begin(), offsets.end(), index.get());
+		std::vector<unsigned char> states(offsets.size(), 0);
+		std::string source(lpszFilename);
+		Init(static_cast<WORD>(offsets.size()));
+		if (offsets.empty()) return true;
+		m_file = file.release();
+		m_file_index = index.release();
+		m_LoadState = std::move(states);
+		m_SourceFilename = std::move(source);
+		m_bRunningLoad = true;
+		return true;
+	} catch (...) {
+		LOG_ERROR("Cannot prepare pack: source=%s", lpszFilename ? lpszFilename : "<null>");
 		return false;
 	}
-
-	indexFile.read((char *)&m_Size, 2);
-
-	if (!indexFile.good())
-	{
-		printf("ERROR: Failed to read size from index file: %s\n", filename.c_str());
-		indexFile.close();
-		return false;
-	}
-
-	Init(m_Size);
-
-	if(m_file == NULL)
-	{
-		m_file = new std::ifstream;
-//		printf("DEBUG LoadFromFileRunning: Created new m_file=%p for %s\n", (void*)m_file, lpszFilename);
-	}
-	else
-	{
-//		printf("DEBUG LoadFromFileRunning: Reusing existing m_file=%p for %s\n", (void*)m_file, lpszFilename);
-	}
-
-	m_file_index = new int[m_Size];
-	for (int i = 0; i < m_Size; i++)
-	{
-		indexFile.read((char*)&m_file_index[i], 4);
-	}
-	indexFile.close();
-
-	// file에서 sprite 개수를 읽어온다.	
-	m_file->open(lpszFilename, std::ios::binary);
-
-	// Check if data file opened successfully
-	if (!m_file->is_open() || !m_file->good())
-	{
-		printf("ERROR: Failed to open data file: %s\n", lpszFilename);
-		delete []m_file_index;
-		m_file_index = NULL;
-		m_bRunningLoad = false;
-		return false;
-	}
-
-	m_file->read((char*)&m_Size, 2);
-
-	if (!m_file->good())
-	{
-		printf("ERROR: Failed to read size from data file: %s\n", lpszFilename);
-		m_file->close();
-		delete m_file;
-		m_file = NULL;
-		delete []m_file_index;
-		m_file_index = NULL;
-		m_bRunningLoad = false;
-		return false;
-	}
-
-	m_bRunningLoad = true;
-	m_nLoadData = 0;
-
-//	printf("DEBUG LoadFromFileRunning: Successfully loaded %s (size=%d)\n", lpszFilename, m_Size);
-
-	return true;
 }
 
 template <class TypeBase, class Type1, class Type2>
@@ -929,9 +887,12 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileData(int dataID, int fileID
 {
 	if (!m_pData || dataID < 0 || dataID >= m_Size) return false;
 	std::ifstream dataFile;
-	if (!CTypePackDetail::OpenIndexedEntry(fileID, packFilename, indexFilename, dataFile))
+	if (!CTypePackDetail::OpenIndexedEntry(fileID, packFilename, indexFilename, dataFile)) {
+		LOG_ERROR("Rejected indexed pack read: source=%s id=%d",
+			packFilename ? packFilename : "<null>", fileID);
 		return false;
-	return m_pData[dataID].LoadFromFile(dataFile);
+	}
+	return CTypePackDetail::LoadElement(m_pData[dataID], dataFile, packFilename, static_cast<unsigned>(fileID));
 }
 
 #endif

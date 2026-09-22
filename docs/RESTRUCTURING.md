@@ -1254,6 +1254,17 @@ rounds settled* for the host rules). Test fixtures share
 
 ---
 
+- [x] **5.5 Sprite-pack input and rejection diagnostics.**
+  > **Status:** done (2026-09-22). Both `CTypePack` templates validate complete
+  > matching counts and in-file offsets before replacing lazy-load state.
+  > Rejected entries are attempted once per load; revisiting one cannot close
+  > the file before other entries load. Eager and indexed loads propagate
+  > decoder/stream failure and log the source, entry and offset where available.
+  > Empty loads clear prior state; invalid index reloads preserve it.
+  - Owner: `test_ctypepack_indexed.cpp`, real sprite and template instantiations,
+    plus full build, architecture and sanitizer checks. Broader asset-format
+    auditing remains in the code-health review's caveats.
+
 ## Build and review follow-up (2026-09-18)
 
 Table reads now expose const rows; `CTypeTable::GetMutable` and `Set` reject
