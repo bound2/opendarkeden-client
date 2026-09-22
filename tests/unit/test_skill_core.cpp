@@ -13,6 +13,7 @@
 //----------------------------------------------------------------------
 
 #include "test_framework.h"
+#include "type_table_access.h"
 
 #include "gamemodel_world.h"
 #include "MSkillManager.h"
@@ -59,11 +60,11 @@ struct SkillWorld : GameModelWorld
 		g_pSkillAvailable = new MSkillSet;
 
 		// A three-step chain, one level apart.
-		(*g_pSkillInfoTable)[kRoot].Set(0, "Single Blow", 0, 0, 0, "Single Blow");
-		(*g_pSkillInfoTable)[kChild].Set(1, "Double Impact", 1, 0, 0, "Double Impact");
-		(*g_pSkillInfoTable)[kLeaf].Set(2, "Fast Reload", 2, 0, 0, "Fast Reload");
-		(*g_pSkillInfoTable)[kRoot].AddNextSkill(kChild);
-		(*g_pSkillInfoTable)[kChild].AddNextSkill(kLeaf);
+		testfw::MutableRow(*g_pSkillInfoTable, kRoot).Set(0, "Single Blow", 0, 0, 0, "Single Blow");
+		testfw::MutableRow(*g_pSkillInfoTable, kChild).Set(1, "Double Impact", 1, 0, 0, "Double Impact");
+		testfw::MutableRow(*g_pSkillInfoTable, kLeaf).Set(2, "Fast Reload", 2, 0, 0, "Fast Reload");
+		testfw::MutableRow(*g_pSkillInfoTable, kRoot).AddNextSkill(kChild);
+		testfw::MutableRow(*g_pSkillInfoTable, kChild).AddNextSkill(kLeaf);
 
 		MItem::SetHost(&s_Host);
 	}
@@ -434,12 +435,12 @@ TEST(SkillDomain, AStepListIsOrderedByLearnLevelAndHoldsEachSkillOnce)
 	// All three sit in one step, and the level the skill file says
 	// each is learned at runs against the order the tree walk meets
 	// them.
-	(*g_pSkillInfoTable)[kRoot].SetSkillStep(SKILL_STEP_APPRENTICE);
-	(*g_pSkillInfoTable)[kChild].SetSkillStep(SKILL_STEP_APPRENTICE);
-	(*g_pSkillInfoTable)[kLeaf].SetSkillStep(SKILL_STEP_APPRENTICE);
-	(*g_pSkillInfoTable)[kRoot].SetLearnLevel(30);
-	(*g_pSkillInfoTable)[kChild].SetLearnLevel(20);
-	(*g_pSkillInfoTable)[kLeaf].SetLearnLevel(10);
+	testfw::MutableRow(*g_pSkillInfoTable, kRoot).SetSkillStep(SKILL_STEP_APPRENTICE);
+	testfw::MutableRow(*g_pSkillInfoTable, kChild).SetSkillStep(SKILL_STEP_APPRENTICE);
+	testfw::MutableRow(*g_pSkillInfoTable, kLeaf).SetSkillStep(SKILL_STEP_APPRENTICE);
+	testfw::MutableRow(*g_pSkillInfoTable, kRoot).SetLearnLevel(30);
+	testfw::MutableRow(*g_pSkillInfoTable, kChild).SetLearnLevel(20);
+	testfw::MutableRow(*g_pSkillInfoTable, kLeaf).SetLearnLevel(10);
 
 	MSkillDomain domain;
 
@@ -485,9 +486,9 @@ TEST(SkillDomain, ASavedDomainComesBackReadyToLearnAndUnlearn)
 	SkillWorld world;
 	MSkillDomain domain;
 
-	(*g_pSkillInfoTable)[kRoot].SetSkillStep(SKILL_STEP_APPRENTICE);
-	(*g_pSkillInfoTable)[kChild].SetSkillStep(SKILL_STEP_APPRENTICE);
-	(*g_pSkillInfoTable)[kLeaf].SetSkillStep(SKILL_STEP_APPRENTICE);
+	testfw::MutableRow(*g_pSkillInfoTable, kRoot).SetSkillStep(SKILL_STEP_APPRENTICE);
+	testfw::MutableRow(*g_pSkillInfoTable, kChild).SetSkillStep(SKILL_STEP_APPRENTICE);
+	testfw::MutableRow(*g_pSkillInfoTable, kLeaf).SetSkillStep(SKILL_STEP_APPRENTICE);
 
 	domain.SetRootSkill(kRoot);
 	domain.SetNewSkill();
@@ -787,7 +788,7 @@ TEST(SkillManager, InitSkillListRebuildsTheTreesAndKeepsTheDomainLevels)
 
 	g_pSkillManager->Init();
 
-	MSkillDomain& blade = (*g_pSkillManager)[SKILLDOMAIN_BLADE];
+	MSkillDomain& blade = testfw::MutableRow(*g_pSkillManager, SKILLDOMAIN_BLADE);
 
 	blade.SetDomainLevel(9);
 	blade.SetDomainExpRemain(1200);
@@ -844,7 +845,7 @@ TEST(SkillDomain, ASkillDeeperThanTheDomainWasBuiltForIsRefused)
 	// which is the shape of a heap write past the end - here nine
 	// entries into an array of three.
 	//------------------------------------------------------------------
-	(*g_pSkillInfoTable)[kChild].Set(9, "Double Impact", 1, 0, 0, "Double Impact");
+	testfw::MutableRow(*g_pSkillInfoTable, kChild).Set(9, "Double Impact", 1, 0, 0, "Double Impact");
 
 	domain.SetNewSkill();
 	CHECK_EQ(false, domain.LearnSkill(kChild));
@@ -854,13 +855,13 @@ TEST(SkillDomain, ASkillDeeperThanTheDomainWasBuiltForIsRefused)
 	CHECK_EQ(false, g_pSkillAvailable->IsEnableSkill(kChild));
 
 	// A negative level is no level either.
-	(*g_pSkillInfoTable)[kChild].Set(-1, "Double Impact", 1, 0, 0, "Double Impact");
+	testfw::MutableRow(*g_pSkillInfoTable, kChild).Set(-1, "Double Impact", 1, 0, 0, "Double Impact");
 	domain.SetNewSkill();
 	CHECK_EQ(false, domain.LearnSkill(kChild));
 	CHECK_EQ(false, g_pSkillAvailable->IsEnableSkill(kChild));
 
 	// And the skill at a level the domain does hold still learns.
-	(*g_pSkillInfoTable)[kChild].Set(1, "Double Impact", 1, 0, 0, "Double Impact");
+	testfw::MutableRow(*g_pSkillInfoTable, kChild).Set(1, "Double Impact", 1, 0, 0, "Double Impact");
 	domain.SetNewSkill();
 	CHECK(domain.LearnSkill(kChild));
 	CHECK(g_pSkillAvailable->IsEnableSkill(kChild));
@@ -872,12 +873,12 @@ TEST(SkillDomain, TheSkillTheRacesShareTakesTheStepOfTheDomainItJoins)
 
 	// The one skill every race has sits in a step of its own for each
 	// of them, and the domain it is added to is what says which.
-	(*g_pSkillInfoTable)[SKILL_SOUL_CHAIN].SetSkillStep(SKILL_STEP_ETC);
+	testfw::MutableRow(*g_pSkillInfoTable, SKILL_SOUL_CHAIN).SetSkillStep(SKILL_STEP_ETC);
 
 	g_pSkillManager->Init();
 
-	(*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].SetRootSkill(SKILL_SOUL_CHAIN, false);
-	(*g_pSkillManager)[SKILLDOMAIN_OUSTERS].SetRootSkill(SKILL_SOUL_CHAIN, false);
+	testfw::MutableRow(*g_pSkillManager, SKILLDOMAIN_VAMPIRE).SetRootSkill(SKILL_SOUL_CHAIN, false);
+	testfw::MutableRow(*g_pSkillManager, SKILLDOMAIN_OUSTERS).SetRootSkill(SKILL_SOUL_CHAIN, false);
 
 	const MSkillDomain::SKILL_STEP_LIST* pList;
 
@@ -902,7 +903,7 @@ TEST(SkillDomain, TheSkillTheRacesShareTakesTheStepOfTheDomainItJoins)
 	}
 
 	// A skill whose step the file did name keeps it.
-	(*g_pSkillInfoTable)[kRoot].SetSkillStep(SKILL_STEP_MASTER);
+	testfw::MutableRow(*g_pSkillInfoTable, kRoot).SetSkillStep(SKILL_STEP_MASTER);
 	MSkillDomain domain;
 	domain.SetRootSkill(kRoot);
 	CHECK(domain.GetSkillStepList(SKILL_STEP_MASTER) != NULL);
@@ -913,9 +914,9 @@ TEST(SkillDomain, ALoadOverALiveDomainLeavesNoneOfTheOldTreeBehind)
 	SkillWorld world;
 
 	// Two skills in one step, one in another.
-	(*g_pSkillInfoTable)[kRoot].SetSkillStep(SKILL_STEP_APPRENTICE);
-	(*g_pSkillInfoTable)[kChild].SetSkillStep(SKILL_STEP_APPRENTICE);
-	(*g_pSkillInfoTable)[kLeaf].SetSkillStep(SKILL_STEP_ADEPT);
+	testfw::MutableRow(*g_pSkillInfoTable, kRoot).SetSkillStep(SKILL_STEP_APPRENTICE);
+	testfw::MutableRow(*g_pSkillInfoTable, kChild).SetSkillStep(SKILL_STEP_APPRENTICE);
+	testfw::MutableRow(*g_pSkillInfoTable, kLeaf).SetSkillStep(SKILL_STEP_ADEPT);
 
 	MSkillDomain domain;
 	domain.SetRootSkill(kRoot);
@@ -1021,7 +1022,7 @@ TEST(SkillDomain, TheGlobalsTheExecutableOwnsMayBeGone)
 	MSkillSet*		pSet = g_pSkillAvailable;
 	MSkillManager*	pManager = g_pSkillManager;
 
-	(*g_pSkillInfoTable)[SKILL_SOUL_CHAIN].SetSkillStep(SKILL_STEP_ETC);
+	testfw::MutableRow(*g_pSkillInfoTable, SKILL_SOUL_CHAIN).SetSkillStep(SKILL_STEP_ETC);
 
 	g_pSkillAvailable = NULL;
 	g_pSkillManager = NULL;

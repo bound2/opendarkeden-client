@@ -14,6 +14,7 @@
 //----------------------------------------------------------------------
 
 #include "test_framework.h"
+#include "type_table_access.h"
 
 #include "gamemodel_world.h"
 #include "MItemManager.h"
@@ -37,13 +38,13 @@ struct ContainerWorld : GameModelWorld
 	{
 		s_Alive = 0;
 		g_pItemTable->InitClass(ITEM_CLASS_SWORD, 3);
-		(*g_pItemTable)[ITEM_CLASS_SWORD][0].SetGrid(2, 1);
-		(*g_pItemTable)[ITEM_CLASS_SWORD][1].SetGrid(1, 1);
-		(*g_pItemTable)[ITEM_CLASS_SWORD][2].SetGrid(3, 3);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SWORD, 0).SetGrid(2, 1);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SWORD, 1).SetGrid(1, 1);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SWORD, 2).SetGrid(3, 3);
 		g_pItemTable->InitClass(ITEM_CLASS_BELT, 1);
-		(*g_pItemTable)[ITEM_CLASS_BELT][0].SetValue(0, 0, 3);	// Value3: pockets
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_BELT, 0).SetValue(0, 0, 3);	// Value3: pockets
 		g_pItemTable->InitClass(ITEM_CLASS_POTION, 1);
-		(*g_pItemTable)[ITEM_CLASS_POTION][0].SetGrid(1, 1);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_POTION, 0).SetGrid(1, 1);
 	}
 };
 

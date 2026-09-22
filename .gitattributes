@@ -35,3 +35,4 @@ tools/git-hooks/* text eol=lf
 # as trailing whitespace.
 *.cpp whitespace=cr-at-eol
 *.h whitespace=cr-at-eol
+*.inl whitespace=cr-at-eol

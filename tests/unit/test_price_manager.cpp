@@ -12,6 +12,7 @@
 //----------------------------------------------------------------------
 
 #include "test_framework.h"
+#include "type_table_access.h"
 
 #include "gamemodel_world.h"
 #include "MPriceManager.h"
@@ -61,7 +62,7 @@ void	LoadClassFromFile(ITEM_CLASS itemClass, int firstPrice, int secondPrice)
 		second.SaveToFile(out);
 	}
 	std::ifstream in(kTempFile, std::ios::binary);
-	(*g_pItemTable)[itemClass].LoadFromFile(in);
+	testfw::MutableRow(*g_pItemTable, itemClass).LoadFromFile(in);
 	in.close();
 	std::remove(kTempFile);
 }
@@ -82,43 +83,43 @@ struct PriceWorld : GameModelWorld
 		s_TaxPercent = 100;
 
 		g_pItemTable->InitClass(ITEM_CLASS_SWORD, 2);
-		(*g_pItemTable)[ITEM_CLASS_SWORD][0].Price = 1000;
-		(*g_pItemTable)[ITEM_CLASS_SWORD][0].SilverMax = 50;
-		(*g_pItemTable)[ITEM_CLASS_SWORD][1].Price = 2000;
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SWORD, 0).Price = 1000;
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SWORD, 0).SilverMax = 50;
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SWORD, 1).Price = 2000;
 		g_pItemTable->InitClass(ITEM_CLASS_MACE, 1);
-		(*g_pItemTable)[ITEM_CLASS_MACE][0].Price = 1000;		// SilverMax 0: cannot be coated
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_MACE, 0).Price = 1000;		// SilverMax 0: cannot be coated
 		g_pItemTable->InitClass(ITEM_CLASS_POTION, 6);
 		for (int i = 0; i < 6; i++)
-			(*g_pItemTable)[ITEM_CLASS_POTION][i].Price = 100;
+			testfw::MutableRow(*g_pItemTable, ITEM_CLASS_POTION, i).Price = 100;
 		g_pItemTable->InitClass(ITEM_CLASS_SERUM, 1);
-		(*g_pItemTable)[ITEM_CLASS_SERUM][0].Price = 200;
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SERUM, 0).Price = 200;
 		g_pItemTable->InitClass(ITEM_CLASS_SKULL, 1);
-		(*g_pItemTable)[ITEM_CLASS_SKULL][0].Price = 400;
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SKULL, 0).Price = 400;
 		g_pItemTable->InitClass(ITEM_CLASS_MOON_CARD, 5);
 		for (int i = 0; i < 5; i++)
-			(*g_pItemTable)[ITEM_CLASS_MOON_CARD][i].Price = 300;
+			testfw::MutableRow(*g_pItemTable, ITEM_CLASS_MOON_CARD, i).Price = 300;
 		g_pItemTable->InitClass(ITEM_CLASS_VAMPIRE_PORTAL_ITEM, 1);
-		(*g_pItemTable)[ITEM_CLASS_VAMPIRE_PORTAL_ITEM][0].Price = 500;
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_VAMPIRE_PORTAL_ITEM, 0).Price = 500;
 		g_pItemTable->InitClass(ITEM_CLASS_BLOOD_BIBLE_SIGN, 1);
-		(*g_pItemTable)[ITEM_CLASS_BLOOD_BIBLE_SIGN][0].Price = 500;
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_BLOOD_BIBLE_SIGN, 0).Price = 500;
 		g_pItemTable->InitClass(ITEM_CLASS_OUSTERS_SUMMON_ITEM, 1);
-		(*g_pItemTable)[ITEM_CLASS_OUSTERS_SUMMON_ITEM][0].Price = 1000;
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_OUSTERS_SUMMON_ITEM, 0).Price = 1000;
 		// Blades: 4200 and 6000, so the class average is 5100 -> 500 in hundreds.
 		LoadClassFromFile(ITEM_CLASS_BLADE, 4200, 6000);
 
 		// Row 0 is the "no option" row; the others carry a part and a
 		// price multiplier in percent.
-		g_pItemOptionTable->Get(0).Part = ITEMOPTION_TABLE::PART_HP;
-		g_pItemOptionTable->Get(1).Part = ITEMOPTION_TABLE::PART_DAMAGE;
-		g_pItemOptionTable->Get(1).PriceMultiplier = 150;
-		g_pItemOptionTable->Get(2).Part = ITEMOPTION_TABLE::PART_STR;
-		g_pItemOptionTable->Get(2).PriceMultiplier = 50;
-		g_pItemOptionTable->Get(3).Part = ITEMOPTION_TABLE::PART_ATTACK_SPEED;
-		g_pItemOptionTable->Get(3).PriceMultiplier = 100;
-		g_pItemOptionTable->Get(4).Part = ITEMOPTION_TABLE::PART_INT;
-		g_pItemOptionTable->Get(4).PriceMultiplier = 100;
-		g_pItemOptionTable->Get(5).Part = ITEMOPTION_TABLE::PART_DEX;
-		g_pItemOptionTable->Get(5).PriceMultiplier = 100;
+		testfw::MutableRow(*g_pItemOptionTable, 0).Part = ITEMOPTION_TABLE::PART_HP;
+		testfw::MutableRow(*g_pItemOptionTable, 1).Part = ITEMOPTION_TABLE::PART_DAMAGE;
+		testfw::MutableRow(*g_pItemOptionTable, 1).PriceMultiplier = 150;
+		testfw::MutableRow(*g_pItemOptionTable, 2).Part = ITEMOPTION_TABLE::PART_STR;
+		testfw::MutableRow(*g_pItemOptionTable, 2).PriceMultiplier = 50;
+		testfw::MutableRow(*g_pItemOptionTable, 3).Part = ITEMOPTION_TABLE::PART_ATTACK_SPEED;
+		testfw::MutableRow(*g_pItemOptionTable, 3).PriceMultiplier = 100;
+		testfw::MutableRow(*g_pItemOptionTable, 4).Part = ITEMOPTION_TABLE::PART_INT;
+		testfw::MutableRow(*g_pItemOptionTable, 4).PriceMultiplier = 100;
+		testfw::MutableRow(*g_pItemOptionTable, 5).Part = ITEMOPTION_TABLE::PART_DEX;
+		testfw::MutableRow(*g_pItemOptionTable, 5).PriceMultiplier = 100;
 
 		g_pUserInformation->HeadPrice = 100;
 

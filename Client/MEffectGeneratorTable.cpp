@@ -272,7 +272,7 @@ MEffectGeneratorTable::Generate(
 		// 대체로 0이지만.. main node부터 시작하는 경우도 있다.
 		// 그러므로 --> pEffectTarget->GetCurrentPhase()
 		//------------------------------------------------------------
-		ACTION_INFO_NODE&			info	= (*g_pActionInfoTable)[ nActionInfo ][pEffectTarget->GetCurrentPhase()];
+		const ACTION_INFO_NODE&			info	= (*g_pActionInfoTable)[ nActionInfo ][pEffectTarget->GetCurrentPhase()];
 		TYPE_EFFECTSPRITETYPE		EffectSpriteType = info.EffectSpriteType;
 		
 		if(nActionInfo == MAGIC_ACID_TOUCH || nActionInfo == MAGIC_BLOODY_NAIL )
@@ -616,7 +616,7 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 	int nActionInfoNode = pEffectTarget->GetCurrentPhase();		
 
 	
-	ACTION_INFO_NODE&			info	= (*g_pActionInfoTable)[ pEffect->GetActionInfo() ][ nActionInfoNode ];
+	const ACTION_INFO_NODE&			info	= (*g_pActionInfoTable)[ pEffect->GetActionInfo() ][ nActionInfoNode ];
 
 	int targetX = pEffectTarget->GetX();
 	int targetY = pEffectTarget->GetY();

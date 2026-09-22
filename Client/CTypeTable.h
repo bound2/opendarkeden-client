@@ -8,6 +8,7 @@
 //#include "DebugInfo.h"
 //#define	 new DEBUG_NEW
 #include <fstream>
+#include <cstdint>
 
 //----------------------------------------------------------------------
 //
@@ -34,7 +35,8 @@ class CTypeTable {
 		//-------------------------------------------------------
 		// Debug/Internal access
 		//-------------------------------------------------------
-		Type*			GetInternalPointer() const { return m_pTypeInfo; }
+		Type*			GetInternalPointer() { return m_pTypeInfo; }
+		const Type*		GetInternalPointer() const { return m_pTypeInfo; }
 		
 		//-------------------------------------------------------
 		// Reference
@@ -47,31 +49,33 @@ class CTypeTable {
 		// defines for Debug and not for Release - so the only
 		// build without the check was the one that ships.
 		//
-		// Out of range yields a default-constructed Type, exactly
-		// what the Debug build has always returned. Note that a
-		// default MString holds a NULL string, so a caller that
-		// copies out of the result still needs its own test.
+		// Reads yield an immutable default out of range. Mutation
+		// uses GetMutable/Set and cannot write into a shared fallback.
+		// A default MString holds a NULL string, so copying out of
+		// a lookup still requires the caller to check that string.
 		//-------------------------------------------------------
 		const Type&	operator [] (int type) const {
 			if (m_pTypeInfo == NULL || type < 0 || type >= m_Size) {
-				static Type dummy;
+				static const Type dummy{};
 				return dummy;
 			}
 			return m_pTypeInfo[type];
 		}
-		Type&	operator [] (int type) {
-			if (m_pTypeInfo == NULL || type < 0 || type >= m_Size) {
-				static Type dummy;
-				return dummy;
-			}
-			return m_pTypeInfo[type];
+		const Type&	Get(int type) const {
+			return (*this)[type];
 		}
-		Type&	Get(int type) {
-			if (m_pTypeInfo == NULL || type < 0 || type >= m_Size) {
-				static Type dummy;
-				return dummy;
-			}
-			return m_pTypeInfo[type];
+		Type*	GetMutable(int type) {
+			if (m_pTypeInfo == NULL || type < 0 || type >= m_Size)
+				return nullptr;
+			return &m_pTypeInfo[type];
+		}
+		template <class Value>
+		bool	Set(int type, const Value& value) {
+			Type* entry = GetMutable(type);
+			if (entry == nullptr)
+				return false;
+			*entry = value;
+			return true;
 		}
 
 
@@ -163,7 +167,7 @@ CTypeTable<Type>::Init(int size)
 
 	// m_Size is only published once the array exists, so a throwing
 	// allocation cannot leave a size behind with no table under it
-	Type*	pTypeInfo = new Type [size];
+	Type*	pTypeInfo = new Type [size]();
 
 	m_pTypeInfo	= pTypeInfo;
 	m_Size		= size;
@@ -285,7 +289,7 @@ CTypeTable<Type>::LoadFromFile_NickNameString(std::ifstream& file)
 	file.read((char*)&numSize, 4);
 
 	// the count is whatever the file says, and Init allocates from it
-	if (!IsEntryCountSane(file, numSize, sizeof(WORD) + 1))
+	if (!IsEntryCountSane(file, numSize, sizeof(std::uint16_t) + 1))
 	{
 		file.setstate(std::ios::failbit);
 		return false;
@@ -304,7 +308,7 @@ CTypeTable<Type>::LoadFromFile_NickNameString(std::ifstream& file)
 
 	for (int i=0; i<m_Size; i++)
 	{
-		WORD wIndex = 0;
+		std::uint16_t wIndex = 0;
 		if (!file.read((char*)&wIndex, sizeof(wIndex)))
 			return false;
 		if (wIndex >= m_Size)

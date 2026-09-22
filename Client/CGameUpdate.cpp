@@ -2898,7 +2898,9 @@ ProcessInputRButtonDown(MObject* pObject, bool bForceAttack = false)
 	//		_CGSkillToSelf.setCEffectID( m_pEffectTarget->GetEffectID() );
 			g_pSocket->sendPacket( &_CGSkillToSelf );
 			g_pPlayer->SetWaitVerify( MPlayer::WAIT_VERIFY_SYLPH_SUMMON_GETOFF );
-			(*g_pSkillInfoTable)[SKILL_SUMMON_SYLPH].SetAvailableTime( 4000 );
+			if (auto* entry = g_pSkillInfoTable->GetMutable(SKILL_SUMMON_SYLPH)) {
+				entry->SetAvailableTime( 4000 );
+			}
 	//		gC_vs_ui.UnselectSkill();
 		}
 		else 

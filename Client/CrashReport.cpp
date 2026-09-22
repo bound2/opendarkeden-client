@@ -152,7 +152,7 @@ LONG __stdcall RecordExceptionInfo( _EXCEPTION_POINTERS* pExp )
 
 	MCrashReportManager crm;
 	crm.Init(1);
-	MCrashReport &cr = crm[0];
+	MCrashReport &cr = *crm.GetMutable(0); // Init(1) above guarantees this row.
 
 	char szTemp[1024];
 	GetModuleFileName(NULL, szTemp, 1024);

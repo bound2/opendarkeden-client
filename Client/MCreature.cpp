@@ -995,7 +995,7 @@ MCreature::SetCreatureType(TYPE_CREATURETYPE type)
 	for(int framecnt = 0;  framecnt < (*g_pCreatureTable)[m_CreatureType].SpriteTypes.GetSize(); framecnt++ )
 	{
 		spriteType = (*g_pCreatureTable)[m_CreatureType].SpriteTypes[framecnt];
-		m_CreatureFrameIDs[framecnt]	= (*g_pCreatureSpriteTable)[spriteType].FrameID;
+		m_CreatureFrameIDs.Set(framecnt, (*g_pCreatureSpriteTable)[spriteType].FrameID);
 	}
 	
 	

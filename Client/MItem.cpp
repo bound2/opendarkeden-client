@@ -549,7 +549,7 @@ MGearItem::GetMaxDurability() const
 
 	while(itr != m_ItemOptionList.end())
 	{
-		ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[*itr];
+		const ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[*itr];
 		
 		if (optionInfo.Part == ITEMOPTION_TABLE::PART_DURABILITY)
 		{
@@ -624,7 +624,7 @@ MArmorItem2::GetMaxDurability() const
 
 	while(itr != m_ItemOptionList.end())
 	{
-		ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[*itr];
+		const ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[*itr];
 		
 		if (optionInfo.Part == ITEMOPTION_TABLE::PART_DURABILITY)
 		{
@@ -792,7 +792,7 @@ MItem::GetItemOptionColorSet(int OptionNum)
 
 				for(int i = 1; i < size; i++)
 				{
-					ITEMOPTION_INFO &optionInfo = g_pItemOptionTable->Get(i);
+					const ITEMOPTION_INFO &optionInfo = g_pItemOptionTable->Get(i);
 					if(optionInfo.Part == optionPart && optionInfo.UpgradeOptionType == 0)
 					{
 						SetItemColorSet(optionInfo.ColorSet);
@@ -1306,7 +1306,7 @@ MMotorcycle::GetMaxDurability() const
 
 	while(itr != m_ItemOptionList.end())
 	{
-		ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[*itr];
+		const ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[*itr];
 		
 		if (optionInfo.Part == ITEMOPTION_TABLE::PART_DURABILITY)
 		{

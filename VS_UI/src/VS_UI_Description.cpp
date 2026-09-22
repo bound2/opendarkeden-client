@@ -1014,7 +1014,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				
 				while(itr != optionList.end() && *itr < g_pItemOptionTable->GetSize())
 				{
-					ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
+					const ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
 					char pPartName[20];
 					strcpy(pPartName,g_pItemOptionTable->ITEMOPTION_PARTNAME[optionInfo.Part].GetString());
 					if(strstr(pPartName,"MP") != NULL)
@@ -1065,7 +1065,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 								
 				while(itr != DefaultOptionList.end())
 				{
-					ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
+					const ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
 					char pPartName[20];
 					strcpy(pPartName,g_pItemOptionTable->ITEMOPTION_PARTNAME[optionInfo.Part].GetString());
 					
@@ -2441,8 +2441,8 @@ void	_SkillTree_Description_Show(Rect rect, void * void_ptr, long left, long rig
 					{
 						if((*g_pSkillInfoTable)[*itr].GetSkillStep() == SKILL_STEP_OUSTERS_ETC && (*g_pSkillManager)[SKILLDOMAIN_OUSTERS].GetSkillStatus((ACTIONINFO)*itr) == MSkillDomain::SKILLSTATUS_LEARNED)
 						{
-							SKILLINFO_NODE::SKILLTYPE_LIST::iterator itr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.begin();
-							SKILLINFO_NODE::SKILLTYPE_LIST::iterator endItr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.end();
+							SKILLINFO_NODE::SKILLTYPE_LIST::const_iterator itr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.begin();
+							SKILLINFO_NODE::SKILLTYPE_LIST::const_iterator endItr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.end();
 							while(itr2 != endItr2)
 							{
 								if((*g_pSkillManager)[SKILLDOMAIN_OUSTERS].GetSkillStatus((ACTIONINFO)*itr2) == MSkillDomain::SKILLSTATUS_LEARNED

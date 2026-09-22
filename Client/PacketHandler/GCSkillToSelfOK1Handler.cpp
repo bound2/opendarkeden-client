@@ -106,7 +106,9 @@ void GCSkillToSelfOK1Handler::execute ( GCSkillToSelfOK1 * pPacket , Player * pP
 	{
 		if (skillID < MIN_RESULT_ACTIONINFO)
 		{
-			(*g_pSkillInfoTable)[skillID].SetNextAvailableTime();
+			if (auto* entry = g_pSkillInfoTable->GetMutable(skillID)) {
+				entry->SetNextAvailableTime();
+			}
 		}
 //		g_pUIMessageManager->Execute(UI_CLOSE_TRACE_WINDOW, 0, 0, NULL);
 	}
@@ -158,7 +160,9 @@ void GCSkillToSelfOK1Handler::execute ( GCSkillToSelfOK1 * pPacket , Player * pP
 	if(skillID == SKILL_WILL_OF_LIFE )
 	{
 		g_pPlayer->CheckRegen();
-		(*g_pSkillInfoTable)[skillID].SetAvailableTime( (3 + (g_pPlayer->GetLEVEL() / 10)) * 2 * 1000 );
+		if (auto* entry = g_pSkillInfoTable->GetMutable(skillID)) {
+			entry->SetAvailableTime( (3 + (g_pPlayer->GetLEVEL() / 10)) * 2 * 1000 );
+		}
 	}
 
 	//------------------------------------------------------------------

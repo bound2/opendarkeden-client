@@ -99,7 +99,9 @@ void GCRemoveEffectHandler::execute ( GCRemoveEffect * pPacket , Player * pPlaye
 					{
 						//						case MAGIC_SACRIFICE :
 					case MAGIC_AURA_SHIELD :
-						(*g_pSkillInfoTable)[actionInfo].SetAvailableTime();
+						if (auto* entry = g_pSkillInfoTable->GetMutable(actionInfo)) {
+							entry->SetAvailableTime();
+						}
 						break;						
 					}
 				}

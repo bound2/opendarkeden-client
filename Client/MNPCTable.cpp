@@ -321,7 +321,9 @@ int	MServerNPCTable::AffectToNPCTable(MNPCTable * npc)
 		ni->Description		= info->Description;
 		ni->ListShopTemplateID.clear();
 
-		(*g_pCreatureTable)[id].Name = info->Name;
+		if (auto* creatureInfo = g_pCreatureTable->GetMutable(id)) {
+			creatureInfo->Name = info->Name;
+		}
 
 		std::list<unsigned int>::iterator iID = info->ListShopTemplateID.begin();
 		while (iID != info->ListShopTemplateID.end())

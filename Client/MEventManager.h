@@ -135,7 +135,9 @@ class MEventManager
 		void			RemoveAllEventByType(EVENT_TYPE type);
 
 		bool					AssertEventBackground(EVENTBACKGROUND_ID id);
-		CDirectDrawSurface*		GetEventBackground(EVENTBACKGROUND_ID id) { AssertEventBackground(id); return &m_EventBackGround[id]; }
+		CDirectDrawSurface*		GetEventBackground(EVENTBACKGROUND_ID id) {
+			return AssertEventBackground(id) ? m_EventBackGround.GetMutable(id) : nullptr;
+		}
 		
 		typedef std::map<EVENT_ID, MEvent>		EVENT_MAP;
 		

@@ -279,7 +279,7 @@ bool MEventManager::AssertEventBackground(EVENTBACKGROUND_ID id)
 	
 	};
 
-	if(id >= EVENTBACKGROUNDID_MAX)
+	if(id < 0 || id >= EVENTBACKGROUNDID_MAX)
 		return false;
 
 	if(m_EventBackGround.GetSize() == 0)
@@ -287,14 +287,17 @@ bool MEventManager::AssertEventBackground(EVENTBACKGROUND_ID id)
 		m_EventBackGround.Init(EVENTBACKGROUNDID_MAX);
 	}
 
-	if(m_EventBackGround[id].GetSurface() != NULL)
+	CDirectDrawSurface* entry = m_EventBackGround.GetMutable(id);
+	if (entry == nullptr)
+		return false;
+	if(entry->GetSurface() != NULL)
 		return true;
 
 	CJpeg jpg;
 	bool bOpen = jpg.Open(strFilename[id].c_str());
 	if(bOpen == true && jpg.GetWidth() > 0 && jpg.GetHeight() > 0 && jpg.GetHeight() > 0)
 	{
-		CDirectDrawSurface &surface = m_EventBackGround[id];
+		CDirectDrawSurface &surface = *entry;
 		const int bpp = jpg.GetBpp(), width = jpg.GetWidth(), height = jpg.GetHeight(), pitch = width*bpp;
 
 		if (surface.InitOffsurface(width, height, DDSCAPS_SYSTEMMEMORY))

@@ -504,7 +504,9 @@ MTopView::InitChanges()
 
 			for (int i=0; i<numSize; i++)
 			{
-				(*g_pCreatureSpriteTable)[i].bLoad = false;
+				if (auto* entry = g_pCreatureSpriteTable->GetMutable(i)) {
+					entry->bLoad = false;
+				}
 			}
 		}
 
@@ -5115,7 +5117,9 @@ MTopView::LoadFromFileCreatureSPK(int spriteType)
 		}	
 
 		// Load했다고 표시한다.
-		(*g_pCreatureSpriteTable)[spriteType].bLoad = TRUE;
+		if (auto* entry = g_pCreatureSpriteTable->GetMutable(spriteType)) {
+			entry->bLoad = TRUE;
+		}
 
 		//--------------------------------------------------------
 		// Player그림일경우는 추가하지 않는다.
@@ -5433,7 +5437,9 @@ MTopView::ReleaseCreatureSPK(int n)
 			// 		}
 
 			// load하지 않았다고 표시한다.
-			(*g_pCreatureSpriteTable)[spriteType].bLoad = FALSE;
+			if (auto* entry = g_pCreatureSpriteTable->GetMutable(spriteType)) {
+				entry->bLoad = FALSE;
+			}
 
 			m_listLoadedCreatureSprite.Remove( spriteType );
 
@@ -5562,7 +5568,9 @@ MTopView::ReleaseUselessCreatureSPKExcept(const INT_ORDERED_LIST& listUse)
 			}
 
 			// load하지 않았다고 표시한다.
-			(*g_pCreatureSpriteTable)[spriteType].bLoad = FALSE;
+			if (auto* entry = g_pCreatureSpriteTable->GetMutable(spriteType)) {
+				entry->bLoad = FALSE;
+			}
 		}
 
 		iSpriteType++;
@@ -16778,9 +16786,9 @@ MTopView::DrawAttachEffect(POINT* pPoint, ATTACHEFFECT_LIST::const_iterator iEff
 					// 언제 출력되는건지 체크함 해준다.
 					if (HAS_PAIR_EFFECTSPRITETYPE(sest) && bBack == true )
 					{
-						EFFECTSPRITETYPETABLE_INFO::FRAMEID_LIST& idList = (*g_pEffectSpriteTypeTable)[sest].PairFrameIDList;
+						const EFFECTSPRITETYPETABLE_INFO::FRAMEID_LIST& idList = (*g_pEffectSpriteTypeTable)[sest].PairFrameIDList;
 
-						EFFECTSPRITETYPETABLE_INFO::FRAMEID_LIST::iterator iID = idList.begin();
+						EFFECTSPRITETYPETABLE_INFO::FRAMEID_LIST::const_iterator iID = idList.begin();
 
 						while (iID != idList.end())
 						{
@@ -16929,9 +16937,9 @@ MTopView::DrawAttachEffect(POINT* pPoint, ATTACHEFFECT_LIST::const_iterator iEff
 
 					if (HAS_PAIR_EFFECTSPRITETYPE(sest) && bBack == false )
 					{
-						EFFECTSPRITETYPETABLE_INFO::FRAMEID_LIST& idList = (*g_pEffectSpriteTypeTable)[sest].PairFrameIDList;
+						const EFFECTSPRITETYPETABLE_INFO::FRAMEID_LIST& idList = (*g_pEffectSpriteTypeTable)[sest].PairFrameIDList;
 
-						EFFECTSPRITETYPETABLE_INFO::FRAMEID_LIST::iterator iID = idList.begin();
+						EFFECTSPRITETYPETABLE_INFO::FRAMEID_LIST::const_iterator iID = idList.begin();
 
 						while (iID != idList.end())
 						{
@@ -17141,9 +17149,9 @@ MTopView::DrawAttachEffect(POINT* pPoint, ATTACHEFFECT_LIST::const_iterator iEff
 
 					if (HAS_PAIR_EFFECTSPRITETYPE(est))
 					{
-						EFFECTSPRITETYPETABLE_INFO::FRAMEID_LIST& idList = (*g_pEffectSpriteTypeTable)[est].PairFrameIDList;
+						const EFFECTSPRITETYPETABLE_INFO::FRAMEID_LIST& idList = (*g_pEffectSpriteTypeTable)[est].PairFrameIDList;
 
-						EFFECTSPRITETYPETABLE_INFO::FRAMEID_LIST::iterator iID = idList.begin();
+						EFFECTSPRITETYPETABLE_INFO::FRAMEID_LIST::const_iterator iID = idList.begin();
 
 						while (iID != idList.end())
 						{
@@ -19630,7 +19638,8 @@ MTopView::ExcuteOustersFinEvent()
 
 // SDL2: Cast CDirectDrawSurface* to CSpriteSurface* for compatibility (unified path)
 		CSpriteSurface* pSpriteSurface = reinterpret_cast<CSpriteSurface*>(pSurface);
-		m_pSurface->BltNoColorkey(&p, pSpriteSurface, &r);
+		if (pSpriteSurface != nullptr)
+			m_pSurface->BltNoColorkey(&p, pSpriteSurface, &r);
 
 //			m_pSurface->BltSprite(&p, g_pEventManager->GetEventBackground(event->parameter4));
 

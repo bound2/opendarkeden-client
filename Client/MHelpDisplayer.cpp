@@ -60,7 +60,7 @@ MHelpDisplayer::OutputHelp(HELP_OUTPUT ho)
 			}
 			else
 			{
-				MString& helpString = (*g_pHelpStringTable)[ho];
+				const MString& helpString = (*g_pHelpStringTable)[ho];
 
 				g_pHelpMessage->Add( helpString.GetString() );
 

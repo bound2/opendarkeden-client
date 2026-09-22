@@ -30,10 +30,14 @@ void GCLearnSkillOKHandler::execute ( GCLearnSkillOK * pPacket , Player * pPlaye
 
 	int domainType	= pPacket->getSkillDomainType();
 	int skillType	= pPacket->getSkillType();
+	auto* domain = g_pSkillManager->GetMutable(domainType);
+	auto* skill = g_pSkillInfoTable->GetMutable(skillType);
+	if (domain == nullptr || skill == nullptr)
+		return;
 
 
 	// 배운다.
-	MSkillDomain& swordDomain = (*g_pSkillManager)[domainType];
+	MSkillDomain& swordDomain = *domain;
 
 	swordDomain.SetNewSkill();
 	bool bLearn = swordDomain.LearnSkill( (ACTIONINFO)skillType );
@@ -43,7 +47,7 @@ void GCLearnSkillOKHandler::execute ( GCLearnSkillOK * pPacket , Player * pPlaye
 		// 현재 사용가능한 skill에 추가
 		g_pSkillAvailable->AddSkill( (ACTIONINFO)skillType );
 		
-		SKILLINFO_NODE& skillInfo = (*g_pSkillInfoTable)[skillType];
+		SKILLINFO_NODE& skillInfo = *skill;
 		
 		skillInfo.SetExpLevel( 1 );
 		skillInfo.SetSkillExp( 0 );
@@ -56,7 +60,7 @@ void GCLearnSkillOKHandler::execute ( GCLearnSkillOK * pPacket , Player * pPlaye
 	else if( g_pPlayer->IsOusters() )
 	{
 		// 아우스터즈인경우 이미 배운 스킬이면
-		SKILLINFO_NODE& skillInfo = (*g_pSkillInfoTable)[skillType];
+		SKILLINFO_NODE& skillInfo = *skill;
 		skillInfo.SetExpLevel( skillInfo.GetExpLevel()+1 );
 		
 	}

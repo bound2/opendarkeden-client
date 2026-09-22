@@ -157,8 +157,8 @@ class CREATURETABLE_INFO {
 		void				SetActionCount(int n, int count)		{ m_pActionCount[n] = count; }
 
 		enum CREATURETRIBE	GetCreatureTribe() const				{ return m_CreatureTribe; }
-		int					GetActionCount(int n)					{ return m_pActionCount[n]; }
-		TYPE_SOUNDID		GetActionSound(int n)					{ if (n >= 0 && n < m_nMaxAction) return m_pActionSound[n]; else return SOUNDID_NULL; }		
+		int					GetActionCount(int n) const					{ return m_pActionCount[n]; }
+		TYPE_SOUNDID		GetActionSound(int n) const					{ if (n >= 0 && n < m_nMaxAction) return m_pActionSound[n]; else return SOUNDID_NULL; }
 		int					GetActionMax() const;
 		
 		bool				IsFlyingCreature() const				{ return bFlyingCreature; }

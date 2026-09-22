@@ -164,7 +164,9 @@ MSkillSet::SetAvailableSkills()
 			//-----------------------------------------------------
 			// Blade
 			//-----------------------------------------------------
-			MSkillDomain& bladeDomain = (*g_pSkillManager)[SKILLDOMAIN_BLADE];
+			auto* pBladeDomain = g_pSkillManager->GetMutable(SKILLDOMAIN_BLADE);
+			if (pBladeDomain == nullptr) return;
+			MSkillDomain& bladeDomain = *pBladeDomain;
 
 			bladeDomain.SetBegin();		
 			while (bladeDomain.IsNotEnd())
@@ -200,7 +202,9 @@ MSkillSet::SetAvailableSkills()
 			//-----------------------------------------------------
 			// Sword
 			//-----------------------------------------------------
-			MSkillDomain& swordDomain = (*g_pSkillManager)[SKILLDOMAIN_SWORD];
+			auto* pSwordDomain = g_pSkillManager->GetMutable(SKILLDOMAIN_SWORD);
+			if (pSwordDomain == nullptr) return;
+			MSkillDomain& swordDomain = *pSwordDomain;
 
 			swordDomain.SetBegin();		
 			while (swordDomain.IsNotEnd())
@@ -236,7 +240,9 @@ MSkillSet::SetAvailableSkills()
 			//-----------------------------------------------------
 			// Gun
 			//-----------------------------------------------------
-			MSkillDomain& gunDomain = (*g_pSkillManager)[SKILLDOMAIN_GUN];
+			auto* pGunDomain = g_pSkillManager->GetMutable(SKILLDOMAIN_GUN);
+			if (pGunDomain == nullptr) return;
+			MSkillDomain& gunDomain = *pGunDomain;
 
 			gunDomain.SetBegin();		
 			while (gunDomain.IsNotEnd())
@@ -272,7 +278,9 @@ MSkillSet::SetAvailableSkills()
 			//-----------------------------------------------------
 			// Enchant - 그냥 모두 추가하면 된다.
 			//-----------------------------------------------------
-			MSkillDomain& enchantDomain = (*g_pSkillManager)[SKILLDOMAIN_ENCHANT];
+			auto* pEnchantDomain = g_pSkillManager->GetMutable(SKILLDOMAIN_ENCHANT);
+			if (pEnchantDomain == nullptr) return;
+			MSkillDomain& enchantDomain = *pEnchantDomain;
 
 			enchantDomain.SetBegin();		
 			while (enchantDomain.IsNotEnd())
@@ -304,7 +312,9 @@ MSkillSet::SetAvailableSkills()
 			//-----------------------------------------------------
 			// Heal - 그냥 모두 추가하면 된다.
 			//-----------------------------------------------------
-			MSkillDomain& healDomain = (*g_pSkillManager)[SKILLDOMAIN_HEAL];
+			auto* pHealDomain = g_pSkillManager->GetMutable(SKILLDOMAIN_HEAL);
+			if (pHealDomain == nullptr) return;
+			MSkillDomain& healDomain = *pHealDomain;
 
 			healDomain.SetBegin();		
 			while (healDomain.IsNotEnd())
@@ -335,7 +345,9 @@ MSkillSet::SetAvailableSkills()
 			//-----------------------------------------------------
 			// Etc - 그냥 모두 추가하면 된다.
 			//-----------------------------------------------------
-			MSkillDomain& etcDomain = (*g_pSkillManager)[SKILLDOMAIN_ETC];
+			auto* pEtcDomain = g_pSkillManager->GetMutable(SKILLDOMAIN_ETC);
+			if (pEtcDomain == nullptr) return;
+			MSkillDomain& etcDomain = *pEtcDomain;
 
 			etcDomain.SetBegin();		
 			while (etcDomain.IsNotEnd())
@@ -644,7 +656,9 @@ MSkillSet::SetAvailableSkills()
 				|| g_pPlayer->GetCreatureType()==CREATURETYPE_VAMPIRE_OPERATOR)
 
 			{
-				MSkillDomain& vampireDomain = (*g_pSkillManager)[SKILLDOMAIN_VAMPIRE];
+				auto* pVampireDomain = g_pSkillManager->GetMutable(SKILLDOMAIN_VAMPIRE);
+				if (pVampireDomain == nullptr) return;
+				MSkillDomain& vampireDomain = *pVampireDomain;
 				
 				vampireDomain.SetBegin();		
 
@@ -861,7 +875,9 @@ MSkillSet::SetAvailableSkills()
 			//
 			//-----------------------------------------------------
 			{
-				MSkillDomain& oustersDomain = (*g_pSkillManager)[SKILLDOMAIN_OUSTERS];
+				auto* pOustersDomain = g_pSkillManager->GetMutable(SKILLDOMAIN_OUSTERS);
+				if (pOustersDomain == nullptr) return;
+				MSkillDomain& oustersDomain = *pOustersDomain;
 				
 				oustersDomain.SetBegin();		
 				while (oustersDomain.IsNotEnd())
@@ -1033,7 +1049,9 @@ MSkillSet::SetAvailableSkills()
 void			
 MSkillSet::SetAvailableVampireSkills()
 {
-	MSkillDomain& vampireDomain = (*g_pSkillManager)[SKILLDOMAIN_VAMPIRE];
+	auto* pVampireDomain = g_pSkillManager->GetMutable(SKILLDOMAIN_VAMPIRE);
+	if (pVampireDomain == nullptr) return;
+	MSkillDomain& vampireDomain = *pVampireDomain;
 	TYPE_CREATURETYPE PlayerCreatureType = g_pPlayer->GetCreatureType();
 
 	int playerMP;		

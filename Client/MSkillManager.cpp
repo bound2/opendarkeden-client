@@ -1625,18 +1625,15 @@ MSkillDomain::LoadFromFileServerDomainInfo(std::ifstream& file)
 	info.LoadFromFile( file );
 
 	//--------------------------------------------------
-	// The level names the row to fill. A table answers every index it
-	// does not hold with one row shared across every table of that
-	// type, so a level outside this one would not be stored under
-	// that level - it would become what every level past the end
-	// reads. The level is the file's, so it is checked here.
+	// The level names the row to fill. An invalid level consumes its
+	// complete record but must not alter this table or a fallback value.
 	//--------------------------------------------------
 	if (level<0 || level>=m_DomainExpTable.GetSize())
 	{
 		return;
 	}
 
-	m_DomainExpTable[level] = info;
+	m_DomainExpTable.Set(level, info);
 }
 
 bool		

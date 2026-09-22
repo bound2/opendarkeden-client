@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 
 #include "test_framework.h"
+#include "type_table_access.h"
 
 #include "gamemodel_world.h"
 #include "MGameStringTable.h"
@@ -58,11 +59,11 @@ struct SkillWorld : GameModelWorld
 		g_pSkillManager = new MSkillManager;
 		g_pSkillAvailable = new MSkillSet;
 
-		(*g_pSkillInfoTable)[kRoot].Set(0, "Single Blow", 0, 0, 0, "Single Blow");
-		(*g_pSkillInfoTable)[kChild].Set(1, "Double Impact", 1, 0, 0, "Double Impact");
-		(*g_pSkillInfoTable)[kLeaf].Set(2, "Fast Reload", 2, 0, 0, "Fast Reload");
-		(*g_pSkillInfoTable)[kRoot].AddNextSkill(kChild);
-		(*g_pSkillInfoTable)[kChild].AddNextSkill(kLeaf);
+		testfw::MutableRow(*g_pSkillInfoTable, kRoot).Set(0, "Single Blow", 0, 0, 0, "Single Blow");
+		testfw::MutableRow(*g_pSkillInfoTable, kChild).Set(1, "Double Impact", 1, 0, 0, "Double Impact");
+		testfw::MutableRow(*g_pSkillInfoTable, kLeaf).Set(2, "Fast Reload", 2, 0, 0, "Fast Reload");
+		testfw::MutableRow(*g_pSkillInfoTable, kRoot).AddNextSkill(kChild);
+		testfw::MutableRow(*g_pSkillInfoTable, kChild).AddNextSkill(kLeaf);
 
 		MItem::SetHost(&s_Host);
 	}
@@ -107,9 +108,9 @@ TEST(Cpp20ContainerHelpers2, SkillDomainAnswersStepMembershipFromTheMap)
 	SkillWorld world;
 
 	// Two steps across the three skills of the chain.
-	(*g_pSkillInfoTable)[kRoot].SetSkillStep(SKILL_STEP_APPRENTICE);
-	(*g_pSkillInfoTable)[kChild].SetSkillStep(SKILL_STEP_APPRENTICE);
-	(*g_pSkillInfoTable)[kLeaf].SetSkillStep(SKILL_STEP_ADEPT);
+	testfw::MutableRow(*g_pSkillInfoTable, kRoot).SetSkillStep(SKILL_STEP_APPRENTICE);
+	testfw::MutableRow(*g_pSkillInfoTable, kChild).SetSkillStep(SKILL_STEP_APPRENTICE);
+	testfw::MutableRow(*g_pSkillInfoTable, kLeaf).SetSkillStep(SKILL_STEP_ADEPT);
 
 	MSkillDomain domain;
 
@@ -144,12 +145,12 @@ TEST(Cpp20ContainerHelpers2, AStepListTakesEachSkillOnceHoweverOftenTheWalkRuns)
 	SkillWorld world;
 
 	// All three in one step, in the order the tree walk meets them.
-	(*g_pSkillInfoTable)[kRoot].SetSkillStep(SKILL_STEP_APPRENTICE);
-	(*g_pSkillInfoTable)[kChild].SetSkillStep(SKILL_STEP_APPRENTICE);
-	(*g_pSkillInfoTable)[kLeaf].SetSkillStep(SKILL_STEP_APPRENTICE);
-	(*g_pSkillInfoTable)[kRoot].SetLearnLevel(30);
-	(*g_pSkillInfoTable)[kChild].SetLearnLevel(20);
-	(*g_pSkillInfoTable)[kLeaf].SetLearnLevel(10);
+	testfw::MutableRow(*g_pSkillInfoTable, kRoot).SetSkillStep(SKILL_STEP_APPRENTICE);
+	testfw::MutableRow(*g_pSkillInfoTable, kChild).SetSkillStep(SKILL_STEP_APPRENTICE);
+	testfw::MutableRow(*g_pSkillInfoTable, kLeaf).SetSkillStep(SKILL_STEP_APPRENTICE);
+	testfw::MutableRow(*g_pSkillInfoTable, kRoot).SetLearnLevel(30);
+	testfw::MutableRow(*g_pSkillInfoTable, kChild).SetLearnLevel(20);
+	testfw::MutableRow(*g_pSkillInfoTable, kLeaf).SetLearnLevel(10);
 
 	MSkillDomain domain;
 

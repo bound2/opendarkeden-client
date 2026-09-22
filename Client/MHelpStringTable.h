@@ -27,8 +27,8 @@ class MHelpStringTable : public MStringArray {
 		//-------------------------------------------------------
 		// Reference
 		//-------------------------------------------------------		
-		MString&	operator [] (int type);
-		MString&	Get(int type);
+		const MString&	operator [] (int type);
+		const MString&	Get(int type);
 
 		//-------------------------------------------------------
 		// File I/O

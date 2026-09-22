@@ -21,6 +21,7 @@
 //----------------------------------------------------------------------
 
 #include "test_framework.h"
+#include "type_table_access.h"
 
 #include "ExperienceTable.h"
 #include "MItemOptionTable.h"
@@ -218,8 +219,8 @@ TEST(SoundTable, SaveAndLoadRoundTripTheFileNames)
 {
 	SOUND_TABLE src;
 	src.Init(2);
-	src[0].Filename = "hit.wav";
-	src[1].Filename = "miss.wav";
+	testfw::MutableRow(src, 0).Filename = "hit.wav";
+	testfw::MutableRow(src, 1).Filename = "miss.wav";
 	{
 		std::ofstream out(kTempFile, std::ios::binary | std::ios::trunc);
 		src.SaveToFile(out);
@@ -488,8 +489,8 @@ TEST(RankBonusTable, LoadsEveryRaceAndPreservesTheOnDiskFieldWidths)
 	}
 
 	// Packet-driven status changes are independent for each row.
-	table[1].SetStatus(RankBonusInfo::STATUS_LEARNED);
-	table[2].SetStatus(RankBonusInfo::STATUS_CANNOT_LEARN);
+	testfw::MutableRow(table, 1).SetStatus(RankBonusInfo::STATUS_LEARNED);
+	testfw::MutableRow(table, 2).SetStatus(RankBonusInfo::STATUS_CANNOT_LEARN);
 	CHECK_EQ(RankBonusInfo::STATUS_NULL, table[0].GetStatus());
 	CHECK_EQ(RankBonusInfo::STATUS_LEARNED, table[1].GetStatus());
 	CHECK_EQ(RankBonusInfo::STATUS_CANNOT_LEARN, table[2].GetStatus());
@@ -499,7 +500,7 @@ TEST(RankBonusTable, MissingRowsReturnTheDefaultAndReleaseEmptiesTheTable)
 {
 	RankBonusTable table;
 	table.Init(2);
-	table[0].SetStatus(RankBonusInfo::STATUS_LEARNED);
+	testfw::MutableRow(table, 0).SetStatus(RankBonusInfo::STATUS_LEARNED);
 	const RankBonusTable& readOnly = table;
 	for (int index : { -1, 2, 65535 })
 	{
@@ -519,7 +520,7 @@ TEST(RankBonusTable, EmptyReloadClearsExistingRowsAndNegativeCountIsRejected)
 {
 	RankBonusTable table;
 	table.Init(1);
-	table[0].SetStatus(RankBonusInfo::STATUS_LEARNED);
+	testfw::MutableRow(table, 0).SetStatus(RankBonusInfo::STATUS_LEARNED);
 	Bytes negative;
 	negative.Int(-1);
 	WriteScratch(negative);

@@ -62,7 +62,7 @@ void GCAddNPCHandler::execute ( GCAddNPC * pPacket , Player * pPlayer )
 			int creatureType = npcID;
 			int spriteType = (*g_pCreatureTable)[creatureType].SpriteTypes[0];			
 			
-			CREATURESPRITETABLE_INFO& spriteInfo = (*g_pCreatureSpriteTable)[spriteType];
+			const CREATURESPRITETABLE_INFO& spriteInfo = (*g_pCreatureSpriteTable)[spriteType];
 
 			if (spriteInfo.IsNPCSprite()
 				&& spriteInfo.IsSlayerSprite()

@@ -50,7 +50,9 @@ ModifyStatusManager*		g_pModifyStatusManager = NULL;
 bool
 CanLearnDomainSkill(int domain)
 {
-	MSkillDomain& skillDomain = (*g_pSkillManager)[domain];
+	auto* pSkillDomain = g_pSkillManager->GetMutable(domain);
+	if (pSkillDomain == nullptr) return false;
+	MSkillDomain& skillDomain = *pSkillDomain;
 	int domainLevel = skillDomain.GetDomainLevel();
 	
 	//--------------------------------------------------
@@ -96,7 +98,9 @@ CanLearnDomainSkill(int domain)
 void
 SetDomainLevel( int domain, int domainLevel )
 {
-	MSkillDomain& skillDomain = (*g_pSkillManager)[domain];
+	auto* pSkillDomain = g_pSkillManager->GetMutable(domain);
+	if (pSkillDomain == nullptr) return;
+	MSkillDomain& skillDomain = *pSkillDomain;
 	skillDomain.SetDomainLevel( domainLevel );
 
 	if (g_Mode==MODE_GAME)
@@ -823,7 +827,9 @@ ModifyStatusManager::Function_MODIFY_LEVEL(void* pVoid)
 {
 	EXTRACT_MODIFY_VALUE( pVoid )
 
-	(*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].SetDomainLevel( value );
+	if (auto* entry = g_pSkillManager->GetMutable(SKILLDOMAIN_VAMPIRE)) {
+		entry->SetDomainLevel( value );
+	}
 
 	if (g_Mode==MODE_GAME)
 	{
@@ -1046,7 +1052,9 @@ ModifyStatusManager::Function_MODIFY_SWORD_DOMAIN_EXP_REMAIN(void* pVoid)
 {
 	EXTRACT_MODIFY_VALUE( pVoid )
 
-	(*g_pSkillManager)[SKILLDOMAIN_SWORD].SetDomainExpRemain( value );
+	if (auto* entry = g_pSkillManager->GetMutable(SKILLDOMAIN_SWORD)) {
+		entry->SetDomainExpRemain( value );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1057,7 +1065,9 @@ ModifyStatusManager::Function_MODIFY_BLADE_DOMAIN_EXP_REMAIN(void* pVoid)
 {
 	EXTRACT_MODIFY_VALUE( pVoid )
 
-	(*g_pSkillManager)[SKILLDOMAIN_BLADE].SetDomainExpRemain( value );
+	if (auto* entry = g_pSkillManager->GetMutable(SKILLDOMAIN_BLADE)) {
+		entry->SetDomainExpRemain( value );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1068,7 +1078,9 @@ ModifyStatusManager::Function_MODIFY_HEAL_DOMAIN_EXP_REMAIN(void* pVoid)
 {
 	EXTRACT_MODIFY_VALUE( pVoid )
 
-	(*g_pSkillManager)[SKILLDOMAIN_HEAL].SetDomainExpRemain( value );
+	if (auto* entry = g_pSkillManager->GetMutable(SKILLDOMAIN_HEAL)) {
+		entry->SetDomainExpRemain( value );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1079,7 +1091,9 @@ ModifyStatusManager::Function_MODIFY_ENCHANT_DOMAIN_EXP_REMAIN(void* pVoid)
 {
 	EXTRACT_MODIFY_VALUE( pVoid )
 
-	(*g_pSkillManager)[SKILLDOMAIN_ENCHANT].SetDomainExpRemain( value );
+	if (auto* entry = g_pSkillManager->GetMutable(SKILLDOMAIN_ENCHANT)) {
+		entry->SetDomainExpRemain( value );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1090,7 +1104,9 @@ ModifyStatusManager::Function_MODIFY_GUN_DOMAIN_EXP_REMAIN(void* pVoid)
 {
 	EXTRACT_MODIFY_VALUE( pVoid )
 
-	(*g_pSkillManager)[SKILLDOMAIN_GUN].SetDomainExpRemain( value );
+	if (auto* entry = g_pSkillManager->GetMutable(SKILLDOMAIN_GUN)) {
+		entry->SetDomainExpRemain( value );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1101,7 +1117,9 @@ ModifyStatusManager::Function_MODIFY_ETC_DOMAIN_EXP_REMAIN(void* pVoid)
 {
 	EXTRACT_MODIFY_VALUE( pVoid )
 
-	(*g_pSkillManager)[SKILLDOMAIN_ETC].SetDomainExpRemain( value );
+	if (auto* entry = g_pSkillManager->GetMutable(SKILLDOMAIN_ETC)) {
+		entry->SetDomainExpRemain( value );
+	}
 }
 	
 //-----------------------------------------------------------------------------
@@ -1257,7 +1275,9 @@ ModifyStatusManager::Function_MODIFY_SKILL_LEVEL(void *pVoid)
 
 	if( SkillID >= 0 && SkillID < MAX_ACTIONINFO && g_pSkillInfoTable != NULL)
 	{
-		(*g_pSkillInfoTable)[SkillID].SetExpLevel( SkillLev );
+		if (auto* entry = g_pSkillInfoTable->GetMutable(SkillID)) {
+			entry->SetExpLevel( SkillLev );
+		}
 
 		if (g_Mode==MODE_GAME)
 		{
@@ -1285,7 +1305,9 @@ ModifyStatusManager::Function_MODIFY_SKILL_EXP(void *pVoid)
 	int				SkillExp = LOWORD( value ) * 10;
 
 	if( SkillID >= 0 && SkillID < MAX_ACTIONINFO && g_pSkillInfoTable != NULL)
-		(*g_pSkillInfoTable)[SkillID].SetSkillExp( SkillExp );
+		if (auto* entry = g_pSkillInfoTable->GetMutable(SkillID)) {
+			entry->SetSkillExp( SkillExp );
+		}
 }
 
 void 
