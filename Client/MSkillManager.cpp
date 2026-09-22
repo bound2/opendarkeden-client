@@ -1623,6 +1623,8 @@ MSkillDomain::LoadFromFileServerDomainInfo(std::ifstream& file)
 	info.GoalExp = 0;
 	info.AccumExp = 0;
 	info.LoadFromFile( file );
+	if (!file.good())
+		return;
 
 	//--------------------------------------------------
 	// The level names the row to fill. An invalid level consumes its
@@ -1742,9 +1744,13 @@ MSkillManager::InitSkillList()
 void		
 MSkillManager::LoadFromFileServerDomainInfo(std::ifstream& file)
 {
-	int num, domain;
-
-	file.read((char*)&num, 4);
+	int num = 0;
+	// A record contains domain, level, goal and accumulated experience.
+	if (!file.read((char*)&num, 4) || !IsEntryCountSane(file, num, 16))
+	{
+		file.setstate(std::ios::failbit);
+		return;
+	}
 
 	// The count and each domain are the file's. m_pTypeInfo is indexed
 	// raw here, past even the typed table's own bound, so a domain the
@@ -1753,6 +1759,7 @@ MSkillManager::LoadFromFileServerDomainInfo(std::ifstream& file)
 	// row begins, so reading stops.
 	for (int i=0; i<num; i++)
 	{
+		int domain = 0;
 		if (!file.read((char*)&domain, 4))
 		{
 			return;
@@ -1760,9 +1767,12 @@ MSkillManager::LoadFromFileServerDomainInfo(std::ifstream& file)
 
 		if (domain < 0 || domain >= GetSize())
 		{
+			file.setstate(std::ios::failbit);
 			return;
 		}
 
 		m_pTypeInfo[domain].LoadFromFileServerDomainInfo( file );
+		if (!file.good())
+			return;
 	}
 }
