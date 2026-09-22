@@ -32359,11 +32359,15 @@ void	C_VS_UI_POPUP_MESSAGE::Show()
 		const auto text = TextSystem::TextService::NormalizeText(m_Str);
 		const auto pixels = static_cast<long long>(x) + w - 30 - vx;
 		const size_t column = static_cast<size_t>(max(1LL, pixels / max(1, char_width)));
-		for (const auto& row : TextSystem::WrapUtf8Lines(text, column,
-			{.skipSeamSpace = false, .splitNewlines = false, .trimLeadingSpaces = true, .splitEscapedNewlines = true}))
+		const int glyphHeight = max(1, g_GetStringHeight("a", gpC_base->m_dialog_msg_pi.hfont));
+		const auto bottom = static_cast<long long>(y) + h - 55;
+		std::string_view remaining = text;
+		while (!remaining.empty() && static_cast<long long>(py) + glyphHeight <= bottom)
 		{
-			g_PrintColorStr(vx, py, row.c_str(), gpC_base->m_dialog_msg_pi, RGB_WHITE);
-			vx = print_x;
+			const auto row = TextSystem::NextUtf8Line(remaining, column,
+				{.skipSeamSpace = false, .splitNewlines = false, .trimLeadingSpaces = true, .splitEscapedNewlines = true});
+			remaining.remove_prefix(row.consumed);
+			g_PrintColorStr(vx, py, row.text.c_str(), gpC_base->m_dialog_msg_pi, RGB_WHITE);
 			py += print_gap;
 		}
 		g_FL2_ReleaseDC();

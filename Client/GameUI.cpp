@@ -26,6 +26,7 @@
 #include "ClientFunction.h"
 #include "MGameStringTable.h"
 #include "SafeFormat.h"
+#include "MailTemplate.h"
 #include "MItemOptionTable.h"
 #include "CToken.h"
 #include "UserOption.h"
@@ -4622,7 +4623,6 @@ UI_RunNotice(DWORD sendID, DWORD parameter)
 {
 	std::string FileName;
 
-	SIZE windowSize;
 	bool bOpen = false;
 	char szDate[128];
 	switch(sendID)
@@ -4671,7 +4671,7 @@ UI_RunNotice(DWORD sendID, DWORD parameter)
 
 	// 2차 펫 퀘스트
 	case 7:
-		sprintf(szDate, "%02d%02d%02d",	(g_pGameTime->GetYear()+100)%100,
+		SafeFormat::Format(szDate, "%02d%02d%02d",	(g_pGameTime->GetYear()+100)%100,
 									g_pGameTime->GetMonth(),
 									g_pGameTime->GetDay());
 		parameter = (atoi(szDate))*100;
@@ -4679,6 +4679,8 @@ UI_RunNotice(DWORD sendID, DWORD parameter)
 		break;
 	case 8: 
 		gC_vs_ui.RunSMSMessage();
+		return;
+	default:
 		return;
 	}
 
@@ -4697,6 +4699,8 @@ UI_RunNotice(DWORD sendID, DWORD parameter)
 		case RACE_OUSTERS :	
 			FileName += "Ousters.txt";	
 			break;
+		default:
+			return;
 		}
 	}
 	else
@@ -4707,37 +4711,18 @@ UI_RunNotice(DWORD sendID, DWORD parameter)
 //	style.Type = C_VS_UI_POPUP_MESSAGE::POPUP_NORMAL;	
 //	style.SendID = 2;
 
-	CRarFile PackFile;
-	char szLine[4096];
-		
-	PackFile.SetRAR( RPK_TUTORIAL_ETC, RPK_PASSWORD );
-	std::string sender, title, contents;
-	if( PackFile.IsSet() )
-	{
-		PackFile.Open( FileName.c_str() );
-		ZeroMemory( szLine, 4096 );
-		PackFile.GetString(szLine, 4096);
-		sscanf(szLine, "%d %d", &windowSize.cx, &windowSize.cy);
-		ZeroMemory( szLine, 4096 );
-		PackFile.GetString(szLine, 4096);
-		sender = szLine;
-		ZeroMemory( szLine, 4096 );
-		PackFile.GetString(szLine, 4096);
-		title = szLine;
-		ZeroMemory( szLine, 4096 );
-		PackFile.GetString(szLine, 4096);
-		contents = szLine;
-		
-		PackFile.Release();
+	CRarFile packFile;
+	packFile.SetRAR(RPK_TUTORIAL_ETC, RPK_PASSWORD);
+	if (!packFile.OpenText(FileName.c_str())) return;
+	MailTemplate::Data mail;
+	if (!MailTemplate::Parse(std::string_view(packFile.GetFilePointer(), packFile.GetRemainingSize()),
+		g_GameRect.right, g_GameRect.bottom, mail)) {
+		DEBUG_ADD_FORMAT("[Notice] Invalid mail template: %s", FileName.c_str());
+		return;
 	}
-	else return;
-	
-
-	gC_vs_ui.AddMail(0, sendID, windowSize, sender.c_str(), title.c_str(), parameter, bOpen);
-	gC_vs_ui.AddMailContents(0, sendID, contents.c_str());
-//	gC_vs_ui.AddMail(0, 2, sender, title, 030000, windowSize);
-//	gC_vs_ui.AddMailContents(0, 2, contents, true);
-//	gC_vs_ui.RunPopupMessage( style );
+	const SIZE windowSize = {mail.width, mail.height};
+	gC_vs_ui.AddMail(0, sendID, windowSize, mail.sender.c_str(), mail.title.c_str(), parameter, bOpen);
+	gC_vs_ui.AddMailContents(0, sendID, mail.contents.c_str());
 }
 
 void

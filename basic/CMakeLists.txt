@@ -73,6 +73,8 @@ set(BASIC_SOURCES
 	HelpMarkup.cpp
 	DescriptorText.cpp
 	HelpLayout.cpp
+	MailTemplate.cpp
+	MasterCommands.cpp
 	TextEncoding.cpp
 	ResourceText.cpp
 	MemoryPool.cpp
