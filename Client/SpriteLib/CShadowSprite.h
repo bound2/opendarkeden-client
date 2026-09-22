@@ -19,6 +19,8 @@
 #include "CSpriteDef.h"
 #include "CIndexSprite.h"
 #include "CSprite.h"
+#include <span>
+#include <vector>
 
 
 //----------------------------------------------------------------------
@@ -53,6 +55,7 @@ class CShadowSprite
 {
 	public :
 		CShadowSprite();
+		CShadowSprite(const CShadowSprite& sprite);
 		~CShadowSprite();
 
 		bool		IsNotInit() const	{ return !m_bInit; }
@@ -101,6 +104,11 @@ class CShadowSprite
 		WORD		GetHeight()		const			{ return m_Height; }
 		WORD		GetPixel(WORD x, WORD y)const	{ return m_Pixels[y][x]; }
 		WORD*		GetPixelLine(WORD y)	const	{ return m_Pixels[y]; }
+		std::span<const WORD> GetPixelLineSpan(WORD y) const
+		{
+			if (!m_Pixels || y >= m_Height || y >= m_PixelLengths.size()) return {};
+			return {m_Pixels[y], m_PixelLengths[y]};
+		}
 
 #ifdef SPRITELIB_BACKEND_SDL
 		/* Backend sprite management */
@@ -233,6 +241,7 @@ class CShadowSprite
 		WORD			m_Height;		// 세로 pixel수		
 		WORD**			m_Pixels;		// pixels
 		bool			m_bInit;		// data가 있는가?
+		std::vector<size_t> m_PixelLengths;
 
 #ifdef SPRITELIB_BACKEND_SDL
 		spritectl_sprite_t	m_backend_sprite;	// Backend sprite handle

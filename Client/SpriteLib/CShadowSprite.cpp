@@ -5,6 +5,7 @@
 #include "CSpriteSurface.h"
 #include "CFilter.h"
 #include "CShadowSprite.h"
+#include "SpriteScanline.h"
 #include <memory>
 #include <vector>
 
@@ -46,6 +47,11 @@ CShadowSprite::CShadowSprite()
 #endif
 }
 
+CShadowSprite::CShadowSprite(const CShadowSprite& sprite) : CShadowSprite()
+{
+	*this = sprite;
+}
+
 CShadowSprite::~CShadowSprite()
 {
 	Release();
@@ -78,44 +84,38 @@ CShadowSprite::Release()
 	m_Width = 0;
 	m_Height = 0;
 	m_bInit = false;
+	m_PixelLengths.clear();
 }
 
 //----------------------------------------------------------------------
 // operator = 
 //----------------------------------------------------------------------
-void		
-CShadowSprite::operator = (const CShadowSprite& Sprite)
+void
+CShadowSprite::operator = (const CShadowSprite& sprite)
 {
-	// 메모리 해제
+	if (this == &sprite) return;
 	Release();
-
-	// NULL이면 저장하지 않는다.
-	if (Sprite.m_Pixels==NULL || Sprite.m_Width==0 || Sprite.m_Height==0)
+	if (!sprite.m_bInit) return;
+	if (sprite.m_Width == 0 || sprite.m_Height == 0) {
+		m_Width = sprite.m_Width;
+		m_Height = sprite.m_Height;
+		m_bInit = true;
 		return;
-
-	// 크기 설정
-	m_Width = Sprite.m_Width;
-	m_Height = Sprite.m_Height;	
-
-	// 압축 된 것 저장
-	WORD index;	
-
-	// 메모리 잡기
-	m_Pixels = new WORD* [m_Height];
-
-	//--------------------------------
-	// 5:6:5
-	//--------------------------------
-	for (int i=0; i<m_Height; i++)
-	{
-		// 반복수 + 반복수*2byte
-		index	= 1 + m_Pixels[i][0]*2;	
-
-		// 메모리 잡기
-		m_Pixels[i] = new WORD [index];
-		memcpy(m_Pixels[i], Sprite.m_Pixels[i], index<<1);
 	}
-
+	std::vector<std::unique_ptr<WORD[]>> rows(sprite.m_Height);
+	for (WORD y = 0; y < sprite.m_Height; ++y) {
+		const auto line = sprite.GetPixelLineSpan(y);
+		if (!ValidateShadowScanline(line, sprite.m_Width)) return;
+		rows[y] = std::make_unique<WORD[]>(line.size());
+		memcpy(rows[y].get(), line.data(), line.size_bytes());
+	}
+	auto pointers = std::make_unique<WORD*[]>(sprite.m_Height);
+	m_PixelLengths = sprite.m_PixelLengths;
+	for (WORD y = 0; y < sprite.m_Height; ++y) pointers[y] = rows[y].release();
+	m_Pixels = pointers.release();
+	m_Width = sprite.m_Width;
+	m_Height = sprite.m_Height;
+	m_bInit = true;
 }
 
 //----------------------------------------------------------------------
@@ -182,17 +182,11 @@ CShadowSprite::LoadFromFile(ifstream& file)
 		// Consume every row before rejecting a complete malformed record, so
 		// the next packed sprite remains readable. Extra padding is permitted.
 		for (WORD y = 0; y < height; ++y) {
-			const WORD* row = rows[y].get();
-			if (lengths[y] == 0 || size_t(row[0]) * 2 + 1 > lengths[y]) return false;
-			size_t remaining = width;
-			for (size_t run = 0; run < row[0]; ++run) {
-				const size_t extent = size_t(row[1 + run * 2]) + row[2 + run * 2];
-				if (extent > remaining) return false;
-				remaining -= extent;
-			}
+			if (!ValidateShadowScanline({rows[y].get(), lengths[y]}, width)) return false;
 		}
 		auto pointers = std::make_unique<WORD*[]>(height);
 		for (WORD y = 0; y < height; ++y) pointers[y] = rows[y].release();
+		m_PixelLengths = std::move(lengths);
 		m_Pixels = pointers.release();
 		m_Width = width;
 		m_Height = height;
@@ -226,7 +220,7 @@ CShadowSprite::SetPixel(WORD *pSource, WORD pitch, WORD width, WORD height)
 	m_Height = height;
 
 	// 일단 memory를 적당히 잡아둔다.	
-	WORD*	data = new WORD[m_Width+2];
+	std::vector<WORD> data(size_t(m_Width) + 2);
 
 	int	index;				// data의 index로 사용			
 	int	count;				// 반복수
@@ -239,7 +233,8 @@ CShadowSprite::SetPixel(WORD *pSource, WORD pitch, WORD width, WORD height)
 
 
 	// height줄 만큼 memory잡기
-	m_Pixels = new WORD* [height];
+	m_PixelLengths.assign(height, 0);
+	m_Pixels = new WORD* [height]{};
 
 	int i;
 	int j;
@@ -305,16 +300,16 @@ CShadowSprite::SetPixel(WORD *pSource, WORD pitch, WORD width, WORD height)
 		
 		// memory를 다시 잡는다.
 		m_Pixels[i] = new WORD [index+1];
+		m_PixelLengths[i] = size_t(index) + 1;
 
 		// m_Pixels[i]를 압축했으므로 data로 대체한다.
 		// m_Pixels[i][0]에는 count를 넣어야 한다.
 		m_Pixels[i][0] = count;
-		memcpy(m_Pixels[i]+1, data, index<<1);
+		memcpy(m_Pixels[i]+1, data.data(), index<<1);
 
 		pSource = (WORD*)((BYTE*)pSource + pitch);
 	}
 
-	delete [] data;
 
 	m_bInit = true;
 }
@@ -344,7 +339,8 @@ CShadowSprite::SetPixel(CIndexSprite& ispr)
 	int j;	
 
 	// height줄 만큼 memory잡기
-	m_Pixels = new WORD* [m_Height];
+	m_PixelLengths.assign(m_Height, 0);
+	m_Pixels = new WORD* [m_Height]{};
 
 	for (int i=0; i<m_Height; i++)
 	{			
@@ -355,6 +351,7 @@ CShadowSprite::SetPixel(CIndexSprite& ispr)
 
 		// 반복수 + (투명수,그림자수)*반복수
 		m_Pixels[i] = new WORD [1 + (transPair<<1)];
+		m_PixelLengths[i] = 1 + (size_t(transPair) * 2);
 		index = 0;
 		m_Pixels[i][index++] = transPair;
 		
@@ -407,7 +404,8 @@ CShadowSprite::SetPixel(CSprite& spr)
 	int j;	
 
 	// height줄 만큼 memory잡기
-	m_Pixels = new WORD* [m_Height];
+	m_PixelLengths.assign(m_Height, 0);
+	m_Pixels = new WORD* [m_Height]{};
 
 	for (int i=0; i<m_Height; i++)
 	{			
@@ -418,6 +416,7 @@ CShadowSprite::SetPixel(CSprite& spr)
 
 		// 반복수 + (투명수,그림자수)*반복수
 		m_Pixels[i] = new WORD [1 + (transPair<<1)];
+		m_PixelLengths[i] = 1 + (size_t(transPair) * 2);
 		index = 0;
 		m_Pixels[i][index++] = transPair;
 		
