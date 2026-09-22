@@ -9492,12 +9492,13 @@ void	C_VS_UI_REGEN_TOWER_MINIMAP::Show()
 			{ 204, 4, 304, 104 }
 		};
 
-		const int map_width = 128, map_height=256;
+		const int map_width = RegenTowerInfo::MapWidth, map_height = RegenTowerInfo::MapHeight;
 		
 		for(int i = 0; i < g_pRegenTowerInfoManager->GetSize(); i++ )
 		{
 			int index,cx,cy,image;
 			const RegenTowerInfo* pInfo = &g_pRegenTowerInfoManager->Get(i);
+			if (!pInfo->IsValid()) continue;
 			
 			index = 2 - (pInfo->zoneID - 71);
 			
@@ -9584,7 +9585,7 @@ bool	C_VS_UI_REGEN_TOWER_MINIMAP::MouseControl(UINT message, int _x, int _y)
 		{ 204, 4, 304, 104 }
 	};
 
-	const int map_width = 128, map_height=256;
+	const int map_width = RegenTowerInfo::MapWidth, map_height = RegenTowerInfo::MapHeight;
 
 	_x-=x; _y-=y;
 	switch(message)
@@ -9596,6 +9597,7 @@ bool	C_VS_UI_REGEN_TOWER_MINIMAP::MouseControl(UINT message, int _x, int _y)
 			{
 				int index,cx,cy;
 				const RegenTowerInfo* pInfo = &g_pRegenTowerInfoManager->Get(i);
+				if (!pInfo->IsValid()) continue;
 				
 				index = 2 - (pInfo->zoneID - 71);
 				
