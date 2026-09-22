@@ -72,7 +72,7 @@ my %entry;
 	my $t = <$fh>;
 	close $fh;
 
-	while ($t =~ /\(\*g_pGameStringTable\)\[\s*([A-Za-z_]\w*)\s*\]\s*=\s*"((?:[^"\\]|\\.)*)"\s*;/g)
+	while ($t =~ /g_pGameStringTable->Set\(\s*([A-Za-z_]\w*)\s*,\s*"((?:[^"\\]|\\.)*)"\s*\)\s*;/g)
 	{
 		$entry{$1} = $2;
 	}

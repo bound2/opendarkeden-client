@@ -1237,6 +1237,14 @@ rounds settled* for the host rules). Test fixtures share
 
 ## Build and review follow-up (2026-09-18)
 
+Table reads now expose const rows; `CTypeTable::GetMutable` and `Set` reject
+invalid writes without publishing a shared fallback. Callers use checked
+mutation for skills, status, sprite state and text initialization. The owners
+are `test_type_table_access.cpp` and `test_experience_input.cpp`; the latter
+also pins count, level, truncation and record-boundary handling for all ten
+experience loaders. The format checker parses the migrated built-in string
+setters and retains its site and resolution floors.
+
 The scrollbar's position calculations now live in `basic/ScrollRange.h`,
 inherited by the real UI widget. The move preserves the existing behavior;
 the following fix makes the state private, clamps updates, validates pixel

@@ -3010,8 +3010,10 @@ SetPCSlayerInfo(PCSlayerInfo2* pInfo)
 	{
 		int domain = domains[i];
 
-		(*g_pSkillManager)[domain].SetDomainLevel( pInfo->getSkillDomainLevel( (SkillDomain)domain ) );
-		(*g_pSkillManager)[domain].SetDomainExpRemain( pInfo->getSkillDomainExp( (SkillDomain)domain ) );
+		if (auto* entry = g_pSkillManager->GetMutable(domain)) {
+			entry->SetDomainLevel( pInfo->getSkillDomainLevel( (SkillDomain)domain ) );
+			entry->SetDomainExpRemain( pInfo->getSkillDomainExp( (SkillDomain)domain ) );
+		}
 	}	
 	
 	DEBUG_ADD( "Set Slayer Info : Money" );
@@ -5250,7 +5252,7 @@ SetPetInfo(PetInfo* pPetInfo, TYPE_OBJECTID objectID)
 
 						for(int i = 1; i < size; i++)
 						{
-							ITEMOPTION_INFO &optionInfo = g_pItemOptionTable->Get(i);
+							const ITEMOPTION_INFO &optionInfo = g_pItemOptionTable->Get(i);
 							if(optionInfo.Part == optionPart && optionInfo.UpgradeOptionType == 0)
 							{
 								pFakeCreature->SetBodyColor1(optionInfo.ColorSet);
@@ -5432,7 +5434,7 @@ void	SendCrashReport()
 		int sizeCrashReport = crm.GetSize();
 		for(int i = 0; i < sizeCrashReport; i++)
 		{
-			MCrashReport &cr = crm[i];
+			const MCrashReport &cr = crm[i];
 
 			CGCrashReport _CGCrashReport;
 			if(NULL != cr.GetAddress())			_CGCrashReport.setAddress(cr.GetAddress());
@@ -5455,11 +5457,15 @@ void	SetFlagTo( bool bTae )
 {
 	if( g_pTopView == NULL )
 		return;
+	auto* itemClass = g_pItemTable->GetMutable(ITEM_CLASS_EVENT_ITEM);
+	auto* flag = itemClass == nullptr ? nullptr : itemClass->GetMutable(27);
 
 	if( bTae == true )
 	{
-		(*g_pItemTable)[ITEM_CLASS_EVENT_ITEM][27].SetFrameID( 856, 879,0 );
-		(*g_pItemTable)[ITEM_CLASS_EVENT_ITEM][27].SetDropFrameID( 856 );
+		if (flag != nullptr) {
+			flag->SetFrameID(856, 879, 0);
+			flag->SetDropFrameID(856);
+		}
 		
 		(g_pTopView->m_EffectAlphaFPK)[EFFECTSPRITETYPE_FLAG_HEAD] = (g_pTopView->m_EffectAlphaFPK)[EFFECTSPRITETYPE_FLAG_HEAD_TAE];
 		(g_pTopView->m_EffectAlphaFPK)[EFFECTSPRITETYPE_FLAG_GROUND] = (g_pTopView->m_EffectAlphaFPK)[EFFECTSPRITETYPE_FLAG_GROUND_TAE];
@@ -5469,8 +5475,10 @@ void	SetFlagTo( bool bTae )
 	}
 	else
 	{
-		(*g_pItemTable)[ITEM_CLASS_EVENT_ITEM][27].SetFrameID( 750,764,0 );
-		(*g_pItemTable)[ITEM_CLASS_EVENT_ITEM][27].SetDropFrameID( 750 );
+		if (flag != nullptr) {
+			flag->SetFrameID(750, 764, 0);
+			flag->SetDropFrameID(750);
+		}
 
 		(g_pTopView->m_EffectAlphaFPK)[EFFECTSPRITETYPE_FLAG_HEAD] = (g_pTopView->m_EffectAlphaFPK)[EFFECTSPRITETYPE_FLAG_HEAD_ORIGINAL];
 		(g_pTopView->m_EffectAlphaFPK)[EFFECTSPRITETYPE_FLAG_GROUND] = (g_pTopView->m_EffectAlphaFPK)[EFFECTSPRITETYPE_FLAG_GROUND_ORIGINAL];

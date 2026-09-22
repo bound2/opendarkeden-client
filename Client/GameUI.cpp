@@ -1791,7 +1791,9 @@ UI_RunSkillTree(int domain, int maxLevel)
 		//---------------------------------------------------
 		// Domain에서 배울 수 있는 기술들 추가
 		//---------------------------------------------------
-		MSkillDomain& domainInfo = (*g_pSkillManager)[domain];
+		auto* pDomainInfo = g_pSkillManager->GetMutable(domain);
+		if (pDomainInfo == nullptr) return;
+		MSkillDomain& domainInfo = *pDomainInfo;
 
 		int domainLevel;
 

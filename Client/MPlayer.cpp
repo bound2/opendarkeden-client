@@ -2084,7 +2084,9 @@ MPlayer::SelfSpecialAction()
 									#endif
 
 
-										(*g_pSkillInfoTable)[m_nSpecialActionInfo].SetNextAvailableTime();
+										if (auto* entry = g_pSkillInfoTable->GetMutable(m_nSpecialActionInfo)) {
+											entry->SetNextAvailableTime();
+										}
 								}
 							}
 					}						
@@ -2147,7 +2149,9 @@ MPlayer::SelfSpecialAction()
 									#endif
 										
 
-										(*g_pSkillInfoTable)[m_nSpecialActionInfo].SetNextAvailableTime();
+										if (auto* entry = g_pSkillInfoTable->GetMutable(m_nSpecialActionInfo)) {
+											entry->SetNextAvailableTime();
+										}
 
 								}
 							}
@@ -2264,7 +2268,9 @@ MPlayer::SelfSpecialAction()
 								SetWaitVerify( MPlayer::WAIT_VERIFY_SKILL_SUCCESS );
 								SetItemCheckBuffer( pItem, MPlayer::ITEM_CHECK_BUFFER_SKILL_TO_INVENTORY );
 
-								(*g_pSkillInfoTable)[MAGIC_CREATE_HOLY_WATER].SetNextAvailableTime();
+								if (auto* entry = g_pSkillInfoTable->GetMutable(MAGIC_CREATE_HOLY_WATER)) {
+									entry->SetNextAvailableTime();
+								}
 
 								//----------------------------------------------------
 								// 기술 사용 시도 동작
@@ -2332,7 +2338,9 @@ MPlayer::SelfSpecialAction()
 								SetWaitVerify( MPlayer::WAIT_VERIFY_SKILL_SUCCESS );
 								SetItemCheckBuffer( pItem, MPlayer::ITEM_CHECK_BUFFER_SKILL_TO_INVENTORY );
 
-								(*g_pSkillInfoTable)[SKILL_CREATE_HOLY_POTION].SetNextAvailableTime();
+								if (auto* entry = g_pSkillInfoTable->GetMutable(SKILL_CREATE_HOLY_POTION)) {
+									entry->SetNextAvailableTime();
+								}
 
 								//----------------------------------------------------
 								// 기술 사용 시도 동작
@@ -2553,7 +2561,9 @@ MPlayer::SelfSpecialAction()
 								#endif
 									
 
-									(*g_pSkillInfoTable)[m_nSpecialActionInfo].SetNextAvailableTime();
+									if (auto* entry = g_pSkillInfoTable->GetMutable(m_nSpecialActionInfo)) {
+										entry->SetNextAvailableTime();
+									}
 
 									//----------------------------------------------------
 									// 기술 사용 시도 동작
@@ -2641,7 +2651,9 @@ MPlayer::SelfSpecialAction()
 								SetItemCheckBuffer( pItem, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
 							#endif
 
-								(*g_pSkillInfoTable)[SKILL_SUMMON_SYLPH].SetAvailableTime( 4000 );
+								if (auto* entry = g_pSkillInfoTable->GetMutable(SKILL_SUMMON_SYLPH)) {
+									entry->SetAvailableTime( 4000 );
+								}
 							}
 						} else
 						{
@@ -2900,7 +2912,7 @@ MPlayer::GetActionInfoRange(TYPE_ACTIONINFO nActionInfo)
 		//nActionInfo = m_nBasicActionInfo;
 	}
 	
-	SKILLINFO_NODE& skillInfo = (*g_pSkillInfoTable)[nActionInfo];	
+	const SKILLINFO_NODE& skillInfo = (*g_pSkillInfoTable)[nActionInfo];
 
 	int minRange = skillInfo.minRange;
 	int maxRange = skillInfo.maxRange;
@@ -7010,7 +7022,9 @@ MPlayer::ActionToSendPacket()
 				int originalActionInfo = m_nUsedActionInfo;
 				if( (*g_pActionInfoTable)[m_nUsedActionInfo].GetParentActionInfo() != ACTIONINFO_NULL )
 					originalActionInfo = (*g_pActionInfoTable)[m_nUsedActionInfo].GetParentActionInfo();
-				(*g_pSkillInfoTable)[originalActionInfo].SetNextAvailableTime();
+				if (auto* entry = g_pSkillInfoTable->GetMutable(originalActionInfo)) {
+					entry->SetNextAvailableTime();
+				}
 
 				//----------------------------------------------------------
 				// 보내는 packet 종류 설정
@@ -12493,7 +12507,7 @@ MPlayer::CalculateStatus()
 			while(optionListItr != optionList.end())
 			{
 				
-				ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[*optionListItr];
+				const ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[*optionListItr];
 				//---------------------------------------------------
 				// 부가적인 Option
 				//---------------------------------------------------
@@ -12519,7 +12533,7 @@ MPlayer::CalculateStatus()
 			{
 				TYPE_ITEM_OPTION option = *itr;
 
-				ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[option];
+				const ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[option];
 				//---------------------------------------------------
 				// 부가적인 Option
 				//---------------------------------------------------
@@ -13217,7 +13231,7 @@ void	MPlayer::CalculateSight()
 			std::list<TYPE_ITEM_OPTION>::const_iterator optionListItr = optionList.begin();
 			while(optionListItr != optionList.end())
 			{				
-				ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[*optionListItr];
+				const ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[*optionListItr];
 				//---------------------------------------------------
 				// 부가적인 Option
 				//---------------------------------------------------
@@ -13235,7 +13249,7 @@ void	MPlayer::CalculateSight()
 			while(itr != pItem->GetItemDefaultOptionList().end())
 			{
 				TYPE_ITEM_OPTION option = *itr;
-				ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[option];
+				const ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[option];
 				//---------------------------------------------------
 				// 부가적인 Option
 				//---------------------------------------------------

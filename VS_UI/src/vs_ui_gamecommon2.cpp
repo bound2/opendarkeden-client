@@ -737,7 +737,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 				
 				while(itr != optionList.end() && *itr < g_pItemOptionTable->GetSize())
 				{
-					ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
+					const ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
 					char pPartName[20];
 					strcpy(pPartName,g_pItemOptionTable->ITEMOPTION_PARTNAME[optionInfo.Part].GetString());
 					if(pCurrentFocusItem->IsVampireItem() && strstr(pPartName,"MP") != NULL)
@@ -781,7 +781,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 				
 				while(itr != DefaultOptionList.end())
 				{
-					ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
+					const ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
 					char pPartName[20];
 					strcpy(pPartName,g_pItemOptionTable->ITEMOPTION_PARTNAME[optionInfo.Part].GetString());
 					if(pCurrentFocusItem->IsVampireItem() && strstr(pPartName,"MP") != NULL)
@@ -3176,8 +3176,8 @@ bool C_VS_UI_MIXING_FORGE::IsCorrectOption(MItem *p_item1, MItem *p_item2)
 	std::list<TYPE_ITEM_OPTION>::const_iterator itr1 = optionList1.begin();
 	std::list<TYPE_ITEM_OPTION>::const_iterator itr2 = optionList2.begin();
 
-	ITEMOPTION_INFO& optionInfo1 = (*g_pItemOptionTable)[*itr1];
-	ITEMOPTION_INFO& optionInfo2 = (*g_pItemOptionTable)[*itr2];
+	const ITEMOPTION_INFO& optionInfo1 = (*g_pItemOptionTable)[*itr1];
+	const ITEMOPTION_INFO& optionInfo2 = (*g_pItemOptionTable)[*itr2];
 
 	if( optionInfo1.Part != optionInfo2.Part )
 		return true;
@@ -3239,7 +3239,7 @@ C_VS_UI_REMOVE_OPTION::C_VS_UI_REMOVE_OPTION(const MItem * pItem, const MItem *p
 		if(*itr > g_pItemOptionTable->GetSize() || i >= 2)
 			break;
 
-		ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
+		const ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
 		m_str_option[i] = g_pItemOptionTable->ITEMOPTION_PARTNAME[optionInfo.Part].GetString();
 
 		char temp[256] ={0,};
@@ -3925,8 +3925,8 @@ void	C_VS_UI_OUSTERS_SKILL_INFO::Show()
 						{
 							if((*g_pSkillInfoTable)[*itr].GetSkillStep() == SKILL_STEP_OUSTERS_ETC && (*g_pSkillManager)[SKILLDOMAIN_OUSTERS].GetSkillStatus((ACTIONINFO)*itr) == MSkillDomain::SKILLSTATUS_LEARNED)
 							{
-								SKILLINFO_NODE::SKILLTYPE_LIST::iterator itr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.begin();
-								SKILLINFO_NODE::SKILLTYPE_LIST::iterator endItr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.end();
+								SKILLINFO_NODE::SKILLTYPE_LIST::const_iterator itr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.begin();
+								SKILLINFO_NODE::SKILLTYPE_LIST::const_iterator endItr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.end();
 								while(itr2 != endItr2)
 								{
 									if((*g_pSkillManager)[SKILLDOMAIN_OUSTERS].GetSkillStatus((ACTIONINFO)*itr2) == MSkillDomain::SKILLSTATUS_LEARNED
@@ -4223,8 +4223,8 @@ void	C_VS_UI_OUSTERS_SKILL_INFO::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_butto
 						{
 							if((*g_pSkillInfoTable)[*itr].GetSkillStep() == SKILL_STEP_OUSTERS_ETC && (*g_pSkillManager)[SKILLDOMAIN_OUSTERS].GetSkillStatus((ACTIONINFO)*itr) == MSkillDomain::SKILLSTATUS_LEARNED)
 							{
-								SKILLINFO_NODE::SKILLTYPE_LIST::iterator itr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.begin();
-								SKILLINFO_NODE::SKILLTYPE_LIST::iterator endItr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.end();
+								SKILLINFO_NODE::SKILLTYPE_LIST::const_iterator itr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.begin();
+								SKILLINFO_NODE::SKILLTYPE_LIST::const_iterator endItr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.end();
 								while(itr2 != endItr2)
 								{
 									if((*g_pSkillManager)[SKILLDOMAIN_OUSTERS].GetSkillStatus((ACTIONINFO)*itr2) == MSkillDomain::SKILLSTATUS_LEARNED
@@ -4287,8 +4287,8 @@ void	C_VS_UI_OUSTERS_SKILL_INFO::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_butto
 						{
 							if((*g_pSkillInfoTable)[*itr].GetSkillStep() == SKILL_STEP_OUSTERS_ETC && (*g_pSkillManager)[SKILLDOMAIN_OUSTERS].GetSkillStatus((ACTIONINFO)*itr) == MSkillDomain::SKILLSTATUS_LEARNED)
 							{
-								SKILLINFO_NODE::SKILLTYPE_LIST::iterator itr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.begin();
-								SKILLINFO_NODE::SKILLTYPE_LIST::iterator endItr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.end();
+								SKILLINFO_NODE::SKILLTYPE_LIST::const_iterator itr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.begin();
+								SKILLINFO_NODE::SKILLTYPE_LIST::const_iterator endItr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.end();
 								while(itr2 != endItr2)
 								{
 									if((*g_pSkillManager)[SKILLDOMAIN_OUSTERS].GetSkillStatus((ACTIONINFO)*itr2) == MSkillDomain::SKILLSTATUS_LEARNED
@@ -4416,8 +4416,8 @@ void	C_VS_UI_OUSTERS_SKILL_INFO::Run(id_t id)
 						{
 							if((*g_pSkillInfoTable)[*itr].GetSkillStep() == SKILL_STEP_OUSTERS_ETC && (*g_pSkillManager)[SKILLDOMAIN_OUSTERS].GetSkillStatus((ACTIONINFO)*itr) == MSkillDomain::SKILLSTATUS_LEARNED)
 							{
-								SKILLINFO_NODE::SKILLTYPE_LIST::iterator itr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.begin();
-								SKILLINFO_NODE::SKILLTYPE_LIST::iterator endItr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.end();
+								SKILLINFO_NODE::SKILLTYPE_LIST::const_iterator itr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.begin();
+								SKILLINFO_NODE::SKILLTYPE_LIST::const_iterator endItr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.end();
 								while(itr2 != endItr2)
 								{
 									if((*g_pSkillManager)[SKILLDOMAIN_OUSTERS].GetSkillStatus((ACTIONINFO)*itr2) == MSkillDomain::SKILLSTATUS_LEARNED
@@ -10136,7 +10136,7 @@ void	C_VS_UI_PET_INFO::Show()
 		if(m_PetInfo.OPTION >= 0)
 		{
 			WORD itemOption = m_PetInfo.OPTION;
-			ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[itemOption];
+			const ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[itemOption];
 			char pPartName[20];
 			strcpy(pPartName,g_pItemOptionTable->ITEMOPTION_PARTNAME[optionInfo.Part].GetString());
 			if(strstr(pPartName,"MP") != NULL)

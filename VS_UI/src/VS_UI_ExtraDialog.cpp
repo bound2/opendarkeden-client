@@ -1753,7 +1753,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 				
 				while(itr != optionList.end() && *itr < g_pItemOptionTable->GetSize())
 				{
-					ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
+					const ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
 					char pPartName[20];
 					strcpy(pPartName,g_pItemOptionTable->ITEMOPTION_PARTNAME[optionInfo.Part]);
 					if(p_item->IsVampireItem() && strstr(pPartName,"MP") != NULL)
@@ -1807,11 +1807,11 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 			}
 			if(!(*g_pItemTable)[p_item->GetItemClass()][p_item->GetItemType()].DefaultOptionList.empty())
 			{
-				std::list<TYPE_ITEM_OPTION>::iterator itr;
+				std::list<TYPE_ITEM_OPTION>::const_iterator itr;
 				itr=(*g_pItemTable)[p_item->GetItemClass()][p_item->GetItemType()].DefaultOptionList.begin();
 				while(itr != (*g_pItemTable)[p_item->GetItemClass()][p_item->GetItemType()].DefaultOptionList.end())
 				{
-					ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
+					const ITEMOPTION_INFO& optionInfo=(*g_pItemOptionTable)[*itr];
 					char pPartName[20];
 					strcpy(pPartName,g_pItemOptionTable->ITEMOPTION_PARTNAME[optionInfo.Part]);
 					if(p_item->IsVampireItem() && strstr(pPartName,"MP") != NULL)

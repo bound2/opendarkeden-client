@@ -526,33 +526,33 @@ class MActionInfo : public CTypeTable<ACTION_INFO_NODE> {
 		//-------------------------------------------------------
 		void		SetUseActionGrade() {	m_bUseGrade = true; }
 		void		UnsetUseActionGrade() { m_bUseGrade = false; }
-		bool		IsUseActionGrade() { return m_bUseGrade; }
+		bool		IsUseActionGrade() const { return m_bUseGrade; }
 
 		//-------------------------------------------------------
 		// ActionStep
 		//-------------------------------------------------------
 		void		SetUseActionStep()	{ m_bUseActionStep = true; }
 		void		SetActionStep(BYTE step,  TYPE_ACTIONINFO action);
-		bool		IsUseActionStep() { return m_bUseActionStep; }
-		TYPE_ACTIONINFO	GetActionStep(BYTE step);
+		bool		IsUseActionStep() const { return m_bUseActionStep; }
+		TYPE_ACTIONINFO	GetActionStep(BYTE step) const;
 
 		void		SetParentActionInfo( TYPE_ACTIONINFO Parent );
-		TYPE_ACTIONINFO	GetParentActionInfo();
+		TYPE_ACTIONINFO	GetParentActionInfo() const;
 
 		//-------------------------------------------------------
 		// ForceSelectEffectTarget
 		//-------------------------------------------------------
 		void		SetAttachSelf()	{ m_bAttachSelf = true; }
-		bool		IsAttachSelf() { return m_bAttachSelf; }
+		bool		IsAttachSelf() const { return m_bAttachSelf; }
 
 		//-------------------------------------------------------
 		// MasterySkill
 		//-------------------------------------------------------
 		void		SetMasterySkillStep(BYTE step = 3)	{ m_MasterySkillStep = step; }
-		bool		IsMasterySkillStep() { return m_MasterySkillStep!=0; }
-		BYTE		GetMasterySkillStep() { return m_MasterySkillStep; }
+		bool		IsMasterySkillStep() const { return m_MasterySkillStep!=0; }
+		BYTE		GetMasterySkillStep() const { return m_MasterySkillStep; }
 
-		bool		IsIgnoreSkillFailDelay() { return m_bIgnoreFailDelay;}
+		bool		IsIgnoreSkillFailDelay() const { return m_bIgnoreFailDelay;}
 		void		SetSkillFailDelay(bool bflag = true) {	m_bIgnoreFailDelay = bflag;}
 	protected :
 		MString						m_Name;						// 기술 이름		

@@ -32,11 +32,15 @@ void GCDownSkillOKHandler::execute ( GCDownSkillOK * pGCDownSkillOK , Player * p
 		return;
 	}
 
-	(*g_pSkillInfoTable)[skillID].SetExpLevel( curLevel );
+	if (auto* entry = g_pSkillInfoTable->GetMutable(skillID)) {
+		entry->SetExpLevel( curLevel );
+	}
 	// 2004, 11, 9, sobeit add start - 레벨이 0까지 다운되면 다시 배울수 있다고 세팅해야함 
 	if(0 == curLevel)
 	{
-		(*g_pSkillManager)[SKILLDOMAIN_OUSTERS].AddNextSkillForce((ACTIONINFO)skillID); 
+		if (auto* entry = g_pSkillManager->GetMutable(SKILLDOMAIN_OUSTERS)) {
+			entry->AddNextSkillForce((ACTIONINFO)skillID);
+		}
 	}
 	// 2004, 11, 9, sobeit add end
 	UI_PopupMessage( STRING_MESSAGE_SUCCESS_CHANGE );

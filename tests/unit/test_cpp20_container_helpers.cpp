@@ -22,6 +22,7 @@
 //----------------------------------------------------------------------
 
 #include "test_framework.h"
+#include "type_table_access.h"
 #include "packet_stream_access.h"
 
 #include "PacketIDSet.h"
@@ -92,7 +93,7 @@ struct HelperWorld : GameModelWorld
 	{
 		s_Alive = 0;
 		g_pItemTable->InitClass(ITEM_CLASS_SWORD, 1);
-		(*g_pItemTable)[ITEM_CLASS_SWORD][0].SetGrid(1, 1);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SWORD, 0).SetGrid(1, 1);
 	}
 };
 
@@ -135,11 +136,11 @@ struct SkillWorld : GameModelWorld
 		g_pSkillManager = new MSkillManager;
 		g_pSkillAvailable = new MSkillSet;
 
-		(*g_pSkillInfoTable)[kRoot].Set(0, "Single Blow", 0, 0, 0, "Single Blow");
-		(*g_pSkillInfoTable)[kChild].Set(1, "Double Impact", 1, 0, 0, "Double Impact");
-		(*g_pSkillInfoTable)[kLeaf].Set(2, "Fast Reload", 2, 0, 0, "Fast Reload");
-		(*g_pSkillInfoTable)[kRoot].AddNextSkill(kChild);
-		(*g_pSkillInfoTable)[kChild].AddNextSkill(kLeaf);
+		testfw::MutableRow(*g_pSkillInfoTable, kRoot).Set(0, "Single Blow", 0, 0, 0, "Single Blow");
+		testfw::MutableRow(*g_pSkillInfoTable, kChild).Set(1, "Double Impact", 1, 0, 0, "Double Impact");
+		testfw::MutableRow(*g_pSkillInfoTable, kLeaf).Set(2, "Fast Reload", 2, 0, 0, "Fast Reload");
+		testfw::MutableRow(*g_pSkillInfoTable, kRoot).AddNextSkill(kChild);
+		testfw::MutableRow(*g_pSkillInfoTable, kChild).AddNextSkill(kLeaf);
 
 		MItem::SetHost(&s_Host);
 	}

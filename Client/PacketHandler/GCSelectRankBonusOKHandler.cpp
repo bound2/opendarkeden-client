@@ -26,16 +26,22 @@ void GCSelectRankBonusOKHandler::execute ( GCSelectRankBonusOK * pGCSelectRankBo
 
 	if(type < g_pRankBonusTable->GetSize())
 	{
-		(*g_pRankBonusTable)[type].SetStatus(RankBonusInfo::STATUS_LEARNED);
+		if (auto* entry = g_pRankBonusTable->GetMutable(type)) {
+			entry->SetStatus(RankBonusInfo::STATUS_LEARNED);
+		}
 		
 		const int level = (*g_pRankBonusTable)[type].GetLevel();
 		int i;
 		
 		for(i = type-1; i >= 0 && (*g_pRankBonusTable)[i].GetLevel() == level; i--)
-			(*g_pRankBonusTable)[i].SetStatus(RankBonusInfo::STATUS_CANNOT_LEARN);
+			if (auto* entry = g_pRankBonusTable->GetMutable(i)) {
+				entry->SetStatus(RankBonusInfo::STATUS_CANNOT_LEARN);
+			}
 		
 		for(i = type+1; i < g_pRankBonusTable->GetSize() && (*g_pRankBonusTable)[i].GetLevel() == level; i++)
-			(*g_pRankBonusTable)[i].SetStatus(RankBonusInfo::STATUS_CANNOT_LEARN);
+			if (auto* entry = g_pRankBonusTable->GetMutable(i)) {
+				entry->SetStatus(RankBonusInfo::STATUS_CANNOT_LEARN);
+			}
 	}
 
 	if(type == RANK_BONUS_URANUS_BLESS)

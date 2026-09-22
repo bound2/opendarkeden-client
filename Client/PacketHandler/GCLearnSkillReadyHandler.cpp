@@ -42,7 +42,9 @@ void GCLearnSkillReadyHandler::execute ( GCLearnSkillReady * pPacket , Player * 
 		return;
 	}
 
-	(*g_pSkillManager)[domainType].SetNewSkill();
+	if (auto* entry = g_pSkillManager->GetMutable(domainType)) {
+		entry->SetNewSkill();
+	}
 
 	// SKILLDOMAIN_NAME holds string table ids, not strings, so look the name up
 	// before formatting it.

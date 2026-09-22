@@ -48,7 +48,7 @@ MHelpStringTable::ClearDisplayed()
 {
 	for (int i=0; i<m_Displayed.GetSize(); i++)
 	{
-		m_Displayed[i] = false;
+		m_Displayed.Set(i, false);
 	}
 }
 
@@ -68,19 +68,19 @@ MHelpStringTable::LoadFromFile(std::ifstream& file)
 //---------------------------------------------------------------------------
 // operator []
 //---------------------------------------------------------------------------
-MString&	
+const MString&
 MHelpStringTable::operator [] (int type)		
 {
-	m_Displayed[type] = true;
-	return m_pTypeInfo[type]; 
+	m_Displayed.Set(type, true);
+	return MStringArray::Get(type);
 }
 
 //---------------------------------------------------------------------------
 // get
 //---------------------------------------------------------------------------
-MString&	
+const MString&
 MHelpStringTable::Get(int type)				
 { 
-	m_Displayed[type] = true;
-	return m_pTypeInfo[type]; 
+	m_Displayed.Set(type, true);
+	return MStringArray::Get(type);
 }

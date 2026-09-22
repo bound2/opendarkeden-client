@@ -15,6 +15,7 @@
 //----------------------------------------------------------------------
 
 #include "test_framework.h"
+#include "type_table_access.h"
 
 #include "gamemodel_world.h"
 #include "MItemLimits.h"
@@ -37,13 +38,13 @@ struct ItemWorld : GameModelWorld
 		g_pItemTable->InitClass(ITEM_CLASS_PET_ITEM, 1);
 
 		// Option 0 is the "no option" row; 1 and 2 carry requirements.
-		g_pItemOptionTable->Get(1).RequireSUM = 10;
-		g_pItemOptionTable->Get(1).ColorSet = 501;
-		g_pItemOptionTable->Get(2).RequireSUM = 25;
-		g_pItemOptionTable->Get(2).ColorSet = 502;
+		testfw::MutableRow(*g_pItemOptionTable, 1).RequireSUM = 10;
+		testfw::MutableRow(*g_pItemOptionTable, 1).ColorSet = 501;
+		testfw::MutableRow(*g_pItemOptionTable, 2).RequireSUM = 25;
+		testfw::MutableRow(*g_pItemOptionTable, 2).ColorSet = 502;
 
 		g_pGameStringTable->Init(STRING_MESSAGE_SOUL_STONE + 1);
-		(*g_pGameStringTable)[STRING_MESSAGE_SOUL_STONE] = "Soul Stone";
+		testfw::MutableRow(*g_pGameStringTable, STRING_MESSAGE_SOUL_STONE) = "Soul Stone";
 
 		g_pUserInformation->GoreLevel = true;
 
@@ -71,7 +72,7 @@ struct PetItem : public MItem
 
 ITEMTABLE_INFO&	SwordInfo(int type = 0)
 {
-	return (*g_pItemTable)[ITEM_CLASS_SWORD][type];
+	return testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SWORD, type);
 }
 
 //----------------------------------------------------------------------
@@ -345,7 +346,7 @@ TEST(ItemCore, NoDropFrameMeansNoDrop)
 TEST(ItemCore, SkullNameBecomesSoulStoneWhenGoreIsOff)
 {
 	ItemWorld world;
-	(*g_pItemTable)[ITEM_CLASS_SKULL][0].HName = "Wolf Head";
+	testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SKULL, 0).HName = "Wolf Head";
 
 	{
 		Skull gory;
@@ -361,7 +362,7 @@ TEST(ItemCore, SkullNameBecomesSoulStoneWhenGoreIsOff)
 	}
 
 	// A name too short to carry the noun is left alone.
-	(*g_pItemTable)[ITEM_CLASS_SKULL][0].HName = "Orb";
+	testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SKULL, 0).HName = "Orb";
 	{
 		Skull teen;
 		CHECK(StrEq(teen.GetName(), "Orb"));

@@ -13111,7 +13111,7 @@ void C_VS_UI_INFO::Run(id_t id)
 
 		if(m_draw_grade_skill_mark > nowID)
 		{
-			RankBonusInfo& RankBonus = (*g_pRankBonusTable)[m_grade_skill_id[nowID]];
+			const RankBonusInfo& RankBonus = (*g_pRankBonusTable)[m_grade_skill_id[nowID]];
 			int MyGrade;
 			switch(g_eRaceInterface)
 			{
@@ -16306,8 +16306,8 @@ void	C_VS_UI_INFO::_Show1()
 							p.x -= m_pC_skill_scroll_bar_width->GetScrollPos();
 							p.y -= max(0,m_pC_skill_scroll_bar->GetScrollPos());
 							
-							SKILLINFO_NODE::SKILLTYPE_LIST::iterator itr = (*g_pSkillInfoTable)[SkillID].SkillTypeList.begin();
-							SKILLINFO_NODE::SKILLTYPE_LIST::iterator endItr = (*g_pSkillInfoTable)[SkillID].SkillTypeList.end();
+							SKILLINFO_NODE::SKILLTYPE_LIST::const_iterator itr = (*g_pSkillInfoTable)[SkillID].SkillTypeList.begin();
+							SKILLINFO_NODE::SKILLTYPE_LIST::const_iterator endItr = (*g_pSkillInfoTable)[SkillID].SkillTypeList.end();
 							
 							//POINT source = {p.x+iconHalf+sprX, p.y+iconHalf+sprY}, dest;
 							while(itr != endItr)
@@ -16405,8 +16405,8 @@ void	C_VS_UI_INFO::_Show1()
 							p.x -= m_pC_skill_scroll_bar_width->GetScrollPos();
 							p.y -= max(0,m_pC_skill_scroll_bar->GetScrollPos());
 							
-							SKILLINFO_NODE::SKILLTYPE_LIST::iterator itr = (*g_pSkillInfoTable)[SkillID].SkillTypeList.begin();
-							SKILLINFO_NODE::SKILLTYPE_LIST::iterator endItr = (*g_pSkillInfoTable)[SkillID].SkillTypeList.end();
+							SKILLINFO_NODE::SKILLTYPE_LIST::const_iterator itr = (*g_pSkillInfoTable)[SkillID].SkillTypeList.begin();
+							SKILLINFO_NODE::SKILLTYPE_LIST::const_iterator endItr = (*g_pSkillInfoTable)[SkillID].SkillTypeList.end();
 							
 							//POINT source = {p.x+iconHalf+sprX, p.y+iconHalf+sprY}, dest;
 							while(itr != endItr)
@@ -16513,8 +16513,8 @@ void	C_VS_UI_INFO::_Show1()
 								{
 									if((*g_pSkillInfoTable)[*itr].GetSkillStep() == SKILL_STEP_OUSTERS_ETC && (*g_pSkillManager)[SKILLDOMAIN_OUSTERS].GetSkillStatus((ACTIONINFO)*itr) == MSkillDomain::SKILLSTATUS_LEARNED)
 									{
-										SKILLINFO_NODE::SKILLTYPE_LIST::iterator itr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.begin();
-										SKILLINFO_NODE::SKILLTYPE_LIST::iterator endItr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.end();
+										SKILLINFO_NODE::SKILLTYPE_LIST::const_iterator itr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.begin();
+										SKILLINFO_NODE::SKILLTYPE_LIST::const_iterator endItr2 = (*g_pSkillInfoTable)[*itr].SkillTypeList.end();
 										while(itr2 != endItr2)
 										{
 											if((*g_pSkillManager)[SKILLDOMAIN_OUSTERS].GetSkillStatus((ACTIONINFO)*itr2) == MSkillDomain::SKILLSTATUS_LEARNED

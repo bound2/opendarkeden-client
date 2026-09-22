@@ -693,7 +693,9 @@ void	MWater::UseInventory()
 						g_pPlayer->SetWaitVerify( MPlayer::WAIT_VERIFY_SKILL_SUCCESS );
 						g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_SKILL_TO_INVENTORY );								
 
-						(*g_pSkillInfoTable)[useSkill].SetNextAvailableTime();
+						if (auto* entry = g_pSkillInfoTable->GetMutable(useSkill)) {
+							entry->SetNextAvailableTime();
+						}
 
 						//----------------------------------------------------
 						// 기술 사용 시도 동작
@@ -730,7 +732,9 @@ void	MWater::UseInventory()
 						g_pPlayer->SetWaitVerify( MPlayer::WAIT_VERIFY_SKILL_SUCCESS );
 						g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_SKILL_TO_INVENTORY );
 						
-						(*g_pSkillInfoTable)[useSkill].SetNextAvailableTime();
+						if (auto* entry = g_pSkillInfoTable->GetMutable(useSkill)) {
+							entry->SetNextAvailableTime();
+						}
 						
 						AddNewInventoryEffect( GetID(),
 							useSkill,
@@ -1030,7 +1034,9 @@ void	MMine::UseInventory()
 		g_pPlayer->SetWaitVerify( MPlayer::WAIT_VERIFY_SKILL_SUCCESS );
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_SKILL_TO_INVENTORY );
 
-		(*g_pSkillInfoTable)[useSkill].SetNextAvailableTime();
+		if (auto* entry = g_pSkillInfoTable->GetMutable(useSkill)) {
+			entry->SetNextAvailableTime();
+		}
 
 		//----------------------------------------------------
 		// 기술 사용 시도 동작
@@ -1118,7 +1124,9 @@ void	MVampirePortalItem::UseInventory()
 			g_pPlayer->SetWaitVerify( MPlayer::WAIT_VERIFY_SKILL_SUCCESS );
 			g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_SKILL_TO_INVENTORY );
 
-			(*g_pSkillInfoTable)[useSkill].SetNextAvailableTime();
+			if (auto* entry = g_pSkillInfoTable->GetMutable(useSkill)) {
+				entry->SetNextAvailableTime();
+			}
 
 			//----------------------------------------------------
 			// 기술 사용 시도 동작
@@ -1340,7 +1348,9 @@ void MVampireETC::UseInventory()
 				#endif
 					
 
-					(*g_pSkillInfoTable)[useSkill].SetNextAvailableTime();
+					if (auto* entry = g_pSkillInfoTable->GetMutable(useSkill)) {
+						entry->SetNextAvailableTime();
+					}
 
 					//----------------------------------------------------
 					// 기술 사용 시도 동작
@@ -1434,7 +1444,9 @@ void	MSkull::UseInventory()
 					g_pPlayer->SetWaitVerify( MPlayer::WAIT_VERIFY_SKILL_SUCCESS );
 					g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_SKILL_TO_INVENTORY );
 
-					(*g_pSkillInfoTable)[useSkill].SetNextAvailableTime();
+					if (auto* entry = g_pSkillInfoTable->GetMutable(useSkill)) {
+						entry->SetNextAvailableTime();
+					}
 
 					//----------------------------------------------------
 					// 기술 사용 시도 동작
@@ -1832,7 +1844,9 @@ void	MOustersSummonGem::UseInventory()
 		g_pPlayer->SetItemCheckBuffer( this, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
 	#endif
 		
-		(*g_pSkillInfoTable)[SKILL_SUMMON_SYLPH].SetAvailableTime( 4000 );
+		if (auto* entry = g_pSkillInfoTable->GetMutable(SKILL_SUMMON_SYLPH)) {
+			entry->SetAvailableTime( 4000 );
+		}
 	}
 }
 	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 增加包中包
@@ -2087,7 +2101,7 @@ std::string MPetItem::GetPetOptionName()
 
 		for(int i = 1; i < size; i++)
 		{
-			ITEMOPTION_INFO &optionInfo = g_pItemOptionTable->Get(i);
+			const ITEMOPTION_INFO &optionInfo = g_pItemOptionTable->Get(i);
 			if(optionInfo.Part == optionPart)
 			{
 				bFound = true;
@@ -2136,7 +2150,7 @@ std::string MPetItem::GetPetOptionEName()
 
 		for(int i = 1; i < size; i++)
 		{
-			ITEMOPTION_INFO &optionInfo = g_pItemOptionTable->Get(i);
+			const ITEMOPTION_INFO &optionInfo = g_pItemOptionTable->Get(i);
 			if(optionInfo.Part == optionPart)
 			{
 				bFound = true;

@@ -2717,6 +2717,6 @@ ApplyEnglishNPCScriptTable()
 			continue;
 		}
 
-		table[ entry.Index ] = entry.pText;
+		table.Set(entry.Index, entry.pText);
 	}
 }

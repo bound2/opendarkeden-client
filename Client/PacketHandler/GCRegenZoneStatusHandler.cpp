@@ -24,18 +24,20 @@ void GCRegenZoneStatusHandler::execute ( GCRegenZoneStatus * pPacket , Player * 
 	int i;
 	for(i = 0; i < 8 ; i++ )
 	{
-		RegenTowerInfo& pInfo = g_pRegenTowerInfoManager->Get( i );
-		pInfo.owner = (int)pPacket->getStatus( i );
+		if (auto* info = g_pRegenTowerInfoManager->GetMutable(i)) {
+			info->owner = (int)pPacket->getStatus(i);
+		}
 	}
 
 	for(;i < g_pRegenTowerInfoManager->GetSize(); i++)
 	{
-		RegenTowerInfo& pInfo = g_pRegenTowerInfoManager->Get( i );
+		auto* info = g_pRegenTowerInfoManager->GetMutable(i);
+		if (info == nullptr) continue;
 		if( i >= 8 && i <= 11 )
 		{
-			pInfo.owner = (i&0x1) ? RACE_VAMPIRE : RACE_SLAYER;			
+			info->owner = (i&0x1) ? RACE_VAMPIRE : RACE_SLAYER;
 		}
 		else
-			pInfo.owner = RACE_OUSTERS;
+			info->owner = RACE_OUSTERS;
 	}
 }

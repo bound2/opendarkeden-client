@@ -14,6 +14,7 @@
 //----------------------------------------------------------------------
 
 #include "test_framework.h"
+#include "type_table_access.h"
 
 #include "gamemodel_world.h"
 #include "MPlayerGear.h"
@@ -69,35 +70,35 @@ struct GearWorld : GameModelWorld
 		s_Sounds.clear();
 
 		g_pItemTable->InitClass(ITEM_CLASS_HELM, 1);
-		(*g_pItemTable)[ITEM_CLASS_HELM][0].Race = FLAG_RACE_SLAYER;
-		(*g_pItemTable)[ITEM_CLASS_HELM][0].SetSoundID(10, 20, 81, 40);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_HELM, 0).Race = FLAG_RACE_SLAYER;
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_HELM, 0).SetSoundID(10, 20, 81, 40);
 		g_pItemTable->InitClass(ITEM_CLASS_SWORD, 1);
-		(*g_pItemTable)[ITEM_CLASS_SWORD][0].Race = FLAG_RACE_SLAYER;
-		(*g_pItemTable)[ITEM_CLASS_SWORD][0].SetSoundID(10, 20, 82, 40);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SWORD, 0).Race = FLAG_RACE_SLAYER;
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SWORD, 0).SetSoundID(10, 20, 82, 40);
 		g_pItemTable->InitClass(ITEM_CLASS_RING, 1);
-		(*g_pItemTable)[ITEM_CLASS_RING][0].Race = FLAG_RACE_SLAYER;
-		(*g_pItemTable)[ITEM_CLASS_RING][0].SetSoundID(10, 20, 83, 40);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_RING, 0).Race = FLAG_RACE_SLAYER;
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_RING, 0).SetSoundID(10, 20, 83, 40);
 		g_pItemTable->InitClass(ITEM_CLASS_CORE_ZAP, 1);
-		(*g_pItemTable)[ITEM_CLASS_CORE_ZAP][0].Race = FLAG_RACE_SLAYER;
-		(*g_pItemTable)[ITEM_CLASS_CORE_ZAP][0].SetSoundID(10, 20, 84, 40);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_CORE_ZAP, 0).Race = FLAG_RACE_SLAYER;
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_CORE_ZAP, 0).SetSoundID(10, 20, 84, 40);
 		g_pItemTable->InitClass(ITEM_CLASS_BELT, 1);
-		(*g_pItemTable)[ITEM_CLASS_BELT][0].Race = FLAG_RACE_SLAYER;
-		(*g_pItemTable)[ITEM_CLASS_BELT][0].SetSoundID(10, 20, 85, 40);
-		(*g_pItemTable)[ITEM_CLASS_BELT][0].SetValue(0, 0, 3);		// Value3: pockets
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_BELT, 0).Race = FLAG_RACE_SLAYER;
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_BELT, 0).SetSoundID(10, 20, 85, 40);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_BELT, 0).SetValue(0, 0, 3);		// Value3: pockets
 		g_pItemTable->InitClass(ITEM_CLASS_VAMPIRE_COAT, 1);
-		(*g_pItemTable)[ITEM_CLASS_VAMPIRE_COAT][0].Race = FLAG_RACE_VAMPIRE;
-		(*g_pItemTable)[ITEM_CLASS_VAMPIRE_COAT][0].SetSoundID(10, 20, 86, 40);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_VAMPIRE_COAT, 0).Race = FLAG_RACE_VAMPIRE;
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_VAMPIRE_COAT, 0).SetSoundID(10, 20, 86, 40);
 		g_pItemTable->InitClass(ITEM_CLASS_OUSTERS_ARMSBAND, 1);
-		(*g_pItemTable)[ITEM_CLASS_OUSTERS_ARMSBAND][0].Race = FLAG_RACE_OUSTERS;
-		(*g_pItemTable)[ITEM_CLASS_OUSTERS_ARMSBAND][0].SetSoundID(10, 20, 87, 40);
-		(*g_pItemTable)[ITEM_CLASS_OUSTERS_ARMSBAND][0].SetValue(0, 0, 2);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_OUSTERS_ARMSBAND, 0).Race = FLAG_RACE_OUSTERS;
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_OUSTERS_ARMSBAND, 0).SetSoundID(10, 20, 87, 40);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_OUSTERS_ARMSBAND, 0).SetValue(0, 0, 2);
 		g_pItemTable->InitClass(ITEM_CLASS_GLOVE, 1);
-		(*g_pItemTable)[ITEM_CLASS_GLOVE][0].Race = FLAG_RACE_SLAYER;
-		(*g_pItemTable)[ITEM_CLASS_GLOVE][0].SetSoundID(10, 20, 88, 40);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_GLOVE, 0).Race = FLAG_RACE_SLAYER;
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_GLOVE, 0).SetSoundID(10, 20, 88, 40);
 		// A slayer's potion, so the gear refuses it for not being gear
 		// rather than for the race.
 		g_pItemTable->InitClass(ITEM_CLASS_POTION, 1);
-		(*g_pItemTable)[ITEM_CLASS_POTION][0].Race = FLAG_RACE_SLAYER;
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_POTION, 0).Race = FLAG_RACE_SLAYER;
 
 		// A piece is "somewhat broken" at a quarter of its durability
 		// and "almost broken" at a tenth.

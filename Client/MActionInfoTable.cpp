@@ -452,7 +452,7 @@ void		MActionInfo::SetActionStep(BYTE step,  TYPE_ACTIONINFO action)
 	m_ActionStep[step] = action;
 }
 
-TYPE_ACTIONINFO	MActionInfo::GetActionStep(BYTE step)
+TYPE_ACTIONINFO	MActionInfo::GetActionStep(BYTE step) const
 {
 	if(!IsUseActionStep() || step < 0 || step >= MAX_ACTION_STEP )
 		return ACTIONINFO_NULL;
@@ -465,7 +465,7 @@ void		MActionInfo::SetParentActionInfo( TYPE_ACTIONINFO Parent )
 	m_Parent = Parent;
 }
 
-TYPE_ACTIONINFO	MActionInfo::GetParentActionInfo()
+TYPE_ACTIONINFO	MActionInfo::GetParentActionInfo() const
 {
 	return m_Parent;
 }

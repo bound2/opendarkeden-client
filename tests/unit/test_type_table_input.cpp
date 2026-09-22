@@ -1,4 +1,5 @@
 #include "test_framework.h"
+#include "type_table_access.h"
 #include "Platform.h"
 #include "MStringArray.h"
 
@@ -48,8 +49,8 @@ struct Fixture
 void Seed(MStringArray& table)
 {
 	table.Init(2);
-	table[0] = "keep zero";
-	table[1] = "keep one";
+	testfw::MutableRow(table, 0) = "keep zero";
+	testfw::MutableRow(table, 1) = "keep one";
 }
 
 void CheckRow(const MStringArray& table, int index, const char* expected)

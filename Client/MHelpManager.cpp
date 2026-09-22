@@ -326,7 +326,7 @@ MHelpManager::Init(int size)
 	{
 		m_pTypeInfo[i] = NULL;
 
-		m_EventOccured[i] = false;
+		m_EventOccured.Set(i, false);
 	}
 	
 }
@@ -360,7 +360,7 @@ MHelpManager::ClearEventOccured()
 {
 	for (int i=0; i<m_EventOccured.GetSize(); i++)
 	{
-		m_EventOccured[i] = false;
+		m_EventOccured.Set(i, false);
 	}
 }
 

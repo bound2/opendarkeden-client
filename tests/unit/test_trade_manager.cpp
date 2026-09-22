@@ -12,6 +12,7 @@
 //----------------------------------------------------------------------
 
 #include "test_framework.h"
+#include "type_table_access.h"
 
 #include "gamemodel_world.h"
 #include "MTradeManager.h"
@@ -41,9 +42,9 @@ struct TradeWorld : GameModelWorld
 		s_Now = MonotonicClock::TimePoint();
 
 		g_pItemTable->InitClass(ITEM_CLASS_SWORD, 3);
-		(*g_pItemTable)[ITEM_CLASS_SWORD][0].SetGrid(1, 1);
-		(*g_pItemTable)[ITEM_CLASS_SWORD][1].SetGrid(2, 2);
-		(*g_pItemTable)[ITEM_CLASS_SWORD][2].SetGrid(3, 1);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SWORD, 0).SetGrid(1, 1);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SWORD, 1).SetGrid(2, 2);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SWORD, 2).SetGrid(3, 1);
 		g_pClientConfig->TRADE_ACCEPT_DELAY_TIME = 5000;
 
 		// The player's side: a small grid and a wallet with a ceiling.

@@ -92,41 +92,61 @@ void GCSkillInfoHandler::execute ( GCSkillInfo * pPacket , Player * pPlayer )
 
 							if((*g_pSkillInfoTable)[skillType].GetSkillStep() == SKILL_STEP_ETC)
 							{
-								(*g_pSkillManager)[SKILL_DOMAIN_BLADE].SetNewSkill();
-								(*g_pSkillManager)[SKILL_DOMAIN_BLADE].LearnSkill( (ACTIONINFO)skillType );
+								if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_BLADE)) {
+									entry->SetNewSkill();
+									entry->LearnSkill( (ACTIONINFO)skillType );
+								}
 
-								(*g_pSkillManager)[SKILL_DOMAIN_SWORD].SetNewSkill();
-								(*g_pSkillManager)[SKILL_DOMAIN_SWORD].LearnSkill( (ACTIONINFO)skillType );
+								if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_SWORD)) {
+									entry->SetNewSkill();
+									entry->LearnSkill( (ACTIONINFO)skillType );
+								}
 								
-								(*g_pSkillManager)[SKILL_DOMAIN_GUN].SetNewSkill();
-								(*g_pSkillManager)[SKILL_DOMAIN_GUN].LearnSkill( (ACTIONINFO)skillType );
+								if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_GUN)) {
+									entry->SetNewSkill();
+									entry->LearnSkill( (ACTIONINFO)skillType );
+								}
 								
-								(*g_pSkillManager)[SKILL_DOMAIN_HEAL].SetNewSkill();
-								(*g_pSkillManager)[SKILL_DOMAIN_HEAL].LearnSkill( (ACTIONINFO)skillType );
+								if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_HEAL)) {
+									entry->SetNewSkill();
+									entry->LearnSkill( (ACTIONINFO)skillType );
+								}
 								
-								(*g_pSkillManager)[SKILL_DOMAIN_ENCHANT].SetNewSkill();
-								(*g_pSkillManager)[SKILL_DOMAIN_ENCHANT].LearnSkill( (ACTIONINFO)skillType );
+								if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_ENCHANT)) {
+									entry->SetNewSkill();
+									entry->LearnSkill( (ACTIONINFO)skillType );
+								}
 								
-								(*g_pSkillManager)[SKILL_DOMAIN_VAMPIRE].SetNewSkill();
-								(*g_pSkillManager)[SKILL_DOMAIN_VAMPIRE].LearnSkill( (ACTIONINFO)skillType );
+								if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_VAMPIRE)) {
+									entry->SetNewSkill();
+									entry->LearnSkill( (ACTIONINFO)skillType );
+								}
 
-								(*g_pSkillManager)[SKILL_DOMAIN_ETC].SetNewSkill();
-								(*g_pSkillManager)[SKILL_DOMAIN_ETC].LearnSkill( (ACTIONINFO)skillType );
+								if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_ETC)) {
+									entry->SetNewSkill();
+									entry->LearnSkill( (ACTIONINFO)skillType );
+								}
 								
 							}
 							else
 							{
-								(*g_pSkillManager)[domainType].SetNewSkill();
-								(*g_pSkillManager)[domainType].LearnSkill( (ACTIONINFO)skillType );
+								if (auto* entry = g_pSkillManager->GetMutable(domainType)) {
+									entry->SetNewSkill();
+									entry->LearnSkill( (ACTIONINFO)skillType );
+								}
 							}
 
-							(*g_pSkillInfoTable)[skillType].SetExpLevel( ExpLevel );
-							(*g_pSkillInfoTable)[skillType].SetSkillExp( skillExp );
+							if (auto* entry = g_pSkillInfoTable->GetMutable(skillType)) {
+								entry->SetExpLevel( ExpLevel );
+								entry->SetSkillExp( skillExp );
 
-							(*g_pSkillInfoTable)[skillType].SetDelayTime( delayTime );
-							(*g_pSkillInfoTable)[skillType].SetEnable( bEnable );
+								entry->SetDelayTime( delayTime );
+								entry->SetEnable( bEnable );
+							}
 
-							(*g_pSkillInfoTable)[skillType].SetAvailableTime( currentDelay );
+							if (auto* entry = g_pSkillInfoTable->GetMutable(skillType)) {
+								entry->SetAvailableTime( currentDelay );
+							}
 
 							switch (skillType)
 							{
@@ -136,20 +156,40 @@ void GCSkillInfoHandler::execute ( GCSkillInfo * pPacket , Player * pPlayer )
 
 								case SKILL_THROW_BOMB :
 								{
-									(*g_pSkillInfoTable)[BOMB_SPLINTER].SetExpLevel( ExpLevel );
-									(*g_pSkillInfoTable)[BOMB_ACER].SetExpLevel( ExpLevel );
-									(*g_pSkillInfoTable)[BOMB_BULLS].SetExpLevel( ExpLevel );
-									(*g_pSkillInfoTable)[BOMB_STUN].SetExpLevel( ExpLevel );
-									(*g_pSkillInfoTable)[BOMB_CROSSBOW].SetExpLevel( ExpLevel );
+									if (auto* entry = g_pSkillInfoTable->GetMutable(BOMB_SPLINTER)) {
+										entry->SetExpLevel( ExpLevel );
+									}
+									if (auto* entry = g_pSkillInfoTable->GetMutable(BOMB_ACER)) {
+										entry->SetExpLevel( ExpLevel );
+									}
+									if (auto* entry = g_pSkillInfoTable->GetMutable(BOMB_BULLS)) {
+										entry->SetExpLevel( ExpLevel );
+									}
+									if (auto* entry = g_pSkillInfoTable->GetMutable(BOMB_STUN)) {
+										entry->SetExpLevel( ExpLevel );
+									}
+									if (auto* entry = g_pSkillInfoTable->GetMutable(BOMB_CROSSBOW)) {
+										entry->SetExpLevel( ExpLevel );
+									}
 								}
 								break;
 
 								case SKILL_INSTALL_MINE :
-									(*g_pSkillInfoTable)[MINE_ANKLE_KILLER].SetExpLevel( ExpLevel );
-									(*g_pSkillInfoTable)[MINE_POMZ].SetExpLevel( ExpLevel );
-									(*g_pSkillInfoTable)[MINE_AP_C1].SetExpLevel( ExpLevel );
-									(*g_pSkillInfoTable)[MINE_DIAMONDBACK].SetExpLevel( ExpLevel );
-									(*g_pSkillInfoTable)[MINE_SWIFT_EX].SetExpLevel( ExpLevel );
+									if (auto* entry = g_pSkillInfoTable->GetMutable(MINE_ANKLE_KILLER)) {
+										entry->SetExpLevel( ExpLevel );
+									}
+									if (auto* entry = g_pSkillInfoTable->GetMutable(MINE_POMZ)) {
+										entry->SetExpLevel( ExpLevel );
+									}
+									if (auto* entry = g_pSkillInfoTable->GetMutable(MINE_AP_C1)) {
+										entry->SetExpLevel( ExpLevel );
+									}
+									if (auto* entry = g_pSkillInfoTable->GetMutable(MINE_DIAMONDBACK)) {
+										entry->SetExpLevel( ExpLevel );
+									}
+									if (auto* entry = g_pSkillInfoTable->GetMutable(MINE_SWIFT_EX)) {
+										entry->SetExpLevel( ExpLevel );
+									}
 								break;
 							}
 							
@@ -162,7 +202,9 @@ void GCSkillInfoHandler::execute ( GCSkillInfo * pPacket , Player * pPlayer )
 					//--------------------------------------------------
 					if (pSlayerSkillInfo->isLearnNewSkill())
 					{
-						(*g_pSkillManager)[domainType].SetNewSkill();					
+						if (auto* entry = g_pSkillManager->GetMutable(domainType)) {
+							entry->SetNewSkill();
+						}
 					}
 
 				}
@@ -198,36 +240,54 @@ void GCSkillInfoHandler::execute ( GCSkillInfo * pPacket , Player * pPlayer )
 							// Skill 배웠다는걸 체크한다.
 							if((*g_pSkillInfoTable)[skillType].GetSkillStep() == SKILL_STEP_ETC)
 							{
-								(*g_pSkillManager)[SKILL_DOMAIN_BLADE].SetNewSkill();
-								(*g_pSkillManager)[SKILL_DOMAIN_BLADE].LearnSkill( (ACTIONINFO)skillType );
+								if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_BLADE)) {
+									entry->SetNewSkill();
+									entry->LearnSkill( (ACTIONINFO)skillType );
+								}
 
-								(*g_pSkillManager)[SKILL_DOMAIN_SWORD].SetNewSkill();
-								(*g_pSkillManager)[SKILL_DOMAIN_SWORD].LearnSkill( (ACTIONINFO)skillType );
+								if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_SWORD)) {
+									entry->SetNewSkill();
+									entry->LearnSkill( (ACTIONINFO)skillType );
+								}
 								
-								(*g_pSkillManager)[SKILL_DOMAIN_GUN].SetNewSkill();
-								(*g_pSkillManager)[SKILL_DOMAIN_GUN].LearnSkill( (ACTIONINFO)skillType );
+								if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_GUN)) {
+									entry->SetNewSkill();
+									entry->LearnSkill( (ACTIONINFO)skillType );
+								}
 								
-								(*g_pSkillManager)[SKILL_DOMAIN_HEAL].SetNewSkill();
-								(*g_pSkillManager)[SKILL_DOMAIN_HEAL].LearnSkill( (ACTIONINFO)skillType );
+								if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_HEAL)) {
+									entry->SetNewSkill();
+									entry->LearnSkill( (ACTIONINFO)skillType );
+								}
 								
-								(*g_pSkillManager)[SKILL_DOMAIN_ENCHANT].SetNewSkill();
-								(*g_pSkillManager)[SKILL_DOMAIN_ENCHANT].LearnSkill( (ACTIONINFO)skillType );
+								if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_ENCHANT)) {
+									entry->SetNewSkill();
+									entry->LearnSkill( (ACTIONINFO)skillType );
+								}
 								
-								(*g_pSkillManager)[SKILL_DOMAIN_VAMPIRE].SetNewSkill();
-								(*g_pSkillManager)[SKILL_DOMAIN_VAMPIRE].LearnSkill( (ACTIONINFO)skillType );
+								if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_VAMPIRE)) {
+									entry->SetNewSkill();
+									entry->LearnSkill( (ACTIONINFO)skillType );
+								}
 
-								(*g_pSkillManager)[SKILL_DOMAIN_ETC].SetNewSkill();
-								(*g_pSkillManager)[SKILL_DOMAIN_ETC].LearnSkill( (ACTIONINFO)skillType );
+								if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_ETC)) {
+									entry->SetNewSkill();
+									entry->LearnSkill( (ACTIONINFO)skillType );
+								}
 								
 							}
 							else
 							{
-								(*g_pSkillManager)[domainType].SetNewSkill();
-								(*g_pSkillManager)[domainType].LearnSkill( (ACTIONINFO)skillType );							
+								if (auto* entry = g_pSkillManager->GetMutable(domainType)) {
+									entry->SetNewSkill();
+									entry->LearnSkill( (ACTIONINFO)skillType );
+								}
 							}
 							
-							(*g_pSkillInfoTable)[skillType].SetDelayTime( delayTime );							
-							(*g_pSkillInfoTable)[skillType].SetAvailableTime( currentDelay );
+							if (auto* entry = g_pSkillInfoTable->GetMutable(skillType)) {
+								entry->SetDelayTime( delayTime );
+								entry->SetAvailableTime( currentDelay );
+							}
 
 							switch (skillType)
 							{
@@ -257,7 +317,9 @@ void GCSkillInfoHandler::execute ( GCSkillInfo * pPacket , Player * pPlayer )
 					//--------------------------------------------------
 					if (pVampireSkillInfo->isLearnNewSkill())
 					{
-						(*g_pSkillManager)[domainType].SetNewSkill();					
+						if (auto* entry = g_pSkillManager->GetMutable(domainType)) {
+							entry->SetNewSkill();
+						}
 					}
 				}
 				break;
@@ -293,42 +355,62 @@ void GCSkillInfoHandler::execute ( GCSkillInfo * pPacket , Player * pPlayer )
 								// Skill 배웠다는걸 체크한다.
 								if((*g_pSkillInfoTable)[skillType].GetSkillStep() == SKILL_STEP_ETC)
 								{
-									(*g_pSkillManager)[SKILL_DOMAIN_BLADE].SetNewSkill();
-									(*g_pSkillManager)[SKILL_DOMAIN_BLADE].LearnSkill( (ACTIONINFO)skillType );
+									if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_BLADE)) {
+										entry->SetNewSkill();
+										entry->LearnSkill( (ACTIONINFO)skillType );
+									}
 									
-									(*g_pSkillManager)[SKILL_DOMAIN_SWORD].SetNewSkill();
-									(*g_pSkillManager)[SKILL_DOMAIN_SWORD].LearnSkill( (ACTIONINFO)skillType );
+									if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_SWORD)) {
+										entry->SetNewSkill();
+										entry->LearnSkill( (ACTIONINFO)skillType );
+									}
 									
-									(*g_pSkillManager)[SKILL_DOMAIN_GUN].SetNewSkill();
-									(*g_pSkillManager)[SKILL_DOMAIN_GUN].LearnSkill( (ACTIONINFO)skillType );
+									if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_GUN)) {
+										entry->SetNewSkill();
+										entry->LearnSkill( (ACTIONINFO)skillType );
+									}
 									
-									(*g_pSkillManager)[SKILL_DOMAIN_HEAL].SetNewSkill();
-									(*g_pSkillManager)[SKILL_DOMAIN_HEAL].LearnSkill( (ACTIONINFO)skillType );
+									if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_HEAL)) {
+										entry->SetNewSkill();
+										entry->LearnSkill( (ACTIONINFO)skillType );
+									}
 									
-									(*g_pSkillManager)[SKILL_DOMAIN_ENCHANT].SetNewSkill();
-									(*g_pSkillManager)[SKILL_DOMAIN_ENCHANT].LearnSkill( (ACTIONINFO)skillType );
+									if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_ENCHANT)) {
+										entry->SetNewSkill();
+										entry->LearnSkill( (ACTIONINFO)skillType );
+									}
 									
-									(*g_pSkillManager)[SKILL_DOMAIN_VAMPIRE].SetNewSkill();
-									(*g_pSkillManager)[SKILL_DOMAIN_VAMPIRE].LearnSkill( (ACTIONINFO)skillType );
+									if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_VAMPIRE)) {
+										entry->SetNewSkill();
+										entry->LearnSkill( (ACTIONINFO)skillType );
+									}
 									
-									(*g_pSkillManager)[SKILL_DOMAIN_OUSTERS].SetNewSkill();
-									(*g_pSkillManager)[SKILL_DOMAIN_OUSTERS].LearnSkill( (ACTIONINFO)skillType );
+									if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_OUSTERS)) {
+										entry->SetNewSkill();
+										entry->LearnSkill( (ACTIONINFO)skillType );
+									}
 									
-									(*g_pSkillManager)[SKILL_DOMAIN_ETC].SetNewSkill();
-									(*g_pSkillManager)[SKILL_DOMAIN_ETC].LearnSkill( (ACTIONINFO)skillType );
+									if (auto* entry = g_pSkillManager->GetMutable(SKILL_DOMAIN_ETC)) {
+										entry->SetNewSkill();
+										entry->LearnSkill( (ACTIONINFO)skillType );
+									}
 									
 								}
 								else
 								{
-									(*g_pSkillManager)[domainType].SetNewSkill();
-									(*g_pSkillManager)[domainType].LearnSkill( (ACTIONINFO)skillType );							
+									if (auto* entry = g_pSkillManager->GetMutable(domainType)) {
+										entry->SetNewSkill();
+										entry->LearnSkill( (ACTIONINFO)skillType );
+									}
 								}
 								
-								(*g_pSkillInfoTable)[skillType].SetExpLevel( expLevel );
+								if (auto* entry = g_pSkillInfoTable->GetMutable(skillType)) {
+									entry->SetExpLevel( expLevel );
 								
-								(*g_pSkillInfoTable)[skillType].SetDelayTime( delayTime );
+									entry->SetDelayTime( delayTime );
 								
-								(*g_pSkillInfoTable)[skillType].SetAvailableTime( currentDelay );
+									entry->SetAvailableTime( currentDelay );
+								}
 								
 								delete pInfo;
 							}
@@ -339,7 +421,9 @@ void GCSkillInfoHandler::execute ( GCSkillInfo * pPacket , Player * pPlayer )
 						//--------------------------------------------------
 						if (pOustersSkillInfo->isLearnNewSkill())
 						{
-							(*g_pSkillManager)[domainType].SetNewSkill();					
+							if (auto* entry = g_pSkillManager->GetMutable(domainType)) {
+								entry->SetNewSkill();
+							}
 						}
 					}
 					break;

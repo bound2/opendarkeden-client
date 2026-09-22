@@ -82,13 +82,17 @@ void GCSkillFailed1Handler::execute ( GCSkillFailed1 * pPacket , Player * pPlaye
 		{
 			if (skillID < MIN_RESULT_ACTIONINFO)
 			{
-				(*g_pSkillInfoTable)[skillID].SetAvailableTime();
+				if (auto* entry = g_pSkillInfoTable->GetMutable(skillID)) {
+					entry->SetAvailableTime();
+				}
 			}
 		}
 
 		if( skillID == SKILL_WILL_OF_LIFE )
 		{
-			(*g_pSkillInfoTable)[skillID].SetAvailableTime( (3 + (g_pPlayer->GetLEVEL() / 10)) * 2 * 1000 );
+			if (auto* entry = g_pSkillInfoTable->GetMutable(skillID)) {
+				entry->SetAvailableTime( (3 + (g_pPlayer->GetLEVEL() / 10)) * 2 * 1000 );
+			}
 		}
 	}
 

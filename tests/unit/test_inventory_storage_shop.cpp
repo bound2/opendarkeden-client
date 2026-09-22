@@ -13,6 +13,7 @@
 //----------------------------------------------------------------------
 
 #include "test_framework.h"
+#include "type_table_access.h"
 
 #include "gamemodel_world.h"
 #include "MInventory.h"
@@ -49,15 +50,15 @@ struct ContainerWorld : GameModelWorld
 		s_Sounds.clear();
 
 		g_pItemTable->InitClass(ITEM_CLASS_SWORD, 2);
-		(*g_pItemTable)[ITEM_CLASS_SWORD][0].SetGrid(2, 1);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SWORD, 0).SetGrid(2, 1);
 		// (tile, inventory, gear, use): the slots differ, so a container
 		// playing any slot but the inventory one fails the sound checks.
-		(*g_pItemTable)[ITEM_CLASS_SWORD][0].SetSoundID(170, 71, 270, 370);
-		(*g_pItemTable)[ITEM_CLASS_SWORD][1].SetGrid(1, 1);
-		(*g_pItemTable)[ITEM_CLASS_SWORD][1].SetSoundID(171, 72, 271, 371);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SWORD, 0).SetSoundID(170, 71, 270, 370);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SWORD, 1).SetGrid(1, 1);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_SWORD, 1).SetSoundID(171, 72, 271, 371);
 		g_pItemTable->InitClass(ITEM_CLASS_POTION, 1);
-		(*g_pItemTable)[ITEM_CLASS_POTION][0].SetGrid(1, 1);
-		(*g_pItemTable)[ITEM_CLASS_POTION][0].SetSoundID(172, 73, 272, 372);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_POTION, 0).SetGrid(1, 1);
+		testfw::MutableRow(*g_pItemTable, ITEM_CLASS_POTION, 0).SetSoundID(172, 73, 272, 372);
 
 		MItem::SetHost(&s_Host);
 	}

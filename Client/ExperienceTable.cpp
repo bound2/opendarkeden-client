@@ -3,6 +3,44 @@
 //---------------------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "ExperienceTable.h"
+#include <limits>
+
+namespace {
+void LoadExperienceRows(std::ifstream& file, ExpTable& rows)
+{
+	int count = 0;
+	if (!file.read(reinterpret_cast<char*>(&count), 4) || count < 0 ||
+		count == (std::numeric_limits<int>::max)()) {
+		file.setstate(std::ios::failbit);
+		return;
+	}
+	// Each row is a four-byte level followed by two four-byte experience values.
+	const std::streamoff position = file.tellg();
+	if (position < 0) { file.setstate(std::ios::failbit); return; }
+	file.seekg(0, std::ios::end);
+	const std::streamoff end = file.tellg();
+	if (!file.good() || end < position) { file.setstate(std::ios::failbit); return; }
+	file.seekg(position, std::ios::beg);
+	if (!file.good() || count > (end - position) / 12) {
+		file.setstate(std::ios::failbit);
+		return;
+	}
+
+	// File levels start at one; the unused zero row stays a default value.
+	rows.Init(count + 1);
+	for (int i = 0; i < count; ++i) {
+		int level = 0;
+		if (!file.read(reinterpret_cast<char*>(&level), 4)) return;
+		ExpInfo value{};
+		value.LoadFromFile(file);
+		if (!file.good()) return;
+		if (!rows.Set(level, value)) {
+			file.setstate(std::ios::failbit);
+			return;
+		}
+	}
+}
+}
 
 //---------------------------------------------------------------------------------
 // Global
@@ -51,19 +89,7 @@ ExperienceTable::Release()
 void		
 ExperienceTable::LoadFromFileSTR(std::ifstream& file)
 {
-	int num, level;
-	file.read((char*)&num, 4);
-
-	// file에는 1 level부터 들어가있는걸로 가정하기 때문에...
-	m_STRExp.Init( num + 1 );
-
-	for (int i=0; i<num; i++)
-	{
-		file.read((char*)&level, 4);
-		
-		// level에 맞게 loading한다.
-		m_STRExp[level].LoadFromFile( file );		
-	}
+	LoadExperienceRows(file, m_STRExp);
 }
 
 //---------------------------------------------------------------------------------
@@ -72,19 +98,7 @@ ExperienceTable::LoadFromFileSTR(std::ifstream& file)
 void		
 ExperienceTable::LoadFromFileDEX(std::ifstream& file)
 {
-	int num, level;
-	file.read((char*)&num, 4);
-
-	// file에는 1 level부터 들어가있는걸로 가정하기 때문에...
-	m_DEXExp.Init( num + 1 );
-
-	for (int i=0; i<num; i++)
-	{
-		file.read((char*)&level, 4);
-		
-		// level에 맞게 loading한다.
-		m_DEXExp[level].LoadFromFile( file );		
-	}
+	LoadExperienceRows(file, m_DEXExp);
 }
 
 //---------------------------------------------------------------------------------
@@ -93,19 +107,7 @@ ExperienceTable::LoadFromFileDEX(std::ifstream& file)
 void		
 ExperienceTable::LoadFromFileINT(std::ifstream& file)
 {
-	int num, level;
-	file.read((char*)&num, 4);
-
-	// file에는 1 level부터 들어가있는걸로 가정하기 때문에...
-	m_INTExp.Init( num + 1 );
-
-	for (int i=0; i<num; i++)
-	{
-		file.read((char*)&level, 4);
-		
-		// level에 맞게 loading한다.
-		m_INTExp[level].LoadFromFile( file );		
-	}
+	LoadExperienceRows(file, m_INTExp);
 }
 
 //---------------------------------------------------------------------------------
@@ -114,19 +116,7 @@ ExperienceTable::LoadFromFileINT(std::ifstream& file)
 void		
 ExperienceTable::LoadFromFileVampire(std::ifstream& file)
 {
-	int num, level;
-	file.read((char*)&num, 4);
-
-	// file에는 1 level부터 들어가있는걸로 가정하기 때문에...
-	m_VampireExp.Init( num + 1 );
-
-	for (int i=0; i<num; i++)
-	{
-		file.read((char*)&level, 4);
-		
-		// level에 맞게 loading한다.
-		m_VampireExp[level].LoadFromFile( file );		
-	}
+	LoadExperienceRows(file, m_VampireExp);
 }
 
 //---------------------------------------------------------------------------------
@@ -135,19 +125,7 @@ ExperienceTable::LoadFromFileVampire(std::ifstream& file)
 void		
 ExperienceTable::LoadFromFileOusters(std::ifstream& file)
 {
-	int num, level;
-	file.read((char*)&num, 4);
-	
-	// file에는 1 level부터 들어가있는걸로 가정하기 때문에...
-	m_OustersExp.Init( num + 1 );
-	
-	for (int i=0; i<num; i++)
-	{
-		file.read((char*)&level, 4);
-		
-		// level에 맞게 loading한다.
-		m_OustersExp[level].LoadFromFile( file );		
-	}
+	LoadExperienceRows(file, m_OustersExp);
 }
 
 //---------------------------------------------------------------------------------
@@ -156,19 +134,7 @@ ExperienceTable::LoadFromFileOusters(std::ifstream& file)
 void		
 ExperienceTable::LoadFromFileSlayerRank(std::ifstream& file)
 {
-	int num, level;
-	file.read((char*)&num, 4);
-
-	// file에는 1 level부터 들어가있는걸로 가정하기 때문에...
-	m_SlayerRankExp.Init( num + 1 );
-
-	for (int i=0; i<num; i++)
-	{
-		file.read((char*)&level, 4);
-		
-		// level에 맞게 loading한다.
-		m_SlayerRankExp[level].LoadFromFile( file );		
-	}
+	LoadExperienceRows(file, m_SlayerRankExp);
 }
 
 //---------------------------------------------------------------------------------
@@ -177,19 +143,7 @@ ExperienceTable::LoadFromFileSlayerRank(std::ifstream& file)
 void		
 ExperienceTable::LoadFromFileVampireRank(std::ifstream& file)
 {
-	int num, level;
-	file.read((char*)&num, 4);
-
-	// file에는 1 level부터 들어가있는걸로 가정하기 때문에...
-	m_VampireRankExp.Init( num + 1 );
-
-	for (int i=0; i<num; i++)
-	{
-		file.read((char*)&level, 4);
-		
-		// level에 맞게 loading한다.
-		m_VampireRankExp[level].LoadFromFile( file );		
-	}
+	LoadExperienceRows(file, m_VampireRankExp);
 }
 
 //---------------------------------------------------------------------------------
@@ -198,19 +152,7 @@ ExperienceTable::LoadFromFileVampireRank(std::ifstream& file)
 void		
 ExperienceTable::LoadFromFileOustersRank(std::ifstream& file)
 {
-	int num, level;
-	file.read((char*)&num, 4);
-	
-	// file에는 1 level부터 들어가있는걸로 가정하기 때문에...
-	m_OustersRankExp.Init( num + 1 );
-	
-	for (int i=0; i<num; i++)
-	{
-		file.read((char*)&level, 4);
-		
-		// level에 맞게 loading한다.
-		m_OustersRankExp[level].LoadFromFile( file );		
-	}
+	LoadExperienceRows(file, m_OustersRankExp);
 }
 
 //---------------------------------------------------------------------------------
@@ -219,37 +161,13 @@ ExperienceTable::LoadFromFileOustersRank(std::ifstream& file)
 void		
 ExperienceTable::LoadFromFilePetExp(std::ifstream& file)
 {
-	int num, level;
-	file.read((char*)&num, 4);
-	
-	// file에는 1 level부터 들어가있는걸로 가정하기 때문에...
-	m_PetExp.Init( num + 1 );
-	
-	for (int i=0; i<num; i++)
-	{
-		file.read((char*)&level, 4);
-		
-		// level에 맞게 loading한다.
-		m_PetExp[level].LoadFromFile( file );		
-	}
+	LoadExperienceRows(file, m_PetExp);
 }
 
 void
 ExperienceTable::LoadFromFileAdvanceMent(std::ifstream& file)
 {
-	int num, level;
-	file.read((char*)&num, 4);
-	
-	// file에는 1 level부터 들어가있는걸로 가정하기 때문에...
-	m_advanceSkillExp.Init( num + 1 );
-	
-	for (int i=0; i<num; i++)
-	{
-		file.read((char*)&level, 4);
-		
-		// level에 맞게 loading한다.
-		m_advanceSkillExp[level].LoadFromFile( file );		
-	}
+	LoadExperienceRows(file, m_advanceSkillExp);
 }
 
 

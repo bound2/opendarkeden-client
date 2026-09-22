@@ -226,9 +226,9 @@ extern RECT g_GameRect;
 #define DRAW_SPRITE_WITH_EFFECTFRAME_PAIR( est, pPoint, EffectSPK, EffectFPK, direction, frame )	\
 		if (HAS_PAIR_EFFECTSPRITETYPE(est))															\
 		{																							\
-			EFFECTSPRITETYPETABLE_INFO::FRAMEID_LIST& idList = (*g_pEffectSpriteTypeTable)[est].PairFrameIDList;	\
+			const EFFECTSPRITETYPETABLE_INFO::FRAMEID_LIST& idList = (*g_pEffectSpriteTypeTable)[est].PairFrameIDList;	\
 																									\
-			EFFECTSPRITETYPETABLE_INFO::FRAMEID_LIST::iterator iID = idList.begin();				\
+			EFFECTSPRITETYPETABLE_INFO::FRAMEID_LIST::const_iterator iID = idList.begin();				\
 																									\
 			while (iID != idList.end())																\
 			{																						\

@@ -18,7 +18,9 @@ void GCRankBonusInfoHandler::execute ( GCRankBonusInfo * pPacket , Player * pPla
 {
 	__BEGIN_TRY
 	for(int i = 0; i < g_pRankBonusTable->GetSize(); i++)
-		(*g_pRankBonusTable)[i].SetStatus(RankBonusInfo::STATUS_NULL);
+		if (auto* entry = g_pRankBonusTable->GetMutable(i)) {
+			entry->SetStatus(RankBonusInfo::STATUS_NULL);
+		}
 
 	DWORD type = 0;
 
@@ -26,16 +28,22 @@ void GCRankBonusInfoHandler::execute ( GCRankBonusInfo * pPacket , Player * pPla
 	{
 		if(type < g_pRankBonusTable->GetSize())
 		{
-			(*g_pRankBonusTable)[type].SetStatus(RankBonusInfo::STATUS_LEARNED);
+			if (auto* entry = g_pRankBonusTable->GetMutable(type)) {
+				entry->SetStatus(RankBonusInfo::STATUS_LEARNED);
+			}
 
 			const int level = (*g_pRankBonusTable)[type].GetLevel();
 			int i;
 
 			for(i = type-1; i >= 0 && (*g_pRankBonusTable)[i].GetLevel() == level; i--)
-				(*g_pRankBonusTable)[i].SetStatus(RankBonusInfo::STATUS_CANNOT_LEARN);
+				if (auto* entry = g_pRankBonusTable->GetMutable(i)) {
+					entry->SetStatus(RankBonusInfo::STATUS_CANNOT_LEARN);
+				}
 
 			for(i = type+1; i < g_pRankBonusTable->GetSize() && (*g_pRankBonusTable)[i].GetLevel() == level; i++)
-				(*g_pRankBonusTable)[i].SetStatus(RankBonusInfo::STATUS_CANNOT_LEARN);
+				if (auto* entry = g_pRankBonusTable->GetMutable(i)) {
+					entry->SetStatus(RankBonusInfo::STATUS_CANNOT_LEARN);
+				}
 		}
 	}
 

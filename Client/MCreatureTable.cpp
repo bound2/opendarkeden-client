@@ -414,7 +414,7 @@ CREATURETABLE_INFO::operator = (const CREATURETABLE_INFO& creatureInfo)
 	SpriteTypes.Init(creatureInfo.SpriteTypes.GetSize());
 
 	for(int st = 0; st< creatureInfo.SpriteTypes.GetSize(); st++)
-		SpriteTypes[st] = creatureInfo.SpriteTypes[st];
+		SpriteTypes.Set(st, creatureInfo.SpriteTypes[st]);
 
 	bMale		= creatureInfo.bMale;
 	SetCreatureTribe( creatureInfo.m_CreatureTribe );
