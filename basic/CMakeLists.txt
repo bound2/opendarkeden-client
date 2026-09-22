@@ -77,6 +77,7 @@ set(BASIC_SOURCES
 	MasterCommands.cpp
 	TextEncoding.cpp
 	ResourceText.cpp
+	RarArchive.cpp
 	MemoryPool.cpp
 	CMessageArray.cpp
 	ConfigFile.cpp
@@ -95,6 +96,7 @@ message(STATUS "Basic: Compiling PlatformSDL.cpp")
 # Create static library
 add_library(basic STATIC ${BASIC_SOURCES})
 target_link_libraries(basic PUBLIC Iconv::Iconv)
+target_link_libraries(basic PRIVATE darkeden_unrar)
 
 # Platform.h is public, so its backend selection must reach every consumer.
 if(USE_SDL_BACKEND OR NOT WIN32)
@@ -158,6 +160,7 @@ install(FILES
 	TextUtf8.h
 	TextEncoding.h
 	ResourceText.h
+	RarArchive.h
 	StringReduction.h
 	MemoryPool.h
 	ScrollRange.h

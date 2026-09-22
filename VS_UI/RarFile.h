@@ -1,5 +1,5 @@
 // RarFile.h: interface for the CRarFile class.
-// Modified for cross-platform support without RAR dependency
+// Loose resource overrides and bounded in-memory RAR/RPK reading.
 //////////////////////////////////////////////////////////////////////
 
 #ifndef _RAR_FILE_HEADER_
@@ -19,12 +19,11 @@
 #include <string.h>
 
 /**
- * CRarFile - Cross-platform file reader that works with extracted RAR content
+ * CRarFile - Cross-platform loose and packed resource reader.
  *
- * Files are read beside the named archive: Data/Info/infodata.rpk selects
- * Data/Info/. Archive decompression is not implemented here.
- *
- * This avoids dependency on unrar library and improves cross-platform compatibility
+ * Loose files beside the named archive override its members. Otherwise the
+ * archive is read into bounded memory using its password, without extracting
+ * anything to disk. Raw opens retain bytes; text opens decode once to UTF-8.
  */
 
 class CRarFile
@@ -53,10 +52,10 @@ public:
 	// Release resources
 	void Release();
 
-	// Set RAR file path (converted to directory path)
+	// Set archive path and the adjacent directory for loose overrides.
 	void SetRAR(const char *rar_filename, const char *pass);
 
-	// Open raw bytes from the extracted directory. Failed opens close old data.
+	// Open raw bytes from the loose directory or archive. Failure closes old data.
 	bool Open(const char *in_filename);
 	// Decode once using the resource page or UTF-8 BOM, with a 16 MiB input cap.
 	// GetString then clips only at UTF-8 scalar boundaries, consuming each line.
@@ -74,7 +73,8 @@ public:
 	// Check if EOF
 	bool	IsEOF(int plus = 0);
 
-	// Caller owns the returned list, even when empty. Archive listing is a stub.
+	// Caller owns regular archive-member names, even when empty. Optional glob
+	// filter uses '*' and '?', folded separators, and ASCII case-insensitivity.
 	std::vector<std::string> *GetList(char *filter = NULL);
 
 	char* GetFilePointer(){return m_file_pointer;};

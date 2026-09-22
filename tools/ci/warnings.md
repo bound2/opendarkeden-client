@@ -45,3 +45,19 @@ the preset (`macos-arm64`, `linux-x86_64`, etc.); Windows uses
 Review the counts before committing them. A toolchain upgrade that changes
 diagnostics needs a measured rebaseline and an explanation, rather than an
 automatic increase. Do not record an incremental build or a failed build.
+
+The 2026-09-22 packed-resource reader adds the pinned `darkeden_unrar` target
+under the same warning policy. Its complete clean CI builds establish the
+new dependency's initial diagnostic population, with each architecture
+measured independently. GCC adds 188 dependency sites and Linux Clang adds
+194; Apple Clang adds 199 on x86_64 and 200 on arm64. The archive listing
+implementation also removes one project `-Wunused-parameter` site, so the
+net Unix increases are one smaller. New warning locations are in the bundled
+source, including its shared headers; no project-source growth is hidden.
+
+Windows adds ten upstream C4996 sites and SDK `winioctl.h` C4668 diagnostics.
+The hosted SDK emits 16 new C4668 sites; the local SDK emits 29. The recorded
+Windows budgets use the hosted CI toolchain's complete clean builds, rather
+than the larger local measurement. No compiler warnings or sanitizers are
+disabled for the dependency; later changes retain the same comparison
+against the recorded counts.

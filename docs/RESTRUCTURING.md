@@ -1083,7 +1083,13 @@ rounds settled* for the host rules). Test fixtures share
   > capacity and XML saves escape markup. `CRarFile::OpenText` provides a
   > bounded, once-per-file decoding path and UTF-8-safe line clipping;
   > `test_resource_reader.cpp` owns its bounds, cursor and buffer-lifetime
-  > contracts. Common/race chat tips and welcome/event popups now use that
+  > contracts. Packed RAR/RPK fallback and archive enumeration are restored
+  > through `basic/RarArchive`, backed by a pinned static UnRAR dependency.
+  > Reads retain loose overrides, passwords and raw/text separation; archive
+  > members never go to disk. `test_rar_archive.cpp` owns malformed input,
+  > limits, solid encryption and Unicode path contracts. Dependency notices
+  > accompany built binaries and the macOS package.
+  > Common/race chat tips and welcome/event popups now use that
   > loader; popups test the open result before reading. Other plain-text
   > callers and retirement of the renderer fallback remain open under
   > the encoding finding.

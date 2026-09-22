@@ -9,6 +9,9 @@
 #include <fstream>
 #include <string>
 #include <limits>
+#include <filesystem>
+#include <memory>
+#include <algorithm>
 
 namespace {
 struct ReaderFile {
@@ -23,6 +26,78 @@ struct EncodingScope {
 	TextEncoding::Encoding saved = TextEncoding::GetResourceEncoding();
 	~EncodingScope() { TextEncoding::SetResourceEncoding(saved); }
 };
+
+std::string ArchiveFixture(const char* name)
+{
+	return (std::filesystem::path(__FILE__).parent_path().parent_path() /
+		"fixtures" / "rar" / name).string();
+}
+}
+
+TEST(ResourceReader, PackedFilesReadExactBytesAndResolveWindowsMemberNames)
+{
+	const auto archive = ArchiveFixture("test_read_format_rar.rar");
+	CRarFile reader(archive.c_str(), nullptr);
+	CHECK(reader.Open("TESTDIR\\TEST.TXT"));
+	CHECK_EQ(20, reader.GetRemainingSize());
+	char bytes[21] = {};
+	CHECK(reader.Read(bytes, 20) != nullptr);
+	CHECK(std::string(bytes) == "test text document\r\n");
+	CHECK(reader.IsEOF());
+	CHECK(!reader.Open("absent.txt"));
+	CHECK(!reader.IsSet());
+}
+
+TEST(ResourceReader, PackedListsAreOwnedFilteredAndContainOnlyRegularMembers)
+{
+	std::unique_ptr<std::vector<std::string>> list;
+	{
+		const auto archive = ArchiveFixture("test_read_format_rar.rar");
+		CRarFile reader(archive.c_str(), nullptr);
+		list.reset(reader.GetList());
+		char filter[] = "TESTDIR/*.TXT";
+		std::unique_ptr<std::vector<std::string>> filtered(reader.GetList(filter));
+		CHECK_EQ(1, filtered->size());
+		if (!filtered->empty()) CHECK((*filtered)[0] == "testdir/test.txt");
+	}
+	CHECK_EQ(2, list->size());
+	CHECK(std::find(list->begin(), list->end(), "test.txt") != list->end());
+	CHECK(std::find(list->begin(), list->end(), "testdir/test.txt") != list->end());
+}
+
+TEST(ResourceReader, PackedEncryptedDataAndHeadersUseTheSuppliedPassword)
+{
+	for (const char* fixture : {"test_read_format_rar_encryption_data.rar",
+		"test_read_format_rar_encryption_header.rar"}) {
+		const auto archive = ArchiveFixture(fixture);
+		CRarFile reader(archive.c_str(), "12345678");
+		CHECK(reader.Open("foo.txt"));
+		CHECK_EQ(16, reader.GetRemainingSize());
+		reader.SetRAR(archive.c_str(), "wrong");
+		CHECK(!reader.Open("foo.txt"));
+		CHECK(!reader.IsSet());
+		reader.SetRAR(archive.c_str(), nullptr);
+		CHECK(!reader.Open("foo.txt"));
+		CHECK(!reader.IsSet());
+	}
+}
+
+TEST(ResourceReader, PackedTextAndListingsPreserveTheCursorAndLooseOverrides)
+{
+	const auto archive = ArchiveFixture("test_read_format_rar.rar");
+	CRarFile reader(archive.c_str(), nullptr);
+	CHECK(reader.OpenText("test.txt"));
+	char line[64] = {};
+	std::unique_ptr<std::vector<std::string>> names(reader.GetList());
+	CHECK(reader.GetString(line, sizeof(line)));
+	CHECK(std::string(line) == "test text document");
+	CHECK(reader.IsEOF());
+	ReaderFile loose("override");
+	// With an archive in the current directory, loose files still work even
+	// if that archive is unavailable (the supported extracted-resource layout).
+	reader.SetRAR("absent_archive.rar", "ignored");
+	CHECK(reader.Open(ReaderFile::path));
+	CHECK_EQ(8, reader.GetRemainingSize());
 }
 
 TEST(ResourceReader, RejectedReadsPreserveTheCursorAndDestination)

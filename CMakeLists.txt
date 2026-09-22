@@ -296,6 +296,7 @@ else()
 endif()
 
 # Subdirectories
+add_subdirectory(third_party/unrar)
 add_subdirectory(basic)
 add_subdirectory(Client/DXLib)
 add_subdirectory(Client/SpriteLib)
@@ -1045,6 +1046,16 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# the library has nothing to add; it used to be linked there anyway,
 	# through a target Homebrew's config only exports when libSDL2main.a
 	# happens to be installed.
+
+	# Keep the static archive reader's redistribution notices beside each build.
+	add_custom_command(TARGET DarkEden POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:DarkEden>/licenses/unrar"
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			"${CMAKE_CURRENT_SOURCE_DIR}/third_party/unrar/license.txt"
+			"${CMAKE_CURRENT_SOURCE_DIR}/third_party/unrar/acknow.txt"
+			"${CMAKE_CURRENT_SOURCE_DIR}/third_party/unrar/README.md"
+			"$<TARGET_FILE_DIR:DarkEden>/licenses/unrar"
+		VERBATIM)
 
 	# The macOS application bundle, off by default: a bare executable in
 	# bin/ beside the Data tree is what the Linux and Windows builds

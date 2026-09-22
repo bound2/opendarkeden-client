@@ -16,6 +16,9 @@ package="build/packages/darkeden-client-macos-$arch"
 mkdir -p "$package"
 cp "$binary" "$package/DarkEden"
 chmod 755 "$package/DarkEden"
+mkdir -p "$package/licenses/unrar"
+cp third_party/unrar/license.txt third_party/unrar/acknow.txt \
+    third_party/unrar/README.md "$package/licenses/unrar/"
 
 # Resolve every directly linked non-system library on the build machine.
 # Dependencies stay external, as in the Linux release package.

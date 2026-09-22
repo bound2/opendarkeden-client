@@ -1,5 +1,5 @@
 // RarFile.cpp: implementation of the CRarFile class.
-// Modified for cross-platform support without RAR dependency
+// Loose resource overrides and bounded in-memory RAR/RPK reading.
 //////////////////////////////////////////////////////////////////////
 
 #include "RarFile.h"
@@ -9,6 +9,8 @@
 #include <memory>
 #include "ResourceText.h"
 #include "TextUtf8.h"
+#include "RarArchive.h"
+#include "DataPath.h"
 
 //////////////////////////////////////////////////////////////////////
 // Error Reporting Macro (cross-platform)
@@ -72,7 +74,7 @@ void CRarFile::Release()
 
 //////////////////////////////////////////////////////////////////////
 // SetRAR
-// Convert RAR file path to directory path
+// Select an archive and its adjacent loose-resource directory.
 //////////////////////////////////////////////////////////////////////
 void CRarFile::SetRAR(const char *rar_filename, const char *pass)
 {
@@ -86,11 +88,10 @@ void CRarFile::SetRAR(const char *rar_filename, const char *pass)
 	}
 
 	m_rar_filename = rar_filename;
-	m_password = pass ? pass : "";  // Unused for extracted files.
+	m_password = pass ? pass : "";
 
-	// Use the directory containing the .rpk/.rar file as the base directory,
-	// since the game data ships with archive contents extracted flat next to
-	// the archive itself, not into a subfolder named after the archive.
+	// Loose resource overrides live beside the .rpk/.rar, not in a subfolder
+	// named after it. This also supports existing fully extracted data trees.
 	// Example: "Data/Info/infodata.rpk" -> "Data/Info/"
 	std::string path = rar_filename;
 	size_t lastSlash = path.find_last_of("/\\");
@@ -103,7 +104,7 @@ void CRarFile::SetRAR(const char *rar_filename, const char *pass)
 
 //////////////////////////////////////////////////////////////////////
 // Open
-// Open a file from the extracted directory
+// Open a loose resource override, or its packed member when no override exists.
 //////////////////////////////////////////////////////////////////////
 bool CRarFile::Open(const char *in_filename)
 {
@@ -125,55 +126,39 @@ bool CRarFile::OpenLimited(const char* in_filename, bool text)
 	}
 
 	// Build full path by combining base directory with filename
-	std::string fullPath = m_base_dir + in_filename;
+	std::string fullPath = Basic::NormalizeDataPath(m_base_dir + in_filename);
+	const size_t limit = text ? ResourceText::MaxFileBytes :
+		static_cast<size_t>((std::numeric_limits<int>::max)() - 1);
+	std::unique_ptr<char, decltype(&free)> data(nullptr, &free);
+	size_t bytesRead = 0;
 
 	// Open the file
 	const auto closeFile = [](FILE* value) { fclose(value); };
 	std::unique_ptr<FILE, decltype(closeFile)> file(fopen(fullPath.c_str(), "rb"), closeFile);
 	if (!file)
 	{
-		// Log detailed error information
-		char errorMsg[512];
-		snprintf(errorMsg, sizeof(errorMsg),
-				"Failed to open file: %s (base_dir=%s, filename=%s)",
-				fullPath.c_str(), m_base_dir.c_str(), in_filename);
-		RARFILE_ERROR(errorMsg);
-		return false;
+		std::string packed;
+		if (!RarArchive::Read(m_rar_filename, m_password, in_filename, limit, packed)) {
+			char errorMsg[512];
+			snprintf(errorMsg, sizeof(errorMsg), "Cannot read resource %s (archive=%s)",
+				fullPath.c_str(), m_rar_filename.c_str());
+			RARFILE_ERROR(errorMsg);
+			return false;
+		}
+		data.reset(static_cast<char*>(malloc(packed.size() + 1)));
+		if (!data) return false;
+		bytesRead = packed.size();
+		memcpy(data.get(), packed.data(), bytesRead);
 	}
-
-	// Get file size
-	if (fseek(file.get(), 0, SEEK_END) != 0) return false;
-	const long fileSize = ftell(file.get());
-	const size_t limit = text ? ResourceText::MaxFileBytes :
-		static_cast<size_t>((std::numeric_limits<int>::max)() - 1);
-	if (fileSize < 0 || static_cast<size_t>(fileSize) > limit ||
-		fseek(file.get(), 0, SEEK_SET) != 0)
-	{
-		char errorMsg[256];
-		snprintf(errorMsg, sizeof(errorMsg),
-				"File has invalid size: %s (size=%ld)", fullPath.c_str(), fileSize);
-		RARFILE_ERROR(errorMsg);
-		return false;
-	}
-
-	// Allocate buffer and read entire file
-	std::unique_ptr<char, decltype(&free)> data(
-		static_cast<char*>(malloc(static_cast<size_t>(fileSize) + 1)), &free);
-	if (!data)
-	{
-		RARFILE_ERROR("Memory allocation failed for file data");
-		return false;
-	}
-
-	size_t bytesRead = fread(data.get(), 1, static_cast<size_t>(fileSize), file.get());
-
-	if (bytesRead != (size_t)fileSize) {
-		char errorMsg[256];
-		snprintf(errorMsg, sizeof(errorMsg),
-				"Read size mismatch: %s (expected=%ld, actual=%zu)",
-				fullPath.c_str(), fileSize, bytesRead);
-		RARFILE_ERROR(errorMsg);
-		return false;
+	else {
+		if (fseek(file.get(), 0, SEEK_END) != 0) return false;
+		const long fileSize = ftell(file.get());
+		if (fileSize < 0 || static_cast<size_t>(fileSize) > limit ||
+			fseek(file.get(), 0, SEEK_SET) != 0) return false;
+		data.reset(static_cast<char*>(malloc(static_cast<size_t>(fileSize) + 1)));
+		if (!data) return false;
+		bytesRead = fread(data.get(), 1, static_cast<size_t>(fileSize), file.get());
+		if (bytesRead != static_cast<size_t>(fileSize)) return false;
 	}
 
 	if (text) {
@@ -305,11 +290,11 @@ bool CRarFile::IsEOF(int plus)
 
 //////////////////////////////////////////////////////////////////////
 // GetList
-// Stub implementation for compatibility
+// Enumerate regular members of this archive, preserving caller ownership.
 //////////////////////////////////////////////////////////////////////
 std::vector<std::string> *CRarFile::GetList(char *filter)
 {
-	// The tutorial owns and deletes this list after the reader has gone away.
-	// Archive enumeration remains unimplemented, but its ownership is real.
-	return new std::vector<std::string>;
+	auto list = std::make_unique<std::vector<std::string>>();
+	RarArchive::List(m_rar_filename, m_password, filter ? filter : "", *list);
+	return list.release();
 }
