@@ -335,7 +335,7 @@ data, repeated loads and unaligned input. The dialog checks opens, logs rejected
 files, skips positions outside its map sprite and retains filtered zones for
 navigation. UI regression guards also replace the all-filtered navigation
 fallback's bitwise `&` with modulo and check a zone-name lookup before use.
-Archive extraction remains open.
+Packed resource reading is restored by the 2026-09-22 follow-up below.
 
 - **555 rejection cursor follow-up resolved (2026-09-21).** `CAlphaSprite555` already uses the shared alpha loader, whose packed-record cursor test covers both formats. `CIndexSprite555` and `CIndexSprite565` now share a checked loader too: both header words and complete rows must read successfully; encoded counts, cumulative pixel width and palette gradations are validated before publication. Complete malformed records consume all their rows before rejection, preserving the next packed sprite; truncated input retains stream failure and an empty sprite. Only fixed colors convert to 555, while palette words and padding survive. `Release` also resets empty-header state. Four new real-library tests reproduced 151 failed checks before the fix, then passed under ASan. The existing alpha cursor test supplies evidence for its older fix. Real-art validation and caller rejection diagnostics remain separate work.
 - **The 555 fixes are latent in this build.** `ColorDraw::Is565()` returns a hardcoded `true`, and the 555 sprite variants are only constructed on the false branch, so the `CSprite555` family and `Convert565to555` fixes have no runtime effect today. They matter if a 5:5:5 surface is ever supported again.
