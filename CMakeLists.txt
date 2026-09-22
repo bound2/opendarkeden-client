@@ -532,6 +532,12 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# executable on every platform like the rest of Client/ (the port
 	# assessment, area A).
 	add_library(VS_UI STATIC ${VS_UI_SRC_SOURCES})
+	# Compile the shared header with this target's own definitions/options.
+	# The VS_UI wrapper keeps its warning pragmas local to existing includers;
+	# forcing that wrapper into every source would hide additional diagnostics.
+	target_precompile_headers(VS_UI PRIVATE
+		"$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/Client/Client_PCH.h>"
+	)
 
 	# VS_UI_WebBrowser.h/.cpp use ATL (atlbase.h, CComBSTR, CComVariant) for the
 	# legacy in-game IE browser control. ATL ships alongside the MSVC toolset
@@ -967,6 +973,11 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	else()
 		add_executable(DarkEden ${CLIENT_MAIN_SOURCES})
 	endif()
+	# Keep this PCH private and separate from VS_UI: their compile definitions
+	# differ, so sharing the compiled artifact with REUSE_FROM is not valid.
+	target_precompile_headers(DarkEden PRIVATE
+		"$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/Client/Client_PCH.h>"
+	)
 
 	# Set output directory
 	set_target_properties(DarkEden PROPERTIES
