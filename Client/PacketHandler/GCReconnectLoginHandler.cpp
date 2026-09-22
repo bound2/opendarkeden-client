@@ -65,7 +65,6 @@ void GCReconnectLoginHandler::execute ( GCReconnectLogin * pPacket , Player * pP
 	CGConnectSetKey cgConnectSetKey;
 	cgConnectSetKey.setEncryptKey(rand());
 	cgConnectSetKey.setHashKey(rand());
-	pClientPlayer->delKey();
 	pClientPlayer->sendPacket(&cgConnectSetKey);
 	UpdateSocketOutput();
 	Sleep(500);

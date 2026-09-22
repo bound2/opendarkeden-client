@@ -1444,7 +1444,7 @@ SocketInputStream::EncryptData (line 766) begins with `return EncryptKey;` at li
 >
 > ~~Worth knowing before anyone re-enables this from git history: the deleted code passed `&m_Buffer[m_Tail]` after receiving into `&m_Buffer[0]`.~~ **That warning was wrong and is retracted.** The branch runs only when `nReceived == nFree` with `nFree = m_BufferLen - m_Tail`, so `m_Tail` is provably 0 there — and the deleted code *asserted* it three lines above (`Assert( m_Tail == 0 );`). `&m_Buffer[m_Tail]` was `&m_Buffer[0]`. The claim came from a reviewer, was repeated here without checking the surrounding lines, and is exactly the kind of plausible-sounding detail this document should not carry.
 >
-> Follow-up left open: `Player::setKey` still allocates a 512-byte hash table that nothing now reads. Harmless and still freed by `delKey`, but it belongs to whoever next touches `Player.cpp`.
+> ✅ **Follow-up closed (2026-09-22):** removed `Player`'s unused 512-byte hash table, `setKey`/`delKey`, the stream no-op setters and the two reconnect cleanup calls. `CGConnectSetKey` packets still carry their existing fields and retain their explicit no-op local dispatch; the separate per-field `Encrypter` remains live. Existing player receive-loop tests and packet golden tests own the surviving behavior. Tests solely about the deleted table were retired with it.
 
 #### 🟠 High -- SendBugReport vsprintf's a caller-supplied runtime string into a fixed 256-byte stack buffer, and two callers pass an exception message as the format string.
 

@@ -10,13 +10,8 @@
 // debug facilities, so this file is first of all the proof that they
 // link.
 //
-// Most of Player still cannot be driven from here: processCommand,
-// processInput, processOutput, sendPacket, disconnect and toString all
-// dereference a stream or the socket without testing either, and a
-// player holding a real socket would have to be given a peer. What is
-// reachable is the two constructors, the id, the socket accessors and
-// the encryption table.
-//
+// The fixtures cover constructors, IDs and socket accessors, then drive
+// processCommand through buffered frames without connecting to a peer.
 //----------------------------------------------------------------------
 
 #include "test_framework.h"
@@ -163,57 +158,17 @@ void AppendReceiveLoopFrame(std::vector<unsigned char>& wire,
 //----------------------------------------------------------------------
 // The socket-free constructor
 //----------------------------------------------------------------------
-TEST(PlayerBase, ADefaultPlayerHoldsNoSocketAndNoKey)
+TEST(PlayerBase, ADefaultPlayerHoldsNoSocket)
 {
 	Player player;
 
 	// Nothing to send or receive through yet.
 	CHECK(player.getSocket() == NULL);
 
-	// And no encryption table, which the key calls free.
-	CHECK(player.pHashTable == NULL);
-
 	// The id is the one piece of state that needs no socket.
 	CHECK(player.getID().empty());
 	player.setID("tester");
 	CHECK_EQ(0, std::strcmp("tester", player.getID().c_str()));
-}
-
-TEST(PlayerBase, TheEncryptionTableFollowsTheHashKeyAndIsGivenBack)
-{
-	Player player;
-
-	// Both streams are absent, so setKey builds the table and stops
-	// there - which is what makes it reachable without a socket.
-	player.setKey(7, 1234);
-	CHECK(player.pHashTable != NULL);
-
-	// The table is 512 bytes walked out of an 8-bit state seeded with
-	// (HashKey + 4658) & 0xFF, so it follows the hash key modulo 256
-	// and nothing else - the encrypt key only picks an offset into it.
-	// The same key therefore gives the same table, and 1234 against 99
-	// below differ modulo 256; 1234 against 1490 would not.
-	BYTE first[512];
-	std::memcpy(first, player.pHashTable, 512);
-
-	player.delKey();
-	CHECK(player.pHashTable == NULL);
-
-	// Giving back a table that is not there is not an error.
-	player.delKey();
-	CHECK(player.pHashTable == NULL);
-
-	player.setKey(7, 1234);
-	CHECK(player.pHashTable != NULL);
-	CHECK_EQ(0, std::memcmp(first, player.pHashTable, 512));
-
-	// A different hash key gives a different table.
-	player.delKey();
-	player.setKey(7, 99);
-	CHECK(player.pHashTable != NULL);
-	CHECK(std::memcmp(first, player.pHashTable, 512) != 0);
-
-	player.delKey();
 }
 
 TEST(PlayerBase, SettingASocketKeepsIt)
@@ -234,57 +189,6 @@ TEST(PlayerBase, SettingASocketKeepsIt)
 	player.setSocket(NULL);
 	CHECK(player.getSocket() == NULL);
 
-	// The key calls stay safe across that, since they test the streams
-	// one at a time.
-	player.setKey(1, 2);
-	CHECK(player.pHashTable != NULL);
-	player.delKey();
-	CHECK(player.pHashTable == NULL);
-}
-
-//----------------------------------------------------------------------
-// The constructor that takes a socket
-//----------------------------------------------------------------------
-TEST(PlayerBase, ASocketBuiltPlayerHasNoKeyToGiveBack)
-{
-	//------------------------------------------------------------------
-	// The constructor RequestServerPlayer forwards to (as did the
-	// deleted RequestClientPlayer). It set every member but pHashTable, which delKey
-	// then delete[]s - and delKey has two live callers, the reconnect
-	// handlers. They are safe only because ClientPlayer, the class
-	// they cast to, leaves its base default-constructed; a base
-	// initialiser on that one class would have made every reconnect a
-	// free of whatever the memory held.
-	//------------------------------------------------------------------
-	EnsureSocketsInitialised();
-
-	{
-		// A socket over a descriptor nothing ever created: the player
-		// takes ownership and closes it, which Winsock answers with
-		// the exception SocketImpl::close catches.
-		Player	player(new Socket(new SocketImpl()));
-
-		CHECK(player.pHashTable == NULL);
-		CHECK(player.getSocket() != NULL);
-
-		// So giving back a key it was never given is not a free of a
-		// wild pointer.
-		player.delKey();
-		CHECK(player.pHashTable == NULL);
-
-		// And a table it is given really is given back - the streams
-		// exist here, so setKey reaches their (no-op) setKey too.
-		player.setKey(3, 77);
-		CHECK(player.pHashTable != NULL);
-		player.delKey();
-		CHECK(player.pHashTable == NULL);
-
-		// Asking twice replaces the table rather than stranding the
-		// first one; the destructor frees whatever is left.
-		player.setKey(3, 77);
-		player.setKey(4, 88);
-		CHECK(player.pHashTable != NULL);
-	}
 }
 
 TEST(PlayerReceiveLoop, FragmentationAndMalformedBodiesNeverDispatchOrLeak)

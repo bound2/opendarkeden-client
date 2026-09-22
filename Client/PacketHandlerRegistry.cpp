@@ -696,9 +696,8 @@ void registerClientPacketHandlers()
 	// CGConnectSetKey: the client constructs one locally and dispatches
 	// it on the login paths (UIMessageManager.cpp:1377, :2105). The
 	// linked handler was always the empty stub in the deleted
-	// CGHandlersStub.cpp - transport encryption is dead and
-	// SocketInputStream::setKey is itself a no-op - so the no-op is the
-	// live behavior, preserved explicitly.
+	// CGHandlersStub.cpp. Transport encryption is absent; preserve
+	// the existing no-op dispatch behavior explicitly.
 	//------------------------------------------------------------------
 	{
 		struct Thunk {

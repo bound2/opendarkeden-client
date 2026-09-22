@@ -42,6 +42,10 @@ class Packet;
 //
 // class SocketInputStream
 //
+// The socket transport is unencrypted, including the CLLogin password.
+// Individual readEncrypt/writeEncrypt fields use the separate Encrypter.
+// Adding transport encryption requires a matching server protocol change.
+//
 //////////////////////////////////////////////////////////////////////
 
 class SocketInputStream {
@@ -172,17 +176,6 @@ private :
 	bool m_bFrameBounded;
 	bool m_bFrameReadFailed;
 	uint m_FrameRemaining;
-public :
-
-	// There is no transport encryption on this stream. The EncryptData that
-	// used to live here returned its key before reaching its own XOR loop, so
-	// every call in fill() was a no-op and the socket has always carried
-	// cleartext -- including the account password that CLLogin::write sends.
-	// Both the dead function and its call sites are gone so the absence is
-	// visible rather than implied. setKey survives only because Player::setKey
-	// still calls it after CGConnectSetKey; adding real encryption is a
-	// protocol change that has to be agreed with the server repository first.
-	void setKey(WORD /*EncryptKey*/, BYTE* /*HashTable*/) noexcept {}
 };
 
 #endif

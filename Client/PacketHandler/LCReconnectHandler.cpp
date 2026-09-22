@@ -72,7 +72,6 @@ void LCReconnectHandler::execute ( LCReconnect * pPacket , Player * pPlayer )
 	CGConnectSetKey cgConnectSetKey;
 	cgConnectSetKey.setEncryptKey(rand());
 	cgConnectSetKey.setHashKey(rand());
-	pClientPlayer->delKey();
 	pClientPlayer->sendPacket(&cgConnectSetKey);
 	UpdateSocketOutput();
 	Sleep(500);

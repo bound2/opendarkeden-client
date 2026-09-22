@@ -79,13 +79,6 @@ public :
 	// get debug std::string
 	virtual std::string toString () const;
 
-	//add by viva
-	void setKey(WORD EncryptKey, WORD HashKey);
-	void delKey();
-
-	BYTE* pHashTable;
-	//end
-	
 protected :
 
 	// player id
