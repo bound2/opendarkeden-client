@@ -9,7 +9,6 @@
 namespace {
 constexpr size_t MaxLineBytes = 512;
 constexpr size_t MaxLines = 16384;
-constexpr size_t MaxTextBytes = RegenTowerInfoManager::MaxTextBytes;
 constexpr int MaxEntries = RegenTowerInfo::MaxCount;
 
 bool White(char c)
