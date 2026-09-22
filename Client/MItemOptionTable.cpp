@@ -220,7 +220,9 @@ ITEMOPTION_TABLE::LoadFromFile(std::ifstream& file)
 	ITEMOPTION_PARTENAME.swap(pending.ITEMOPTION_PARTENAME);
 	std::swap(m_Size, pending.m_Size);
 	std::swap(m_pTypeInfo, pending.m_pTypeInfo);
-}std::string ITEMOPTION_TABLE::GetPartName(int part, char manaPrefix) const
+}
+
+std::string ITEMOPTION_TABLE::GetPartName(int part, char manaPrefix) const
 {
 	if (part < 0 || part >= MAX_PART)
 		return {};
@@ -232,7 +234,9 @@ ITEMOPTION_TABLE::LoadFromFile(std::ifstream& file)
 			result[pos] = manaPrefix;
 	}
 	return result;
-}std::string ITEMOPTION_TABLE::GetPartEName(int part) const
+}
+
+std::string ITEMOPTION_TABLE::GetPartEName(int part) const
 {
 	if (part < 0 || part >= MAX_PART)
 		return {};
