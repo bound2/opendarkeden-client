@@ -1295,6 +1295,14 @@ rounds settled* for the host rules). Test fixtures share
   - Owner: `test_shadow_sprite_loading.cpp`, covering independent destruction,
     real backend caches, all three generated forms and malformed source rows.
 
+- [x] **5.9 Shadow-sprite adapter bounds.**
+  > **Status:** done (2026-09-22). The SDL shadow adapter validates retained
+  > row spans before creating or refreshing a backend sprite. Empty geometry
+  > and rasters beyond the backend's signed pixel-count limit are rejected
+  > before allocation. Raster multiplication and row strides use `size_t`.
+  - Owner: the `ShadowSpriteAdapter` cases in `test_shadow_sprite_loading.cpp`,
+    covering the reproduced overflow, dirty caches and geometry boundaries.
+
 ## Build and review follow-up (2026-09-18)
 
 Table reads now expose const rows; `CTypeTable::GetMutable` and `Set` reject
