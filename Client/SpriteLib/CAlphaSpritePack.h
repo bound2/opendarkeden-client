@@ -15,11 +15,14 @@
 #include "DrawTypeDef.h"
 #include "CAlphaSprite565.h"
 #include "CAlphaSprite555.h"
+#include <memory>
 
 class CAlphaSpritePack {
 	public :
 		CAlphaSpritePack();
 		~CAlphaSpritePack();
+		CAlphaSpritePack(const CAlphaSpritePack&) = delete;
+		CAlphaSpritePack& operator=(const CAlphaSpritePack&) = delete;
 
 		//------------------------------------------------------------
 		// Init/Release
@@ -34,8 +37,10 @@ class CAlphaSpritePack {
 		//------------------------------------------------------------
 		bool		SaveToFile(std::ofstream& spkFile, std::ofstream& indexFile);
 		bool		SaveToFileSpriteOnly(std::ofstream& spkFile, int32_t &filePosition);
-		void		LoadFromFile(std::ifstream& file);		
-		void		LoadFromFilePart(std::ifstream& file, int32_t filePosition,
+		// Full reloads publish together. Partial loads report rejection and keep
+		// earlier complete rows; a rejected decoded row becomes empty.
+		bool		LoadFromFile(std::ifstream& file);
+		bool		LoadFromFilePart(std::ifstream& file, int32_t filePosition,
 								TYPE_SPRITEID firstSpriteID, TYPE_SPRITEID lastSpriteID);
 
 		bool		LoadFromFileSprite(int spriteID, int fileSpriteID, std::ifstream& spkFile, std::ifstream& indexFile);
@@ -49,11 +54,14 @@ class CAlphaSpritePack {
 		//------------------------------------------------------------
 		// operator
 		//------------------------------------------------------------
-		CAlphaSprite&	operator [] (TYPE_SPRITEID n) { return m_pSprites[n]; }
+		CAlphaSprite&	operator [] (TYPE_SPRITEID n);
 
-	protected :
+	private :
+		void Swap(CAlphaSpritePack& other) noexcept;
 		TYPE_SPRITEID	m_nSprites;		// CAlphaSprite의 개수
-		CAlphaSprite*	m_pSprites;		// CAlphaSprite들을 저장해둔다.
+		bool m_rgb565 = true;
+		std::unique_ptr<CAlphaSprite565[]> m_sprites565;
+		std::unique_ptr<CAlphaSprite555[]> m_sprites555;
 };
 
 #endif

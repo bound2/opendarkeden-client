@@ -6,6 +6,9 @@
 #include "CAlphaSprite555.h"
 #include "CAlphaSprite565.h"
 #include "CAlphaSpritePack.h"
+#include "CTypePack.h"
+#include <stdexcept>
+#include <utility>
 #include <fstream>
 #include <cstdint>
 
@@ -18,7 +21,6 @@
 CAlphaSpritePack::CAlphaSpritePack()
 {
 	m_nSprites = 0;
-	m_pSprites = NULL;
 }
 
 CAlphaSpritePack::~CAlphaSpritePack()
@@ -39,24 +41,30 @@ CAlphaSpritePack::~CAlphaSpritePack()
 void
 CAlphaSpritePack::Init(TYPE_SPRITEID count, bool b565)
 {
-	// 개수가 없을 경우 
-	if (count==0) 
-		return;
-
-	// 일단 해제
-	Release();
-
-	// 메모리 잡기
-	m_nSprites = count;
-
-	if (b565)
-	{
-		m_pSprites = new CAlphaSprite565 [m_nSprites];
+	CAlphaSpritePack pending;
+	pending.m_rgb565 = b565;
+	if (count) {
+		if (b565) pending.m_sprites565 = std::make_unique<CAlphaSprite565[]>(count);
+		else pending.m_sprites555 = std::make_unique<CAlphaSprite555[]>(count);
 	}
-	else
-	{
-		m_pSprites = new CAlphaSprite555 [m_nSprites];
-	}
+	pending.m_nSprites = count;
+	Swap(pending);
+}
+
+void CAlphaSpritePack::Swap(CAlphaSpritePack& other) noexcept
+{
+	std::swap(m_nSprites, other.m_nSprites);
+	std::swap(m_rgb565, other.m_rgb565);
+	m_sprites565.swap(other.m_sprites565);
+	m_sprites555.swap(other.m_sprites555);
+}
+
+CAlphaSprite& CAlphaSpritePack::operator[](TYPE_SPRITEID n)
+{
+	if (n >= m_nSprites) throw std::out_of_range("alpha sprite pack index");
+	// Both array indexing and destruction use the allocated concrete type.
+	if (m_rgb565) return m_sprites565[n];
+	return m_sprites555[n];
 }
 
 
@@ -66,14 +74,9 @@ CAlphaSpritePack::Init(TYPE_SPRITEID count, bool b565)
 void
 CAlphaSpritePack::Release()
 {
-	if (m_pSprites != NULL)
-	{
-		// 모든 CAlphaSprite를 지운다.
-		delete [] m_pSprites;
-		m_pSprites = NULL;
-		
-		m_nSprites = 0;
-	}
+	m_sprites565.reset();
+	m_sprites555.reset();
+	m_nSprites = 0;
 }
 
 //----------------------------------------------------------------------
@@ -85,15 +88,14 @@ void
 CAlphaSpritePack::ReleasePart(TYPE_SPRITEID firstSpriteID, TYPE_SPRITEID lastSpriteID)
 {
 	// SpritePack의 memory가 잡혀있지 않으면 그냥 return한다.	
-	if (m_pSprites==NULL
-		|| firstSpriteID >= m_nSprites)
+	if (firstSpriteID >= m_nSprites)
 		return;
 
 	int last = min(lastSpriteID, m_nSprites-1);
 
 	for (int id=firstSpriteID; id<=last; id++)
 	{
-		m_pSprites[id].Release();
+		(*this)[static_cast<TYPE_SPRITEID>(id)].Release();
 	}
 }
 
@@ -106,7 +108,7 @@ bool
 CAlphaSpritePack::SaveToFile(ofstream& spkFile, ofstream& indexFile)
 {
 	// 초기화되지 않았으면 
-	if (m_nSprites==0 || m_pSprites==NULL)
+	if (m_nSprites==0)
 		return false;
 	
 	//--------------------------------------------------
@@ -131,11 +133,11 @@ CAlphaSpritePack::SaveToFile(ofstream& spkFile, ofstream& indexFile)
 		// SpritePack file에 쓰여지는 index를 저장
 		pIndex[i] = spkFile.tellp();
 
-		// m_pSprites[i]에 저장된 pixel이 없어도
+		// The record header also represents an empty sprite.
 		// CAlphaSprite 내부적으로 길이만 저장하므로 
 		// 다음에 Load할 때 문제가 없을 것이다.
 
-		m_pSprites[i].SaveToFile(spkFile);		// CAlphaSprite저장	
+		(*this)[i].SaveToFile(spkFile);
 	}
 
 	//--------------------------------------------------
@@ -160,7 +162,7 @@ bool
 CAlphaSpritePack::SaveToFileSpriteOnly(ofstream& spkFile, int32_t &filePosition)
 {
 	// 초기화되지 않았으면 
-	if (m_nSprites==0 || m_pSprites==NULL)
+	if (m_nSprites==0)
 		return false;
 
 	// SpritePack file에 쓰여지는 index를 저장
@@ -173,11 +175,11 @@ CAlphaSpritePack::SaveToFileSpriteOnly(ofstream& spkFile, int32_t &filePosition)
 	//--------------------------------------------------
 	for (TYPE_SPRITEID i=0; i<m_nSprites; i++)
 	{
-		// m_pSprites[i]에 저장된 pixel이 없어도
+		// The record header also represents an empty sprite.
 		// CSprite 내부적으로 길이만 저장하므로 
 		// 다음에 Load할 때 문제가 없을 것이다.
 
-		m_pSprites[i].SaveToFile(spkFile);		// CSprite저장	
+		(*this)[i].SaveToFile(spkFile);
 	}
 
 	return true;
@@ -188,22 +190,30 @@ CAlphaSpritePack::SaveToFileSpriteOnly(ofstream& spkFile, int32_t &filePosition)
 //----------------------------------------------------------------------
 // file에서 ID와 Sprite를 읽어와서 map에 하나씩 저장한다.
 //----------------------------------------------------------------------
-void
+bool
 CAlphaSpritePack::LoadFromFile(ifstream& file)
 {
-	// memory에서 map제거
-	Release();
-
-	// file에서 sprite 개수를 읽어온다.	
-	file.read((char*)&m_nSprites, SIZE_SPRITEID);
-
-	// memory잡는다.
-	Init(m_nSprites, ColorDraw::Is565());
-
-	// file에 있는 Sprite들을 Load	
-	for (TYPE_SPRITEID i=0; i<m_nSprites; i++)
-	{			
-		m_pSprites[i].LoadFromFile(file);	// Sprite 읽어오기
+	try {
+		TYPE_SPRITEID count = 0;
+		if (!file.read(reinterpret_cast<char*>(&count), SIZE_SPRITEID)) return false;
+		const auto start = file.tellg();
+		if (start == std::streampos(-1) || !file.seekg(0, std::ios::end)) return false;
+		const auto end = file.tellg();
+		if (end < start || !file.seekg(start) || std::streamoff(count) > (end - start) / 4) return false;
+		CAlphaSpritePack pending;
+		pending.Init(count, ColorDraw::Is565());
+		bool accepted = true;
+		for (unsigned i = 0; i < count; ++i) {
+			if (!CTypePackDetail::LoadElement(pending[static_cast<TYPE_SPRITEID>(i)],
+				file, "<alpha pack>", i)) accepted = false;
+			if (!file) break;
+		}
+		if (!accepted) return false;
+		Swap(pending);
+		return true;
+	} catch (...) {
+		LOG_ERROR("Cannot read alpha sprite pack");
+		return false;
 	}
 }
 
@@ -216,29 +226,25 @@ CAlphaSpritePack::LoadFromFile(ifstream& file)
 // file의 filePosition에서부터 읽어들이고..
 // FirstSpriteID부터 SpriteSize개만큼만 읽어들인다.
 //----------------------------------------------------------------------
-void			
+bool
 CAlphaSpritePack::LoadFromFilePart(ifstream& file, int32_t filePosition,
 							  TYPE_SPRITEID firstSpriteID, TYPE_SPRITEID lastSpriteID)
 {
-	if (firstSpriteID==SPRITEID_NULL || lastSpriteID==SPRITEID_NULL)
-		return;
-
-	// SpritePack의 memory가 잡혀있지 않으면 그냥 return한다.	
-	if (m_pSprites==NULL)
-		return;
-
-	// Load할려는 위치까지 FilePosition을 이동한다.
-	file.seekg(static_cast<std::streamoff>(filePosition), ios::beg);
-
-	// firstSpriteID ~ lastSpriteID까지의 Sprite를 Load한다.
-	for (TYPE_SPRITEID id=firstSpriteID; id<=lastSpriteID; id++)
-	{
-		// 아직 Load되지 않은 경우에만 Load한다.
-		//if (m_pSprites[id].IsInit())
-		//	continue;
-		// file position을 이동시켜줘야 하므로 무조건 loading해야 한다.
-
-		m_pSprites[id].LoadFromFile( file );
+	if (firstSpriteID > lastSpriteID || lastSpriteID >= m_nSprites || filePosition < 0) return false;
+	try {
+		if (!file || !file.seekg(0, std::ios::end)) return false;
+		const auto end = file.tellg();
+		if (std::streampos(filePosition) >= end || !file.seekg(filePosition)) return false;
+		bool accepted = true;
+		for (unsigned id = firstSpriteID; id <= lastSpriteID; ++id) {
+			if (!CTypePackDetail::LoadElement((*this)[static_cast<TYPE_SPRITEID>(id)],
+				file, "<alpha pack range>", id)) accepted = false;
+			if (!file) break;
+		}
+		return accepted;
+	} catch (...) {
+		LOG_ERROR("Cannot read alpha sprite pack range");
+		return false;
 	}
 }
 
@@ -250,37 +256,24 @@ CAlphaSpritePack::LoadFromFilePart(ifstream& file, int32_t filePosition,
 bool
 CAlphaSpritePack::LoadFromFileSprite(int spriteID, int fileSpriteID, std::ifstream& spkFile, std::ifstream& indexFile)
 {
-	if (spriteID < 0 || spriteID >= m_nSprites)
-	{
+	if (spriteID < 0 || spriteID >= m_nSprites || fileSpriteID < 0) return false;
+	try {
+		if (!spkFile || !indexFile || !spkFile.seekg(0, std::ios::end)) return false;
+		const auto end = spkFile.tellg();
+		TYPE_SPRITEID count = 0, dataCount = 0;
+		if (!indexFile.seekg(0) || !indexFile.read(reinterpret_cast<char*>(&count), SIZE_SPRITEID) ||
+			!spkFile.seekg(0) || !spkFile.read(reinterpret_cast<char*>(&dataCount), SIZE_SPRITEID) ||
+			count != dataCount || fileSpriteID >= count) return false;
+		int32_t offset = 0;
+		if (!indexFile.seekg(std::streamoff(2) + std::streamoff(fileSpriteID) * 4) ||
+			!indexFile.read(reinterpret_cast<char*>(&offset), 4) ||
+			offset < 2 || std::streampos(offset) >= end || !spkFile.seekg(offset)) return false;
+		return CTypePackDetail::LoadElement((*this)[static_cast<TYPE_SPRITEID>(spriteID)],
+			spkFile, "<indexed alpha pack>", static_cast<unsigned>(fileSpriteID));
+	} catch (...) {
+		LOG_ERROR("Cannot read indexed alpha sprite");
 		return false;
 	}
-
-	//-------------------------------------------------------------------
-	// index의 개수를 체크한다. fileSpriteID가 있는지..?
-	//-------------------------------------------------------------------
-	TYPE_SPRITEID num;
-	indexFile.read((char*)&num, SIZE_SPRITEID);
-
-	if (fileSpriteID >= num)
-	{
-		return false;
-	}
-
-	//-------------------------------------------------------------------
-	// load할 sprite의 file pointer를 읽는다.
-	//-------------------------------------------------------------------
-	int32_t fp = 0;
-	indexFile.seekg( 2 + fileSpriteID*4 );		// 2(num) + spriteID * (4 bytes)
-	indexFile.read((char*)&fp, 4);
-
-	//-------------------------------------------------------------------
-	// minimap sprite loading
-	//-------------------------------------------------------------------
-	spkFile.seekg(static_cast<std::streamoff>(fp));
-
-	m_pSprites[spriteID].LoadFromFile( spkFile );
-
-	return true;
 }
 
 //----------------------------------------------------------------------
@@ -291,7 +284,7 @@ CAlphaSpritePack::LoadFromFileSprite(int spriteID, int fileSpriteID, std::ifstre
 bool
 CAlphaSpritePack::LoadFromFileSprite(int spriteID, int fileSpriteID, const char* spkFilename, const char* indexFilename)
 {
-	if (spriteID < 0 || spriteID >= m_nSprites)
+	if (spriteID < 0 || spriteID >= m_nSprites || fileSpriteID < 0 || !spkFilename || !indexFilename)
 	{
 		return false;
 	}

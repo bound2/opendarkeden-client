@@ -1322,6 +1322,17 @@ rounds settled* for the host rules). Test fixtures share
     game-side connection. The installed `Light2D.ftp` passes the production
     loader under ASan with all 12 records consumed and no trailing bytes.
 
+- [x] **5.12 Specialized alpha-pack input and ownership.**
+  > **Status:** done (2026-09-23). `CAlphaSpritePack` owns and indexes typed
+  > 555/565 arrays and cannot be shallow-copied. Full reloads validate complete
+  > records before publication. Partial loads validate the whole destination
+  > range first, report rejected rows and retain earlier complete rows. Indexed
+  > reads check both file headers, IDs and offsets and rewind a reused index.
+  > Empty initialization releases prior storage; invalid element access throws.
+  - Owner: `test_alpha_sprite_pack.cpp`, linking the real library API in both
+    formats. This specialized pack has no active game construction; the live
+    effect-alpha resource uses `CAlphaSpritePalPack` instead.
+
 ## Build and review follow-up (2026-09-18)
 
 Table reads now expose const rows; `CTypeTable::GetMutable` and `Set` reject
