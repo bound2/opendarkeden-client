@@ -243,7 +243,7 @@ template<class Pack> void CheckPreloadRangeResult()
 		CHECK(!pack.LoadFromFilePart(0, 2));
 		CHECK_EQ(1, pack.Get(0).loads);
 		CHECK(pack.LoadFromFilePart(1, 2));
-		for (const auto range : {std::pair{-1, 1}, std::pair{0, 3},
+		for (const auto& range : {std::pair{-1, 1}, std::pair{0, 3},
 			std::pair{2, 1}, std::pair{65536, 65536}, std::pair{0, 65536}})
 			CHECK(!pack.LoadFromFilePart(range.first, range.second));
 		CHECK(pack.LoadFromFilePart(65535, 65535)); // absent-sprite sentinel
