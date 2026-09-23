@@ -1295,6 +1295,18 @@ Lines 624-634 bail out with a warning whenever `pPoint->x < 0 || pPoint->y < 0 |
 
 **Category:** dead-code  |  **Location:** `Client/SpriteLib/CSpriteSurface_SDL.cpp:35`
 
+> ✅ **Selection residual closed (2026-09-23):** the supported non-palette
+> grayscale/gradation and palette screen effects are registered. Both selectors
+> now reject table-end indices before reading a function pointer and issue an
+> SDL rendering warning for unavailable selections. Warnings are bounded to one
+> per effect and family, with a single invalid-ID bucket, preserving the existing
+> copy fallback without a per-frame log flood. This follows the recommendation's
+> explicit-diagnostic option for unported effects; unsafe 5-bit palette routines
+> remain disabled on 565 surfaces. Two real-library tests reproduce an ASan
+> global-buffer-overflow in `SetEffect(MAX_EFFECT)` and two missing-diagnostic
+> checks, then cover repeated selection, fallback pixels and supported entries.
+> The following paragraph describes the narrower original screen-effect fix.
+
 > ✅ **Fixed** in `6fd3f34`, for the one entry any call site selects. `EFFECT_SCREEN` is registered in the palette table and `InitEffectTable` fills the screen tables; every `DRAW_NORMALSPRITEPAL_EFFECT` in `MTopView.cpp` passes `EFFECT_SCREEN`, and nothing else calls `SetPalEffect`. The other twelve palette routines stay at NULL on purpose: they assume three 5-bit channels, and `ColorDraw::Green` on this backend returns the 6-bit field — `memcpyPalEffectColorDodge` divides by `(32 - green)`. The non-palette table stays empty because its routines were never compiled for SDL (the header declares `memcpyEffectDarker` and siblings; no SDL translation unit defines them), which is what makes the `EFFECT_WIPE_OUT` call site this finding names a plain copy still. This was not merely dead code: it was the second of three defects behind every screen-blend skill effect drawing nothing — see *Runtime defects*. Filling the tables also exposed the third, the 32-wide green table under *Found by reading*.
 
 s_pMemcpyEffectFunctionTable and s_pMemcpyPalEffectFunctionTable are defined as `{0}` at lines 35 and 37, and InitEffectTable() at lines 361-364 is an empty body. SetEffect (line 795) and SetPalEffect (line 800) therefore always assign NULL, and memcpyEffect (line 806) falls through to `dest[i] = src[i]`. Meanwhile the effect implementations exist and are compiled (Client/SpriteLib/CSpriteSurface_Effects.cpp defines memcpyPalEffectDarker, memcpyPalEffectGrayScale, memcpyPalEffectLighten, memcpyPalEffectDarken and more), and live call sites still invoke the API — e.g. Client/DrawCreatureEffect.cpp:882 calls `CSpriteSurface::SetEffect(CSpriteSurface::EFFECT_WIPE_OUT)`. A contributor reading either side reasonably concludes the feature works.

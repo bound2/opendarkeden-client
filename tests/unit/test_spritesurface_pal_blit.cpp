@@ -53,6 +53,8 @@
 #include "CAlphaSpritePal.h"
 #include "MPalette.h"
 #include "ColorDraw.h"
+#include <SDL_log.h>
+#include <string>
 #include <cstdio>
 #include <fstream>
 #include <vector>
@@ -997,4 +999,83 @@ TEST(SpriteSurfaceEffects, SkillAndRankStatesRespectTransparencyAndViewport)
     }
     CSpriteSurface::s_pMemcpyEffectFunction = savedEffect;
     CSpriteSurface::s_Value1 = savedValue;
+}
+
+namespace {
+struct EffectLogCapture {
+    SDL_LogOutputFunction previous = nullptr;
+    void* context = nullptr;
+    SDL_LogPriority priority = SDL_LogGetPriority(SDL_LOG_CATEGORY_RENDER);
+    FUNCTION_MEMCPYEFFECT pixel = CSpriteSurface::s_pMemcpyEffectFunction;
+    FUNCTION_MEMCPYPALEFFECT palette = CSpriteSurface::s_pMemcpyPalEffectFunction;
+    std::vector<std::string> messages;
+
+    static void SDLCALL Record(void* data, int category, SDL_LogPriority level, const char* text)
+    {
+        if (category == SDL_LOG_CATEGORY_RENDER && level == SDL_LOG_PRIORITY_WARN)
+            static_cast<EffectLogCapture*>(data)->messages.emplace_back(text);
+    }
+    EffectLogCapture()
+    {
+        SDL_LogGetOutputFunction(&previous, &context);
+        SDL_LogSetPriority(SDL_LOG_CATEGORY_RENDER, SDL_LOG_PRIORITY_WARN);
+        SDL_LogSetOutputFunction(Record, this);
+    }
+    ~EffectLogCapture()
+    {
+        SDL_LogSetOutputFunction(previous, context);
+        SDL_LogSetPriority(SDL_LOG_CATEGORY_RENDER, priority);
+        CSpriteSurface::s_pMemcpyEffectFunction = pixel;
+        CSpriteSurface::s_pMemcpyPalEffectFunction = palette;
+    }
+};
+}
+
+TEST(SpriteSurfaceEffects, UnsupportedSelectionsReportOnceAndKeepTheirCopyFallback)
+{
+    EffectLogCapture log;
+    for (int repeat = 0; repeat < 100; ++repeat) {
+        CSpriteSurface::SetEffect(CSpriteSurface::EFFECT_WIPE_OUT);
+        CSpriteSurface::SetPalEffect(CSpriteSurface::EFFECT_WIPE_OUT);
+    }
+    CHECK_EQ(2u, log.messages.size());
+    if (log.messages.size() == 2) {
+        CHECK(log.messages[0].find("pixel") != std::string::npos);
+        CHECK(log.messages[1].find("palette") != std::string::npos);
+        for (const auto& message : log.messages) {
+            CHECK(message.find("10") != std::string::npos);
+            CHECK(message.find("plain copy") != std::string::npos);
+        }
+    }
+    WORD source[] = {0xf800, 0x07e0, 0x001f};
+    WORD dest[] = {0, 0, 0};
+    CSpriteSurface::memcpyEffect(dest, source, 3);
+    for (unsigned i = 0; i < 3; ++i) CHECK_EQ(source[i], dest[i]);
+    MPalette pal;
+    pal.Init(3);
+    for (BYTE i = 0; i < 3; ++i) pal[i] = source[i];
+    BYTE indices[] = {2, 0, 1};
+    CSpriteSurface::memcpyPalEffect(dest, indices, 3, pal);
+    for (unsigned i = 0; i < 3; ++i) CHECK_EQ(source[indices[i]], dest[i]);
+    CSpriteSurface::SetEffect(CSpriteSurface::EFFECT_GRAY_SCALE);
+    CHECK(CSpriteSurface::s_pMemcpyEffectFunction != nullptr);
+    CSpriteSurface::SetEffect(CSpriteSurface::EFFECT_GRADATION);
+    CHECK(CSpriteSurface::s_pMemcpyEffectFunction != nullptr);
+    CSpriteSurface::SetPalEffect(CSpriteSurface::EFFECT_SCREEN);
+    CHECK(CSpriteSurface::s_pMemcpyPalEffectFunction != nullptr);
+    CHECK_EQ(2u, log.messages.size());
+}
+
+TEST(SpriteSurfaceEffects, SentinelSelectionCannotIndexPastEitherFunctionTable)
+{
+    EffectLogCapture log;
+    for (int repeat = 0; repeat < 3; ++repeat) {
+        CSpriteSurface::SetEffect(CSpriteSurface::EFFECT_GRAY_SCALE);
+        CSpriteSurface::SetEffect(CSpriteSurface::MAX_EFFECT);
+        CHECK(CSpriteSurface::s_pMemcpyEffectFunction == nullptr);
+        CSpriteSurface::SetPalEffect(CSpriteSurface::EFFECT_SCREEN);
+        CSpriteSurface::SetPalEffect(CSpriteSurface::MAX_EFFECT);
+        CHECK(CSpriteSurface::s_pMemcpyPalEffectFunction == nullptr);
+    }
+    CHECK_EQ(2u, log.messages.size());
 }

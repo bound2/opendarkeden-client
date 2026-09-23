@@ -780,14 +780,37 @@ bool CSpriteSurface::Restore()
 	return true;
 }
 
+namespace {
+void ReportUnsupportedEffect(int effect, bool palette)
+{
+	// Selection happens while drawing. Report each unsupported kind once,
+	// with one shared bucket for invalid IDs, rather than once per frame.
+	static bool reported[2][CSpriteSurface::MAX_EFFECT + 1]{};
+	const int slot = effect >= 0 && effect < CSpriteSurface::MAX_EFFECT
+		? effect : CSpriteSurface::MAX_EFFECT;
+	bool& seen = reported[palette ? 1 : 0][slot];
+	if (seen) return;
+	seen = true;
+	SDL_LogWarn(SDL_LOG_CATEGORY_RENDER,
+		"Unsupported %s sprite effect %d; using plain copy",
+		palette ? "palette" : "pixel", effect);
+}
+}
+
 void CSpriteSurface::SetEffect(FUNCTION_EFFECT effect)
 {
-	s_pMemcpyEffectFunction = s_pMemcpyEffectFunctionTable[effect];
+	const int index = static_cast<int>(effect);
+	s_pMemcpyEffectFunction = index >= 0 && index < MAX_EFFECT
+		? s_pMemcpyEffectFunctionTable[index] : nullptr;
+	if (!s_pMemcpyEffectFunction) ReportUnsupportedEffect(index, false);
 }
 
 void CSpriteSurface::SetPalEffect(FUNCTION_EFFECT effect)
 {
-	s_pMemcpyPalEffectFunction = s_pMemcpyPalEffectFunctionTable[effect];
+	const int index = static_cast<int>(effect);
+	s_pMemcpyPalEffectFunction = index >= 0 && index < MAX_EFFECT
+		? s_pMemcpyPalEffectFunctionTable[index] : nullptr;
+	if (!s_pMemcpyPalEffectFunction) ReportUnsupportedEffect(index, true);
 }
 
 // Static effect methods
