@@ -18,7 +18,6 @@
 #include "UserInformation.h"
 #include "MZoneTable.h"
 #include "SystemAvailabilities.h"
-//#include "ex\DebugInfo.h"
 extern RECT g_GameRect;
 #define MP_CASE_X				708
 #define MP_CASE_Y				508

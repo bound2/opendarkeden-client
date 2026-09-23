@@ -26,7 +26,6 @@
 #include "MItemOptionTable.h"
 #include "MGameStringTable.h"
 #include "SafeFormat.h"
-//#include "ex\DebugInfo.h"
 #include "RankBonusDef.h"
 #include "RankBonusTable.h"
 #include "KeyAccelerator.h"

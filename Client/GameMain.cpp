@@ -75,7 +75,6 @@ extern "C" void spritectl_window_to_game_coords(int* x, int* y);
 #include "UtilityFunction.h"
 
 // 2002.6.28 [UDP수정]
-// #include "packet\Cpackets\CGPortCheck.h" // 본 코드에서 없어짐 ( 이재현 )
 
 #include "MWarManager.h"
 #include "MTimeItemManager.h"
