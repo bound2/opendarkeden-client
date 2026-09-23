@@ -4,6 +4,8 @@
 #include "CSpritePack.h"
 
 #include <cstdio>
+#include <limits>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -223,4 +225,116 @@ TEST(CTypePackIndexed, LazyReloadAndEvictionKeepTheUniqueEntryCount)
 {
 	CheckReloadState<CTypePack<Element>>();
 	CheckReloadState<CTypePack2<Element, Element, Element>>();
+}
+
+namespace {
+template<class Pack> void CheckPreloadRangeResult()
+{
+	Fixture fixture;
+	const std::string runningIndex = std::string(dataPath) + "i";
+	Write(dataPath, {3, 0, 0, 17, 42});
+	Write(runningIndex.c_str(), {3, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0});
+	{
+		Pack pack;
+		CHECK(pack.LoadFromFileRunning(dataPath));
+		CHECK(!pack.LoadFromFilePart(0, 2));
+		CHECK_EQ(17, pack.Get(1).value);
+		CHECK_EQ(42, pack.Get(2).value);
+		CHECK(!pack.LoadFromFilePart(0, 2));
+		CHECK_EQ(1, pack.Get(0).loads);
+		CHECK(pack.LoadFromFilePart(1, 2));
+		for (const auto& range : {std::pair{-1, 1}, std::pair{0, 3},
+			std::pair{2, 1}, std::pair{65536, 65536}, std::pair{0, 65536}})
+			CHECK(!pack.LoadFromFilePart(range.first, range.second));
+		CHECK(pack.LoadFromFilePart(65535, 65535)); // absent-sprite sentinel
+	}
+	std::remove(runningIndex.c_str());
+}
+
+template<class Pack> void CheckPreloadSetResult()
+{
+	Fixture fixture;
+	const std::string runningIndex = std::string(dataPath) + "i";
+	Write(dataPath, {2, 0, 0, 42});
+	Write(runningIndex.c_str(), {2, 0, 2, 0, 0, 0, 3, 0, 0, 0});
+	{
+		Pack pack;
+		CHECK(pack.LoadFromFileRunning(dataPath));
+		CSpriteSetManager ids;
+		ids.Add(0); ids.Add(1); ids.Add(65535);
+		CHECK(!pack.LoadFromFilePart(ids));
+		CHECK_EQ(42, pack.Get(1).value);
+		CHECK(!pack.LoadFromFilePart(ids));
+		CHECK_EQ(1, pack.Get(0).loads);
+		ids.Remove(0);
+		CHECK(pack.LoadFromFilePart(ids));
+		ids.Add(9);
+		CHECK(!pack.LoadFromFilePart(ids));
+		ids.Release();
+		CHECK(pack.LoadFromFilePart(ids));
+		pack.Release();
+		CHECK(pack.LoadFromFilePart(ids));
+		ids.Add(65535);
+		CHECK(pack.LoadFromFilePart(ids));
+		ids.Add(0);
+		CHECK(!pack.LoadFromFilePart(ids));
+	}
+	std::remove(runningIndex.c_str());
+}
+}
+
+TEST(CTypePackIndexed, RangePreloadsReportRejectionAndKeepFollowingRows)
+{
+	CheckPreloadRangeResult<CTypePack<StreamFailingElement>>();
+	CheckPreloadRangeResult<CTypePack2<StreamFailingElement, StreamFailingElement, StreamFailingElement>>();
+}
+
+TEST(CTypePackIndexed, SetPreloadsReportRejectionAndIgnoreTheAbsentSpriteSentinel)
+{
+	CheckPreloadSetResult<CTypePack<StreamFailingElement>>();
+	CheckPreloadSetResult<CTypePack2<StreamFailingElement, StreamFailingElement, StreamFailingElement>>();
+}
+
+TEST(CTypePackIndexed, FullSpriteSetsDoNotWrapTheirIterationCount)
+{
+	CSpriteSetManager ids;
+	for (int id = 65535; id >= 0; --id) ids.Add(static_cast<WORD>(id));
+	CTypePack<Element> first;
+	CTypePack2<Element, Element, Element> second;
+	first.Init(1); second.Init(1);
+	CHECK(!first.LoadFromFilePart(ids));
+	CHECK(!second.LoadFromFilePart(ids));
+}
+
+namespace {
+template<class Pack> void CheckEmptySpritePreload()
+{
+	Fixture fixture;
+	const std::string runningIndex = std::string(dataPath) + "i";
+	Write(dataPath, {1, 0, 0, 0, 0, 0}); // one valid 0x0 sprite
+	Write(runningIndex.c_str(), {1, 0, 2, 0, 0, 0});
+	{
+		Pack pack;
+		CHECK(!pack.LoadFromFilePart(0, 0));
+		CHECK(pack.LoadFromFilePart(65535, 65535));
+		CHECK(pack.LoadFromFileRunning(dataPath));
+		CHECK(pack.LoadFromFilePart(0, 0));
+		CHECK_EQ(0, pack.Get(0).GetWidth());
+		CHECK_EQ(0, pack.Get(0).GetHeight());
+		CHECK(pack.LoadFromFilePart(0, 0));
+		CSpriteSetManager ids;
+		ids.Add(0);
+		CHECK(pack.LoadFromFilePart(ids));
+		CHECK(!pack.LoadFromFilePart((std::numeric_limits<int>::min)(), 0));
+		CHECK(!pack.LoadFromFilePart(0, (std::numeric_limits<int>::max)()));
+	}
+	std::remove(runningIndex.c_str());
+}
+}
+
+TEST(CTypePackIndexed, EmptySpritesAreSuccessfulPreloadsAfterTheStreamCloses)
+{
+	CheckEmptySpritePreload<CTypePack<CSprite555>>();
+	CheckEmptySpritePreload<CTypePack<CSprite565>>();
+	CheckEmptySpritePreload<CSpritePack>();
 }

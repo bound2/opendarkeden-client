@@ -58,6 +58,7 @@ class CSetManager {
 
 		// 첫번째 위치의 List Iterater를 넘겨준다.
 		typename DATA_LIST::const_iterator	GetIterator() const	{ return m_List.begin(); }
+		typename DATA_LIST::const_iterator	GetEndIterator() const	{ return m_List.end(); }
 
 	protected :			
 		DATA_LIST			m_List;		// Data pointer들을 저장해둔다.

@@ -382,29 +382,29 @@ bool CTypePack<Type>::SaveToFile(std::ofstream&dataFile, std::ofstream&indexFile
 template <class Type>
 bool CTypePack<Type>::LoadFromFilePart(int first, int last)
 {
-	last = (std::min)(last, 0xFFFE);
-	for(int i = first; i <= last; i++)
-		operator[](i);
-
-	return true;
+	if (first == 0xFFFF && last == 0xFFFF) return true;
+	if (!m_pData || first < 0 || last < first || last >= m_Size) return false;
+	bool accepted = true;
+	for (int id = first; id <= last; ++id) {
+		Get(static_cast<WORD>(id));
+		// Successful empty records need not report IsInit(). The lazy read's
+		// result remains authoritative after its stream has been closed.
+		if (!m_LoadState.empty() && m_LoadState[id] == 2) accepted = false;
+	}
+	return accepted;
 }
 
 template <class Type>
 bool CTypePack<Type>::LoadFromFilePart(const CSpriteSetManager& SSM)
 {
-	CSpriteSetManager::DATA_LIST::const_iterator iID = SSM.GetIterator();
-	for (int t=0; t<SSM.GetSize(); t++)
-	{
-		if(*iID != 0xFFFF)
-			Get(*iID);
-
-		// The iterator has to advance. Without this the loop asked for
-		// whatever the first entry named once per pass and never
-		// touched the rest of the set.
-		++iID;
+	bool accepted = true;
+	for (auto id = SSM.GetIterator(); id != SSM.GetEndIterator(); ++id) {
+		if (*id == 0xFFFF) continue;
+		if (*id >= m_Size || !m_pData) { accepted = false; continue; }
+		Get(*id);
+		if (!m_LoadState.empty() && m_LoadState[*id] == 2) accepted = false;
 	}
-
-	return true;
+	return accepted;
 }
 
 template <class Type>
@@ -811,29 +811,27 @@ bool CTypePack2<TypeBase, Type1, Type2>::SaveToFile(std::ofstream&dataFile, std:
 template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFilePart(int first, int last)
 {
-	last = (std::min)(last, 0xFFFE);
-	for(int i = first; i <= last; i++)
-		operator[](i);
-
-	return true;
+	if (first == 0xFFFF && last == 0xFFFF) return true;
+	if (!m_pData || first < 0 || last < first || last >= m_Size) return false;
+	bool accepted = true;
+	for (int id = first; id <= last; ++id) {
+		Get(static_cast<WORD>(id));
+		if (!m_LoadState.empty() && m_LoadState[id] == 2) accepted = false;
+	}
+	return accepted;
 }
 
 template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFilePart(const CSpriteSetManager& SSM)
 {
-	CSpriteSetManager::DATA_LIST::const_iterator iID = SSM.GetIterator();
-	for (int t=0; t<SSM.GetSize(); t++)
-	{
-		if(*iID != 0xFFFF)
-			Get(*iID);
-
-		// The iterator has to advance. Without this the loop asked for
-		// whatever the first entry named once per pass and never
-		// touched the rest of the set.
-		++iID;
+	bool accepted = true;
+	for (auto id = SSM.GetIterator(); id != SSM.GetEndIterator(); ++id) {
+		if (*id == 0xFFFF) continue;
+		if (*id >= m_Size || !m_pData) { accepted = false; continue; }
+		Get(*id);
+		if (!m_LoadState.empty() && m_LoadState[*id] == 2) accepted = false;
 	}
-
-	return true;
+	return accepted;
 }
 
 template <class TypeBase, class Type1, class Type2>

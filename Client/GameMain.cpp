@@ -2172,7 +2172,12 @@ LoadZone(int n)
 			CSpriteSetManager TileSSM;
 			CSpriteSetManager ImageObjectSSM;
 			g_pZone->GetNearSpriteSet(TileSSM, ImageObjectSSM, g_pPlayer->GetX(), g_pPlayer->GetY());
-			g_pTopView->LoadFromFileTileAndImageObjectSet(TileSSM, ImageObjectSSM);
+			if (!g_pTopView->LoadFromFileTileAndImageObjectSet(TileSSM, ImageObjectSSM)) {
+				LOG_ERROR("Rejected zone sprite preload: zone=%d", n);
+				SetMode(MODE_QUIT);
+				if (g_pLoadingThread) g_pLoadingThread->SetPriority(THREAD_PRIORITY_LOWEST);
+				return FALSE;
+			}
 
 			DEBUG_ADD("[Load Zone] Find Tile&ImageObject ID.. OK");
 			
@@ -2388,7 +2393,12 @@ LoadZone(int n)
 			CSpriteSetManager TileSSM;
 			CSpriteSetManager ImageObjectSSM;
 			g_pZone->GetNearSpriteSet(TileSSM, ImageObjectSSM, g_pPlayer->GetX(), g_pPlayer->GetY());
-			g_pTopView->LoadFromFileTileAndImageObjectSet(TileSSM, ImageObjectSSM);
+			if (!g_pTopView->LoadFromFileTileAndImageObjectSet(TileSSM, ImageObjectSSM)) {
+				LOG_ERROR("Rejected zone sprite preload: zone=%d", n);
+				SetMode(MODE_QUIT);
+				if (g_pLoadingThread) g_pLoadingThread->SetPriority(THREAD_PRIORITY_LOWEST);
+				return FALSE;
+			}
 			
 			DEBUG_ADD("[Load Zone] Find Tile&ImageObject ID.. OK");
 				
