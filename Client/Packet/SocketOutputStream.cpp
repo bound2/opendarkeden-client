@@ -14,7 +14,7 @@
 #include "PacketAssert.h"
 #include "Packet.h"
 
-#include <limits>
+#include <algorithm>
 #include <cstdint>
 
 //////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ SocketOutputStream::SocketOutputStream ( Socket * sock , uint BufferLen )
 	__BEGIN_TRY
 
 	Assert( m_Socket != NULL );
-	if (m_BufferLen < 2 || m_BufferLen > static_cast<uint>((std::numeric_limits<int>::max)()))
+	if (m_BufferLen < 2 || m_BufferLen > MaxSocketOutputBufferSize)
 		throw IOException("invalid socket output buffer size");
 	
 	m_Buffer = new char[ m_BufferLen ];
@@ -84,8 +84,9 @@ uint SocketOutputStream::write ( std::span<const char> buf )
 
 	if ( buf.empty() )
 		return 0;
-	if ( buf.size() > static_cast<uint>((std::numeric_limits<int>::max)()) - length() - 1 )
-		throw InvalidProtocolException("span is too large");
+	const uint queued = length();
+	if (buf.size() > MaxSocketOutputBufferSize - queued - 1)
+		throw InvalidProtocolException("socket output queue exceeds its byte budget");
 
 	const uint len = static_cast<uint>(buf.size());
 
@@ -94,8 +95,12 @@ uint SocketOutputStream::write ( std::span<const char> buf )
 	//m_Tail - m_Head - 1 );
 
 	// 쓸려고 하는 데이타의 크기가 빈 영역의 크기를 초과할 경우 버퍼를 증가시킨다.
-	if ( len >= nFree )
-		resize( len - nFree + 1 );
+	if (len > nFree) {
+		const uint required = queued + len + 1;
+		const uint grown = (std::min)(MaxSocketOutputBufferSize, m_BufferLen * 2);
+		const uint capacity = (std::max)(required, grown);
+		resize(static_cast<int>(capacity - m_BufferLen));
+	}
 		
 	if ( m_Head <= m_Tail ) {		// normal order
 
@@ -299,7 +304,7 @@ void SocketOutputStream::resize ( int size )
 	const std::int64_t requested = static_cast<std::int64_t>(m_BufferLen) + size;
 	const uint len = length();
 	// Keep the sentinel slot, reject signed underflow and bound allocation.
-	if (requested < 2 || requested <= len || requested > (std::numeric_limits<int>::max)())
+	if (requested < 2 || requested <= len || requested > MaxSocketOutputBufferSize)
 		throw IOException("invalid socket buffer size");
 	const uint newBufferLen = static_cast<uint>(requested);
 

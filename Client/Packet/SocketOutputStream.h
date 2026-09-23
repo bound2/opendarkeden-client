@@ -20,6 +20,9 @@
 
 // constant definitions
 const unsigned int DefaultSocketOutputBufferSize = 8192;
+// Includes the ring's empty sentinel slot. A blocked peer cannot make the
+// client retain an unbounded queue; writes over this budget are rejected.
+inline constexpr uint MaxSocketOutputBufferSize = 16 * 1024 * 1024;
 
 // forward declaration
 class Packet;

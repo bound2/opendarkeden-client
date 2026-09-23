@@ -249,6 +249,7 @@ TEST(WireLayout, EveryFactoryCreatesAPacketWithItsOwnId)
 	{
 		const FactoryEntry& entry = all.factories[i];
 		CHECK(static_cast<std::uint64_t>(entry.factory->getPacketMaxSize()) + szPacketHeader < MaxSocketInputBufferSize / 4);
+		CHECK(static_cast<std::uint64_t>(entry.factory->getPacketMaxSize()) + szPacketHeader < MaxSocketOutputBufferSize / 4);
 		Packet* pPacket = entry.factory->createPacket();
 		const bool bCreated = pPacket != NULL;
 		const bool bSameId = bCreated && pPacket->getPacketID() == entry.factory->getPacketID();

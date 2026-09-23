@@ -410,3 +410,94 @@ TEST(SocketEncryptOutputStream, APartialFlushDeliversTheFrameContiguously)
 	CHECK(f.m_pImpl->getPeer() == expected);
 	CHECK(f.m_Stream.isEmpty());
 }
+
+namespace {
+constexpr uint OutputBudget = 16 * 1024 * 1024;
+static_assert(OutputBudget == MaxSocketOutputBufferSize);
+template<class Action> bool RefusesOutput(Action action)
+{
+	try { action(); }
+	catch (const Throwable&) { return true; }
+	return false;
+}
+}
+
+TEST(SocketOutputStream, RepeatedSmallWritesReuseCapacityAndPreserveBytes)
+{
+	FlushFixture f(4);
+	const auto expected = Pattern(4096, 17);
+	unsigned growths = 0;
+	for (unsigned char byte : expected) {
+		const int before = f.m_Stream.capacity();
+		f.m_Stream.write(static_cast<char>(byte));
+		if (f.m_Stream.capacity() != before) ++growths;
+	}
+	CHECK(growths <= 12); // Amortized growth, rather than copying on each write.
+	CHECK(SocketOutputStreamTestAccess::Bytes(f.m_Stream) == expected);
+	CHECK_EQ(expected.size(), f.m_Stream.flush());
+	CHECK(f.m_pImpl->getPeer() == expected);
+
+	FlushFixture exact(8);
+	Queue(exact.m_Stream, Pattern(7, 1));
+	CHECK_EQ(8, exact.m_Stream.capacity()); // The empty sentinel still fits.
+}
+
+TEST(SocketOutputStream, BudgetRejectsConstructionResizeAndWritesWithoutLosingBytes)
+{
+	FlushFixture f(64);
+	const auto before = FillWrapped(f.m_Stream);
+	CHECK(RefusesOutput([&] { SocketOutputStream oversized(&f.m_Socket, OutputBudget + 1); }));
+	CHECK(RefusesOutput([&] { f.m_Stream.resize(static_cast<int>(OutputBudget)); }));
+	CHECK_EQ(64, f.m_Stream.capacity());
+	CHECK(SocketOutputStreamTestAccess::Bytes(f.m_Stream) == before);
+	const std::vector<char> tooLarge(OutputBudget, 'X');
+	CHECK(RefusesOutput([&] { f.m_Stream.write(std::span<const char>(tooLarge)); }));
+	CHECK_EQ(64, f.m_Stream.capacity());
+	CHECK(SocketOutputStreamTestAccess::Bytes(f.m_Stream) == before);
+	CHECK_EQ(before.size(), f.m_Stream.flush());
+	CHECK(f.m_pImpl->getPeer() == before);
+}
+
+TEST(SocketOutputStream, ExactBudgetKeepsTheSentinelAndAllowsProgressAfterBackpressure)
+{
+	FlushFixture f(64);
+	const ByteVec queued(OutputBudget - 1, 37);
+	Queue(f.m_Stream, queued);
+	CHECK_EQ(OutputBudget, f.m_Stream.capacity());
+	CHECK_EQ(OutputBudget - 1, f.m_Stream.length());
+	Script(f, 0);
+	CHECK_EQ(0, f.m_Stream.flush());
+	CHECK(RefusesOutput([&] { f.m_Stream.write('X'); }));
+	CHECK_EQ(0, f.m_Stream.write(std::span<const char>{}));
+	CHECK(SocketOutputStreamTestAccess::Bytes(f.m_Stream) == queued);
+	Script(f, 13, 0);
+	CHECK_EQ(13, f.m_Stream.flush());
+	const ByteVec tail = Pattern(13, 91);
+	Queue(f.m_Stream, tail); // Wrap without growth, using only newly freed space.
+	CHECK_EQ(OutputBudget, f.m_Stream.capacity());
+	CHECK_EQ(OutputBudget - 1, f.m_Stream.flush());
+	CHECK(f.m_pImpl->getPeer() == Join(queued, tail));
+	CHECK(f.m_Stream.isEmpty());
+}
+
+TEST(SocketEncryptOutputStream, BudgetFailureRollsBackTheFrameAndSequence)
+{
+	CGSkillToSelf packet;
+	packet.setSkillType(0x71B2);
+	packet.setCEffectID(0x83C4);
+	EncryptFlushFixture reference;
+	reference.m_Stream.setEncryptCode(3);
+	reference.m_Stream.write(&packet);
+	const auto expected = SocketOutputStreamTestAccess::Bytes(reference.m_Stream);
+	for (uint freeBytes : {1u, 8u}) { // Reject within the header and within the body.
+		EncryptFlushFixture f;
+		f.m_Stream.setEncryptCode(3);
+		const ByteVec queued(OutputBudget - 1 - freeBytes, 37);
+		Queue(f.m_Stream, queued);
+		CHECK(RefusesOutput([&] { f.m_Stream.write(&packet); }));
+		CHECK(SocketOutputStreamTestAccess::Bytes(f.m_Stream) == queued);
+		SocketOutputStreamTestAccess::Consume(f.m_Stream, f.m_Stream.length());
+		f.m_Stream.write(&packet);
+		CHECK(SocketOutputStreamTestAccess::Bytes(f.m_Stream) == expected);
+	}
+}
