@@ -4304,10 +4304,10 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 		//------------------------------
 		// 초기화 되지 않았으면 초기화한다.
 		//------------------------------
-		if (!g_pTopView->IsInit())
+		if (!g_pTopView->IsInit() && !g_pTopView->Init())
 		{
-			g_pTopView->Init();			
-		
+			LOG_ERROR("Game view initialization failed; stopping before the frame loop");
+			goto release_objects;
 		}
 
 		g_bActiveApp = TRUE;
@@ -4488,6 +4488,7 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 	//-----------------------------------------------------------------------------
 	// 모든 object들 제거
 	//-----------------------------------------------------------------------------	
+release_objects:
 	ReleaseAllObjects();
 #ifdef __WEB_BROWSER__
 	if(NULL != g_pWebBrowser)

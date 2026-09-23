@@ -958,6 +958,11 @@ MTopView::RestoreSurface()
 bool
 MTopView::InitSurfaces()
 {
+	// The renderer borrows this surface. A rejected pack must not leave it
+	// pointing at the surface being replaced, and retries must not leak it.
+	delete m_pTileRenderer;
+	m_pTileRenderer = nullptr;
+
 	//-----------------------------------------------
 	// Tile Surface
 	//-----------------------------------------------
@@ -1209,7 +1214,7 @@ MTopView::InitSprites()
 //	//m_ImageObjectSSPK.Release();
 //
 	{
-		m_ImageObjectSSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SSPRITE_IMAGEOBJECT").c_str());
+		if (!m_ImageObjectSSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SSPRITE_IMAGEOBJECT").c_str())) return false;
 // 		ImageObjectShadowFile2.close();
 	}
 
@@ -1250,7 +1255,7 @@ MTopView::InitSprites()
 //		if (!FileOpenBinary(FILE_ISPRITE_CREATURE, m_CreatureSPKFile))
 //			return false;	
 //
-		m_CreatureSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_ISPRITE_CREATURE").c_str() );
+		if (!m_CreatureSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_ISPRITE_CREATURE").c_str() )) return false;
 
 	}
 
@@ -1377,7 +1382,7 @@ MTopView::InitSprites()
 //
 //		m_CreatureSSPKFile.read((char*)&numCreatureSSPK, SIZE_SPRITEID);
 // 		m_CreatureSSPK.Init( numCreatureSSPK );			
-		m_CreatureSSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SSPRITE_CREATURE").c_str());
+		if (!m_CreatureSSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SSPRITE_CREATURE").c_str())) return false;
 	}
 
 //	UI_DrawProgress(4);
@@ -1514,14 +1519,14 @@ MTopView::InitSprites()
 //		m_AddonSPKFile.read((char*)&numAddonSPK, SIZE_SPRITEID);
 //		m_AddonSPK.Init( numAddonSPK, CSDLGraphics::Is565() );	
 //	}
-	m_AddonSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_ISPRITE_ADDON").c_str() );
-	m_OustersSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_ISPRITE_OUSTERS").c_str() );
+	if (!m_AddonSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_ISPRITE_ADDON").c_str() )) return false;
+	if (!m_OustersSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_ISPRITE_OUSTERS").c_str() )) return false;
 
-	m_AdvancementSlayerManSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_ISPRITE_ADVANCEMENT_CLASS_SLAYER_MAN" ).c_str() );
-	m_AdvancementSlayerManSSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_SSPRITE_ADVANCEMENT_CLASS_SLAYER_MAN" ).c_str() );
+	if (!m_AdvancementSlayerManSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_ISPRITE_ADVANCEMENT_CLASS_SLAYER_MAN" ).c_str() )) return false;
+	if (!m_AdvancementSlayerManSSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_SSPRITE_ADVANCEMENT_CLASS_SLAYER_MAN" ).c_str() )) return false;
 
-	m_AdvancementSlayerWomanSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_ISPRITE_ADVANCEMENT_CLASS_SLAYER_WOMAN" ).c_str() );
-	m_AdvancementSlayerWomanSSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_SSPRITE_ADVANCEMENT_CLASS_SLAYER_WOMAN" ).c_str() );
+	if (!m_AdvancementSlayerWomanSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_ISPRITE_ADVANCEMENT_CLASS_SLAYER_WOMAN" ).c_str() )) return false;
+	if (!m_AdvancementSlayerWomanSSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_SSPRITE_ADVANCEMENT_CLASS_SLAYER_WOMAN" ).c_str() )) return false;
 
 //	if (!true)
 	{
@@ -1534,18 +1539,18 @@ MTopView::InitSprites()
 //			m_AddonSSPKFile.read((char*)&numAddonSSPK, SIZE_SPRITEID);
 //			m_AddonSSPK.Init( numAddonSSPK );	
 //		}
-		m_AddonSSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SSPRITE_ADDON").c_str());
-		m_OustersSSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SSPRITE_OUSTERS").c_str());
+		if (!m_AddonSSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SSPRITE_ADDON").c_str())) return false;
+		if (!m_OustersSSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SSPRITE_OUSTERS").c_str())) return false;
 	}
 
-	m_AdvancementOustersSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_ISPRITE_ADVANCEMENT_CLASS_OUSTERS" ).c_str() );
-	m_AdvancementOustersSSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_SSPRITE_ADVANCEMENT_CLASS_OUSTERS" ).c_str() );// ***
+	if (!m_AdvancementOustersSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_ISPRITE_ADVANCEMENT_CLASS_OUSTERS" ).c_str() )) return false;
+	if (!m_AdvancementOustersSSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_SSPRITE_ADVANCEMENT_CLASS_OUSTERS" ).c_str() )) return false;
 
-	m_AdvancementVampireManSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_ISPRITE_ADVANCEMENT_CLASS_VAMPIRE_MAN" ).c_str() );
-	m_AdvancementVampireManSSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_SSPRITE_ADVANCEMENT_CLASS_VAMPIRE_MAN" ).c_str() );
+	if (!m_AdvancementVampireManSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_ISPRITE_ADVANCEMENT_CLASS_VAMPIRE_MAN" ).c_str() )) return false;
+	if (!m_AdvancementVampireManSSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_SSPRITE_ADVANCEMENT_CLASS_VAMPIRE_MAN" ).c_str() )) return false;
 
-	m_AdvancementVampireWomanSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_ISPRITE_ADVANCEMENT_CLASS_VAMPIRE_WOMAN" ).c_str() );
-	m_AdvancementVampireWomanSSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_SSPRITE_ADVANCEMENT_CLASS_VAMPIRE_WOMAN" ).c_str() );
+	if (!m_AdvancementVampireWomanSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_ISPRITE_ADVANCEMENT_CLASS_VAMPIRE_WOMAN" ).c_str() )) return false;
+	if (!m_AdvancementVampireWomanSSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_SSPRITE_ADVANCEMENT_CLASS_VAMPIRE_WOMAN" ).c_str() )) return false;
 
 /*
 	m_AdvancementSlayerSPK.LoadFromFileRunning( g_pFileDef->getProperty( "FILE_ISPRITE_ADVANCEMENT_CLASS_SLAYER" ).c_str() );
@@ -1675,7 +1680,7 @@ MTopView::InitSprites()
 	//------------------------------------------------------------
 	if (m_ItemTileISPK.GetSize()==0)
 	{
-		m_ItemTileISPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_ISPRITE_ITEMTILE").c_str());
+		if (!m_ItemTileISPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_ISPRITE_ITEMTILE").c_str())) return false;
 	}
 
 	//------------------------------------------------------------
@@ -1691,7 +1696,7 @@ MTopView::InitSprites()
 	//------------------------------------------------------------
 	if (m_ItemDropISPK.GetSize()==0)
 	{
-		m_ItemDropISPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_ISPRITE_ITEMDROP").c_str());
+		if (!m_ItemDropISPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_ISPRITE_ITEMDROP").c_str())) return false;
 	}
 
 	//------------------------------------------------------------
@@ -1707,7 +1712,7 @@ MTopView::InitSprites()
 	//------------------------------------------------------------
 	if (m_ItemBrokenSPK.GetSize()==0)
 	{
-		m_ItemBrokenSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SPRITE_ITEMBROKEN").c_str());
+		if (!m_ItemBrokenSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SPRITE_ITEMBROKEN").c_str())) return false;
 	}
 
 //	UI_DrawProgress(8);
@@ -1839,7 +1844,7 @@ MTopView::InitSprites()
 	m_TileSPK.LoadFromFilePart(TilePackFile, TileSFPArray);
 	TilePackFile.close();
 	*/
-	m_TileSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SPRITE_TILE").c_str() );
+	if (!m_TileSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SPRITE_TILE").c_str() )) return false;
 
 	//----------------------------------------------------------------------
 	// Create TileRenderer instance (Phase 4 integration)
@@ -1949,7 +1954,7 @@ MTopView::InitSprites()
 //		m_ImageObjectSPK.Init( m_ImageObjectSPKI.GetSize(), CSDLGraphics::Is565() );
 //
 //		m_ImageObjectSPKFile.open(FILE_SPRITE_IMAGEOBJECT, ios::binary);
-		m_ImageObjectSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SPRITE_IMAGEOBJECT").c_str() );
+		if (!m_ImageObjectSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SPRITE_IMAGEOBJECT").c_str() )) return false;
 
 		//m_ImageObjectSPK.LoadFromFile( m_ImageObjectSPKFile );
 
@@ -2214,8 +2219,8 @@ MTopView::InitSprites()
 //		//------------------------------------------------------------
 //		if (!FileOpenBinary(FILE_ASPRITE_ALPHAEFFECT, m_EffectAlphaSPKFile))
 //			return false;
-		m_EffectAlphaSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_ASPRITE_ALPHAEFFECT").c_str());
-		m_EffectAlphaPPK.LoadFromFileRunning( g_pFileDef->getProperty("FILE_PALETTE_ALPHAEFFECT").c_str() );
+		if (!m_EffectAlphaSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_ASPRITE_ALPHAEFFECT").c_str())) return false;
+		if (!m_EffectAlphaPPK.LoadFromFileRunning( g_pFileDef->getProperty("FILE_PALETTE_ALPHAEFFECT").c_str() )) return false;
 	}
 
 	//------------------------------------------------------------
@@ -2238,9 +2243,12 @@ MTopView::InitSprites()
 //		//------------------------------------------------------------
 //		if (!FileOpenBinary(FILE_SPRITE_SCREENEFFECT, m_EffectScreenSPKFile))
 //			return false;
-		m_EffectScreenSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SPRITE_SCREENEFFECT").c_str());
+		if (!m_EffectScreenSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SPRITE_SCREENEFFECT").c_str())) return false;
 		//m_EffectScreenSPK.LoadFromFile(g_pFileDef->getProperty("FILE_SPRITE_SCREENEFFECT").c_str());
-		m_EffectScreenPPK.LoadFromFile( g_pFileDef->getProperty("FILE_PALETTE_SCREENEFFECT").c_str() );
+		if (!m_EffectScreenPPK.LoadFromFile(g_pFileDef->getProperty("FILE_PALETTE_SCREENEFFECT").c_str())) {
+			m_EffectScreenPPK.Release();
+			return false;
+		}
 	}
 
 	//------------------------------------------------------------
@@ -2255,6 +2263,7 @@ MTopView::InitSprites()
 		if (!FileOpenBinary(filename.c_str(), shadowFile)) return false;
 		if (!m_EffectShadowSPK.LoadFromFile(shadowFile)) {
 			LOG_ERROR("Rejected shadow effect sprite pack: %s", filename.c_str());
+			m_EffectShadowSPK.Release();
 			return false;
 		}
 	}
@@ -2343,11 +2352,14 @@ MTopView::InitSprites()
 	//------------------------------------------------------------	
 	if (m_EtcSPK.GetSize()==0)
 	{
-		std::ifstream	EtcFile2;//(FILE_SPRITE_ETC, ios::binary);
-		if (!FileOpenBinary(g_pFileDef->getProperty("FILE_SPRITE_ETC").c_str(), EtcFile2))
+		const std::string& filename = g_pFileDef->getProperty("FILE_SPRITE_ETC");
+		std::ifstream EtcFile2;
+		if (!FileOpenBinary(filename.c_str(), EtcFile2)) return false;
+		if (!m_EtcSPK.LoadFromFile(EtcFile2) || m_EtcSPK.GetSize() == 0) {
+			LOG_ERROR("Rejected miscellaneous sprite pack: %s", filename.c_str());
+			m_EtcSPK.Release();
 			return false;
-		m_EtcSPK.LoadFromFile(EtcFile2);
-		EtcFile2.close();
+		}
 	}
 
 	//------------------------------------------------------------		
@@ -2413,7 +2425,7 @@ MTopView::InitSprites()
 	//------------------------------------------------------------
 	if (m_EffectNormalSPK.GetSize()==0)
 	{
-		m_EffectNormalSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SPRITE_NORMALEFFECT").c_str());
+		if (!m_EffectNormalSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SPRITE_NORMALEFFECT").c_str())) return false;
 	}
 
 
@@ -2429,11 +2441,14 @@ MTopView::InitSprites()
 	//------------------------------------------------------------
 	if (m_WeatherSPK.GetSize()==0)
 	{
-		std::ifstream	WeatherFile2;//(FILE_SPRITE_WEATHER, ios::binary);
-		if (!FileOpenBinary(g_pFileDef->getProperty("FILE_SPRITE_WEATHER").c_str(), WeatherFile2))
+		const std::string& filename = g_pFileDef->getProperty("FILE_SPRITE_WEATHER");
+		std::ifstream WeatherFile2;
+		if (!FileOpenBinary(filename.c_str(), WeatherFile2)) return false;
+		if (!m_WeatherSPK.LoadFromFile(WeatherFile2) || m_WeatherSPK.GetSize() == 0) {
+			LOG_ERROR("Rejected weather sprite pack: %s", filename.c_str());
+			m_WeatherSPK.Release();
 			return false;
-		m_WeatherSPK.LoadFromFile(WeatherFile2);
-		WeatherFile2.close();
+		}
 	}
 
 	//------------------------------------------------------------
@@ -19670,11 +19685,15 @@ MTopView::ExcuteOustersFinEvent()
 
 		if(m_OustersFinSPK.GetSize() == 0)
 		{
-			std::ifstream	FinFile;
-			if (!FileOpenBinary(g_pFileDef->getProperty("FILE_SPRITE_OUSTERS_FIN").c_str(), FinFile))
+			const std::string& filename = g_pFileDef->getProperty("FILE_SPRITE_OUSTERS_FIN");
+			std::ifstream FinFile;
+			if (!FileOpenBinary(filename.c_str(), FinFile)) return bDrawBackGround;
+			// This sequence uses sprite IDs 0 through 10.
+			if (!m_OustersFinSPK.LoadFromFile(FinFile) || m_OustersFinSPK.GetSize() < 11) {
+				LOG_ERROR("Rejected Ousters ending sprite pack: %s", filename.c_str());
+				m_OustersFinSPK.Release();
 				return bDrawBackGround;
-			m_OustersFinSPK.LoadFromFile(FinFile);
-			FinFile.close();
+			}
 		}
 
 		const TYPE_SOUNDID soundID = SOUND_SLAYER_ENCHANT_B2;
