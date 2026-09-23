@@ -1417,6 +1417,17 @@ rounds settled* for the host rules). Test fixtures share
     header/body rejection and resumed delivery. The wire inventory checks that
     four copies of every declared maximum frame fit within the budget.
 
+- [x] **5.19 Effect selection diagnostics.**
+  > **Status:** done (2026-09-23). Both surface effect selectors validate the
+  > table index and report unavailable effects once per effect/family, with one
+  > bounded bucket for invalid IDs. Missing selections retain the plain-copy
+  > fallback. The supported pixel grayscale/gradation and palette screen paths
+  > remain registered; unsafe legacy palette routines remain disabled.
+  - Owner: two `test_spritesurface_pal_blit.cpp` cases cover diagnostics,
+    repeated selections, fallback pixels, supported entries and the table-end
+    sentinel. Before the fix, the sentinel produced an ASan global-buffer
+    overflow and absent diagnostics produced two failed checks.
+
 ## Build and review follow-up (2026-09-18)
 
 Table reads now expose const rows; `CTypeTable::GetMutable` and `Set` reject
