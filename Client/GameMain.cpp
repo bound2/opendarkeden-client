@@ -4520,43 +4520,30 @@ UpdateDisconnected()
 	// 필살~ 임시 코드..
 	CSpritePack		SPK;
 	CFileIndexTable	FIT;
-	
-	std::ifstream indexFile(g_pFileDef->getProperty("FILE_SPRITEINDEX_UI").c_str(), ios::binary);
-	FIT.LoadFromFile( indexFile );
-	indexFile.close();
+	SPK.Init(3);
+	CSprite* pSpriteDisconected = &SPK[0];
+	CSprite* pSpriteDisconectedCloseFocused = &SPK[1];
+	CSprite* pSpriteDisconectedClosePushed = &SPK[2];
 
-	SPK.Init( FIT.GetSize() );
-	
-	// return을 누를 때까지...
-	CSprite* pSpriteDisconected = &SPK[ SPRITEID_DISCONNECTED ];
-	CSprite* pSpriteDisconectedCloseFocused = &SPK[ SPRITEID_DISCONNECTED_CLOSE_FOCUSED ];
-	CSprite* pSpriteDisconectedClosePushed = &SPK[ SPRITEID_DISCONNECTED_CLOSE_PUSHED ];
-
-	if (pSpriteDisconected->IsNotInit() 
-		|| pSpriteDisconectedCloseFocused->IsNotInit()
-		|| pSpriteDisconectedClosePushed->IsNotInit())
-	{
-		std::ifstream spkFile(g_pFileDef->getProperty("FILE_SPRITE_UI").c_str(), ios::binary);
-		
-		if (pSpriteDisconected->IsNotInit())
-		{
-			spkFile.seekg(FIT[SPRITEID_DISCONNECTED], ios::beg);
-			pSpriteDisconected->LoadFromFile( spkFile );
+	const std::string indexPath = g_pFileDef->getProperty("FILE_SPRITEINDEX_UI");
+	std::ifstream indexFile(indexPath, ios::binary);
+	if (!FIT.LoadFromFile(indexFile)) {
+		LOG_ERROR("Rejected disconnect sprite index: source=%s", indexPath.c_str());
+	} else {
+		const std::string path = g_pFileDef->getProperty("FILE_SPRITE_UI");
+		std::ifstream spkFile(path, ios::binary);
+		const unsigned ids[] = { SPRITEID_DISCONNECTED, SPRITEID_DISCONNECTED_CLOSE_FOCUSED,
+			SPRITEID_DISCONNECTED_CLOSE_PUSHED };
+		for (WORD i = 0; i < 3; ++i) {
+			long offset = 0;
+			if (!FIT.TryGetOffset(ids[i], offset)) {
+				LOG_ERROR("Missing disconnect sprite index: source=%s id=%u", indexPath.c_str(), ids[i]);
+				continue;
+			}
+			spkFile.clear();
+			spkFile.seekg(offset);
+			CTypePackDetail::LoadElement(SPK[i], spkFile, path.c_str(), ids[i]);
 		}
-
-		if (pSpriteDisconectedCloseFocused->IsNotInit())
-		{
-			spkFile.seekg(FIT[SPRITEID_DISCONNECTED_CLOSE_FOCUSED], ios::beg);
-			pSpriteDisconectedCloseFocused->LoadFromFile( spkFile );		
-		}
-
-		if (pSpriteDisconectedClosePushed->IsNotInit())
-		{
-			spkFile.seekg(FIT[SPRITEID_DISCONNECTED_CLOSE_PUSHED], ios::beg);
-			pSpriteDisconectedClosePushed->LoadFromFile( spkFile );		
-		}
-
-		spkFile.close();
 	}
 
 	DEBUG_ADD("UpdateDisconnected : Load Disconnected Dialog OK");

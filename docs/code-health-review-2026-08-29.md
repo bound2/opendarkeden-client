@@ -329,6 +329,33 @@ The same audit found that all three races tried to redirect a two-hand removal b
 
 ### Caveats
 
+**File-index table follow-up (2026-09-23):** `CFileIndexTable` checks complete
+little-endian counts and signed 32-bit offsets before replacing live storage.
+Offsets below the pack header or above `INT32_MAX` are rejected; repeated and
+out-of-order offsets remain valid. Complete malformed tables retain the next
+record's cursor. Owned vectors prevent shallow-copy lifetime bugs; checked
+lookup preserves its output on a missing ID, and direct invalid access throws.
+Nine real-library tests cover truncated prefixes, invalid offsets, empty and
+maximum counts, following records, copies, release, bounds and stream exceptions.
+Two test-first cases reproduced 38 failed checks. The title and disconnect
+callers now check lookup and decoding, report failures and avoid publishing or
+mutating a shared fallback sprite. These executable integrations are regression
+guards. All six records of the installed `UI.spk` pass the changed index reader
+and both pixel decoders under ASan (12 decoder calls).
+
+**Asset-inventory expansion (2026-09-23):** the earlier UI denominator counted
+constant `new C_SPRITE_PACK(...)` calls but missed member `.Open(...)` calls.
+A comment- and string-aware source map now covers 152 installed constant-path UI
+packs from 209 call sites; all 3,289 indexed records pass both pixel decoders
+under ASan (6,578 calls). This total includes the earlier 75 files, rather than
+adding to them. Three referenced friend-window packs (`FrdWinSlayer.spk`,
+`FrdWinVampire.spk`, `FrdWinOusters.spk`) are absent from this installation at six
+call sites and have no asset-validation claim. The eager `Etc.spk`, `Weather.spk`
+and `OustersFin.spk` packs also pass the production pack reader in both formats:
+47, 24 and 11 records respectively (164 calls). Their game callers still need
+to propagate load failure. Dynamic profile filenames and any other unclassified
+resource entry points remain outside this expanded constant-path inventory.
+
 **Specialized alpha-pack follow-up (2026-09-23):** `CAlphaSpritePack` now owns
 typed 555/565 arrays, including concrete indexing and destruction, and disables
 shallow copying. Full reloads publish only complete packs; partial and indexed

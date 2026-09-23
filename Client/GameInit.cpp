@@ -20,6 +20,7 @@
 #include <arpa/inet.h>
 #endif
 #include "DebugLog.h"
+#include <memory>
 #include "TextEncoding.h"
 #include "DirectoryListing.h"
 #include "Client.h"
@@ -269,28 +270,24 @@ StartTitleLoading()
 	
 	if (g_pTitleLoadingSprite==NULL)
 	{
-		if (CSDLGraphics::Is565())
-		{
-			g_pTitleLoadingSprite = new CSprite565;
-		}
-		else
-		{
-			g_pTitleLoadingSprite = new CSprite555;
-		}
-
 		CFileIndexTable	FIT;
-		std::ifstream indexFile(g_pFileDef->getProperty("FILE_SPRITEINDEX_UI").c_str(), ios::binary);
-		FIT.LoadFromFile( indexFile );
-		indexFile.close();
+		const std::string indexPath = g_pFileDef->getProperty("FILE_SPRITEINDEX_UI");
+		std::ifstream indexFile(indexPath, ios::binary);
+		const unsigned id = g_MyFull ? 5 : SPRITEID_CI;
+		long offset = 0;
+		if (!FIT.LoadFromFile(indexFile) || !FIT.TryGetOffset(id, offset)) {
+			LOG_ERROR("Rejected title sprite index: source=%s id=%u", indexPath.c_str(), id);
+			return;
+		}
 
-		std::ifstream spkFile(g_pFileDef->getProperty("FILE_SPRITE_UI").c_str(), ios::binary);
-		if(g_MyFull)
-			spkFile.seekg( FIT[5] );
-		else
-			spkFile.seekg( FIT[SPRITEID_CI] );
-
-		g_pTitleLoadingSprite->LoadFromFile( spkFile );
-		spkFile.close();
+		std::unique_ptr<CSprite> sprite;
+		if (CSDLGraphics::Is565()) sprite = std::make_unique<CSprite565>();
+		else sprite = std::make_unique<CSprite555>();
+		const std::string path = g_pFileDef->getProperty("FILE_SPRITE_UI");
+		std::ifstream spkFile(path, ios::binary);
+		spkFile.seekg(offset);
+		if (!CTypePackDetail::LoadElement(*sprite, spkFile, path.c_str(), id)) return;
+		g_pTitleLoadingSprite = sprite.release();
 	}
 }
 	
