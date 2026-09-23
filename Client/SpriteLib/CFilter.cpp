@@ -42,7 +42,8 @@ CFilter::Init(WORD width, WORD height)
 	m_Height = height;
 	
 	// linear로 memory생성
-	m_ppFilter = new BYTE* [m_Height];
+	// A later row allocation may throw; Release must see only owned rows.
+	m_ppFilter = new BYTE* [m_Height]{};
 
 	for (int i=0; i<m_Height; i++)
 	{

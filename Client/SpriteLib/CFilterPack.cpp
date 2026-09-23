@@ -4,6 +4,8 @@
 
 #include "CFilter.h"
 #include "CFilterPack.h"
+#include "DebugLog.h"
+#include <memory>
 #include <fstream>
 
 //----------------------------------------------------------------------
@@ -36,17 +38,10 @@ CFilterPack::~CFilterPack()
 void
 CFilterPack::Init(TYPE_FILTERID count)
 {
-	// 개수가 없을 경우 
-	if (count==0) 
-		return;
-
-	// 일단 해제
+	std::unique_ptr<CFilter[]> pending(count ? new CFilter[count] : nullptr);
 	Release();
-
-	// 메모리 잡기
+	m_pFilters = pending.release();
 	m_nFilters = count;
-
-	m_pFilters = new CFilter [m_nFilters];
 }
 
 
@@ -62,8 +57,8 @@ CFilterPack::Release()
 		delete [] m_pFilters;
 		m_pFilters = NULL;
 		
-		m_nFilters = 0;
 	}
+	m_nFilters = 0;
 }
 
 //----------------------------------------------------------------------
@@ -89,22 +84,39 @@ CFilterPack::SaveToFile(ofstream& file)
 //----------------------------------------------------------------------
 // Load From File
 //----------------------------------------------------------------------
-void		
+bool
 CFilterPack::LoadFromFile(ifstream& file)
 {
-	// 개수 읽어오기
-	file.read((char*)&m_nFilters, SIZE_FILTERID);
-
-	// 없으면 return
-	if (m_nFilters==0)
-		return;
-
-	// memory잡기
-	Init( m_nFilters );
-
-	// 각각의 Filter를 Load해 온다.
-	for (TYPE_FILTERID i=0; i<m_nFilters; i++)
-	{
-		m_pFilters[i].LoadFromFile( file );
+	try {
+		TYPE_FILTERID count = 0;
+		if (!file.read(reinterpret_cast<char*>(&count), SIZE_FILTERID)) {
+			LOG_ERROR("Rejected light-filter pack header");
+			return false;
+		}
+		const auto start = file.tellg();
+		if (start == std::streampos(-1) || !file.seekg(0, std::ios::end)) return false;
+		const auto end = file.tellg();
+		if (end < start || !file.seekg(start)) return false;
+		// Every nonempty filter needs two dimension words and at least one byte.
+		if (static_cast<std::streamoff>(count) > (end - start) / 5) {
+			LOG_ERROR("Rejected light-filter pack count: count=%u", unsigned(count));
+			return false;
+		}
+		std::unique_ptr<CFilter[]> pending(count ? new CFilter[count] : nullptr);
+		for (unsigned i = 0; i < count; ++i) {
+			const auto offset = file.tellg();
+			if (!pending[i].LoadFromFile(file) || !file) {
+				LOG_ERROR("Rejected light-filter pack entry: id=%u offset=%lld", i,
+					static_cast<long long>(static_cast<std::streamoff>(offset)));
+				return false;
+			}
+		}
+		Release();
+		m_pFilters = pending.release();
+		m_nFilters = count;
+		return true;
+	} catch (...) {
+		LOG_ERROR("Cannot read light-filter pack");
+		return false;
 	}
 }

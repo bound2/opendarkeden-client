@@ -29,7 +29,8 @@ class CFilterPack {
 		// file I/O
 		//--------------------------------------------------------
 		void		SaveToFile(std::ofstream& file);
-		void		LoadFromFile(std::ifstream& file);		
+		// Publish complete packs together; failed reads preserve current filters.
+		bool		LoadFromFile(std::ifstream& file);
 		
 		//--------------------------------------------------------
 		// size
@@ -47,4 +48,3 @@ class CFilterPack {
 };
 
 #endif
-	
