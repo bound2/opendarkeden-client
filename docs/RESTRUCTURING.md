@@ -1277,6 +1277,15 @@ rounds settled* for the host rules). Test fixtures share
   - Owner: `test_pixel_sprite_loading.cpp` and the existing 555 cursor tests,
     exercised with the actual SpriteLib implementations under ASan.
 
+- [x] **5.7 Shadow-sprite input validation.**
+  > **Status:** done (2026-09-22). `CShadowSprite` checks complete headers and
+  > rows, encoded pair counts and cumulative width before publishing data.
+  > Complete rejected records retain the next packed-record cursor; truncated
+  > or throwing reads release pending rows and leave an empty object. Explicit
+  > release also resets complete empty-header state. Row padding is preserved.
+  - Owner: `test_shadow_sprite_loading.cpp`, exercising the actual loader,
+    drawing, maximum lengths, reloads and release under ASan.
+
 ## Build and review follow-up (2026-09-18)
 
 Table reads now expose const rows; `CTypeTable::GetMutable` and `Set` reject

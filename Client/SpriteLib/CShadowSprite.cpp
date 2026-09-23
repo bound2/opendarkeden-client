@@ -5,6 +5,8 @@
 #include "CSpriteSurface.h"
 #include "CFilter.h"
 #include "CShadowSprite.h"
+#include <memory>
+#include <vector>
 
 #ifdef SPRITELIB_BACKEND_SDL
 #include "SpriteLibBackend.h"
@@ -56,31 +58,26 @@ CShadowSprite::~CShadowSprite()
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// m_Pixels의 memory를 해제한다.
+// Release all rows and reset even a sprite with empty geometry.
 //----------------------------------------------------------------------
-void	
+void
 CShadowSprite::Release()
 {
 #ifdef SPRITELIB_BACKEND_SDL
 	if (m_backend_sprite != SPRITECTL_INVALID_SPRITE) {
 		spritectl_destroy_sprite(m_backend_sprite);
 		m_backend_sprite = SPRITECTL_INVALID_SPRITE;
-		m_backend_dirty = false;
 	}
+	m_backend_dirty = false;
 #endif
-	if (m_Pixels!=NULL)
-	{
-		m_bInit		= false;
-
-		for (int i=0; i<m_Height; i++)
-			delete [] m_Pixels[i];
-		
-		delete [] m_Pixels;
-
-		m_Pixels	= NULL;
-		m_Width		= 0;
-		m_Height	= 0;	
+	if (m_Pixels != nullptr) {
+		for (int i = 0; i < m_Height; ++i) delete[] m_Pixels[i];
+		delete[] m_Pixels;
 	}
+	m_Pixels = nullptr;
+	m_Width = 0;
+	m_Height = 0;
+	m_bInit = false;
 }
 
 //----------------------------------------------------------------------
@@ -156,49 +153,54 @@ CShadowSprite::SaveToFile(ofstream& file)
 }
 
 //----------------------------------------------------------------------
-// fstream에서 load한다.
+// Read and validate a complete shadow record before publishing its rows.
 //----------------------------------------------------------------------
-bool	
+bool
 CShadowSprite::LoadFromFile(ifstream& file)
 {
-	// 이미 잡혀있는 memory를 release한다.
 	Release();
-
-	// width와 height를 Load한다.
-	file.read((char*)&m_Width , 2);
-	file.read((char*)&m_Height, 2);	
-
-	// 길이가 0이면 더 Load할게 없겠지..
-	if (m_Width==0 || m_Height==0) 
-	{	
+	try {
+		WORD width = 0, height = 0;
+		if (!file.read(reinterpret_cast<char*>(&width), sizeof(width)) ||
+			!file.read(reinterpret_cast<char*>(&height), sizeof(height))) return false;
+		if (width == 0 || height == 0) {
+			m_Width = width;
+			m_Height = height;
+			m_bInit = true;
+			return true;
+		}
+		std::vector<std::unique_ptr<WORD[]>> rows(height);
+		std::vector<size_t> lengths(height);
+		for (WORD y = 0; y < height; ++y) {
+			WORD length = 0;
+			if (!file.read(reinterpret_cast<char*>(&length), sizeof(length))) return false;
+			lengths[y] = length;
+			if (length == 0) continue;
+			rows[y] = std::make_unique<WORD[]>(length);
+			if (!file.read(reinterpret_cast<char*>(rows[y].get()), length * sizeof(WORD))) return false;
+		}
+		// Consume every row before rejecting a complete malformed record, so
+		// the next packed sprite remains readable. Extra padding is permitted.
+		for (WORD y = 0; y < height; ++y) {
+			const WORD* row = rows[y].get();
+			if (lengths[y] == 0 || size_t(row[0]) * 2 + 1 > lengths[y]) return false;
+			size_t remaining = width;
+			for (size_t run = 0; run < row[0]; ++run) {
+				const size_t extent = size_t(row[1 + run * 2]) + row[2 + run * 2];
+				if (extent > remaining) return false;
+				remaining -= extent;
+			}
+		}
+		auto pointers = std::make_unique<WORD*[]>(height);
+		for (WORD y = 0; y < height; ++y) pointers[y] = rows[y].release();
+		m_Pixels = pointers.release();
+		m_Width = width;
+		m_Height = height;
 		m_bInit = true;
-
 		return true;
+	} catch (...) {
+		return false;
 	}
-
-	m_Pixels = NULL;
-	m_Pixels = new WORD* [m_Height];	
-	//m_Pixels = (WORD**)malloc(sizeof(WORD*)*m_Height);
-
-	WORD len;
-
-	//--------------------------------
-	// 5:6:5
-	//--------------------------------
-	for (int i=0; i<m_Height; i++)
-	{
-		// byte수와 실제 data를 Load한다.
-		file.read((char*)&len, 2);
-		
-		m_Pixels[i] = NULL;
-		m_Pixels[i] = new WORD [len];		
-	
-		file.read((char*)m_Pixels[i], len<<1);
-	}	
-	
-	m_bInit = true;
-
-	return true;
 }
 
 //----------------------------------------------------------------------
