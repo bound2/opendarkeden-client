@@ -1115,7 +1115,17 @@ rounds settled* for the host rules). Test fixtures share
   > plan. Local `*mc N` selectors are consumed rather than sent to the server.
   > `test_mail_template.cpp` and `test_master_commands.cpp` own these parser,
   > encoding, lifetime and failure contracts; UI dispatch remains a regression
-  > guard. Renderer fallback retirement still requires the ingress audit.
+  > guard. The 2026-09-23 ingress audit and renderer change below complete
+  > retirement of the fallback.
+  > **Renderer UTF-8 contract (2026-09-23):** resources, XML, SDL editor input,
+  > source literals and paired-server text now have explicit ingress contracts;
+  > see [the source and installed-XML audit](text-ingress-audit-2026-09-23.md).
+  > Normalization preserves valid UTF-8 and replaces each malformed byte with
+  > U+FFFD, without selecting a legacy code page. The bounded cache remains.
+  > `test_textservice_normalize.cpp` and `test_text_service.cpp` own replacement,
+  > suffix preservation, idempotence, explicit resource decoding and cache
+  > independence. The malformed optional ghost-position asset is documented
+  > separately; it does not supply displayed text.
   > The obsolete `g_PossibleStringCut` declaration and SDL definition are now
   > removed after all compiled callers migrated. Shared UTF-8 prefix and row
   > helpers, descriptor/help layout tests and builds without the old symbol
