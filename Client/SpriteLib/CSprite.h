@@ -304,6 +304,7 @@ class CSprite
 
 
 	protected :
+		bool LoadPixels(std::ifstream& file, bool convertTo555);
 		WORD			m_Width;		// 가로 pixel수
 		WORD			m_Height;		// 세로 pixel수		
 		WORD**			m_Pixels;		// pixels
