@@ -329,6 +329,18 @@ The same audit found that all three races tried to redirect a two-hand removal b
 
 ### Caveats
 
+**Ending failure cleanup (2026-09-23):** the advancement ending now checks its
+eager load, requires all seven sprites and validates the event's adjacent pair
+before index addition. The three event setters select pairs 1/2, 3/4 and 5/6;
+the scrolling path also uses sprite 0. On missing or rejected resources, both
+advancement and Ousters endings reset their timer, remove the event and release
+partial storage before returning to normal background drawing. This also clears
+the ending's input-denial flags instead of leaving a failed event active.
+These executable changes are source/build regression guards. All seven installed
+`AdvancementQuestEnding.spk` records pass the production eager pack reader in
+both formats under ASan (14 decoder calls); the eleven Ousters records were
+validated in the earlier pack audit.
+
 **File-index table follow-up (2026-09-23):** `CFileIndexTable` checks complete
 little-endian counts and signed 32-bit offsets before replacing live storage.
 Offsets below the pack header or above `INT32_MAX` are rejected; repeated and
