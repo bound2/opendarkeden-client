@@ -172,7 +172,8 @@ TEST(ShadowSpriteOwnership, SelfAssignmentPreservesTheLoadedSprite)
 	std::ifstream in(path, std::ios::binary);
 	CShadowSprite sprite;
 	CHECK(sprite.LoadFromFile(in));
-	sprite = sprite;
+	CShadowSprite& alias = sprite;
+	sprite = alias;
 	CHECK(sprite.IsInit());
 	CHECK_EQ(4, sprite.GetWidth());
 	CHECK_EQ(1, sprite.GetHeight());
