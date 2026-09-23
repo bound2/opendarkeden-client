@@ -357,3 +357,30 @@ TEST(ShadowSpriteAdapter, WideValidRowsKeepTheirGeometryAndPixels)
 		CHECK_EQ(0, backend->pixels[79999]);
 	}
 }
+
+TEST(ShadowSpriteLoading, EagerPackReadsAllRecordsWithoutTheLegacyIndex)
+{
+	Fixture fixture;
+	std::vector<WORD> words{3};
+	for (unsigned id = 0; id < 3; ++id) words.insert(words.end(), valid.begin(), valid.end());
+	Write(words);
+	const std::string indexPath = std::string(path) + 'i';
+	struct IndexCleanup {
+		const std::string& path;
+		~IndexCleanup() { std::remove(path.c_str()); }
+	} cleanup{indexPath};
+	{
+		std::ofstream index(indexPath, std::ios::binary | std::ios::trunc);
+		index.put(14);
+		index.put(0);
+	}
+	CShadowSpritePack pack;
+	CHECK(!pack.LoadFromFileRunning(path));
+	CHECK(pack.LoadFromFile(path));
+	CHECK_EQ(3, pack.GetSize());
+	for (unsigned id = 0; id < pack.GetSize(); ++id) {
+		CHECK(pack[id].IsInit());
+		CHECK_EQ(4, pack[id].GetWidth());
+		CHECK(pack[id].IsColorPixel(3, 0));
+	}
+}
