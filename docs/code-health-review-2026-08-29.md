@@ -329,6 +329,17 @@ The same audit found that all three races tried to redirect a two-hand removal b
 
 ### Caveats
 
+**Guild-mark reader follow-up (2026-09-23):** the custom loader used
+`2 + spriteID * sizeof(long)` for a file containing four-byte offsets, selecting
+the wrong entry on LP64 systems. It now uses the shared checked index reader,
+validates that both sprite IDs exist and seeks each one separately. Scoped
+owners retain the large/small pair until both decodes succeed and cache
+publication completes. Rejected pairs are logged and negatively cached without
+partial art; repeated failed-cache lookups return false. Shared index and pixel
+tests own decoding. The game-cache integration is a source/build regression
+guard; no live-client reproduction is claimed. All 4,758 installed guild-mark
+records pass the index helper and both pixel decoders under ASan (9,516 calls).
+
 **Ending failure cleanup (2026-09-23):** the advancement ending now checks its
 eager load, requires all seven sprites and validates the event's adjacent pair
 before index addition. The three event setters select pairs 1/2, 3/4 and 5/6;
@@ -357,9 +368,11 @@ and both pixel decoders under ASan (12 decoder calls).
 
 **Asset-inventory expansion (2026-09-23):** the earlier UI denominator counted
 constant `new C_SPRITE_PACK(...)` calls but missed member `.Open(...)` calls.
-A comment- and string-aware source map now covers 152 installed constant-path UI
-packs from 209 call sites; all 3,289 indexed records pass both pixel decoders
-under ASan (6,578 calls). This total includes the earlier 75 files, rather than
+A comment- and string-aware source map now covers 151 distinct installed UI
+packs from 209 constant-path call sites; all 3,213 indexed records pass both pixel
+decoders under ASan (6,426 calls). The earlier 152-path / 6,578-call total counted
+`ArrowTile.spk` twice through case aliases; the distinct-file rerun corrects it.
+This total includes the earlier 75 files, rather than
 adding to them. Three referenced friend-window packs (`FrdWinSlayer.spk`,
 `FrdWinVampire.spk`, `FrdWinOusters.spk`) are absent from this installation at six
 call sites and have no asset-validation claim. The eager `Etc.spk`, `Weather.spk`

@@ -200,6 +200,7 @@ Shrink it when a task extracts a seam, and record the removal here.
 |---|---|
 | `GameMain.cpp`, `GameInit.cpp`, `GameUI.cpp`, `Client.cpp`, `SDLMain.cpp` | process lifecycle, DLL whitelist, render loop and quest UI events; also where the hosts (`MItemHost`, `MPriceHost`, `WireHost`) are installed, which no test can prove - `WireHost`'s installer is designated-initialised since 2026-09-09, so a wrong slot there is a compile error, but a wrong *body* still is not |
 | `MZone` live sector allocation/application, rendering and visual-effect ownership / `TileRenderer` draw paths | map parsing is tested in `ZoneMapData`; application and effects reach live sectors, creature status, sprite tables and `MTopView`; drawing uses live surfaces. Viewer tools cover some drawing; ownership guards use full builds and source-path audits. |
+| `MGuildMarkManager::LoadGuildMark` integration | binds the live guild mapper to the renderer's owned sprite cache; index and sprite decoding stay in the tested SpriteLib helpers. Publication and negative-cache guards use full builds and source/ownership review. |
 | `MCreature`, `MPlayer`, `MFakeCreature` movement and attached-effect orchestration; `PacketFunction::ExecuteActionInfoFromMainNode` | virtual character classes reach the live zone, UI, sprite tables and effect generators; action results transfer to `MEffectTarget` and execute through the same game objects. Bounds/queue/ownership guards stay here; extracting those classes would require the render/game-loop rewrite excluded above. Review regression guards use full builds and existing automated checks, without a runtime gate. |
 | `VS_UI/src/**` rendering and dialogs that still reach game globals | these paths use full builds and available automated checks; live verification is optional. `ui_tests` now links the real Button, EventButton, SkinManager, LineEditor, LineEditorVisual state/focus methods, InputFocusManager and the UI result receiver, so those independently reachable components require test-first fixes. `LineEditorVisual::Show` remains separate because it reaches the game's renderer. |
 | `Client/PacketHandler/*Handler.cpp` bodies | mutate `g_pZone`/creature state; the *parsers* they consume are in `packetwire` and testable, the mutations are not |
@@ -1381,6 +1382,17 @@ rounds settled* for the host rules). Test fixtures share
     of the event setters, flags, cleanup and draw callers. These executable
     integrations are regression guards. All seven installed advancement sprites
     pass the production eager loader in both pixel formats under ASan.
+
+- [x] **5.16 Guild-mark indexed input.**
+  > **Status:** done (2026-09-23). The guild-mark loader uses the checked pack
+  > index reader's four-byte offsets on every platform. It requires both IDs,
+  > independently seeks and decodes the large/small sprites, and publishes
+  > only a complete owned pair. Failure retains the existing negative-cache
+  > policy and remains false on repeated calls; missing mapper entries are safe.
+  - Owner: `test_ctypepack_indexed.cpp` owns the shared index/decode contracts;
+    pixel-loader tests own record bounds. Game cache publication uses the named
+    exemption and full builds. All 4,758 installed guild-mark records pass the
+    same index helper and both pixel decoders under ASan (9,516 decoder calls).
 
 ## Build and review follow-up (2026-09-18)
 

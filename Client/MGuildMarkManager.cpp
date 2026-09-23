@@ -9,6 +9,8 @@
 #include "UtilityFunction.h"
 #include "basic/ColorDraw.h"
 #include "DXLib/CDirectDrawSurface.h"
+#include <memory>
+#include <vector>
 
 	#include "UtilityFunction.h"
 	#include "AppendPatchInfo.h"
@@ -263,95 +265,48 @@ MGuildMarkManager::HasGuildMark(WORD guildID) const
 // guildMarkSPKIndex에서 그 SpriteID로 그 길드Sprite의 SpriteIndex를 
 // 알 수 있으므로.. 바로 Load해올 수 있다.
 //----------------------------------------------------------------------
-bool		
+bool
 MGuildMarkManager::LoadGuildMark(WORD guildID)
 {
-	// 이미 있으면 load 안한다.
-	GUILDMARK_MAP::iterator iMark = m_GuildMarks.find(guildID);
+	// Negative cache entries retain their failed result.
+	const auto cached = m_GuildMarks.find(guildID);
+	if (cached != m_GuildMarks.end())
+		return cached->second.pSprite != nullptr && cached->second.pSpriteSmall != nullptr;
 
-	if (iMark != m_GuildMarks.end())
-	{
-		return true;
-	}
-
-	MGuildInfoMapper::const_iterator iMapper = g_pGuildInfoMapper->find( guildID );
-
-	if (iMapper!=g_pGuildInfoMapper->end())
-	{
-		GUILD_INFO* pInfo		= iMapper->second;
-		TYPE_SPRITEID spriteID	= pInfo->GetSpriteID();
-
-		//---------------------------------------------------------
-		// file이름 준비..
-		//---------------------------------------------------------
-		char spkiFilename[256];
-
-		// filename.spki
-		snprintf(spkiFilename, sizeof(spkiFilename), "%si", m_GuildMarkSPKFilename.GetString());
-
-		std::ifstream spkFile(m_GuildMarkSPKFilename.GetString(), ios::binary );
-		std::ifstream spkiFile(spkiFilename, ios::binary );
-
-		TYPE_SPRITEID maxSpkSize = 0;
-
-		if (spkFile.is_open()
-			&& spkiFile.is_open())
-		{			
-			//---------------------------------------------------------
-			// Sprite의 개수를 알아낸다.
-			//---------------------------------------------------------
-			spkiFile.seekg( 0, ios::beg );
-			spkiFile.read((char*)&maxSpkSize, 2);			
-
-			if (spriteID < maxSpkSize)	// spriteID체크
-			{
-				long fp = 0;
-
-				//-----------------------------------------------------
-				// 어디 들었는지 찾기
-				//-----------------------------------------------------
-				spkiFile.seekg( 2 + spriteID*sizeof(long), ios::beg );
-				spkiFile.read((char*)&fp, 4);				
-				spkiFile.close();
-
-				spkFile.seekg( fp, ios::beg );
-
-				//-----------------------------------------------------
-				// CSprite생성
-				//-----------------------------------------------------
-				CSprite* pSprite = NULL;
-				CSprite* pSpriteSmall = NULL;
-
-				if (ColorDraw::Is565())
-				{
-					pSprite = new CSprite565;
-					pSpriteSmall = new CSprite565;
-				}
-				else
-				{
-					pSprite = new CSprite555;
-					pSpriteSmall = new CSprite555;
-				}
-
-				//-----------------------------------------------------
-				// Load 해서 
-				//-----------------------------------------------------
-				pSprite->LoadFromFile( spkFile );
-				pSpriteSmall->LoadFromFile( spkFile );	
-				
-				spkFile.close();
-
-				m_GuildMarks[guildID] = GUILD_SPRITES( pSprite, pSpriteSmall );
-
-				return true;
+	const char* filename = m_GuildMarkSPKFilename.GetString();
+	const GUILD_INFO* info = g_pGuildInfoMapper ? g_pGuildInfoMapper->Get(guildID) : nullptr;
+	if (filename && info) {
+		const unsigned spriteID = info->GetSpriteID();
+		std::ifstream data;
+		std::vector<int> offsets;
+		if (CTypePackDetail::ReadRunningIndex(filename, data, offsets) &&
+			offsets.size() >= 2 && spriteID < offsets.size() - 1) {
+			std::unique_ptr<CSprite> largeSprite, smallSprite;
+			if (ColorDraw::Is565()) {
+				largeSprite = std::make_unique<CSprite565>();
+				smallSprite = std::make_unique<CSprite565>();
+			} else {
+				largeSprite = std::make_unique<CSprite555>();
+				smallSprite = std::make_unique<CSprite555>();
 			}
-		}		
+			// Each member uses its own checked four-byte index entry.
+			data.seekg(offsets[spriteID]);
+			if (CTypePackDetail::LoadElement(*largeSprite, data, filename, spriteID)) {
+				data.seekg(offsets[spriteID + 1]);
+				if (CTypePackDetail::LoadElement(*smallSprite, data, filename, spriteID + 1)) {
+					m_GuildMarks[guildID] = GUILD_SPRITES(largeSprite.get(), smallSprite.get());
+					largeSprite.release();
+					smallSprite.release();
+					return true;
+				}
+			}
+		}
+		LOG_ERROR("Rejected guild sprite pair: source=%s guild=%u id=%u", filename,
+			static_cast<unsigned>(guildID), spriteID);
 	}
 
-	// 화일에 없다는 얘기니까..
-	// 다시 체크안하도록 NULL로 넣어둔다.
-	m_GuildMarks[guildID] = GUILD_SPRITES( NULL, NULL );
-
+	// Keep the existing negative-cache policy without publishing partial art.
+	m_GuildMarks[guildID] = GUILD_SPRITES(nullptr, nullptr);
 	return false;
 }
 
