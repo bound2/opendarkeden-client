@@ -1,90 +1,39 @@
-//----------------------------------------------------------------------
-// CFileIndexTable.cpp
-//----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "CFileIndexTable.h"
-//----------------------------------------------------------------------
-//
-// constructor/destructor
-//
-//----------------------------------------------------------------------
+#include <cstdint>
+#include <limits>
 
-CFileIndexTable::CFileIndexTable()
+bool CFileIndexTable::LoadFromFile(std::ifstream& indexFile)
 {
-	m_Size		= 0;
-	m_pIndex		= NULL;
-}
-
-CFileIndexTable::~CFileIndexTable()
-{
-	// array를 메모리에서 제거한다.
-	Release();
-}
-
-//----------------------------------------------------------------------
-//
-// member functions
-//
-//----------------------------------------------------------------------
-
-//----------------------------------------------------------------------
-// Init
-//----------------------------------------------------------------------
-void
-CFileIndexTable::Init(WORD count)
-{
-	// 개수가 없을 경우 
-	if (count==0) 
-		return;
-
-	// 일단 해제
-	Release();
-
-	// 메모리 잡기
-	m_Size = count;
-
-	m_pIndex = new long [m_Size];
-	
-}
-
-//----------------------------------------------------------------------
-// Release
-//----------------------------------------------------------------------
-void
-CFileIndexTable::Release()
-{
-	if (m_pIndex != NULL)
-	{
-		// 모든 index를 지운다.
-		delete [] m_pIndex;
-		m_pIndex = NULL;
-
-		m_Size = 0;
+	try {
+		unsigned char header[2];
+		if (!indexFile.read(reinterpret_cast<char*>(header), sizeof(header))) return false;
+		const unsigned count = unsigned(header[0]) | (unsigned(header[1]) << 8);
+		std::vector<long> pending(count);
+		bool valid = true;
+		for (auto& offset : pending) {
+			unsigned char bytes[4];
+			if (!indexFile.read(reinterpret_cast<char*>(bytes), sizeof(bytes))) return false;
+			const std::uint32_t value = std::uint32_t(bytes[0]) |
+				(std::uint32_t(bytes[1]) << 8) | (std::uint32_t(bytes[2]) << 16) |
+				(std::uint32_t(bytes[3]) << 24);
+			if (value < 2 || value > std::uint32_t((std::numeric_limits<std::int32_t>::max)()))
+				valid = false;
+			else
+				offset = static_cast<long>(value);
+		}
+		if (!valid) return false;
+		m_Index.swap(pending);
+		return true;
+	} catch (...) {
+		return false;
 	}
 }
 
-//----------------------------------------------------------------------
-// Load From File
-//----------------------------------------------------------------------
-bool		
-CFileIndexTable::LoadFromFile(ifstream& indexFile)
+bool CFileIndexTable::TryGetOffset(std::size_t id, long& offset) const noexcept
 {
-	//------------------------------------------------------
-	// index개수를 읽어들인다.
-	//------------------------------------------------------
-	indexFile.read((char*)&m_Size, 2);
-
-	Init(m_Size);
-
-	//------------------------------------------------------
-	// IndexFile을 모두 읽어들인다.
-	//------------------------------------------------------
-	for (int i=0; i<m_Size; i++)
-	{
-		m_pIndex[i] = 0;
-		indexFile.read((char*)&m_pIndex[i], 4);
-	}
-
+	if (id >= m_Index.size()) return false;
+	offset = m_Index[id];
 	return true;
 }
 

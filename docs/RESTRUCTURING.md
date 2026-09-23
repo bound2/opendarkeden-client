@@ -1333,6 +1333,18 @@ rounds settled* for the host rules). Test fixtures share
     formats. This specialized pack has no active game construction; the live
     effect-alpha resource uses `CAlphaSpritePalPack` instead.
 
+- [x] **5.13 File-index table input validation.**
+  > **Status:** done (2026-09-23). `CFileIndexTable` stages complete little-endian
+  > counts and signed 32-bit offsets before publication. Rejected reloads keep
+  > the previous table; copies own their storage and lookup checks the full ID.
+  > Title loading publishes only a successfully decoded sprite. The disconnect
+  > screen retains three owned empty sprites when an index or record fails and
+  > continues its existing shutdown flow, with source/ID diagnostics.
+  - Owner: nine `test_file_index_table.cpp` cases, plus existing production
+    sprite-reader tests. The installed `UI.spk` passes the changed index reader
+    and both pixel decoders for all six indexed records under ASan. Game-side
+    wiring uses the executable exemption and full builds.
+
 ## Build and review follow-up (2026-09-18)
 
 Table reads now expose const rows; `CTypeTable::GetMutable` and `Set` reject
