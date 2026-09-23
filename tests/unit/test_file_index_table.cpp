@@ -164,7 +164,8 @@ TEST(FileIndexTable, CopiesOwnTheirOffsetsIndependently)
 	table.Release();
 	CheckSeed(copy);
 	CheckSeed(assigned);
-	copy = copy;
+	const auto& same = copy;
+	copy = same;
 	CheckSeed(copy);
 	copy.Release();
 	CheckSeed(assigned);
