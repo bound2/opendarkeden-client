@@ -329,6 +329,20 @@ The same audit found that all three races tried to redirect a two-hand removal b
 
 ### Caveats
 
+**Light-filter pack follow-up (2026-09-23):** the live `CFilterPack` loader
+validates counts against the remaining input and stages complete filters before
+replacing existing rows. Failed reads preserve the previous pack, and explicit
+empty loads or initialization clear it. Seven library tests cover every
+truncated prefix, invalid counts/dimensions, a malformed later row, maximum
+counts, stream exceptions and following records; two test-first cases reproduced
+17 failed checks. Filter row-pointer arrays are zero-initialized so interrupted
+allocation can be released safely; allocator failure itself was not injected.
+The game reports and propagates rejected or empty light resources, and skips
+empty packs in both drawing paths. These game integrations are regression
+guards. The production ASan pack loader accepts all 12 installed `Light2D.ftp`
+records with no trailing bytes. Other specialized sprite/list callers and the
+dynamic UI resource inventory remain separate work.
+
 **Portal-resource follow-up (2026-09-21):** the Slayer portal's binary reader
 was separated from its game-coupled dialog, then ASan reproduced its null
 dereference with the final coordinate truncated by one byte. `SlayerPortalData`

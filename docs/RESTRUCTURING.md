@@ -1311,6 +1311,17 @@ rounds settled* for the host rules). Test fixtures share
   - Owner: `ShadowSpriteLoading.EagerPackReadsAllRecordsWithoutTheLegacyIndex`,
     the production-loader asset audit and full builds for the game-side wiring.
 
+- [x] **5.11 Light-filter pack input validation.**
+  > **Status:** done (2026-09-23). `CFilterPack` checks complete counts and
+  > filter records before replacing the current pack; invalid reloads preserve
+  > all prior filters. An explicit empty pack clears storage. Pending filter
+  > rows remain releasable if allocation throws. Game initialization reports
+  > and propagates rejected or empty light packs, and both light draw paths
+  > skip empty packs before calculating an index.
+  - Owner: the `CFilterPack` cases in `test_cfilter.cpp`; full builds cover the
+    game-side connection. The installed `Light2D.ftp` passes the production
+    loader under ASan with all 12 records consumed and no trailing bytes.
+
 ## Build and review follow-up (2026-09-18)
 
 Table reads now expose const rows; `CTypeTable::GetMutable` and `Set` reject

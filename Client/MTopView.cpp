@@ -2608,6 +2608,18 @@ MTopView::InitSprites()
 bool
 MTopView::InitFilters()
 {
+	// Validate the resource before releasing live lighting buffers. Surface
+	// restoration also calls this function and may retain the previous pack.
+	{
+		const std::string& filename = g_pFileDef->getProperty("FILE_FILTER_LIGHT2D");
+		std::ifstream file;
+		if (!FileOpenBinary(filename.c_str(), file)) return false;
+		if (!m_LightFTP.LoadFromFile(file) || m_LightFTP.GetSize() == 0) {
+			LOG_ERROR("Rejected light-filter resource: %s", filename.c_str());
+			return false;
+		}
+	}
+
 	/*
 	TYPE_FILTERID	filterID;
 
@@ -2705,15 +2717,6 @@ MTopView::InitFilters()
 		// lightBuffer initialization
 		//------------------------------------------------------
 		m_LightBufferFilter.Init( SCREENLIGHT_WIDTH, SCREENLIGHT_HEIGHT );
-
-		//------------------------------------------------------------
-		// Load Light2D FilterPack
-		//------------------------------------------------------------
-		std::ifstream LightFilter2DFile2;
-		if (!FileOpenBinary(g_pFileDef->getProperty("FILE_FILTER_LIGHT2D").c_str(), LightFilter2DFile2))
-			return false;
-		m_LightFTP.LoadFromFile(LightFilter2DFile2);
-		LightFilter2DFile2.close();
 
 		m_p2DLightPixelWidth = new int [SCREENLIGHT_WIDTH];
 		m_p2DLightPixelHeight = new int [SCREENLIGHT_HEIGHT];
@@ -8773,6 +8776,7 @@ MTopView::ClearLightBufferFilter2D()
 void			
 MTopView::AddLightFilter2D(int x, int y, BYTE range, bool bMapPixel, bool bForceLight)
 {
+	if (m_LightFTP.GetSize() == 0) return;
 	if (!bForceLight)
 	{
 		range = min( max(g_pPlayer->GetSight()-3, 0), range );
@@ -8846,6 +8850,7 @@ MTopView::AddLightFilter2D(int x, int y, BYTE range, bool bMapPixel, bool bForce
 void			
 MTopView::AddLightFilter3D(int x, int y, BYTE range, bool bMapPixel, bool bForceLight)
 {
+	if (m_LightFTP.GetSize() == 0) return;
 	if (!bForceLight)
 	{
 		range = min( max(g_pPlayer->GetSight()-3, 0), range );
