@@ -7,7 +7,6 @@
 #include "VS_UI_mouse_pointer.h"
 #include "VS_UI.h"
 #include "VS_UI_Tutorial.h"
-//#include "ex\DebugInfo.h"
 #include "UserOption.h"
 //#include "debuginfo.h"
 #include "MGameStringTable.h"

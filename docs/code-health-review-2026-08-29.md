@@ -60,7 +60,12 @@ A subsystem-by-subsystem review surfaced **197 findings**. Every area graded **D
 
 ## Remediation Status
 
-**2026-09-17 follow-up in progress:** all remaining findings are being checked against the current tree. The dated totals below are historical and include stale open entries; closure notes in the individual findings record the current evidence. Live-server verification is optional and does not gate these fixes or their merges.
+**2026-09-23 reconciliation complete:** all 197 finding headings have current
+dispositions, including duplicate findings, removals and corrected original
+claims. The [reconciliation](code-health-reconciliation-2026-09-23.md) maps
+their regression owners and records the cross-cutting follow-ups. Historical
+totals, grades and intermediate open notes below describe earlier trees; the
+latest closure notes take precedence. Live-server verification is optional.
 
 **Updated 2026-09-10, later:** the Medium *Networking & Protocol* finding below — wire bytes copied raw into `bool` members — is fixed on `feature/cpp20-macaddress-span`, centrally in the two stream reads, taking the total to 88 fixed and Medium to 19 fixed / 62 open. Its red run showed a bool holding 0x02 answering `if (a)` and `a == true` differently under MSVC; no consumer in the tree compares a wire bool with `== true`, so in play this was a sanitizer trap and an invalid value propagating into UI structs, not an inverted branch.
 
@@ -227,10 +232,10 @@ crash with silent corruption:
   ESC path through `ClosePopupWindow`, deletes it. `TempInformation` owns `std::string`
   copies now.
 
-Recorded latent: the bus queues messages and dispatches one per frame, so a sender that
-passes `c_str()` can in principle have its owner deleted in that window. The handlers
-copy immediately on dispatch, so the exposure is one frame; closing it properly means
-having the bus own its payloads.
+The 2026-09-18 queued-text follow-up closes the borrowed-string lifetime gap:
+text messages own their payload through callback completion, including reentrant
+dispatch. General raw payloads retain their caller-owned lifetime contract. The
+tests and source audit are recorded under *Found by reading* below.
 
 ### Also fixed, not in this review
 
@@ -393,8 +398,9 @@ and `OustersFin.spk` packs also pass the production pack reader in both formats:
 and string literals finds no active `CSpritePackList`, `CSpritePalPackList` or
 `CAlphaSpritePackList` callers outside SpriteLib in Client, VS_UI or tools; their
 legacy APIs are not assigned installed asset formats. Dynamic profile filenames
-and any other unclassified resource entry points remain outside this expanded
-constant-path inventory.
+and unused wrapper/list APIs are classified in the final
+[sprite audit](sprite-asset-audit-2026-09-23.md); generated profile samples
+and absent files have no installed-asset validation claim.
 
 **Game pack failure propagation (2026-09-23):** `MTopView::InitSprites` now checks
 all 26 active lazy sprite/palette opens, allowing initialization/restoration to
@@ -438,8 +444,8 @@ allocation can be released safely; allocator failure itself was not injected.
 The game reports and propagates rejected or empty light resources, and skips
 empty packs in both drawing paths. These game integrations are regression
 guards. The production ASan pack loader accepts all 12 installed `Light2D.ftp`
-records with no trailing bytes. Other specialized sprite/list callers and the
-dynamic UI resource inventory remain separate work.
+records with no trailing bytes. Subsequent specialized-caller and UI coverage
+is recorded in the [sprite audit](sprite-asset-audit-2026-09-23.md).
 
 **Portal-resource follow-up (2026-09-21):** the Slayer portal's binary reader
 was separated from its game-coupled dialog, then ASan reproduced its null
@@ -455,19 +461,29 @@ navigation. UI regression guards also replace the all-filtered navigation
 fallback's bitwise `&` with modulo and check a zone-name lookup before use.
 Packed resource reading is restored by the 2026-09-22 follow-up below.
 
-- **555 rejection cursor follow-up resolved (2026-09-21).** `CAlphaSprite555` already uses the shared alpha loader, whose packed-record cursor test covers both formats. `CIndexSprite555` and `CIndexSprite565` now share a checked loader too: both header words and complete rows must read successfully; encoded counts, cumulative pixel width and palette gradations are validated before publication. Complete malformed records consume all their rows before rejection, preserving the next packed sprite; truncated input retains stream failure and an empty sprite. Only fixed colors convert to 555, while palette words and padding survive. `Release` also resets empty-header state. Four new real-library tests reproduced 151 failed checks before the fix, then passed under ASan. The existing alpha cursor test supplies evidence for its older fix. The generic pack callers now log and propagate rejection; the asset-format audit and other specialized callers remain separate work.
+- **555 rejection cursor follow-up resolved (2026-09-21).** `CAlphaSprite555` already uses the shared alpha loader, whose packed-record cursor test covers both formats. `CIndexSprite555` and `CIndexSprite565` now share a checked loader too: both header words and complete rows must read successfully; encoded counts, cumulative pixel width and palette gradations are validated before publication. Complete malformed records consume all their rows before rejection, preserving the next packed sprite; truncated input retains stream failure and an empty sprite. Only fixed colors convert to 555, while palette words and padding survive. `Release` also resets empty-header state. Four new real-library tests reproduced 151 failed checks before the fix, then passed under ASan. The existing alpha cursor test supplies evidence for its older fix. The generic pack callers now log and propagate rejection; the completed [sprite audit](sprite-asset-audit-2026-09-23.md) records formats and specialized callers.
 - **The 555 fixes are latent in this build.** `ColorDraw::Is565()` returns a hardcoded `true`, and the 555 sprite variants are only constructed on the false branch, so the `CSprite555` family and `Convert565to555` fixes have no runtime effect today. They matter if a 5:5:5 surface is ever supported again.
-- **Real-art audit remains in progress.** Offline tools can exercise the actual library decoders against installed assets without launching the game. The initial extension-based scan is not valid evidence of asset defects: `.spk`/`.aspk` names are used by different palette, pixel and frame formats, so each file must be matched to its production caller. The generic `CTypePack` callers now report rejected headers, indexes and elements, including source/id/offset where available. A source-mapped audit of 26 installed files now passes under ASan: 331,515 declared records and 503,544 decoder calls including both pixel formats, with no rejection or truncation. `ItemDrop.ispk` has 4,296 trailing bytes beyond its declared entries; these are not claimed as validated records. The audit exposed the one-column `Effect.spk` discrepancy handled by the pixel-loader follow-up. A further 75 UI files mapped from constant constructor arguments pass 4,008 decoder calls (2,004 declared records in both formats); six contain unconsumed trailing bytes. A subsequent indexed scan uses the production index reader and validates every indexed target in all 75 UI files (4,008 calls), including three appended records missed by sequential scanning. The same scan accepts 503,541 decoder calls in 25 core files; the effect-shadow pack now takes the eager path and all three records pass the real pack loader. Unreferenced trailing bytes remain outside the validation claim. Dynamic UI filenames and specialized pack/list callers still need the same audit. Live-server verification is optional and does not block this work.
+- **Source-mapped real-art audit completed (2026-09-23).** The production ASan
+  readers accepted 193 distinct installed files, 345,531 declared records and
+  531,564 decoder calls. The [audit and inventory](sprite-asset-audit-2026-09-23.md)
+  identify formats, indexed/eager paths, the corrected UI case-alias count,
+  absent friend-window packs, generated profiles and unused legacy APIs.
+  Unreferenced trailing bytes remain outside the claim. This is parser/index
+  evidence, not a game-rendering run; the initial extension-only scan is not
+  evidence of asset defects.
 
 - **Packed resource reading and listing restored (2026-09-22).** The port's extracted-file-only `CRarFile` left quest data, help and tutorial resources inside password-protected RPK archives unreadable. It now keeps loose files as overrides and falls back to `basic/RarArchive`, backed by pinned static UnRAR 7.3.1. `GetList` returns owned regular-member names from the selected archive, with optional wildcard filtering. Decompression goes to bounded memory, never to filesystem extraction; volumes, links, unsafe member paths, corrupt data and oversized members fail without publishing partial bytes. Limits cover member bytes, dictionary size, cumulative decompression, header count and listed-name storage. The reader preserves its raw-byte and once-decoded text contracts, including the 16 MiB text-input cap and UTF-8 line clipping.
 
-  `test_resource_reader.cpp` reproduced twelve failed checks for missing packed reads, encrypted data/headers and listing. `test_rar_archive.cpp` adds regression guards for every truncated prefix of a first member, damaged CRCs, impossible metadata, per-read limits, rejected links/paths, solid encrypted RAR4/RAR5, Unicode member names and UTF-8 archive paths. An offline audit through the production archive adapter, including Linux UBSan with the portable-access patch, read all **1,733 members / 761,686 bytes across eight installed Info/UI packs**, with zero failures, including `SimpleGQuest.xml` and `EventGQuest.xml`. This proves the installed archives decode; it does not claim a game-rendering run. Plain-text callers and retirement of the renderer's legacy encoding fallback remain separate work.
+  `test_resource_reader.cpp` reproduced twelve failed checks for missing packed reads, encrypted data/headers and listing. `test_rar_archive.cpp` adds regression guards for every truncated prefix of a first member, damaged CRCs, impossible metadata, per-read limits, rejected links/paths, solid encrypted RAR4/RAR5, Unicode member names and UTF-8 archive paths. An offline audit through the production archive adapter, including Linux UBSan with the portable-access patch, read all **1,733 members / 761,686 bytes across eight installed Info/UI packs**, with zero failures, including `SimpleGQuest.xml` and `EventGQuest.xml`. This proves the installed archives decode; it does not claim a game-rendering run. Plain-text ingress and renderer fallback retirement are now covered by the [display-text audit](text-ingress-audit-2026-09-23.md), which separately records XML parsing and the malformed optional ghost-position asset.
 
 - **The scanline validation enforces an upper bound, not an exact one.** The encoder normally emits exactly `width` pixels per row, but its per-row segment count is stored in a byte, so a row needing more than 255 segments truncates and decodes to fewer.
-- **Two fixes are regression guards rather than reproductions**, and say so in their commit messages: the out-of-range `CTypePack::Get` read did not fault when tested, and `LoadFromFilePart(CSpriteSetManager)` has no observable effect without a running load.
+- **Reproduction limits remain explicit.** The original out-of-range `CTypePack::Get` test was a guard, not a reproduced fault. Partial preload behavior is now observable through the real indexed fixtures in `test_ctypepack_indexed.cpp`; its range/set follow-up reproduced 24 failed checks.
 - **`USE_ASAN` now covers MSVC as well as GCC and Clang.** `/fsanitize=address` is wired up in `CMakeLists.txt`, along with the flag surgery it requires: `/RTC1` and incremental linking are both incompatible and are removed, and the sanitizer runtime DLL is copied beside the executables so a run outside the debugger can find it. It needs the *C++ AddressSanitizer* individual component, which the C++ workload does not install; configure fails with instructions if it is absent. See the AddressSanitizer section of `README.md`.
 
-  This was the highest-leverage unfixed item, because it is the only way to reach the memory-safety findings in `Client/Packet/` and the game logic — code no test binary can link against. Turning it on is not the same as having run it: the findings below are still open until something exercises those paths under the sanitizer.
+  Packet parsers and extracted game helpers now link into real-library tests,
+  which run under ASan. Remaining game-global integrations use the named
+  executable exemptions, source review and full builds. Enabling ASan alone
+  is not evidence of exercising a path; live-server verification stays optional.
 - **Enabling it costs `/RTC1`.** MSVC rejects the runtime checks alongside the sanitizer, and `/RTC1` is what caught the uninitialised `bool` in the runtime defect list above. The two builds are complementary rather than one superseding the other, and `README.md` now sets out which checks live in which.
 
   `/RTC1` itself was only ever present because CMake happens to include it in the built-in Debug flags — nothing in this tree asked for it, so a toolchain file, preset or CI script that set `CMAKE_CXX_FLAGS_DEBUG` would have removed the check without a word. It is now requested explicitly, and configure reports which of the two mutually exclusive check sets is active.
@@ -815,7 +831,7 @@ In the loop at lines 3688-3708, `char_temp = cur[CurrentPos - check]; cur[Curren
 
 **Recommendation:** Add `UI_RemoveDescriptor((void*)pItem);` before the `delete` here, and audit every `delete`/`SAFE_DELETE` of an MItem. Longer term, have DescriptorManager hold the item ID rather than a raw pointer, and re-resolve it in `Show()`.
 
-> ✅ **Fixed** in `f0b8ae6` (branch `harden/network-input`) for this handler, matching the shop/gear/reload handlers. The broader delete-site audit and the hold-the-ID redesign remain open. Regression guard; the timing window was not reproduced.
+> ✅ **Fixed** in `f0b8ae6` (branch `harden/network-input`) for this handler, matching the shop/gear/reload handlers. The broader lifetime requirement is now covered by the 2026-09-22 item-destruction follow-up under C25; ID-only resolution is superseded by exact-object invalidation. The original handler fix was a regression guard, not a reproduced timing window.
 
 > ✅ **Deletion-lifetime residual closed (2026-09-22):** `MItem`'s virtual destructor now notifies its host, and the executable invalidates both primary and secondary tooltip pointers through the existing `UI_RemoveDescriptor` path. This covers direct deletes, container release and stack lifetimes without requiring each caller to remember UI cleanup. Shutdown releases the UI and item owners before clearing the host. ID-only resolution is superseded by destruction invalidation: locally created magazines can share ID zero, while destruction identifies the exact object. `test_item_lifetime.cpp` guards stack/base-pointer destruction, container cleanup, address reuse and absent hosts; these are destruction-contract regression guards, not a reproduction of the original rendering timing window. The executable's UI wiring is checked by source audit and full builds.
 
@@ -1337,7 +1353,7 @@ The constructor at lines 474-483 initializes m_pData, m_Size, m_bRunningLoad, m_
 
 **Category:** correctness  |  **Location:** `Client/SpriteLib/CTypePack.h:327`
 
-> ✅ **Fixed** in `6f457e0`, completed in `6ee3e76`. Both iterators advance and list entries are range checked. `6f457e0` clamped `ReleasePart(int,int)` to m_Size on `CTypePack` but missed the identical overload on `CTypePack2` — which is the template the sprite packs actually instantiate and the one `MTopView` calls — so the unbounded write survived until an adversarial review caught it. The `CSpriteSetManager` variant has no observable effect without a running load, so it has no test of its own and was fixed alongside its tested twin.
+> ✅ **Fixed** in `6f457e0`, completed in `6ee3e76`. Both iterators advance and list entries are range checked. `6f457e0` clamped `ReleasePart(int,int)` to m_Size on `CTypePack` but missed the identical overload on `CTypePack2` — which is the template the sprite packs actually instantiate and the one `MTopView` calls — so the unbounded write survived until an adversarial review caught it. The original `CSpriteSetManager` change had no running-load fixture. The current `test_ctypepack_indexed.cpp` exercises both variants through real running indexes, including mixed/repeated failures and all 65,536 set IDs.
 
 CTypePack::LoadFromFilePart(const CSpriteSetManager&) at lines 329-334 obtains `iID = SSM.GetIterator()` and loops `for (int t=0; t<SSM.GetSize(); t++) { if(*iID != 0xFFFF) Get(*iID); }` — iID is never incremented. CTypePack::ReleasePart(COrderedList) at lines 352-357 has the identical defect, as do both CTypePack2 copies at lines 818-823 and 841-846. The effect is that a partial preload or partial release touches only the first sprite in the set and silently leaves every other requested sprite unloaded (or unreleased), which manifests as missing graphics or unbounded memory growth rather than a crash.
 
@@ -2540,7 +2556,7 @@ The original in VS_UI/src/hangul/FL2.cpp:38 walked the string counting DBCS lead
 
 **Recommendation:** Add `UI_RemoveDescriptor((void*)pItem);` before the `delete` here, and audit every `delete`/`SAFE_DELETE` of an MItem. Longer term, have DescriptorManager hold the item ID rather than a raw pointer, and re-resolve it in `Show()`.
 
-> ✅ **Fixed** in `f0b8ae6` (branch `harden/network-input`) for this handler, matching the shop/gear/reload handlers. The broader delete-site audit and the hold-the-ID redesign remain open. Regression guard; the timing window was not reproduced.
+> ✅ **Fixed** in `f0b8ae6` (branch `harden/network-input`) for this handler, matching the shop/gear/reload handlers. The broader lifetime requirement is now covered by the 2026-09-22 item-destruction follow-up under C25; ID-only resolution is superseded by exact-object invalidation. The original handler fix was a regression guard, not a reproduced timing window.
 
 #### 🔴 Critical -- _Multiline_Info_Show writes a NUL terminator at a fixed offset into the caller's buffer before checking that the remaining string is that long, walking past the end of the buffer.
 
@@ -2892,7 +2908,7 @@ git ls-files shows the tracked names as basic/Basics.h, basic/i_signal.h, basic/
 > 2. **The CRLF verification cited was worthless.** The claim was that `git diff --numstat` equalling `git diff --ignore-cr-at-eol --numstat` proves line endings survived. It proves nothing here: `core.autocrlf=true`, so blobs store LF and git normalises the worktree side before diffing — stripping *every* CR from a committed file produces no diff from either command. The outcome is fine (a per-file census of CRLF, lone-LF, final-newline and UTF-8 BOM counts across all 179 content-changed blobs found zero anomalies, and 46 of those files carry a BOM), but the check originally offered as evidence could not have detected the damage it was supposed to rule out.
 > 3. **The script had two systematic blind spots**, neither of which was stated: `../`-relative includes, which it refuses because resolving `..` changes the component count and breaks its own invariant; and a UTF-8 BOM on line 1, which defeats the `^\s*#` anchor — so two files had every include rewritten *except* the first one. Six live case-broken includes survived on that account and are now fixed by hand.
 >
-> **What remains open:** nine backslash includes, all inside `//` comments — among them five naming an `ex/` directory that does not exist and one naming `mp3lib/mp3.h`, deleted with the orphaned decoder in `66d8637`. Dead, but they will mislead the next reader. And **nothing here is verified by a compiler**: Windows resolves either spelling, so all four trees are green before and after, which is precisely why this class of bug survived for years. The evidence is `git ls-files` plus the invariants. Only a Linux configure proves it — the finding's CI recommendation, still unaddressed.
+> **Residual reconciled (2026-09-23):** the nine commented backslash includes are removed, including obsolete `ex/` and MP3 paths. The deletion changes only complete `//` lines. Full hosted Linux and macOS compilers now verify the active include paths; the earlier Windows-only verification limitation is superseded.
 
 #### 🟠 High -- platform_event_wait contains an unreachable branch and a hardcoded true, so manual-reset events are never honoured and already-signalled auto-reset events never clear.
 
@@ -3105,7 +3121,7 @@ Client/framelib/TArray.h:150-190: `SizeType newSize = m_Size + array.m_Size;` th
 
 **Category:** memory-safety  |  **Location:** `Client/framelib/TArray.h:56`
 
-> ✅ **Fixed** in `a2b3c8a` (copy constructor) and `1a3b32d` (self-assignment). Applied to both copies of the template, in `framelib` and `SpriteLib`, so they do not diverge. Covered by `tests/unit/test_tarray.cpp` and `tests/unit/test_tarray_spritelib.cpp`.
+> ✅ **Fixed** in `a2b3c8a` (copy constructor) and `1a3b32d` (self-assignment). Applied to both copies of the template, in `framelib` and `SpriteLib`, so they do not diverge. Following consolidation, `tests/unit/test_tarray.cpp` covers the shared implementation and both compatibility headers; the redundant SpriteLib-only test file was retired.
 
 Client/framelib/TArray.h declares `~TArray()` (line 99) which deletes m_pData, and a user-defined `void operator = (const TArray&)` (line 58), but no copy constructor. The implicitly generated copy constructor performs a memberwise copy of m_Size and the raw m_pData pointer, so two TArray objects end up owning the same buffer and both delete it. Because the assignment operator is user-declared the compiler does not warn. Additionally, operator= at lines 239-249 begins with `Init( array.m_Size );`, and Init calls Release() — for self-assignment (`a = a`) this frees the source buffer and then copies the freshly default-constructed elements onto themselves, silently wiping the array. The class is used pervasively: CFramePack derives from it (Client/framelib/CFramePack.h:25) and the FRAME_ARRAY / DIRECTION_FRAME_ARRAY / ACTION_FRAME_ARRAY typedefs (Client/framelib/CFrame.h:152-168) are nested instantiations of it.
 

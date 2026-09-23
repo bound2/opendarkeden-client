@@ -10,7 +10,6 @@
 #include "CMP3.h"
 #include "DebugInfo.h"
 
-//#include "mp3lib\mp3.h"
 //
 //MP3 *CMP3::mp3 = NULL ;
 //LPDIRECTSOUNDBUFFER CMP3::mp3Buf = NULL ;

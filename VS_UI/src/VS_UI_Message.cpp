@@ -7,7 +7,6 @@
 #define DEBUG_OUTPUT
 #include "VS_UI_Message.h"
 #include "MGameStringTable.h"
-//#include "ex\debuginfo.h"
 //-----------------------------------------------------------------------------
 // Global
 //-----------------------------------------------------------------------------

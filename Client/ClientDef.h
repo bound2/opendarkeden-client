@@ -19,7 +19,6 @@ class MTopView;
 class MItem;
 //#include "MMusic.h"
 #include "MPlayer.h"
-//#include "Packet\Player.h"
 class ClientPlayer;
 #include "MZone.h"
 #include "CMessageArray.h"

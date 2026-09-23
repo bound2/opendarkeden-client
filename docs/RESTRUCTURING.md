@@ -8,8 +8,10 @@ true from here, and *What the review rounds settled* is what a later slice
 of any kind should read first. 5.2's *Candidates for a next slice* - dead
 code the plan found and did not take unasked - was the last list open and
 closed on 2026-09-16 with the eleventh slice; what still shrinks is the
-exemption list, whenever a task extracts a seam. Further game-model extractions
-are tracked under Phase 4; task 4.5 continues that work with the rank-bonus table.
+exemption list, whenever a task extracts a seam. Phase 4 records the completed
+game-model extractions, including the rank-bonus table. The follow-up is reconciled in
+[the completion evidence](code-health-reconciliation-2026-09-23.md), with current
+regression owners and explicit asset/runtime limits.
 
 Living, trackable plan for moving the OpenDarkEden client's game code out of the
 `DarkEden` executable and into testable static libraries, while the outstanding
@@ -1104,8 +1106,8 @@ rounds settled* for the host rules). Test fixtures share
   > limits, solid encryption and Unicode path contracts. Dependency notices
   > accompany built binaries and the macOS package.
   > Common/race chat tips and welcome/event popups now use that
-  > loader; popups test the open result before reading. Other plain-text
-  > callers and retirement of the renderer fallback remain open under
+  > loader; popups test the open result before reading. The subsequent plain-text
+  > caller migration and renderer fallback retirement are recorded under
   > the encoding finding.
   > Notice mail templates now open before reading and use `basic/MailTemplate`
   > for four complete decoded rows and viewport-bounded geometry. Popup drawing
@@ -1172,8 +1174,8 @@ rounds settled* for the host rules). Test fixtures share
   > renders the same rows it scrolls and clips images without changing the prior
   > clip; its integration remains a regression guard. Images share the text row
   > origin, including centered art. The uncalled substitution API is removed.
-  > The last compiled caller of the old cut predicate is gone; retiring its
-  > definition/declaration remains separate cleanup under findings 116/135.
+  > The old cut predicate's compiled callers, definition and declaration are
+  > retired under findings 116/135.
   > Descriptors now share `basic/DescriptorText` for bounded, owned UTF-8
   > rows, title extraction, header/image spacing and checked resource indices.
   > File input uses `OpenText`; string input keeps resource tags as plain text.
