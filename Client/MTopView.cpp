@@ -19493,15 +19493,29 @@ MTopView::ExcuteAdvancementQuestEnding(void *pVoid)
 	if(AdvancementQuestEndingEvent!= NULL)
 	{
 		bool bFinEnd = false;
+		const auto cancelEnding = [this]() {
+			UI_REQUEST_DIE_TIMER_RESET();
+			g_pEventManager->RemoveEvent(EVENTID_ADVANCEMENT_QUEST_ENDING);
+			m_AdvacementQuestEnding.Release();
+			return true;
+		};
 
 		int SpkIndex = AdvancementQuestEndingEvent->parameter4;
 		if(m_AdvacementQuestEnding.GetSize() == 0)
 		{
+			const std::string& filename = g_pFileDef->getProperty("FILE_SPRITE_ADVANCEMENT_QUEST");
 			std::ifstream	FinFile;
-			if (!FileOpenBinary(g_pFileDef->getProperty("FILE_SPRITE_ADVANCEMENT_QUEST").c_str(), FinFile))
-				return false;
-			m_AdvacementQuestEnding.LoadFromFile(FinFile);
-			FinFile.close();
+			if (!FileOpenBinary(filename.c_str(), FinFile)) return cancelEnding();
+			// The three race endings use pairs 1/2, 3/4 and 5/6, plus scroll 0.
+			if (!m_AdvacementQuestEnding.LoadFromFile(FinFile) || m_AdvacementQuestEnding.GetSize() < 7) {
+				LOG_ERROR("Rejected advancement ending sprite pack: %s", filename.c_str());
+				return cancelEnding();
+			}
+		}
+		// Check before adding one, including a malformed event's INT_MAX index.
+		if (SpkIndex < 0 || SpkIndex >= int(m_AdvacementQuestEnding.GetSize()) - 1) {
+			LOG_ERROR("Rejected advancement ending sprite pair: id=%d", SpkIndex);
+			return cancelEnding();
 		}
 		const TYPE_SOUNDID soundID = SOUND_SLAYER_ENCHANT_B2;
 
@@ -19682,17 +19696,22 @@ MTopView::ExcuteOustersFinEvent()
 	if(OustersFinEvent != NULL)
 	{
 		bool bFinEnd = false;
+		const auto cancelEnding = [this]() {
+			UI_REQUEST_DIE_TIMER_RESET();
+			g_pEventManager->RemoveEvent(EVENTID_OUSTERS_FIN);
+			m_OustersFinSPK.Release();
+			return true;
+		};
 
 		if(m_OustersFinSPK.GetSize() == 0)
 		{
 			const std::string& filename = g_pFileDef->getProperty("FILE_SPRITE_OUSTERS_FIN");
 			std::ifstream FinFile;
-			if (!FileOpenBinary(filename.c_str(), FinFile)) return bDrawBackGround;
+			if (!FileOpenBinary(filename.c_str(), FinFile)) return cancelEnding();
 			// This sequence uses sprite IDs 0 through 10.
 			if (!m_OustersFinSPK.LoadFromFile(FinFile) || m_OustersFinSPK.GetSize() < 11) {
 				LOG_ERROR("Rejected Ousters ending sprite pack: %s", filename.c_str());
-				m_OustersFinSPK.Release();
-				return bDrawBackGround;
+				return cancelEnding();
 			}
 		}
 

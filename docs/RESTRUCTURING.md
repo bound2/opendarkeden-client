@@ -1371,6 +1371,17 @@ rounds settled* for the host rules). Test fixtures share
     caller audit. Offline ASan validation covers the production loading paths,
     including both effect palettes (5,126 decoder calls in both pixel formats).
 
+- [x] **5.15 Ending sprite-pack failure cleanup.**
+  > **Status:** done (2026-09-23). The advancement ending requires a complete
+  > seven-sprite pack and validates its selected pair before adding one to the
+  > event index. Both advancement and Ousters endings reset their timer, remove
+  > the input-blocking event and release the pack when an open or decode fails.
+  > Normal background drawing resumes instead of retaining a failed ending.
+  - Owner: existing sprite-pack decoder tests, full builds and a source audit
+    of the event setters, flags, cleanup and draw callers. These executable
+    integrations are regression guards. All seven installed advancement sprites
+    pass the production eager loader in both pixel formats under ASan.
+
 ## Build and review follow-up (2026-09-18)
 
 Table reads now expose const rows; `CTypeTable::GetMutable` and `Set` reject
