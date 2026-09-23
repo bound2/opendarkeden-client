@@ -1406,6 +1406,17 @@ rounds settled* for the host rules). Test fixtures share
     sentinels, full ID sets and valid empty sprites, with three test-first cases
     reproducing 24 failed checks. Game-side integration is a regression guard.
 
+- [x] **5.18 Output queue budget.**
+  > **Status:** done (2026-09-23). The output ring has a 16 MiB capacity ceiling,
+  > including its empty sentinel, enforced on construction, resize and writes.
+  > Automatic growth reserves space geometrically. Rejection preserves queued
+  > bytes; packet rejection restores the frame and sequence through the existing
+  > rollback path. A drained ring retains its bounded allocation for reuse.
+  - Owner: four test-first cases in `test_output_stream_flush.cpp` reproduce
+    22 failed checks and cover growth, the exact limit, wrapped backpressure,
+    header/body rejection and resumed delivery. The wire inventory checks that
+    four copies of every declared maximum frame fit within the budget.
+
 ## Build and review follow-up (2026-09-18)
 
 Table reads now expose const rows; `CTypeTable::GetMutable` and `Set` reject

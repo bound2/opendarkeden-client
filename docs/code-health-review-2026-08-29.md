@@ -1685,6 +1685,19 @@ The send loops at lines 189-194, 209-214 and 225-230 call `m_Socket->send(...)`,
 
 > ✅ **Fixed on 2026-09-06** (`fix/flush-partial-send`), which is the recommendation above, taken as written. The one thing worth stating plainly is that no byte count had to be recovered from the exception: `send()` returns the number it accepted — a short count is an ordinary return, not a failure — and `SocketAPI::send_ex` (SocketAPI.cpp:672, 720-721) raises `NonBlockingIOException` only when the underlying `send()` returned `SOCKET_ERROR`, so the call that throws transferred nothing and every byte that did go out is already in `m_Head`, which all three send loops advance by each returned count (true of the shipped build: `SocketImpl.cpp`'s `__USE_ENCRY__` arm returns `len` whatever the kernel accepted, and nothing defines `__USE_ENCRY__`). The growth this leaves under sustained backpressure is the worst shape: `resize()` leaves exactly one spare byte, so with the peer blocked every `write()` reallocates and copies the whole live run; geometric growth and a cap are the follow-up. `flush()` therefore only had to stop throwing the rest away: the catch is unchanged, and `m_Head = m_Tail = 0` is now guarded by `m_Head == m_Tail`, which keeps the normalisation of a drained ring and drops nothing from a partial one. `tests/unit/test_output_stream_flush.cpp` pins the remainder, the head and tail, the peer's byte stream across two flushes, both segments of a wrapped ring, a would-block that sent nothing, writes queued behind a remainder, and a real framed packet cut mid-body — driven through a `SocketImpl` whose `send()` is scripted with one cap per call, which is why that method is now virtual (the seam is documented at its declaration in `SocketImpl.h`). The finding's sibling at SocketInputStream.cpp:421 (the zero-length `recv`) and the unbounded input-buffer growth above it are untouched. One consequence is worth naming rather than leaving to be discovered: keeping the remainder means a peer that stays blocked while the client keeps writing now grows the output ring — `write()` resizes when it fills, and nothing caps it — where before the ring was emptied on every flush by throwing the data away. That is the trade the recommendation asks for and the one every correct implementation makes, but it gives the output stream the same unbounded-growth shape the input stream's Medium finding above describes, and neither has a cap yet.
 
+> ✅ **Output-growth residual fixed (2026-09-23):** `SocketOutputStream` enforces
+> a 16 MiB allocation ceiling, including its empty sentinel, at construction,
+> explicit resize and every write. Automatic growth reserves space geometrically
+> instead of reallocating for each small write. Over-budget writes raise the
+> existing protocol exception without changing queued bytes; the packet rollback
+> path also restores sequence state when a header or body hits the limit.
+> Four test-first cases reproduced 22 failed checks and cover exact capacity,
+> wrapped rings, blocked/partial sends, resumed delivery and rejected frames.
+> `test_wire_layout.cpp` verifies that four copies of every declared maximum
+> frame fit. Storage remains bounded and reusable after draining; it is not
+> returned to the original capacity. The input-buffer residual above was closed
+> on 2026-09-17. The older paragraph records the state after the original fix.
+
 #### 🟡 Medium -- Dynamic exception specifications are violated throughout, which calls std::terminate on GCC/Clang while MSVC silently ignores it.
 
 **Category:** portability  |  **Location:** `Client/RequestFileManager.cpp:419`
