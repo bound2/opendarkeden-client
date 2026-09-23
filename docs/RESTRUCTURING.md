@@ -1345,6 +1345,22 @@ rounds settled* for the host rules). Test fixtures share
     and both pixel decoders for all six indexed records under ASan. Game-side
     wiring uses the executable exemption and full builds.
 
+- [x] **5.14 Game sprite-pack failure propagation.**
+  > **Status:** done (2026-09-23). `MTopView::InitSprites` checks all 26 active
+  > lazy sprite/palette opens and propagates rejected indexes. Eager screen
+  > palettes, effect shadows, miscellaneous sprites and weather sprites clear
+  > partially loaded packs after rejection. The Ousters ending stops before
+  > drawing unless its pack loads and contains all eleven required sprites.
+  > Empty miscellaneous/weather packs also fail initialization; clearing the
+  > failed pack permits later retries through the existing size check.
+  > Startup and display restoration stop through existing cleanup/quit paths
+  > on view failure. The tile renderer is discarded before replacing its
+  > borrowed surface, preventing stale references and leaks during retry.
+  - Owner: existing `CTypePack` and concrete decoder tests; these game-coupled
+    branches use the executable exemption, full builds and a comment-aware
+    caller audit. Offline ASan validation covers the production loading paths,
+    including both effect palettes (5,126 decoder calls in both pixel formats).
+
 ## Build and review follow-up (2026-09-18)
 
 Table reads now expose const rows; `CTypeTable::GetMutable` and `Set` reject

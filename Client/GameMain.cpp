@@ -564,9 +564,12 @@ SetMode(enum CLIENT_MODE mode)
 			//-----------------------------------------------------------------
 			// g_pTopView : 2D <--> 3D 바뀔때..
 			//-----------------------------------------------------------------
-			if (g_pTopView!=NULL)
+			if (g_pTopView!=NULL && !g_pTopView->InitChanges())
 			{
-				g_pTopView->InitChanges();
+				LOG_ERROR("Game view restoration failed; stopping before another frame");
+				g_pUIDialog->CloseMessageDlg();
+				SetMode(MODE_QUIT);
+				return;
 			}
 
 			g_pUIDialog->CloseMessageDlg();

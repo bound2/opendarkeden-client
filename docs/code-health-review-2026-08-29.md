@@ -352,9 +352,30 @@ adding to them. Three referenced friend-window packs (`FrdWinSlayer.spk`,
 `FrdWinVampire.spk`, `FrdWinOusters.spk`) are absent from this installation at six
 call sites and have no asset-validation claim. The eager `Etc.spk`, `Weather.spk`
 and `OustersFin.spk` packs also pass the production pack reader in both formats:
-47, 24 and 11 records respectively (164 calls). Their game callers still need
-to propagate load failure. Dynamic profile filenames and any other unclassified
-resource entry points remain outside this expanded constant-path inventory.
+47, 24 and 11 records respectively (164 calls). A source scan excluding comments
+and string literals finds no active `CSpritePackList`, `CSpritePalPackList` or
+`CAlphaSpritePackList` callers outside SpriteLib in Client, VS_UI or tools; their
+legacy APIs are not assigned installed asset formats. Dynamic profile filenames
+and any other unclassified resource entry points remain outside this expanded
+constant-path inventory.
+
+**Game pack failure propagation (2026-09-23):** `MTopView::InitSprites` now checks
+all 26 active lazy sprite/palette opens, allowing initialization/restoration to
+report rejected indexes. It checks the eager screen palette, miscellaneous and
+weather loaders too; failed eager loads clear partial storage, including the
+already checked effect-shadow path. Empty miscellaneous/weather packs fail,
+and the Ousters ending requires all eleven sprite slots before rendering.
+Clearing failed packs keeps the size-based retry path reachable. Startup and
+display restoration now stop through their existing cleanup/quit paths when
+view initialization fails. The tile renderer is discarded before its borrowed
+surface is replaced, so an early pack rejection cannot leave a dangling renderer
+or leak it on retry. These are executable regression guards, reviewed against
+the initialization callers, renderer ownership and the ending's sprite IDs,
+not runtime reproductions. Existing library tests own
+the loaders. Offline ASan checks also accept the installed effect palettes in
+both formats: 1,957 indexed `Effect.ppk` records and 606 eager `EffectScreen.ppk`
+records, for 5,126 decoder calls. Lazy record failures still report at first use;
+this change does not eagerly decode the large game packs during startup.
 
 **Specialized alpha-pack follow-up (2026-09-23):** `CAlphaSpritePack` now owns
 typed 555/565 arrays, including concrete indexing and destruction, and disables
