@@ -1394,6 +1394,18 @@ rounds settled* for the host rules). Test fixtures share
     exemption and full builds. All 4,758 installed guild-mark records pass the
     same index helper and both pixel decoders under ASan (9,516 decoder calls).
 
+- [x] **5.17 Partial sprite-load results.**
+  > **Status:** done (2026-09-23). Both generic pack variants return rejected
+  > lazy-record results from range/set preloads, including cached failures
+  > after the input stream closes. They validate ranges and IDs, retain valid
+  > later rows and preserve the absent-sprite sentinel. Set iteration uses its
+  > actual end rather than a narrowed 16-bit count. Addon/creature callers do
+  > not mark failed preloads complete, and zone loading follows its existing
+  > quit/priority-reset path when tile preload or image-pack reopening fails.
+  - Owner: four `test_ctypepack_indexed.cpp` cases cover results, bounds,
+    sentinels, full ID sets and valid empty sprites, with three test-first cases
+    reproducing 24 failed checks. Game-side integration is a regression guard.
+
 ## Build and review follow-up (2026-09-18)
 
 Table reads now expose const rows; `CTypeTable::GetMutable` and `Set` reject

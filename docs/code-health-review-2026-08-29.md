@@ -329,6 +329,18 @@ The same audit found that all three races tried to redirect a two-hand removal b
 
 ### Caveats
 
+**Partial sprite-load result follow-up (2026-09-23):** both generic pack
+variants previously returned true from every range/set preload, even when
+individual lazy records failed. They now retain and report those failures,
+validate IDs/ranges and continue loading valid following rows. Empty requests
+and the absent-sprite sentinel remain valid; an all-ID set no longer becomes
+an empty iteration when its size narrows to 16 bits. Three test-first cases
+reproduced 24 failed checks; a fourth covers valid empty pixel sprites in both
+formats and the two-type pack. Addon/creature callers no longer publish loaded
+flags after rejection. Both zone-loading branches now check tile/image preload
+results and use the existing quit/priority-reset path. Game wiring is a
+source/build regression guard, with library tests owning the loader contract.
+
 **Guild-mark reader follow-up (2026-09-23):** the custom loader used
 `2 + spriteID * sizeof(long)` for a file containing four-byte offsets, selecting
 the wrong entry on LP64 systems. It now uses the shared checked index reader,

@@ -587,7 +587,11 @@ LoadingAddonSPK(bool bLoadingAll)
 				}
 			#endif
 
-			g_pTopView->m_AddonSPK.LoadFromFilePart(first, last);
+			if (!g_pTopView->m_AddonSPK.LoadFromFilePart(first, last)) {
+				LOG_ERROR("Rejected addon preload: first=%u last=%u",
+					static_cast<unsigned>(first), static_cast<unsigned>(last));
+				return false;
+			}
 		
 			g_AddonSPKLoaded[i] = true;
 

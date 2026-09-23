@@ -5096,7 +5096,10 @@ MTopView::LoadFromFileCreatureSPK(int spriteType)
 				TYPE_SPRITEID last	= (*g_pCreatureSpriteTable)[spriteType].LastSpriteID;
 				long			fp	= (*g_pCreatureSpriteTable)[spriteType].SpriteFilePosition;
 
-				m_CreatureSPK.LoadFromFilePart(first, last);
+				if (!m_CreatureSPK.LoadFromFilePart(first, last)) {
+					LOG_ERROR("Rejected creature preload: type=%d", spriteType);
+					return;
+				}
 				// n번째 creature load	
 //				m_CreatureSPK.LoadFromFilePart(creatureFile, 
 //												fp,
@@ -5131,7 +5134,10 @@ MTopView::LoadFromFileCreatureSPK(int spriteType)
 					TYPE_SPRITEID first = (*g_pCreatureSpriteTable)[spriteType].FirstShadowSpriteID;
 					TYPE_SPRITEID last	= (*g_pCreatureSpriteTable)[spriteType].LastShadowSpriteID;
 
-					m_CreatureSSPK.LoadFromFilePart(first, last);
+					if (!m_CreatureSSPK.LoadFromFilePart(first, last)) {
+						LOG_ERROR("Rejected creature shadow preload: type=%d", spriteType);
+						return;
+					}
 //					m_CreatureSSPK.LoadFromFilePart(creatureShadowFile, 
 //													(*g_pCreatureSpriteTable)[spriteType].SpriteShadowFilePosition,
 //													first, 
@@ -5642,16 +5648,14 @@ MTopView::LoadFromFileTileAndImageObjectSet(const CSpriteSetManager &TileSSM, co
 //	if (!bLoad)
 //		return false;
 //
-	bool bLoad = m_TileSPK.LoadFromFilePart(TileSSM);
+	if (!m_TileSPK.LoadFromFilePart(TileSSM)) return false;
 
 	//--------------------------------------------------------
 	//
 	// ImageObject 일부 Load
 	//
 	//--------------------------------------------------------
-	m_ImageObjectSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SPRITE_IMAGEOBJECT").c_str());
-
-	return bLoad;
+	return m_ImageObjectSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SPRITE_IMAGEOBJECT").c_str());
 }
 
 //----------------------------------------------------------------------
