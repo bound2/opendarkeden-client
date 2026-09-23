@@ -2249,7 +2249,14 @@ MTopView::InitSprites()
 	//
 	//------------------------------------------------------------
 	{
-		m_EffectShadowSPK.LoadFromFileRunning(g_pFileDef->getProperty("FILE_SSPRITE_SHADOWEFFECT").c_str());
+		// This small pack loads directly, without depending on its legacy index.
+		const std::string& filename = g_pFileDef->getProperty("FILE_SSPRITE_SHADOWEFFECT");
+		std::ifstream shadowFile;
+		if (!FileOpenBinary(filename.c_str(), shadowFile)) return false;
+		if (!m_EffectShadowSPK.LoadFromFile(shadowFile)) {
+			LOG_ERROR("Rejected shadow effect sprite pack: %s", filename.c_str());
+			return false;
+		}
 	}
 
 //	UI_DrawProgress(12);

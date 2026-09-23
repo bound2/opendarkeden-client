@@ -279,7 +279,12 @@ static spritectl_sprite_t get_backend_shadow_sprite(CShadowSprite* pSprite)
 		WORD width = pSprite->GetWidth();
 		WORD height = pSprite->GetHeight();
 
-		size_t pixel_count = width * height;
+		const size_t pixel_count = size_t(width) * height;
+		if (!pixel_count || pixel_count > INT_MAX) return SPRITECTL_INVALID_SPRITE;
+		for (WORD y = 0; y < height; ++y) {
+			if (!ValidateShadowScanline(pSprite->GetPixelLineSpan(y), width))
+				return SPRITECTL_INVALID_SPRITE;
+		}
 		size_t data_size = pixel_count * sizeof(WORD);
 
 		SA_DEBUG_LIFECYCLE("get_backend_shadow_sprite: Creating backend sprite, size=%dx%d (%zu pixels, %zu bytes)",
@@ -295,7 +300,18 @@ static spritectl_sprite_t get_backend_shadow_sprite(CShadowSprite* pSprite)
 		SA_DEBUG_LIFECYCLE("get_backend_shadow_sprite: Allocated temp pixels=%p", (void*)pixels);
 
 		memset(pixels, 0, data_size);
-		pSprite->Blt(pixels, width * sizeof(WORD));
+		// Decode with a size_t row stride; the legacy Blt API takes WORD pitch.
+		for (WORD y = 0; y < height; ++y) {
+			const auto line = pSprite->GetPixelLineSpan(y);
+			WORD* dest = pixels + size_t(y) * width;
+			size_t x = 0;
+			for (size_t run = 0; run < line[0]; ++run) {
+				x += line[1 + run * 2];
+				const size_t colored = line[2 + run * 2];
+				memset(dest + x, 0, colored * sizeof(WORD));
+				x += colored;
+			}
+		}
 
 		/* Create backend sprite */
 		spritectl_sprite_t new_sprite = spritectl_create_sprite(

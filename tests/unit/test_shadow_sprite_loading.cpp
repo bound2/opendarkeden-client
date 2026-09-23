@@ -286,3 +286,101 @@ TEST(ShadowSpriteOwnership, AllGeneratedFormsRetainCopyableRowBounds)
 		CHECK(copied.IsColorPixel(3, 0));
 	}
 }
+
+TEST(ShadowSpriteAdapter, RejectsMutatedRowsBeforeCreatingOrRefreshingABackend)
+{
+	Fixture fixture;
+	CHECK_EQ(0, spritectl_init());
+	Write(valid);
+	std::ifstream in(path, std::ios::binary);
+	CShadowSprite sprite;
+	CHECK(sprite.LoadFromFile(in));
+	CSpriteSurface surface;
+	CHECK(surface.Init(4, 1));
+	POINT origin{0, 0};
+	sprite.GetPixelLine(0)[2] = 5;
+	surface.BltShadowSprite(&origin, &sprite);
+	CHECK(sprite.GetBackendSprite() == nullptr);
+	sprite.GetPixelLine(0)[2] = 1;
+	surface.BltShadowSprite(&origin, &sprite);
+	CHECK(sprite.GetBackendSprite() != nullptr);
+	sprite.GetPixelLine(0)[0] = 65535;
+	sprite.SetBackendDirty(true);
+	surface.BltShadowSprite(&origin, &sprite);
+	CHECK(sprite.GetBackendSprite() == nullptr);
+}
+
+TEST(ShadowSpriteAdapter, RejectsEmptyAndUnrepresentableRasterGeometry)
+{
+	Fixture fixture;
+	CHECK_EQ(0, spritectl_init());
+	CSpriteSurface surface;
+	CHECK(surface.Init(4, 1));
+	POINT origin{0, 0};
+	for (const auto& words : {std::vector<WORD>{0, 1}, std::vector<WORD>{1, 0}, std::vector<WORD>{0, 0}}) {
+		Write(words);
+		std::ifstream in(path, std::ios::binary);
+		CShadowSprite sprite;
+		CHECK(sprite.LoadFromFile(in));
+		surface.BltShadowSprite(&origin, &sprite);
+		CHECK(sprite.GetBackendSprite() == nullptr);
+	}
+	std::vector<WORD> huge{65535, 65535};
+	for (size_t y = 0; y < 65535; ++y) { huge.push_back(1); huge.push_back(0); }
+	Write(huge);
+	std::ifstream in(path, std::ios::binary);
+	CShadowSprite sprite;
+	CHECK(sprite.LoadFromFile(in));
+	surface.BltShadowSprite(&origin, &sprite);
+	CHECK(sprite.GetBackendSprite() == nullptr);
+}
+
+TEST(ShadowSpriteAdapter, WideValidRowsKeepTheirGeometryAndPixels)
+{
+	Fixture fixture;
+	CHECK_EQ(0, spritectl_init());
+	Write({40000, 2, 3, 1, 39999, 1, 3, 1, 39999, 1});
+	std::ifstream in(path, std::ios::binary);
+	CShadowSprite sprite;
+	CHECK(sprite.LoadFromFile(in));
+	CSpriteSurface surface;
+	CHECK(surface.Init(4, 2));
+	POINT origin{0, 0};
+	surface.BltShadowSprite(&origin, &sprite);
+	const auto backend = sprite.GetBackendSprite();
+	CHECK(backend != nullptr);
+	if (backend) {
+		CHECK_EQ(40000, backend->width);
+		CHECK_EQ(2, backend->height);
+		CHECK_EQ(160000, backend->data_size);
+		CHECK_EQ(0, backend->pixels[39999]);
+		CHECK_EQ(0, backend->pixels[79999]);
+	}
+}
+
+TEST(ShadowSpriteLoading, EagerPackReadsAllRecordsWithoutTheLegacyIndex)
+{
+	Fixture fixture;
+	std::vector<WORD> words{3};
+	for (unsigned id = 0; id < 3; ++id) words.insert(words.end(), valid.begin(), valid.end());
+	Write(words);
+	const std::string indexPath = std::string(path) + 'i';
+	struct IndexCleanup {
+		const std::string& path;
+		~IndexCleanup() { std::remove(path.c_str()); }
+	} cleanup{indexPath};
+	{
+		std::ofstream index(indexPath, std::ios::binary | std::ios::trunc);
+		index.put(14);
+		index.put(0);
+	}
+	CShadowSpritePack pack;
+	CHECK(!pack.LoadFromFileRunning(path));
+	CHECK(pack.LoadFromFile(path));
+	CHECK_EQ(3, pack.GetSize());
+	for (unsigned id = 0; id < pack.GetSize(); ++id) {
+		CHECK(pack[id].IsInit());
+		CHECK_EQ(4, pack[id].GetWidth());
+		CHECK(pack[id].IsColorPixel(3, 0));
+	}
+}
