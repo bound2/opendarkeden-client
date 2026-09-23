@@ -41,6 +41,10 @@ Client/MGameStringTable.h
 Client/CToken.cpp
 Client/CToken.h
 
+# Shrine rows and their line parser; archive access remains executable-side.
+Client/ShrineInfoData.cpp
+Client/ShrineInfoManager.h
+
 # Sound table
 Client/MSoundTable.cpp
 Client/MSoundTable.h
