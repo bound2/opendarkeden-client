@@ -1,5 +1,9 @@
 #include "test_framework.h"
 #include "CShadowSprite.h"
+#include "CIndexSprite565.h"
+#include "CSprite565.h"
+#include "CSpriteSurface.h"
+#include "SpriteLibBackendSDL.h"
 #include <algorithm>
 #include <cstdio>
 #include <fstream>
@@ -159,4 +163,126 @@ TEST(ShadowSpriteLoading, ValidRowsSupportDrawingPaddingAndMaximumLengths)
 	CHECK(loaded);
 	if (loaded) CHECK_EQ(0, sprite.GetPixelLine(65534)[0]);
 	CHECK_EQ(65535, sprite.GetHeight());
+}
+
+TEST(ShadowSpriteOwnership, SelfAssignmentPreservesTheLoadedSprite)
+{
+	Fixture fixture;
+	Write(valid);
+	std::ifstream in(path, std::ios::binary);
+	CShadowSprite sprite;
+	CHECK(sprite.LoadFromFile(in));
+	CShadowSprite& alias = sprite;
+	sprite = alias;
+	CHECK(sprite.IsInit());
+	CHECK_EQ(4, sprite.GetWidth());
+	CHECK_EQ(1, sprite.GetHeight());
+	CHECK(sprite.IsColorPixel(3, 0));
+}
+
+TEST(ShadowSpriteOwnership, AssignmentRetainsAnInitializedEmptyRecord)
+{
+	Fixture fixture;
+	Write({0, 3});
+	std::ifstream in(path, std::ios::binary);
+	CShadowSprite source, copy;
+	CHECK(source.LoadFromFile(in));
+	copy = source;
+	CHECK(copy.IsInit());
+	CHECK_EQ(0, copy.GetWidth());
+	CHECK_EQ(3, copy.GetHeight());
+}
+
+TEST(ShadowSpriteOwnership, CopiesOwnRowsPaddingAndBackendCachesIndependently)
+{
+	Fixture fixture;
+	CHECK_EQ(0, spritectl_init());
+	auto words = valid;
+	words[2] += 2;
+	words.push_back(0x1234);
+	words.push_back(0xffff);
+	Write(words);
+	std::ifstream in(path, std::ios::binary);
+	CShadowSprite source, assigned;
+	CHECK(source.LoadFromFile(in));
+	CSpriteSurface surface;
+	CHECK(surface.Init(4, 1));
+	POINT origin{0, 0};
+	surface.BltShadowSprite(&origin, &source);
+	CHECK(source.GetBackendSprite() != nullptr);
+	CShadowSprite constructed(source);
+	assigned = source;
+	for (auto* copy : {&constructed, &assigned}) {
+		CHECK(copy->GetBackendSprite() == nullptr);
+		CHECK(copy->GetPixelLine(0) != source.GetPixelLine(0));
+		const auto line = copy->GetPixelLineSpan(0);
+		CHECK_EQ(7, line.size());
+		if (line.size() == 7) CHECK_EQ(0xffff, line[6]);
+		surface.BltShadowSprite(&origin, copy);
+		CHECK(copy->GetBackendSprite() != nullptr);
+		CHECK(copy->GetBackendSprite() != source.GetBackendSprite());
+	}
+	source.Release();
+	for (auto* copy : {&constructed, &assigned}) {
+		CHECK(copy->IsColorPixel(3, 0));
+		copy->Release();
+		CHECK(copy->GetPixelLineSpan(0).empty());
+		CHECK(copy->GetBackendSprite() == nullptr);
+	}
+}
+
+TEST(ShadowSpriteOwnership, CorruptedSourceCountsAreRejectedBeforeCopying)
+{
+	Fixture fixture;
+	for (WORD bad : {WORD(3), WORD(65535)}) {
+		Write(valid);
+		std::ifstream in(path, std::ios::binary);
+		CShadowSprite source, assigned;
+		CHECK(source.LoadFromFile(in));
+		source.GetPixelLine(0)[0] = bad;
+		assigned = source;
+		CheckEmpty(assigned);
+		CShadowSprite constructed(source);
+		CheckEmpty(constructed);
+	}
+	Write(valid);
+	std::ifstream in(path, std::ios::binary);
+	CShadowSprite source, assigned;
+	CHECK(source.LoadFromFile(in));
+	source.GetPixelLine(0)[2] = 4;
+	assigned = source;
+	CheckEmpty(assigned);
+}
+
+TEST(ShadowSpriteOwnership, AllGeneratedFormsRetainCopyableRowBounds)
+{
+	Fixture fixture;
+	CShadowSprite::SetColorkey(0);
+	WORD pixels[]{0, 0xffff, 0, 0xffff};
+	CShadowSprite fromPixels, fromSprite, fromIndexed;
+	fromPixels.SetPixel(pixels, sizeof(pixels), 4, 1);
+	CSprite565 sprite;
+	Write({4, 1, 7, 2, 1, 1, 0xffff, 1, 1, 0xffff});
+	{
+		std::ifstream in(path, std::ios::binary);
+		CHECK(sprite.LoadFromFile(in));
+	}
+	fromSprite.SetPixel(sprite);
+	CIndexSprite565 indexed;
+	Write({4, 1, 9, 2, 1, 1, 0x010a, 0, 1, 0, 1, 0xffff});
+	{
+		std::ifstream in(path, std::ios::binary);
+		CHECK(indexed.LoadFromFile(in));
+	}
+	fromIndexed.SetPixel(indexed);
+	for (auto* source : {&fromPixels, &fromSprite, &fromIndexed}) {
+		CHECK_EQ(5, source->GetPixelLineSpan(0).size());
+		CShadowSprite copied(*source);
+		source->Release();
+		CHECK(copied.IsInit());
+		CHECK(!copied.IsColorPixel(0, 0));
+		CHECK(copied.IsColorPixel(1, 0));
+		CHECK(!copied.IsColorPixel(2, 0));
+		CHECK(copied.IsColorPixel(3, 0));
+	}
 }

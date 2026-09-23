@@ -1286,6 +1286,15 @@ rounds settled* for the host rules). Test fixtures share
   - Owner: `test_shadow_sprite_loading.cpp`, exercising the actual loader,
     drawing, maximum lengths, reloads and release under ASan.
 
+- [x] **5.8 Shadow-sprite copy ownership.**
+  > **Status:** done (2026-09-22). Copy construction and assignment own their
+  > rows independently, preserve self-assignment and empty initialized records,
+  > and start without a borrowed backend cache. Loaded and generated rows retain
+  > allocation spans; copies validate those spans before reading, preserve
+  > padding, and reject corrupted source rows. Pending copies use scoped owners.
+  - Owner: `test_shadow_sprite_loading.cpp`, covering independent destruction,
+    real backend caches, all three generated forms and malformed source rows.
+
 ## Build and review follow-up (2026-09-18)
 
 Table reads now expose const rows; `CTypeTable::GetMutable` and `Set` reject

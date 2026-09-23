@@ -28,4 +28,17 @@ inline bool ValidateSpriteScanline(std::span<const uint16_t> line,
 	return true;
 }
 
+// Shadow rows contain only transparent/colored counts, without color words.
+inline bool ValidateShadowScanline(std::span<const uint16_t> line, int width)
+{
+	if (line.empty() || width < 0 || std::size_t(line[0]) * 2 + 1 > line.size()) return false;
+	std::size_t remaining = static_cast<std::size_t>(width);
+	for (std::size_t run = 0; run < line[0]; ++run) {
+		const std::size_t extent = std::size_t(line[1 + run * 2]) + line[2 + run * 2];
+		if (extent > remaining) return false;
+		remaining -= extent;
+	}
+	return true;
+}
+
 #endif
