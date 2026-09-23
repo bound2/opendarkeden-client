@@ -329,6 +329,19 @@ The same audit found that all three races tried to redirect a two-hand removal b
 
 ### Caveats
 
+**Specialized alpha-pack follow-up (2026-09-23):** `CAlphaSpritePack` now owns
+typed 555/565 arrays, including concrete indexing and destruction, and disables
+shallow copying. Full reloads publish only complete packs; partial and indexed
+loads validate IDs/ranges/offsets and report decode failure. Complete malformed
+records retain the following-record cursor; successful earlier partial rows
+remain loaded, while rejected decoded rows are empty. Reused index streams read
+their header from the beginning. Twelve real-library tests cover both formats,
+reloads, malformed input, exceptions, maximum counts, packed cursors and the two
+save paths; three test-first cases reproduced 54 failed checks. This is a latent
+library API fix: current game effect-alpha resources use `CAlphaSpritePalPack`,
+and the specialized pack has no active game construction. It does not enlarge
+the installed-asset audit's format coverage.
+
 **Light-filter pack follow-up (2026-09-23):** the live `CFilterPack` loader
 validates counts against the remaining input and stages complete filters before
 replacing existing rows. Failed reads preserve the previous pack, and explicit

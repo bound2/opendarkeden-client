@@ -270,10 +270,9 @@ TEST(CSprite555, LoadFromFileAcceptsZeroSizedSprite)
 //----------------------------------------------------------------------
 // Rejecting a sprite must leave the stream at the next one.
 //
-// Sprites are stored back to back in a pack file, and the callers that
-// load them (CSpritePackList555, CAlphaSpritePack, CShadowSpritePack)
-// ignore the return value and rely on the stream position having moved
-// past the sprite. An earlier version of the bounds checking returned
+// Sprites are stored back to back in a pack file. Pack loaders record
+// rejected entries while continuing through complete records, so the
+// stream must advance past each sprite. An earlier bounds check returned
 // as soon as it spotted bad data, part way through the sprite, so one
 // malformed entry silently destroyed every entry after it.
 //----------------------------------------------------------------------
