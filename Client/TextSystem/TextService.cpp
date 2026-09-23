@@ -87,7 +87,8 @@ NormalizationCacheStats TextService::GetNormalizationCacheStats()
 	return stats;
 }
 
-// The existing normalization policy, evaluated only on a cache miss.
+// Resources decode at their declared boundary; display text is UTF-8.
+// Repair malformed bytes without guessing a different character set.
 static std::string NormalizeUncached(const std::string& text)
 {
 	if (text.empty())
@@ -96,17 +97,11 @@ static std::string NormalizeUncached(const std::string& text)
 	if (IsValidUtf8(text.c_str(), text.size()))
 		return text;
 
-	// Try common encodings: Korean first, then Chinese, then fallback
 	using TextEncoding::Encoding;
-	const Encoding encodings[] = {Encoding::Cp949, Encoding::EucKr, Encoding::Gbk,
-		Encoding::Gb2312, Encoding::Big5};
-	for (const auto encoding : encodings) {
-		std::string converted;
-		if (TextEncoding::Convert(text, encoding, Encoding::Utf8, converted))
-			return converted;
-	}
-
-	return text;
+	std::string converted;
+	if (!TextEncoding::Convert(text, Encoding::Utf8, Encoding::Utf8, converted,
+		TextEncoding::InvalidInput::Replace)) return {};
+	return converted;
 }
 
 std::string TextService::NormalizeText(const std::string& text)

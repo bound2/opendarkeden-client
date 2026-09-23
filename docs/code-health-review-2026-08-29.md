@@ -2213,6 +2213,18 @@ The bounds check in `operator[]`, the const overload, and `Get()` (lines 42-68) 
 
 #### 🟠 High -- ConvertEncoding treats SDL_ICONV_EILSEQ/EINVAL/E2BIG as success, so partial and mis-guessed conversions are accepted as valid text.
 
+> ✅ **Encoding contract completed (2026-09-23):** the renderer now accepts UTF-8
+> and repairs malformed bytes with U+FFFD, preserving valid text on both sides.
+> It no longer tries CP949/EUC-KR/Chinese pages. Legacy resources decode at their
+> selected or declared boundary. The [ingress audit](text-ingress-audit-2026-09-23.md)
+> traces resources, XML, source literals, editor input and paired-server strings;
+> it also records the production ASan parser results for installed XML and the
+> malformed numerical ghost-position asset. Two test-first renderer cases
+> reproduced 132 failed checks. The current tests cover replacement, retained
+> suffixes, scalar errors, embedded NULs, idempotence and explicit resource
+> decoding, with all 11 CTests passing in Debug, ASan and Release. The older
+> fallback discussion below describes the superseded implementation.
+
 **Category:** correctness  |  **Location:** `Client/TextSystem/TextService.cpp:77`
 
 `SDL_iconv` returns SDL_ICONV_ERROR (-1), SDL_ICONV_E2BIG (-2), SDL_ICONV_EILSEQ (-3) or SDL_ICONV_EINVAL (-4), but line 77 only tests `res == static_cast<size_t>(-1)`. An invalid byte sequence (-3) or a truncated tail (-4) therefore falls through to line 80-81 and returns the *partially* converted prefix. `NormalizeText` (line 100-104) accepts the first non-empty result, and its candidate order is `{CP949, EUC-KR, GBK, GB2312, BIG5}` — Korean first. Because GBK and CP949 share the same double-byte lead-byte range, GBK resource text almost always decodes "successfully" as CP949.

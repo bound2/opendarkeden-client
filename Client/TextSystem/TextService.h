@@ -48,10 +48,11 @@ public:
 	// binary link TextSystem without inventing that global.
 	static void RenderText(int x, int y, const std::string& text);
 
-	// Encoding normalization: converts CP949/EUC-KR/other encodings to UTF-8
+	// Display text is UTF-8. Preserve valid scalars and replace each malformed
+	// byte with U+FFFD; legacy resources must decode at their declared boundary.
 	static std::string NormalizeText(const std::string& text);
 	// The cache is local to the calling thread. Reset also clears counters and
-	// must accompany any future change to the legacy encoding policy.
+	// does not depend on the resource pack's encoding selection.
 	static void ResetNormalizationCache(NormalizationCacheLimits limits = {});
 	static NormalizationCacheStats GetNormalizationCacheStats();
 

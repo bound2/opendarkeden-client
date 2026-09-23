@@ -5,15 +5,12 @@
 // Tests for TextService::NormalizeText in Client/TextSystem/TextService.cpp.
 //
 // TextService's layout and drawing paths call this function before decoding
-// UTF-8. MString::LoadFromFile now uses the shared codec with a declared
-// resource encoding; these tests cover the remaining renderer fallback.
-// Two properties must hold here:
+// UTF-8. MString::LoadFromFile and text-resource readers decode their declared
+// encoding before display. Two properties must hold here:
 //
 //   - text that is already valid UTF-8 comes back untouched, or a table that
 //     has been converted ahead of time would be decoded a second time;
-//   - CP949 is tried before the Chinese code pages, since the byte ranges
-//     overlap and Korean data decoded as GBK yields plausible-looking but
-//     wrong Chinese.
+//   - malformed UTF-8 is repaired with U+FFFD, never guessed as another page.
 //
 // The vectors below are real bytes from Data/Info/NPCScript.inf.
 //
@@ -22,6 +19,8 @@
 #include "test_framework.h"
 
 #include "TextService.h"
+#include "ResourceText.h"
+#include "TextUtf8.h"
 
 #include <string>
 
@@ -59,6 +58,20 @@ public:
 	int GetHeight() const override { return 40; }
 };
 
+struct ResourceScope {
+	TextEncoding::Encoding saved = TextEncoding::GetResourceEncoding();
+	~ResourceScope() { TextEncoding::SetResourceEncoding(saved); }
+};
+
+std::string DecodeKoreanResource(const std::string& input)
+{
+	ResourceScope scope;
+	CHECK(TextEncoding::SetResourceEncoding(TextEncoding::Encoding::Cp949));
+	std::string decoded;
+	CHECK(ResourceText::Decode(input, decoded));
+	return decoded;
+}
+
 } // namespace
 
 //----------------------------------------------------------------------
@@ -93,42 +106,40 @@ TEST(TextServiceNormalize, ValidUtf8IsNotDecodedTwice)
 }
 
 //----------------------------------------------------------------------
-// The case the NPC dialogue actually hits.
+// NPC resources decode before their text reaches the renderer.
 //----------------------------------------------------------------------
-TEST(TextServiceNormalize, Cp949KoreanBecomesUtf8)
+TEST(TextServiceNormalize, Cp949ResourceReachesTheRendererAsUtf8)
 {
-	CHECK(std::string(UTF8_GRUBER) == Normalize(std::string(CP949_GRUBER)));
+	CHECK(std::string(UTF8_GRUBER) == Normalize(DecodeKoreanResource(CP949_GRUBER)));
 }
 
-TEST(TextServiceNormalize, Cp949SingleSyllableBecomesUtf8)
+TEST(TextServiceNormalize, Cp949SingleSyllableDecodesBeforeRendering)
 {
-	CHECK(std::string(UTF8_HAN) == Normalize(std::string(CP949_HAN)));
+	CHECK(std::string(UTF8_HAN) == Normalize(DecodeKoreanResource(CP949_HAN)));
 }
 
 //----------------------------------------------------------------------
 // Mixed ASCII and CP949 is what most .inf rows look like: a name or a
 // format specifier next to Korean prose.
 //----------------------------------------------------------------------
-TEST(TextServiceNormalize, MixedAsciiAndCp949Converts)
+TEST(TextServiceNormalize, MixedAsciiAndCp949ResourcesDecodeOnce)
 {
 	const std::string mixed = std::string("[") + CP949_HAN + "] %d";
 	const std::string want  = std::string("[") + UTF8_HAN + "] %d";
 
-	CHECK(want == Normalize(mixed));
+	CHECK(want == Normalize(DecodeKoreanResource(mixed)));
 }
 
 TEST(TextServiceNormalize, RepeatedLabelsAndRejectedInputAreComputedOnce)
 {
 	CacheScope cache;
-	const std::string label = std::string("[") + CP949_GRUBER + "]";
+	const std::string label = std::string("[") + UTF8_GRUBER + "]";
 	const std::string expected = std::string("[") + UTF8_GRUBER + "]";
-	// A1 starts an incomplete double-byte sequence in every candidate codec.
-	// 81 is a valid C1 control in glibc's EUC-KR, so it is not a portable
-	// rejected-input fixture for the existing normalization policy.
+	// Invalid UTF-8 has the same replacement result on every platform.
 	const std::string malformed("\xA1");
 	for (int i = 0; i < 20; ++i) {
 		CHECK(expected == Normalize(label));
-		CHECK(malformed == Normalize(malformed));
+		CHECK(std::string("\xEF\xBF\xBD") == Normalize(malformed));
 	}
 	const auto stats = TextSystem::TextService::GetNormalizationCacheStats();
 	CHECK_EQ(2, stats.computations);
@@ -184,7 +195,7 @@ TEST(TextServiceNormalize, MeasurementWrappingAndDrawingShareNormalizedLabels)
 	const auto style = service.GetDefaultStyle();
 	CHECK(style.font.IsValid());
 	EmptyTarget target;
-	const std::string label = std::string("[") + CP949_GRUBER + "]";
+	const std::string label = std::string("[") + UTF8_GRUBER + "]";
 	const std::string expected = std::string("[") + UTF8_GRUBER + "]";
 	for (int i = 0; i < 3; ++i) {
 		const auto metrics = service.MeasureText(label, style);
@@ -197,4 +208,51 @@ TEST(TextServiceNormalize, MeasurementWrappingAndDrawingShareNormalizedLabels)
 	}
 	CHECK_EQ(1, TextSystem::TextService::GetNormalizationCacheStats().computations);
 	CHECK_EQ(8, TextSystem::TextService::GetNormalizationCacheStats().hits);
+}
+
+TEST(TextServiceNormalize, MalformedUtf8NeverSelectsALegacyCodePage)
+{
+	CacheScope cache;
+	const std::string replacement = "\xEF\xBF\xBD";
+	const std::string suffix = "!\xED\x95\x9C\xF0\x9F\x98\x80";
+	for (int byte = 0x80; byte <= 0xff; ++byte) {
+		const std::string input = std::string("prefix") + char(byte) + suffix;
+		CHECK(Normalize(input) == std::string("prefix") + replacement + suffix);
+	}
+	CHECK(Normalize(std::string(CP949_HAN)) == replacement + replacement);
+	CHECK(Normalize(std::string("a\0\xA1!", 4)) == std::string("a\0", 2) + replacement + "!");
+}
+
+TEST(TextServiceNormalize, ExplicitResourceDecodingPrecedesRendering)
+{
+	ResourceScope scope;
+	CacheScope cache;
+	CHECK(TextEncoding::SetResourceEncoding(TextEncoding::Encoding::Cp949));
+	std::string decoded;
+	CHECK(ResourceText::Decode(CP949_GRUBER, decoded));
+	CHECK(decoded == UTF8_GRUBER);
+	CHECK(Normalize(decoded) == decoded);
+	const std::string raw = "\xC7\xD1";
+	const std::string repaired = "\xEF\xBF\xBD\xEF\xBF\xBD";
+	CHECK(Normalize(raw) == repaired);
+	CHECK(TextEncoding::SetResourceEncoding(TextEncoding::Encoding::Gbk));
+	CHECK(Normalize(raw) == repaired);
+	const auto result = Normalize(raw);
+	CHECK(TextSystem::IsValidUtf8(result.data(), result.size()));
+}
+
+TEST(TextServiceNormalize, ScalarErrorsPreserveFollowingTextAndAreIdempotent)
+{
+	CacheScope cache;
+	const std::string replacement = "\xEF\xBF\xBD";
+	for (const std::string invalid : {"\xC0\x80", "\xED\xA0\x80", "\xF4\x90\x80\x80",
+		"\xF5\x80\x80\x80", "\xE2\x82", "\xF0\x9F\x98"}) {
+		std::string expected;
+		for (size_t i = 0; i < invalid.size(); ++i) expected += replacement;
+		expected += "!\xC2\xA1\xF4\x8F\xBF\xBF";
+		const auto result = Normalize(invalid + "!\xC2\xA1\xF4\x8F\xBF\xBF");
+		CHECK(result == expected);
+		CHECK(TextSystem::IsValidUtf8(result.data(), result.size()));
+		CHECK(Normalize(result) == result);
+	}
 }
