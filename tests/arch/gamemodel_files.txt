@@ -184,3 +184,16 @@ Client/MStringArray.cpp
 Client/MStringArray.h
 Client/CTypeTable.h
 Client/MTypeDef.h
+
+# World metadata and game calendar; unchanged implementation ownership.
+Client/MZoneTable.cpp
+Client/MZoneTable.h
+Client/MCreatureTable.cpp
+Client/MCreatureTable.h
+Client/MNPCTable.cpp
+Client/MNPCTable.h
+Client/MGuildInfoMapper.cpp
+Client/MGuildInfoMapper.h
+Client/MGameTime.cpp
+Client/MGameTime.h
+Client/CTypeMap.h
