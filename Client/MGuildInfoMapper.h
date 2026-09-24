@@ -5,7 +5,9 @@
 #ifndef __MGUILD_INFO_MAPPER_H__
 #define __MGUILD_INFO_MAPPER_H__
 
+#ifdef _MSC_VER
 #pragma warning(disable:4786)
+#endif
 
 #include "Platform.h"
 #include "DrawTypeDef.h"

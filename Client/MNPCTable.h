@@ -23,7 +23,9 @@
 #ifndef __MNPCTABLE_H__
 #define	__MNPCTABLE_H__
 
+#ifdef _MSC_VER
 #pragma warning(disable:4786)
+#endif
 
 #include "CTypeMap.h"
 #include <list>
