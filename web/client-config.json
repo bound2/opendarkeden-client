@@ -1,0 +1,5 @@
+{
+  "websocketUrl": "/game",
+  "loginHost": "127.0.0.1",
+  "loginPort": 9999
+}

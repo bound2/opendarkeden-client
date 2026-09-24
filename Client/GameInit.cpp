@@ -68,6 +68,8 @@
 #include "MathTable.h"
 #include "ModifyStatusManager.h"
 #include "RequestServerPlayerManager.h"
+#include "WebSocketTransport.h"
+#include <cstdlib>
 #include "ClientCommunicationManager.h"
 #include "KeyAccelerator.h"
 #include "AcceleratorManager.h"
@@ -2016,7 +2018,18 @@ InitSocket()
 				}
 
 				// domain으로 된 주소인 경우..
-				if (ServerAddress[0] < '0' || ServerAddress[0] > '9')
+				if (const char* host = std::getenv("DARKEDEN_LOGIN_HOST")) {
+					if (*host) ServerAddress = host;
+				}
+				if (const char* configuredPort = std::getenv("DARKEDEN_LOGIN_PORT")) {
+					char* end = nullptr;
+					const long value = std::strtol(configuredPort, &end, 10);
+					if (!*configuredPort || *end || value < 1 || value > 65535)
+						throw ConnectException("Invalid DARKEDEN_LOGIN_PORT");
+					port = static_cast<uint>(value);
+				}
+				if (ServerAddress.empty()) throw ConnectException("Login server address is empty");
+				if (!NetworkTransport::UsesWebSocket() && (ServerAddress[0] < '0' || ServerAddress[0] > '9'))
 				{
 					struct hostent* h;
 
@@ -2159,6 +2172,7 @@ InitSocket()
 	{
 		DEBUG_ADD("[ InitGame ]  delete RequestServerPlayerManager");
 		delete g_pRequestServerPlayerManager;
+		g_pRequestServerPlayerManager = nullptr;
 	}
 
 	if (g_pClientCommunicationManager!=NULL)
@@ -2189,7 +2203,7 @@ InitSocket()
 
 	// RequestServer functionality is for server mode only - Windows only
 #ifdef PLATFORM_WINDOWS
-	if (g_pClientConfig->MAX_REQUEST_SERVICE > 0)
+	if (g_pClientConfig->MAX_REQUEST_SERVICE > 0 && !NetworkTransport::UsesWebSocket())
 	{
 		DEBUG_ADD("[ InitGame ] new RequestServerPlayerManager");
 		g_pRequestServerPlayerManager = new RequestServerPlayerManager;

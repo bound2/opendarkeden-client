@@ -32,6 +32,7 @@ Client/Packet/ServerSocket.cpp
 Client/Packet/Socket.cpp
 Client/Packet/SocketAPI.cpp
 Client/Packet/SocketImpl.cpp
+Client/Packet/WebSocketTransport.cpp
 
 # The base under all three player classes: the send/receive plumbing
 # over a socket, with no game state of its own (task 5.1)

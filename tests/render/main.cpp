@@ -16,10 +16,20 @@ int main(int argc, char** argv)
 	const bool benchmarkXbrz = argc == 2 && std::strcmp(argv[1], "--benchmark-xbrz") == 0;
 	const bool benchmarkMixed = argc == 2 && std::strcmp(argv[1], "--benchmark-mixed") == 0;
 	const bool foreign = argc == 2 && std::strcmp(argv[1], "--foreign-shaders") == 0;
-	const bool shaders = foreign || benchmarkXbrz || benchmarkMixed || (argc == 2 && std::strcmp(argv[1], "--shaders") == 0);
+	const bool shaders =
+#ifdef __EMSCRIPTEN__
+		true ||
+#endif
+		foreign || benchmarkXbrz || benchmarkMixed || (argc == 2 && std::strcmp(argv[1], "--shaders") == 0);
 	const bool accelerated = shaders || benchmark || (argc == 2 && std::strcmp(argv[1], "--accelerated") == 0);
 	SDL_SetMainReady();
-	if (shaders) SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
+	if (shaders) SDL_SetHint(SDL_HINT_RENDER_DRIVER,
+#ifdef __EMSCRIPTEN__
+		"opengles2"
+#else
+		"opengl"
+#endif
+	);
 	if (!accelerated) SDL_setenv("SDL_VIDEODRIVER", "dummy", 1);
 	if (spritectl_init() != 0) return 1;
 	SDL_Window* window = nullptr;

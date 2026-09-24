@@ -17,6 +17,10 @@ if(WIN32)
 	target_sources(darkeden_unrar PRIVATE isnt.cpp motw.cpp)
 	target_link_libraries(darkeden_unrar PRIVATE shlwapi powrprof psapi wbemuuid
 		advapi32 ole32 oleaut32)
+elseif(EMSCRIPTEN)
+	# Browser asset reads run on the main thread; spawning UnRAR workers would
+	# require SharedArrayBuffer and cross-origin isolation for every deployment.
+	target_compile_definitions(darkeden_unrar PRIVATE _FILE_OFFSET_BITS=64 _LARGEFILE_SOURCE)
 else()
 	find_package(Threads REQUIRED)
 	target_compile_definitions(darkeden_unrar PRIVATE

@@ -15,6 +15,9 @@
 #include "Types.h"
 #include "Exception.h"
 #include "SocketAPI.h"
+#include <memory>
+
+namespace NetworkTransport { class WebSocketTransport; }
 
 //////////////////////////////////////////////////
 // forward declarations
@@ -121,7 +124,7 @@ public :
 	uint getPort () const noexcept { return m_Port; }
 
 	// check if socket is valid
-	bool isValid () const noexcept { return m_SocketID != INVALID_SOCKET; }
+	bool isValid () const noexcept { return m_WebMode || m_SocketID != INVALID_SOCKET; }
 	
 	// get socket descriptor
 	SOCKET getSOCKET () const noexcept { return m_SocketID; }
@@ -157,6 +160,8 @@ protected :
 	
 	// peer port
 	uint m_Port;
+	bool m_WebMode = false;
+	std::unique_ptr<NetworkTransport::WebSocketTransport> m_WebSocket;
 
 public:
 	char m_key;

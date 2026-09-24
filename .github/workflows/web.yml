@@ -1,0 +1,74 @@
+name: Browser build and tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  webgl:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Build WebAssembly client and probes
+        run: |
+          docker run --rm --mount type=bind,source="$PWD",target=/src,readonly \
+            --mount type=volume,source=darkeden-web-ci,target=/work \
+            --env WEB_BUILD_JOBS=4 \
+            emscripten/emsdk:6.0.10@sha256:e077d54e2b8970575ebc4f185ac1de0b95c05f2b266134d4ba27449af7aebf65 \
+            bash /src/tools/web/build-container.sh
+          mkdir -p build/web
+          docker run --rm --mount type=volume,source=darkeden-web-ci,target=/work,readonly \
+            --mount type=bind,source="$PWD/build/web",target=/out \
+            alpine:3.22 cp -r /work/build-wasm/bin/. /out/
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test runner
+        working-directory: tools/web
+        run: npm ci --ignore-scripts
+      - name: Check out the compatible production gateway fixture
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: bound2/opendarkeden-server
+          ref: cc6478598b6ef1e44cff22f5884d43c28fdedd4e
+          path: build/gateway
+          sparse-checkout: tools/websocket
+          persist-credentials: false
+      - name: Verify WebGL pixels and binary login/world handoffs
+        env:
+          WEB_TEST_SOFTWARE_GL: '1'
+        run: |
+          npm ci --ignore-scripts --prefix build/gateway/tools/websocket
+          python3 -m http.server 18739 --bind 127.0.0.1 --directory build/web > build/web-http.log 2>&1 &
+          http_pid=$!
+          node build/gateway/tools/websocket/client-fixture.mjs > build/web-gateway.log 2>&1 &
+          gateway_pid=$!
+          trap 'kill "$http_pid" "$gateway_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:18739/web_sprite_tests.html >/dev/null; then break; fi
+            sleep 1
+          done
+          node tools/web/test-renderer.mjs
+          node tools/web/test-transport.mjs
+      - name: Upload browser build and diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: browser-client
+          retention-days: 7
+          path: |
+            build/web/
+            build/web-*.log
+            web-renderer.log

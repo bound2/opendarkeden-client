@@ -33,7 +33,6 @@ set(SPRITELIB_SOURCES
 	# Backend implementation
 	SpriteLibBackendSDL.cpp
 	SpriteGpu.cpp
-	SpriteGpuEffects.cpp
 	FrameUpscaler.cpp
 
 	# SDL-specific CSpriteSurface implementation
@@ -153,6 +152,11 @@ set(SPRITELIB_HEADERS
 )
 
 # Create SpriteLib library
+if(EMSCRIPTEN)
+	list(APPEND SPRITELIB_SOURCES SpriteGpuEffectsWeb.cpp)
+else()
+	list(APPEND SPRITELIB_SOURCES SpriteGpuEffects.cpp)
+endif()
 add_library(SpriteLib STATIC ${SPRITELIB_SOURCES})
 
 # CSpriteSurface_Adapter.cpp logs through DebugLog.h, which basic

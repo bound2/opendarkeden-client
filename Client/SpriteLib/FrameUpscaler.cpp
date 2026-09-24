@@ -69,8 +69,12 @@ bool FrameUpscaler::Draw(SDL_Surface* source, SDL_Renderer* renderer, const SDL_
             output_.resize(static_cast<size_t>(width * height));
             // This is an opaque, already-composited frame. RGB avoids treating
             // the frame boundary as a transparent sprite edge.
+#ifdef __EMSCRIPTEN__
+            const unsigned workers = 1;
+#else
             const unsigned workers = current_.size() >= 65536 ?
                 std::clamp(std::thread::hardware_concurrency(), 1u, 4u) : 1u;
+#endif
             // xBRZ accepts independent, non-overlapping output row slices and
             // reads the neighboring source rows itself. SDL stays on this thread.
             std::array<std::future<void>, 3> jobs;

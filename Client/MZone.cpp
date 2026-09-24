@@ -909,13 +909,8 @@ MZone::LoadFromFileSectorSound(std::ifstream& file)
 bool
 MZone::LoadFromFile(std::ifstream& file)
 {
-	bool skipImageObjects = false;
-#ifdef __EMSCRIPTEN__
-	extern bool g_demoSkipImageObjects;
-	skipImageObjects = g_demoSkipImageObjects;
-#endif
 	ZoneMapData loaded;
-	if (!loaded.LoadFromFile(file, skipImageObjects)) {
+	if (!loaded.LoadFromFile(file, false)) {
 		DEBUG_ADD_ERR("Invalid or truncated map file");
 		return false;
 	}

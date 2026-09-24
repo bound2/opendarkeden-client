@@ -7,8 +7,24 @@
 // and output matrices. The algorithm, thresholds, rotations and weights are
 // retained. The upstream linking exceptions are not extended to this file.
 namespace SpriteGpuXbrz {
-inline constexpr const char* Common = R"glsl(#version 120
+inline constexpr const char* Common =
+#ifdef __EMSCRIPTEN__
+R"glsl(#version 300 es
+precision highp float;
+precision highp int;
+precision highp sampler2DArray;
+#define WEBGL
+#define texture2D(s, uv) texture(s, uv).bgra
+#define gl_FragColor fragmentColor.bgra
+out vec4 fragmentColor;
+uniform sampler2DArray distances;
+)glsl"
+#else
+R"glsl(#version 120
 #extension GL_ARB_gpu_shader_fp64 : require
+)glsl"
+#endif
+R"glsl(
 uniform sampler2D source;
 uniform sampler2D corners;
 uniform vec2 sourceSize;
@@ -24,13 +40,48 @@ vec3 pixel(vec2 p) {
 }
 
 float fastDist(vec3 a, vec3 b) {
+#ifdef WEBGL
+	// One-time RGB-distance upload replaces fp64, which WebGL does not have.
+	// Negating all three deltas leaves the squared distance unchanged, so only
+	// 128 red layers are needed (32 MiB instead of the CPU table's 64 MiB).
+	ivec3 delta = ivec3((a - b) / 2.0);
+	if (delta.r < 0) delta = -delta;
+	return texelFetch(distances, ivec3(delta.g + 127, delta.b + 127, delta.r), 0).r;
+#else
 	// xBRZ's buffered RGB distance truncates each signed difference / 2.
 	vec3 delta = sign(a - b) * floor(abs(a - b) / 2.0) * 2.0;
 	float y = dot(delta, vec3(0.2627, 0.6780, 0.0593));
 	float cb = (delta.b - y) * (0.5 / (1.0 - 0.0593));
 	float cr = (delta.r - y) * (0.5 / (1.0 - 0.2627));
 	return sqrt(y * y + cb * cb + cr * cr);
+#endif
 }
+#ifdef WEBGL
+// CPU distances are float values accumulated as doubles. Their bounded range
+// permits exact unsigned fixed-point accumulation with 23 fractional bits.
+// Keep the high and low words separate so GPU float reassociation cannot change
+// edge decisions. Multiplication by 18/5 and 11/5 implements xBRZ's thresholds.
+uvec2 addDistance(uvec2 a, uvec2 b) {
+	uint low = a.x + b.x;
+	return uvec2(low, a.y + b.y + uint(low < a.x));
+}
+uvec2 multiplyDistance(uvec2 a, uint multiplier) {
+	uint low = (a.x & 65535u) * multiplier;
+	uint high = (a.x >> 16u) * multiplier + (low >> 16u);
+	return uvec2((low & 65535u) | (high << 16u), a.y * multiplier + (high >> 16u));
+}
+bool lessDistance(uvec2 a, uvec2 b) {
+	return a.y < b.y || (a.y == b.y && a.x < b.x);
+}
+uvec2 dist(vec3 a, vec3 b) {
+	uint bits = floatBitsToUint(fastDist(a, b));
+	if (bits == 0u) return uvec2(0u);
+	uint mantissa = (bits & 0x7fffffu) | 0x800000u;
+	uint shift = (bits >> 23u) - 127u;
+	return uvec2(mantissa << shift, shift == 0u ? 0u : mantissa >> (32u - shift));
+}
+bool eq(vec3 a, vec3 b) { return fastDist(a, b) < 30.0; }
+#else
 double dist(vec3 a, vec3 b) {
 	dvec3 delta = dvec3(sign(a - b) * floor(abs(a - b) / 2.0) * 2.0);
 	double kb = double(593) / double(10000), kr = double(2627) / double(10000);
@@ -45,6 +96,7 @@ bool eq(vec3 a, vec3 b) {
 	float d = fastDist(a, b);
 	return abs(d - 30.0) < 0.001 ? dist(a, b) < double(30) : d < 30.0;
 }
+#endif
 )glsl";
 
 inline constexpr const char* Classify = R"glsl(
@@ -56,6 +108,15 @@ void main() {
 	vec3 n = pixel(p + vec2(0, 2)), o = pixel(p + vec2(1, 2));
 	vec4 blend = vec4(0.0); // F, G, J, K at this crossing of four pixels.
 	if (!((f == g && j == k) || (f == j && g == k))) {
+#ifdef WEBGL
+		uvec2 jg = addDistance(addDistance(addDistance(dist(i, f), dist(f, c)),
+			addDistance(dist(n, k), dist(k, h))), multiplyDistance(dist(j, g), 4u));
+		uvec2 fk = addDistance(addDistance(addDistance(dist(e, j), dist(j, o)),
+			addDistance(dist(b, g), dist(g, l))), multiplyDistance(dist(f, k), 4u));
+		bool jgLess = lessDistance(jg, fk), fkLess = lessDistance(fk, jg);
+		bool jgDominant = lessDistance(multiplyDistance(jg, 18u), multiplyDistance(fk, 5u));
+		bool fkDominant = lessDistance(multiplyDistance(fk, 18u), multiplyDistance(jg, 5u));
+#else
 		float jgFast = fastDist(i, f) + fastDist(f, c) + fastDist(n, k) + fastDist(k, h) + 4.0 * fastDist(j, g);
 		float fkFast = fastDist(e, j) + fastDist(j, o) + fastDist(b, g) + fastDist(g, l) + 4.0 * fastDist(f, k);
 		double jg = double(jgFast), fk = double(fkFast);
@@ -65,12 +126,16 @@ void main() {
 			jg = dist(i, f) + dist(f, c) + dist(n, k) + dist(k, h) + double(4) * dist(j, g);
 			fk = dist(e, j) + dist(j, o) + dist(b, g) + dist(g, l) + double(4) * dist(f, k);
 		}
-		if (jg < fk) {
-			float strength = (double(36) / double(10)) * jg < fk ? 2.0 : 1.0;
+		bool jgLess = jg < fk, fkLess = fk < jg;
+		bool jgDominant = (double(36) / double(10)) * jg < fk;
+		bool fkDominant = (double(36) / double(10)) * fk < jg;
+#endif
+		if (jgLess) {
+			float strength = jgDominant ? 2.0 : 1.0;
 			if (f != g && f != j) blend.r = strength;
 			if (k != j && k != g) blend.a = strength;
-		} else if (fk < jg) {
-			float strength = (double(36) / double(10)) * fk < jg ? 2.0 : 1.0;
+		} else if (fkLess) {
+			float strength = fkDominant ? 2.0 : 1.0;
 			if (j != f && j != k) blend.b = strength;
 			if (g != f && g != k) blend.g = strength;
 		}
@@ -140,8 +205,13 @@ vec3 blendPixel(vec3 result, vec2 outputPixel, vec4 blend,
 		(blend.g != 0.0 && !eq(e, g)) || (blend.a != 0.0 && !eq(e, c)) ||
 		(!eq(e, i) && eq(g, h) && eq(h, i) && eq(i, f) && eq(f, c)));
 	float ef = fastDist(e, f), eh = fastDist(e, h);
+#ifdef WEBGL
+	bool chooseF = ef <= eh;
+	uvec2 fg = dist(f, g), hc = dist(h, c);
+	bool isShallow = !lessDistance(multiplyDistance(hc, 5u), multiplyDistance(fg, 11u)) && e != g && d != g;
+	bool isSteep = !lessDistance(multiplyDistance(fg, 5u), multiplyDistance(hc, 11u)) && e != c && b != c;
+#else
 	bool chooseF = abs(ef - eh) < 0.001 ? dist(e, f) <= dist(e, h) : ef <= eh;
-	vec3 color = chooseF ? f : h;
 	float fgFast = fastDist(f, g), hcFast = fastDist(h, c);
 	double fg = double(fgFast), hc = double(hcFast);
 	if (abs(2.2 * fgFast - hcFast) < 0.01 || abs(2.2 * hcFast - fgFast) < 0.01) {
@@ -149,6 +219,8 @@ vec3 blendPixel(vec3 result, vec2 outputPixel, vec4 blend,
 	}
 	bool isShallow = (double(22) / double(10)) * fg <= hc && e != g && d != g;
 	bool isSteep = (double(22) / double(10)) * hc <= fg && e != c && b != c;
+#endif
+	vec3 color = chooseF ? f : h;
 	vec2 w = weight(outputPixel, line, isShallow, isSteep);
 	// Avoid a floating divide rounding an exact integer infinitesimally down.
 	return floor((color * w.x + result * (w.y - w.x)) / w.y + 0.0001);

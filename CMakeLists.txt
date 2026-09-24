@@ -41,6 +41,12 @@ option(USE_UBSAN "Enable UndefinedBehaviorSanitizer for undefined behavior detec
 set(USE_SDL_BACKEND ON CACHE BOOL "Use SDL backend instead of native Windows APIs" FORCE)
 
 option(BUILD_ENGINE "Build new SDL-based engine" ON)
+if(EMSCRIPTEN)
+	set(_build_tools_default OFF)
+else()
+	set(_build_tools_default ON)
+endif()
+option(BUILD_RESOURCE_TOOLS "Build native resource validators and viewers" ${_build_tools_default})
 option(BUILD_TESTS "Build unit tests for the static libraries" OFF)
 option(REQUIRE_TEST_TOOLS "Require the complete CTest suite and its Bash/Perl tools" OFF)
 if(REQUIRE_TEST_TOOLS AND NOT BUILD_TESTS)
@@ -266,6 +272,10 @@ endif()
 link_libraries(project_warnings)
 
 # Find SDL2 (needed for engine and DXLib)
+if(EMSCRIPTEN)
+	list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/web")
+	include(cmake/web/Dependencies.cmake)
+else()
 if(BUILD_ENGINE OR USE_SDL_BACKEND OR NOT WIN32)
 	find_package(SDL2 REQUIRED)
 	find_package(SDL2_image REQUIRED)
@@ -293,6 +303,7 @@ if(JPEG_FOUND OR JPEG_LIBRARIES)
 	message(STATUS "JPEG library found: ${JPEG_LIBRARIES}")
 else()
 	message(WARNING "JPEG library not found - JPG loading/saving may not work")
+endif()
 endif()
 
 # Subdirectories
@@ -378,6 +389,7 @@ target_compile_definitions(packetwire PRIVATE
 target_compile_definitions(packetwire PUBLIC ${DARKEDEN_PLATFORM_DEFINITIONS})
 
 target_link_libraries(packetwire PUBLIC basic)
+include(cmake/WebSocket.cmake)
 
 # Socket.cpp/SocketImpl.cpp call Winsock directly; carry the import
 # library with the target so every consumer resolves it.
@@ -631,6 +643,7 @@ endif()
 # ============================================================
 
 # Resource Validator - checks all resource files for integrity
+if(BUILD_RESOURCE_TOOLS)
 add_executable(resource_validator
 	Client/tools/resource_validator.cpp
 )
@@ -832,6 +845,7 @@ endif()
 set_target_properties(effect_viewer PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
+endif()
 
 
 # Examples (always built if backend is enabled)
@@ -1141,6 +1155,11 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# PLATFORM_POSIX, which basic/Platform.h derives from the compiler.
 
 	message(STATUS "DarkEden executable will be built from remaining Client files (VS_UI compiled separately)")
+endif()
+
+if(EMSCRIPTEN)
+	include(cmake/web/Client.cmake)
+	include(cmake/web/Tests.cmake)
 endif()
 
 # Generate the actual, transitive options of every compiled target for CTest.

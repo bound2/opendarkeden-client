@@ -79,6 +79,7 @@
 #include "VS_UI_GameCommon2.h"
 
 #include "Cpackets/CGPartyPosition.h"
+#include "WebSocketTransport.h"
 
 extern void UI_RunPetInfo(struct PETINFO *pPetInfo);
 extern bool UpdateSocketOutput();
@@ -586,7 +587,7 @@ SendPositionInfoToParty()
 		// 좌표가 달라졌으면 보낸다.
 		if (oldX!=x || oldY!=y || oldZoneID!=zoneID)			
 		{
-			if(g_pUserInformation->bKorean == true)
+			if(g_pUserInformation->bKorean == true && !NetworkTransport::UsesWebSocket())
 			{
 				RCPositionInfo _RCPositionInfo;
 
@@ -668,7 +669,7 @@ SendStatusInfoToParty()
 			// 좌표가 달라졌으면 보낸다.
 			if (oldHP!=HP || oldMaxHP!=MaxHP)
 			{
-				if(g_pUserInformation->bKorean == true)
+				if(g_pUserInformation->bKorean == true && !NetworkTransport::UsesWebSocket())
 				{
 					RCStatusHP _RCStatusHP;
 

@@ -64,6 +64,10 @@
 #include <sys/stat.h>
 #include <filesystem>
 #include "ClientMain.h"
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include "UserOption.h"
+#endif
 #ifndef PLATFORM_WINDOWS
 #include "DXLib/DXLibBackend.h"	// dxlib_input_update(), the SDL event pump
 #include "DataPath.h"			// Basic::FindDataRoot, the working directory off Windows
@@ -2997,6 +3001,184 @@ WinMain(HINSTANCE hInstance,
 //       Win32-only steps are behind PLATFORM_WINDOWS, with the SDL
 //       equivalent in the other branch where one is needed.
 //-----------------------------------------------------------------------------
+static void FinishClient(HANDLE hMutex, const char* lpCmdLine)
+{
+	(void)hMutex;
+	ReleaseAllObjects();
+#ifdef __WEB_BROWSER__
+	if(NULL != g_pWebBrowser)
+	{
+		g_pWebBrowser->Quit();
+		g_pWebBrowser->Release();
+		DeleteObject(g_pWebBrowser);
+		g_pWebBrowser= NULL;
+		CoUninitialize();
+	}
+#endif
+//#if defined(OUTPUT_DEBUG) && !defined(_DEBUG)
+	delete gC_ci;
+#ifdef OUTPUT_DEBUG
+//	_close(CLogFile);
+//	CheckCLogFile();
+#endif
+
+	#ifdef OUTPUT_DEBUG
+		if (g_bNeedUpdate)
+		{
+			//MessageBox(0,"Error:[g_bNeedUpdate]","Error",MB_OK);
+			DEBUG_ADD("Need to Update! Run Updater.exe");
+		}
+
+		DEBUG_ADD("---------------[  End ReleaseAllObjects  ]---------------");
+
+		if (g_pDebugMessage!=NULL)
+		{
+			DEBUG_ADD("--------------- Delete DebugMessageArray --------------");
+			delete g_pDebugMessage;
+			g_pDebugMessage = NULL;
+		}
+	#endif
+	DEBUG_CMD(MIN_HIDEWND, "------------------------------");
+
+
+	if (g_pClientConfig!=NULL)
+	{
+		delete g_pClientConfig;
+		g_pClientConfig = NULL;
+	}
+
+// REMOVED: nProtect anti-cheat code (SDL migration - no longer needed)
+
+
+#ifndef OUTPUT_DEBUG
+	ReleaseMutex( hMutex );
+#endif
+
+	#ifdef OUTPUT_DEBUG
+		DeleteCriticalSection(&g_Lock);
+	#endif
+
+	//----------------------------------------------------------------
+	// Updater를 실행시킨다.
+	//----------------------------------------------------------------
+	if (g_bNeedUpdate)
+	{
+		//_spawnl(_P_NOWAIT, UPDATER_FILENAME, UPDATER_FILENAME, "UPDATE", NULL);
+		char szTemp[512];
+		snprintf(szTemp, sizeof(szTemp), "UPDATE %s", lpCmdLine);
+		_chdir(g_CWD);
+		//::MessageBox(0,"뗍혤溝固DLL놔댄，댄轎ID：8004,헝섟珂蕨乖쳬瓊슥댄轎。","댄轎",MB_OK);
+		_spawnl(_P_OVERLAY, UPDATER_FILENAME, UPDATER_FILENAME, szTemp, NULL);
+		//		ShellExecute(g_hWnd, NULL, UPDATER_FILENAME, szTemp, NULL, SW_SHOW);
+	}
+
+}
+
+static bool RunClientFrame(BOOL& bBadTimer)
+{
+	MSG msg{};
+//			Sleep(1);	//add by viva
+#ifndef PLATFORM_WINDOWS
+	// The SDL event pump: dxlib_input_update() drains the queue into the
+	// input state and clears g_bRunning on SDL_QUIT. PeekMessage below
+	// is the shim's stub and always says no, so the frame runs.
+	dxlib_input_update();
+	if (!g_bRunning)
+		return false;
+#endif
+	if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+	//if (GetMessage(&msg, NULL, 0, 0))
+	{
+		if (!GetMessage(&msg, NULL, 0, 0))
+			return false;
+			//return msg.wParam;
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+	else if (g_bActiveApp
+#ifdef OUTPUT_DEBUG
+		|| g_bTestMode
+#endif
+		)
+	{
+
+		{
+
+			StampFrameClock();
+
+			//if (g_CurrentTime - lastTime > g_UpdateDelay)
+			{
+				if (g_pUpdate!=NULL)
+				{
+					// 노파심.. 으흠.. --;;
+					CWinUpdate*	pCurrentUpdate = g_pUpdate;
+
+					pCurrentUpdate->Update();
+
+					#ifdef __METROTECH_TEST__
+						CheckFlushLogFile();
+					#endif
+
+				}
+				//lastTime = g_CurrentTime;
+			}
+// REMOVED: nProtect anti-cheat code (SDL migration - no longer needed)
+
+			if( g_bForceExitBynProtect )
+			{
+				//MessageBox(0,"#3","#3",MB_OK);
+				bBadTimer = TRUE;
+
+				return false;
+			}
+
+			//#ifdef OUTPUT_DEBUG
+				DWORD timeGap = (DWORD)(g_FrameNow - g_StartTime).count();
+
+				if (timeGap > 1000)
+				{
+					//UpdateFrame();
+
+					g_FrameRate = (g_FrameCount - g_StartFrameCount) * 1000 / timeGap;
+
+					// 15 fps 이상
+					g_bGoodFPS = (g_FrameRate >= g_FrameGood);
+
+					g_StartTime = g_FrameNow;
+					g_StartFrameCount = g_FrameCount;
+				}
+		}
+	}
+	else
+	{
+		// Make sure we go to sleep if we have nothing else to do
+		WaitMessage();
+	}
+
+	return true;
+}
+
+#ifdef __EMSCRIPTEN__
+namespace {
+bool browserLoopRunning = false;
+struct BrowserSession { HANDLE mutex; std::string command; BOOL badTimer; };
+void BrowserFrame(void* data)
+{
+	auto* session = static_cast<BrowserSession*>(data);
+	if (RunClientFrame(session->badTimer)) return;
+	emscripten_cancel_main_loop();
+	browserLoopRunning = false;
+	if (g_pUserOption && g_pFileDef)
+		g_pUserOption->SaveToFile(g_pFileDef->getProperty("FILE_INFO_USEROPTION").c_str());
+	FinishClient(session->mutex, session->command.c_str());
+	delete session;
+	SDL_Quit();
+	emscripten_force_exit(0);
+}
+}
+bool ClientHasBrowserLoop() { return browserLoopRunning; }
+#endif
+
 int ClientMain(char* lpCmdLine, int nCmdShow)
 {
 // 	char tttt[] = "0000000011";
@@ -3369,6 +3551,8 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 				// Release configs use differently-suffixed DLL names, so both
 				// are listed.
 				InvalidDll != "sdl2d.dll" &&
+				InvalidDll != "libssl-3-x64.dll" &&
+				InvalidDll != "libcrypto-3-x64.dll" &&
 				InvalidDll != "sdl2.dll" &&
 				InvalidDll != "sdl2_ttfd.dll" &&
 				InvalidDll != "sdl2_ttf.dll" &&
@@ -4114,7 +4298,6 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 
 	BOOL bBadTimer = FALSE;
 
-    MSG                         msg;
 
 	NETMARBLE_INFO NetmarbleInfo;
 	REALSERVER_INFO RealServerInfo;
@@ -4303,86 +4486,17 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 		DEBUG_CMD(MIN_SHOWWND, "------------------------------");
 		
 
-		while (TRUE)
-		{
-//			Sleep(1);	//add by viva
-#ifndef PLATFORM_WINDOWS
-			// The SDL event pump: dxlib_input_update() drains the queue into the
-			// input state and clears g_bRunning on SDL_QUIT. PeekMessage below
-			// is the shim's stub and always says no, so the frame runs.
-			dxlib_input_update();
-			if (!g_bRunning)
-				break;
+#ifdef __EMSCRIPTEN__
+		auto* browser = new BrowserSession{nullptr, std::string(lpCmdLine), FALSE};
+#ifndef OUTPUT_DEBUG
+		browser->mutex = hMutex;
 #endif
-			if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
-			//if (GetMessage(&msg, NULL, 0, 0))
-			{	
-				if (!GetMessage(&msg, NULL, 0, 0))
-					break;
-					//return msg.wParam;
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-			}
-			else if (g_bActiveApp
-#ifdef OUTPUT_DEBUG
-				|| g_bTestMode
+		browserLoopRunning = true;
+		emscripten_set_main_loop_arg(BrowserFrame, browser, 0, false);
+		return 0;
+#else
+		while (RunClientFrame(bBadTimer)) {}
 #endif
-				)
-			{
-	
-				{						
-
-					StampFrameClock();
-
-					//if (g_CurrentTime - lastTime > g_UpdateDelay)
-					{
-						if (g_pUpdate!=NULL)
-						{
-							// 노파심.. 으흠.. --;;
-							CWinUpdate*	pCurrentUpdate = g_pUpdate;
-
-							pCurrentUpdate->Update();
-
-							#ifdef __METROTECH_TEST__
-								CheckFlushLogFile();
-							#endif
-
-						}
-						//lastTime = g_CurrentTime;
-					}
-// REMOVED: nProtect anti-cheat code (SDL migration - no longer needed)
-					
-					if( g_bForceExitBynProtect )
-					{
-						//MessageBox(0,"#3","#3",MB_OK);
-						bBadTimer = TRUE;
-						
-						break;
-					}
-
-					//#ifdef OUTPUT_DEBUG
-						DWORD timeGap = (DWORD)(g_FrameNow - g_StartTime).count();
-							
-						if (timeGap > 1000)
-						{
-							//UpdateFrame();
-					
-							g_FrameRate = (g_FrameCount - g_StartFrameCount) * 1000 / timeGap;
-
-							// 15 fps 이상
-							g_bGoodFPS = (g_FrameRate >= g_FrameGood);
-							
-							g_StartTime = g_FrameNow;
-							g_StartFrameCount = g_FrameCount;
-						}								
-				}
-			}
-			else
-			{
-				// Make sure we go to sleep if we have nothing else to do
-				WaitMessage();
-			}
-		}	
 
 		#ifndef __OUTPUT_DEBUG__
 		SystemParametersInfo(SPI_SETSCREENSAVERRUNNING, FALSE, NULL, NULL); 
@@ -4476,73 +4590,11 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 	// 모든 object들 제거
 	//-----------------------------------------------------------------------------	
 release_objects:
-	ReleaseAllObjects();
-#ifdef __WEB_BROWSER__
-	if(NULL != g_pWebBrowser)
-	{
-		g_pWebBrowser->Quit();
-		g_pWebBrowser->Release();
-		DeleteObject(g_pWebBrowser);
-		g_pWebBrowser= NULL;
-		CoUninitialize();
-	}
-#endif
-//#if defined(OUTPUT_DEBUG) && !defined(_DEBUG)
-	delete gC_ci;
 #ifdef OUTPUT_DEBUG
-//	_close(CLogFile);
-//	CheckCLogFile();
+	FinishClient(nullptr, lpCmdLine);
+#else
+	FinishClient(hMutex, lpCmdLine);
 #endif
-
-	#ifdef OUTPUT_DEBUG	
-		if (g_bNeedUpdate)	
-		{
-			//MessageBox(0,"Error:[g_bNeedUpdate]","Error",MB_OK);
-			DEBUG_ADD("Need to Update! Run Updater.exe"); 
-		}
-
-		DEBUG_ADD("---------------[  End ReleaseAllObjects  ]---------------");
-	
-		if (g_pDebugMessage!=NULL)
-		{
-			DEBUG_ADD("--------------- Delete DebugMessageArray --------------");		
-			delete g_pDebugMessage;	
-			g_pDebugMessage = NULL;
-		}
-	#endif
-	DEBUG_CMD(MIN_HIDEWND, "------------------------------");
-
-
-	if (g_pClientConfig!=NULL)
-	{
-		delete g_pClientConfig;
-		g_pClientConfig = NULL;
-	}
-
-// REMOVED: nProtect anti-cheat code (SDL migration - no longer needed)
-
-
-#ifndef OUTPUT_DEBUG
-	ReleaseMutex( hMutex );
-#endif
-
-	#ifdef OUTPUT_DEBUG
-		DeleteCriticalSection(&g_Lock);
-	#endif
-	
-	//----------------------------------------------------------------
-	// Updater를 실행시킨다.
-	//----------------------------------------------------------------
-	if (g_bNeedUpdate)
-	{
-		//_spawnl(_P_NOWAIT, UPDATER_FILENAME, UPDATER_FILENAME, "UPDATE", NULL);
-		char szTemp[512];
-		snprintf(szTemp, sizeof(szTemp), "UPDATE %s", lpCmdLine);
-		_chdir(g_CWD);
-		//::MessageBox(0,"뗍혤溝固DLL놔댄，댄轎ID：8004,헝섟珂蕨乖쳬瓊슥댄轎。","댄轎",MB_OK);
-		_spawnl(_P_OVERLAY, UPDATER_FILENAME, UPDATER_FILENAME, szTemp, NULL);
-		//		ShellExecute(g_hWnd, NULL, UPDATER_FILENAME, szTemp, NULL, SW_SHOW);
-	}	
 
 	return 0;
 }

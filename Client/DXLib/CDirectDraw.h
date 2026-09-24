@@ -209,6 +209,9 @@ public:
 
 	// Init - creates the real SDL window/renderer for hWnd (implemented in .cpp)
 	static void		Init(HWND hWnd, WORD width, WORD height, SCREENMODE mode, bool bUseHAL = true, bool bUseIME = true);
+#ifdef __EMSCRIPTEN__
+	static void ResizeBrowserCanvas(int width, int height);
+#endif
 
 	// Display methods - Flip()/ReleaseAll() implemented in .cpp (real SDL2
 	// presentation), the rest remain stubs (no corresponding SDL2 concept needed)

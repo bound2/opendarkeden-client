@@ -40,6 +40,8 @@
 	#ifndef PLATFORM_WINDOWS
 		#define PLATFORM_WINDOWS
 	#endif
+#elif defined(__EMSCRIPTEN__)
+	#define PLATFORM_WEB
 #elif defined(__linux__)
 	#ifndef PLATFORM_LINUX
 		#define PLATFORM_LINUX
@@ -59,7 +61,7 @@
    paths and threads are the same BSD/POSIX API on Linux and macOS, and
    most of the tree only ever needs "not Windows". Test this, not
    PLATFORM_MACOS, for anything that is not actually Darwin-specific. */
-#if defined(PLATFORM_LINUX) || defined(PLATFORM_MACOS) || defined(__unix__)
+#if defined(PLATFORM_LINUX) || defined(PLATFORM_MACOS) || defined(PLATFORM_WEB) || defined(__unix__)
 	#ifndef PLATFORM_POSIX
 		#define PLATFORM_POSIX
 	#endif
@@ -402,7 +404,13 @@ typedef DWORD			COLORREF;
 typedef DWORD			id_t;
 #endif
 
+#ifdef __cplusplus
+// A supported character type is required by std::basic_string. Recent libc++
+// no longer supplies the non-standard char_traits<unsigned short> extension.
+typedef char16_t		char_t;
+#else
 typedef WORD			char_t;
+#endif
 
 /* ============================================================================
  * Common Windows Type Definitions (for cross-platform compatibility)
