@@ -1,5 +1,4 @@
 #include "Client_PCH.h"
-#include "ClientDef.h"
 
 #include "MMonsterKillQuestInfo.h"
 

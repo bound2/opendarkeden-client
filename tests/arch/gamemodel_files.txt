@@ -197,3 +197,13 @@ Client/MGuildInfoMapper.h
 Client/MGameTime.cpp
 Client/MGameTime.h
 Client/CTypeMap.h
+
+# Quest metadata, independent of the live quest UI.
+Client/MMonsterKillQuestInfo.cpp
+Client/MMonsterKillQuestInfo.h
+Client/MQuestInfo.cpp
+Client/MQuestInfo.h
+
+# Party records and membership, with live creature actions behind MPartyHost.
+Client/MParty.cpp
+Client/MParty.h

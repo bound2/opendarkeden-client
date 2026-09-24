@@ -109,7 +109,7 @@
 #include "RaceType.h"
 #include <map>
 
-#define GRADE_MARK_MAX 50
+#include "GuildMarkTypes.h"
 //----------------------------------------------------------------------
 // MGuildMarkManager
 //----------------------------------------------------------------------

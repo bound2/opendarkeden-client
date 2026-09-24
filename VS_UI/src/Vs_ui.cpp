@@ -16,6 +16,7 @@
 #include "MZoneTable.h"
 #include "DebugInfo.h"
 #include "MEventManager.h"
+#include "UiRuntime.h"
 #include "MGameStringTable.h"
 #include "SafeFormat.h"
 #include "SkinManager.h"
@@ -699,7 +700,7 @@ void C_VS_UI::ClearAllCharacter()
 bool C_VS_UI::MouseControl(UINT message, int x, int y)
 {
 #ifdef _LIB
-	if(g_pEventManager->GetEventByFlag(EVENTFLAG_DENY_INPUT_MOUSE))
+	if(UiRuntime::EventFlagActive(EVENTFLAG_DENY_INPUT_MOUSE))
 		return false;
 #endif
 	
@@ -767,7 +768,7 @@ void C_VS_UI::DIKeyboardControl(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_co
 //	DEBUG_ADD("[C_VS_UI] DIKeyboardControl");
 #endif
 #ifdef _LIB
-	if(g_pEventManager != NULL && g_pEventManager->GetEventByFlag(EVENTFLAG_DENY_INPUT_KEYBOARD))
+	if(UiRuntime::EventFlagActive(EVENTFLAG_DENY_INPUT_KEYBOARD))
 		return;
 #endif
 
@@ -974,7 +975,7 @@ void C_VS_UI::DIKeyboardControl(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_co
 void C_VS_UI::KeyboardControl(UINT message, UINT key, long extra)
 {
 #ifdef _LIB
-	if(g_pEventManager != NULL && g_pEventManager->GetEventByFlag(EVENTFLAG_DENY_INPUT_KEYBOARD))
+	if(UiRuntime::EventFlagActive(EVENTFLAG_DENY_INPUT_KEYBOARD))
 		return;
 #endif
 
@@ -1654,7 +1655,7 @@ void ShowItem_KeyboardControl(UINT message, UINT key, long extra)
 void C_VS_UI::Show()
 {
 #ifdef _LIB
-	if(g_pEventManager->GetEventByFlag(EVENTFLAG_NOT_DRAW_UI) != NULL)
+	if(UiRuntime::EventFlagActive(EVENTFLAG_NOT_DRAW_UI))
 	{
 		return;
 	}
@@ -1844,7 +1845,7 @@ if(gbl_info_show)
 void C_VS_UI::DrawMousePointer()
 {
 #ifdef _LIB
-	if(g_pEventManager->GetEventByFlag(EVENTFLAG_NOT_DRAW_MOUSE_POINTER))
+	if(UiRuntime::EventFlagActive(EVENTFLAG_NOT_DRAW_MOUSE_POINTER))
 		return;
 #endif
 	

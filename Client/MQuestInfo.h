@@ -1,6 +1,7 @@
 #ifndef __QUEST_INFO_HEADER__
 #define __QUEST_INFO_HEADER__
 
+#include "Platform.h"
 #include <fstream>
 
 enum QUEST_INFO_TYPE

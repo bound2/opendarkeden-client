@@ -24,6 +24,7 @@
 #include "../Client/Packet/SocketOutputStream.h"
 
 #include "MGameStringTable.h"
+#include "UiRuntime.h"
 
 //-----------------------------------------------------------------------------
 // C_VS_UI_POINT_EXCHANGE
@@ -376,20 +377,14 @@ void C_VS_UI_POINT_EXCHANGE::SwitchTab(int tabID)
 
 void C_VS_UI_POINT_EXCHANGE::RefreshList()
 {
-	// Send CGExchangeList packet to server
-	if (!g_pSocket) return;
-
-	CGExchangeList* pPacket = new CGExchangeList();
-	pPacket->setPage(m_currentPage);
-	pPacket->setPageSize(m_pageSize);
-	pPacket->setItemClass(m_filterItemClass);
-	pPacket->setItemType(m_filterItemType);
-	pPacket->setMinPrice(m_minPrice);
-	pPacket->setMaxPrice(m_maxPrice);
-
-	g_pSocket->sendPacket(pPacket);
-
-	delete pPacket;
+	UiRuntime::RequestExchangeList({
+		.page = m_currentPage,
+		.pageSize = m_pageSize,
+		.itemClass = static_cast<std::uint8_t>(m_filterItemClass),
+		.itemType = static_cast<std::uint16_t>(m_filterItemType),
+		.minPrice = m_minPrice,
+		.maxPrice = m_maxPrice,
+	});
 }
 
 //-----------------------------------------------------------------------------
@@ -426,16 +421,8 @@ void C_VS_UI_POINT_EXCHANGE::SelectItem(ExchangeListingItem* pItem)
 
 void C_VS_UI_POINT_EXCHANGE::BuyItem()
 {
-	if (!m_pSelectedItem || !g_pSocket)
-		return;
-
-	// Send buy request to server
-	CGExchangeBuy* pPacket = new CGExchangeBuy();
-	pPacket->setListingID(m_pSelectedItem->listingID);
-
-	g_pSocket->sendPacket(pPacket);
-
-	delete pPacket;
+	if (!m_pSelectedItem) return;
+	UiRuntime::RequestExchangeBuy(m_pSelectedItem->listingID);
 }
 
 void C_VS_UI_POINT_EXCHANGE::CreateListing(MItem* pItem, int price)

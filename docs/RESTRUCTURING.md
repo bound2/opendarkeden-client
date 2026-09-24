@@ -240,10 +240,10 @@ every baseline move; the table below is the current reading.
 
 | # | Metric | Now | What it counts, and does not |
 |---|--------|---:|---|
-| R1 | Application translation units compiled directly into the `DarkEden` target | **460** | `ClCompile` entries in `DarkEden.vcxproj`, excluding CMake's generated `CMakeFiles/DarkEden.dir/cmake_pch.cxx`, read from the ctest run's own build dir; SKIP (never PASS) without a supported generated project. Both the Visual Studio configure stamp and Ninja's `build.ninja` must be newer than CMakeLists.txt and both library membership files. Ninja's baseline is **458**, since the non-Windows source list is two files shorter; Linux/macOS CI verifies that count. Baseline 1,044 on 2026-09-01; 484 after task 5.2's eighth slice. **482 on 2026-09-17:** the earlier deletion of `md5.cpp` had left the recorded 484 one too high (483 measured before this extraction); task 4.5 moves `RankBonusTable.cpp` into `gamemodel` (483 → 482). **478 later that day:** delete the four unused Direct3D texture/shadow cache translation units; their object declarations were commented out and the active sprite path never constructed them. **477 later still:** remove the unused Windows-only WinINet downloader; Ninja remains 475. It counts what still cannot be unit-tested. Recorded growths, each the executable side of a split: `PacketHandlerRegistry.cpp`, `GCExchangeBuyHandler.cpp`, `MItemUse.cpp`, `MObjectScreen.cpp`, `MSkillAvailable.cpp`, `TextServiceScreen.cpp`. **473 Windows / 471 Ninja later that day:** six map-record/header translation units move to `gamemodel`, while two new executable files retain screen geometry and live interaction actions; `ShowTimeChecker`'s pure constructor and I/O move to `ShowTimeData.cpp`. A further executable unit moved to `basic` with `CMessageArray` (2026-09-18). **470 Windows / 468 Ninja on 2026-09-21:** `UserOption.cpp` moves unchanged into `VS_UI`; its test links the same object as the game. **469 Windows / 467 Ninja:** the corrected `SXml.cpp` moves unchanged into `VS_UI`, replacing the older duplicate and allowing XML tests to link the production implementation. **468 Windows / 466 Ninja:** the help-message loader moves unchanged into `VS_UI` for real-library parser tests. **467 on 2026-09-21:** `CToken.cpp` joins `gamemodel` byte-identically so token and reset lifetimes can be tested. **466 Windows / 464 Ninja:** the empty handwritten `Client_PCH.cpp` is retired when CMake starts producing the private PCH. Generated PCH producers are excluded from both inventories; ordinary application `.cxx` and `.cc` files remain counted.  **465 Windows / 463 Ninja on 2026-09-24:** the inactive Client/DebugInfo.cpp implementation is removed.  **460 Windows / 458 Ninja on 2026-09-24:** five unchanged world metadata implementations join gamemodel. |
+| R1 | Application translation units compiled directly into the `DarkEden` target | **455** | `ClCompile` entries in `DarkEden.vcxproj`, excluding CMake's generated `CMakeFiles/DarkEden.dir/cmake_pch.cxx`, read from the ctest run's own build dir; SKIP (never PASS) without a supported generated project. Both the Visual Studio configure stamp and Ninja's `build.ninja` must be newer than CMakeLists.txt and both library membership files. Ninja's baseline is **453**, since the non-Windows source list is two files shorter; Linux/macOS CI verifies that count. Baseline 1,044 on 2026-09-01; 484 after task 5.2's eighth slice. **482 on 2026-09-17:** the earlier deletion of `md5.cpp` had left the recorded 484 one too high (483 measured before this extraction); task 4.5 moves `RankBonusTable.cpp` into `gamemodel` (483 → 482). **478 later that day:** delete the four unused Direct3D texture/shadow cache translation units; their object declarations were commented out and the active sprite path never constructed them. **477 later still:** remove the unused Windows-only WinINet downloader; Ninja remains 475. It counts what still cannot be unit-tested. Recorded growths, each the executable side of a split: `PacketHandlerRegistry.cpp`, `GCExchangeBuyHandler.cpp`, `MItemUse.cpp`, `MObjectScreen.cpp`, `MSkillAvailable.cpp`, `TextServiceScreen.cpp`. **473 Windows / 471 Ninja later that day:** six map-record/header translation units move to `gamemodel`, while two new executable files retain screen geometry and live interaction actions; `ShowTimeChecker`'s pure constructor and I/O move to `ShowTimeData.cpp`. A further executable unit moved to `basic` with `CMessageArray` (2026-09-18). **470 Windows / 468 Ninja on 2026-09-21:** `UserOption.cpp` moves unchanged into `VS_UI`; its test links the same object as the game. **469 Windows / 467 Ninja:** the corrected `SXml.cpp` moves unchanged into `VS_UI`, replacing the older duplicate and allowing XML tests to link the production implementation. **468 Windows / 466 Ninja:** the help-message loader moves unchanged into `VS_UI` for real-library parser tests. **467 on 2026-09-21:** `CToken.cpp` joins `gamemodel` byte-identically so token and reset lifetimes can be tested. **466 Windows / 464 Ninja:** the empty handwritten `Client_PCH.cpp` is retired when CMake starts producing the private PCH. Generated PCH producers are excluded from both inventories; ordinary application `.cxx` and `.cc` files remain counted.  **465 Windows / 463 Ninja on 2026-09-24:** the inactive Client/DebugInfo.cpp implementation is removed.  **460 Windows / 458 Ninja on 2026-09-24:** five unchanged world metadata implementations join gamemodel. **456 Windows / 454 Ninja:** quest metadata joins gamemodel; profile and shrine file adapters join VS_UI. **455 Windows / 453 Ninja:** party membership joins gamemodel behind its live-creature host. |
 | R2 | Packet `.cpp` files still defining a packet-style `::execute(Player` | **0** | `grep -rlE '^void\s+\w+::execute\s*\(\s*Player' Client/Packet/{Gpackets,Cpackets,Lpackets,Rpackets,Upackets} --include='*.cpp' \| grep -v Handler \| wc -l`. Baseline 448. Holds the line since `Packet::execute` itself was deleted; the client twin of the server's R4. |
 | R3 | Live `sprintf`/`strcpy`/`strcat` lines under `Client/Packet` and `Client/PacketHandler` | **0** | Line-based; strips `//` tails before matching, so a commented-out call does not count. `\b` rejects the `w` in `wsprintf`, which R7 sees instead. Baseline 61 (a quarter of it commented-out code). Holds the line since the packet-tree copy pass (2026-09-04, PR #76). |
-| R4 | Library-compiled `.cpp` files referencing `g_p*` client globals no library file defines | **5** | Over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files; comment lines excluded; the subtraction is library-wide, so a library file reading a global another library defines is not a seam. **All 5 are `VS_UI` files.** Blind to a library file calling an executable-side *function* (the link proofs cover that) and to a global not named `g_p*`. Baseline 83. **20 on 2026-09-18:** the editor uses the common TextService-backed printer, removing its direct `g_pLast`/`g_pBack` declarations. The printer still reaches game state; this is a reduction in direct references, not a claim that rendering is independent. **10 on 2026-09-21:** moving `UserOption` and `g_pUserOption` into `VS_UI` makes ten existing UI files resolve their only executable-owned global within the library; an ownership reclassification, not ten further file extractions. The text-mode scan now includes the NUL-bearing `VS_UI_GameCommon.cpp` on every platform: **11** is the corrected count; GNU grep previously omitted that file while BSD grep counted it.  **10 on 2026-09-24:** the duplicate inactive VS_UI/DebugInfo.cpp implementation is removed.  **5 on 2026-09-24:** zone, creature, NPC and guild metadata plus the game calendar belong to gamemodel, with real object/link tests; their implementation bytes are unchanged. |
+| R4 | Library-compiled `.cpp` files referencing `g_p*` client globals no library file defines | **0** | Over the library dirs (minus CMake-excluded files) plus the `packetwire` and `gamemodel` membership files; comment lines excluded; the subtraction is library-wide, so a library file reading a global another library defines is not a seam. Blind to a library file calling an executable-side *function* (the link proofs cover that) and to a global not named `g_p*`. Baseline 83. **20 on 2026-09-18:** the editor uses the common TextService-backed printer, removing its direct `g_pLast`/`g_pBack` declarations. The printer still reaches game state; this is a reduction in direct references, not a claim that rendering is independent. **10 on 2026-09-21:** moving `UserOption` and `g_pUserOption` into `VS_UI` makes ten existing UI files resolve their only executable-owned global within the library; an ownership reclassification, not ten further file extractions. The text-mode scan now includes the NUL-bearing `VS_UI_GameCommon.cpp` on every platform: **11** is the corrected count; GNU grep previously omitted that file while BSD grep counted it.  **10 on 2026-09-24:** the duplicate inactive VS_UI/DebugInfo.cpp implementation is removed.  **5 on 2026-09-24:** zone, creature, NPC and guild metadata plus the game calendar belong to gamemodel, with real object/link tests; their implementation bytes are unchanged. **4 later that day:** CImm's unused sound-manager declaration is removed. **0 later that day:** party ownership and eight UI host callbacks remove the remaining live references; an inline comment naming the player global is translated without changing the scanner. This is not a claim that every UI object links independently. |
 | R5 | Direct packet `execute()` call sites outside `Client/Packet` | **0** | The unused, commented-out `PacketAttackMelee` block in `CGameUpdate.cpp` was deleted on 2026-09-24. Added when the 2.2 review found the client fabricates packets locally and calls `execute()` on them; a live caller is a compile error now, before it is a ratchet failure. |
 | R6 | *retired* — `packetwire` members calling `SendBugReport` | — | Lived one slice (2026-09-03). Added to replace the failed-link detector that stubbing the symbol had disabled; fired on the next promotion (count 2), which said "move the function, not the seam". `SendBugReport` is in `Client/Packet/WireHost.cpp`, the stub is gone, and the link is the detector again — narrower, since a link catches a call only in a library `unit_tests` links and in an object a test pulls in, which is what the address-taking link proofs in `test_wire_host.cpp` and `test_player_base.cpp` guarantee. |
 | R7 | Call sites handing a game string table entry to a printf as its **format**, where the lookup is spelled at the call site | **0** | Five alternatives: the `sprintf` family (`fprintf` included), the size-taking family, `AddFormat`, the offset-append form `sprintf(buf + strlen(buf), …)`, and `.Format` (`MString::Format` is a printf reached as a method). The tree is joined before matching because sites put destination and format on different lines. **Blind to indirection**: an entry copied into a static array or a local first is invisible. Baseline 293; holds the line since PR #71. On its own it is not a measure of finding C19. |
@@ -733,9 +733,10 @@ rounds settled* for the host rules). Test fixtures share
   > wire's one-byte identifier, zones fit the three minimap rectangles, and
   > coordinates fit their 128 by 256 maps. Rendering and hit testing use the
   > same validity predicate before indexing a rectangle. Resource access and
-  > the process-owned pointer remain in `ShrineInfoManager.cpp`. Its bounded
+  > the shared pointer now live in `VS_UI/src/ShrineInfoManager.cpp`. Its bounded
   > text open rejects embedded NULs and excessive input before supplying
-  > lines; that adapter and the UI callers are build/source regression guards.
+  > lines; `test_ui_metadata.cpp` exercises the real adapter. UI rendering
+  > callers remain build/source regression guards.
   - Owner: `gamemodel_files.txt`, M0–M2, and `test_regen_tower.cpp`.
 
 - [x] **4.8 World metadata ownership:** `MZoneTable`, `MCreatureTable`,
@@ -747,6 +748,35 @@ rounds settled* for the host rules). Test fixtures share
   > does not change the legacy file readers or calendar arithmetic.
   - Owner: `tests/arch/gamemodel_files.txt`, M0-M2, R1/R4 and
     `tests/unit/test_world_metadata.cpp`.
+
+- [x] **4.9 UI metadata ownership:** quest records compile in `gamemodel`;
+  the profile map and shrine resource adapter compile in `VS_UI`.
+  > **Status:** done (2026-09-24). Implementations move unchanged after
+  > the quest include preparation. Tests construct the real owners,
+  > update quest/profile records and load shrine text through `CRarFile`.
+  > Existing quest readers and profile image conversion are unchanged.
+  - Owner: M0-M2, R1/R4, `test_quest_metadata.cpp` and `test_ui_metadata.cpp`.
+
+- [x] **4.10 Party membership:** `MParty` records and ownership compile in
+  `gamemodel`; `MPartyHost` supplies creature actions and the frame clock.
+  > **Status:** done (2026-09-24). The executable installs named callbacks
+  > and clears them at shutdown. Missing live creatures skip flag updates;
+  > a missing clock means no kick delay, and missing config uses its default.
+  > Membership ownership and callback order are tested without game globals.
+  - Owner: M0-M2, R1, `test_party_model.cpp` and the designated host installer.
+
+- [x] **4.11 UI runtime services:** `UiRuntime` supplies event flags, guild
+  marks, copied portal/pet data and exchange requests through eight callbacks.
+  > **Status:** done (2026-09-24). The executable installs named callbacks
+  > before UI initialization and clears them at shutdown. Guild cache misses
+  > retain find/load/find order; sprites stay renderer-owned. Exchange requests
+  > construct real packets and borrow them synchronously for one send. Missing
+  > live owners and out-of-range portal maps now return empty/false/null instead
+  > of dereferencing them; failed pet reads preserve the last displayed data.
+  > The host object links without executable globals. The larger UI translation
+  > units still call executable functions; R4 zero does not prove their isolation.
+  - Owner: R4, `UiRuntime.h`, the designated installer in `GameInit.cpp` and
+    `tests/ui/test_ui_runtime.cpp` (real sprites, packets and copied snapshots).
 
 ## Phase 5 — Long tail
 
@@ -1154,8 +1184,10 @@ rounds settled* for the host rules). Test fixtures share
   > calling it and indexes message arrays only after eligibility succeeds.
   > `TextUtf8.h` also owns the scalar-boundary prefix operation used by resource
   > line clipping and all three in-place string reducers. Their byte/storage
-  > bounds and valid UTF-8 output are tested independently; the old wrapping
-  > predicate and caller loops remain follow-up work under findings 116/135.
+  > bounds and valid UTF-8 output are tested independently. Findings 116/135
+  > are closed by the caller migrations below and retirement of the old
+  > wrapping predicate; the shared declaration and compiled implementation
+  > are gone.
   > Multiline tooltip sizing and drawing now share `basic/TextWrap` rows:
   > complete UTF-8 scalars, explicit newlines and progress at narrow columns,
   > with owned strings instead of temporary writes into borrowed text. Width
@@ -1514,8 +1546,9 @@ Complete rejected sprites leave the following packed record readable, while
 truncation leaves an empty object and failed stream. Encoded counts, decoded
 width and palette indices are validated before publication; conversion changes
 only fixed colors. `test_index_sprite_loading.cpp` owns these contracts and
-empty-sprite release state. Offline real-art validation and rejection logging
-remain separate review follow-ups.
+empty-sprite release state. Rejection diagnostics are owned by task 5.5;
+the [2026-09-23 asset audit](sprite-asset-audit-2026-09-23.md) records offline
+production-loader validation and its explicit coverage limits.
 
 The unused GL import and TGA/IMG interfaces are deleted, together with their
 abandoned UI drawing comments. VS_UI uses the existing SDL surface helper;
