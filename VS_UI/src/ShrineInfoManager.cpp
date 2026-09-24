@@ -1,5 +1,5 @@
 
-#include "Client_PCH.h"
+#include "../../Client/Client_PCH.h"
 #include "ShrineInfoManager.h"
 #include "RarFile.h"
 #include "Properties.h"

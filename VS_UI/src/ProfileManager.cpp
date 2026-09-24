@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // ProfileManager.cpp
 //----------------------------------------------------------------------
-#include "Client_PCH.h"
+#include "../../Client/Client_PCH.h"
 #ifdef PLATFORM_WINDOWS
 #include <direct.h>
 #include <io.h>
@@ -10,14 +10,10 @@
 #include <sys/stat.h>
 #include <sys/dir.h>
 #endif
-#include "CDirectDraw.h"
 #include "CSpritePack.h"
-#include "UserInformation.h"
-//#include "MFileDef.h"
 
 	#include "Properties.h"
 
-#include "UtilityFunction.h"
 #include "ProfileManager.h"
 
 // std::filesystem directory enumeration, in place of the _findfirst /
@@ -29,7 +25,6 @@
 #include <vector>
 
 
-#include "DebugInfo.h"
 
 //----------------------------------------------------------------------
 // Global

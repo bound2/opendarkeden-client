@@ -64,7 +64,7 @@ TEST(UiMetadata, ShrineFileAdapterUsesTheRealResourceReaderAndParser)
 	CHECK(!towers.LoadRegenTowerInfo());
 	CHECK_EQ(2, towers.GetSize());
 	{
-		std::string text = "*1\n0 74 1 2";
+		std::string text = "*1\n0 71 1 2";
 		text.push_back('\0');
 		text += "hidden\n";
 		TowerFile file(text);

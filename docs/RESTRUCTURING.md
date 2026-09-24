@@ -733,9 +733,10 @@ rounds settled* for the host rules). Test fixtures share
   > wire's one-byte identifier, zones fit the three minimap rectangles, and
   > coordinates fit their 128 by 256 maps. Rendering and hit testing use the
   > same validity predicate before indexing a rectangle. Resource access and
-  > the process-owned pointer remain in `ShrineInfoManager.cpp`. Its bounded
+  > the shared pointer now live in `VS_UI/src/ShrineInfoManager.cpp`. Its bounded
   > text open rejects embedded NULs and excessive input before supplying
-  > lines; that adapter and the UI callers are build/source regression guards.
+  > lines; `test_ui_metadata.cpp` exercises the real adapter. UI rendering
+  > callers remain build/source regression guards.
   - Owner: `gamemodel_files.txt`, M0–M2, and `test_regen_tower.cpp`.
 
 - [x] **4.8 World metadata ownership:** `MZoneTable`, `MCreatureTable`,

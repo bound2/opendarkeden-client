@@ -25,7 +25,7 @@ public :
 	int		owner;
 };
 
-// Resource access stays with the executable; the table consumes its lines.
+// VS_UI owns the resource adapter; the gamemodel table consumes its lines.
 struct RegenTowerLineReader {
 	// Return one NUL-terminated line, consuming any clipped remainder. False
 	// means EOF; report read failures by throwing. Input must not contain NUL.
@@ -47,5 +47,5 @@ public :
 private :
 };
 
-// Process-owned table; resource access stays in the executable.
+// VS_UI owns this shared pointer and its resource-loading adapter.
 extern RegenTowerInfoManager *g_pRegenTowerInfoManager;
