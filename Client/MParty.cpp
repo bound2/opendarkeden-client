@@ -191,7 +191,7 @@ MParty::RemoveMember(int creatureID)
 PARTY_INFO*	
 MParty::GetMemberInfo(int n) const
 {
-	if (n>=0 && n < m_pInfo.capacity())
+	if (n>=0 && n < m_pInfo.size())
 	{
 		return m_pInfo[n];
 	}

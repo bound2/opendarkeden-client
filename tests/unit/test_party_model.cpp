@@ -158,3 +158,19 @@ TEST(PartyModel, KickDelayReadsCurrentClockAndConfigurationWithStrictBoundary)
 	party.SetJoinTime(frame);
 	CHECK(party.GetJoinTime() == frame);
 }
+
+TEST(PartyModel, IndexQueriesOnlyReturnOccupiedMembers)
+{
+	HostScope scope(nullptr);
+	MParty party;
+	CHECK(party.GetMemberInfo(0) == nullptr);
+	CHECK(party.GetMemberInfo(5) == nullptr);
+	auto first = Member("One", 1);
+	CHECK(party.AddMember(first.get()));
+	first.release();
+	CHECK(party.GetMemberInfo(0) != nullptr);
+	CHECK(party.GetMemberInfo(1) == nullptr);
+	CHECK(party.GetMemberInfo(5) == nullptr);
+	CHECK(party.RemoveMember(1));
+	CHECK(party.GetMemberInfo(0) == nullptr);
+}
