@@ -47,13 +47,6 @@ void log_set_console_output(bool enable);
 void log_set_file_output(const char *path);
 void log_set_array_output(bool enable);
 
-// Core logging function (called by macros)
-void log_write(LogLevel level,
-			   const char *file,
-			   int line,
-			   const char *fmt,
-			   ...);
-
 //-----------------------------------------------------------------------------
 // Logging Macros
 //-----------------------------------------------------------------------------
@@ -89,27 +82,15 @@ void log_write(LogLevel level,
 #ifdef __cplusplus
 
 #include <source_location>
+#include "SafeFormat.h"
 
 //-----------------------------------------------------------------------------
 // C++20 diagnostics seam
 //-----------------------------------------------------------------------------
 //
-// log_write is a C variadic function, so a std::source_location parameter can
-// neither follow its '...' nor be defaulted there. LogSite is that parameter
-// moved in front of the format: default-construct one and it captures the
-// caller's file, line and function, because a
-// std::source_location::current() written as a default argument is evaluated
-// at the call site rather than here. The standard states that as recommended
-// practice rather than a guarantee; MSVC, Clang and GCC all do it, and
-// tests/unit/test_source_location_diagnostics.cpp pins it against __LINE__.
-//
-//     log_write_at(LogSite(), LOG_LEVEL_INFO, "zone %d loaded", nZoneID);
-//
-// The LOG_* and DEBUG_ADD* macros above are untouched and still forward
-// __FILE__ and __LINE__. Both entry points reach the same core and produce
-// the same log line: the function name is captured but deliberately NOT
-// printed, so the console and on-disk format is exactly what it was.
-//-----------------------------------------------------------------------------
+// LogSite captures the caller before typed arguments reach the shared sink.
+// The macros retain their __FILE__/__LINE__ sites; both interfaces produce
+// the same line. Function names are captured for observers, not printed.
 struct LogSite
 {
 	const char	*file;
@@ -131,11 +112,23 @@ struct LogSite
 	}
 };
 
-// C++20 entry point. The site comes first because it cannot follow the '...'.
-void log_write_at(const LogSite &site,
-				  LogLevel level,
-				  const char *fmt,
-				  ...);
+// Argument types and count remain available until the format is interpreted.
+// Diagnostic call sites use the same bounded conversion vocabulary as the UI.
+void log_write_args(const LogSite& site, LogLevel level, const char* format,
+	const SafeFormat::Arg* args, size_t count);
+
+template <typename... Args>
+void log_write_at(const LogSite& site, LogLevel level, const char* format, Args... args)
+{
+	const SafeFormat::Arg packed[] = {SafeFormat::MakeArg(args)..., SafeFormat::Arg()};
+	log_write_args(site, level, format, packed, sizeof...(args));
+}
+
+template <typename... Args>
+void log_write(LogLevel level, const char* file, int line, const char* format, Args... args)
+{
+	log_write_at(LogSite(file, line), level, format, args...);
+}
 
 //-----------------------------------------------------------------------------
 // Test seam

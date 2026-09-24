@@ -1174,7 +1174,7 @@ MCreatureWear::RemoveEffectStatus(EFFECTSTATUS status)
 		if(type == EFFECTSPRITETYPE_FAST_MOVE_STOP)
 			type2 = EFFECTSPRITETYPE_FAST_MOVE_FLY;
 
-		_MinTrace("remove effectsprite\n");
+		_MinTraceA("remove effectsprite\n");
 
 		//-------------------------------------------------------
 		// Creature에 붙어 있는 Effect중에서

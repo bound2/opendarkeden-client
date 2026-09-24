@@ -2801,7 +2801,7 @@ UI_StartProgress(int zoneID)
 
 	if (g_pServerInformation!=NULL)
 	{
-		DEBUG_ADD_FORMAT("[UI] SetCurrentServerName : %x %s %s %d", g_pServerInformation, g_pServerInformation->GetServerGroupName(), g_pServerInformation->GetServerName(), g_pServerInformation->GetServerStatus());
+		DEBUG_ADD_FORMAT("[UI] SetCurrentServerName : %p %s %s %d", static_cast<const void*>(g_pServerInformation), g_pServerInformation->GetServerGroupName(), g_pServerInformation->GetServerName(), g_pServerInformation->GetServerStatus());
 		gC_vs_ui.SetCurrentServerName( g_pServerInformation->GetServerGroupName(),
 										g_pServerInformation->GetServerName(),
 										g_pServerInformation->GetServerStatus() );

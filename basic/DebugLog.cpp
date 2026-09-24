@@ -6,7 +6,6 @@
 //-----------------------------------------------------------------------------
 
 #include "DebugLog.h"
-#include <stdarg.h>
 #include <string.h>
 #include <time.h>
 #include "Platform.h"
@@ -226,24 +225,9 @@ LogSiteObserver log_set_site_observer(LogSiteObserver observer) {
 // Core Logging Function
 //-----------------------------------------------------------------------------
 
-// True when a log call still has something to do. An installed observer wants
-// every site whatever the level is; otherwise the level filter decides. Kept
-// out of log_emit so the entry points below can still return before va_start
-// on the filtered-out path, exactly as log_write did before.
-static bool log_wants(LogLevel level) {
-	if (g_site_observer != NULL) {
-		return true;
-	}
-
-	return !(level < g_config.level || !g_initialized);
-}
-
-// The one body behind both entry points, so a converted call site and an
-// unconverted one cannot drift apart.
-static void log_emit(const LogSite &site,
-					 LogLevel level,
-					 const char *fmt,
-					 va_list args)
+// The shared sink observes the call site before filtering and formatting.
+void log_write_args(const LogSite& site, LogLevel level, const char* fmt,
+	const SafeFormat::Arg* args, size_t count)
 {
 	// Test seam: reported before the level filter (see DebugLog.h).
 	if (g_site_observer != NULL) {
@@ -261,7 +245,7 @@ static void log_emit(const LogSite &site,
 
 	// Format message
 	char message[2048];
-	vsnprintf(message, sizeof(message), fmt, args);
+	SafeFormat::FormatV(message, sizeof(message), fmt, args, count);
 
 	// Build full log line
 	char log_line[2048];
@@ -289,45 +273,4 @@ static void log_emit(const LogSite &site,
 
 
 	LeaveCriticalSection(&g_log_lock);
-}
-
-//-----------------------------------------------------------------------------
-// Entry Points
-//-----------------------------------------------------------------------------
-
-// The C entry point the LOG_* and DEBUG_ADD* macros expand to. Unchanged in
-// signature and in what it writes.
-void log_write(LogLevel level,
-			   const char *file,
-			   int line,
-			   const char *fmt,
-			   ...)
-{
-	// Fast path: level filtering (no lock needed)
-	if (!log_wants(level)) {
-		return;
-	}
-
-	va_list args;
-	va_start(args, fmt);
-	log_emit(LogSite(file, line), level, fmt, args);
-	va_end(args);
-}
-
-// The C++20 entry point. See DebugLog.h: the site is built by the caller
-// because a std::source_location cannot follow a C variadic '...'.
-void log_write_at(const LogSite &site,
-				  LogLevel level,
-				  const char *fmt,
-				  ...)
-{
-	// Fast path: level filtering (no lock needed)
-	if (!log_wants(level)) {
-		return;
-	}
-
-	va_list args;
-	va_start(args, fmt);
-	log_emit(site, level, fmt, args);
-	va_end(args);
 }

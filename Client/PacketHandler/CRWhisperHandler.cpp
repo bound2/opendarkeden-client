@@ -157,7 +157,7 @@ void CRWhisperHandler::execute ( CRWhisper * pPacket , Player * pPlayer )
 				if ( bMasterWords )
 				{
 					// 운영자일경우 시스템 메시지로도 찍어준다.
-					g_pNoticeMessage->AddFormat("%s>%s",strName,str);
+					g_pNoticeMessage->AddSafeFormat("%s>%s",strName,str);
 				}
 
 				// 귓속말 대상 설정 ID+' '

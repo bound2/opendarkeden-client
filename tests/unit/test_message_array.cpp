@@ -1,6 +1,5 @@
 #include "test_framework.h"
 #include "CMessageArray.h"
-#include <cstdarg>
 #include <cstdio>
 #include <fstream>
 #include <limits>
@@ -10,12 +9,11 @@
 #endif
 
 namespace {
-void AddV(CMessageArray& messages, const char* format, ...)
+template <typename... Args>
+void AddV(CMessageArray& messages, const char* format, Args... values)
 {
-	va_list args;
-	va_start(args, format);
-	messages.AddFormatVL(format, args);
-	va_end(args);
+	const SafeFormat::Arg args[] = {SafeFormat::MakeArg(values)..., SafeFormat::Arg()};
+	messages.AddSafeFormatV(format, args, sizeof...(values));
 }
 
 constexpr const char* path = "message_ring_test.log";
@@ -30,7 +28,7 @@ TEST(MessageArray, RealRingLinksFromBasicAndRetainsNewestRowsInOrder)
 	CMessageArray messages;
 	messages.Init(3, 12);
 	messages.Add("first");
-	messages.AddFormat("row %d", 2);
+	messages.AddSafeFormat("row %d", 2);
 	messages.AddSafeFormat("row %d", 3);
 	messages.Add("last");
 	CHECK_EQ(3, messages.GetSize());
@@ -43,7 +41,7 @@ TEST(MessageArray, RingsAbove255RowsKeepTheirCompleteOrdering)
 {
 	CMessageArray messages;
 	messages.Init(300, 16);
-	for (int i = 0; i < 650; ++i) messages.AddFormat("row %d", i);
+	for (int i = 0; i < 650; ++i) messages.AddSafeFormat("row %d", i);
 	for (int i = 0; i < 300; ++i)
 		CHECK(std::string(messages[i]) == "row " + std::to_string(350 + i));
 }
@@ -67,7 +65,7 @@ TEST(MessageArray, EmptyAndReleasedRingsAcceptNoWritesOrInvalidReads)
 		CHECK(messages.GetCurrent() == nullptr);
 		CHECK(std::string(messages[0]).empty());
 		messages.Add("ignored"); messages.Add(nullptr);
-		messages.AddFormat("row %d", 4); messages.AddFormat(nullptr);
+		messages.AddSafeFormat("row %d", 4); messages.AddSafeFormat(nullptr);
 		AddV(messages, "row %d", 5); AddV(messages, nullptr);
 		messages.AddSafeFormat("row %d", 6);
 		messages.AddToFile("ignored"); messages.AddToFile(nullptr);
@@ -97,7 +95,7 @@ TEST(MessageArray, EveryWritePathTruncatesAndClearKeepsTheRingUsable)
 	CMessageArray messages;
 	messages.Init(4, 4);
 	messages.Add("abcdef");
-	messages.AddFormat("%s", "ghijkl");
+	messages.AddSafeFormat("%s", "ghijkl");
 	AddV(messages, "%s", "mnopqr");
 	messages.AddSafeFormat("%s", "stuvwx");
 	CHECK(std::string(messages[0]) == "abcd");
@@ -153,4 +151,14 @@ TEST(MessageArray, AFailedLogOpenStillReleasesItsFilename)
 	CHECK(messages.GetFilename() == nullptr);
 	messages.Init(2, 8); messages.Add("new");
 	CHECK(std::string(messages[1]) == "new");
+}
+
+TEST(MessageArray, TypedFrontEndAndPackedEntryRefuseUnprovidedArguments)
+{
+	CMessageArray messages;
+	messages.Init(2, 64);
+	messages.AddSafeFormat("%s %d %s", 42);
+	AddV(messages, "%s", "literal %s %n %%");
+	CHECK(std::string(messages[0]) == "%s 42 %s");
+	CHECK(std::string(messages[1]) == "literal %s %n %%");
 }

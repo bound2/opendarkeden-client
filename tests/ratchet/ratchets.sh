@@ -188,7 +188,8 @@ check () {
 # 467: CToken moves byte-identically into gamemodel for reset/lifetime tests.
 # 466: remove the empty Client_PCH.cpp; CMake now generates the PCH producer.
 # Count application sources, excluding only that generated target-specific file.
-R1_BASELINE=466
+# 465: remove the inactive Client/DebugInfo.cpp implementation.
+R1_BASELINE=465
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -225,7 +226,7 @@ elif [ -n "$BUILD_DIR" ] && [ -f "$BUILD_DIR/build.ninja" ]; then
 	# this branch existed the ratchet SKIPPED on every non-MSVC tree,
 	# which the port assessment listed as fail-open (area A). build.ninja
 	# is rewritten on every configure, so its mtime is the configure time.
-	R1_NINJA_BASELINE=464
+	R1_NINJA_BASELINE=463
 	R1_NINJA="$BUILD_DIR/build.ninja"
 	if [ CMakeLists.txt -nt "$R1_NINJA" ] || [ tests/arch/packetwire_files.txt -nt "$R1_NINJA" ] || [ tests/arch/gamemodel_files.txt -nt "$R1_NINJA" ]; then
 		echo "FAIL R1: $BUILD_DIR was configured before CMakeLists.txt or a library membership file last changed - reconfigure that tree first"
@@ -399,7 +400,8 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 # 11: force text mode when scanning source, including GameCommon's embedded
 # NUL bytes. GNU grep had omitted that file; BSD grep already counted it.
 # This corrects the measurement, not a new library-to-executable dependency.
-R4_BASELINE=11
+# 10: remove the duplicate, inactive VS_UI/DebugInfo.cpp implementation.
+R4_BASELINE=10
 
 lib_members () {
 	# The directory trees minus the files CMake excludes from the
@@ -726,7 +728,8 @@ check "R7 (data-file format strings passed to printf)" "$R7" "$R7_BASELINE"
 # 40: removing the wsprintf shim removes its declaration and vararg forward;
 # the wide MinTrace command now uses an explicit wide literal instead of _T().
 # 34: SafeFormat emits validated arguments through literal CRT conversions.
-R8_BASELINE=34
+# 0: retire inactive debug formatters and carry tagged arguments to every live sink.
+R8_BASELINE=0
 
 for d in Client VS_UI; do
 	if [ ! -d "$d" ]; then
@@ -1515,7 +1518,8 @@ fi
 # 569: rich-help layout removes the unused substitution loop's dead strcpy.
 # 568: the mail-template notice date uses checked formatting.
 # 518: option-name formatting/copies are bounded; two obsolete option blocks removed.
-R17_BASELINE=518
+# 512: retire MinTrace formatters and bound two macro-wrapped UI literals.
+R17_BASELINE=512
 R17_FILES_FLOOR=500
 
 r17_members () {

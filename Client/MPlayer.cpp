@@ -6500,7 +6500,7 @@ MPlayer::AffectUsedActionInfo(TYPE_ACTIONINFO nUsedActionInfo)
 		{
 			if (m_pEffectTarget != NULL)
 			{
-				DEBUG_ADD_FORMAT("RemoveEffectTarget: action=(%d/%d) ActionInfo=%d, pEffectTarget=%x", m_ActionCount, m_ActionCountMax, nUsedActionInfo, m_pEffectTarget);
+				DEBUG_ADD_FORMAT("RemoveEffectTarget: action=(%d/%d) ActionInfo=%d, pEffectTarget=%p", m_ActionCount, m_ActionCountMax, nUsedActionInfo, static_cast<const void*>(m_pEffectTarget));
 				
 				RemoveEffectTarget( m_pEffectTarget->GetEffectID() );
 				MEffectTarget* pTempEffectTarget = m_pEffectTarget;
@@ -6520,13 +6520,13 @@ MPlayer::AffectUsedActionInfo(TYPE_ACTIONINFO nUsedActionInfo)
 			AddEffectTarget( m_pEffectTarget );
 			//m_listEffectTarget.push_back( pEffectTarget );
 
-			DEBUG_ADD_FORMAT("NewEffectTarget: action=(%d/%d) ActionInfo=%d, pEffectTarget=%x", m_ActionCount, m_ActionCountMax, nUsedActionInfo, m_pEffectTarget);
+			DEBUG_ADD_FORMAT("NewEffectTarget: action=(%d/%d) ActionInfo=%d, pEffectTarget=%p", m_ActionCount, m_ActionCountMax, nUsedActionInfo, static_cast<const void*>(m_pEffectTarget));
 		}
 		
 
 		if (m_pEffectTarget==NULL)
 		{	
-			DEBUG_ADD_FORMAT("EffectTarget is NULL, newEffectTarget : %x", m_pEffectTarget);
+			DEBUG_ADD_FORMAT("EffectTarget is NULL, newEffectTarget : %p", static_cast<const void*>(m_pEffectTarget));
 			
 			m_pEffectTarget = new MEffectTarget( (*g_pActionInfoTable)[nUsedActionInfo].GetSize() );
 			m_pEffectTarget->NewEffectID();
@@ -6763,7 +6763,7 @@ MPlayer::ActionToSendPacket()
 				}
 				else
 				{
-					g_pGameMessage->AddFormat("[瓊刻] %s",(*g_pGameStringTable)[STRING_STATUS_NOT_FIND_SKILL_CRAD].GetString());
+					g_pGameMessage->AddSafeFormat("[瓊刻] %s",(*g_pGameStringTable)[STRING_STATUS_NOT_FIND_SKILL_CRAD].GetString());
 					return;
 				}
 			}
@@ -6798,7 +6798,7 @@ MPlayer::ActionToSendPacket()
 				}
 				else
 				{
-					g_pGameMessage->AddFormat("[瓊刻] %s",(*g_pGameStringTable)[STRING_STATUS_NOT_FIND_SKILL_CRAD].GetString());
+					g_pGameMessage->AddSafeFormat("[瓊刻] %s",(*g_pGameStringTable)[STRING_STATUS_NOT_FIND_SKILL_CRAD].GetString());
 					return;
 				}
 			}
@@ -6826,7 +6826,7 @@ MPlayer::ActionToSendPacket()
 				}
 				else
 				{
-					g_pGameMessage->AddFormat("[瓊刻] %s",(*g_pGameStringTable)[STRING_STATUS_NOT_FIND_SKILL_CRAD].GetString());
+					g_pGameMessage->AddSafeFormat("[瓊刻] %s",(*g_pGameStringTable)[STRING_STATUS_NOT_FIND_SKILL_CRAD].GetString());
 					return;
 				}
 			}
@@ -6985,7 +6985,7 @@ MPlayer::ActionToSendPacket()
 			// 
 			if (m_pEffectTarget != NULL)
 			{
-				DEBUG_ADD_FORMAT("RemoveEffectTarget: action=(%d/%d) ActionInfo=%d, pEffectTarget=%x", m_ActionCount, m_ActionCountMax, m_nUsedActionInfo, m_pEffectTarget);
+				DEBUG_ADD_FORMAT("RemoveEffectTarget: action=(%d/%d) ActionInfo=%d, pEffectTarget=%p", m_ActionCount, m_ActionCountMax, m_nUsedActionInfo, static_cast<const void*>(m_pEffectTarget));
 				
 				RemoveEffectTarget( m_pEffectTarget->GetEffectID() );
 
@@ -7001,7 +7001,7 @@ MPlayer::ActionToSendPacket()
 			//----------------------------------------------------------
 			m_pEffectTarget = new MEffectTarget( (*g_pActionInfoTable)[m_nUsedActionInfo].GetSize() );
 			
-			DEBUG_ADD_FORMAT("NewEffectTarget: action=(%d/%d) ActionInfo=%d, pEffectTarget=%x", m_ActionCount, m_ActionCountMax, m_nUsedActionInfo, m_pEffectTarget);
+			DEBUG_ADD_FORMAT("NewEffectTarget: action=(%d/%d) ActionInfo=%d, pEffectTarget=%p", m_ActionCount, m_ActionCountMax, m_nUsedActionInfo, static_cast<const void*>(m_pEffectTarget));
 			
 			//---------------------------------------------------------
 			// 진행중인 결과로서 추가한다.

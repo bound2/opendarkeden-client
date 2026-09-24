@@ -372,7 +372,7 @@ ParsingRealServer(const char* pCommandLine, int Dimention, REALSERVER_INFO &info
 // Name: InitFail()
 // Desc: This function is called if an initialization function fails
 //-----------------------------------------------------------------------------
-HRESULT InitFail(LPCTSTR szError,...)
+HRESULT InitFailMessage(const char* message)
 {
 	// 프로그램 중단..
 	g_bActiveApp = FALSE;
@@ -380,27 +380,12 @@ HRESULT InitFail(LPCTSTR szError,...)
 	ShowCursor( TRUE );
 	ShowWindow(g_hWnd, SW_HIDE);
 
-    char		szBuff[1024];
-    va_list		vl;
-
-    va_start(vl, szError);
-    int written = vsnprintf(szBuff, sizeof(szBuff), szError, vl);
-
-	// vsnprintf NUL terminates within sizeof(szBuff), so an over long message
-	// is truncated rather than written past the end. A negative return is an
-	// encoding error, where nothing usable was produced, so the message logged
-	// below is made empty.
-	if (written < 0)
-		szBuff[0] = '\0';
-
     //ReleaseAllObjects();
-	DEBUG_ADD( szBuff );
+	DEBUG_ADD( message );
 //add by sonic 2006.4.11
-    //MessageBox(g_hWnd, szBuff, PROGRAM_TITLE, MB_OK);
 #ifdef PLATFORM_WINDOWS
     DestroyWindow(g_hWnd);
 #endif
-    va_end(vl);
 //end 
 
     return 0;

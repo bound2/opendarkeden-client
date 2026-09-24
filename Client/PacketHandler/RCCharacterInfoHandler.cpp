@@ -67,7 +67,7 @@ void RCCharacterInfoHandler::execute ( RCCharacterInfo * pPacket )
 			#if defined(_DEBUG) && defined(OUTPUT_DEBUG)
 				if (g_pGameMessage!=NULL)
 				{
-					g_pGameMessage->AddFormat("[RCCharacterInfo] %d", pInfo->guildID);
+					g_pGameMessage->AddSafeFormat("[RCCharacterInfo] %d", pInfo->guildID);
 				}
 			#endif
 		}

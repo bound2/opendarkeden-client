@@ -69,7 +69,7 @@ void RCStatusHPHandler::execute ( RCStatusHP * pPacket )
 			#if defined(_DEBUG) && defined(OUTPUT_DEBUG)
 				if (g_pGameMessage!=NULL)
 				{
-					g_pGameMessage->AddFormat("[RCStatusHP] %d/%d", pInfo->HP, pInfo->MaxHP);
+					g_pGameMessage->AddSafeFormat("[RCStatusHP] %d/%d", pInfo->HP, pInfo->MaxHP);
 				}
 			#endif
 		}
@@ -78,7 +78,7 @@ void RCStatusHPHandler::execute ( RCStatusHP * pPacket )
 			#if defined(_DEBUG) && defined(OUTPUT_DEBUG)
 				if (g_pGameMessage!=NULL)
 				{
-					g_pGameMessage->AddFormat("[RCStatusHP] in sight");
+					g_pGameMessage->AddSafeFormat("[RCStatusHP] in sight");
 				}
 			#endif
 		}

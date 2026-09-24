@@ -10,6 +10,7 @@
 // include
 //-----------------------------------------------------------------------------
 #include "MonotonicClock.h"
+#include "SafeFormat.h"
 #ifdef PLATFORM_WINDOWS
 #ifndef _WINDOWS_
 #define WIN32_LEAN_AND_MEAN
@@ -227,7 +228,14 @@ extern CWinUpdate*				g_pUpdate;
 // Global Function Prototypes
 //-----------------------------------------------------------------------------
 
-HRESULT		InitFail(LPCTSTR szError,...);
+HRESULT InitFailMessage(const char* message);
+template <typename... Args>
+HRESULT InitFail(const char* format, Args... args)
+{
+	char message[1024];
+	SafeFormat::Format(message, format, args...);
+	return InitFailMessage(message);
+}
 //bool		CheckDXVersion();
 void		ReleaseAllObjects();
 void		ReleaseSocket();

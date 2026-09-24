@@ -30,6 +30,8 @@
 #ifndef __PACKET_DIAGNOSTICS_H__
 #define __PACKET_DIAGNOSTICS_H__
 
+#include "SafeFormat.h"
+
 namespace PacketDiagnostics {
 
 	// Receives one fully formatted report.
@@ -40,9 +42,15 @@ namespace PacketDiagnostics {
 	void setBugReportHook(BugReportFn fn);
 	BugReportFn getBugReportHook();
 
-	// printf-style; formats into a bounded buffer (the same 256 bytes
-	// SendBugReport uses) and hands the text to the hook, if any.
-	void reportBug(const char* format, ...);
+	// Formats a typed argument list into the same bounded 256-byte report.
+	void reportBugArgs(const char* format, const SafeFormat::Arg* args, size_t count);
+	template <typename... Args>
+	void reportBug(const char* format, Args... args)
+	{
+		const SafeFormat::Arg packed[] = {SafeFormat::MakeArg(args)..., SafeFormat::Arg()};
+		reportBugArgs(format, packed, sizeof...(args));
+	}
+
 }
 
 #endif // __PACKET_DIAGNOSTICS_H__

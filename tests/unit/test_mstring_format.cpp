@@ -6,14 +6,8 @@
 // MString::Format, added by task 5.4's fifth slice
 // (docs/code-health-review-2026-08-29.md finding C19).
 //
-// MString::Format is an ordinary varargs printf reached as a method,
-// which is why every pattern in this repo that hunts for a data-file
-// format string walked past it: R3, R7 and the format_arity audit all
-// match on a printf's NAME. Three call sites in Client/GameUI.cpp were
-// handing it a String.inf entry as the format, and the vsnprintf inside
-// it bounds the write but not the read - one %s more than the call site
-// passed still makes the CRT take a stack word as a char* and copy from
-// wherever that points.
+// Both Format entry points now preserve argument types. FormatChecked also
+// guarantees readable storage when the formatted result is empty.
 //
 // MString is in gamemodel, so unlike the twenty-four VS_UI sites the
 // same slice converted, this half of the fix has a test path at all.
@@ -59,8 +53,8 @@ TEST(MStringFormatChecked, PrintsAConversionWithNoArgumentAsText)
 	MString msg;
 
 	// The primitive of finding C19: an entry carrying one conversion
-	// more than the call site passes. Through Format() this reads a
-	// stack word as a char*.
+	// more than the call site passes. The old variadic path would have
+	// read a stack word as a char*.
 	msg.FormatChecked("The %s lair has opened. %s");
 
 	CHECK(Is("The %s lair has opened. %s", msg));
@@ -105,4 +99,20 @@ TEST(MStringFormatChecked, LeavesTheLengthAgreeingWithTheText)
 	msg.FormatChecked("%s");
 
 	CHECK_EQ(2, (int)msg.GetLength());
+}
+
+TEST(MStringFormat, TypedFormattingRetainsTheStorageAndTruncationContracts)
+{
+	MString text("old");
+	text.Format("%s %d %s", 42);
+	CHECK(Is("%s 42 %s", text));
+	text.Format("[%s]", text.GetString());
+	CHECK(Is("[%s 42 %s]", text));
+	const std::string longText(2048, 'x');
+	text.Format("%s", longText.c_str());
+	CHECK_EQ(1023, text.GetLength());
+	CHECK(std::string(text.GetString()) == longText.substr(0, 1023));
+	text.Format("");
+	CHECK(text.GetString() == NULL);
+	CHECK_EQ(0, text.GetLength());
 }

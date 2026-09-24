@@ -23,6 +23,7 @@
 #ifndef __WIREHOST_H__
 #define __WIREHOST_H__
 
+#include "SafeFormat.h"
 #include "Types.h"
 #include "Types/ZoneTypes.h"
 
@@ -180,10 +181,22 @@ private :
 // failed link found it. It lives here now, and takes its target from
 // the host.
 //----------------------------------------------------------------------
-void	SendBugReport ( const char * bug , ... );
+void SendBugReportArgs(const DiagnosticSite* site, const char* format,
+	const SafeFormat::Arg* args, size_t count);
 
-// The same report with "[file,line] " in front, from a site captured
-// at the call.
-void	SendBugReportAt ( const DiagnosticSite & site , const char * bug , ... );
+template <typename... Args>
+void SendBugReport(const char* format, Args... args)
+{
+	const SafeFormat::Arg packed[] = {SafeFormat::MakeArg(args)..., SafeFormat::Arg()};
+	SendBugReportArgs(nullptr, format, packed, sizeof...(args));
+}
+
+// The same report prefixed with the caller's captured file and line.
+template <typename... Args>
+void SendBugReportAt(const DiagnosticSite& site, const char* format, Args... args)
+{
+	const SafeFormat::Arg packed[] = {SafeFormat::MakeArg(args)..., SafeFormat::Arg()};
+	SendBugReportArgs(&site, format, packed, sizeof...(args));
+}
 
 #endif	// __WIREHOST_H__
