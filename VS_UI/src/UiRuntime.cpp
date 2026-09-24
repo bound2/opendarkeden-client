@@ -65,6 +65,7 @@ bool RequestExchangeList(const ExchangeFilter& filter)
 	packet.setItemType(filter.itemType);
 	packet.setMinPrice(filter.minPrice);
 	packet.setMaxPrice(filter.maxPrice);
+	packet.setSellerFilter(filter.sellerFilter);
 	return activeHost->SendPacket(packet);
 }
 

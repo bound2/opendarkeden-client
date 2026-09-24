@@ -217,3 +217,20 @@ TEST(UiRuntime, ExchangeRequestsBuildRealPacketsAndBorrowThemForOneSend)
 	CHECK(!UiRuntime::RequestExchangeBuy(4));
 	CHECK_EQ(4, capture.packetIDs.size());
 }
+
+TEST(UiRuntime, ExchangeListCarriesTheSellerFilterItWasGiven)
+{
+	capture = {};
+	HostScope scope(&host);
+	UiRuntime::ExchangeFilter filter;
+	filter.sellerFilter = "Kain";
+	CHECK(UiRuntime::RequestExchangeList(filter));
+	CHECK(capture.seller == "Kain");
+	CHECK_EQ(1, capture.filter.page);
+	CHECK_EQ(0xff, capture.filter.itemClass);
+	CHECK_EQ(0xffff, capture.filter.itemType);
+	// An empty filter sends an empty seller: no filter at all.
+	CHECK(UiRuntime::RequestExchangeList({}));
+	CHECK(capture.seller.empty());
+	CHECK_EQ(2, capture.packetIDs.size());
+}

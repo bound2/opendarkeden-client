@@ -385,6 +385,7 @@ void C_VS_UI_POINT_EXCHANGE::RefreshList()
 		.itemType = static_cast<std::uint16_t>(m_filterItemType),
 		.minPrice = m_minPrice,
 		.maxPrice = m_maxPrice,
+		.sellerFilter = m_filterSeller,
 	});
 }
 
