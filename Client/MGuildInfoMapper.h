@@ -7,7 +7,8 @@
 
 #pragma warning(disable:4786)
 
-#include "CSprite.h"
+#include "Platform.h"
+#include "DrawTypeDef.h"
 #include "MString.h"
 
 #include <fstream>
