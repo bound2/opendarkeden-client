@@ -385,8 +385,6 @@ void C_VS_UI_PROGRESS::Show()
 			
 			Rect rect;
 			RECT rt;
-			S_SURFACEINFO surface_info;
-			gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surface_info);
 			
 			rect.Set(0, 0, (*m_pC_character)[0].GetWidth(), (*m_pC_character)[0].GetHeight()*(100-m_percent)/100);
 			rt.left = max(-p.x, rect.x);
@@ -405,10 +403,7 @@ void C_VS_UI_PROGRESS::Show()
 			// end
 			if(rt.left < rt.right && rt.top < rt.bottom)
 			{
-				WORD * p_dest = (WORD *)surface_info.p_surface+p.x+rt.left;
-				p_dest = (WORD *)((BYTE *)p_dest+(p.y+rt.top)*surface_info.pitch);
-				
-				(*m_pC_character)[0].BltEffectClipHeight(p_dest, surface_info.pitch, &rt);
+				gpC_base->m_p_DDSurface_back->BltSpriteEffectClip(&p, &(*m_pC_character)[0], &rt);
 			}
 			
 			SetRect((RECT *)&rect, 0, (*m_pC_character)[0].GetHeight()*(100-m_percent)/100, (*m_pC_character)[0].GetWidth(), (*m_pC_character)[0].GetHeight() - (*m_pC_character)[0].GetHeight()*(100-m_percent)/100);
@@ -429,10 +424,7 @@ void C_VS_UI_PROGRESS::Show()
 			if(rt.left < rt.right && rt.top < rt.bottom)
 			{
 				
-				WORD * p_dest = (WORD *)surface_info.p_surface+p.x+rt.left;
-				p_dest = (WORD *)((BYTE *)p_dest+(p.y+rt.top)*surface_info.pitch);
-				
-				(*m_pC_character)[0].BltClipHeight(p_dest, surface_info.pitch, &rt);
+				gpC_base->m_p_DDSurface_back->BltSpriteClip(&p, &(*m_pC_character)[0], &rt);
 			}
 			
 			

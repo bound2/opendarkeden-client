@@ -22,8 +22,10 @@
 #include "CSpriteSurface.h"
 #include "SpriteLibBackend.h"
 #include "SpriteLibBackendSDL.h"
+#include "SpriteGpu.h"
 #include <algorithm>
 #include <cstdint>
+#include <vector>
 
 namespace {
 // Internal drawing holds SDL pixels until its last read/write. The public
@@ -272,6 +274,7 @@ void CSpriteSurface::DrawRect(RECT* rect, WORD color)
 	}
 
 	spritectl_surface_info_t info;
+	if (SpriteGpu::Fill(m_backend_surface, &sdl_rect, pixel)) return;
 	if (spritectl_lock_surface(m_backend_surface, &info) == 0) {
 		SDL_FillRect(surf, &sdl_rect, pixel);
 		spritectl_unlock_surface(m_backend_surface);
@@ -489,16 +492,7 @@ int CSpriteSurface::GetSurfacePitch() const
 		return 0;
 	}
 
-	/* Lock surface to get pitch */
-	spritectl_surface_info_t info;
-	if (spritectl_lock_surface((spritectl_surface_t)m_backend_surface, &info) == 0) {
-		int pitch = info.pitch;
-		spritectl_unlock_surface((spritectl_surface_t)m_backend_surface);
-		return pitch;
-	}
-
-	/* Default: width * 2 for RGB565 format */
-	return m_width * 2;
+	return m_backend_surface->surface->pitch;
 }
 
 int CSpriteSurface::GetWidth() const
@@ -517,6 +511,7 @@ void CSpriteSurface::GetSurfaceInfo(S_SURFACEINFO* info)
 	*info = {};
 	if (!m_backend_surface || !m_backend_surface->surface) return;
 	SDL_Surface* surface = m_backend_surface->surface;
+	if (!SpriteGpu::CpuAccess(m_backend_surface, true, true)) return;
 	info->width = surface->w;
 	info->height = surface->h;
 	info->pitch = surface->pitch;
@@ -587,6 +582,9 @@ void CSpriteSurface::Blt(POINT* pPoint, CSpriteSurface* SourceSurface, RECT* pRe
 	if (left >= right || top >= bottom) return;
 	sx += left; dx += left; sy += top; dy += top;
 	width = right - left; height = bottom - top;
+	const SDL_Rect from{int(sx), int(sy), int(width), int(height)};
+	const SDL_Rect to{int(dx), int(dy), int(width), int(height)};
+	if (SpriteGpu::Copy(m_backend_surface, to, SourceSurface->m_backend_surface, from)) return;
 
 	SurfacePixelLock source(SourceSurface->m_backend_surface);
 	SurfacePixelLock dest(m_backend_surface);
@@ -607,6 +605,7 @@ void CSpriteSurface::Blt(POINT* pPoint, CSpriteSurface* SourceSurface, RECT* pRe
 void CSpriteSurface::FillSurface(WORD color)
 {
 	if (!m_backend_surface || m_backend_surface->surface->format->BytesPerPixel != 2) return;
+	if (SpriteGpu::Fill(m_backend_surface, nullptr, color, true)) return;
 	SurfacePixelLock lock(m_backend_surface);
 	if (!lock.info.pixels) return;
 	for (int y = 0; y < lock.info.height; ++y) {
@@ -673,32 +672,31 @@ void CSpriteSurface::GammaBox565(RECT* pRect, int p)
 		return;
 	}
 
-	SurfacePixelLock lock(m_backend_surface);
-	const auto& info = lock.info;
-	if (info.pixels == NULL)
-	{
-		return;
-	}
-
 	// SDL backend has no DirectDraw-style clip region tracking, so clip
 	// against the surface's own bounds instead (matches GetClipRight()/
 	// GetClipBottom() stubs above, which return m_width/m_height).
-	if (pRect->bottom < 0 || pRect->top > info.height
-		|| pRect->right < 0 || pRect->left > info.width)
+	if (pRect->bottom < 0 || pRect->top > m_height
+		|| pRect->right < 0 || pRect->left > m_width)
 	{
 		return;
 	}
 
 	if (pRect->left < 0) pRect->left = 0;
-	if (pRect->right > info.width) pRect->right = info.width;
+	if (pRect->right > m_width) pRect->right = m_width;
 	if (pRect->top < 0) pRect->top = 0;
-	if (pRect->bottom > info.height) pRect->bottom = info.height;
+	if (pRect->bottom > m_height) pRect->bottom = m_height;
 
 	if (pRect->left >= pRect->right || pRect->top >= pRect->bottom)
 	{
 		return;
 	}
 
+	const SDL_Rect region{int(pRect->left), int(pRect->top),
+		int(pRect->right - pRect->left), int(pRect->bottom - pRect->top)};
+	if (SpriteGpu::Gamma(m_backend_surface, region, p)) return;
+	SurfacePixelLock lock(m_backend_surface);
+	const auto& info = lock.info;
+	if (!info.pixels) return;
 	WORD* pDest = (WORD*)((BYTE*)info.pixels + pRect->top * info.pitch + (pRect->left << 1));
 	int dLen = pRect->right - pRect->left;
 	int rows = pRect->bottom - pRect->top;
@@ -714,6 +712,56 @@ void CSpriteSurface::GammaBox555(RECT* pRect, int p)
 {
 	// SDL backend always uses RGB565 surfaces (see Gamma4Pixel555 above)
 	GammaBox565(pRect, p);
+}
+
+void CSpriteSurface::ColorBox(const RECT* rect, BYTE rgb)
+{
+	if (!m_backend_surface || !rect || rgb > 2) return;
+	const int left = int((std::max)(int64_t(0), int64_t(rect->left)));
+	const int top = int((std::max)(int64_t(0), int64_t(rect->top)));
+	const int right = int((std::min)(int64_t(m_width), int64_t(rect->right)));
+	const int bottom = int((std::min)(int64_t(m_height), int64_t(rect->bottom)));
+	if (left >= right || top >= bottom) return;
+	const SDL_Rect region{left, top, right - left, bottom - top};
+	if (SpriteGpu::Tint(m_backend_surface, region, rgb)) return;
+	SurfacePixelLock lock(m_backend_surface);
+	if (!lock.info.pixels) return;
+	const WORD masks[]{0xf800, 0x07e0, 0x001f};
+	for (int y = top; y < bottom; ++y) {
+		auto* row = reinterpret_cast<WORD*>(static_cast<BYTE*>(lock.info.pixels) + y * lock.info.pitch);
+		for (int x = left; x < right; ++x) row[x] &= masks[rgb];
+	}
+}
+
+void CSpriteSurface::ApplyLightGrid(const CFilter& filter, const int* widths, const int* heights)
+{
+	if (!m_backend_surface || !filter.IsInit() || !widths || !heights) return;
+	std::vector<SpriteGpuEffects::LightCell> cells;
+	cells.reserve(size_t(filter.GetWidth()) * filter.GetHeight());
+	int64_t top = 0;
+	for (int y = 0; y < filter.GetHeight() && top < m_height; ++y) {
+		if (heights[y] <= 0) return;
+		int64_t left = 0;
+		const BYTE* light = filter.GetFilter(WORD(y));
+		if (!light) return;
+		for (int x = 0; x < filter.GetWidth() && left < m_width; ++x) {
+			if (widths[x] <= 0) return;
+			const int width = int((std::min)(int64_t(widths[x]), int64_t(m_width) - left));
+			const int height = int((std::min)(int64_t(heights[y]), int64_t(m_height) - top));
+			cells.push_back({{int(left), int(top), width, height}, light[x]});
+			left += widths[x];
+		}
+		top += heights[y];
+	}
+	if (SpriteGpu::LightGrid(m_backend_surface, cells)) return;
+	SurfacePixelLock lock(m_backend_surface);
+	if (!lock.info.pixels) return;
+	for (const auto& cell : cells) {
+		for (int y = cell.rect.y; y < cell.rect.y + cell.rect.h; ++y) {
+			auto* row = reinterpret_cast<WORD*>(static_cast<BYTE*>(lock.info.pixels) + y * lock.info.pitch);
+			Gamma4Pixel565(row + cell.rect.x, cell.rect.w, cell.light);
+		}
+	}
 }
 
 /* ============================================================================
@@ -749,6 +797,13 @@ void* CSpriteSurface::GetSurfacePointer()
 	return info.p_surface;
 }
 
+bool CSpriteSurface::Lock()
+{
+	if (!m_backend_surface || !m_backend_surface->surface || SDL_MUSTLOCK(m_backend_surface->surface)) return false;
+	m_lock_count = 1;
+	return true;
+}
+
 void* CSpriteSurface::Lock(RECT* rect, DWORD* pitch)
 {
 	(void)rect;
@@ -762,6 +817,7 @@ void* CSpriteSurface::Lock(RECT* rect, DWORD* pitch)
 
 void CSpriteSurface::Unlock()
 {
+	SpriteGpu::EndBorrow(m_backend_surface);
 	m_lock_count = 0;
 }
 

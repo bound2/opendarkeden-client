@@ -181,7 +181,7 @@ TEST(SpriteSurfaceBounds, CompressedPixelsStayLockedDuringDrawing)
 	source.GetSurfaceInfo(&borrowed);
 	CHECK(borrowed.p_surface == nullptr);
 	CHECK(source.GetSurfacePointer() == nullptr);
-	CHECK(source.Lock() == nullptr);
+	CHECK(!source.Lock());
 	CHECK(!source.IsLock());
 	POINT origin{0, 0};
 	dest.Blt(&origin, &source, nullptr);
@@ -201,9 +201,10 @@ TEST(SpriteSurfaceBounds, LegacyLockIsIdempotentAndReleaseClearsIt)
 	CHECK_EQ(0, spritectl_init());
 	CSpriteSurface surface;
 	CHECK(surface.Init(3, 3));
-	void* pixels = surface.Lock();
+	CHECK(surface.Lock());
+	void* pixels = surface.Lock(nullptr);
 	CHECK(pixels != nullptr);
-	CHECK(surface.Lock() == pixels);
+	CHECK(surface.Lock(nullptr) == pixels);
 	CHECK(surface.GetSurfacePointer() == pixels);
 	CHECK(surface.IsLock());
 	CHECK_EQ(0, surface.GetBackendSurface()->locked);

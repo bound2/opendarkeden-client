@@ -23,6 +23,7 @@ void CSDLGraphics::Flip()
 		return;
 	}
 
+	spritectl_finish_rendering();
 	SDL_RenderClear(m_pSDLRenderer);
 
 	if (g_pBack != NULL)

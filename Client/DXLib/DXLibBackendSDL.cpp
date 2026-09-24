@@ -21,6 +21,7 @@
  * SpriteLibBackend.h, which dxlib cannot include - it builds without the
  * SpriteLib include paths). Resolved when the executable links both libs. */
 extern "C" void spritectl_window_to_game_coords(int* x, int* y);
+extern "C" void spritectl_render_device_reset(void);
 
 #ifdef DXLIB_BACKEND_SDL
 
@@ -371,6 +372,11 @@ void dxlib_input_release(void) {
 void DXInput::ProcessEvent(const SDL_Event& event) {
 	if (!g_input_initialized) return;
 	switch (event.type) {
+		case SDL_RENDER_TARGETS_RESET:
+		case SDL_RENDER_DEVICE_RESET:
+			spritectl_render_device_reset();
+			if (DXInput::GetHost().graphicsReset) DXInput::GetHost().graphicsReset();
+			break;
 		case SDL_QUIT:
 			g_bRunning = false;
 			break;

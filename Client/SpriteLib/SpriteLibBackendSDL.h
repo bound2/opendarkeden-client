@@ -37,6 +37,7 @@ struct spritectl_surface_s {
 	int format;                 /* SPRITECTL_FORMAT_* */
 	int locked;                 /* Lock count */
 	int ref_count;              /* Reference count */
+	int cpu_borrowed;           /* Raw pixels exposed until CSpriteSurface::Unlock */
 };
 
 /* ============================================================================

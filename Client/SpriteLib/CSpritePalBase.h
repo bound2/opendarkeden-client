@@ -13,6 +13,8 @@
 // declarations below name the stream types, so the header has to be
 // usable without a precompiled header having pulled them in first.
 #include <fstream>
+#include <cstdint>
+#include <span>
 
 class CSpritePalBase
 {
@@ -46,6 +48,9 @@ public:
 	//--------------------------------------------------------
 	WORD	GetWidth() const	{ return m_Width; }
 	WORD	GetHeight() const	{ return m_Height; }
+	// Decode asset data once for the GPU cache: red=index, green=alpha/32,
+	// alpha=run coverage. Palette colors remain a separate shader lookup.
+	bool DecodeGpuPixels(std::span<uint32_t> pixels, bool withAlpha) const;
 	
 	static void	SetColorKey(BYTE color)		{ s_Colorkey = color; }
 	static BYTE	GetColorKey()				{ return s_Colorkey; }

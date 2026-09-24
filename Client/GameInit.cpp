@@ -654,7 +654,8 @@ InitInput()
 		.textInput = [](const char* text) { g_GetInputFocusManager().HandleTextInput(text); },
 		.textEditing = [](const char* text, int start, int length) {
 			g_GetInputFocusManager().HandleTextEditing(text, start, length);
-		}
+		},
+		.graphicsReset = []() { if (g_pTopView) g_pTopView->SetFirstDraw(); }
 	});
 	// Debug Message
 	DEBUG_ADD("[ InitGame ]  Input");

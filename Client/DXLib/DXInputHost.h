@@ -10,6 +10,7 @@ struct Host {
 	void (*keyDown)(unsigned int key) = nullptr;
 	void (*textInput)(const char* text) = nullptr;
 	void (*textEditing)(const char* text, int start, int length) = nullptr;
+	void (*graphicsReset)() = nullptr;
 };
 
 void SetHost(const Host& host);

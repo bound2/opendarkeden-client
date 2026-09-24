@@ -84,6 +84,13 @@ set_source_files_properties(
 
 add_test(NAME unit_tests COMMAND unit_tests)
 
+# Runs the texture compositor on SDL's deterministic software device in CI.
+# Invoke sprite_gpu_tests --accelerated locally to require a real GPU device;
+# that run fails, rather than silently skipping, if acceleration is unavailable.
+add_executable(sprite_gpu_tests render/main.cpp render/test_sprite_gpu.cpp render/benchmark.cpp)
+target_link_libraries(sprite_gpu_tests PRIVATE test_framework SpriteLib darkeden_xbrz)
+add_test(NAME sprite_gpu_tests COMMAND sprite_gpu_tests)
+
 # Exercise the actual settings reader/writer and key bindings, including old files.
 add_executable(user_option_tests
 	framework/test_main.cpp

@@ -10378,44 +10378,8 @@ MTopView::Draw(int firstPointX,int firstPointY)
 void
 MTopView::DrawLightBuffer3D()
 {
-	#ifdef OUTPUT_DEBUG_DRAW_PROCESS
-		DEBUG_ADD( "Start DrawLightBuffer3D" );
-	#endif
-
-	if (//true && 
-		m_DarkBits || g_pPlayer->IsInDarkness())
-	{
-		//------------------------------------------------
-		// LightBufferFilter --> Texture (SDL2 unified path)
-		//------------------------------------------------
-		WORD *lpSurface, pitch;
-		m_pLightBufferTexture->Lock();
-		lpSurface = (WORD*)m_pLightBufferTexture->GetSurfacePointer();
-		pitch = m_pLightBufferTexture->GetSurfacePitch();
-
-		m_LightBufferFilter.Blt4444(lpSurface, pitch);
-
-		m_pLightBufferTexture->Unlock();
-
-		//------------------------------------------------
-		// Texture output
-		//------------------------------------------------
-		RECT rect = { 0, 0, g_GameRect.right, g_GameRect.bottom };
-
-		// SDL2: Use BltNoColorkey for all platforms
-		POINT destPoint = { 0, 0 };
-		m_pLightBufferTexture->BltNoColorkey(&destPoint, m_pSurface, &rect);
-
-		#ifdef OUTPUT_DEBUG_DRAW_PROCESS
-			DEBUG_ADD( "End DrawLightBuffer3D" );
-		#endif
-	}
-
-	#ifdef OUTPUT_DEBUG_DRAW_PROCESS
-		DEBUG_ADD( "End DrawLightBuffer3D" );
-	#endif
-
-
+	// SDL uses the same light-grid shader for both legacy entry points.
+	DrawLightBuffer2D();
 }
 
 //----------------------------------------------------------------------
@@ -10428,375 +10392,8 @@ MTopView::DrawLightBuffer3D()
 void
 MTopView::DrawLightBuffer2D()
 {
-	//if (true && m_b3DLight && 
 	if (m_DarkBits || g_pPlayer->IsInDarkness())
-	{
-		//------------------------------------------------
-		// LightBufferFilter --> m_pSurface
-		//------------------------------------------------
-		WORD *lpSurface, pitch;
-
-		WORD	*lpSurfaceTemp1,
-				*lpSurfaceTemp2,
-				*lpSurfaceTemp3,
-				*lpSurfaceTemp4,
-				*lpSurfaceTemp5,
-				*lpSurfaceTemp6,
-				*lpSurfaceTemp7,
-				*lpSurfaceTemp8,
-				*lpSurfaceTemp9,
-				*lpSurfaceTemp10,
-				*lpSurfaceTemp11,
-				*lpSurfaceTemp12;
-		//m_pSurface->Lock();
-		lpSurface = (WORD*)m_pSurface->GetSurfacePointer();
-		pitch = m_pSurface->GetSurfacePitch();		
-
-		//--------------------------------------------
-		// 5:6:5
-		//--------------------------------------------
-		if (CSDLGraphics::Is565())
-		{
-			int*	pPH = m_p2DLightPixelHeight;
-			for (int y=0; y<m_LightBufferFilter.GetHeight(); y++)
-			{			
-				BYTE*	pFilter = m_LightBufferFilter.GetFilter(y);
-				int*	pPW	= m_p2DLightPixelWidth;			
-
-
-				//--------------------------------------------
-				// 9줄씩 출력할때...
-				//--------------------------------------------
-				if (*pPH==9)
-				{
-					lpSurfaceTemp1 = lpSurface;
-					lpSurfaceTemp2 = (WORD*)((BYTE*)lpSurfaceTemp1 + pitch);
-					lpSurfaceTemp3 = (WORD*)((BYTE*)lpSurfaceTemp2 + pitch);
-					lpSurfaceTemp4 = (WORD*)((BYTE*)lpSurfaceTemp3 + pitch);
-					lpSurfaceTemp5 = (WORD*)((BYTE*)lpSurfaceTemp4 + pitch);
-					lpSurfaceTemp6 = (WORD*)((BYTE*)lpSurfaceTemp5 + pitch);
-					lpSurfaceTemp7 = (WORD*)((BYTE*)lpSurfaceTemp6 + pitch);
-					lpSurfaceTemp8 = (WORD*)((BYTE*)lpSurfaceTemp7 + pitch);
-					lpSurfaceTemp9 = (WORD*)((BYTE*)lpSurfaceTemp8 + pitch);
-					// add by sonic 2006.9.29
-					if(g_MyFull)
-					{
-						lpSurfaceTemp10 = (WORD*)((BYTE*)lpSurfaceTemp9 + pitch);
-						lpSurfaceTemp11 = (WORD*)((BYTE*)lpSurfaceTemp10 + pitch);
-						lpSurface = (WORD*)((BYTE*)lpSurfaceTemp11 + pitch);
-					}
-					else
-					{
-						lpSurface = (WORD*)((BYTE*)lpSurfaceTemp9 + pitch);
-					}
-					//end by sonic
-					// 다음..
-
-
-					for (int x=0; x<m_LightBufferFilter.GetWidth(); x++)
-					{				
-						int light	= *pFilter;
-						int	len		= *pPW;
-
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp1, len, light);
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp2, len, light);
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp3, len, light);
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp4, len, light);
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp5, len, light);
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp6, len, light);
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp7, len, light);
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp8, len, light);
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp9, len, light);
-							// add by sonic 2006.9.29
-							if(g_MyFull)
-							{
-								m_pSurface->Gamma4Pixel565(lpSurfaceTemp10, len, light);
-								m_pSurface->Gamma4Pixel565(lpSurfaceTemp11, len, light);
-							}
-							// end by sonic
-						//}
-
-
-						// 다음 filter값
-						pFilter++;
-						pPW++;
-
-						// 다음 출력 위치 --> 8 pixel 뒤
-						lpSurfaceTemp1 += len;
-						lpSurfaceTemp2 += len;
-						lpSurfaceTemp3 += len;
-						lpSurfaceTemp4 += len;
-						lpSurfaceTemp5 += len;
-						lpSurfaceTemp6 += len;
-						lpSurfaceTemp7 += len;
-						lpSurfaceTemp8 += len;
-						lpSurfaceTemp9 += len;
-						// add by sonic 2006.9.29
-						if(g_MyFull)
-						{
-							lpSurfaceTemp10 += len;
-							lpSurfaceTemp11 += len;							
-						}
-						// end by sonic
-					}	
-				}
-				//--------------------------------------------
-				// 10줄씩 출력
-				//--------------------------------------------
-				else //if (*pPH==8)
-				{
-					lpSurfaceTemp1 = lpSurface;
-					lpSurfaceTemp2 = (WORD*)((BYTE*)lpSurfaceTemp1 + pitch);
-					lpSurfaceTemp3 = (WORD*)((BYTE*)lpSurfaceTemp2 + pitch);
-					lpSurfaceTemp4 = (WORD*)((BYTE*)lpSurfaceTemp3 + pitch);
-					lpSurfaceTemp5 = (WORD*)((BYTE*)lpSurfaceTemp4 + pitch);
-					lpSurfaceTemp6 = (WORD*)((BYTE*)lpSurfaceTemp5 + pitch);
-					lpSurfaceTemp7 = (WORD*)((BYTE*)lpSurfaceTemp6 + pitch);
-					lpSurfaceTemp8 = (WORD*)((BYTE*)lpSurfaceTemp7 + pitch);
-					lpSurfaceTemp9 = (WORD*)((BYTE*)lpSurfaceTemp8 + pitch);
-					lpSurfaceTemp10 = (WORD*)((BYTE*)lpSurfaceTemp9 + pitch);
-					// add by sonic 2006.9.29
-					if(g_MyFull)
-					{
-						lpSurfaceTemp11 = (WORD*)((BYTE*)lpSurfaceTemp10 + pitch);
-						lpSurfaceTemp12 = (WORD*)((BYTE*)lpSurfaceTemp11 + pitch);
-						lpSurface = (WORD*)((BYTE*)lpSurfaceTemp12 + pitch);
-					}
-					else
-					{
-						lpSurface = (WORD*)((BYTE*)lpSurfaceTemp10 + pitch);
-					}
-					// end by sonic
-
-					// 다음..
-					//lpSurface = (WORD*)((BYTE*)lpSurfaceTemp10 + pitch);
-
-					for (int x=0; x<m_LightBufferFilter.GetWidth(); x++)
-					{				
-						int light	= *pFilter;
-						int	len		= *pPW;
-
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp1, len, light);
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp2, len, light);
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp3, len, light);
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp4, len, light);
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp5, len, light);
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp6, len, light);
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp7, len, light);
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp8, len, light);
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp9, len, light);
-							m_pSurface->Gamma4Pixel565(lpSurfaceTemp10, len, light);
-							// add by sonic 2006.9.29
-							if(g_MyFull)
-							{
-								m_pSurface->Gamma4Pixel565(lpSurfaceTemp11, len, light);
-								m_pSurface->Gamma4Pixel565(lpSurfaceTemp12, len, light);
-							}
-							// edn by sonic
-						//}
-
-
-						// 다음 filter값
-						pFilter++;
-						pPW++;
-
-						// 다음 출력 위치 --> 8 pixel 뒤
-						lpSurfaceTemp1 += len;
-						lpSurfaceTemp2 += len;
-						lpSurfaceTemp3 += len;
-						lpSurfaceTemp4 += len;
-						lpSurfaceTemp5 += len;
-						lpSurfaceTemp6 += len;
-						lpSurfaceTemp7 += len;
-						lpSurfaceTemp8 += len;
-						lpSurfaceTemp9 += len;
-						lpSurfaceTemp10 += len;
-						// add by sonic 2006.9.29
-						if(g_MyFull)
-						{
-							lpSurfaceTemp11 += len;
-							lpSurfaceTemp12 += len;
-						}
-						// end by sonic
-					}	
-				}
-
-				pPH++;
-			}
-		}
-		//--------------------------------------------
-		// 5:5:5
-		//--------------------------------------------
-		else
-		{
-			int*	pPH = m_p2DLightPixelHeight;
-			for (int y=0; y<m_LightBufferFilter.GetHeight(); y++)
-			{			
-				BYTE*	pFilter = m_LightBufferFilter.GetFilter(y);
-				int*	pPW	= m_p2DLightPixelWidth;			
-
-
-				//--------------------------------------------
-				// 9줄씩 출력할때...
-				//--------------------------------------------
-				if (*pPH==9)
-				{
-					lpSurfaceTemp1 = lpSurface;
-					lpSurfaceTemp2 = (WORD*)((BYTE*)lpSurfaceTemp1 + pitch);
-					lpSurfaceTemp3 = (WORD*)((BYTE*)lpSurfaceTemp2 + pitch);
-					lpSurfaceTemp4 = (WORD*)((BYTE*)lpSurfaceTemp3 + pitch);
-					lpSurfaceTemp5 = (WORD*)((BYTE*)lpSurfaceTemp4 + pitch);
-					lpSurfaceTemp6 = (WORD*)((BYTE*)lpSurfaceTemp5 + pitch);
-					lpSurfaceTemp7 = (WORD*)((BYTE*)lpSurfaceTemp6 + pitch);
-					lpSurfaceTemp8 = (WORD*)((BYTE*)lpSurfaceTemp7 + pitch);
-					lpSurfaceTemp9 = (WORD*)((BYTE*)lpSurfaceTemp8 + pitch);
-					// add by sonic 2006.9.29
-					if(g_MyFull)
-					{
-						lpSurfaceTemp10 = (WORD*)((BYTE*)lpSurfaceTemp9 + pitch);
-						lpSurfaceTemp11 = (WORD*)((BYTE*)lpSurfaceTemp10 + pitch);
-						lpSurface = (WORD*)((BYTE*)lpSurfaceTemp11 + pitch);
-					}
-					else
-					{
-						lpSurface = (WORD*)((BYTE*)lpSurfaceTemp9 + pitch);
-					}
-					// end by sonic
-					// 다음..
-
-
-					for (int x=0; x<m_LightBufferFilter.GetWidth(); x++)
-					{				
-						int light	= *pFilter;
-						int	len		= *pPW;
-
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp1, len, light);
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp2, len, light);
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp3, len, light);
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp4, len, light);
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp5, len, light);
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp6, len, light);
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp7, len, light);
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp8, len, light);
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp9, len, light);
-							// add by sonic 2006.9.29
-							if(g_MyFull)
-							{
-								m_pSurface->Gamma4Pixel555(lpSurfaceTemp10, len, light);
-								m_pSurface->Gamma4Pixel555(lpSurfaceTemp11, len, light);
-							}
-							// end by sonic
-						//}
-
-
-						// 다음 filter값
-						pFilter++;
-						pPW++;
-
-						// 다음 출력 위치 --> 8 pixel 뒤
-						lpSurfaceTemp1 += len;
-						lpSurfaceTemp2 += len;
-						lpSurfaceTemp3 += len;
-						lpSurfaceTemp4 += len;
-						lpSurfaceTemp5 += len;
-						lpSurfaceTemp6 += len;
-						lpSurfaceTemp7 += len;
-						lpSurfaceTemp8 += len;
-						lpSurfaceTemp9 += len;
-						// add by sonic 2006.9.29
-						if(g_MyFull)
-						{
-							lpSurfaceTemp10 += len;
-							lpSurfaceTemp11 += len;
-						}
-						// end by sonic
-					}	
-				}
-				//--------------------------------------------
-				// 10줄씩 출력
-				//--------------------------------------------
-				else //if (*pPH==8)
-				{
-					lpSurfaceTemp1 = lpSurface;
-					lpSurfaceTemp2 = (WORD*)((BYTE*)lpSurfaceTemp1 + pitch);
-					lpSurfaceTemp3 = (WORD*)((BYTE*)lpSurfaceTemp2 + pitch);
-					lpSurfaceTemp4 = (WORD*)((BYTE*)lpSurfaceTemp3 + pitch);
-					lpSurfaceTemp5 = (WORD*)((BYTE*)lpSurfaceTemp4 + pitch);
-					lpSurfaceTemp6 = (WORD*)((BYTE*)lpSurfaceTemp5 + pitch);
-					lpSurfaceTemp7 = (WORD*)((BYTE*)lpSurfaceTemp6 + pitch);
-					lpSurfaceTemp8 = (WORD*)((BYTE*)lpSurfaceTemp7 + pitch);
-					lpSurfaceTemp9 = (WORD*)((BYTE*)lpSurfaceTemp8 + pitch);
-					lpSurfaceTemp10 = (WORD*)((BYTE*)lpSurfaceTemp9 + pitch);
-						// add by sonic 2006.9.29
-						if(g_MyFull)
-						{
-							lpSurfaceTemp11 = (WORD*)((BYTE*)lpSurfaceTemp10 + pitch);
-							lpSurfaceTemp12 = (WORD*)((BYTE*)lpSurfaceTemp11 + pitch);
-							lpSurface = (WORD*)((BYTE*)lpSurfaceTemp12 + pitch);
-						}else 
-						{
-							// 다음..
-							lpSurface = (WORD*)((BYTE*)lpSurfaceTemp10 + pitch);
-						}
-						// end by sonic
-
-
-					for (int x=0; x<m_LightBufferFilter.GetWidth(); x++)
-					{				
-						int light	= *pFilter;
-						int	len		= *pPW;
-
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp1, len, light);
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp2, len, light);
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp3, len, light);
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp4, len, light);
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp5, len, light);
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp6, len, light);
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp7, len, light);
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp8, len, light);
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp9, len, light);
-							m_pSurface->Gamma4Pixel555(lpSurfaceTemp10, len, light);
-							// add by sonic 2006.9.29
-							if(g_MyFull)
-							{
-								m_pSurface->Gamma4Pixel555(lpSurfaceTemp11, len, light);
-								m_pSurface->Gamma4Pixel555(lpSurfaceTemp12, len, light);
-							}
-							// end by sonic
-						//}
-
-
-						// 다음 filter값
-						pFilter++;
-						pPW++;
-
-						// 다음 출력 위치 --> 8 pixel 뒤
-						lpSurfaceTemp1 += len;
-						lpSurfaceTemp2 += len;
-						lpSurfaceTemp3 += len;
-						lpSurfaceTemp4 += len;
-						lpSurfaceTemp5 += len;
-						lpSurfaceTemp6 += len;
-						lpSurfaceTemp7 += len;
-						lpSurfaceTemp8 += len;
-						lpSurfaceTemp9 += len;
-						lpSurfaceTemp10 += len;
-						// add by sonic 2006.9.29
-						if(g_MyFull)
-						{
-							lpSurfaceTemp11 += len;
-							lpSurfaceTemp12 += len;
-						}
-						// end by sonic
-					}	
-				}
-
-				pPH++;
-			}
-		}
-		//m_pSurface->Unlock();
-		//*/	
-	}
+		m_pSurface->ApplyLightGrid(m_LightBufferFilter, m_p2DLightPixelWidth, m_p2DLightPixelHeight);
 }
 
 
@@ -19554,8 +19151,6 @@ MTopView::ExcuteAdvancementQuestEnding(void *pVoid)
 				int scroll3 = ( (scroll_progress < 0)? 500+scroll_progress : 500 );
 
 				Rect rect(0, scroll, m_AdvacementQuestEnding[0].GetWidth(), min(scroll3, m_AdvacementQuestEnding[0].GetHeight() - scroll));
-				S_SURFACEINFO surface_info;
-				SetSurfaceInfo(&surface_info, gpC_base->m_p_DDSurface_back->GetDDSD());
 
 				int x = scroll_x, y = scroll_y-scroll2;
 				RECT rt;
@@ -19571,11 +19166,8 @@ MTopView::ExcuteAdvancementQuestEnding(void *pVoid)
 
 				if(rt.left < rt.right && rt.top < rt.bottom)
 				{
-					WORD * p_dest = (WORD *)surface_info.p_surface+x+rt.left;
-					p_dest = (WORD *)((BYTE *)p_dest+(y+rt.top)*surface_info.pitch);
-
-					//void BltClip(WORD *pDest, WORD pitch, RECT* pRect); // in CSprite.h
-					m_AdvacementQuestEnding[0].BltClipWidth(p_dest, surface_info.pitch, &rt);
+					POINT point{x, y};
+					m_pSurface->BltSpriteClip(&point, &m_AdvacementQuestEnding[0], &rt);
 				}
 				m_pSurface->Unlock();
 			}
@@ -20007,8 +19599,6 @@ MTopView::ExcuteOustersFinEvent()
 				int scroll3 = ( (scroll_progress < 0)? 500+scroll_progress : 500 );
 
 				Rect rect(0, scroll, m_OustersFinSPK[spriteID].GetWidth(), min(scroll3, m_OustersFinSPK[spriteID].GetHeight() - scroll));
-				S_SURFACEINFO surface_info;
-				SetSurfaceInfo(&surface_info, gpC_base->m_p_DDSurface_back->GetDDSD());
 
 				int x = scroll_x, y = scroll_y-scroll2;
 				RECT rt;
@@ -20024,11 +19614,8 @@ MTopView::ExcuteOustersFinEvent()
 
 				if(rt.left < rt.right && rt.top < rt.bottom)
 				{
-					WORD * p_dest = (WORD *)surface_info.p_surface+x+rt.left;
-					p_dest = (WORD *)((BYTE *)p_dest+(y+rt.top)*surface_info.pitch);
-
-					//void BltClip(WORD *pDest, WORD pitch, RECT* pRect); // in CSprite.h
-					m_OustersFinSPK[spriteID].BltClipWidth(p_dest, surface_info.pitch, &rt);
+					POINT point{x, y};
+					m_pSurface->BltSpriteClip(&point, &m_OustersFinSPK[spriteID], &rt);
 				}
 
 				Rect rect2(0, 0, m_OustersFinSPK[1].GetWidth(), min(scroll3 - (m_OustersFinSPK[spriteID].GetHeight() - scroll) -50, m_OustersFinSPK[1].GetHeight()));
@@ -20042,11 +19629,8 @@ MTopView::ExcuteOustersFinEvent()
 
 				if(rt.left < rt.right && rt.top < rt.bottom)
 				{
-					WORD *p_dest = (WORD *)surface_info.p_surface+x+rt.left;
-					p_dest = (WORD *)((BYTE *)p_dest+(y+rt.top)*surface_info.pitch);
-
-					//void BltClip(WORD *pDest, WORD pitch, rect2* prect2); // in CSprite.h
-					m_OustersFinSPK[1].BltClipWidth(p_dest, surface_info.pitch, &rt);
+					POINT point{x, y};
+					m_pSurface->BltSpriteClip(&point, &m_OustersFinSPK[1], &rt);
 				}
 
 				m_pSurface->Unlock();

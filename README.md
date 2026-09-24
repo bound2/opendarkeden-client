@@ -385,6 +385,29 @@ policy, with a UTF-8 BOM overriding the pack default. Help-message reloads keep
 the previous collection if a document is incomplete or invalid; saves use UTF-8
 with a BOM so they can be read under any configured pack encoding.
 
+### Native GPU sprite rendering
+
+The native client now uses SDL's accelerated texture renderer for ordinary
+sprites, tiles, glyphs, fills, scaling, and surface copies when the device
+supports render targets. Sprite images are uploaded on first use and reused;
+draw order remains the game's original order. No new graphics SDK is required.
+Set `DARKEDEN_SPRITE_RENDERER=software` before launching to compare against the
+original CPU renderer. A device without acceleration keeps the software path.
+
+The client prefers SDL's OpenGL renderer for shader-based gamma, sprite color
+effects, palette screen blending, and palette alpha. Explicit `SDL_RENDER_DRIVER`
+overrides are honored; other devices retain ordinary GPU composition with CPU
+effect fallbacks. No additional runtime DLL is required.
+
+Clipped UI sprites, world lighting, minimap overlays and scratch-card drawing
+also use the GPU surface API. xBRZ runs in two shader passes when OpenGL supports
+`GL_ARB_gpu_shader_fp64`; older devices retain the CPU filter. The saved
+**Options > Graphics > xBRZ smoothing** preference is honored.
+
+The startup log names the rendering device; shutdown reports texture draws,
+uploads and readbacks. GPU tests and a repeatable synthetic benchmark are
+documented in [the native renderer notes](docs/native-gpu-renderer.md).
+
 ### Toggle xBRZ rendering
 
 Open **Options > Graphics** and use **xBRZ smoothing**, immediately below the FPS
@@ -400,13 +423,14 @@ and letterboxing. It does not add widescreen world visibility or replace artwork
 Because filtering happens after composition, character edges may differ from
 the individual transparent sprites in the offline comparison gallery.
 
-xBRZ runs on up to four CPU threads at an integer scale of 2x to 4x, then SDL fits the result to
-the window. Buffers and textures are reused, and unchanged frames reuse the
-filtered texture. The intermediate image is capped at 64 MiB; texture/allocation
-failures restore original presentation. Moving scenes still require filtering
-each new frame, so compare frame time with the toggle on your machine. The
-vendored filter is compiled with `/O2` in every configuration, Debug included:
-unoptimised it costs about three times as much per frame.
+xBRZ filters at an integer scale of 2x to 4x, then SDL fits the result to the
+window. The GPU path keeps the composed frame and filter intermediates on the
+device, with a combined 64 MiB intermediate texture budget. Unchanged frames
+reuse the filtered texture. Unsupported devices or GPU allocation failures use
+the existing CPU filter (up to four workers); failure of both paths restores
+original presentation. Moving scenes filter each new frame, so compare frame
+time with the toggle on your machine. The CPU fallback is compiled with `/O2`
+in every configuration, Debug included.
 
 The pinned xBRZ source and upstream license are under `third_party/xbrz/`.
 
