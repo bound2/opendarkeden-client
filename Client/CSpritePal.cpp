@@ -1,4 +1,5 @@
 #include "CSpritePal.h"
+#include "SafeFormat.h"
 
 #include <vector>
 #include <fstream>
@@ -600,7 +601,7 @@ bool CSpritePalPack::SaveToFile(std::ofstream &file)
 	if(realSize != m_Size)
 	{
 		char szTemp[512];
-		sprintf(szTemp, "real size : %d size : %d", realSize, m_Size);
+		SafeFormat::Format(szTemp, "real size : %d size : %d", realSize, m_Size);
 		file.seekp(0);
 		file.write((const char *)&realSize, 2);
 	}

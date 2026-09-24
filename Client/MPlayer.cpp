@@ -10337,52 +10337,6 @@ MPlayer::RemoveEffectTarget(BYTE id)
 // 공격 당했을때의 처리이다.
 // 해킹의 위험이 있지 않을까.. 흠흠.. - -;;
 //----------------------------------------------------------------------
-/*
-void	
-MPlayer::PacketBack()
-{
-	// 정지된 상태이면 필요가 없다.
-	if (m_sX==0 && m_sY==0)
-		return;
-
-	// 반대방향.. 	
-	//m_sX = -m_sX;
-	//m_sY = -m_sY;
-	//m_cX = -m_cX;
-	//m_cY = -m_cY;
-	//m_ActionCount = m_ActionCountMax - m_ActionCount;
-	
-
-	// 정지된 상태가 아니면.. 정지 시킨다.
-	SetStop();
-
-	// 바로 전의 위치는...
-	// 현재 위치에서 진행방향의 반대방향으로 되돌아 가면 된다.
-	m_Direction = GetCounterDirection( m_Direction );
-
-	// 방향으로 움직인 좌표를 얻는다.
-	GetPositionToDirection(m_X, m_Y, m_Direction);
-
-	// Back이동을 했다가 Server로 보낸다.
-	#ifdef	CONNECT_SERVER
-		CGMove _CGMove;
-		_CGMove.setX( m_X );
-		_CGMove.setY( m_Y );
-		_CGMove.setDir( m_Direction );
-		g_pSocket->sendPacket( &_CGMove );
-
-		#if defined(OUTPUT_DEBUG) && defined(__DEBUG_OUTPUT__)
-				sprintf(g_pDebugMessage->GetCurrent(), "[Send] [Back]%s", _CGMove.toString().c_str());
-				g_pDebugMessage->Next();
-		#endif
-
-		// Server로 보낸 방향을 기억해둔다.
-		m_listSendDirection.push_back( m_Direction );
-		m_SendMove++;
-		
-	#endif
-}
-*/
 
 //----------------------------------------------------------------------
 // Packet MoveOK

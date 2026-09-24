@@ -273,7 +273,7 @@ int g_Convert_DBCS_Ascii2SingleByte(const char_t * p_dbcs, int dbcs_len, char * 
 	p_new_buf = new char[len+1];
 	CheckMemAlloc(p_new_buf);
 
-	strcpy(p_new_buf, p_temp);
+	memcpy(p_new_buf, p_temp, static_cast<size_t>(len) + 1);
 
 	DeleteNewArray(p_temp);
 

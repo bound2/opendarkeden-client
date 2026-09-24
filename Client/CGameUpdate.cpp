@@ -306,38 +306,6 @@ CGameUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 				//---------------------------------------------------------
 				// Minimap에 클릭하면 그쪽으로 이동한다.
 				//---------------------------------------------------------
-				/* // 2001.7.14 주석처리
-				if (g_pSDLInput->KeyDown(DIK_RCONTROL) && g_pUserOption->DrawMinimap)
-				{
-					int x = g_x - (800 - 256) * g_pZone->GetWidth() / 256;
-					int y = g_y * g_pZone->GetWidth() / 128;
-
-					if (x>=0 && x<g_pZone->GetWidth()
-						&& y>=0 && y<g_pZone->GetWidth())
-					{
-						char str[80];
-
-						int zoneID = (g_bZonePlayerInLarge? g_nZoneLarge : g_nZoneSmall);
-
-						sprintf(str, "*warp %d %d %d", zoneID, x, y);
-
-						#ifdef CONNECT_SERVER
-							CGSay _CGSay;
-							_CGSay.setMessage( str );	//pWansungString );
-							g_pSocket->sendPacket( &_CGSay );
-
-							#if defined(OUTPUT_DEBUG) && defined(__DEBUG_OUTPUT__)
-										DEBUG_ADD_FORMAT("[Send] %s", _CGSay.toString().c_str() );
-							#endif	
-						#endif
-					}
-				}
-
-				//---------------------------------------------------------
-				// Chatting창에 extra input
-				//---------------------------------------------------------
-				gC_vs_ui.ChatMouseControlExtra( M_LEFTBUTTON_DOWN, g_x, g_y );
-				*/
 				#endif
 			break;
 
@@ -2229,17 +2197,6 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 						}
 
 						/*
-						#ifdef OUTPUT_DEBUG
-							if (g_pDebugMessage!=NULL)
-							{
-								char logFile[128];
-								strcpy(logFile, g_pDebugMessage->GetFilename());
-								
-								g_pDebugMessage->Init(MAX_DEBUGMESSAGE, 256, logFile);
-							}
-						#endif
-						*/
-						/*
 						int x = g_pPlayer->GetX();
 						int y = g_pPlayer->GetY();
 						int dir = g_pPlayer->GetDirection();
@@ -2293,7 +2250,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 					{
 						int objectID = MFakeCreature::GetFakeID();
 						char name[80];
-						sprintf(name, "Fake%d", objectID);
+						SafeFormat::Format(name, "Fake%d", objectID);
 						int x = g_pPlayer->GetX() + rand()%30-15;
 						int y = g_pPlayer->GetY() + rand()%30-15;
 						int dir = rand()%8;
@@ -2467,33 +2424,6 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 				//
 				//------------------------------------------------------------
 				case DIK_LBRACKET : case DIK_RBRACKET :
-					/*
-					if (g_pSDLInput->KeyDown(DIK_LCONTROL) || g_pSDLInput->KeyDown(DIK_RCONTROL))
-					{
-						char str[80];
-
-						if (key==DIK_LBRACKET)
-						{
-							// 슬레이어 길드
-							strcpy(str, "*warp 3 229 52");
-						}
-						else
-						{
-							// 뱀파이어 길드
-							sprintf(str, "*warp 9 55 78");
-						}
-
-						#ifdef CONNECT_SERVER
-							CGSay _CGSay;
-							_CGSay.setMessage( str );	//pWansungString );
-							g_pSocket->sendPacket( &_CGSay );
-
-							#if defined(OUTPUT_DEBUG) && defined(__DEBUG_OUTPUT__)
-									DEBUG_ADD_FORMAT("[Send] %s", _CGSay.toString().c_str() );
-							#endif	
-						#endif
-					}
-					*/
 				break;						
 
 				/*
@@ -4133,7 +4063,7 @@ CGameUpdate::ProcessInput()
 							else
 							{
 								char str[80];
-								strcpy(str, pItem->GetName());
+								SafeFormat::Copy(str, pItem->GetName());
 								
 								gpC_mouse_pointer->SetCursorPickUp( str, color );
 							}
@@ -5157,7 +5087,7 @@ CGameUpdate::UpdateDraw()
 				//-----------------------------------------------------------------
 				// FPS 찍기	
 				//-----------------------------------------------------------------				
-				sprintf(str, "%d FPS", g_FrameRate);	
+				SafeFormat::Format(str, "%d FPS", g_FrameRate);
 				
 				// Keep the counter below the HP frame, with a real dark shadow.
 				TextSystem::SpriteSurfaceRenderTarget target(g_pLast);
@@ -5209,28 +5139,6 @@ CGameUpdate::UpdateDraw()
 	//-------------------------------------------------------------------
 	// Mouse로 선택한 좌표에 대한 debug용 code
 	//-------------------------------------------------------------------
-	/*
-	WORD*	lpSurface;
-	long	lPitch;
-	g_pLast->LockW(NULL, lpSurface, lPitch);
-
-	for (int y=g_y-30; y<g_y+30; y++)
-		for (int x=g_x-60; x<g_x+60; x++)
-		{
-			point = g_pTopView->GetSelectedSector(x,y);
-
-			if (point.x==g_SelectSector.x && point.y==g_SelectSector.y)
-			{
-				*(lpSurface + y*lPitch + x) = 0xCCCC;
-			}
-		}
-
-	g_pLast->Unlock();
-
-	sprintf(str, "Selected Sector = (%d, %d)", g_SelectSector.x, g_SelectSector.y);
-	// g_pLast->GDI_Text(10,200, str, RGB(220,220,220));
-	TextSystem::TextService::RenderText(10, 200, str);
-	*/
 
 
 	//-----------------------------------------------------------------
@@ -5557,7 +5465,7 @@ CGameUpdate::UpdateDraw()
 					char str[10];
 					for (int i=0; i<numValue; i++)
 					{
-						sprintf(str, "%d", value[i]);
+						SafeFormat::Format(str, "%d", value[i]);
 						g_Print(200 + i*40, 455 + i*8, str, pPrintInfo);
 					}				
 
@@ -5600,7 +5508,7 @@ CGameUpdate::UpdateDraw()
 				// Debug Log Filename 출력하기
 				if (g_pDebugMessage->GetFilename()!=NULL)
 				{
-					sprintf(str, "LogFile : %s", g_pDebugMessage->GetFilename());
+					SafeFormat::Format(str, "LogFile : %s", g_pDebugMessage->GetFilename());
 
 					const COLORREF txColor = RGB(31<<3, 11<<3, 11<<3);										
 					pPrintInfo->text_color	= txColor;
@@ -5612,7 +5520,7 @@ CGameUpdate::UpdateDraw()
 			
 			if (g_pLoadingThread!=NULL && g_pLoadingThread->IsWorking())
 			{		
-				sprintf(str, "<<< Loading >>>");
+				SafeFormat::Format(str, "<<< Loading >>>");
 				//g_pBack->GDI_Text(700,580, str, 0xFFFFFF);
 				const COLORREF txColor = RGB(31<<3, 31<<3, 31<<3);				
 
@@ -5625,7 +5533,7 @@ CGameUpdate::UpdateDraw()
 			///*	 
 			if (g_pPlayer->GetSpecialActionInfo() != ACTIONINFO_NULL)
 			{
-				sprintf(str, "[%d] %s", g_pPlayer->GetSpecialActionInfo(), (*g_pActionInfoTable)[g_pPlayer->GetSpecialActionInfo()].GetName());
+				SafeFormat::Format(str, "[%d] %s", g_pPlayer->GetSpecialActionInfo(), (*g_pActionInfoTable)[g_pPlayer->GetSpecialActionInfo()].GetName());
 				
 				//g_pBack->GDI_Text(550,10, str, RGB(20,20,20));
 				//g_pBack->GDI_Text(551,11, str, RGB(120,255,120));
@@ -5643,7 +5551,7 @@ CGameUpdate::UpdateDraw()
 			//*/
 
 			// 가진 돈
-			sprintf(str, "Money : %d", (*g_pMoneyManager).GetMoney());
+			SafeFormat::Format(str, "Money : %d", (*g_pMoneyManager).GetMoney());
 			
 			//g_pBack->GDI_Text(550,10, str, RGB(20,20,20));
 			//g_pBack->GDI_Text(551,11, str, RGB(120,255,120));
@@ -5657,21 +5565,10 @@ CGameUpdate::UpdateDraw()
 			pPrintInfo->text_color	= txMoneyColor;
 			g_Print(501, 31, str, pPrintInfo);
 
-			sprintf(str, "QuestColorset = %d", g_pClientConfig->QuestItemColorSet);
+			SafeFormat::Format(str, "QuestColorset = %d", g_pClientConfig->QuestItemColorSet);
 			pPrintInfo->text_color	= txMoneyColor;
 			g_Print(501, 51, str, pPrintInfo);
 
-			/*
-			// 임시로 item 개수 보여주기
-			if (gpC_mouse_pointer->GetPickUpItem() != NULL)
-			{
-				sprintf(str, "%d", gpC_mouse_pointer->GetPickUpItem()->GetNumber());
-				// g_pBack->GDI_Text(g_x+1,g_y+1, str, RGB(20,20,20));
-				TextSystem::TextService::RenderText(g_x+1, g_y+1, str);
-				// g_pBack->GDI_Text(g_x,g_y, str, 0xFFFFFF);
-				TextSystem::TextService::RenderText(g_x, g_y, str);
-			}
-			*/
 
 			if (!true)
 			{
@@ -5680,26 +5577,6 @@ CGameUpdate::UpdateDraw()
 		}
 	#endif
 
-	/*
-	if (outputInfo || (*g_pUserOption).DrawFPS)
-	{
-		//-----------------------------------------------------------------
-		// FPS 찍기	
-		//-----------------------------------------------------------------
-		if (true)
-		{
-			sprintf(str, "%d FPS(HAL)", g_FrameRate);	
-		}
-		else
-		{
-			sprintf(str, "%d FPS", g_FrameRate);	
-		}
-		// g_pBack->GDI_Text(11,11, str, RGB(20,20,20));
-		TextSystem::TextService::RenderText(11, 11, str);
-		// g_pBack->GDI_Text(10,10, str, 0xFFFFFF);
-		TextSystem::TextService::RenderText(10, 10, str);
-	}
-	*/
 
 	__END_PROFILE("DrawDebugInfo")
 

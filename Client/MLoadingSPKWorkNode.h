@@ -57,6 +57,7 @@
 #define __MLOADINSPKWORKNODE_H__
 
 #include "MWorkNode.h"
+#include <string>
 #include "SpriteLib/CSpriteDef.h"
 //#include "CSpritePack.h"
 #include "SpriteLib/CSpritePack.h"
@@ -80,12 +81,12 @@ class MLoadingSPKWorkNode : public MWorkNode {
 		void			SetSPK(CSpritePack* pSPK, const char* filename)
 		{
 			m_pSPK = pSPK;
-			strcpy(m_SPKFilename, filename);
+			m_SPKFilename = filename ? filename : "";
 		}
 
 	protected :
 		CSpritePack*			m_pSPK;
-		char					m_SPKFilename[MAX_FILENAME];
+		std::string			m_SPKFilename;
 };
 
 //----------------------------------------------------------------------
@@ -93,13 +94,13 @@ class MLoadingSPKWorkNode : public MWorkNode {
 //----------------------------------------------------------------------
 class MLoadingSPKWorkNode1 : public MLoadingSPKWorkNode {
 	public :
-		MLoadingSPKWorkNode1(const char* sfpaFilename, long filePosition) { strcpy(m_SFPAFilename, sfpaFilename); m_FilePosition = filePosition; }
+		MLoadingSPKWorkNode1(const char* sfpaFilename, long filePosition) { m_SFPAFilename = sfpaFilename ? sfpaFilename : ""; m_FilePosition = filePosition; }
 		~MLoadingSPKWorkNode1() {}
 
 		BOOL		Execute(MWorkNode*& pRemainNode);
 
 	protected :
-		char							m_SFPAFilename[MAX_FILENAME];
+		std::string			m_SFPAFilename;
 		long							m_FilePosition;
 };
 

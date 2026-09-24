@@ -9452,7 +9452,7 @@ MTopView::DrawInformation()
 		if ((*g_pPlayerMessage)[c][0] != NULL)
 		{
 			// 取出信息
-			strcpy(message,(*g_pPlayerMessage)[c]);
+			SafeFormat::Copy(message,(*g_pPlayerMessage)[c]);
 			// 取出颜色类型
 			pColorType = &message[strlen(message)-1];
 			iColorType = atoi(pColorType);
@@ -9611,7 +9611,7 @@ MTopView::DrawInformation()
 		point.x += m_EtcSPK[SPRITEID_BULLET].GetWidth() + 2;
 		point.y += m_EtcSPK[SPRITEID_BULLET].GetHeight() - 18;
 
-		sprintf(str, "%d", g_pCurrentMagazine->GetNumber());
+		SafeFormat::Format(str, "%d", g_pCurrentMagazine->GetNumber());
 
 		const COLORREF bulletColor = RGB(30<<3, 28<<3, 30<<3);
 
@@ -9650,7 +9650,7 @@ MTopView::DrawInformation()
 
 			for (int status=0; status<statusNum; status++)
 			{
-				sprintf(str, "%s = %d", statusName[status], statusValue[status]);
+				SafeFormat::Format(str, "%s = %d", statusName[status], statusValue[status]);
 
 				pPrintInfo->text_color = 0;
 				g_Print(701, strY+1, str, pPrintInfo);
@@ -9703,12 +9703,12 @@ MTopView::DrawEventString(int& strX, int& strY)
 
 					if(stringID >= 0 && stringID < g_pGameStringTable->GetSize()
 						&& (*g_pGameStringTable)[stringID].GetString() != NULL)
-						strcpy(str, (*g_pGameStringTable)[stringID].GetString());
+						SafeFormat::Copy(str, (*g_pGameStringTable)[stringID].GetString());
 				}
 				break;
 
 			case EVENTFLAG_SHOW_DELAY:
-				sprintf(str, "%d", (event->eventDelay - event->ElapsedMillis()+999)/1000);
+				SafeFormat::Format(str, "%d", (event->eventDelay - event->ElapsedMillis()+999)/1000);
 				break;
 
 			case EVENTFLAG_SHOW_DELAY_STRING:
@@ -9760,50 +9760,50 @@ void MTopView::DrawDebugInfo(void* pSurface)
 
 		if (g_pPlayer->IsAttackModeNormal())
 		{
-			strcpy(attackMode, "Normal");
+			SafeFormat::Copy(attackMode, "Normal");
 		}
 		else if (g_pPlayer->IsAttackModeAggress())
 		{
-			strcpy(attackMode, "Aggress");
+			SafeFormat::Copy(attackMode, "Aggress");
 		}
 		else if (g_pPlayer->IsAttackModePeace())
 		{
-			strcpy(attackMode, "Peace");
+			SafeFormat::Copy(attackMode, "Peace");
 		}		
 
 		switch (g_pPlayer->GetWeaponSpeed())
 		{
-			case MCreature::WEAPON_SPEED_SLOW : sprintf(attackMode, "Slow(%d)", g_pPlayer->GetAttackSpeed()); break;
-			case MCreature::WEAPON_SPEED_NORMAL : sprintf(attackMode, "Normal(%d)", g_pPlayer->GetAttackSpeed()); break;
-			case MCreature::WEAPON_SPEED_FAST : sprintf(attackMode, "Fast(%d)", g_pPlayer->GetAttackSpeed()); break;		
+			case MCreature::WEAPON_SPEED_SLOW : SafeFormat::Format(attackMode, "Slow(%d)", g_pPlayer->GetAttackSpeed()); break;
+			case MCreature::WEAPON_SPEED_NORMAL : SafeFormat::Format(attackMode, "Normal(%d)", g_pPlayer->GetAttackSpeed()); break;
+			case MCreature::WEAPON_SPEED_FAST : SafeFormat::Format(attackMode, "Fast(%d)", g_pPlayer->GetAttackSpeed()); break;
 		}
 
-		sprintf(attackMode, "gtx(%d. %d %d)", gtx_op, gtx_src, gtx_dest);
+		SafeFormat::Format(attackMode, "gtx(%d. %d %d)", gtx_op, gtx_src, gtx_dest);
 
 		int zoneID = (g_bZonePlayerInLarge)? g_nZoneLarge : g_nZoneSmall;
 
-sprintf(str, "ID = %d / %d명 [Weapon=%s] [align=%d]", g_pPlayer->GetID(), m_pZone->GetCreatureNumber(), attackMode, g_pPlayer->GetAlignment());	
+SafeFormat::Format(str, "ID = %d / %d명 [Weapon=%s] [align=%d]", g_pPlayer->GetID(), m_pZone->GetCreatureNumber(), attackMode, g_pPlayer->GetAlignment());
 		// pSurfaceCast->GDI_Text(10,35, str, RGB(220,220,220));
 		TextSystem::TextService::RenderText(10, 35, str);
 
-		sprintf(str, " [ZoneID=%d] XY=(%d, %d), sXY=(%d, %d), SerXY=(%d, %d)", zoneID, g_pPlayer->GetX(), g_pPlayer->GetY(), g_pPlayer->GetSX(), g_pPlayer->GetSY(), g_pPlayer->GetServerX(), g_pPlayer->GetServerY());	
+		SafeFormat::Format(str, " [ZoneID=%d] XY=(%d, %d), sXY=(%d, %d), SerXY=(%d, %d)", zoneID, g_pPlayer->GetX(), g_pPlayer->GetY(), g_pPlayer->GetSX(), g_pPlayer->GetSY(), g_pPlayer->GetServerX(), g_pPlayer->GetServerY());
 		// pSurfaceCast->GDI_Text(10,56, str, RGB(220,220,220));
 		TextSystem::TextService::RenderText(10, 56, str);
 
-		sprintf(str, "SX = %d, SY = %d, HP=%d, MP=%d", g_pPlayer->GetSX(), g_pPlayer->GetSY(), g_pPlayer->GetHP(), g_pPlayer->GetMP());
+		SafeFormat::Format(str, "SX = %d, SY = %d, HP=%d, MP=%d", g_pPlayer->GetSX(), g_pPlayer->GetSY(), g_pPlayer->GetHP(), g_pPlayer->GetMP());
 		//sprintf(str, "[Wait Move = %d]", g_pPlayer->GetSendMove());
 		// pSurfaceCast->GDI_Text(10,72, str, RGB(220,220,220));
 		TextSystem::TextService::RenderText(10, 72, str);
 
-		sprintf(str, "ActionCount = [%d] %d/%d", g_pPlayer->GetAction(), g_pPlayer->GetActionCount(), g_pPlayer->GetActionCountMax());
+		SafeFormat::Format(str, "ActionCount = [%d] %d/%d", g_pPlayer->GetAction(), g_pPlayer->GetActionCount(), g_pPlayer->GetActionCountMax());
 		// pSurfaceCast->GDI_Text(10,88, str, RGB(220,220,220));
 		TextSystem::TextService::RenderText(10, 88, str);
 
-		sprintf(str, "MoveCount = %d/%d", g_pPlayer->GetMoveCount(), g_pPlayer->GetMoveCountMax());
+		SafeFormat::Format(str, "MoveCount = %d/%d", g_pPlayer->GetMoveCount(), g_pPlayer->GetMoveCountMax());
 		// pSurfaceCast->GDI_Text(10,104, str, RGB(220,220,220));
 		TextSystem::TextService::RenderText(10, 104, str);
 
-		sprintf(str, "Dark/Light/Sight = %d/%d/%d", m_DarkBits, g_pPlayer->GetLightSight() + g_pPlayer->GetItemLightSight(), g_pPlayer->GetSight());
+		SafeFormat::Format(str, "Dark/Light/Sight = %d/%d/%d", m_DarkBits, g_pPlayer->GetLightSight() + g_pPlayer->GetItemLightSight(), g_pPlayer->GetSight());
 		// pSurfaceCast->GDI_Text(10,120, str, RGB(220,220,220));
 		TextSystem::TextService::RenderText(10, 120, str);
 
@@ -9813,7 +9813,7 @@ sprintf(str, "ID = %d / %d명 [Weapon=%s] [align=%d]", g_pPlayer->GetID(), m_pZo
 			DWORD times = g_pProfiler->GetTimes(g_ProfileInfoName.GetString());
 			float avgTime = g_pProfiler->GetAverageTime(g_ProfileInfoName.GetString());
 
-			sprintf(str, "%s = %d / %d = %7.3f", g_ProfileInfoName.GetString(), totalTime, times, avgTime);
+			SafeFormat::Format(str, "%s = %d / %d = %7.3f", g_ProfileInfoName.GetString(), totalTime, times, avgTime);
 			// pSurfaceCast->GDI_Text(10,136, str, RGB(220,220,220));		
 			TextSystem::TextService::RenderText(10, 136, str);		
 		}		
@@ -9826,7 +9826,7 @@ sprintf(str, "ID = %d / %d명 [Weapon=%s] [align=%d]", g_pPlayer->GetID(), m_pZo
 
 		if (g_pRequestServerPlayerManager!=NULL)
 		{
-			sprintf(str, "Request Other = %d", g_pRequestServerPlayerManager->GetSize());
+			SafeFormat::Format(str, "Request Other = %d", g_pRequestServerPlayerManager->GetSize());
 			// pSurfaceCast->GDI_Text(10,225, str, RGB(220,220,220));	
 			TextSystem::TextService::RenderText(10, 225, str);	
 		}
@@ -9853,7 +9853,7 @@ sprintf(str, "ID = %d / %d명 [Weapon=%s] [align=%d]", g_pPlayer->GetID(), m_pZo
 			{ "One", "Slide" }
 		};
 
-		sprintf(str, "%s, %s, InputFocus=%s, SCShot=%s",
+		SafeFormat::Format(str, "%s, %s, InputFocus=%s, SCShot=%s",
 						infoStr[0][CSDLGraphics::Is565()],
 						infoStr[1][g_SDLMusic.IsSoftwareSynth()],
 						infoStr[2][g_bUIInput],
@@ -9871,7 +9871,7 @@ sprintf(str, "ID = %d / %d명 [Weapon=%s] [align=%d]", g_pPlayer->GetID(), m_pZo
 		ddsCaps2.dwCaps = DDSCAPS_TEXTURE; 
 		HRESULT hr = CSDLGraphics::GetDD()->GetAvailableVidMem(&ddsCaps2, &dwTotal, &dwFree);
 
-		sprintf(str, "Texture = %ld/%ld", dwFree, dwTotal);
+		SafeFormat::Format(str, "Texture = %ld/%ld", dwFree, dwTotal);
 		// pSurfaceCast->GDI_Text(500,580, str, 0xFFFFFF);		
 		TextSystem::TextService::RenderText(500, 580, str);		
 
@@ -12695,52 +12695,6 @@ MTopView::DrawZone(int firstPointX,int firstPointY)
 		iCreatureOutput ++;
 	}
 // 2004, 03, 24, sobeit end
-	/*
-	//------------------------------------------------------
-	// Sprite 하나 보기
-	//------------------------------------------------------
-			static int s_id = 0;
-			static DWORD lastFrame = g_CurrentFrame;
-
-			if (g_pSDLInput->KeyDown(DIK_N) && g_CurrentFrame-lastFrame>2)
-			{
-				if (g_pSDLInput->KeyDown(DIK_LSHIFT))
-				{
-					s_id -= 9;
-				}
-
-				if (--s_id < 0)
-				{
-					s_id = 0;
-				}
-
-				lastFrame = g_CurrentFrame;
-			}
-
-			if (g_pSDLInput->KeyDown(DIK_M) && g_CurrentFrame-lastFrame>2)
-			{
-				if (g_pSDLInput->KeyDown(DIK_LSHIFT))
-				{
-					s_id += 9;
-				}
-
-				if (++s_id >= m_CreatureSPK.GetSize())
-				{
-					s_id = m_CreatureSPK.GetSize()-1;
-				}
-				lastFrame = g_CurrentFrame;
-			}
-
-			POINT pointS = { 400, 20 };
-			CIndexSprite::SetUsingColorSet( 10, 10 );
-			char str[80];
-			sprintf(str, "id = %d", s_id);
-
-			m_pSurface->BltIndexSprite(&pointS, &m_CreatureSPK[s_id]);
-m_pSurface->Unlock();
-			m_pSurface->GDI_Text(400, 2, str, 0xFFFFFF);
-if (!m_pSurface->Lock()) return;
-	*/
 
 
 	// Surface의 정보를 저장해둔다.
@@ -15780,7 +15734,7 @@ MTopView::DrawImageObject(POINT* pPoint, MImageObject* pImageObject)
 						m_pSurface->Unlock();
 
 						char str[128];
-						sprintf(str, "iid=%d, view=%d", (int)pImageObject->GetImageObjectID(), (int)pImageObject->GetViewpoint());
+						SafeFormat::Format(str, "iid=%d, view=%d", (int)pImageObject->GetImageObjectID(), (int)pImageObject->GetViewpoint());
 						// m_pSurface->GDI_Text(pPoint->x, pPoint->y, str, 0xFFFF);
 						TextSystem::TextService::RenderText(pPoint->x, pPoint->y, str);
 
@@ -16080,7 +16034,7 @@ MTopView::DrawImageObject(POINT* pPoint, MImageObject* pImageObject)
 					(g_pSDLInput->KeyDown(DIK_LCONTROL) || g_pSDLInput->KeyDown(DIK_RCONTROL)))
 				{
 					char str[128];
-					sprintf(str, "iid=%d, sid=%d, vp=%d", (int)pImageObject->GetImageObjectID(), (int)spriteID, (int)pImageObject->GetViewpoint());
+					SafeFormat::Format(str, "iid=%d, sid=%d, vp=%d", (int)pImageObject->GetImageObjectID(), (int)spriteID, (int)pImageObject->GetViewpoint());
 
 					m_pSurface->Unlock();
 					// m_pSurface->GDI_Text(pPoint->x, pPoint->y, str, 0xFFFF);
@@ -16349,16 +16303,6 @@ MTopView::DrawImageObject(POINT* pPoint, MImageObject* pImageObject)
 
 	}
 
-	/*
-	// ImageObject ID 출력
-	char str[80];
-	sprintf(str, "%d", pImageObject->GetID());
-	gC_font.PrintStringNoConvert(&m_SurfaceInfo, 
-								str, 
-								pPoint->x, 
-								pPoint->y, 
-								0xFFFFFF);
-	*/
 
 	//#ifdef OUTPUT_DEBUG
 		//	DEBUG_ADD("[TempDebug] After Draw ImageObject");
@@ -16586,7 +16530,7 @@ MTopView::DrawGroundEffect()
 					MPortalEffectTarget* pPortalEffectTarget = (MPortalEffectTarget*)pEffectTarget;
 
 					char ownerName[20];
-					strcpy(ownerName, pPortalEffectTarget->GetOwnerName());					
+					SafeFormat::Copy(ownerName, pPortalEffectTarget->GetOwnerName());
 					int zoneID = pPortalEffectTarget->GetZoneID();
 
 
@@ -18239,12 +18183,12 @@ MTopView::DrawCreatureHPModify(POINT *point, MCreature* pCreature)
 		const int modifyValue = itr->modify;
 		if(itr->modify < 0 )
 		{
-			sprintf(str, "%d", modifyValue);
+			SafeFormat::Format(str, "%d", modifyValue);
 			color = RGB(255, 150, 150);
 		}
 		else
 		{
-			sprintf(str, "+%d", modifyValue);
+			SafeFormat::Format(str, "+%d", modifyValue);
 			RGB(150, 255, 150);
 		}
 
@@ -18826,7 +18770,7 @@ MTopView::DrawCreatureName(MCreature* pCreature)
 				(g_pSDLInput->KeyDown(DIK_LCONTROL) || g_pSDLInput->KeyDown(DIK_RCONTROL)))
 			{
 				char str[128];
-				sprintf(str, "HP=%d/%d", currentHP, maxHP);
+				SafeFormat::Format(str, "HP=%d/%d", currentHP, maxHP);
 				// m_pSurface->GDI_Text(rectLeft, rectTop-20, str, 0xFFFF);
 				TextSystem::TextService::RenderText(rectLeft, rectTop-20, str);
 			}
@@ -19275,7 +19219,7 @@ MTopView::DrawCreatureMyName()
 				(g_pSDLInput->KeyDown(DIK_LCONTROL) || g_pSDLInput->KeyDown(DIK_RCONTROL)))
 			{
 				char str[128];
-				sprintf(str, "HP=%d/%d", currentHP, maxHP);
+				SafeFormat::Format(str, "HP=%d/%d", currentHP, maxHP);
 				// m_pSurface->GDI_Text(rectLeft, rectTop-20, str, 0xFFFF);
 				TextSystem::TextService::RenderText(rectLeft, rectTop-20, str);
 			}					

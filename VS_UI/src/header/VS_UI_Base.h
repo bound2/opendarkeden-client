@@ -10,6 +10,7 @@
 #define __VS_UI_BASE_H__
 
 #include "Basics.h"
+#include "SafeFormat.h"
 #include "DLL.h"
 #include "DXLib/DXLib.h"
 #include "timer2.h"
@@ -59,7 +60,7 @@ struct S_BLOOD_BIBLE_DESCRIPTION
 #if (defined(_SHOW_WINDOW_ATTR) && !defined(_LIB))
 #define SHOW_WINDOW_ATTR { \
 								char buf[200]; \
-								sprintf(buf, "[move=%d, pin=%d, topmost=%d, kctrl=%d", GetAttributes()->window_move, GetAttributes()->pin, GetAttributes()->topmost, GetAttributes()->keyboard_control); \
+								SafeFormat::Format(buf, "[move=%d, pin=%d, topmost=%d, kctrl=%d", GetAttributes()->window_move, GetAttributes()->pin, GetAttributes()->topmost, GetAttributes()->keyboard_control); \
 								g_Print(x, y, buf); \
 								}
 #else

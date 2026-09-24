@@ -1381,7 +1381,7 @@ void	C_VS_UI_EXCHANGE::Show()
 			std::string sstr = money_buf;
 			for(int i = 3; i <= 13; i += 4)
 				if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
-			sprintf(money_buf, "$%s", sstr.c_str());
+			SafeFormat::Format(money_buf, "$%s", sstr.c_str());
 			g_Print(x+m_inventory_money_button_point.x+150, y+m_inventory_money_button_point.y+2, money_buf, &gpC_base->m_money2_pi);
 		}
 	}
@@ -1409,7 +1409,7 @@ void	C_VS_UI_EXCHANGE::Show()
 			std::string sstr = money_buf;
 			for(int i = 3; i <= 13; i += 4)
 				if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
-			sprintf(money_buf, "$%s", sstr.c_str());
+			SafeFormat::Format(money_buf, "$%s", sstr.c_str());
 			g_Print(x+m_money_button_point.x+150, y+m_money_button_point.y+2, money_buf, &gpC_base->m_money2_pi);
 		}
 	}
@@ -1437,7 +1437,7 @@ void	C_VS_UI_EXCHANGE::Show()
 			std::string sstr = money_buf;
 			for(int i = 3; i <= 13; i += 4)
 				if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
-			sprintf(money_buf, "$%s", sstr.c_str());
+			SafeFormat::Format(money_buf, "$%s", sstr.c_str());
 			g_Print(x+m_your_money_button_point.x+150, y+m_your_money_button_point.y+2, money_buf, &gpC_base->m_money2_pi);
 		}
 	}

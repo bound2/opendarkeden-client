@@ -72,3 +72,20 @@ TEST(UiMetadata, ShrineFileAdapterUsesTheRealResourceReaderAndParser)
 		CHECK_EQ(72, towers.Get(0).zoneID);
 	}
 }
+
+#include "StringCell.h"
+
+TEST(UiText, StringCellPreservesAliasedInputAndNullSemantics)
+{
+	StringCell cell;
+	CHECK(cell.GetString() == nullptr);
+	cell.SetString("alpha beta");
+	cell.SetString(cell.GetString());
+	CHECK(std::string(cell.GetString()) == "alpha beta");
+	cell.SetString(cell.GetString() + 6);
+	CHECK(std::string(cell.GetString()) == "beta");
+	cell.SetString(nullptr);
+	CHECK(std::string(cell.GetString()) == "beta");
+	cell.Release();
+	CHECK(cell.GetString() == nullptr);
+}

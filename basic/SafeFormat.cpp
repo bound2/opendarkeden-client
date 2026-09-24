@@ -16,6 +16,26 @@
 
 namespace SafeFormat {
 
+size_t Copy(char* destination, size_t capacity, const char* source)
+{
+	if (!destination || !capacity) return 0;
+	size_t length = 0;
+	if (source)
+		while (length < capacity - 1 && source[length]) ++length;
+	// Measure before writing so interior/self aliases remain valid.
+	if (length) memmove(destination, source, length);
+	destination[length] = '\0';
+	return length;
+}
+
+size_t Append(char* destination, size_t capacity, const char* source)
+{
+	if (!destination || !capacity) return 0;
+	size_t length = 0;
+	while (length < capacity - 1 && destination[length]) ++length;
+	return length + Copy(destination + length, capacity - length, source);
+}
+
 namespace {
 
 //----------------------------------------------------------------------

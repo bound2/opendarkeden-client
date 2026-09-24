@@ -43,7 +43,7 @@ WavePackFileInfo::SaveToFileData(std::ofstream& file)
 	{
 		return false;
 	}
-	strcpy(filename, pFilename);
+	memcpy(filename, pFilename, strlen(pFilename) + 1);
 
 	HMMIO wavefile = mmioOpen(filename, 0, MMIO_READ|MMIO_ALLOCBUF);
 	if(wavefile == NULL)

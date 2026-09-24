@@ -1,6 +1,7 @@
 // VS_UI_GameVampire.cpp
 
 #include "Client_PCH.h"
+#include "SafeFormat.h"
 #include "VS_UI_GameVampire.h"
 #include "VS_UI_filepath.h"
 #include "VS_UI_mouse_pointer.h"
@@ -205,139 +206,6 @@ void C_VS_UI_VAMPIRE::DrawEnergy()
 //	sprintf(sz_info_buf, "(%d/%d)", m_hp_cur, m_hp_max);
 //	g_Print(270, 9, sz_info_buf);
 	
-}
-*/
-/*
-//-----------------------------------------------------------------------------
-// DrawMinimap
-//
-
-//-----------------------------------------------------------------------------
-void C_VS_UI_VAMPIRE::DrawMinimap()
-{
-	int _x, _y, map_x_x, map_x_y, map_y_x, map_y_y;
-
-	if(!m_bl_minimap)
-	{
-		_x = g_GameRect.right - m_pC_etc_spk->GetWidth(MINIMAP_CASE);
-		_y = 0;
-
-		m_pC_etc_spk->Blt(_x, _y, MINIMAP_CASE);
-		
-		map_x_x = _x+71;
-		map_x_y = _y + 24;
-		map_y_x = map_x_x;
-		map_y_y = _y + 45;
-	}
-	else
-	{
-		_x = g_GameRect.right - m_pC_etc_spk->GetWidth(MINIMAP_CASE_EXTEND);
-		_y = 0;
-
-		m_pC_etc_spk->Blt(_x, _y, MINIMAP_CASE_EXTEND);
-
-		RECT rt = {0,0,m_p_minimap_surface->GetWidth(),m_p_minimap_surface->GetHeight()};
-		gpC_base->m_p_DDSurface_back->Blt(&m_map_start_point, m_p_minimap_surface, &rt);
-		
-		map_x_x = _x+71;
-		map_x_y = _y + 24+12;
-		map_y_x = map_x_x;
-		map_y_y = _y + 45+12;
-
-		int map_w = 200, map_h = 100;
-		if(m_map_w != m_map_h)
-		{
-			if(m_map_w > m_map_h)map_h = map_h * m_map_h / m_map_w;
-			if(m_map_h > m_map_w)map_w = map_w * m_map_w / m_map_h;
-		}
-
-		if(gpC_base->m_p_DDSurface_back->Lock())
-		{
-			WORD *mem = (WORD *)gpC_base->m_p_DDSurface_back->GetSurfacePointer();
-			long pitch = gpC_base->m_p_DDSurface_back->GetSurfacePitch();
-
-			int map_x = m_map_start_point.x + m_map_x*map_w/m_map_w + (200 - map_w)/2,
-				map_y = m_map_start_point.y + m_map_y*map_h/m_map_h + (100 - map_h)/2;
-
-			mem[(map_y)*pitch/2 + map_x] = 0xffff;
-			mem[(map_y+1)*pitch/2 + map_x+1] = 0xffff;
-			mem[(map_y-1)*pitch/2 + map_x-1] = 0xffff;
-			mem[(map_y+1)*pitch/2 + map_x-1] = 0xffff;
-			mem[(map_y-1)*pitch/2 + map_x+1] = 0xffff;
-
-			static int color=21;
-			static int color_direct = 1;
-			if(Timer())
-			{
-				color += color_direct;
-				if(color > 30 || color < 21)color_direct *= -1;
-			}
-
-			BYTE r = 31, g = 63, b = 31;
-			WORD portal_color = CSDLGraphics::Color(r, g, b);
-
-			int i, _x, _y;
-			WORD _color, _color2;
-
-			r = color, g = color-10, b = color;
-			_color = CSDLGraphics::Color(r, g, b);
-			r = color*2/3, g = (color-10)*2/3, b = color*2/3;
-			_color2 = CSDLGraphics::Color(r, g, b);
-			for(i = 0; i < m_portal.size(); i++)
-			{
-				_x = m_map_start_point.x + (m_portal[i].left+m_portal[i].right)/2*map_w/m_map_w + (200 - map_w)/2;
-				_y = m_map_start_point.y + (m_portal[i].top+m_portal[i].bottom)/2*map_h/m_map_h + (100 - map_h)/2;
-
-				mem[(_y)*pitch/2 + _x] = _color;
-				mem[(_y-1)*pitch/2 + _x-1] = _color2;
-				mem[(_y-1)*pitch/2 + _x] = _color;
-				mem[(_y-1)*pitch/2 + _x+1] = _color2;
-				mem[(_y-2)*pitch/2 + _x-1] = _color;
-				mem[(_y-2)*pitch/2 + _x] = _color;
-				mem[(_y-2)*pitch/2 + _x+1] = _color;
-
-			}
-
-			r = color-10, g = color, b = color-10;
-			_color = CSDLGraphics::Color(r, g, b);
-			for(i = 0; i < m_npc.size(); i++)
-			{
-				_x = m_map_start_point.x + m_npc[i].x*map_w/m_map_w + (200 - map_w)/2;
-				_y = m_map_start_point.y + m_npc[i].y*map_h/m_map_h + (100 - map_h)/2;
-
-				mem[(_y)*pitch/2 + _x] = _color;
-				mem[(_y-1)*pitch/2 + _x] = _color;
-				mem[(_y-2)*pitch/2 + _x-1] = _color;
-				mem[(_y-2)*pitch/2 + _x] = _color;
-				mem[(_y-2)*pitch/2 + _x+1] = _color;
-				mem[(_y-3)*pitch/2 + _x] = _color;
-			}
-			gpC_base->m_p_DDSurface_back->Unlock();
-		}
-
-	}
-	
-	char sz_temp[100];
-
-
-//	m_map_x = 125;
-//	m_map_y = 208;
-
-	g_FL2_GetDC();
-
-	if(m_bl_minimap)
-	{
-		g_PrintColorStr(g_GameRect.right - 115 - g_GetStringWidth(m_zone_name.c_str(), gpC_base->m_info_pi.hfont)/2, _y+9, m_zone_name.c_str(), gpC_base->m_info_pi, RGB_WHITE);	
-	}
-
-	wsprintf(sz_temp, "%d", m_map_x);
-	g_PrintColorStr(map_x_x - g_GetStringWidth(sz_temp, gpC_base->m_info_pi.hfont)/2, map_x_y, sz_temp, gpC_base->m_info_pi, RGB_WHITE);	
-	wsprintf(sz_temp, "%d", m_map_y);
-	g_PrintColorStr(map_y_x - g_GetStringWidth(sz_temp, gpC_base->m_info_pi.hfont)/2, map_y_y, sz_temp, gpC_base->m_info_pi, RGB_WHITE);	
-
-	g_FL2_ReleaseDC();
-
-
 }
 */
 /*
@@ -550,7 +418,7 @@ void C_VS_UI_VAMPIRE::Show()
 		
 		int sec = 0, min = 0, hour = 0;
 		char sz_temp[20];
-		strcpy(sz_temp, m_time.c_str());
+		SafeFormat::Copy(sz_temp, m_time.c_str());
 		sec = atoi(sz_temp+strlen(sz_temp)-2);
 		sz_temp[strlen(sz_temp)-3] = '\0';
 		min = atoi(sz_temp+strlen(sz_temp)-2);
@@ -758,75 +626,7 @@ void C_VS_UI_VAMPIRE::Process()
 //		m_pC_chatting->MouseControl(message, _x, _y);
 //		m_pC_button_group->MouseControl(message, _x, _y);
 //	}
-/*	
-	switch (message)
-	{
-	case M_MOVING:
-		{
-
-			if(_x >= m_map_start_point.x && _y >= m_map_start_point.y && _x < m_map_start_point.x+200 && _y < m_map_start_point.y+100)
-			{
-				int map_w = 200, map_h = 100;
-				if(m_map_w != m_map_h)
-				{
-					if(m_map_w > m_map_h)map_h = map_h * m_map_h / m_map_w;
-					if(m_map_h > m_map_w)map_w = map_w * m_map_w / m_map_h;
-				}
-				
-				for(int i = 0; i < m_portal.size(); i++)
-				{
-					int x = m_map_start_point.x + (m_portal[i].left+m_portal[i].right)/2*map_w/m_map_w + (200 - map_w)/2;
-					int y = m_map_start_point.y + (m_portal[i].top+m_portal[i].bottom)/2*map_h/m_map_h + (100 - map_h)/2;
-					if(_x > x-5 && _x < x+5 && _y > y-5 && _y < y+5)
-					{
-						int print_x = gpC_mouse_pointer->GetPointerX();
-						int print_y = gpC_mouse_pointer->GetPointerY();
-						
-						g_descriptor_manager.Set(DID_INFO, print_x, print_y, (void *)GetZoneName(m_portal_zone_id[i]));
-						break;
-					}
-				}
-				
-				for(i = 0; i < m_npc.size(); i++)
-				{
-					int x = m_map_start_point.x + m_npc[i].x*map_w/m_map_w + (200 - map_w)/2;
-					int y = m_map_start_point.y + m_npc[i].y*map_h/m_map_h + (100 - map_h)/2;
-					
-					if(_x > x-5 && _x < x+5 && _y > y-5 && _y < y+5)
-					{
-						int print_x = gpC_mouse_pointer->GetPointerX();
-						int print_y = gpC_mouse_pointer->GetPointerY();
-						
-						static char npc_name[50];
-						if((*g_pCreatureTable)[m_npc[i].id].Name.GetString())
-							strcpy(npc_name, (*g_pCreatureTable)[m_npc[i].id].Name.GetString());
-						else strcpy(npc_name, "");
-						
-						g_descriptor_manager.Set(DID_INFO, print_x, print_y, (void *)npc_name);
-						break;
-					}
-				}
-//				C_VS_UI_EVENT_BUTTON * p_button;
-//				p_button = m_pC_button_group->IsInRect(_x, _y);
-//				if (p_button != NULL)
-//				{
-//					// help description
-//					g_descriptor_manager.Set(DID_HELP, p_button->x, p_button->y, (void *)&g_help_string[p_button->GetID()-0xffff], 2);
-//				}
-			}
-		}
-		break;
-
-	case M_LEFTBUTTON_DOWN:
-	case M_LB_DOUBLECLICK:
-	case M_LEFTBUTTON_UP:
-	case M_RIGHTBUTTON_DOWN:
-	case M_RIGHTBUTTON_UP:
-//		if(_y < 300)return false;
-		break;
-	}
-
-*///	return true;
+//	return true;
 //}
 
 //-----------------------------------------------------------------------------

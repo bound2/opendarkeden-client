@@ -1177,7 +1177,7 @@ UIMessageManager::Execute_UI_NEW_CHARACTER(intptr_t left, intptr_t right, void* 
 		else
 		{
 			char strName[80];
-			strcpy(strName, pChar->sz_name);
+			SafeFormat::Copy(strName, pChar->sz_name);
 
 			// 안 좋은 말이 들어있는 경우는 허용이 안된다
 			if (g_pChatManager->RemoveCurse(strName))
@@ -1310,7 +1310,7 @@ RegisterNewUser(LOGIN* pLogin)
 		if (idLength < (int)PlayerInfo::minIDLength || idLength > (int)PlayerInfo::maxIDLength)
 		{
 			DEBUG_ADD("[RegisterNewUser] rejected: ID length");
-			sprintf(strTemp, "The ID must be %d to %d characters.", PlayerInfo::minIDLength, PlayerInfo::maxIDLength);
+			SafeFormat::Format(strTemp, "The ID must be %d to %d characters.", PlayerInfo::minIDLength, PlayerInfo::maxIDLength);
 			g_ShowMessage( strTemp );
 		}
 		else if (!bIDCharsOK)
@@ -1324,7 +1324,7 @@ RegisterNewUser(LOGIN* pLogin)
 		else if (passwordLength < (int)PlayerInfo::minPasswordLength || passwordLength > (int)PlayerInfo::maxPasswordLength)
 		{
 			DEBUG_ADD("[RegisterNewUser] rejected: password length");
-			sprintf(strTemp, "The password must be %d to %d characters.", PlayerInfo::minPasswordLength, PlayerInfo::maxPasswordLength);
+			SafeFormat::Format(strTemp, "The password must be %d to %d characters.", PlayerInfo::minPasswordLength, PlayerInfo::maxPasswordLength);
 			g_ShowMessage( strTemp );
 		}
 		else if (!IsValidPassword(pLogin->sz_password))
@@ -1341,7 +1341,7 @@ RegisterNewUser(LOGIN* pLogin)
 	if (bOK)
 	{
 		char strName[128];
-		strcpy(strName, pLogin->sz_id);
+		SafeFormat::Copy(strName, pLogin->sz_id);
 
 		// An ID containing a curse word is not allowed.
 		if (g_pChatManager->RemoveCurse(strName))
@@ -1463,12 +1463,9 @@ UIMessageManager::Execute_UI_RUN_NEWUSER_REGISTRATION(intptr_t left, intptr_t ri
 #ifdef PLATFORM_WINDOWS
 			char str[256];
 
-			GetWindowsDirectory(
-				str,  // address of buffer for Windows directory
-				255        // size of directory buffer
-			);
-
-			sprintf(str, "%s\\Explorer.exe", str);
+			if (const UINT length = GetWindowsDirectoryA(str, static_cast<UINT>(sizeof(str)));
+				length == 0 || length > sizeof(str) - sizeof("\\Explorer.exe")) break;
+			SafeFormat::Append(str, "\\Explorer.exe");
 
 			// CSDLGraphics::GetDD() always returns nullptr (stub - see
 			// 참고자료/작업필요stub.md 1-1), and IDirectDraw is only
@@ -1560,7 +1557,7 @@ UIMessageManager::Execute_UI_CHECK_EXIST_ID(intptr_t left, intptr_t right, void*
 		if (len<PlayerInfo::minIDLength || len>PlayerInfo::maxIDLength)
 		{
 			char strTemp[128];
-			sprintf(strTemp, "ID는 %d~%d자입니다", PlayerInfo::minIDLength, PlayerInfo::maxIDLength);
+			SafeFormat::Format(strTemp, "ID는 %d~%d자입니다", PlayerInfo::minIDLength, PlayerInfo::maxIDLength);
 			g_pUIDialog->PopupFreeMessageDlg( strTemp );						
 		}
 		else
@@ -1660,354 +1657,6 @@ UIMessageManager::Execute_UI_TERMINATION(intptr_t left, intptr_t right, void* vo
 // 새 사용자 등록
 //
 //-----------------------------------------------------------------------------
-/*
-void
-UIMessageManager::Execute_UI_NEW_USER_REGISTRATION(intptr_t left, intptr_t right, void* void_ptr)
-{
-	DEBUG_ADD("[UI] UI_NEW_USER_REGISTRATION");
-	
-	//
-	// ((NEW_REGISTRATION *)void_ptr) = ...
-	//
-	// // !string ptr을 저장하면 안된다.
-	//
-	//struct NEW_REGISTRATION
-	//{
-	//	char *	sz_id;
-	//	char *	sz_password;
-	//	char *	sz_repassword;
-	//	char *	sz_name;
-	//	char *	sz_email;
-	//	char *	sz_address;
-	//	char *	sz_ssn_number_part1; // 주민번호
-	//	char *	sz_ssn_number_part2; // 주민번호
-	//	char *	sz_homepage;
-	//	char *	sz_woo;
-	//	char *	sz_phone;
-	//	bool		bl_female;
-	//	bool		bl_announce_my_info;
-	//};
-	//			
-
-	NEW_REGISTRATION* pReg = (NEW_REGISTRATION *)void_ptr;
-
-	BOOL AllOK = TRUE;
-
-	//--------------------------------------------------
-	// string 길이 체크
-	//--------------------------------------------------
-	if (pReg->sz_id==NULL 
-		|| pReg->sz_password==NULL
-		|| pReg->sz_name==NULL
-		|| pReg->sz_ssn_number_part1==NULL
-		|| pReg->sz_ssn_number_part2==NULL
-		|| pReg->sz_email==NULL)
-	{
-		// 필수항목이 입력 안된 경우
-		AllOK = FALSE;
-
-		g_pUIDialog->PopupFreeMessageDlg((*g_pGameStringTable)[STRING_USER_REGISTER_EMPTY_FIELD].GetString());
-	}
-	else
-	{
-		int len;
-		char strTemp[128];
-			
-		
-		//--------------------------------------------------
-		// ID 길이 체크
-		//--------------------------------------------------
-		len = strlen(pReg->sz_id);	
-		
-		if (len<PlayerInfo::minIDLength || len>PlayerInfo::maxIDLength)
-		{
-			SafeFormat::Format(strTemp, GetGameString(STRING_USER_REGISTER_ID_LENGTH), PlayerInfo::minIDLength, PlayerInfo::maxIDLength);
-			g_pUIDialog->PopupFreeMessageDlg( strTemp );
-			AllOK = FALSE;
-		}
-
-		//---------------------------------------------
-		// 잘못된 ID인지 체크한다.
-		//---------------------------------------------						
-		if (AllOK)
-		{
-			if (!IsValidID(pReg->sz_id, NULL))
-			{
-				g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_INVALID_ID].GetString() );
-				AllOK = FALSE;
-			}
-			else
-			{
-				char strName[80];
-				strcpy(strName, pReg->sz_id);
-
-				// 안 좋은 말이 들어있는 경우는 허용이 안된다.
-				if (g_pChatManager->RemoveCurse(strName))
-				{
-					g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_INVALID_ID].GetString() );
-					AllOK = FALSE;
-				}								
-			}
-		}
-		
-		//--------------------------------------------------
-		// Password 길이 체크
-		//--------------------------------------------------
-		if (AllOK)
-		{
-			len = strlen(pReg->sz_password);	
-			
-			if (len<PlayerInfo::minPasswordLength || len>PlayerInfo::maxPasswordLength)
-			{
-				SafeFormat::Format(strTemp, GetGameString(STRING_USER_REGISTER_PASSWORD_LENGTH), PlayerInfo::minPasswordLength, PlayerInfo::maxPasswordLength);
-				g_pUIDialog->PopupFreeMessageDlg( strTemp );
-				AllOK = FALSE;
-			}
-			else if (!IsValidPassword(pReg->sz_id))
-			//else if (!IsValidID(pReg->sz_id))	// 원래는 이거 써야되는데
-			// 이미 만들어진 아이디 중에..  ID생성룰에 적합하지 않은 것도 있어서..
-			{
-				// ID에 특수문자가 들어간 경우
-				g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_ID_SPECIAL].GetString() );
-				AllOK = FALSE;
-			}			
-			else if (!IsValidPassword(pReg->sz_password))
-			{
-				// 패스워드가 잘못된 경우
-				g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_PASSWORD_SPECIAL].GetString() );
-				AllOK = FALSE;
-			}
-			else
-			{
-				//--------------------------------------------------
-				// 숫자만 사용하면 안된다.
-				//--------------------------------------------------
-				char* str = pReg->sz_password;
-				
-				char ch;
-
-				bool AllNumber = TRUE;
-
-				while (ch=*str++, ch)
-				{
-					if (ch<'0' || ch>'9')
-					{
-						AllNumber = FALSE;
-						break;
-					}
-				}
-
-				if (AllNumber)	// 전부 숫자인 경우..
-				{
-					g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_USER_REGISTER_PASSWORD_NUMBER].GetString() );
-					AllOK = FALSE;
-				}
-			}
-
-		}
-
-		//--------------------------------------------------
-		// 이름
-		//--------------------------------------------------
-		if (AllOK)
-		{
-			len = strlen(pReg->sz_name);	
-			
-			if (len>PlayerInfo::maxNameLength)
-			{
-				SafeFormat::Format(strTemp, GetGameString(STRING_USER_REGISTER_NAME_LENGTH), PlayerInfo::maxNameLength);
-				g_pUIDialog->PopupFreeMessageDlg( strTemp );
-				AllOK = FALSE;
-			}		
-		}
-
-		//--------------------------------------------------
-		// 이름
-		//--------------------------------------------------
-		if (AllOK)
-		{
-			// 제대로 입력된 경우
-			if (//strlen(pReg->sz_ssn_number) == 6+1+7
-				//&& pReg->sz_ssn_number[6]=='-')
-				1)
-			{
-				char ssn1[7];
-				char ssn2[8];
-
-				
-				//pReg->sz_ssn_number[6] = '\0';
-				//strcpy(ssn1, pReg->sz_ssn_number);
-
-				//pReg->sz_ssn_number[6] = '-';
-				//strcpy(ssn2, pReg->sz_ssn_number + 7);
-				
-				strcpy(ssn1, pReg->sz_ssn_number_part1);
-				strcpy(ssn2, pReg->sz_ssn_number_part2);
-
-				//--------------------------------------------------
-				// 주민등록번호 체크
-				//--------------------------------------------------
-				if (!IsValidSSN( ssn1, ssn2 ))
-				{
-					snprintf(strTemp, sizeof(strTemp), "%s", GetGameString(STRING_USER_REGISTER_INVALID_SSN));
-					g_pUIDialog->PopupFreeMessageDlg( strTemp );
-					AllOK = FALSE;
-				}
-				
-			}		
-			//else
-			//{
-			//	sprintf(strTemp, (*g_pGameStringTable)[STRING_USER_REGISTER_SSN_FORMAT].GetString());
-			//	g_pUIDialog->PopupFreeMessageDlg( strTemp );
-			//	AllOK = FALSE;
-			//}
-		}
-	}
-
-	//--------------------------------------------------
-	// 모두 정상이면..
-	//--------------------------------------------------
-	if (AllOK)
-	{
-		if (!InitSocket())
-		{						
-			//InitFail("[Error] Can't init Socket");
-			return;
-		}
-
-		#ifdef	CONNECT_SERVER
-
-			//--------------------------------------------------
-			// CLVersionCheck
-			//--------------------------------------------------
-			#ifndef _DEBUG
-
-				if (!g_bTestMode)
-				{
-					int version;
-					std::ifstream versionFile;//(FILE_INFO_ACTION, ios::binary);
-					if (!FileOpenBinary(FILE_INFO_VERSION, versionFile))
-						return;
-					versionFile.read((char*)&version, 4);
-					versionFile.close();
-
-					CLVersionCheck _CLVersionCheck;
-					_CLVersionCheck.setVersion( version );
-
-					g_pSocket->sendPacket( &_CLVersionCheck );
-				}
-				
-			#endif
-			
-			char ssnAll[20];
-
-			sprintf(ssnAll, "%s-%s", pReg->sz_ssn_number_part1, pReg->sz_ssn_number_part2);							
-			
-			//--------------------------------------------------
-			// CLRegisterPlayer
-			//--------------------------------------------------
-			CLRegisterPlayer	_CLRegisterPlayer;
-			
-			//--------------------------------------------------
-			// 필수항목
-			//--------------------------------------------------
-			_CLRegisterPlayer.setID( pReg->sz_id );
-			_CLRegisterPlayer.setPassword( pReg->sz_password );
-			_CLRegisterPlayer.setName( pReg->sz_name );
-			_CLRegisterPlayer.setSSN( ssnAll );
-			_CLRegisterPlayer.setEmail( pReg->sz_email );						
-			_CLRegisterPlayer.setSex( pReg->bl_female? FEMALE:MALE );
-			
-			//--------------------------------------------------
-			// default
-			//--------------------------------------------------
-			_CLRegisterPlayer.setNation( KOREA );
-
-
-			//--------------------------------------------------
-			// 필수항목이 아닌 것들
-			//--------------------------------------------------
-			if (pReg->sz_address!=NULL)
-			{
-				_CLRegisterPlayer.setAddress( pReg->sz_address );
-			}
-			else
-			{
-				_CLRegisterPlayer.setAddress( "NULL" );
-			}
-
-			if (pReg->sz_phone!=NULL)
-			{
-				_CLRegisterPlayer.setCellular( pReg->sz_phone );
-			}
-			else
-			{
-				_CLRegisterPlayer.setCellular( "NULL" );
-			}
-
-			if (pReg->sz_homepage!=NULL)
-			{
-				_CLRegisterPlayer.setHomepage( pReg->sz_homepage );
-			}
-			else
-			{
-				_CLRegisterPlayer.setHomepage( "NULL" );
-			}
-			
-			if (pReg->sz_phone!=NULL)
-			{
-				_CLRegisterPlayer.setTelephone( pReg->sz_phone );
-			}
-			else
-			{
-				_CLRegisterPlayer.setTelephone( "NULL" );
-			}
-
-			if (pReg->sz_woo!=NULL)
-			{
-				_CLRegisterPlayer.setZipCode( pReg->sz_woo );
-			}
-			else
-			{
-				_CLRegisterPlayer.setZipCode( "NULL" );
-			}
-
-			//--------------------------------------------------
-			// 지금 없다.. 
-			//--------------------------------------------------
-			_CLRegisterPlayer.setProfile( "profile" );
-
-			g_pSocket->setPlayerStatus( CPS_AFTER_SENDING_CL_REGISTER_PLAYER );
-
-			g_pSocket->sendPacket( &_CLRegisterPlayer );
-			
-		#endif	
-
-		// id기억
-		g_pUserInformation->UserID = pReg->sz_id;
-
-		SetMode( MODE_WAIT_REGISTERPLAYEROK );
-
-		//gC_vs_ui.StartCharacterManager();
-		DeleteNewArray(pReg->sz_id);
-		DeleteNewArray(pReg->sz_password);
-		DeleteNewArray(pReg->sz_repassword);
-		DeleteNewArray(pReg->sz_name);
-		DeleteNewArray(pReg->sz_email);
-		DeleteNewArray(pReg->sz_address);
-		DeleteNewArray(pReg->sz_ssn_number_part1);
-		DeleteNewArray(pReg->sz_ssn_number_part2);
-		DeleteNewArray(pReg->sz_homepage);
-		DeleteNewArray(pReg->sz_woo);
-		DeleteNewArray(pReg->sz_phone);
-
-		//gC_vs_ui.CloseUserRegistrationWindow();
-		//gC_vs_ui.StartCharacterManager();
-		//gC_vs_ui.ClearAllCharacter();
-	}
-	
-}
-*/
 
 //-----------------------------------------------------------------------------
 //
@@ -2555,26 +2204,6 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 		//-------------------------------------------------------------
 		//if (pcsChat)
 		//{
-			/*
-			int slot = gC_vs_ui.GetSendPossibleSlot();
-
-			if (slot!=NOT_SELECTED)
-			{
-				char* strUI = (char*)chatString;
-
-				#ifdef	CONNECT_SERVER
-					CGPhoneSay _CGPhoneSay;
-					_CGPhoneSay.setSlotID( slot );
-					_CGPhoneSay.setMessage( strUI );
-
-					g_pSocket->sendPacket( &_CGPhoneSay );					
-				#endif
-
-				char temp[128];
-				sprintf(temp, "[%s] %s", g_pUserInformation->CharacterID.GetString(), strUI);
-				UI_AddChatToHistory( temp );								
-			}
-			*/
 		//}
 		//-------------------------------------------------------------
 		//
@@ -2615,7 +2244,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 						if(0 == strncmp(str, (*g_pGameStringTable)[UI_STRING_MESSAGE_RANGER_SAY].GetString(),(*g_pGameStringTable)[UI_STRING_MESSAGE_RANGER_SAY].GetLength()))
 						{
 							char TempBuffer[CHAT_MESSAGE_MAX_BYTES + 1];
-							strcpy(TempBuffer, str+(*g_pGameStringTable)[UI_STRING_MESSAGE_RANGER_SAY].GetLength());
+							SafeFormat::Copy(TempBuffer, str+(*g_pGameStringTable)[UI_STRING_MESSAGE_RANGER_SAY].GetLength());
 							CGRangerSay _CGRangerSay;
 							_CGRangerSay.setMessage(TempBuffer);
 
@@ -2626,7 +2255,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 
 							// history에 추가
 							char temp[CHAT_MESSAGE_MAX_BYTES + 1];
-							strcpy(temp, str );//+1);
+							SafeFormat::Copy(temp, str );//+1);
 							//sprintf(temp, "[%s] %s", g_pUserInformation->CharacterID.GetString(), str+1);
 							//UI_AddChatToHistory( temp );
 							UI_AddChatToHistory( temp, g_pUserInformation->CharacterID.GetString(), CLD_ZONECHAT, right );
@@ -2662,7 +2291,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 								str[nSayPrefix+60]=NULL;
 							}
 
-							strcpy(TempBuffer, str+nSayPrefix);
+							SafeFormat::Copy(TempBuffer, str+nSayPrefix);
 							string msg="";
 							msg = g_pUserInformation->CharacterID.GetString();
 							msg +=">";
@@ -2731,7 +2360,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 
 										// history에 추가
 										char temp[CHAT_MESSAGE_MAX_BYTES + 1];
-										strcpy(temp, str );//+1);
+										SafeFormat::Copy(temp, str );//+1);
 										//sprintf(temp, "[%s] %s", g_pUserInformation->CharacterID.GetString(), str+1);
 										//UI_AddChatToHistory( temp );
 										UI_AddChatToHistory( temp, g_pUserInformation->CharacterID.GetString(), CLD_ZONECHAT, right );
@@ -2813,7 +2442,7 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 										{
 											// 귓속말 대상 설정 : ID + ' '
 											char strWhisperID[128];
-											sprintf(strWhisperID, "%s ", pName);
+											SafeFormat::Format(strWhisperID, "%s ", pName);
 											g_pUserInformation->WhisperID = strWhisperID;
 
 											// Whispers go through the game server. The
@@ -2833,9 +2462,9 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 											char strName[128];
 											//sprintf(temp, "[%s] <%s> %s", g_pUserInformation->CharacterID.GetString(), pName, pMessage);
 											//UI_AddChatToHistory( temp );
-											strcpy(strMessage, pMessage);
+											SafeFormat::Copy(strMessage, pMessage);
 											// "[내가] 누구에게> 뭐라고"라는 식으로 표현된다.
-											sprintf(strName, "[%s] %s", g_pUserInformation->CharacterID.GetString(), pName);
+											SafeFormat::Format(strName, "[%s] %s", g_pUserInformation->CharacterID.GetString(), pName);
 											UI_AddChatToHistory( strMessage, strName, CLD_WHISPER, right );
 
 											// [도움말] 귓속말 할 때
@@ -2868,9 +2497,9 @@ UIMessageManager::Execute_UI_CHAT_RETURN(intptr_t left, intptr_t right, void* vo
 								const char* pData = strToken.GetEnd();
 
 								char pLwrCommand[CHAT_MESSAGE_MAX_BYTES + 1];
-								strcpy(pLwrCommand, pCommand);
+								SafeFormat::Copy(pLwrCommand, pCommand);
 #ifdef PLATFORM_WINDOWS
-								strcpy(pLwrCommand, _strlwr(pLwrCommand));
+								_strlwr(pLwrCommand);
 #else
 								// Simple lowercase conversion for macOS
 								for (int i = 0; pLwrCommand[i]; i++) {
@@ -5682,40 +5311,6 @@ UIMessageManager::Execute_UI_PLEASE_SET_SLAYER_VALUE(intptr_t left, intptr_t rig
 // PCS 번호를 받을 때 --> 다른 사람과 통화할려고..
 //
 //-----------------------------------------------------------------------------
-/*
-void
-UIMessageManager::Execute_UI_SEND_PCS_NUMBER(intptr_t left, intptr_t right, void* void_ptr)
-{
-	//
-	// left = pcs number
-	//
-	DEBUG_ADD("[UI] UI_SEND_PCS_NUMBER");
-	
-	int pcsNumber = left;
-
-
-	//-------------------------------------------
-	// Server에 접속해 있을 때,
-	//-------------------------------------------
-	#ifdef CONNECT_SERVER
-		CGDialUp _CGDialUp;
-		_CGDialUp.setPhoneNumber( pcsNumber );
-
-		g_pSocket->sendPacket( &_CGDialUp );
-
-		
-	//-------------------------------------------
-	// Client Only
-	//-------------------------------------------
-	#else
-		char str[128];
-		strcpy(str, "Noname");
-		UI_OnLinePCS(str, left);
-	#endif
-
-	//gC_vs_ui.OnLinePCS(); // PCS가 연결되었을 때 해줘야 한다!
-}
- */
 
 //-----------------------------------------------------------------------------
 //
@@ -7535,34 +7130,6 @@ UIMessageManager::Execute_UI_CLOSE_EXCHANGE(intptr_t left, intptr_t right, void*
 //-----------------------------------------------------------------------------
 // left = 입력의 종류
 // void_ptr = 캐릭터이름(!=NULL)
-/*
-void
-UIMessageManager::Execute_UI_CHAT_SELECT_NAME(intptr_t left, intptr_t right, void* void_ptr)
-{
-	DEBUG_ADD("[UI] UI_CHAT_SELECT_NAME");
-	
-	char str[80];
-
-	const char* pID = (const char*)void_ptr;
-		
-	switch (left)
-	{
-		case M_LEFTBUTTON_DOWN :
-			sprintf(str, "/%s ", pID);
-			gC_vs_ui.SetInputString( str );
-		break;
-
-		case M_RIGHTBUTTON_DOWN :
-			#ifdef OUTPUT_DEBUG
-				sprintf(str, "*trace %s", pID);
-				gC_vs_ui.SetInputString( str );
-			#else
-				gC_vs_ui.AddInputString( pID );
-			#endif
-		break;
-	}
-}
-*/
 
 //-----------------------------------------------------------------------------
 //
@@ -8317,70 +7884,6 @@ UIMessageManager::Execute_UI_SELECT_ELEVATOR(intptr_t left, intptr_t right, void
 // Server 선택할 때
 //
 //-----------------------------------------------------------------------------
-/*
-void	
-UIMessageManager::Execute_UI_SELECT_SERVER(intptr_t left, intptr_t right, void* void_ptr)
-{
-	DEBUG_ADD("[UI] Execute_UI_SELECT_SERVER");
-
-	
-	if (g_Mode!=MODE_WAIT_SELECTPC)
-	{
-		DEBUG_ADD("Not Mode MODE_WAIT_SELECTPC");
-		return;
-	}
-
-	
-	// left : serverGroupID
-	int selectedGroup = left;
-
-
-	//-----------------------------------------------------
-	// Server정보 갱신
-	//-----------------------------------------------------
-	if (g_pServerInformation!=NULL)
-	{
-		//-----------------------------------------------------
-		// 서버 이름 읽어오기
-		//-----------------------------------------------------
-		const ServerGroup* pGroup = g_pServerInformation->GetData( selectedGroup );
-
-		if (pGroup!=NULL)
-		{
-			const char* pGroupName = pGroup->GetGroupName();
-
-			//-----------------------------------------------------
-			// 현재 선택되어 있는 server랑 다르면...
-			//-----------------------------------------------------
-			if (pGroupName != g_pServerInformation->GetServerGroupName())
-			{
-				char str[80];
-				strcpy(str, pGroupName);	
-				
-				// UI에 설정
-				//gC_vs_ui.SetServerDefault( str, selectedGroup );
-
-			
-				//-----------------------------------------------------
-				// Packet 보내기
-				//-----------------------------------------------------
-				#ifdef CONNECT_SERVER
-					CLChangeServer _CLChangeServer;
-
-					_CLChangeServer.setServerGroupID( selectedGroup );
-
-					g_pSocket->sendPacket( &_CLChangeServer );
-
-					gC_vs_ui.CharManagerDisable();
-				#endif
-
-				// Server정보에 설정
-				g_pServerInformation->SetServerGroupName( pGroupName );			
-			}
-		}
-	}
-}
-*/
 
 //-----------------------------------------------------------------------------
 //
@@ -9128,7 +8631,7 @@ UIMessageManager::Execute_UI_NEWCHARACTER_CHECK(intptr_t left, intptr_t right, v
 				else
 				{
 					char strName[80];
-					strcpy(strName, pName);
+					SafeFormat::Copy(strName, pName);
 
 					// 안 좋은 말이 들어있는 경우는 허용이 안된다
 					if (g_pChatManager->RemoveCurse(strName))
@@ -9454,7 +8957,7 @@ void UIMessageManager::Execute_UI_FRIEND_REQUEST_ACCEPT(intptr_t left, intptr_t 
 	g_pSocket->sendPacket(&gcFriend);
 	
 	DeleteNew(pDialog);
-	DeleteNew(pName);
+	DeleteNewArray(pName);
 }
 ////////////////////////////////////////////ask_friend_close///////////////////////////////////
 void UIMessageManager::Execute_UI_FRIEND_ASK_CLOSE(intptr_t left, intptr_t right, void* void_ptr)
@@ -9465,14 +8968,14 @@ void UIMessageManager::Execute_UI_FRIEND_ASK_CLOSE(intptr_t left, intptr_t right
 		gC_vs_ui.setFriendWaitAskNull();
 
 	DeleteNew(pDialog);
-	DeleteNew(pName);
+	DeleteNewArray(pName);
 }
 //////////////////////////////////////////////ask_friend_delete_ask//////////////////////////////
 void UIMessageManager::Execute_UI_FRIEND_DELETE_ASK(intptr_t left, intptr_t right, void* void_ptr)
 {
 	C_VS_UI_FRIEND_INFO::FRIEND_LIST* pList = (C_VS_UI_FRIEND_INFO::FRIEND_LIST*)void_ptr;
 	char* pName = new char[pList->Name.size()+1];
-	strcpy(pName, pList->Name.c_str());
+	memcpy(pName, pList->Name.c_str(), pList->Name.size() + 1);
 	gC_vs_ui.RunFriendDeleteAsk(pName);
 }
 ////////////////////////////////////////////////ask_friend_delete_accept/////////////////////////
@@ -9486,7 +8989,7 @@ void UIMessageManager::Execute_UI_FRIEND_DELETE_ACCEPT(intptr_t left, intptr_t r
 	g_pSocket->sendPacket(&gcFriend);
 
 	DeleteNew(pDialog);
-	DeleteNew(pName);
+	DeleteNewArray(pName);
 }
 //end
 
@@ -9598,12 +9101,9 @@ UIMessageManager::Execute_UI_CLOSE_FILE_DIALOG(intptr_t left, intptr_t right, vo
 					surface.FillSurface( 0 );
 					surface.Blt(&destBigRect, &bmpSurface, &bmpRect);
 
-					char saveBmpName[512];
-					strcpy(saveBmpName, g_pFileDef->getProperty("DIR_PROFILE").c_str());
-					strcat(saveBmpName, "\\");
-					strcat(saveBmpName, g_char_slot_ingame.sz_name.c_str());
-					strcat(saveBmpName, ".bmp");
-					surface.SaveToBMP(saveBmpName);
+					const std::string saveBmpName = g_pFileDef->getProperty("DIR_PROFILE")
+						+ "\\" + g_char_slot_ingame.sz_name + ".bmp";
+					surface.SaveToBMP(saveBmpName.c_str());
 
 					g_pProfileManager->InitProfiles();
 					gC_vs_ui.RefreshInfoImage();
@@ -9985,24 +9485,7 @@ UIMessageManager::Execute_GO_BILING_PAGE(intptr_t left, intptr_t right, void* vo
 		// 종료..
 		SetMode( MODE_QUIT );
 
-#ifdef PLATFORM_WINDOWS
-		char str[256];
 
-		GetWindowsDirectory(
-			str,  // address of buffer for Windows directory
-			255        // size of directory buffer
-			);
-
-		sprintf(str, "%s\\Explorer.exe", str);
-
-		// CSDLGraphics::GetDD() always returns nullptr (stub - see
-		// 참고자료/작업필요stub.md 1-1), and IDirectDraw is only
-		// forward-declared, so ->RestoreDisplayMode() never compiled.
-		// Same category as the WinMain.cpp/VS_UI_Title.cpp call sites
-		// already disabled there; just missed here.
-
-	//	_spawnl(_P_NOWAIT, str, "Explorer.exe", g_pClientConfig->URL_HOMEPAGE_BILING.GetString(), NULL);
-#endif
 	}
 }
 
@@ -11391,11 +10874,13 @@ void
 UIMessageManager::Execute_UI_RECALL_BY_NAME(intptr_t left, intptr_t right, void* void_ptr)
 {
 	DEBUG_ADD("[UI] Execute_UI_RECALL_BY_NAME");
-	char *szSelectedID = gC_vs_ui.GetTeamMember_SelectedID();
+	const char *szSelectedID = gC_vs_ui.GetTeamMember_SelectedID();
 	if(szSelectedID != NULL && strlen(szSelectedID)>0)
 	{
 		char szBuf[128];
-		sprintf(szBuf, "*recall %s", szSelectedID );
+		// Never send a truncated player identity as a different recall target.
+		if (strlen(szSelectedID) + sizeof("*recall ") > sizeof(szBuf)) return;
+		SafeFormat::Format(szBuf, "*recall %s", szSelectedID );
 		CGSay _CGSay;
 		_CGSay.setMessage( szBuf );	//pWansungString );
 		_CGSay.setColor( 0 );

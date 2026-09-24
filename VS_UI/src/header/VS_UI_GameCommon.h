@@ -17,6 +17,7 @@
 #define __VS_UI_GAME_COMMON_H__
 
 #include "VS_UI_Base.h"
+#include "StringCell.h"
 #include "VS_UI_util.h"
 #include "MonotonicClock.h"
 #include "VS_UI_Description.h"
@@ -357,45 +358,6 @@ enum CHAT_LINE_CONDITION
 	CLD_MASTER,	// 운영자 메시지
 
 	CLD_TOTAL = CLD_MASTER,
-};
-
-//-----------------------------------------------------------------------------
-// class StringCell
-//
-// Single string class.
-//-----------------------------------------------------------------------------
-class StringCell
-{
-private:
-	char *						m_sz_string;
-
-public:
-	void	Release()
-	{
-		DeleteNewArray(m_sz_string);
-	}
-
-	StringCell()
-	{
-		m_sz_string = NULL;
-	}
-
-	virtual ~StringCell()
-	{
-		Release();
-	}
-
-	void	SetString(const char * sz_str)
-	{
-		if (sz_str == NULL)
-			return;
-
-		Release();
-		m_sz_string = new char[strlen(sz_str)+1];
-		strcpy(m_sz_string, sz_str);
-	}
-
-	const char * GetString() const { return m_sz_string; }
 };
 
 extern COLORREF g_color[4][4];
@@ -2915,7 +2877,7 @@ private:
 	int		m_focus;
 	std::vector<TEAM_MEMBER_LIST>	m_v_member_list;
 	BYTE	m_bAvailableRecall; // 타입에 따라 길원 호출하기 
-	char	m_SelectedID[16];
+	std::string m_SelectedID;
 	char	m_AskingMessage[128];
 public:
 	C_VS_UI_TEAM_MEMBER_LIST();
@@ -2938,7 +2900,7 @@ public:
 	void	_Sort(int nSort);
 	BYTE	GetAvailableRecall() {return m_bAvailableRecall;}
 	void	SetAvailableRecall(BYTE bFlag) {m_bAvailableRecall = bFlag;}
-	char*	GetSelectedID() {return m_SelectedID;}
+	const char* GetSelectedID() const { return m_SelectedID.c_str(); }
 };
 
 class C_VS_UI_NPC_DIALOG;

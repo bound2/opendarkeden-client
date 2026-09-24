@@ -65,4 +65,33 @@ std::vector<std::string> WrapUtf8Lines(std::string_view text, size_t maxBytes,
 	return rows;
 }
 
+std::vector<std::string> WrapUtf8MeasuredLines(std::string_view text,
+	int firstWidth, int followingWidth,
+	const std::function<int(const std::string&)>& measure)
+{
+	std::vector<std::string> rows;
+	while (!text.empty()) {
+		const int width = rows.empty() ? firstWidth : followingWidth;
+		std::string row;
+		size_t consumed = 0;
+		while (consumed < text.size()) {
+			int scalarBytes = 0;
+			const size_t remaining = text.size() - consumed;
+			Utf8Decode(text.data() + consumed,
+				static_cast<int>(remaining < 4 ? remaining : 4), &scalarBytes);
+			const size_t previous = row.size();
+			row.append(text.data() + consumed, static_cast<size_t>(scalarBytes));
+			if (measure(row) > width) {
+				if (previous) row.resize(previous);
+				else consumed += static_cast<size_t>(scalarBytes);
+				break;
+			}
+			consumed += static_cast<size_t>(scalarBytes);
+		}
+		text.remove_prefix(consumed);
+		rows.push_back(std::move(row));
+	}
+	return rows;
+}
+
 } // namespace TextSystem

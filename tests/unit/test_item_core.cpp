@@ -417,3 +417,17 @@ TEST(ItemCore, OptionColourSetPicksTheNthOptionOrTheNoneRow)
 	item.SetQuestFlag(true);
 	CHECK_EQ(QUEST_ITEM_COLOR, (int)item.GetItemOptionColorSet());
 }
+
+TEST(ItemCore, NameAssignmentPreservesAliasedInputAndCanClearAnOverride)
+{
+	ItemWorld world;
+	SwordInfo().HName = "Table sword";
+	Sword sword;
+	sword.SetName("Named sword");
+	sword.SetName(sword.GetName());
+	CHECK(std::strcmp("Named sword", sword.GetName()) == 0);
+	sword.SetName(sword.GetName() + 6);
+	CHECK(std::strcmp("sword", sword.GetName()) == 0);
+	sword.SetName(nullptr);
+	CHECK(std::strcmp("Table sword", sword.GetName()) == 0);
+}

@@ -674,3 +674,50 @@ TEST(SafeFormat, RefusingAConversionNeverWritesMoreThanTheFormatItCameFrom)
 		CHECK_EQ(0, std::memcmp(buf + nSize, untouched, sizeof(buf) - nSize));
 	}
 }
+
+TEST(SafeFormat, PlainCopyAndAppendPreserveTextAndBoundEveryWrite)
+{
+	for (size_t capacity = 0; capacity <= 12; ++capacity) {
+		char destination[16];
+		std::memset(destination, '!', sizeof(destination));
+		const size_t copied = SafeFormat::Copy(destination, capacity, "abc%s");
+		const std::string first = std::string("abc%s").substr(0, capacity ? capacity - 1 : 0);
+		CHECK_EQ(first.size(), copied);
+		if (capacity) CHECK(Is(first.c_str(), destination));
+		const size_t appended = SafeFormat::Append(destination, capacity, "XYZ");
+		const std::string expected = (first + "XYZ").substr(0, capacity ? capacity - 1 : 0);
+		CHECK_EQ(expected.size(), appended);
+		if (capacity) CHECK(Is(expected.c_str(), destination));
+		for (size_t i = capacity; i < sizeof(destination); ++i) CHECK_EQ('!', destination[i]);
+	}
+}
+
+TEST(SafeFormat, PlainTextOperationsSupportAliasedSources)
+{
+	char text[16] = "abcdef";
+	CHECK_EQ(size_t(4), SafeFormat::Copy(text, text + 2));
+	CHECK(Is("cdef", text));
+	CHECK_EQ(size_t(4), SafeFormat::Copy(text + 2, sizeof(text) - 2, text));
+	CHECK(Is("cdcdef", text));
+	CHECK_EQ(size_t(6), SafeFormat::Copy(text, text));
+	CHECK_EQ(size_t(12), SafeFormat::Append(text, text));
+	CHECK(Is("cdcdefcdcdef", text));
+	CHECK_EQ(size_t(15), SafeFormat::Append(text, text + 2));
+	CHECK(Is("cdcdefcdcdefcde", text));
+}
+
+TEST(SafeFormat, PlainTextOperationsHandleMissingAndUnterminatedBuffers)
+{
+	CHECK_EQ(size_t(0), SafeFormat::Copy(nullptr, 8, "x"));
+	CHECK_EQ(size_t(0), SafeFormat::Append(nullptr, 8, "x"));
+	char text[5] = {'a', 'b', 'c', 'd', 'e'};
+	CHECK_EQ(size_t(4), SafeFormat::Append(text, "ignored"));
+	CHECK(Is("abcd", text));
+	CHECK_EQ(size_t(4), SafeFormat::Append(text, nullptr));
+	CHECK_EQ(size_t(0), SafeFormat::Copy(text, nullptr));
+	CHECK(Is("", text));
+	// Only the bytes that fit may be read, even without a source terminator.
+	const char source[4] = {'w', 'x', 'y', 'z'};
+	CHECK_EQ(size_t(4), SafeFormat::Copy(text, source));
+	CHECK(Is("wxyz", text));
+}

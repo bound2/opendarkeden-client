@@ -2086,7 +2086,7 @@ void	C_VS_UI::BackupPrevId(const char * sz_id)
 	if( strlen( sz_id ) >= 11 )
 		return;
 
-	strcpy(g_pUserOption->BackupID, sz_id);
+	SafeFormat::Copy(g_pUserOption->BackupID, sz_id);
 //	if (sz_id)
 //	{
 //		ofstream file(FILE_BACKUP_ID, ios::binary);

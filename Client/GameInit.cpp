@@ -8,6 +8,7 @@
 // Include files
 //-----------------------------------------------------------------------------
 #include "Client_PCH.h"
+#include "SafeFormat.h"
 #ifdef PLATFORM_WINDOWS
 // <MMSystem.h> not included: no real MM_ symbols are used in this file, and
 // including it conflicts with basic/Platform.h's timeGetTime()/GetTickCount()
@@ -439,10 +440,10 @@ EndTitleLoading(bool SendLogin)
 	{
 		static LOGIN	login;
 		login.sz_id = new char[  g_pUserInformation->UserID.GetLength() + 1 ];
-		login.sz_password = new char[ 20 ];
+		login.sz_password = new char[g_pUserInformation->AutoLogInKeyValue.GetLength() + 1];
 		
-		strcpy( login.sz_id, g_pUserInformation->UserID.GetString() );		
-		strcpy( login.sz_password, g_pUserInformation->AutoLogInKeyValue.GetString() );
+		SafeFormat::Copy(login.sz_id, g_pUserInformation->UserID.GetLength() + 1, g_pUserInformation->UserID.GetString());
+		SafeFormat::Copy(login.sz_password, g_pUserInformation->AutoLogInKeyValue.GetLength() + 1, g_pUserInformation->AutoLogInKeyValue.GetString());
 		
 		gpC_base->SendMessage(UI_LOGIN, 0, 0, (void *)&login);
 	}
@@ -1769,74 +1770,6 @@ InitGame()
 		#endif
 		*/
 
-		/*
-		#if defined(_DEBUG) && defined(OUTPUT_DEBUG)
-			std::ifstream guildInfoFile2(FILE_INFO_GUILD_INFO_MAPPER, ios::binary | );	
-
-			if (!guildInfoFile2.is_open())
-			{
-				struct MAKE_GUILD_INFO
-				{
-					WORD	guildID;
-					char	guildName[80];
-				};
-
-				const int numGuild = 20;
-				MAKE_GUILD_INFO guildInfo[numGuild] =
-				{
-					{ 1, "테페즈" },
-					{ 2, "바토리" },
-					{ 100, "E.V.E" },
-					{ 101, "귀천검" },
-					{ 102, "다덴마스터" },
-					{ 103, "레드블러드" },
-					{ 104, "바이러스" },
-					{ 105, "뱀파이어키퍼즈" },
-					{ 106, "버피즈" },
-					{ 107, "블러드레인" },
-					{ 108, "소년미소녀" },
-					{ 109, "십자군" },
-					{ 110, "엘카" },
-					{ 111, "지존" },
-					{ 112, "키퍼즈" },
-					{ 113, "태극" },
-					{ 114, "특전사" },
-					{ 115, "패밀리" },
-					{ 116, "퍼펙트" },
-					{ 117, "데카" }
-				};
-
-
-				char guildMarkFilename[256];
-
-				for (int g=0; g<numGuild; g++)
-				{
-					WORD		guildID		= guildInfo[g].guildID;
-					const char* guildName	= guildInfo[g].guildName;
-
-					GUILD_INFO* pInfo = new GUILD_INFO;
-					pInfo->SetGuildName( guildName );
-					
-					g_pGuildInfoMapper->Set( guildID, pInfo );
-
-					// 길드 마크 생성. "길드이름.bmp"
-					sprintf(guildMarkFilename, "Data\\Guild\\%s.bmp", guildName);
-					g_pGuildMarkManager->CreateGuildMark( guildID, guildMarkFilename );
-				}
-
-				// g_pGuildInfoMapper 저장
-				std::ofstream guildInfoFile(FILE_INFO_GUILD_INFO_MAPPER, ios::binary);	
-				g_pGuildInfoMapper->SaveToFile(guildInfoFile);
-				guildInfoFile.close();
-				
-				g_pGuildInfoMapper->SaveInfoToFile("GuildList.txt");
-			}
-			else
-			{
-				guildInfoFile2.close();
-			}
-		#endif
-		*/
 
 		//----------------------------------------
 		// 내 profile 초기화
@@ -2046,7 +1979,7 @@ InitSocket()
 					if (i!=0)
 					{
 						char str[10];
-						sprintf(str, "%d", i);
+						SafeFormat::Format(str, "%d", i);
 						serverAddressString += str;
 					}
 					

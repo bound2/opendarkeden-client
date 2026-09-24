@@ -4242,7 +4242,7 @@ NewFakeCreature(int creatureType, int x, int y, int dir)
 	
 #ifdef OUTPUT_DEBUG
 	char name[20];
-	sprintf(name, "Fake%d", pFakeCreature->GetID());
+	SafeFormat::Format(name, "Fake%d", pFakeCreature->GetID());
 	pFakeCreature->SetName( name );
 #endif
 	
@@ -4282,7 +4282,7 @@ NewFakeCreature(MCreature* pCreature, int x, int y)
 	
 	#ifdef OUTPUT_DEBUG
 		char name[20];
-		sprintf(name, "Fake%d", pFakeCreature->GetID());
+		SafeFormat::Format(name, "Fake%d", pFakeCreature->GetID());
 		pFakeCreature->SetName( name );
 	#endif
 
@@ -5750,7 +5750,7 @@ CheckMacScreenMode()
 	MacInfo_Map.insert(MACINFO_MAP::value_type("00-02-78-F7-B1-AB", "221.148.70.182")); // ip
 
 	char szMyMac[32];
-	sprintf(szMyMac, "%02X-%02X-%02X-%02X-%02X-%02X", g_macAddress[0], g_macAddress[1], g_macAddress[2], g_macAddress[3], g_macAddress[4], g_macAddress[5]);
+	SafeFormat::Format(szMyMac, "%02X-%02X-%02X-%02X-%02X-%02X", g_macAddress[0], g_macAddress[1], g_macAddress[2], g_macAddress[3], g_macAddress[4], g_macAddress[5]);
 	MACINFO_MAP::const_iterator itr = MacInfo_Map.find( szMyMac ); // 내 Mac Addresss가 있나 찾기.
 	if(itr != MacInfo_Map.end())
 	{

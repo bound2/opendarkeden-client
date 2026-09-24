@@ -178,3 +178,30 @@ TEST(TextWrap, LargeColumnsKeepManyShortExplicitRows)
 	CHECK_EQ(text.size(), rows.size());
 	for (const auto& row : rows) CHECK(row.empty());
 }
+
+TEST(TextWrap, MeasuredRowsPreserveBytesAndUseDifferentContinuationWidths)
+{
+	const auto rows = TextSystem::WrapUtf8MeasuredLines("a bc de", 3, 2,
+		[](const std::string& text) { return static_cast<int>(text.size()); });
+	CHECK_EQ(size_t(3), rows.size());
+	if (rows.size() == 3) {
+		CHECK(rows[0] == "a b");
+		CHECK(rows[1] == "c ");
+		CHECK(rows[2] == "de");
+	}
+}
+
+TEST(TextWrap, MeasuredRowsAdvanceAcrossWideAndMalformedScalars)
+{
+	const std::string input = "\xE2\x82\xAC" "x\xFF";
+	const auto rows = TextSystem::WrapUtf8MeasuredLines(input, 0, 1,
+		[](const std::string&) { return 20; });
+	CHECK_EQ(size_t(3), rows.size());
+	if (rows.size() == 3) {
+		CHECK(rows[0] == input.substr(0, 3));
+		CHECK(rows[1] == "x");
+		CHECK(rows[2] == input.substr(4));
+	}
+	CHECK(TextSystem::WrapUtf8MeasuredLines("", 1, 1,
+		[](const std::string&) { return 0; }).empty());
+}

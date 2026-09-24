@@ -205,6 +205,27 @@ inline int Format(char (&pDest)[N], const char* pFormat, Args... args)
 	return Format(pDest, N, pFormat, args...);
 }
 
+// Copy and append plain text without interpreting percent signs. Both return
+// the destination length actually stored and terminate any nonempty buffer.
+// Overlapping source/destination ranges are supported. The source must be a
+// valid C string or contain at least the number of bytes that can fit.
+// Append bounds its destination scan, repairing an unterminated buffer by
+// keeping its first capacity - 1 bytes. A null source is empty text.
+size_t Copy(char* destination, size_t capacity, const char* source);
+size_t Append(char* destination, size_t capacity, const char* source);
+
+template <size_t N>
+inline size_t Copy(char (&destination)[N], const char* source)
+{
+	return Copy(destination, N, source);
+}
+
+template <size_t N>
+inline size_t Append(char (&destination)[N], const char* source)
+{
+	return Append(destination, N, source);
+}
+
 } // namespace SafeFormat
 
 #endif // __SAFE_FORMAT_H__

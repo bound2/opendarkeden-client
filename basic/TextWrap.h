@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -38,5 +39,12 @@ Utf8Line NextUtf8Line(std::string_view text, size_t maxBytes,
 // embedded NULs follow Utf8Decode's one-byte progress rule; no decoding/repair.
 std::vector<std::string> WrapUtf8Lines(std::string_view text, size_t maxBytes,
 	Utf8WrapOptions options = {});
+
+// Pixel-based history rows retain every byte, including spaces/newlines. The
+// callback measures a complete, terminated prefix. A row always emits at least
+// one scalar, even if it exceeds the width, so every nonempty input advances.
+std::vector<std::string> WrapUtf8MeasuredLines(std::string_view text,
+	int firstWidth, int followingWidth,
+	const std::function<int(const std::string&)>& measure);
 
 } // namespace TextSystem
