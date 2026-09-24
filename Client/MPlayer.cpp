@@ -6763,7 +6763,7 @@ MPlayer::ActionToSendPacket()
 				}
 				else
 				{
-					g_pGameMessage->AddFormat("[瓊刻] %s",(*g_pGameStringTable)[STRING_STATUS_NOT_FIND_SKILL_CRAD].GetString());
+					g_pGameMessage->AddSafeFormat("[瓊刻] %s",(*g_pGameStringTable)[STRING_STATUS_NOT_FIND_SKILL_CRAD].GetString());
 					return;
 				}
 			}
@@ -6798,7 +6798,7 @@ MPlayer::ActionToSendPacket()
 				}
 				else
 				{
-					g_pGameMessage->AddFormat("[瓊刻] %s",(*g_pGameStringTable)[STRING_STATUS_NOT_FIND_SKILL_CRAD].GetString());
+					g_pGameMessage->AddSafeFormat("[瓊刻] %s",(*g_pGameStringTable)[STRING_STATUS_NOT_FIND_SKILL_CRAD].GetString());
 					return;
 				}
 			}
@@ -6826,7 +6826,7 @@ MPlayer::ActionToSendPacket()
 				}
 				else
 				{
-					g_pGameMessage->AddFormat("[瓊刻] %s",(*g_pGameStringTable)[STRING_STATUS_NOT_FIND_SKILL_CRAD].GetString());
+					g_pGameMessage->AddSafeFormat("[瓊刻] %s",(*g_pGameStringTable)[STRING_STATUS_NOT_FIND_SKILL_CRAD].GetString());
 					return;
 				}
 			}

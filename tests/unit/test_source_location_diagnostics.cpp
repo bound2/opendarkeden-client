@@ -418,6 +418,9 @@ TEST(SourceLocationDiagnostics, LogLinesAreByteIdenticalBetweenEntryPoints)
 	const int n_line = __LINE__ + 1;
 	log_write_at(LogSite(), LOG_LEVEL_ERROR, "unit %d", 3);
 
+	log_write(LOG_LEVEL_ERROR, "typed.cpp", 5, "%s %d %s", 42);
+	log_write_at(LogSite("typed.cpp", 6), LOG_LEVEL_ERROR, "%s", "literal %s %n %%");
+
 	// Below the level: nothing may reach the file from either path.
 	log_write(LOG_LEVEL_WARN, "C:\\src\\Some.cpp", 78, "%s", "filtered");
 	log_write_at(LogSite(), LOG_LEVEL_WARN, "%s", "filtered");
@@ -441,12 +444,14 @@ TEST(SourceLocationDiagnostics, LogLinesAreByteIdenticalBetweenEntryPoints)
 	}
 	std::filesystem::remove(log_path, error);
 
-	CHECK_EQ(3, lines.size());
+	CHECK_EQ(5, lines.size());
 
-	if (lines.size() == 3)
+	if (lines.size() == 5)
 	{
 		CHECK(lines[0] == "[ERROR] [Some.cpp:77] unit 3");
 		CHECK(lines[1] == lines[0]);
+		CHECK(lines[3] == "[ERROR] [typed.cpp:5] %s 42 %s");
+		CHECK(lines[4] == "[ERROR] [typed.cpp:6] literal %s %n %%");
 
 		// The function name is captured but deliberately not printed.
 		const std::string expected =

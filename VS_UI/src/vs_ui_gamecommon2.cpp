@@ -8173,11 +8173,11 @@ void	C_VS_UI_CRAZY_MINE::Show()
 //			fNextLine += 40.0f;
 			if ( itr->m_X == 3 || itr->m_O == 3 )
 			{
-				sprintf( szTemp, TEXT("3X or 3O") );
+				snprintf(szTemp, sizeof(szTemp), "3X or 3O" );
 			}
 			else
 			{
-				sprintf( szTemp, TEXT("%dX, %dO"), itr->m_X, itr->m_O );
+				snprintf(szTemp, sizeof(szTemp), "%dX, %dO", itr->m_X, itr->m_O );
 			}
 			if ( bSel && cnt++ == m_SelectedHistory )
 				g_PrintColorStrOut(x+180, y+65+line, szTemp,gpC_base->m_item_name_pi, RGB_WHITE,RGB_RED);				

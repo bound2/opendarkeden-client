@@ -90,7 +90,7 @@ void RCPositionInfoHandler::execute ( RCPositionInfo * pPacket )
 			#if defined(_DEBUG) && defined(OUTPUT_DEBUG)
 				if (g_pGameMessage!=NULL)
 				{
-					g_pGameMessage->AddFormat("[RCMove] %s to zone:%d, (%d, %d)",
+					g_pGameMessage->AddSafeFormat("[RCMove] %s to zone:%d, (%d, %d)",
 												pInfo->Name.GetString(),
 												pInfo->zoneID,
 												pInfo->zoneX,

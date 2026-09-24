@@ -53,7 +53,7 @@ void CRConnectHandler::execute ( CRConnect * pPacket , Player * pPlayer )
 
 				#if defined(_DEBUG) && defined(OUTPUT_DEBUG)
 					if (g_pGameMessage!=NULL)
-						g_pGameMessage->AddFormat("Connection Grant to %s", pRequestServerPlayer->getName().c_str());
+						g_pGameMessage->AddSafeFormat("Connection Grant to %s", pRequestServerPlayer->getName().c_str());
 				#endif
 				
 

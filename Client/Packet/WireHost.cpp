@@ -8,7 +8,6 @@
 #include "Cpackets/CGSay.h"
 #include "DebugLog.h"		// DEBUG_ADD_FORMAT, for the __DEBUG_OUTPUT__ block below
 
-#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -213,7 +212,7 @@ namespace {
 // into one bounded buffer, cut where the packet ends.
 //----------------------------------------------------------------------
 void
-SendBugReportV ( const char * prefix , const char * bug , va_list vl )
+SendBugReportV(const char* prefix, const char* bug, const SafeFormat::Arg* args, size_t count)
 {
 	char Buffer[256];
 	int at = 0;
@@ -229,15 +228,7 @@ SendBugReportV ( const char * prefix , const char * bug , va_list vl )
 			at = (int)sizeof(Buffer) - 1;
 	}
 
-	int written = vsnprintf(Buffer + at, sizeof(Buffer) - at, bug, vl);
-
-	// vsnprintf NUL terminates within sizeof(Buffer), so a report longer than
-	// the buffer is truncated instead of overrunning the stack. That also makes
-	// the strlen and the cut below safe, which they were not while vsprintf
-	// could already have run past the end. A negative return is an encoding
-	// error: nothing usable was produced, so send nothing.
-	if (written < 0)
-		return;
+	SafeFormat::FormatV(Buffer + at, sizeof(Buffer) - at, bug, args, count);
 
 	// And the cut has to land inside what was formatted.
 	static_assert(BUG_REPORT_TEXT_MAX < (int)sizeof(Buffer), "the cut is outside the format buffer");
@@ -274,32 +265,15 @@ SendBugReportV ( const char * prefix , const char * bug , va_list vl )
 
 } // namespace
 
-void
-SendBugReport ( const char * bug , ... )
+void SendBugReportArgs(const DiagnosticSite* site, const char* bug,
+	const SafeFormat::Arg* args, size_t count)
 {
-	if( bug == NULL )
+	if (bug == NULL) return;
+	if (site == NULL) {
+		SendBugReportV(NULL, bug, args, count);
 		return;
-
-	va_list		vl;
-
-	va_start(vl, bug);
-	SendBugReportV(NULL, bug, vl);
-	va_end(vl);
-}
-
-void
-SendBugReportAt ( const DiagnosticSite & site , const char * bug , ... )
-{
-	if( bug == NULL )
-		return;
-
-	// The "[file,line] " the callers used to format by hand.
+	}
 	char prefix[256];
-	snprintf(prefix, sizeof(prefix), "[%s,%d] ", site.file != NULL ? site.file : "", site.line);
-
-	va_list		vl;
-
-	va_start(vl, bug);
-	SendBugReportV(prefix, bug, vl);
-	va_end(vl);
+	snprintf(prefix, sizeof(prefix), "[%s,%d] ", site->file != NULL ? site->file : "", site->line);
+	SendBugReportV(prefix, bug, args, count);
 }

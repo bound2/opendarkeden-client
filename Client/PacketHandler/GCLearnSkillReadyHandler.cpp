@@ -48,7 +48,7 @@ void GCLearnSkillReadyHandler::execute ( GCLearnSkillReady * pPacket , Player * 
 
 	// SKILLDOMAIN_NAME holds string table ids, not strings, so look the name up
 	// before formatting it.
-	g_pGameMessage->AddFormat( "You can learn a new %s skill.",
+	g_pGameMessage->AddSafeFormat( "You can learn a new %s skill.",
 		(*g_pGameStringTable)[SKILLDOMAIN_NAME[domainType]].GetString() );
 
 	// levelup했다고 뭔가 보여준다. 뭘까.... --;

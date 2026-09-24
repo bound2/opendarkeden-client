@@ -86,3 +86,17 @@ TEST(PacketDiagnostics, NullFormatIsIgnored)
 	PacketDiagnostics::reportBug(NULL);
 	CHECK_EQ(0, s_Reports);
 }
+
+TEST(PacketDiagnostics, TypedArgumentsRefuseMissingMismatchedAndWritingConversions)
+{
+	HookGuard guard;
+	PacketDiagnostics::setBugReportHook(&Capture);
+	PacketDiagnostics::reportBug("%s %d %s", 42);
+	CHECK(s_LastReport == "%s 42 %s");
+	int untouched = 17;
+	PacketDiagnostics::reportBug("report%n", &untouched);
+	CHECK(s_LastReport == "report%n");
+	CHECK_EQ(17, untouched);
+	PacketDiagnostics::reportBug("%s", "literal %s %n %%");
+	CHECK(s_LastReport == "literal %s %n %%");
+}

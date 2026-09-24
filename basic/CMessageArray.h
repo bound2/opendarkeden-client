@@ -34,27 +34,9 @@ class CMessageArray {
 		//void		Add(std::string str)			{ Add(str.c_str()); }
 		void		AddToFile(const char *str);
 		//void		AddToFile(std::string str)	{ AddToFile(str.c_str()); }
-		void		AddFormat(const char* format, ...);
-		void		AddFormatVL(const char* format, va_list& vl);
 
-		//--------------------------------------------------
-		// The same thing, for a format that came out of a
-		// data file (docs/RESTRUCTURING.md task 5.4).
-		//
-		// AddFormat's buffer has been bounded since 0e9d247,
-		// so what is left at those call sites is the half a
-		// bound cannot fix: the entry decides how many
-		// arguments are consumed, and it is read from
-		// Data/Info/String.inf while the argument list is
-		// fixed in the source. One %s too many and vsnprintf
-		// reads a stack word as a char*.
-		//
-		// This overload takes the arguments as a typed pack
-		// instead of varargs, so SafeFormat can refuse a
-		// conversion the call site did not supply. Everything
-		// after the formatting - the log file, the row width,
-		// the ring advance - is what AddFormat always did.
-		//--------------------------------------------------
+		// Pack argument types before a format from code or game data is read.
+		// The shared implementation owns formatting, row truncation and logging.
 		template <typename ...Args>
 		void		AddSafeFormat(const char* format, Args... args)
 		{
@@ -87,10 +69,7 @@ class CMessageArray {
 
 
 	protected :
-		// The tail of every Add*Format: the log file, the row
-		// width, the ring advance. AddFormat, AddFormatVL and
-		// AddSafeFormatV differ only in how they fill the
-		// buffer, and this is the part they must not differ in.
+		// Store the formatted message in the log and ring.
 		void		StoreRow(const char* pBuffer, size_t nLength);
 
 		int			m_Length;		// Message 하나의 길이

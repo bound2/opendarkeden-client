@@ -198,14 +198,8 @@ CMessageArray::AddToFile(const char *str)
 //--------------------------------------------------------------------------
 // Store Row
 //--------------------------------------------------------------------------
-// The tail every Add*Format shares: the log file, the row width, the ring
-// advance. It was written out twice, identically, in AddFormat and
-// AddFormatVL; a third copy for the checked formatter would have been three
-// places to keep a row-width rule in step, so there is one.
-//
-// Not locked here. The public entry points hold __BEGIN_LOCK across the
-// whole operation, which is what has to be atomic - the format and the
-// store together, not the store alone.
+// The public entry points hold the lock across formatting and storage.
+// Store the full message in the log, then bound the visible ring row.
 //--------------------------------------------------------------------------
 void
 CMessageArray::StoreRow(const char* pBuffer, size_t nLength)
@@ -228,65 +222,11 @@ CMessageArray::StoreRow(const char* pBuffer, size_t nLength)
 	if (++m_Current == m_Max) m_Current = 0;
 }
 
-//--------------------------------------------------------------------------
-// Add Format VL
-//--------------------------------------------------------------------------
-void
-CMessageArray::AddFormatVL(const char* format, va_list& vl)
-{
-	if (!format || !m_ppMessage) return;
-	__BEGIN_LOCK
-
-	//AddFormat( format, vl );
-//	va_list		vl;
-	char		Buffer[4096];
-
-//    va_start(vl, format);
-	int written = vsnprintf(Buffer, sizeof(Buffer), format, vl);
- //   va_end(vl);
-
-	// vsnprintf returns the length the output *would* have had, so the length
-	// is taken from the buffer instead - len must be what is really stored.
-	// A negative return is an encoding error: nothing usable was produced, so
-	// the row is made empty instead of letting strlen walk uninitialised stack.
-	// On every other path vsnprintf has already terminated inside the buffer;
-	// the explicit terminator is a redundant guard on the truncation path.
-	if (written < 0)
-	{
-		Buffer[0] = '\0';
-	}
-	else
-	{
-		Buffer[sizeof(Buffer)-1] = '\0';
-	}
-
-	StoreRow(Buffer, strlen(Buffer));
-
-	__END_LOCK
-}
-
-//--------------------------------------------------------------------------
-// Add Safe Format VL
-//--------------------------------------------------------------------------
-// AddFormat for a format string that came out of Data/Info/String.inf
-// (docs/RESTRUCTURING.md task 5.4, code-health finding C19). The arguments
-// arrive already packed with their types, so SafeFormat can decline a
-// conversion the call site never supplied instead of reading a stack word
-// as a char*. See CMessageArray.h for why a bounded vsnprintf was not
-// enough on its own.
-//
-// SafeFormat::FormatV always terminates and returns what it really wrote,
-// so there is no negative-return case to handle here and no need to take
-// the length again with strlen.
-//--------------------------------------------------------------------------
+// Typed formatting shares the same row and log storage as Add.
 void
 CMessageArray::AddSafeFormatV(const char* format,
 							  const SafeFormat::Arg* pArgs, size_t nCount)
 {
-	// Mirrors AddFormat's guard rather than AddFormatVL's lack of one,
-	// because AddFormat is what these call sites used to call. Neither
-	// guard fires today: __LOGGING__ is defined unconditionally at the
-	// top of this file.
 	#ifndef __LOGGING__
 		return;
 	#endif
@@ -298,49 +238,6 @@ CMessageArray::AddSafeFormatV(const char* format,
 	const int len = SafeFormat::FormatV(Buffer, sizeof(Buffer), format, pArgs, nCount);
 
 	StoreRow(Buffer, len);
-
-	__END_LOCK
-}
-
-//--------------------------------------------------------------------------
-// Add Format
-//--------------------------------------------------------------------------
-// Build a string from a printf style format.
-//--------------------------------------------------------------------------
-void
-CMessageArray::AddFormat(const char* format, ...)
-{
-	if (!format || !m_ppMessage) return;
-	#ifndef __LOGGING__
-		return;
-	#endif
-
-	__BEGIN_LOCK
-	
-
-	va_list		vl;
-	char		Buffer[4096];
-
-    va_start(vl, format);
-	int written = vsnprintf(Buffer, sizeof(Buffer), format, vl);
-    va_end(vl);
-
-	// vsnprintf returns the length the output *would* have had, so the length
-	// is taken from the buffer instead - len must be what is really stored.
-	// A negative return is an encoding error: nothing usable was produced, so
-	// the row is made empty instead of letting strlen walk uninitialised stack.
-	// On every other path vsnprintf has already terminated inside the buffer;
-	// the explicit terminator is a redundant guard on the truncation path.
-	if (written < 0)
-	{
-		Buffer[0] = '\0';
-	}
-	else
-	{
-		Buffer[sizeof(Buffer)-1] = '\0';
-	}
-
-	StoreRow(Buffer, strlen(Buffer));
 
 	__END_LOCK
 }

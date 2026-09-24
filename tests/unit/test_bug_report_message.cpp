@@ -302,3 +302,17 @@ TEST(BugReport, AReportAtASiteIsCutWithThePrefixInTheCount)
 	CHECK_EQ(2, target.m_nSent);
 	CHECK(target.m_Message == PREFIX + "[x,1] xy");
 }
+
+TEST(BugReport, BothTypedEntryPointsRefuseUnprovidedArgumentsBeforePacketDelivery)
+{
+	CapturingTarget target;
+	NoHost restore;
+	s_pTarget = &target;
+	Wire::SetHost(&s_Host);
+	SendBugReport("%s %d %s", 42);
+	CHECK(target.m_Message == PREFIX + "%s 42 %s");
+	SendBugReportAt(DiagnosticSite("where.cpp", 7), "%s", "literal %s %n %%");
+	CHECK(target.m_Message == PREFIX + "[where.cpp,7] literal %s %n %%");
+	CHECK_EQ(2, target.m_nSent);
+	CHECK(ACGSayCarries(target.m_Message));
+}

@@ -32,30 +32,15 @@ class MString {
 		//----------------------------------------------------
 		void	operator = (const MString& str);
 		void	operator = (const char* str);
-		void	Format(const char* format, ...);
+		template <typename ...Args>
+		void Format(const char* format, Args... args)
+		{
+			char buffer[MAX_BUFFER_LENGTH];
+			SafeFormat::Format(buffer, format, args...);
+			*this = buffer;
+		}
 
-		//----------------------------------------------------
-		// FormatChecked
-		//
-		// Format() for a format that came out of a data file.
-		//
-		// Format() above is an ordinary varargs printf: it trusts the
-		// format and the argument list to agree, and at the three call
-		// sites in Client/GameUI.cpp that hand it a String.inf entry
-		// they cannot, because the format is read off disk and the
-		// arguments are fixed in the source
-		// (docs/code-health-review-2026-08-29.md finding C19). The
-		// vsnprintf inside Format() bounds the write but not the read:
-		// one %s more than the call site passed still makes the CRT
-		// take a stack word as a char* and copy from wherever it
-		// points. This overload checks the entry's conversions against
-		// the arguments it was really handed, so an unmatched
-		// conversion is copied out as text instead.
-		//
-		// Named apart from the SafeFormat namespace it calls into, so
-		// that the namespace stays reachable by its own name inside
-		// this class.
-		//----------------------------------------------------
+		// Checked formatting with readable storage even for an empty result.
 		template <typename ...Args>
 		void	FormatChecked(const char* format, Args... args)
 		{
