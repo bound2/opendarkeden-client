@@ -422,6 +422,44 @@ void CSpriteSurface::BltSprite(POINT* pPoint, CSprite* pSprite) {
 	                    backend_sprite, flags, alpha);
 }
 
+template<class Draw>
+static void WithSpriteClip(spritectl_surface_t surface, const POINT* point,
+	CSprite* sprite, const RECT* source, Draw draw)
+{
+	if (!surface || !surface->surface || !point || !sprite || !source) return;
+	const SDL_Rect saved = surface->surface->clip_rect;
+	const int64_t left = (std::max)(int64_t(saved.x), int64_t(point->x) + (std::max)(int64_t(0), int64_t(source->left)));
+	const int64_t top = (std::max)(int64_t(saved.y), int64_t(point->y) + (std::max)(int64_t(0), int64_t(source->top)));
+	const int64_t right = (std::min)(int64_t(saved.x) + saved.w,
+		int64_t(point->x) + (std::min)(int64_t(sprite->GetWidth()), int64_t(source->right)));
+	const int64_t bottom = (std::min)(int64_t(saved.y) + saved.h,
+		int64_t(point->y) + (std::min)(int64_t(sprite->GetHeight()), int64_t(source->bottom)));
+	if (left >= right || top >= bottom) return;
+	const SDL_Rect clip{int(left), int(top), int(right - left), int(bottom - top)};
+	struct RestoreClip {
+		SDL_Surface* surface;
+		SDL_Rect clip;
+		~RestoreClip() { SDL_SetClipRect(surface, &clip); }
+	} restore{surface->surface, saved};
+	SDL_SetClipRect(surface->surface, &clip);
+	draw();
+}
+
+void CSpriteSurface::BltSpriteClip(POINT* point, CSprite* sprite, const RECT* source)
+{
+	WithSpriteClip(m_backend_surface, point, sprite, source, [&] { BltSprite(point, sprite); });
+}
+
+void CSpriteSurface::BltSpriteColorClip(POINT* point, CSprite* sprite, const RECT* source, BYTE rgb)
+{
+	WithSpriteClip(m_backend_surface, point, sprite, source, [&] { BltSpriteColor(point, sprite, rgb); });
+}
+
+void CSpriteSurface::BltSpriteEffectClip(POINT* point, CSprite* sprite, const RECT* source)
+{
+	WithSpriteClip(m_backend_surface, point, sprite, source, [&] { BltSpriteEffect(point, sprite); });
+}
+
 void CSpriteSurface::BltSpriteNoClip(POINT* pPoint, CSprite* pSprite) {
 	/* For now, same as BltSprite */
 	BltSprite(pPoint, pSprite);
@@ -502,6 +540,7 @@ static void BltClippedSpriteEffect(spritectl_surface_t surface, POINT* point,
         SDL_min(sprite->GetHeight(), viewport.y + viewport.h - point->y)
     };
     if (clip.left >= clip.right || clip.top >= clip.bottom) return;
+    if (!SpriteGpu::CpuAccess(surface, true)) return;
     if (SDL_MUSTLOCK(target) && SDL_LockSurface(target) != 0) return;
     WORD* dest = reinterpret_cast<WORD*>(static_cast<BYTE*>(target->pixels)
         + (point->y + clip.top) * target->pitch) + point->x + clip.left;
@@ -509,25 +548,59 @@ static void BltClippedSpriteEffect(spritectl_surface_t surface, POINT* point,
     if (SDL_MUSTLOCK(target)) SDL_UnlockSurface(target);
 }
 
+static bool BltGpuSpriteEffect(spritectl_surface_t surface, POINT* point, CSprite* sprite,
+	SpriteGpuEffects::Effect effect, int value = 0)
+{
+	if (!SpriteGpuEffects::Active() || !point || !sprite || !sprite->IsInit()) return false;
+	Uint16 gradation[94]{};
+	if (effect == SpriteGpuEffects::Effect::Gradation) {
+		if (value < 0 || value >= MAX_COLORSET) effect = SpriteGpuEffects::Effect::Copy;
+		else for (int i = 0; i < 94; ++i) {
+			const int index = CIndexSprite::ColorToGradation[SDL_min(i, MAX_COLOR_TO_GRADATION - 1)];
+			gradation[i] = CIndexSprite::ColorSet[value][SDL_min(index, MAX_COLORGRADATION - 1)];
+		}
+	}
+	return SpriteGpu::DrawEffect(surface, point->x, point->y, get_backend_sprite(sprite), effect, value, gradation);
+}
+
 void CSpriteSurface::BltSpriteColor(POINT* pPoint, CSprite* pSprite, BYTE rgb) {
+	if (BltGpuSpriteEffect(m_backend_surface, pPoint, pSprite, SpriteGpuEffects::Effect::Color, rgb)) {
+		s_Value1 = rgb;
+		return;
+	}
     BltClippedSpriteEffect(m_backend_surface, pPoint, pSprite, [=](WORD* dest, WORD pitch, RECT* clip) {
         pSprite->BltColorClipWidth(dest, pitch, clip, rgb);
     });
 }
 
 void CSpriteSurface::BltSpriteDarkness(POINT* pPoint, CSprite* pSprite, BYTE DarkBits) {
+	if (BltGpuSpriteEffect(m_backend_surface, pPoint, pSprite, SpriteGpuEffects::Effect::Darkness, DarkBits)) {
+		s_Value1 = DarkBits;
+		return;
+	}
     BltClippedSpriteEffect(m_backend_surface, pPoint, pSprite, [=](WORD* dest, WORD pitch, RECT* clip) {
         pSprite->BltDarknessClipWidth(dest, pitch, clip, DarkBits);
     });
 }
 
 void CSpriteSurface::BltSpriteColorSet(POINT* pPoint, CSprite* pSprite, WORD colorSet) {
+	if (BltGpuSpriteEffect(m_backend_surface, pPoint, pSprite, SpriteGpuEffects::Effect::Gradation, colorSet)) {
+		s_Value1 = colorSet;
+		return;
+	}
     BltClippedSpriteEffect(m_backend_surface, pPoint, pSprite, [=](WORD* dest, WORD pitch, RECT* clip) {
         pSprite->BltColorSetClipWidth(dest, pitch, clip, colorSet);
     });
 }
 
 void CSpriteSurface::BltSpriteEffect(POINT* pPoint, CSprite* pSprite) {
+	using Effect = SpriteGpuEffects::Effect;
+	if (!s_pMemcpyEffectFunction || s_pMemcpyEffectFunction == memcpyEffectGrayScale
+		|| s_pMemcpyEffectFunction == memcpyEffectGradation) {
+		const Effect effect = !s_pMemcpyEffectFunction ? Effect::Copy
+			: s_pMemcpyEffectFunction == memcpyEffectGrayScale ? Effect::GrayScale : Effect::Gradation;
+		if (BltGpuSpriteEffect(m_backend_surface, pPoint, pSprite, effect, s_Value1)) return;
+	}
     BltClippedSpriteEffect(m_backend_surface, pPoint, pSprite, [=](WORD* dest, WORD pitch, RECT* clip) {
         pSprite->BltEffectClipWidth(dest, pitch, clip);
     });
@@ -709,6 +782,9 @@ void CSpriteSurface::BltSpritePalEffect(POINT* pPoint, CSpritePal* pSprite, MPal
 	if (!pPoint || !pSprite || pSprite->IsNotInit()) {
 		return;
 	}
+	if ((!s_pMemcpyPalEffectFunction || s_pMemcpyPalEffectFunction == memcpyPalEffectScreen)
+		&& SpriteGpu::DrawPalette(m_backend_surface, pPoint->x, pPoint->y, pSprite, pal,
+			false, s_pMemcpyPalEffectFunction == memcpyPalEffectScreen)) return;
 
 	spritectl_surface_info_t surface_info;
 	if (spritectl_lock_surface(m_backend_surface, &surface_info) != 0) {
@@ -816,6 +892,7 @@ void CSpriteSurface::BltAlphaSpritePal(POINT* pPoint, CAlphaSpritePal* pSprite, 
 		return;
 	}
 
+	if (SpriteGpu::DrawPalette(m_backend_surface, pPoint->x, pPoint->y, pSprite, pal, true, false)) return;
 	/* Lock backend surface for direct pixel access */
 	spritectl_surface_info_t surface_info;
 	if (spritectl_lock_surface(m_backend_surface, &surface_info) != 0) {

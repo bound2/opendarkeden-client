@@ -386,9 +386,6 @@ extern RECT g_GameRect;
 //----------------------------------------------------------------------
 #define DRAW_CHAT_BOX_TAIL_LOCKED( rect, color )					\
 		{															\
-			WORD *lpSurface, pitch_2;								\
-			lpSurface = (WORD*)m_pSurface->GetSurfacePointer();		\
-			pitch_2 = m_pSurface->GetSurfacePitch() >> 1;			\
 																	\
 			int x = rect.left + CHAT_BOX_TAIL_X;					\
 			int y = rect.bottom;									\
@@ -417,7 +414,7 @@ extern RECT g_GameRect;
 			{														\
 				for (int i=0; i<ptNum; i++)							\
 				{													\
-					*(lpSurface + pitch_2*pt[i].y + pt[i].x) = color;	\
+					m_pSurface->HLine(pt[i].x, pt[i].y, 1, color);	\
 				}														\
 			}															\
 			else														\
@@ -431,7 +428,7 @@ extern RECT g_GameRect;
 						&& x<g_GameRect.right							\
 						&& y<g_GameRect.bottom)						\
 					{													\
-						*(lpSurface + pitch_2*y + x) = color;			\
+						m_pSurface->HLine(x, y, 1, color);			\
 					}													\
 				}														\
 			}															\

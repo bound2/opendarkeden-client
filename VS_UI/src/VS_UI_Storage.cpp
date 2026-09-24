@@ -643,8 +643,6 @@ void C_VS_UI_STORAGE::Show()
 #ifndef _LIB
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
-		S_SURFACEINFO	surfaceinfo;
-		SetSurfaceInfo(&surfaceinfo, gpC_base->m_p_DDSurface_back->GetDDSD());
 /*
 		for (i=0; i<STORAGE_SLOT; i++) // draw every slot rect
 		{

@@ -798,45 +798,13 @@ void C_SPRITE_PACK::BltDarkness(POINT &point, SPRITE_ID sprite_id, int dark)
 //-----------------------------------------------------------------------------
 void C_SPRITE_PACK::BltClip(int x, int y, Rect &rect, SPRITE_ID sprite_id)
 {
-	//assert(sprite_id >= 0);
-
-	//CSprite *p_sprite = m_pC_spk_list->GetSprite(sprite_id);
-
-	//assert(p_sprite);
-
-	assert(!gpC_base->m_p_DDSurface_back->IsLock());
-	if (gpC_base->m_p_DDSurface_back->Lock())
-	{
-		S_SURFACEINFO surface_info;
-		gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surface_info);
-		
-		RECT rt;
-		rt.left = max(-x, rect.x);
-		rt.top = max(-y, rect.y);
-		// add by Sonic 2006.9.26
-		if(g_MyFull)
-		{
-			rt.right = min(rect.x+rect.w, 1024-x);
-			rt.bottom = min(rect.y+rect.h, 768-y);
-		}
-		else
-		{
-			rt.right = min(rect.x+rect.w, 800-x);
-			rt.bottom = min(rect.y+rect.h, 600-y);
-		}
-		// end
-		if(rt.left < rt.right && rt.top < rt.bottom)
-		{
-			
-			WORD * p_dest = (WORD *)surface_info.p_surface+x+rt.left;
-			p_dest = (WORD *)((BYTE *)p_dest+(y+rt.top)*surface_info.pitch);
-			
-			//void BltClip(WORD *pDest, WORD pitch, RECT* pRect); // in CSprite.h
-			m_SPK[sprite_id].BltClipWidth(p_dest, surface_info.pitch, &rt);
-		}
-
-		gpC_base->m_p_DDSurface_back->Unlock();
-	}
+	auto* surface = gpC_base->m_p_DDSurface_back;
+	assert(!surface->IsLock());
+	if (!surface->Lock()) return;
+	POINT point{x, y};
+	RECT source{rect.x, rect.y, rect.x + rect.w, rect.y + rect.h};
+	surface->BltSpriteClip(&point, &m_SPK[sprite_id], &source);
+	surface->Unlock();
 }
 
 /*-----------------------------------------------------------------------------
@@ -1130,41 +1098,11 @@ void C_SPRITE_PACK::BltLockedDarkness(int x, int y, SPRITE_ID sprite_id, int dar
 //-----------------------------------------------------------------------------
 void C_SPRITE_PACK::BltLockedClip(int x, int y, Rect &rect, SPRITE_ID sprite_id)
 {
-	//assert(sprite_id >= 0);
-
-	//CSprite *p_sprite = m_pC_spk_list->GetSprite(sprite_id);
-
-	//assert(p_sprite);
-
-	assert(gpC_base->m_p_DDSurface_back->IsLock());
-
-	S_SURFACEINFO surface_info;
-	gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surface_info);
-	
-	RECT rt;
-	rt.left = max(-x, rect.x);
-	rt.top = max(-y, rect.y);
-	// add by Sonic 2006.9.26
-	if(g_MyFull)
-	{
-		rt.right = min(rect.x+rect.w, 1024-x);
-		rt.bottom = min(rect.y+rect.h, 768-y);
-	}
-	else
-	{
-		rt.right = min(rect.x+rect.w, 800-x);
-		rt.bottom = min(rect.y+rect.h, 600-y);
-	}
-	// end
-	
-	if(rt.left >= rt.right || rt.top >= rt.bottom)return;
-
-	WORD * p_dest = (WORD *)surface_info.p_surface+x+rt.left;
-	p_dest = (WORD *)((BYTE *)p_dest+(y+rt.top)*surface_info.pitch);
-
-	//void BltClip(WORD *pDest, WORD pitch, RECT* pRect); // in CSprite.h
-	m_SPK[sprite_id].BltClipWidth(p_dest, surface_info.pitch, &rt);
-
+	auto* surface = gpC_base->m_p_DDSurface_back;
+	assert(surface->IsLock());
+	POINT point{x, y};
+	RECT source{rect.x, rect.y, rect.x + rect.w, rect.y + rect.h};
+	surface->BltSpriteClip(&point, &m_SPK[sprite_id], &source);
 }
 
 /*-----------------------------------------------------------------------------

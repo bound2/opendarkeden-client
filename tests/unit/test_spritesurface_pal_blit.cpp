@@ -901,7 +901,7 @@ TEST(SpriteSurfaceClip, ScrolledSpritesRespectViewportAndReset)
     surface.FillSurface(0x1234);
     POINT origin = {0, 0};
     surface.BltSprite(&origin, &rle);
-    const WORD* row = static_cast<const WORD*>(surface.Lock());
+    const WORD* row = static_cast<const WORD*>(surface.Lock(nullptr));
     CHECK(row != nullptr);
     if (row) {
         CHECK_EQ(0x1234, row[0]);
@@ -987,7 +987,7 @@ TEST(SpriteSurfaceEffects, SkillAndRankStatesRespectTransparencyAndViewport)
     surface.FillRect(&fullSurface, 0x1234);
     POINT origin = {0, 0};
     surface.BltSprite(&origin, &sprite);
-    const WORD* row = static_cast<const WORD*>(surface.Lock());
+    const WORD* row = static_cast<const WORD*>(surface.Lock(nullptr));
     CHECK(row != nullptr);
     if (row) {
         CHECK_EQ(0xffff, row[1]);

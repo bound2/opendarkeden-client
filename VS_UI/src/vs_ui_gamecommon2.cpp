@@ -1888,9 +1888,7 @@ void	C_VS_UI_REQUEST_RESURRECT::Show()
 							RECT rt;
 							POINT point = { m_ResurrectButton[i].m_ButtonRect.left + 9, m_ResurrectButton[i].m_ButtonRect.top + 9 };
 
-							S_SURFACEINFO surface_info;
 							CSprite* pSprite = &m_image_spk.GetSprite(m_ResurrectButton[i].m_Image);
-							gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surface_info);
 					
 							SetRect((RECT *)&rect, 0, 0, pSprite->GetWidth(), pSprite->GetHeight()*(percent)/100);
 							
@@ -1901,16 +1899,7 @@ void	C_VS_UI_REQUEST_RESURRECT::Show()
 							
 							if(rt.left < rt.right && rt.top < rt.bottom)
 							{
-								if( point.y < 0 )
-								{
-									rt.top = -point.y;
-									point.y=0;
-								}								
-								WORD * p_dest = (WORD *)surface_info.p_surface+point.x+rt.left;
-								p_dest = (WORD *)((BYTE *)p_dest+(point.y+rt.top)*surface_info.pitch);
-								
-								if( rt.top < rt.bottom )
-									pSprite->BltColorClipHeight(p_dest, surface_info.pitch, &rt, rgb_RED);
+								gpC_base->m_p_DDSurface_back->BltSpriteColorClip(&point, pSprite, &rt, rgb_RED);
 							}
 						}
 					}

@@ -21,6 +21,7 @@ bool activated = false;
 unsigned int keyValue = 0;
 std::string textValue, editValue;
 int editStart = 0, editLength = 0;
+int graphicsResets = 0;
 void Receive(CSDLInput::E_MOUSE_EVENT kind, int x, int y, int z)
 {
 	CHECK_EQ(x, hostX); CHECK_EQ(y, hostY);
@@ -78,6 +79,22 @@ TEST(InputAdapter, KeyQueriesOutsideTheTableCannotReadMouseState)
 	CHECK(!input.KeyDown(256)); CHECK(!input.KeyDown(257)); CHECK(!input.KeyDown(258));
 	CHECK(!input.KeyDown(0)); CHECK(!input.KeyDown(255));
 	CHECK(!input.KeyDown((std::numeric_limits<DWORD>::max)()));
+}
+
+TEST(InputAdapter, RendererResetEventsRequestAnApplicationRedraw)
+{
+	Session session;
+	graphicsResets = 0;
+	DXInput::SetHost({.graphicsReset = [] { ++graphicsResets; }});
+	SDL_Event event{};
+	event.type = SDL_RENDER_TARGETS_RESET;
+	DXInput::ProcessEvent(event);
+	event.type = SDL_RENDER_DEVICE_RESET;
+	DXInput::ProcessEvent(event);
+	CHECK_EQ(2, graphicsResets);
+	DXInput::SetHost({});
+	DXInput::ProcessEvent(event);
+	CHECK_EQ(2, graphicsResets);
 }
 
 TEST(InputAdapter, AModeChangeDoesNotReplayTheLastWheelMovement)

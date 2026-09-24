@@ -32,6 +32,8 @@ endif()
 set(SPRITELIB_SOURCES
 	# Backend implementation
 	SpriteLibBackendSDL.cpp
+	SpriteGpu.cpp
+	SpriteGpuEffects.cpp
 	FrameUpscaler.cpp
 
 	# SDL-specific CSpriteSurface implementation

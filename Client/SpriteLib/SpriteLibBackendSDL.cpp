@@ -11,6 +11,7 @@
 
 #include "SpriteLibBackendSDL.h"
 #include "FrameUpscaler.h"
+#include "SpriteGpu.h"
 #include "SpriteScanline.h"
 #include <climits>
 #include <limits>
@@ -182,6 +183,7 @@ spritectl_surface_t spritectl_create_surface(int width, int height, int format) 
 	surface->format = format;
 	surface->locked = 0;
 	surface->ref_count = 1;
+	surface->cpu_borrowed = 0;
 
 	return surface;
 }
@@ -196,6 +198,7 @@ void spritectl_destroy_surface(spritectl_surface_t surface) {
 		return;  /* Still referenced */
 	}
 
+	SpriteGpu::ForgetSurface(surface);
 	/* Free SDL resources */
 	if (surface->texture) {
 		SDL_DestroyTexture(surface->texture);
@@ -212,6 +215,7 @@ int spritectl_lock_surface(spritectl_surface_t surface, spritectl_surface_info_t
 		return -1;
 	}
 
+	if (!SpriteGpu::CpuAccess(surface, true)) return -1;
 	/* Lock SDL surface */
 	if (SDL_LockSurface(surface->surface) != 0) {
 		fprintf(stderr, "SpriteLib Backend: Failed to lock surface: %s\n", SDL_GetError());
@@ -248,6 +252,8 @@ int spritectl_clear_surface(spritectl_surface_t surface, uint32_t color) {
 		return -1;
 	}
 
+	if (SpriteGpu::Fill(surface, nullptr, color)) return 0;
+	if (!SpriteGpu::CpuAccess(surface, true)) return -1;
 	/* Fill entire surface with color */
 	rect.x = 0;
 	rect.y = 0;
@@ -327,6 +333,7 @@ void spritectl_destroy_sprite(spritectl_sprite_t sprite) {
 		return;  /* Still referenced */
 	}
 
+	SpriteGpu::ForgetSprite(sprite);
 	/* Free pixel data */
 	if (sprite->pixels) {
 		free(sprite->pixels);
@@ -432,7 +439,8 @@ int spritectl_blt_sprite_rle(spritectl_surface_t dest, int x, int y,
 			|| !ValidateSpriteScanline({sprite->scanline_rle[sy], length}, sprite->width)))
 			return -1;
 	}
-	if (SDL_LockSurface(sdl_surface) != 0) return -1;
+	if (SpriteGpu::Draw(dest, x, y, sprite, flags, alpha)) return 0;
+	if (!SpriteGpu::CpuAccess(dest, true) || SDL_LockSurface(sdl_surface) != 0) return -1;
 
 	/* Debug: print surface info on first call */
 	static int debug_printed = 0;
@@ -443,7 +451,7 @@ int spritectl_blt_sprite_rle(spritectl_surface_t dest, int x, int y,
 	}
 
 	/* Process each scanline */
-	for (int sy = clip_top; sy < clip_bottom; sy++) {
+	for (int sy = int(clip_top); sy < clip_bottom; sy++) {
 		if (!sprite->scanline_rle[sy] || sprite->scanline_lens[sy] == 0) {
 			continue;  /* Empty scanline */
 		}
@@ -605,6 +613,7 @@ int spritectl_sprite_set_scanline_rle(spritectl_sprite_t sprite, int y,
 	uint16_t* replacement = static_cast<uint16_t*>(malloc(size_t(rle_size) * sizeof(uint16_t)));
 	if (!replacement) return -1;
 	memcpy(replacement, rle_data, size_t(rle_size) * sizeof(uint16_t));
+	SpriteGpu::ForgetSprite(sprite);
 	free(sprite->scanline_rle[y]);
 	sprite->scanline_rle[y] = replacement;
 	sprite->scanline_lens[y] = uint16_t(rle_size);
@@ -621,6 +630,8 @@ int spritectl_blt_sprite(spritectl_surface_t dest, int x, int y,
 	if (sprite->has_rle && sprite->scanline_rle) {
 		return spritectl_blt_sprite_rle(dest, x, y, sprite, flags, alpha);
 	}
+	if (SpriteGpu::Draw(dest, x, y, sprite, flags, alpha)) return 0;
+	if (!SpriteGpu::CpuAccess(dest, true)) return -1;
 
 	/* Fallback to old method for sprites without RLE data */
 	static int fallback_count = 0;
@@ -789,10 +800,15 @@ int spritectl_blt_sprite_scaled(spritectl_surface_t dest, int x, int y,
 	if (!dest || !sprite) {
 		return -1;
 	}
-
 	/* Calculate scaled dimensions (scale is in 1/256 units) */
-	scaled_width = (sprite->width * scale) / 256;
-	scaled_height = (sprite->height * scale) / 256;
+	const int64_t wideWidth = int64_t(sprite->width) * scale / 256;
+	const int64_t wideHeight = int64_t(sprite->height) * scale / 256;
+	if (wideWidth > INT_MAX || wideHeight > INT_MAX) return -1;
+	if (wideWidth <= 0 || wideHeight <= 0) return 0;
+	scaled_width = int(wideWidth);
+	scaled_height = int(wideHeight);
+	if (SpriteGpu::Draw(dest, x, y, sprite, flags, 255, scale)) return 0;
+	if (!SpriteGpu::CpuAccess(dest, true)) return -1;
 
 	if (scaled_width <= 0 || scaled_height <= 0) {
 		return 0;  /* Too small to see */
@@ -922,6 +938,7 @@ int spritectl_blt_surface(spritectl_surface_t dest,
 	}
 
 	/* Blit surface to surface */
+	if (!SpriteGpu::CpuAccess(src, false) || !SpriteGpu::CpuAccess(dest, true)) return -1;
 	if (SDL_BlitSurface(src->surface, &sdl_src_rect, dest->surface, &sdl_dest_rect) != 0) {
 		fprintf(stderr, "SpriteLib Backend: SDL_BlitSurface failed: %s\n", SDL_GetError());
 		return -1;
@@ -1372,12 +1389,16 @@ static int g_scale_tex_h = 0;
 
 void spritectl_set_xbrz_enabled(int enabled) {
 	g_xbrz_enabled = enabled != 0;
-	if (!g_xbrz_enabled) g_frame_upscaler.Release();
+	if (!g_xbrz_enabled) {
+		g_frame_upscaler.Release();
+		SpriteGpu::ReleaseUpscaler();
+	}
 }
 
 int spritectl_get_xbrz_enabled(void) { return g_xbrz_enabled ? 1 : 0; }
 
 void spritectl_release_present_resources(void* renderer_ptr) {
+	SpriteGpu::Detach(static_cast<SDL_Renderer*>(renderer_ptr));
 	SDL_Renderer* renderer = static_cast<SDL_Renderer*>(renderer_ptr);
 	g_frame_upscaler.Release(renderer);
 	if (!renderer || renderer == g_scale_tex_renderer) {
@@ -1407,6 +1428,27 @@ static int present_renderer_accelerated(SDL_Renderer* renderer) {
 
 void spritectl_set_present_window(void* window) {
 	g_present_window = static_cast<SDL_Window*>(window);
+}
+
+void spritectl_set_render_device(void* renderer) {
+	const char* choice = SDL_getenv("DARKEDEN_SPRITE_RENDERER");
+	if (!renderer || (choice && SDL_strcasecmp(choice, "software") == 0)) {
+		SpriteGpu::Detach();
+		return;
+	}
+	if (!SpriteGpu::Attach(static_cast<SDL_Renderer*>(renderer)))
+		SDL_LogWarn(SDL_LOG_CATEGORY_RENDER, "GPU sprite composition unavailable; using software: %s", SDL_GetError());
+}
+
+void spritectl_finish_rendering(void) { SpriteGpu::Finish(); }
+
+void spritectl_render_device_reset(void) {
+	SpriteGpu::Reset();
+	g_frame_upscaler.Release();
+	if (g_scale_tex) SDL_DestroyTexture(g_scale_tex);
+	g_scale_tex = nullptr;
+	g_scale_tex_renderer = nullptr;
+	g_scale_tex_w = g_scale_tex_h = 0;
 }
 
 void spritectl_set_present_geometry(int window_w, int window_h,
@@ -1458,6 +1500,8 @@ void spritectl_window_to_game_coords(int* x, int* y) {
 }
 
 int spritectl_present_surface(spritectl_surface_t surface, void* renderer_ptr) {
+	SpriteGpu::Finish();
+	if (!SpriteGpu::CheckpointOffscreen(surface)) return -1;
 	if (!surface || !renderer_ptr) {
 		return -1;
 	}
@@ -1515,6 +1559,13 @@ int spritectl_present_surface(spritectl_surface_t surface, void* renderer_ptr) {
 	}
 
 	if (g_xbrz_enabled) {
+		const int factor = FrameUpscaler::ScaleFactor(surface->width, surface->height, dest_rect);
+		if (SDL_Texture* texture = SpriteGpu::UpscaledTexture(surface, renderer, factor)) {
+			SDL_SetTextureScaleMode(texture, dest_rect.w == surface->width * factor && dest_rect.h == surface->height * factor
+				? SDL_ScaleModeNearest : SDL_ScaleModeLinear);
+			if (SDL_RenderCopy(renderer, texture, nullptr, &dest_rect) == 0) return 0;
+		}
+		if (!SpriteGpu::CpuAccess(surface, false)) return -1;
 		if (g_frame_upscaler.Draw(sdl_surface, renderer, dest_rect)) return 0;
 		// Restore the original path if filtering cannot allocate/convert/draw.
 		// Disable it until explicitly toggled again instead of retrying every frame.
@@ -1527,39 +1578,33 @@ int spritectl_present_surface(spritectl_surface_t surface, void* renderer_ptr) {
 	 * every call caused continuous GPU/driver-side memory churn even while
 	 * completely idle. Reuse a persistent streaming texture instead, only
 	 * (re)creating it if the renderer changes or it doesn't exist yet. */
-	if (surface->texture != NULL && surface->renderer != renderer) {
-		SDL_DestroyTexture(surface->texture);
-		surface->texture = NULL;
-	}
-
-	if (surface->texture == NULL) {
-		surface->texture = SDL_CreateTexture(renderer, sdl_surface->format->format,
-			SDL_TEXTUREACCESS_STREAMING, sdl_surface->w, sdl_surface->h);
-		if (surface->texture != NULL) {
-			surface->renderer = renderer;
-
-			// DEBUG: Check texture format
-			Uint32 format;
-			if (SDL_QueryTexture(surface->texture, &format, NULL, NULL, NULL) == 0) {
-				fprintf(stderr, "Persistent texture created: surface_format=%s, texture_format=%s\n",
-					SDL_GetPixelFormatName(sdl_surface->format->format), SDL_GetPixelFormatName(format));
-			}
+	SDL_Texture* frameTexture = SpriteGpu::PresentationTexture(surface, renderer);
+	if (!frameTexture) {
+		if (!SpriteGpu::CpuAccess(surface, false)) return -1;
+		if (surface->texture && surface->renderer != renderer) {
+			SDL_DestroyTexture(surface->texture);
+			surface->texture = nullptr;
 		}
+		if (!surface->texture) {
+			surface->texture = SDL_CreateTexture(renderer, sdl_surface->format->format,
+				SDL_TEXTUREACCESS_STREAMING, sdl_surface->w, sdl_surface->h);
+			if (surface->texture) surface->renderer = renderer;
+		}
+		if (surface->texture && SDL_UpdateTexture(surface->texture, nullptr,
+			sdl_surface->pixels, sdl_surface->pitch) == 0) frameTexture = surface->texture;
 	}
-
-	if (surface->texture != NULL &&
-		SDL_UpdateTexture(surface->texture, NULL, sdl_surface->pixels, sdl_surface->pitch) == 0) {
+	if (frameTexture) {
 
 		int drawn = 0;
 
 		if (dest_rect.w == sdl_surface->w || dest_rect.w % sdl_surface->w == 0) {
 			/* 1:1 or exact integer upscale - nearest is pixel-perfect */
-			SDL_SetTextureScaleMode(surface->texture, SDL_ScaleModeNearest);
-			drawn = (SDL_RenderCopy(renderer, surface->texture, NULL, &dest_rect) == 0);
+			SDL_SetTextureScaleMode(frameTexture, SDL_ScaleModeNearest);
+			drawn = (SDL_RenderCopy(renderer, frameTexture, NULL, &dest_rect) == 0);
 		} else if (dest_rect.w < sdl_surface->w) {
 			/* shrinking - plain linear */
-			SDL_SetTextureScaleMode(surface->texture, SDL_ScaleModeLinear);
-			drawn = (SDL_RenderCopy(renderer, surface->texture, NULL, &dest_rect) == 0);
+			SDL_SetTextureScaleMode(frameTexture, SDL_ScaleModeLinear);
+			drawn = (SDL_RenderCopy(renderer, frameTexture, NULL, &dest_rect) == 0);
 		} else {
 			/* Fractional upscale - sharp bilinear: nearest to the next integer
 			 * multiple on a render target, then linear down to the final size.
@@ -1591,9 +1636,9 @@ int spritectl_present_surface(spritectl_surface_t surface, void* renderer_ptr) {
 				}
 
 				if (g_scale_tex != NULL) {
-					SDL_SetTextureScaleMode(surface->texture, SDL_ScaleModeNearest);
+					SDL_SetTextureScaleMode(frameTexture, SDL_ScaleModeNearest);
 					if (SDL_SetRenderTarget(renderer, g_scale_tex) == 0) {
-						SDL_RenderCopy(renderer, surface->texture, NULL, NULL);
+						SDL_RenderCopy(renderer, frameTexture, NULL, NULL);
 						SDL_SetRenderTarget(renderer, NULL);
 						drawn = (SDL_RenderCopy(renderer, g_scale_tex, NULL, &dest_rect) == 0);
 					} else {
@@ -1604,8 +1649,8 @@ int spritectl_present_surface(spritectl_surface_t surface, void* renderer_ptr) {
 
 			if (!drawn) {
 				/* no render-target support (or it failed) - plain linear */
-				SDL_SetTextureScaleMode(surface->texture, SDL_ScaleModeLinear);
-				drawn = (SDL_RenderCopy(renderer, surface->texture, NULL, &dest_rect) == 0);
+				SDL_SetTextureScaleMode(frameTexture, SDL_ScaleModeLinear);
+				drawn = (SDL_RenderCopy(renderer, frameTexture, NULL, &dest_rect) == 0);
 			}
 		}
 
@@ -1619,6 +1664,7 @@ int spritectl_present_surface(spritectl_surface_t surface, void* renderer_ptr) {
 	 * SDL_CreateTextureFromSurface performs any necessary conversion, at the
 	 * cost of allocating/freeing a texture every call - same as the old
 	 * behavior, kept only as a safety net. */
+	if (!SpriteGpu::CpuAccess(surface, false)) return -1;
 	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, sdl_surface);
 	if (!texture) {
 		fprintf(stderr, "SpriteLib Backend: Failed to create texture: %s\n", SDL_GetError());

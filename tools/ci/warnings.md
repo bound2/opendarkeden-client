@@ -61,3 +61,12 @@ Windows budgets use the hosted CI toolchain's complete clean builds, rather
 than the larger local measurement. No compiler warnings or sanitizers are
 disabled for the dependency; later changes retain the same comparison
 against the recorded counts.
+
+The native GPU renderer removes the unused `flags` parameter diagnostic in
+`SpriteLibBackendSDL.cpp` and the signed comparison in `VS_UI_DESC.cpp`.
+The Unix parameter budgets also include the prior exchange-filter change's
+removed parameter warning. Two exchange UI test aggregates now explicitly
+initialize `sellerFilter`, resolving the missing-field warnings inherited
+from that change. Windows loses one C4244 site after using an explicit cast
+for the already-clipped RLE row bound and removing the old light-buffer pitch
+conversion. The budgets tighten these removals without increasing any category.

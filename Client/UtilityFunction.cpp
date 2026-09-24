@@ -1008,32 +1008,18 @@ bool LoadImageToSurface(const char* pFilename, CSpriteSurface& surface)
 		return false;
 	}
 
-	// Get surface info
-	S_SURFACEINFO info;
-	surface.GetSurfaceInfo(&info);
-
-	if (info.p_surface == NULL) {
+	DWORD pitch = 0;
+	auto* dest = static_cast<BYTE*>(surface.Lock(nullptr, &pitch));
+	if (!dest) {
 		SDL_FreeSurface(converted);
 		SDL_FreeSurface(loaded);
 		return false;
 	}
-
-	// Copy pixel data
-	WORD* dest = (WORD*)info.p_surface;
-	int width = min(converted->w, info.width);
-	int height = min(converted->h, info.height);
-
-	for (int y = 0; y < height; y++) {
-		for (int x = 0; x < width; x++) {
-			Uint8 r, g, b;
-			Uint32 pixel = ((Uint32*)converted->pixels)[y * converted->w + x];
-			SDL_GetRGB(pixel, converted->format, &r, &g, &b);
-
-			// Convert RGB888 to RGB565
-			WORD rgb565 = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
-			dest[y * (info.pitch / 2) + x] = rgb565;
-		}
-	}
+	const int width = min(converted->w, surface.GetWidth());
+	const int height = min(converted->h, surface.GetHeight());
+	for (int y = 0; y < height; ++y)
+		memcpy(dest + y * pitch, static_cast<BYTE*>(converted->pixels) + y * converted->pitch, width * sizeof(WORD));
+	surface.Unlock();
 
 	SDL_FreeSurface(converted);
 	SDL_FreeSurface(loaded);

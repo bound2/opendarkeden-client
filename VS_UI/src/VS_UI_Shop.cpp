@@ -769,8 +769,6 @@ void C_VS_UI_SHOP::Show()
 #ifndef _LIB
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
-		S_SURFACEINFO	surfaceinfo;
-		SetSurfaceInfo(&surfaceinfo, gpC_base->m_p_DDSurface_back->GetDDSD());
 /*
 		for (i=0; i<SHOP_SHELF_SLOT; i++) // draw every slot rect
 		{

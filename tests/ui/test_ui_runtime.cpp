@@ -78,7 +78,7 @@ bool Send(Packet& packet)
 	if (packet.getPacketID() == Packet::PACKET_CG_EXCHANGE_LIST) {
 		const auto& list = static_cast<const CGExchangeList&>(packet);
 		capture.filter = {list.getPage(), list.getPageSize(), list.getItemClass(),
-			list.getItemType(), list.getMinPrice(), list.getMaxPrice()};
+			list.getItemType(), list.getMinPrice(), list.getMaxPrice(), {}};
 		capture.seller = list.getSellerFilter();
 	} else if (packet.getPacketID() == Packet::PACKET_CG_EXCHANGE_BUY) {
 		const auto& buy = static_cast<const CGExchangeBuy&>(packet);
@@ -199,7 +199,7 @@ TEST(UiRuntime, ExchangeRequestsBuildRealPacketsAndBorrowThemForOneSend)
 {
 	capture = {};
 	HostScope scope(&host);
-	const UiRuntime::ExchangeFilter filter{3, 50, 12, 345, 100, 9000};
+	const UiRuntime::ExchangeFilter filter{3, 50, 12, 345, 100, 9000, {}};
 	CHECK(UiRuntime::RequestExchangeList(filter));
 	CHECK_EQ(3, capture.filter.page);
 	CHECK_EQ(50, capture.filter.pageSize);

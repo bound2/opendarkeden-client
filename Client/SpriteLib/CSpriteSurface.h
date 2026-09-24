@@ -56,6 +56,7 @@ class CAlphaSprite;
 class CIndexSprite;
 class CShadowSprite;
 class CSpriteOutlineManager;
+class CFilter;
 
 typedef void (*FUNCTION_MEMCPYEFFECT)(WORD*, WORD*, WORD);
 typedef void (*FUNCTION_MEMCPYPALEFFECT)(WORD*, BYTE*, WORD, MPalette &);
@@ -98,12 +99,18 @@ class CSpriteSurface {
 		// Change brightness
 		void	ChangeBrightnessBit(RECT* pRect, BYTE DarkBits);
 		void	BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2);
+		void	ApplyLightGrid(const CFilter& filter, const int* widths, const int* heights);
+		void	ColorBox(const RECT* rect, BYTE rgb);
 
 		//------------------------------------------------------------
 		// Sprite Blitting Methods
 		//------------------------------------------------------------
 		// Sprite
 		void	BltSprite(POINT* pPoint, CSprite* pSprite);
+		// Clip in sprite coordinates without exposing destination pixels.
+		void	BltSpriteClip(POINT* point, CSprite* sprite, const RECT* source);
+		void	BltSpriteColorClip(POINT* point, CSprite* sprite, const RECT* source, BYTE rgb);
+		void	BltSpriteEffectClip(POINT* point, CSprite* sprite, const RECT* source);
 		void	BltSpriteNoClip(POINT* pPoint, CSprite* pSprite);
 		void	BltSpriteHalf(POINT* pPoint, CSprite* pSprite);
 		void	BltSpriteAlpha(POINT* pPoint, CSprite* pSprite, BYTE alphaDepth);
@@ -293,7 +300,10 @@ class CSpriteSurface {
 		// DirectX Compatibility Methods (Stubs for SDL backend)
 		//------------------------------------------------------------
 		bool				Restore();
-		void*				Lock(RECT* rect = NULL, DWORD* pitch = NULL);
+		// No-argument Lock is the legacy drawing-state flag. Direct pixel
+		// access uses Lock(nullptr, &pitch) or GetSurfaceInfo, then Unlock.
+		bool				Lock();
+		void*				Lock(RECT* rect, DWORD* pitch = NULL);
 		void				Unlock();
 		int					GetSurfacePitch() const;
 		void*				GetSurfacePointer();
@@ -372,4 +382,3 @@ class CSpriteSurface {
 
 
 #endif /* __CSPRITESURFACE_H__ */
-

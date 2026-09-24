@@ -80,8 +80,24 @@ void CSDLGraphics::Init(HWND hWnd, WORD width, WORD height, SCREENMODE mode, boo
 	ReleaseAll();
 
 	spritectl_init();
+	bool selectedOpenGL = false;
+	// The programmable effect path shares SDL's OpenGL context. Keep an
+	// explicit SDL_RENDER_DRIVER override, and retain SDL's normal fallback
+	// selection on systems where OpenGL is unavailable.
+	if (!SDL_GetHint(SDL_HINT_RENDER_DRIVER)) {
+		for (int i = 0; i < SDL_GetNumRenderDrivers(); ++i) {
+			SDL_RendererInfo info{};
+			if (SDL_GetRenderDriverInfo(i, &info) == 0 && SDL_strcmp(info.name, "opengl") == 0) {
+				selectedOpenGL = SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl") == SDL_TRUE;
+				break;
+			}
+		}
+	}
 
 #ifdef PLATFORM_WINDOWS
+	const char* driver = SDL_GetHint(SDL_HINT_RENDER_DRIVER);
+	if (driver && SDL_strcmp(driver, "opengl") == 0)
+		SDL_SetHint(SDL_HINT_VIDEO_FOREIGN_WINDOW_OPENGL, "1");
 	m_pSDLWindow = SDL_CreateWindowFrom((void*)hWnd);
 #else
 	// ALLOW_HIGHDPI: on a Retina display (and a scaled Wayland desktop)
@@ -109,6 +125,7 @@ void CSDLGraphics::Init(HWND hWnd, WORD width, WORD height, SCREENMODE mode, boo
 #endif
 	if (m_pSDLWindow == NULL)
 	{
+		if (selectedOpenGL) SDL_ResetHint(SDL_HINT_RENDER_DRIVER);
 		return;
 	}
 
@@ -127,6 +144,13 @@ void CSDLGraphics::Init(HWND hWnd, WORD width, WORD height, SCREENMODE mode, boo
 	{
 		m_pSDLRenderer = SDL_CreateRenderer(m_pSDLWindow, -1, SDL_RENDERER_ACCELERATED);
 	}
+	// Do not let an unavailable automatic preference prevent startup. Restore
+	// the hint after creation so later device recreation probes capabilities too.
+	if (selectedOpenGL) SDL_ResetHint(SDL_HINT_RENDER_DRIVER);
+	if (m_pSDLRenderer == NULL && selectedOpenGL)
+	{
+		m_pSDLRenderer = SDL_CreateRenderer(m_pSDLWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	}
 	if (m_pSDLRenderer == NULL)
 	{
 		m_pSDLRenderer = SDL_CreateRenderer(m_pSDLWindow, -1, 0);
@@ -135,6 +159,7 @@ void CSDLGraphics::Init(HWND hWnd, WORD width, WORD height, SCREENMODE mode, boo
 	if (m_pSDLRenderer != NULL)
 	{
 		SDL_SetRenderDrawColor(m_pSDLRenderer, 0, 0, 0, 255);
+		spritectl_set_render_device(m_pSDLRenderer);
 	}
 
 	m_hWnd = hWnd;

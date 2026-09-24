@@ -9788,8 +9788,6 @@ void C_VS_UI_SKILL::Show2()
 					{
 						Rect rect;
 						RECT rt;
-						S_SURFACEINFO surface_info;
-						gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surface_info);
 
 						SetRect((RECT *)&rect, 0, 0, p_sprite->GetWidth(), p_sprite->GetHeight()*(percent)/100);
 						rt.left = rect.x;
@@ -9799,10 +9797,7 @@ void C_VS_UI_SKILL::Show2()
 						
 						if(rt.left < rt.right && rt.top < rt.bottom)
 						{
-							WORD * p_dest = (WORD *)surface_info.p_surface+point.x+rt.left;
-							p_dest = (WORD *)((BYTE *)p_dest+(point.y+rt.top)*surface_info.pitch);
-							
-							p_sprite->BltColorClipHeight(p_dest, surface_info.pitch, &rt, rgb_RED);
+							gpC_base->m_p_DDSurface_back->BltSpriteColorClip(&point, p_sprite, &rt, rgb_RED);
 						}
 					}
 				}
@@ -9890,8 +9885,6 @@ void C_VS_UI_SKILL::Show2()
 						{
 							Rect rect;
 							RECT rt;
-							S_SURFACEINFO surface_info;
-							gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surface_info);
 							
 							SetRect((RECT *)&rect, 0, 0, p_sprite->GetWidth(), p_sprite->GetHeight()*(percent)/100);
 							rt.left = rect.x;
@@ -9901,16 +9894,7 @@ void C_VS_UI_SKILL::Show2()
 							
 							if(rt.left < rt.right && rt.top < rt.bottom)
 							{
-								if( point.y < 0 )
-								{
-									rt.top = -point.y;
-									point.y=0;
-								}								
-								WORD * p_dest = (WORD *)surface_info.p_surface+point.x+rt.left;
-								p_dest = (WORD *)((BYTE *)p_dest+(point.y+rt.top)*surface_info.pitch);
-
-								if( rt.top < rt.bottom )
-									p_sprite->BltColorClipHeight(p_dest, surface_info.pitch, &rt, rgb_RED);
+								gpC_base->m_p_DDSurface_back->BltSpriteColorClip(&point, p_sprite, &rt, rgb_RED);
 							}
 						}
 					}
@@ -10095,8 +10079,6 @@ void C_VS_UI_SKILL::Show2()
 				  
 				  if (gpC_base->m_p_DDSurface_back->Lock())
 				  {
-					  S_SURFACEINFO	surface_info;
-					  SetSurfaceInfo(&surface_info, gpC_base->m_p_DDSurface_back->GetDDSD());
 					  
 					  //		rectangle(&surface_info, x, y, x+w-1, y+h-1, GREEN);
 					  
@@ -22560,9 +22542,9 @@ void C_VS_UI_MINIMAP::Show()
 		
 		
 		
-		WORD *mem = (WORD *)gpC_base->m_p_DDSurface_back->GetSurfacePointer();
-		long pitch = gpC_base->m_p_DDSurface_back->GetSurfacePitch();
-		long pitch_div_2 = pitch>>1;	// by sigi
+		auto plot = [](int px, int py, WORD color) {
+			gpC_base->m_p_DDSurface_back->HLine(px, py, 1, color);
+		};
 		
 		//		RECT rect = {m_map_start_point.x, m_map_start_point.y, m_map_start_point.x+m_surface_w, m_map_start_point.y+m_surface_h};
 		
@@ -22592,24 +22574,24 @@ void C_VS_UI_MINIMAP::Show()
 			
 			if(_x > 1 && _x < g_GameRect.right-2 && _y > 2 && _y < g_GameRect.bottom-1)
 			{
-				mem[(_y)*pitch_div_2 + _x] = _color;
-				mem[(_y-1)*pitch_div_2 + _x-1] = _color2;
-				mem[(_y-1)*pitch_div_2 + _x] = _color;
-				mem[(_y-1)*pitch_div_2 + _x+1] = _color2;
-				mem[(_y-2)*pitch_div_2 + _x-1] = _color;
-				mem[(_y-2)*pitch_div_2 + _x] = _color;
-				mem[(_y-2)*pitch_div_2 + _x+1] = _color;
+				plot(_x, (_y), _color);
+				plot(_x-1, (_y-1), _color2);
+				plot(_x, (_y-1), _color);
+				plot(_x+1, (_y-1), _color2);
+				plot(_x-1, (_y-2), _color);
+				plot(_x, (_y-2), _color);
+				plot(_x+1, (_y-2), _color);
 				
-				mem[(_y-3)*pitch_div_2 + _x-1] = 0;
-				mem[(_y-3)*pitch_div_2 + _x] = 0;
-				mem[(_y-3)*pitch_div_2 + _x+1] = 0;
-				mem[(_y-2)*pitch_div_2 + _x-2] = 0;
-				mem[(_y-2)*pitch_div_2 + _x+2] = 0;
-				mem[(_y-1)*pitch_div_2 + _x-2] = 0;
-				mem[(_y-1)*pitch_div_2 + _x+2] = 0;
-				mem[(_y)*pitch_div_2 + _x-1] = 0;
-				mem[(_y)*pitch_div_2 + _x+1] = 0;
-				mem[(_y+1)*pitch_div_2 + _x] = 0;
+				plot(_x-1, (_y-3), 0);
+				plot(_x, (_y-3), 0);
+				plot(_x+1, (_y-3), 0);
+				plot(_x-2, (_y-2), 0);
+				plot(_x+2, (_y-2), 0);
+				plot(_x-2, (_y-1), 0);
+				plot(_x+2, (_y-1), 0);
+				plot(_x-1, (_y), 0);
+				plot(_x+1, (_y), 0);
+				plot(_x, (_y+1), 0);
 			}
 			
 		}
@@ -22626,7 +22608,7 @@ void C_VS_UI_MINIMAP::Show()
 			
 			if(_x > 0 && _x < g_GameRect.right-1 && _y > 1 && _y < g_GameRect.bottom)
 			{
-				mem[(_y)*pitch_div_2 + _x] = _color;
+				plot(_x, (_y), _color);
 			}
 			
 		}
@@ -22657,23 +22639,23 @@ void C_VS_UI_MINIMAP::Show()
 			{
 				if(_x > 1 && _x < g_GameRect.right-2 && _y > 3 && _y < g_GameRect.bottom-1)
 				{
-					mem[(_y)*pitch_div_2 + _x] = _color;
-					mem[(_y-1)*pitch_div_2 + _x] = _color;
-					mem[(_y-2)*pitch_div_2 + _x-1] = _color;
-					mem[(_y-2)*pitch_div_2 + _x] = _color;
-					mem[(_y-2)*pitch_div_2 + _x+1] = _color;
-					mem[(_y-3)*pitch_div_2 + _x] = _color;
+					plot(_x, (_y), _color);
+					plot(_x, (_y-1), _color);
+					plot(_x-1, (_y-2), _color);
+					plot(_x, (_y-2), _color);
+					plot(_x+1, (_y-2), _color);
+					plot(_x, (_y-3), _color);
 					
-					mem[(_y-4)*pitch_div_2 + _x] = 0;
-					mem[(_y-3)*pitch_div_2 + _x-1] = 0;
-					mem[(_y-3)*pitch_div_2 + _x+1] = 0;
-					mem[(_y-2)*pitch_div_2 + _x-2] = 0;
-					mem[(_y-2)*pitch_div_2 + _x+2] = 0;
-					mem[(_y-1)*pitch_div_2 + _x-1] = 0;
-					mem[(_y-1)*pitch_div_2 + _x+1] = 0;
-					mem[(_y)*pitch_div_2 + _x-1] = 0;
-					mem[(_y)*pitch_div_2 + _x+1] = 0;
-					mem[(_y+1)*pitch_div_2 + _x] = 0;
+					plot(_x, (_y-4), 0);
+					plot(_x-1, (_y-3), 0);
+					plot(_x+1, (_y-3), 0);
+					plot(_x-2, (_y-2), 0);
+					plot(_x+2, (_y-2), 0);
+					plot(_x-1, (_y-1), 0);
+					plot(_x+1, (_y-1), 0);
+					plot(_x-1, (_y), 0);
+					plot(_x+1, (_y), 0);
+					plot(_x, (_y+1), 0);
 				}
 			}
 		}
@@ -22690,30 +22672,30 @@ void C_VS_UI_MINIMAP::Show()
 			
 			if(_x > 1 && _x < g_GameRect.right-2 && _y > 2 && _y < g_GameRect.bottom-3)
 			{
-				mem[(_y)*pitch_div_2 + _x-1] = _color;
-				mem[(_y)*pitch_div_2 + _x+1] = _color;
-				mem[(_y-1)*pitch_div_2 + _x] = _color;
-				mem[(_y-1)*pitch_div_2 + _x-1] = _color2;
-				mem[(_y-1)*pitch_div_2 + _x+1] = _color2;
-				mem[(_y-2)*pitch_div_2 + _x] = _color;
-				mem[(_y+1)*pitch_div_2 + _x] = _color;
-				mem[(_y+1)*pitch_div_2 + _x-1] = _color2;
-				mem[(_y+1)*pitch_div_2 + _x+1] = _color2;
-				mem[(_y+2)*pitch_div_2 + _x] = _color;
-				
-				mem[(_y)*pitch_div_2 + _x] = 0;
-				mem[(_y)*pitch_div_2 + _x-2] = 0;
-				mem[(_y)*pitch_div_2 + _x+2] = 0;
-				mem[(_y-1)*pitch_div_2 + _x-2] = 0;
-				mem[(_y-1)*pitch_div_2 + _x+2] = 0;
-				mem[(_y-2)*pitch_div_2 + _x-1] = 0;
-				mem[(_y-2)*pitch_div_2 + _x+1] = 0;
-				mem[(_y-3)*pitch_div_2 + _x] = 0;
-				mem[(_y+1)*pitch_div_2 + _x-2] = 0;
-				mem[(_y+1)*pitch_div_2 + _x+2] = 0;
-				mem[(_y+2)*pitch_div_2 + _x-1] = 0;
-				mem[(_y+2)*pitch_div_2 + _x+1] = 0;
-				mem[(_y+3)*pitch_div_2 + _x] = 0;
+				plot(_x-1, (_y), _color);
+				plot(_x+1, (_y), _color);
+				plot(_x, (_y-1), _color);
+				plot(_x-1, (_y-1), _color2);
+				plot(_x+1, (_y-1), _color2);
+				plot(_x, (_y-2), _color);
+				plot(_x, (_y+1), _color);
+				plot(_x-1, (_y+1), _color2);
+				plot(_x+1, (_y+1), _color2);
+				plot(_x, (_y+2), _color);
+
+				plot(_x, (_y), 0);
+				plot(_x-2, (_y), 0);
+				plot(_x+2, (_y), 0);
+				plot(_x-2, (_y-1), 0);
+				plot(_x+2, (_y-1), 0);
+				plot(_x-1, (_y-2), 0);
+				plot(_x+1, (_y-2), 0);
+				plot(_x, (_y-3), 0);
+				plot(_x-2, (_y+1), 0);
+				plot(_x+2, (_y+1), 0);
+				plot(_x-1, (_y+2), 0);
+				plot(_x+1, (_y+2), 0);
+				plot(_x, (_y+3), 0);
 			}
 		}
 
@@ -22732,24 +22714,24 @@ void C_VS_UI_MINIMAP::Show()
 		
 		  if(_x > 0 && _x < g_GameRect.right-1 && _y > 0 && _y < g_GameRect.bottom-1)
 		  {
-		  mem[(_y)*pitch_div_2 + _x] = _color;
-		  mem[(_y-1)*pitch_div_2 + _x-1] = _color;
-		  mem[(_y-1)*pitch_div_2 + _x+1] = _color;
-		  mem[(_y+1)*pitch_div_2 + _x-1] = _color;
-		  mem[(_y+1)*pitch_div_2 + _x+1] = _color;
+		  plot(_x, (_y), _color);
+		  plot(_x-1, (_y-1), _color);
+		  plot(_x+1, (_y-1), _color);
+		  plot(_x-1, (_y+1), _color);
+		  plot(_x+1, (_y+1), _color);
 		  
-			mem[(_y-2)*pitch_div_2 + _x-1] = 0;
-			mem[(_y-2)*pitch_div_2 + _x+1] = 0;
-			mem[(_y-1)*pitch_div_2 + _x-2] = 0;
-			mem[(_y-1)*pitch_div_2 + _x] = 0;
-			mem[(_y-1)*pitch_div_2 + _x+2] = 0;
-			mem[(_y)*pitch_div_2 + _x-1] = 0;
-			mem[(_y)*pitch_div_2 + _x+1] = 0;
-			mem[(_y+1)*pitch_div_2 + _x-2] = 0;
-			mem[(_y+1)*pitch_div_2 + _x] = 0;
-			mem[(_y+1)*pitch_div_2 + _x+2] = 0;
-			mem[(_y+2)*pitch_div_2 + _x-1] = 0;
-			mem[(_y+2)*pitch_div_2 + _x+1] = 0;
+			plot(_x-1, (_y-2), 0);
+			plot(_x+1, (_y-2), 0);
+			plot(_x-2, (_y-1), 0);
+			plot(_x, (_y-1), 0);
+			plot(_x+2, (_y-1), 0);
+			plot(_x-1, (_y), 0);
+			plot(_x+1, (_y), 0);
+			plot(_x-2, (_y+1), 0);
+			plot(_x, (_y+1), 0);
+			plot(_x+2, (_y+1), 0);
+			plot(_x-1, (_y+2), 0);
+			plot(_x+1, (_y+2), 0);
 			}
 			}
 			}
@@ -22761,24 +22743,24 @@ void C_VS_UI_MINIMAP::Show()
 			  
 				if(_x > 0 && _x < g_GameRect.right-1 && _y > 0 && _y < g_GameRect.bottom-1)
 				{
-				mem[(_y)*pitch_div_2 + _x] = 0xffff;
-				mem[(_y+1)*pitch_div_2 + _x+1] = 0xffff;
-				mem[(_y-1)*pitch_div_2 + _x-1] = 0xffff;
-				mem[(_y+1)*pitch_div_2 + _x-1] = 0xffff;
-				mem[(_y-1)*pitch_div_2 + _x+1] = 0xffff;
-				
-				  mem[(_y-2)*pitch_div_2 + _x-1] = 0;
-				  mem[(_y-2)*pitch_div_2 + _x+1] = 0;
-				  mem[(_y-1)*pitch_div_2 + _x-2] = 0;
-				  mem[(_y-1)*pitch_div_2 + _x] = 0;
-				  mem[(_y-1)*pitch_div_2 + _x+2] = 0;
-				  mem[(_y)*pitch_div_2 + _x-1] = 0;
-				  mem[(_y)*pitch_div_2 + _x+1] = 0;
-				  mem[(_y+1)*pitch_div_2 + _x-2] = 0;
-				  mem[(_y+1)*pitch_div_2 + _x] = 0;
-				  mem[(_y+1)*pitch_div_2 + _x+2] = 0;
-				  mem[(_y+2)*pitch_div_2 + _x-1] = 0;
-				  mem[(_y+2)*pitch_div_2 + _x+1] = 0;
+				plot(_x, (_y), 0xffff);
+				plot(_x+1, (_y+1), 0xffff);
+				plot(_x-1, (_y-1), 0xffff);
+				plot(_x-1, (_y+1), 0xffff);
+				plot(_x+1, (_y-1), 0xffff);
+
+				  plot(_x-1, (_y-2), 0);
+				  plot(_x+1, (_y-2), 0);
+				  plot(_x-2, (_y-1), 0);
+				  plot(_x, (_y-1), 0);
+				  plot(_x+2, (_y-1), 0);
+				  plot(_x-1, (_y), 0);
+				  plot(_x+1, (_y), 0);
+				  plot(_x-2, (_y+1), 0);
+				  plot(_x, (_y+1), 0);
+				  plot(_x+2, (_y+1), 0);
+				  plot(_x-1, (_y+2), 0);
+				  plot(_x+1, (_y+2), 0);
 				  }
 		*/
 		// 파티 위치 표시
@@ -22971,35 +22953,10 @@ void C_VS_UI_MINIMAP::SetBlock(int x, int y)
 
 void	C_VS_UI_MINIMAP::SetFlagArea(POINT pt)
 {
-	m_p_minimap_surface->Lock();
-	WORD *mem = (WORD *)m_p_minimap_surface->GetSurfacePointer();
-	int pitch = m_p_minimap_surface->GetSurfacePitch();
-		
-	int remainy = (pt.y+9) % m_map_h;
-	int remainx = (pt.x+9) % m_map_w;
-
-	if(remainy)
-		remainy = 1;
-	else remainy = 0;
-
-	if(remainx)
-		remainx = 1;
-	else remainx = 0;
-
-	if(m_map_w && m_map_h)
-	{
-		for(int y = pt.y*m_surface_h/m_map_h ; 
-		y <= (pt.y+9)*m_surface_h/m_map_h; y++)
-		{
-			for(int x = pt.x*m_surface_w/m_map_w; 
-			x <= (pt.x+9)*m_surface_w/m_map_w; x++)
-			{
-				mem[y*pitch/2+x] = mem[y*pitch/2+x] & CSDLGraphics::Get_R_Bitmask();
-			}
-		}
-	}
-		
-	m_p_minimap_surface->Unlock();
+	if (!m_p_minimap_surface || m_map_w <= 0 || m_map_h <= 0) return;
+	RECT rect{pt.x * m_surface_w / m_map_w, pt.y * m_surface_h / m_map_h,
+		(pt.x + 9) * m_surface_w / m_map_w + 1, (pt.y + 9) * m_surface_h / m_map_h + 1};
+	m_p_minimap_surface->ColorBox(&rect, 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -23010,62 +22967,13 @@ void	C_VS_UI_MINIMAP::SetFlagArea(POINT pt)
 void C_VS_UI_MINIMAP::SetSafetyZone(RECT rect, bool my_zone)
 {
 	m_bl_refresh = true;
-	
-	m_p_minimap_surface->Lock();
-	WORD *mem = (WORD *)m_p_minimap_surface->GetSurfacePointer();
-	int pitch = m_p_minimap_surface->GetSurfacePitch();
-	
-	//int map_w = m_surface_w, map_h = m_surface_h;
-	//	if(m_map_w != m_map_h)
-	//	{
-	//		if(m_map_w > m_map_h)map_h = map_h * m_map_h / m_map_w;
-	//		if(m_map_h > m_map_w)map_w = map_w * m_map_w / m_map_h;
-	//	}
-	
-	int remainy = rect.bottom % m_map_h;
-	int remainx = rect.right % m_map_w;
-
-	if(remainy)
-		remainy = 1;
-	else remainy = 0;
-
-	if(remainx)
-		remainx = 1;
-	else remainx = 0;
-
-	if(m_map_w && m_map_h)
-	{
-		for(int y = rect.top*m_surface_h/m_map_h ; 
-		y <= min((remainy+rect.bottom)*m_surface_h/m_map_h ,m_surface_h-1); y++)
-		{
-			for(int x = rect.left*m_surface_w/m_map_w; 
-			x <= min((remainx+rect.right)*m_surface_w/m_map_w ,m_surface_w-1); x++)
-			{
-				if(my_zone)
-					mem[y*pitch/2+x] = mem[y*pitch/2+x] & CSDLGraphics::Get_G_Bitmask();
-				else
-					mem[y*pitch/2+x] = mem[y*pitch/2+x] & CSDLGraphics::Get_R_Bitmask();
-			}
-		}
-	}
-	
-	/*if(m_map_w && m_map_h)
-	{
-		for(int y = rect.top*map_h/m_map_h + (m_surface_h - map_h)/2; 
-		y <= min(remainy+rect.bottom*map_h/m_map_h + (m_surface_h - map_h)/2,m_surface_h-1); y++)
-		{
-			for(int x = rect.left*map_w/m_map_w + (m_surface_w - map_w)/2; 
-			x <= min(remainx+rect.right*map_w/m_map_w + (m_surface_w - map_w)/2,m_surface_w-1); x++)
-			{
-				if(my_zone)
-					mem[y*pitch/2+x] = mem[y*pitch/2+x] & CSDLGraphics::Get_G_Bitmask();
-				else
-					mem[y*pitch/2+x] = mem[y*pitch/2+x] & CSDLGraphics::Get_R_Bitmask();
-			}
-		}
-	}*/
-	
-	m_p_minimap_surface->Unlock();
+	if (!m_p_minimap_surface || m_map_w <= 0 || m_map_h <= 0) return;
+	const int extraX = rect.right % m_map_w != 0;
+	const int extraY = rect.bottom % m_map_h != 0;
+	RECT area{rect.left * m_surface_w / m_map_w, rect.top * m_surface_h / m_map_h,
+		(extraX + rect.right) * m_surface_w / m_map_w + 1,
+		(extraY + rect.bottom) * m_surface_h / m_map_h + 1};
+	m_p_minimap_surface->ColorBox(&area, my_zone ? 1 : 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -33599,6 +33507,9 @@ C_VS_UI_LOTTERY_CARD::C_VS_UI_LOTTERY_CARD( int step)
 		
 		m_p_cover_surface->Lock();
 		m_p_cover_surface->BltSprite(&point, &coverSPK[0]);
+		S_SURFACEINFO info{};
+		m_p_cover_surface->GetSurfaceInfo(&info);
+		m_scratchCoverage.Reset(m_p_cover_surface->GetWidth(), m_p_cover_surface->GetHeight(), info.p_surface, info.pitch);
 		m_p_cover_surface->Unlock();
 	}
 	coverSPK.Release();
@@ -34048,9 +33959,6 @@ void	C_VS_UI_LOTTERY_CARD::Process()
 
 void	C_VS_UI_LOTTERY_CARD::ScratchCover(int _x, int _y)
 {
-	m_p_cover_surface->Lock();
-	WORD *mem = (WORD *)m_p_cover_surface->GetSurfacePointer();
-	int pitch = m_p_cover_surface->GetSurfacePitch();
 	
 	_x -= 7;
 	_y -= 7;
@@ -34075,48 +33983,28 @@ void	C_VS_UI_LOTTERY_CARD::ScratchCover(int _x, int _y)
 		else
 			D = D + Delta1;
 		
-		for(int j=sy-5; j<sy+5; j++)
-		{
-			for(int i=sx-5; i<sx+5; i++)
-			{
-				if( i >= 0 && i < m_p_cover_surface->GetWidth() && 
-					j >= 0 && j < m_p_cover_surface->GetHeight() ) mem[j*pitch/2+i] = 0xffff;
-			}
-		}		
+		EraseCover(sx - 5, sy - 5, 10, 10);
 	}
 	
 	m_old_point_x = _x;
 	m_old_point_y = _y;
 	
-	m_p_cover_surface->Unlock();
 }
 
-int		C_VS_UI_LOTTERY_CARD::PeelRate()
+void C_VS_UI_LOTTERY_CARD::EraseCover(int x, int y, int width, int height)
 {
-	m_p_cover_surface->Lock();
-	WORD *mem = (WORD *)m_p_cover_surface->GetSurfacePointer();
-	int pitch = m_p_cover_surface->GetSurfacePitch();
-	
-	int count = 0;
+	RECT area{x, y, x + width, y + height};
+	m_p_cover_surface->FillRect(&area, 0xffff);
+	m_scratchCoverage.Erase(x, y, width, height);
+}
 
-	for(int j=0; j<m_p_cover_surface->GetHeight(); j++)
-	{
-		for(int i=0; i<m_p_cover_surface->GetWidth(); i++)
-		{
-			if(mem[j*pitch/2+i] == 0xffff) count++;
-		}
-	}
-	
-	m_p_cover_surface->Unlock();
-
-	return 100 * count / (m_p_cover_surface->GetHeight() * m_p_cover_surface->GetWidth());
+int C_VS_UI_LOTTERY_CARD::PeelRate()
+{
+	return m_scratchCoverage.Percent();
 }
 
 void	C_VS_UI_LOTTERY_CARD::ClearingCover()
 {
-	m_p_cover_surface->Lock();
-	WORD *mem = (WORD *)m_p_cover_surface->GetSurfacePointer();
-	int pitch = m_p_cover_surface->GetSurfacePitch();
 	
 	int _x, _y;
 	int width = m_p_cover_surface->GetWidth();
@@ -34127,31 +34015,17 @@ void	C_VS_UI_LOTTERY_CARD::ClearingCover()
 		_x = rand()%width/2;
 		_y = rand()%height/2;
 
-		mem[_y*pitch/2+_x] = 0xffff;
-		mem[_y*pitch/2+(_x+width/2)] = 0xffff;
-		mem[(_y+height/2)*pitch/2+_x] = 0xffff;
-		mem[(_y+height/2)*pitch/2+(_x+width/2)] = 0xffff;
+		EraseCover(_x, _y, 1, 1);
+		EraseCover(_x + width / 2, _y, 1, 1);
+		EraseCover(_x, _y + height / 2, 1, 1);
+		EraseCover(_x + width / 2, _y + height / 2, 1, 1);
 	}
 	
-	m_p_cover_surface->Unlock();
 }
 
-void	C_VS_UI_LOTTERY_CARD::ClearAllCover()
+void C_VS_UI_LOTTERY_CARD::ClearAllCover()
 {
-	m_p_cover_surface->Lock();
-	WORD *mem = (WORD *)m_p_cover_surface->GetSurfacePointer();
-	int pitch = m_p_cover_surface->GetSurfacePitch();
-	
-	for(int j=0; j<m_p_cover_surface->GetHeight(); j++)
-	{
-		for(int i=0; i<m_p_cover_surface->GetWidth(); i++)
-		{			
-			mem[j*pitch/2+i] = 0xffff;
-		}
-	}
-	
-	m_p_cover_surface->Unlock();
-
+	EraseCover(0, 0, m_p_cover_surface->GetWidth(), m_p_cover_surface->GetHeight());
 	m_Type = LOTTERY_TYPE_CLOSE;
 }
 
@@ -34710,9 +34584,9 @@ void C_VS_UI_WORLDMAP::Show()
 		
 		
 		
-		WORD *mem = (WORD *)gpC_base->m_p_DDSurface_back->GetSurfacePointer();
-		long pitch = gpC_base->m_p_DDSurface_back->GetSurfacePitch();
-		long pitch_div_2 = pitch>>1;	// by sigi
+		auto plot = [](int px, int py, WORD color) {
+			gpC_base->m_p_DDSurface_back->HLine(px, py, 1, color);
+		};
 		
 		//		RECT rect = {m_map_start_point.x, m_map_start_point.y, m_map_start_point.x+m_surface_w, m_map_start_point.y+m_surface_h};
 		
@@ -34742,24 +34616,24 @@ void C_VS_UI_WORLDMAP::Show()
 			
 			if(_x > 1 && _x < g_GameRect.right-2 && _y > 2 && _y < g_GameRect.bottom-1)
 			{
-				mem[(_y)*pitch_div_2 + _x] = _color;
-				mem[(_y-1)*pitch_div_2 + _x-1] = _color2;
-				mem[(_y-1)*pitch_div_2 + _x] = _color;
-				mem[(_y-1)*pitch_div_2 + _x+1] = _color2;
-				mem[(_y-2)*pitch_div_2 + _x-1] = _color;
-				mem[(_y-2)*pitch_div_2 + _x] = _color;
-				mem[(_y-2)*pitch_div_2 + _x+1] = _color;
+				plot(_x, (_y), _color);
+				plot(_x-1, (_y-1), _color2);
+				plot(_x, (_y-1), _color);
+				plot(_x+1, (_y-1), _color2);
+				plot(_x-1, (_y-2), _color);
+				plot(_x, (_y-2), _color);
+				plot(_x+1, (_y-2), _color);
 				
-				mem[(_y-3)*pitch_div_2 + _x-1] = 0;
-				mem[(_y-3)*pitch_div_2 + _x] = 0;
-				mem[(_y-3)*pitch_div_2 + _x+1] = 0;
-				mem[(_y-2)*pitch_div_2 + _x-2] = 0;
-				mem[(_y-2)*pitch_div_2 + _x+2] = 0;
-				mem[(_y-1)*pitch_div_2 + _x-2] = 0;
-				mem[(_y-1)*pitch_div_2 + _x+2] = 0;
-				mem[(_y)*pitch_div_2 + _x-1] = 0;
-				mem[(_y)*pitch_div_2 + _x+1] = 0;
-				mem[(_y+1)*pitch_div_2 + _x] = 0;
+				plot(_x-1, (_y-3), 0);
+				plot(_x, (_y-3), 0);
+				plot(_x+1, (_y-3), 0);
+				plot(_x-2, (_y-2), 0);
+				plot(_x+2, (_y-2), 0);
+				plot(_x-2, (_y-1), 0);
+				plot(_x+2, (_y-1), 0);
+				plot(_x-1, (_y), 0);
+				plot(_x+1, (_y), 0);
+				plot(_x, (_y+1), 0);
 			}
 			
 		}
@@ -34776,7 +34650,7 @@ void C_VS_UI_WORLDMAP::Show()
 			
 			if(_x > 0 && _x < g_GameRect.right-1 && _y > 1 && _y < g_GameRect.bottom)
 			{
-				mem[(_y)*pitch_div_2 + _x] = _color;
+				plot(_x, (_y), _color);
 			}
 			
 		}
@@ -34807,23 +34681,23 @@ void C_VS_UI_WORLDMAP::Show()
 			{
 				if(_x > 1 && _x < g_GameRect.right-2 && _y > 3 && _y < g_GameRect.bottom-1)
 				{
-					mem[(_y)*pitch_div_2 + _x] = _color;
-					mem[(_y-1)*pitch_div_2 + _x] = _color;
-					mem[(_y-2)*pitch_div_2 + _x-1] = _color;
-					mem[(_y-2)*pitch_div_2 + _x] = _color;
-					mem[(_y-2)*pitch_div_2 + _x+1] = _color;
-					mem[(_y-3)*pitch_div_2 + _x] = _color;
+					plot(_x, (_y), _color);
+					plot(_x, (_y-1), _color);
+					plot(_x-1, (_y-2), _color);
+					plot(_x, (_y-2), _color);
+					plot(_x+1, (_y-2), _color);
+					plot(_x, (_y-3), _color);
 					
-					mem[(_y-4)*pitch_div_2 + _x] = 0;
-					mem[(_y-3)*pitch_div_2 + _x-1] = 0;
-					mem[(_y-3)*pitch_div_2 + _x+1] = 0;
-					mem[(_y-2)*pitch_div_2 + _x-2] = 0;
-					mem[(_y-2)*pitch_div_2 + _x+2] = 0;
-					mem[(_y-1)*pitch_div_2 + _x-1] = 0;
-					mem[(_y-1)*pitch_div_2 + _x+1] = 0;
-					mem[(_y)*pitch_div_2 + _x-1] = 0;
-					mem[(_y)*pitch_div_2 + _x+1] = 0;
-					mem[(_y+1)*pitch_div_2 + _x] = 0;
+					plot(_x, (_y-4), 0);
+					plot(_x-1, (_y-3), 0);
+					plot(_x+1, (_y-3), 0);
+					plot(_x-2, (_y-2), 0);
+					plot(_x+2, (_y-2), 0);
+					plot(_x-1, (_y-1), 0);
+					plot(_x+1, (_y-1), 0);
+					plot(_x-1, (_y), 0);
+					plot(_x+1, (_y), 0);
+					plot(_x, (_y+1), 0);
 				}
 			}
 		}
@@ -34840,30 +34714,30 @@ void C_VS_UI_WORLDMAP::Show()
 			
 			if(_x > 1 && _x < g_GameRect.right-2 && _y > 2 && _y < g_GameRect.bottom-3)
 			{
-				mem[(_y)*pitch_div_2 + _x-1] = _color;
-				mem[(_y)*pitch_div_2 + _x+1] = _color;
-				mem[(_y-1)*pitch_div_2 + _x] = _color;
-				mem[(_y-1)*pitch_div_2 + _x-1] = _color2;
-				mem[(_y-1)*pitch_div_2 + _x+1] = _color2;
-				mem[(_y-2)*pitch_div_2 + _x] = _color;
-				mem[(_y+1)*pitch_div_2 + _x] = _color;
-				mem[(_y+1)*pitch_div_2 + _x-1] = _color2;
-				mem[(_y+1)*pitch_div_2 + _x+1] = _color2;
-				mem[(_y+2)*pitch_div_2 + _x] = _color;
-				
-				mem[(_y)*pitch_div_2 + _x] = 0;
-				mem[(_y)*pitch_div_2 + _x-2] = 0;
-				mem[(_y)*pitch_div_2 + _x+2] = 0;
-				mem[(_y-1)*pitch_div_2 + _x-2] = 0;
-				mem[(_y-1)*pitch_div_2 + _x+2] = 0;
-				mem[(_y-2)*pitch_div_2 + _x-1] = 0;
-				mem[(_y-2)*pitch_div_2 + _x+1] = 0;
-				mem[(_y-3)*pitch_div_2 + _x] = 0;
-				mem[(_y+1)*pitch_div_2 + _x-2] = 0;
-				mem[(_y+1)*pitch_div_2 + _x+2] = 0;
-				mem[(_y+2)*pitch_div_2 + _x-1] = 0;
-				mem[(_y+2)*pitch_div_2 + _x+1] = 0;
-				mem[(_y+3)*pitch_div_2 + _x] = 0;
+				plot(_x-1, (_y), _color);
+				plot(_x+1, (_y), _color);
+				plot(_x, (_y-1), _color);
+				plot(_x-1, (_y-1), _color2);
+				plot(_x+1, (_y-1), _color2);
+				plot(_x, (_y-2), _color);
+				plot(_x, (_y+1), _color);
+				plot(_x-1, (_y+1), _color2);
+				plot(_x+1, (_y+1), _color2);
+				plot(_x, (_y+2), _color);
+
+				plot(_x, (_y), 0);
+				plot(_x-2, (_y), 0);
+				plot(_x+2, (_y), 0);
+				plot(_x-2, (_y-1), 0);
+				plot(_x+2, (_y-1), 0);
+				plot(_x-1, (_y-2), 0);
+				plot(_x+1, (_y-2), 0);
+				plot(_x, (_y-3), 0);
+				plot(_x-2, (_y+1), 0);
+				plot(_x+2, (_y+1), 0);
+				plot(_x-1, (_y+2), 0);
+				plot(_x+1, (_y+2), 0);
+				plot(_x, (_y+3), 0);
 			}
 		}
 
@@ -34882,24 +34756,24 @@ void C_VS_UI_WORLDMAP::Show()
 		
 		  if(_x > 0 && _x < g_GameRect.right-1 && _y > 0 && _y < g_GameRect.bottom-1)
 		  {
-		  mem[(_y)*pitch_div_2 + _x] = _color;
-		  mem[(_y-1)*pitch_div_2 + _x-1] = _color;
-		  mem[(_y-1)*pitch_div_2 + _x+1] = _color;
-		  mem[(_y+1)*pitch_div_2 + _x-1] = _color;
-		  mem[(_y+1)*pitch_div_2 + _x+1] = _color;
+		  plot(_x, (_y), _color);
+		  plot(_x-1, (_y-1), _color);
+		  plot(_x+1, (_y-1), _color);
+		  plot(_x-1, (_y+1), _color);
+		  plot(_x+1, (_y+1), _color);
 		  
-			mem[(_y-2)*pitch_div_2 + _x-1] = 0;
-			mem[(_y-2)*pitch_div_2 + _x+1] = 0;
-			mem[(_y-1)*pitch_div_2 + _x-2] = 0;
-			mem[(_y-1)*pitch_div_2 + _x] = 0;
-			mem[(_y-1)*pitch_div_2 + _x+2] = 0;
-			mem[(_y)*pitch_div_2 + _x-1] = 0;
-			mem[(_y)*pitch_div_2 + _x+1] = 0;
-			mem[(_y+1)*pitch_div_2 + _x-2] = 0;
-			mem[(_y+1)*pitch_div_2 + _x] = 0;
-			mem[(_y+1)*pitch_div_2 + _x+2] = 0;
-			mem[(_y+2)*pitch_div_2 + _x-1] = 0;
-			mem[(_y+2)*pitch_div_2 + _x+1] = 0;
+			plot(_x-1, (_y-2), 0);
+			plot(_x+1, (_y-2), 0);
+			plot(_x-2, (_y-1), 0);
+			plot(_x, (_y-1), 0);
+			plot(_x+2, (_y-1), 0);
+			plot(_x-1, (_y), 0);
+			plot(_x+1, (_y), 0);
+			plot(_x-2, (_y+1), 0);
+			plot(_x, (_y+1), 0);
+			plot(_x+2, (_y+1), 0);
+			plot(_x-1, (_y+2), 0);
+			plot(_x+1, (_y+2), 0);
 			}
 			}
 			}
@@ -34911,24 +34785,24 @@ void C_VS_UI_WORLDMAP::Show()
 			  
 				if(_x > 0 && _x < g_GameRect.right-1 && _y > 0 && _y < g_GameRect.bottom-1)
 				{
-				mem[(_y)*pitch_div_2 + _x] = 0xffff;
-				mem[(_y+1)*pitch_div_2 + _x+1] = 0xffff;
-				mem[(_y-1)*pitch_div_2 + _x-1] = 0xffff;
-				mem[(_y+1)*pitch_div_2 + _x-1] = 0xffff;
-				mem[(_y-1)*pitch_div_2 + _x+1] = 0xffff;
-				
-				  mem[(_y-2)*pitch_div_2 + _x-1] = 0;
-				  mem[(_y-2)*pitch_div_2 + _x+1] = 0;
-				  mem[(_y-1)*pitch_div_2 + _x-2] = 0;
-				  mem[(_y-1)*pitch_div_2 + _x] = 0;
-				  mem[(_y-1)*pitch_div_2 + _x+2] = 0;
-				  mem[(_y)*pitch_div_2 + _x-1] = 0;
-				  mem[(_y)*pitch_div_2 + _x+1] = 0;
-				  mem[(_y+1)*pitch_div_2 + _x-2] = 0;
-				  mem[(_y+1)*pitch_div_2 + _x] = 0;
-				  mem[(_y+1)*pitch_div_2 + _x+2] = 0;
-				  mem[(_y+2)*pitch_div_2 + _x-1] = 0;
-				  mem[(_y+2)*pitch_div_2 + _x+1] = 0;
+				plot(_x, (_y), 0xffff);
+				plot(_x+1, (_y+1), 0xffff);
+				plot(_x-1, (_y-1), 0xffff);
+				plot(_x-1, (_y+1), 0xffff);
+				plot(_x+1, (_y-1), 0xffff);
+
+				  plot(_x-1, (_y-2), 0);
+				  plot(_x+1, (_y-2), 0);
+				  plot(_x-2, (_y-1), 0);
+				  plot(_x, (_y-1), 0);
+				  plot(_x+2, (_y-1), 0);
+				  plot(_x-1, (_y), 0);
+				  plot(_x+1, (_y), 0);
+				  plot(_x-2, (_y+1), 0);
+				  plot(_x, (_y+1), 0);
+				  plot(_x+2, (_y+1), 0);
+				  plot(_x-1, (_y+2), 0);
+				  plot(_x+1, (_y+2), 0);
 				  }
 		*/
 		// 파티 위치 표시
@@ -35121,35 +34995,10 @@ void C_VS_UI_WORLDMAP::SetBlock(int x, int y)
 
 void	C_VS_UI_WORLDMAP::SetFlagArea(POINT pt)
 {
-	m_p_minimap_surface->Lock();
-	WORD *mem = (WORD *)m_p_minimap_surface->GetSurfacePointer();
-	int pitch = m_p_minimap_surface->GetSurfacePitch();
-		
-	int remainy = (pt.y+9) % m_map_h;
-	int remainx = (pt.x+9) % m_map_w;
-
-	if(remainy)
-		remainy = 1;
-	else remainy = 0;
-
-	if(remainx)
-		remainx = 1;
-	else remainx = 0;
-
-	if(m_map_w && m_map_h)
-	{
-		for(int y = pt.y*m_surface_h/m_map_h ; 
-		y <= (pt.y+9)*m_surface_h/m_map_h; y++)
-		{
-			for(int x = pt.x*m_surface_w/m_map_w; 
-			x <= (pt.x+9)*m_surface_w/m_map_w; x++)
-			{
-				mem[y*pitch/2+x] = mem[y*pitch/2+x] & CSDLGraphics::Get_R_Bitmask();
-			}
-		}
-	}
-		
-	m_p_minimap_surface->Unlock();
+	if (!m_p_minimap_surface || m_map_w <= 0 || m_map_h <= 0) return;
+	RECT rect{pt.x * m_surface_w / m_map_w, pt.y * m_surface_h / m_map_h,
+		(pt.x + 9) * m_surface_w / m_map_w + 1, (pt.y + 9) * m_surface_h / m_map_h + 1};
+	m_p_minimap_surface->ColorBox(&rect, 0);
 }
 //-----------------------------------------------------------------------------
 // SetSafetyZone
@@ -35159,62 +35008,13 @@ void	C_VS_UI_WORLDMAP::SetFlagArea(POINT pt)
 void C_VS_UI_WORLDMAP::SetSafetyZone(RECT rect, bool my_zone)
 {
 	m_bl_refresh = true;
-	
-	m_p_minimap_surface->Lock();
-	WORD *mem = (WORD *)m_p_minimap_surface->GetSurfacePointer();
-	int pitch = m_p_minimap_surface->GetSurfacePitch();
-	
-	//int map_w = m_surface_w, map_h = m_surface_h;
-	//	if(m_map_w != m_map_h)
-	//	{
-	//		if(m_map_w > m_map_h)map_h = map_h * m_map_h / m_map_w;
-	//		if(m_map_h > m_map_w)map_w = map_w * m_map_w / m_map_h;
-	//	}
-	
-	int remainy = rect.bottom % m_map_h;
-	int remainx = rect.right % m_map_w;
-
-	if(remainy)
-		remainy = 1;
-	else remainy = 0;
-
-	if(remainx)
-		remainx = 1;
-	else remainx = 0;
-
-	if(m_map_w && m_map_h)
-	{
-		for(int y = rect.top*m_surface_h/m_map_h ; 
-		y <= min((remainy+rect.bottom)*m_surface_h/m_map_h ,m_surface_h-1); y++)
-		{
-			for(int x = rect.left*m_surface_w/m_map_w; 
-			x <= min((remainx+rect.right)*m_surface_w/m_map_w ,m_surface_w-1); x++)
-			{
-				if(my_zone)
-					mem[y*pitch/2+x] = mem[y*pitch/2+x] & CSDLGraphics::Get_G_Bitmask();
-				else
-					mem[y*pitch/2+x] = mem[y*pitch/2+x] & CSDLGraphics::Get_R_Bitmask();
-			}
-		}
-	}
-	
-	/*if(m_map_w && m_map_h)
-	{
-		for(int y = rect.top*map_h/m_map_h + (m_surface_h - map_h)/2; 
-		y <= min(remainy+rect.bottom*map_h/m_map_h + (m_surface_h - map_h)/2,m_surface_h-1); y++)
-		{
-			for(int x = rect.left*map_w/m_map_w + (m_surface_w - map_w)/2; 
-			x <= min(remainx+rect.right*map_w/m_map_w + (m_surface_w - map_w)/2,m_surface_w-1); x++)
-			{
-				if(my_zone)
-					mem[y*pitch/2+x] = mem[y*pitch/2+x] & CSDLGraphics::Get_G_Bitmask();
-				else
-					mem[y*pitch/2+x] = mem[y*pitch/2+x] & CSDLGraphics::Get_R_Bitmask();
-			}
-		}
-	}*/
-	
-	m_p_minimap_surface->Unlock();
+	if (!m_p_minimap_surface || m_map_w <= 0 || m_map_h <= 0) return;
+	const int extraX = rect.right % m_map_w != 0;
+	const int extraY = rect.bottom % m_map_h != 0;
+	RECT area{rect.left * m_surface_w / m_map_w, rect.top * m_surface_h / m_map_h,
+		(extraX + rect.right) * m_surface_w / m_map_w + 1,
+		(extraY + rect.bottom) * m_surface_h / m_map_h + 1};
+	m_p_minimap_surface->ColorBox(&area, my_zone ? 1 : 0);
 }
 
 //-----------------------------------------------------------------------------

@@ -76,14 +76,10 @@ void C_VS_UI_DESC::ShowDesc(int x, int y)
 		const auto left = static_cast<long long>(m_desc_x) + x + (tree ? 200 : 0);
 		const auto top = viewTop + (static_cast<long long>(tree ? 0 : picture.pos) - m_desc_scroll) * m_desc_y_distance;
 		if (!gpC_base->m_p_DDSurface_back->Lock()) continue;
-		S_SURFACEINFO surface{};
-		gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surface);
-		if (surface.p_surface && surface.width > 0 && surface.height > 0 &&
-			surface.pitch > 0 && surface.pitch <= (std::numeric_limits<WORD>::max)() &&
-			surface.pitch % sizeof(WORD) == 0 &&
-			static_cast<long long>(surface.pitch) >= static_cast<long long>(surface.width) * sizeof(WORD)) {
-			const auto right = (std::min)(static_cast<long long>(surface.width), static_cast<long long>(g_GameRect.right));
-			const auto bottom = (std::min)(static_cast<long long>(surface.height), static_cast<long long>(g_GameRect.bottom));
+		auto* surface = gpC_base->m_p_DDSurface_back;
+		if (surface->GetWidth() > 0 && surface->GetHeight() > 0) {
+			const auto right = (std::min)(static_cast<long long>(surface->GetWidth()), static_cast<long long>(g_GameRect.right));
+			const auto bottom = (std::min)(static_cast<long long>(surface->GetHeight()), static_cast<long long>(g_GameRect.bottom));
 			const auto clipLeft = (std::max)(0LL, -left);
 			const auto clipTop = (std::max)({0LL, -top, viewTop - top});
 			const auto clipRight = (std::min)(static_cast<long long>(sprite->GetWidth()), right - left);
@@ -91,10 +87,8 @@ void C_VS_UI_DESC::ShowDesc(int x, int y)
 			if (clipLeft < clipRight && clipTop < clipBottom) {
 				RECT source{static_cast<LONG>(clipLeft), static_cast<LONG>(clipTop),
 					static_cast<LONG>(clipRight), static_cast<LONG>(clipBottom)};
-				const size_t offset = static_cast<size_t>(top + clipTop) * static_cast<size_t>(surface.pitch) +
-					static_cast<size_t>(left + clipLeft) * sizeof(WORD);
-				auto* destination = reinterpret_cast<WORD*>(static_cast<BYTE*>(surface.p_surface) + offset);
-				sprite->BltClipWidth(destination, static_cast<WORD>(surface.pitch), &source);
+				POINT point{static_cast<LONG>(left), static_cast<LONG>(top)};
+				surface->BltSpriteClip(&point, sprite, &source);
 			}
 		}
 		gpC_base->m_p_DDSurface_back->Unlock();

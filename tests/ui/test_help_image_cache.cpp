@@ -46,7 +46,7 @@ WORD Pixel(CSpriteSurface* surface, int x = 0, int y = 0)
 {
 	CHECK(surface != nullptr);
 	if (!surface) return 0;
-	const bool locked = surface->Lock() != nullptr;
+	const bool locked = surface->Lock();
 	CHECK(locked);
 	if (!locked) return 0;
 	S_SURFACEINFO info{};

@@ -163,6 +163,15 @@ void spritectl_window_to_game_coords(int* x, int* y);
  */
 void spritectl_set_present_window(void* window);
 
+/* Install the native texture compositor. Pass NULL before destroying the
+ * renderer. DARKEDEN_SPRITE_RENDERER=software keeps the reference rasterizer. */
+void spritectl_set_render_device(void* renderer);
+/* End queued surface rendering before issuing SDL window rendering commands. */
+void spritectl_finish_rendering(void);
+/* Called for SDL_RENDER_TARGETS_RESET / SDL_RENDER_DEVICE_RESET. The host
+ * must redraw the current frame (including its tile cache) afterwards. */
+void spritectl_render_device_reset(void);
+
 /**
  * What a present records for the mapping above, set by hand.
  *

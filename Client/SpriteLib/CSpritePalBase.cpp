@@ -1,6 +1,8 @@
 #include "Client_PCH.h"
 #include "CSpritePalBase.h"
 #include "CSpriteSurface.h"
+#include "SpriteGpu.h"
+#include <algorithm>
 
 
 BYTE CSpritePalBase::s_Colorkey = 0xFF;
@@ -25,6 +27,7 @@ CSpritePalBase::~CSpritePalBase()
 
 void CSpritePalBase::Release()
 {
+	SpriteGpu::ForgetPaletteSprite(this);
 	m_Width = 0;		// 가로 pixel수
 	m_Height = 0;		// 세로 pixel수		
 	m_Size = 0;			// 스프라이트의 size
@@ -225,6 +228,29 @@ bool CSpritePalBase::ValidateScanlines(int bytesPerPixel) const
 		}
 	}
 
+	return true;
+}
+
+bool CSpritePalBase::DecodeGpuPixels(std::span<uint32_t> pixels, bool withAlpha) const
+{
+	if (!IsInit() || !m_pData || !m_pPixels || pixels.size() != size_t(m_Width) * m_Height
+		|| !ValidateScanlines(withAlpha ? 2 : 1)) return false;
+	std::fill(pixels.begin(), pixels.end(), 0);
+	for (int y = 0; y < m_Height; ++y) {
+		const BYTE* source = m_pPixels[y];
+		const int runs = *source++;
+		int x = 0;
+		for (int run = 0; run < runs; ++run) {
+			x += *source++;
+			const int count = *source++;
+			for (int i = 0; i < count; ++i) {
+				const unsigned alpha = withAlpha ? *source++ : 32;
+				if (alpha > 32) return false; // Preserve legacy handling of malformed alpha on the CPU.
+				const unsigned index = *source++;
+				pixels[size_t(y) * m_Width + x++] = 0xff000000u | (index << 16) | (alpha << 8);
+			}
+		}
+	}
 	return true;
 }
 

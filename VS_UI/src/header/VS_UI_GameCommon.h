@@ -20,6 +20,7 @@
 #include "StringCell.h"
 #include "VS_UI_util.h"
 #include "MonotonicClock.h"
+#include "ScratchCoverage.h"
 #include "VS_UI_Description.h"
 #include "VS_UI_ExtraDialog.h"
 #include "VS_UI_title.h" // for S_SLOT
@@ -4038,6 +4039,7 @@ public :
 	int						m_step;
 	C_SPRITE_PACK *			m_pC_lottery_spk;
 	CSpriteSurface *		m_p_cover_surface;
+	ScratchCoverage		m_scratchCoverage;
 	LOTTERY_STATUS			m_Type;	
 	int						m_radio_select;
 	int						m_line_select;
@@ -4146,6 +4148,7 @@ public :
 	}
 
 	void	ScratchCover(int _x, int _y);
+	void	EraseCover(int x, int y, int width, int height);
 	void	ClearingCover();
 	void	ClearAllCover();
 	int		PeelRate();	

@@ -783,8 +783,6 @@ void C_VS_UI_DIALOG::Show()
 #ifndef _LIB
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
-		S_SURFACEINFO	surfaceinfo;
-		SetSurfaceInfo(&surfaceinfo, gpC_base->m_p_DDSurface_back->GetDDSD());
 
 		//rectangle(&surfaceinfo, this, WHITE);
 		//FillRect(&surfaceinfo, &m_client_rect, WHITE);
