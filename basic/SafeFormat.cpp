@@ -220,7 +220,8 @@ size_t Emit(char* dest, size_t size, size_t out, const char* flags,
 		const bool hex = length >= 2 && buffer[0] == '0' && buffer[1] == 'x';
 		if (!hex) return EmitField(dest, size, out, "", 0, buffer, length, width, left, false);
 		char digits[64];
-		size_t digitsLength = length - 2;
+		// BSD renders a null pointer with zero precision as the prefix alone.
+		size_t digitsLength = arg.pPointer == NULL && precision == 0 ? 0 : length - 2;
 		const size_t zeros = precision > 0 && static_cast<size_t>(precision) > digitsLength
 			? static_cast<size_t>(precision) - digitsLength : 0;
 		memset(digits, '0', zeros);
