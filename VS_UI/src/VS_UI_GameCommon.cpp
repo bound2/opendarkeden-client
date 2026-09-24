@@ -18,7 +18,7 @@
 #include "MNPCTable.h"
 #include "MParty.h"
 #include "VS_UI_title.h"
-#include "MGuildMarkManager.h"
+#include "UiRuntime.h"
 #include "MGuildInfoMapper.h"
 #include "ExperienceTable.h"
 #include "UserOption.h"
@@ -11028,20 +11028,7 @@ void	C_VS_UI_PARTY_MANAGER::Show()
 				
 				//길드 마크 로딩
 				// 작은거
-				p_guild_mark = g_pGuildMarkManager->GetGuildMarkSmall(g_char_slot_ingame.GUILD_ID);
-				
-				if (p_guild_mark==NULL)
-				{		
-					//-------------------------------------------------
-					// file에 있는지 본다.
-					//-------------------------------------------------
-					g_pGuildMarkManager->LoadGuildMark(g_char_slot_ingame.GUILD_ID);
-					
-					//-------------------------------------------------
-					// file에서 load되었는지 다시 체크
-					//-------------------------------------------------
-					p_guild_mark = g_pGuildMarkManager->GetGuildMarkSmall(g_char_slot_ingame.GUILD_ID);
-				}
+				p_guild_mark = UiRuntime::GuildMark(g_char_slot_ingame.GUILD_ID, UiRuntime::MarkSize::Small);
 			}
 			else if(g_pParty->GetMemberInfo(i-1) != NULL)
 			{
@@ -11070,20 +11057,7 @@ void	C_VS_UI_PARTY_MANAGER::Show()
 				
 				//길드 마크 로딩
 				// 작은거
-				p_guild_mark = g_pGuildMarkManager->GetGuildMarkSmall(g_pParty->GetMemberInfo(i-1)->guildID);
-				
-				if (p_guild_mark==NULL)
-				{		
-					//-------------------------------------------------
-					// file에 있는지 본다.
-					//-------------------------------------------------
-					g_pGuildMarkManager->LoadGuildMark(g_pParty->GetMemberInfo(i-1)->guildID);
-					
-					//-------------------------------------------------
-					// file에서 load되었는지 다시 체크
-					//-------------------------------------------------
-					p_guild_mark = g_pGuildMarkManager->GetGuildMarkSmall(g_pParty->GetMemberInfo(i-1)->guildID);
-				}
+				p_guild_mark = UiRuntime::GuildMark(g_pParty->GetMemberInfo(i-1)->guildID, UiRuntime::MarkSize::Small);
 			}
 
 
@@ -16970,7 +16944,7 @@ void	C_VS_UI_INFO::_Show2()
 				// 계급 이미지				
 				if(g_char_slot_ingame.GRADE > 0 &&g_char_slot_ingame.GRADE <= GRADE_MARK_MAX)				
 				{
-					CSprite* GradeMark=g_pGuildMarkManager->GetGradeMarkSmall(g_char_slot_ingame.GRADE-1,g_eRaceInterface);
+					CSprite* GradeMark=UiRuntime::GradeMark(g_char_slot_ingame.GRADE-1,g_eRaceInterface, UiRuntime::MarkSize::Small);
 					if(GradeMark!=NULL)
 					{
 						POINT GradePoint = { x+258, y+field1_y+field1_gap*gap_line};
@@ -17368,7 +17342,7 @@ void	C_VS_UI_INFO::_Show2()
 				if(g_char_slot_ingame.GRADE > 0 &&g_char_slot_ingame.GRADE <= GRADE_MARK_MAX)				
 				{
 					POINT GradePoint = { x + 232, y + field1_y + field1_gap * gap_line + 6};
-					CSprite* GradeMark=g_pGuildMarkManager->GetGradeMarkSmall(g_char_slot_ingame.GRADE-1,g_eRaceInterface);
+					CSprite* GradeMark=UiRuntime::GradeMark(g_char_slot_ingame.GRADE-1,g_eRaceInterface, UiRuntime::MarkSize::Small);
 					if(GradeMark!=NULL)
 						gpC_base->m_p_DDSurface_back->BltSprite(&GradePoint,GradeMark);
 				}
@@ -17744,7 +17718,7 @@ void	C_VS_UI_INFO::_Show2()
 				if(g_char_slot_ingame.GRADE > 0 &&g_char_slot_ingame.GRADE <= GRADE_MARK_MAX)				
 				{
 					POINT GradePoint = { x + 232, y + field1_y + field1_gap * gap_line + 6};
-					CSprite* GradeMark=g_pGuildMarkManager->GetGradeMarkSmall(g_char_slot_ingame.GRADE-1,g_eRaceInterface);
+					CSprite* GradeMark=UiRuntime::GradeMark(g_char_slot_ingame.GRADE-1,g_eRaceInterface, UiRuntime::MarkSize::Small);
 					if(GradeMark!=NULL)
 						gpC_base->m_p_DDSurface_back->BltSprite(&GradePoint,GradeMark);
 				}
@@ -19864,20 +19838,7 @@ void C_VS_UI_INFO::Start(INFO_MODE	Info_Mode)
 	}
 	
 	//길드마크 로딩
-	m_p_guild_mark = g_pGuildMarkManager->GetGuildMarkSmall(g_char_slot_ingame.GUILD_ID);
-	
-	if (m_p_guild_mark==NULL)
-	{
-		//-------------------------------------------------
-		// file에 있는지 본다.
-		//-------------------------------------------------
-		g_pGuildMarkManager->LoadGuildMark(g_char_slot_ingame.GUILD_ID);
-		
-		//-------------------------------------------------
-		// file에서 load되었는지 다시 체크
-		//-------------------------------------------------
-		m_p_guild_mark = g_pGuildMarkManager->GetGuildMarkSmall(g_char_slot_ingame.GUILD_ID);
-	}
+	m_p_guild_mark = UiRuntime::GuildMark(g_char_slot_ingame.GUILD_ID, UiRuntime::MarkSize::Small);
 	
 	PI_Processor::Start();
 	
@@ -23743,12 +23704,7 @@ void C_VS_UI_TEAM_LIST::Show()
 			
 			// 길드 마크 출력
 			CSprite *p_guild_mark;
-			p_guild_mark=g_pGuildMarkManager->GetGuildMarkSmall(info->guild_id);
-			if(p_guild_mark==NULL)
-			{
-				g_pGuildMarkManager->LoadGuildMark(info->guild_id);
-				p_guild_mark = g_pGuildMarkManager->GetGuildMarkSmall(info->guild_id);			
-			}
+			p_guild_mark = UiRuntime::GuildMark(info->guild_id, UiRuntime::MarkSize::Small);
 			POINT guild_point = { rect.left,rect.top };
 			if(p_guild_mark != NULL)	// 악!! CSprite직접 쓸때는 Lock할것!! by 쑥갓
 			{
@@ -23803,12 +23759,7 @@ void C_VS_UI_TEAM_LIST::Show()
 			
 			// 길드 마크 출력
 			CSprite *p_guild_mark;
-			p_guild_mark=g_pGuildMarkManager->GetGuildMarkSmall(info->guild_id);
-			if(p_guild_mark==NULL)
-			{
-				g_pGuildMarkManager->LoadGuildMark(info->guild_id);
-				p_guild_mark = g_pGuildMarkManager->GetGuildMarkSmall(info->guild_id);			
-			}
+			p_guild_mark = UiRuntime::GuildMark(info->guild_id, UiRuntime::MarkSize::Small);
 			POINT guild_point = { rect.left,rect.top };
 			if(p_guild_mark != NULL)	// 악!! CSprite직접 쓸때는 Lock할것!! by 쑥갓
 			{
@@ -24296,12 +24247,7 @@ void C_VS_UI_TEAM_MEMBER_LIST::Show()
 
 	// 길드마크 출력 부분
 	CSprite *p_guild_mark;
-	p_guild_mark=g_pGuildMarkManager->GetGuildMarkSmall(g_char_slot_ingame.GUILD_ID);
-	if(p_guild_mark==NULL)
-	{
-		g_pGuildMarkManager->LoadGuildMark(g_char_slot_ingame.GUILD_ID);
-		p_guild_mark=g_pGuildMarkManager->GetGuildMarkSmall(g_char_slot_ingame.GUILD_ID);			
-	}
+	p_guild_mark = UiRuntime::GuildMark(g_char_slot_ingame.GUILD_ID, UiRuntime::MarkSize::Small);
 	POINT guild_mark_position={x+2,y+2};
 	if(g_eRaceInterface == RACE_OUSTERS)
 	{
@@ -26613,12 +26559,7 @@ void C_VS_UI_TEAM_INFO::Show()
 			gpC_base->m_p_DDSurface_back->HLine(print_x, py+line_gap, w - (print_x - x) -30, 0);
 		
 		CSprite *p_guild_mark;
-		p_guild_mark=g_pGuildMarkManager->GetGuildMark(m_regist_info.guild_id);
-		if(p_guild_mark==NULL)
-		{
-			g_pGuildMarkManager->LoadGuildMark(m_regist_info.guild_id);
-			p_guild_mark=g_pGuildMarkManager->GetGuildMark(m_regist_info.guild_id);			
-		}		
+		p_guild_mark = UiRuntime::GuildMark(m_regist_info.guild_id, UiRuntime::MarkSize::Large);
 		
 		if(p_guild_mark!=NULL)
 		{
@@ -27208,12 +27149,7 @@ void C_VS_UI_TEAM_MEMBER_INFO::Show()
 	/*					 길드 멤버 정보에 길드마크 x
 	// 길드 마크 출력
 	CSprite *p_guild_mark;
-	p_guild_mark=g_pGuildMarkManager->GetGuildMark(m_member_info.guild_id);
-	if(p_guild_mark==NULL)
-	{
-	g_pGuildMarkManager->LoadGuildMark(m_member_info.guild_id);
-	p_guild_mark=g_pGuildMarkManager->GetGuildMark(m_member_info.guild_id);			
-	}
+	p_guild_mark = UiRuntime::GuildMark(m_member_info.guild_id, UiRuntime::MarkSize::Large);
 	RECT rect={x,y,0,0};
 	POINT guild_point = { rect.left,rect.top };
 	if(p_guild_mark!=NULL)
@@ -28938,7 +28874,7 @@ void	C_VS_UI_OTHER_INFO::Show()
 				// Grade mark
 				if(m_player_info.GRADE > 0 && m_player_info.GRADE <= GRADE_MARK_MAX )		
 				{
-					GradeMark=g_pGuildMarkManager->GetGradeMark(m_player_info.GRADE-1,g_eRaceInterface);				
+					GradeMark=UiRuntime::GradeMark(m_player_info.GRADE-1,g_eRaceInterface, UiRuntime::MarkSize::Large);
 					if(GradeMark!=NULL)
 					{
 	/*					gpC_base->m_p_DDSurface_back->Unlock();
@@ -29198,7 +29134,7 @@ void	C_VS_UI_OTHER_INFO::Show()
 				// Grade mark
 				if(m_player_info.GRADE > 0 && m_player_info.GRADE <= GRADE_MARK_MAX )		
 				{
-					GradeMark=g_pGuildMarkManager->GetGradeMark(m_player_info.GRADE-1,g_eRaceInterface);			
+					GradeMark=UiRuntime::GradeMark(m_player_info.GRADE-1,g_eRaceInterface, UiRuntime::MarkSize::Large);
 					
 					if(GradeMark!=NULL)
 					{						
@@ -29414,7 +29350,7 @@ void	C_VS_UI_OTHER_INFO::Show()
 				// Grade mark
 				if(m_player_info.GRADE > 0 && m_player_info.GRADE <= GRADE_MARK_MAX )		
 				{
-					GradeMark=g_pGuildMarkManager->GetGradeMark(m_player_info.GRADE-1,g_eRaceInterface);			
+					GradeMark=UiRuntime::GradeMark(m_player_info.GRADE-1,g_eRaceInterface, UiRuntime::MarkSize::Large);
 					
 					if(GradeMark!=NULL)
 					{						
@@ -29652,13 +29588,7 @@ void	C_VS_UI_OTHER_INFO::SetOtherInfo(PLAYER_INFO &info)
 		if(m_player_info.DOMAINLEVEL[TopDomain] < m_player_info.DOMAINLEVEL[i])
 			TopDomain = i;
 	}
-	m_p_guild_mark = g_pGuildMarkManager->GetGuildMark(m_player_info.guild_id);
-	
-	if(m_p_guild_mark == NULL)
-	{
-		g_pGuildMarkManager->LoadGuildMark( m_player_info.guild_id );
-		m_p_guild_mark = g_pGuildMarkManager->GetGuildMark( m_player_info.guild_id );
-	}	
+	m_p_guild_mark = UiRuntime::GuildMark(m_player_info.guild_id, UiRuntime::MarkSize::Large);
 	RefreshImage();
 }
 
@@ -30967,12 +30897,7 @@ void C_VS_UI_WAR_LIST::Show()
 			{
 				// 길드 마크 출력
 				CSprite *p_guild_mark;
-				p_guild_mark=g_pGuildMarkManager->GetGuildMarkSmall(itr->challengerGuildID);
-				if(p_guild_mark==NULL)
-				{
-					g_pGuildMarkManager->LoadGuildMark(itr->challengerGuildID);
-					p_guild_mark = g_pGuildMarkManager->GetGuildMarkSmall(itr->challengerGuildID);
-				}
+				p_guild_mark = UiRuntime::GuildMark(itr->challengerGuildID, UiRuntime::MarkSize::Small);
 				POINT guild_point = { x+tab_x[0]+2, y+tab_y[1]+gap+2 };
 				if(p_guild_mark != NULL)	// 악!! CSprite직접 쓸때는 Lock할것!! by 쑥갓
 				{

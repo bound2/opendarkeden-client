@@ -61,6 +61,8 @@
 #include "MZoneSoundManager.h"
 #include "MNPCScriptTable.h"
 #include "MParty.h"
+#include "UiRuntime.h"
+#include "MFakeCreature.h"
 #include "SpriteIDDef.h"
 #include "MathTable.h"
 #include "ModifyStatusManager.h"
@@ -2723,6 +2725,7 @@ void ReleaseAllObjects()
 	// subsequent static teardown; a later initialization installs the host again.
 	MItem::SetHost(nullptr);
 	MParty::SetHost(nullptr);
+	UiRuntime::SetHost(nullptr);
 
 #ifdef DEBUG_INFO
 	ClearDebugInfo();
@@ -3029,6 +3032,75 @@ static const MPartyHost s_PartyHost = {
 	.CurrentTime = []() { return g_FrameNow; },
 };
 
+// The UI asks for live data and borrowed sprites without depending on owners.
+static bool UiEventFlagActive(std::uint32_t flag)
+{
+	return g_pEventManager && g_pEventManager->GetEventByFlag(flag) != nullptr;
+}
+
+static CSprite* UiFindGuildMark(std::uint16_t guildID, UiRuntime::MarkSize size)
+{
+	if (!g_pGuildMarkManager) return nullptr;
+	return size == UiRuntime::MarkSize::Small
+		? g_pGuildMarkManager->GetGuildMarkSmall(guildID)
+		: g_pGuildMarkManager->GetGuildMark(guildID);
+}
+
+static void UiLoadGuildMark(std::uint16_t guildID)
+{
+	if (g_pGuildMarkManager) g_pGuildMarkManager->LoadGuildMark(guildID);
+}
+
+static CSprite* UiGradeMark(std::uint16_t grade, int race, UiRuntime::MarkSize size)
+{
+	if (!g_pGuildMarkManager || race < 0 || race >= RACE_MAX) return nullptr;
+	return size == UiRuntime::MarkSize::Small
+		? g_pGuildMarkManager->GetGradeMarkSmall(grade, static_cast<Race>(race))
+		: g_pGuildMarkManager->GetGradeMark(grade, static_cast<Race>(race));
+}
+
+static std::size_t UiHornMapCount()
+{
+	return g_pZone ? g_pZone->GetHorn().size() : 0;
+}
+
+static bool UiReadHornPortals(std::size_t map, UiRuntime::HornPortals& portals)
+{
+	if (!g_pZone || map >= g_pZone->GetHorn().size()) return false;
+	portals = g_pZone->GetHorn()[map];
+	return true;
+}
+
+static bool UiReadPetProgress(std::uint32_t itemID, UiRuntime::PetProgress& progress)
+{
+	if (!g_pZone || !g_pPlayer) return false;
+	auto* pet = static_cast<MFakeCreature*>(g_pZone->GetFakeCreature(g_pPlayer->GetPetID()));
+	if (!pet) return false;
+	auto* item = pet->GetPetItem();
+	if (!item || item->GetID() != itemID) return false;
+	progress.experienceRemaining = static_cast<int>(item->GetPetExpRemain());
+	progress.level = item->GetNumber();
+	return true;
+}
+
+static bool UiSendPacket(Packet& packet)
+{
+	if (!g_pSocket) return false;
+	g_pSocket->sendPacket(&packet);
+	return true;
+}
+
+static const UiRuntime::Host s_UiRuntimeHost = {
+	.EventFlagActive = UiEventFlagActive,
+	.FindGuildMark = UiFindGuildMark,
+	.LoadGuildMark = UiLoadGuildMark,
+	.GradeMark = UiGradeMark,
+	.HornMapCount = UiHornMapCount,
+	.ReadHornPortals = UiReadHornPortals,
+	.ReadPetProgress = UiReadPetProgress,
+	.SendPacket = UiSendPacket,
+};
+
 //-----------------------------------------------------------------------------
 // The wire layer's host (docs/RESTRUCTURING.md task 5.1): three tuning
 // values out of the config, and the connection a bug report goes to.
@@ -3236,6 +3308,7 @@ InitGameObject()
 	Wire::SetHost(&s_WireHost);
 	MPriceManager::SetHost(&s_PriceHost);
 	MParty::SetHost(&s_PartyHost);
+	UiRuntime::SetHost(&s_UiRuntimeHost);
 
 	if (g_pPCTalkBox==NULL)
 	{

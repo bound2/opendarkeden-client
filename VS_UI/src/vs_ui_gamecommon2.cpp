@@ -30,6 +30,7 @@
 #include "ShrineInfoManager.h"
 #ifdef _LIB
 #include "MZone.h"
+#include "UiRuntime.h"
 #endif
 
 #include "MZoneTable.h"
@@ -4553,9 +4554,9 @@ C_VS_UI_HORN::C_VS_UI_HORN(int currentZoneID)
 	
 	m_CurrentZone = 0;
 #ifdef _LIB
-	for(int i = 0; i < g_pZone->GetHorn().size(); i++)
+	for(int i = 0; i < UiRuntime::HornMapCount(); i++)
 	{
-		portalList = g_pZone->GetHorn()[i];
+		portalList = UiRuntime::ReadHornPortals(i);
 		
 		UI_PORTAL_LIST::iterator itr = portalList.begin();
 		UI_PORTAL_LIST::iterator endItr = portalList.end();
@@ -4631,7 +4632,7 @@ void	C_VS_UI_HORN::Show()
 		
 	};
 #ifdef _LIB
-	UI_PORTAL_LIST portalList = g_pZone->GetHorn()[m_CurrentZone];
+	UI_PORTAL_LIST portalList = UiRuntime::ReadHornPortals(m_CurrentZone);
 #else
 	UI_PORTAL_LIST portalList;
 #endif
@@ -4698,7 +4699,7 @@ bool	C_VS_UI_HORN::MouseControl(UINT message, int _x, int _y)
 		if(_x >= m_MapX && _x <= m_MapX+200 && _y >= m_MapY && _y <= m_MapY+100)
 		{
 #ifdef _LIB
-			UI_PORTAL_LIST portalList = g_pZone->GetHorn()[m_CurrentZone];
+			UI_PORTAL_LIST portalList = UiRuntime::ReadHornPortals(m_CurrentZone);
 #else
 			UI_PORTAL_LIST portalList ;
 #endif
@@ -4753,7 +4754,7 @@ bool	C_VS_UI_HORN::MouseControl(UINT message, int _x, int _y)
 		if(_x >= m_MapX && _x <= m_MapX+200 && _y >= m_MapY && _y <= m_MapY+100)
 		{
 #ifdef _LIB
-			UI_PORTAL_LIST portalList = g_pZone->GetHorn()[m_CurrentZone];
+			UI_PORTAL_LIST portalList = UiRuntime::ReadHornPortals(m_CurrentZone);
 #else
 			UI_PORTAL_LIST portalList ;
 #endif
@@ -4851,7 +4852,7 @@ int		C_VS_UI_HORN::GetNext(int map, bool bUp)
 		
 		bool bCheck = true;
 #ifdef _LIB
-		UI_PORTAL_LIST &portalList = g_pZone->GetHorn()[nmap];
+		UI_PORTAL_LIST portalList = UiRuntime::ReadHornPortals(nmap);
 #else
 		UI_PORTAL_LIST portalList;
 #endif
@@ -4893,7 +4894,7 @@ void	C_VS_UI_HORN::Run(id_t id)
 		m_CurrentZone = (m_CurrentZone+m_MapSPK.GetSize()-1)%m_MapSPK.GetSize();
 		{
 #ifdef _LIB
-			UI_PORTAL_LIST portalList = g_pZone->GetHorn()[m_CurrentZone];
+			UI_PORTAL_LIST portalList = UiRuntime::ReadHornPortals(m_CurrentZone);
 #else
 			UI_PORTAL_LIST portalList;
 #endif
@@ -4920,7 +4921,7 @@ void	C_VS_UI_HORN::Run(id_t id)
 		m_CurrentZone = (m_CurrentZone+1)%m_MapSPK.GetSize();
 		{
 #ifdef _LIB
-			UI_PORTAL_LIST portalList = g_pZone->GetHorn()[m_CurrentZone];
+			UI_PORTAL_LIST portalList = UiRuntime::ReadHornPortals(m_CurrentZone);
 #else
 			UI_PORTAL_LIST portalList;
 #endif
@@ -10195,18 +10196,11 @@ void	C_VS_UI_PET_INFO::Show()
 		m_AddName.Show();
 
 #ifdef _LIB
-	MFakeCreature *pPet = (MFakeCreature *)g_pZone->GetFakeCreature(g_pPlayer->GetPetID());
-	if(pPet != NULL)
+	UiRuntime::PetProgress progress;
+	if (UiRuntime::ReadPetProgress(m_PetInfo.ITEM_ID, progress))
 	{
-		MPetItem *pPetItem = pPet->GetPetItem();
-		if(pPetItem != NULL)
-		{
-			if(m_PetInfo.ITEM_ID == pPetItem->GetID())
-			{	// exp, level - update
-				m_PetInfo.EXP_REMAIN = pPetItem->GetPetExpRemain();
-				m_PetInfo.LEVEL	= pPetItem->GetNumber();
-			}
-		}
+		m_PetInfo.EXP_REMAIN = progress.experienceRemaining;
+		m_PetInfo.LEVEL = progress.level;
 	}
 #endif
 
@@ -13951,7 +13945,7 @@ void	C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElementAction(DWORD qID, BYTE bCondit
 				if(NULL != _TempAttr)
 				{
 					const char* TempAction = _TempAttr->ToString();
-					if(0 == strcmp(TempAction, "dead")) // g_pPlayer 죽는 동작
+					if(0 == strcmp(TempAction, "dead")) // The player death action.
 					{
 						int TargetZoneID = 0;
 						const XMLAttribute* _TempAttr2 = pElement3->GetAttribute("warp");

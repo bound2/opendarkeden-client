@@ -406,7 +406,9 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 # 10: remove the duplicate, inactive VS_UI/DebugInfo.cpp implementation.
 # 5: world metadata globals are now owned by the tested gamemodel objects.
 # 4: remove CImm's unused executable sound-manager declaration.
-R4_BASELINE=4
+# 0: UiRuntime carries live UI services; party ownership is in gamemodel.
+# An inline comment naming the player global is translated; scanner unchanged.
+R4_BASELINE=0
 
 lib_members () {
 	# The directory trees minus the files CMake excludes from the
