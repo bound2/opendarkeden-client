@@ -127,7 +127,7 @@ public:
 		if(m_pC_game)
 			m_pC_game->AddTeamMemberList(member_info, bType);
 	}
-	char*	GetTeamMember_SelectedID(){
+	const char* GetTeamMember_SelectedID(){
 		if(m_pC_game)
 			return m_pC_game->GetTeamMember_SelectedID();
 		else

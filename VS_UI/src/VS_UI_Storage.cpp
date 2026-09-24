@@ -629,7 +629,7 @@ void C_VS_UI_STORAGE::Show()
 			std::string sstr = money_buf;
 			for(int j = 3; j <= 13; j += 4)
 				if(sstr.size() > j)sstr.insert(sstr.size()-j, ",");
-			sprintf(money_buf, "%s", sstr.c_str());
+			SafeFormat::Format(money_buf, "%s", sstr.c_str());
 			g_Print(x+m_money_button_offset_x+147, y+m_money_button_offset_y+4, money_buf, &gpC_base->m_money2_pi);
 		}
 	}

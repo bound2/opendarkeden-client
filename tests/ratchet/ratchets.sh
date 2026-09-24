@@ -1467,12 +1467,9 @@ fi
 # because VS_UI_GameCommon.cpp carries NUL bytes and a plain grep
 # stops at the first one (CLAUDE.md, Traps).
 #
-# What it cannot see: vsprintf (11 live lines, the vararg forwarders in
-# Client/MinTr.h and the two DebugInfo.cpp, into fixed buffers - the
-# \b in the pattern rejects the leading v, as it rejects the l of
-# lstrcpy and lstrcat, of which the tree has none), strncpy, and a
-# copy spelled any other way; snprintf never matched, having no
-# "sprintf" inside it.
+# What it cannot see: vsprintf, lstrcpy/lstrcat, strncpy, or a copy
+# spelled any other way; snprintf never matched. The old MinTr/DebugInfo
+# vararg forwards were retired or made typed and bounded when R8 reached0.
 #
 # 1,086 on 2026-09-17, from 1,102 before the first slice, which took
 # basic to 0 (C_DIRECTORY, an unused class whose constructor called a
@@ -1526,7 +1523,9 @@ fi
 # 568: the mail-template notice date uses checked formatting.
 # 518: option-name formatting/copies are bounded; two obsolete option blocks removed.
 # 512: retire MinTrace formatters and bound two macro-wrapped UI literals.
-R17_BASELINE=512
+# 0: remaining arrays and pointer capacities are bounded, semantic names/paths
+# are owned, and obsolete comment blocks plus unused APIs are removed.
+R17_BASELINE=0
 R17_FILES_FLOOR=500
 
 r17_members () {

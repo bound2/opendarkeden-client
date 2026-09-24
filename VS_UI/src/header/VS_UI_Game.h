@@ -399,7 +399,7 @@ public:
 		if(m_pC_team_member_list)
 			m_pC_team_member_list->AddMemberList(member_list, bType);
 	}
-	char*	GetTeamMember_SelectedID(){
+	const char* GetTeamMember_SelectedID(){
 		if(m_pC_team_member_list)
 			return m_pC_team_member_list->GetSelectedID();
 		else

@@ -440,7 +440,7 @@ void	C_VS_UI_MONEY_DIALOG::KeyboardControl(UINT message, UINT key, long extra)
 	if (GetValue() > _MAX_MONEY)
 	{
 		char buf[30];
-		sprintf(buf, "%d", _MAX_MONEY);
+		SafeFormat::Format(buf, "%d", _MAX_MONEY);
 		m_lev_value.EraseAll();
 		m_lev_value.AddString(buf);
 
@@ -501,7 +501,7 @@ void	C_VS_UI_MONEY_DIALOG::Show()
 		{
 			Point TempPoint = m_lev_value.GetPosition();
 			char TempBuffer[64];
-			sprintf(TempBuffer, "%d0000",TempValue);
+			SafeFormat::Format(TempBuffer, "%d0000",TempValue);
 			g_PrintColorStr(TempPoint.x, TempPoint.y, TempBuffer, gpC_base->m_item_name_pi, RGB_WHITE);
 		}
 		else
@@ -1904,7 +1904,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 						p_item->GetRequireINT() > 0 ||
 						//					p_item->GetRequireLevel() > 0 ||
 						(p_item->GetRequireSUM() > 0 && p_item->GetRequireSUM() > p_item->GetRequireSTR()))
-						strcat(sz_temp, ",");
+						SafeFormat::Append(sz_temp, ",");
 					temp_string = sz_temp;
 					m_rep_string.push_back(temp_string);
 				}
@@ -1921,7 +1921,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 					if (p_item->GetRequireINT() > 0 ||
 						//					p_item->GetRequireLevel() > 0 ||
 						(p_item->GetRequireSUM() > 0 && p_item->GetRequireSUM() > p_item->GetRequireDEX()))
-						strcat(sz_temp, ",");
+						SafeFormat::Append(sz_temp, ",");
 					temp_string = sz_temp;
 					m_rep_string.push_back(temp_string);
 				}
@@ -1938,7 +1938,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 					
 					if (//p_item->GetRequireLevel() > 0 || 
 						(p_item->GetRequireSUM() > 0 && p_item->GetRequireSUM() > p_item->GetRequireINT()))
-						strcat(sz_temp, ",");
+						SafeFormat::Append(sz_temp, ",");
 					temp_string = sz_temp;
 					m_rep_string.push_back(temp_string);
 				}
@@ -1989,7 +1989,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 					snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE));
 				bl_required = true;
 				
-				strcat(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OTHER_TRIBE].GetString());
+				SafeFormat::Append(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OTHER_TRIBE].GetString());
 				temp_string = sz_temp;
 				m_rep_string.push_back(temp_string);
 			}
@@ -2002,7 +2002,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE));
 				bl_required = true;
 
-				strcat(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ONLY_MALE].GetString());
+				SafeFormat::Append(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ONLY_MALE].GetString());
 				temp_string = sz_temp;
 				m_rep_string.push_back(temp_string);
 			}
@@ -2014,7 +2014,7 @@ C_VS_UI_DESC_DIALOG::C_VS_UI_DESC_DIALOG(id_t type, void* void_ptr, void* void_p
 						snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_DESC_DIALOG_REQUIRE));
 				bl_required = true;
 
-				strcat(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ONLY_FEMALE].GetString());
+				SafeFormat::Append(sz_temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ONLY_FEMALE].GetString());
 				temp_string = sz_temp;
 				m_rep_string.push_back(temp_string);
 			}

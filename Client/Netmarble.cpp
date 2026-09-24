@@ -8,6 +8,7 @@
 #include "assert.h"
 #include "NMCrypt.h"
 #include "MString.h"
+#include "SafeFormat.h"
 
 namespace
 {
@@ -51,9 +52,11 @@ char* _StrTok(const char* str, const char sep)
 	static char token[TOK_BUFSIZE];
 
 	if(str) {
-		int slen = strlen(str);
-//		assert(slen < TOK_BUFSIZE);		// ASSERT
-		strcpy(buf, str);
+		if (strlen(str) >= sizeof(buf)) {
+			pnow = nullptr;
+			return nullptr;
+		}
+		SafeFormat::Copy(buf, str);
 		pnow = buf;
 	}
 
@@ -109,7 +112,8 @@ BOOL AnalyzeArgument(char *key)
 	char* token = _StrTok(buf, ',');
 	while(token && argcnt < 6)
 	{
-		strcpy(arg[argcnt], token);
+		if (strlen(token) >= sizeof(arg[argcnt])) return FALSE;
+		SafeFormat::Copy(arg[argcnt], token);
 		argcnt++;
 		token = _StrTok(NULL, ',');
 	}
@@ -174,7 +178,8 @@ ParsingNetmarble(const char* pCommandLine, NETMARBLE_INFO &info)
 		return false;
 	}
 
-	strcpy(szTemp, pString+1);
+	if (strlen(pString + 1) >= sizeof(szTemp)) return false;
+	SafeFormat::Copy(szTemp, pString + 1);
 		
 	BOOL bResult = AnalyzeArgument( szTemp );
 
@@ -343,127 +348,3 @@ ParsingNetmarble(const char* pCommandLine, NETMARBLE_INFO &info)
 
 	return true;
 }
-
-
-
-/* old version
-char* _StrTok(const char* str, const char sep)
-{
-	// strtok()와 같은 기능의 함수이지만 separator를 1개만 받고
-	// 인자가 비어있는 경우도 인자로 인정함
-
-	static const int TOK_BUFSIZE = 4096;
-
-	static char* pnow = NULL;
-	static char buf[TOK_BUFSIZE];
-	static char token[TOK_BUFSIZE];
-
-	if(str) {
-		int slen = strlen(str);
-		assert(slen < TOK_BUFSIZE);		// ASSERT
-
-		strcpy(buf, str);
-		pnow = buf;
-	}
-
-	if(!pnow || *pnow == 0)
-		return NULL;
-
-	int tlen = 0;
-	char* porg = pnow;
-	while(*pnow != 0)
-	{
-		if(*pnow == sep) {
-			++pnow;
-			break;
-		}
-
-		++tlen;
-		++pnow;
-	}
-
-	if(tlen > 0) {
-		strncpy(token, porg, tlen);
-		token[tlen] = 0;
-	}
-	else {
-		token[0] = 0;
-	}
-
-	return token;
-}
- 
-
-
-BOOL AnalizeArgument(const char *strarg)
-{
-#ifdef NETMARBLE_DEBUG
-	MessageBox(NULL,strarg,strarg,MB_OK);
-#endif
-	//
-	// 인자 전달 규칙(각각의 인자는 컴마(,)로 구분되며 인자 사이의 공백은 없다)
-	// 전달 인자의 순서 : ServerIP,Port,UserID,Pass,Extra (인자는 암호화되어 있다)
-	// - Extra 인자는 생략되기도 한다
-	//
-
-	// arg[0],arg[1],arg[2],arg[2]arg[3]arg[4]
-	// 2,10,larosellarosel,larosellaroselNM000076B17852
-
-	// 인자가 너무 길면 안된다
-	if(strlen(strarg) >= 4096)
-		return FALSE;
-
-	char key[1024] = {0,};
-	char buf[4096] = {0,};
-
-	// 암호 해독 키를 얻어온다(한번 얻어오면 삭제됨)
-	if(!GetCryptKey(key, 1024-1, false)) 
-	{
-		return FALSE;
-	}
-
-	// 복호화 성공여부 검사
-	if(CRYPT_SUCCESS != DecryptString(strarg, key, buf))
-	{
-		return FALSE;
-	}
-
-	// -_- netmarble 에서 보내주는 extra 코드는 안쓴다.
-	char *endchar = strstr(buf,",NM");
-
-	if( endchar != NULL )
-		*endchar = NULL;
-
-	buf[ strlen(buf) - 1 ] = '\0';
-	
-	g_NetmarbleCommandLine = buf;
-
-//	char arg[5][1024] = {0,};
-//
-//	int argcnt = 0;
-//	char* token = _StrTok(buf, ',');
-//	while(token && argcnt<5)
-//	{
-//		strcpy(arg[argcnt], token);
-//		argcnt++;
-//		token = _StrTok(NULL, ',');
-//	}
-
-	// 인자가 최소한 4개는 되어야 한다
-//	if(argcnt < 4)
-//		return FALSE;
-
-	// IP주소가 올바른지 검사
-//	if(strlen(arg[0]) > 16)
-//		return FALSE;
-
-	// CP 게임은 아래부분을 고쳐 쓸것
-//	g_ServIP    = arg[0];		// 서버 IP
-//	g_ServPort  = (UINT)::atoi(arg[1]);	// 서버 Port
-//	g_LoginID   = arg[2];		// 로그인 ID
-//	g_LoginPass = arg[3];		// 로그인 패스워드(CP게임이라면 유니크 넘버)
-//	g_Extra     = arg[4];		// 여분의 인자(CP게임등에서 사용)
-	
-	return TRUE;
-}
-*/

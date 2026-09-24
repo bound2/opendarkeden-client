@@ -27,7 +27,7 @@ MLoadingSPKWorkNode1::Execute(MWorkNode*& pRemainNode)
 	//
 	//---------------------------------------------------
 	std::ifstream file;
-	if (!FileOpenBinary(m_SFPAFilename, file))
+	if (!FileOpenBinary(m_SFPAFilename.c_str(), file))
 	{
 		// -_-;;
 		m_bExecute = FALSE;
@@ -44,7 +44,7 @@ MLoadingSPKWorkNode1::Execute(MWorkNode*& pRemainNode)
 	//
 	//---------------------------------------------------
 	std::ifstream spkFile;
-	if (!FileOpenBinary(m_SPKFilename, spkFile))
+	if (!FileOpenBinary(m_SPKFilename.c_str(), spkFile))
 	{
 		// -_-;;
 		m_bExecute = FALSE;
@@ -98,7 +98,7 @@ MLoadingSPKWorkNode1::Execute(MWorkNode*& pRemainNode)
 
 			MLoadingSPKWorkNode2* pNode = new MLoadingSPKWorkNode2( pRemainSFPA );
 
-			pNode->SetSPK( m_pSPK, m_SPKFilename );
+			pNode->SetSPK( m_pSPK, m_SPKFilename.c_str() );
 			pNode->SetType( m_Type );
 
 			// 남은 일을 넘겨준다.
@@ -138,7 +138,7 @@ MLoadingSPKWorkNode2::Execute(MWorkNode*& pRemainNode)
 	//
 	//---------------------------------------------------
 	std::ifstream spkFile;
-	if (!FileOpenBinary(m_SPKFilename, spkFile))
+	if (!FileOpenBinary(m_SPKFilename.c_str(), spkFile))
 	{
 		// -_-;;
 		m_bExecute = FALSE;
@@ -189,7 +189,7 @@ MLoadingSPKWorkNode2::Execute(MWorkNode*& pRemainNode)
 
 			MLoadingSPKWorkNode2* pNode = new MLoadingSPKWorkNode2( pRemainSFPA );
 
-			pNode->SetSPK( m_pSPK, m_SPKFilename );
+			pNode->SetSPK( m_pSPK, m_SPKFilename.c_str() );
 			pNode->SetType( m_Type );
 
 			// 남은 일을 넘겨준다.
@@ -229,7 +229,7 @@ MLoadingSPKWorkNode3::Execute(MWorkNode*& pRemainNode)
 	if (sprite.IsNotInit())
 	{	
 		std::ifstream spkFile;
-		if (!FileOpenBinary(m_SPKFilename, spkFile))
+		if (!FileOpenBinary(m_SPKFilename.c_str(), spkFile))
 		{
 			// -_-;;
 			m_bExecute = FALSE;
@@ -277,7 +277,7 @@ MLoadingSPKWorkNode4::Execute(MWorkNode*& pRemainNode)
 	//m_bExecute = TRUE;
 
 	std::ifstream spkFile;
-	if (!FileOpenBinary(m_SPKFilename, spkFile))
+	if (!FileOpenBinary(m_SPKFilename.c_str(), spkFile))
 	{
 		// -_-;;
 		m_bExecute = FALSE;
@@ -325,7 +325,7 @@ MLoadingSPKWorkNode4::Execute(MWorkNode*& pRemainNode)
 													m_LastSpriteID,		// last SpriteID
 													spkFile.tellg()		// file position
 												);
-			pNode->SetSPK( m_pSPK, m_SPKFilename );
+			pNode->SetSPK( m_pSPK, m_SPKFilename.c_str() );
 			pNode->SetType( m_Type );
 
 			spkFile.close();

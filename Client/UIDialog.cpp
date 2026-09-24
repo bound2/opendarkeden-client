@@ -2,6 +2,13 @@
 // UIDialog.cpp
 //-----------------------------------------------------------------------------
 #include "Client_PCH.h"
+#include "SafeFormat.h"
+
+namespace {
+constexpr size_t TalkMessageCapacity = 2048;
+constexpr size_t FreeMessageCapacity = 256;
+}
+
 #include "Client.h"			// 이거 안 넣으니까 ambigious.. T_T;;
 #include "UIDialog.h"
 #include "VS_UI_ExtraDialog.h" 
@@ -80,74 +87,6 @@ UIDialog::~UIDialog()
 void
 UIDialog::Init()
 {
-/*
-	char* str = new char[128];
-
-	//-------------------------------------------------------------
-	// MESSAGE_CANNOT_BUY_NO_SPACE
-	//-------------------------------------------------------------
-	m_ppDlgMessageSize[MESSAGE_CANNOT_BUY_NO_SPACE] = 1;	
-	strcpy(str, g_GameStringTable[STRING_MESSAGE_CANNOT_BUY_NO_SPACE].GetString());
-	m_ppDlgMessage[MESSAGE_CANNOT_BUY_NO_SPACE] = new char* [1];
-	m_ppDlgMessage[MESSAGE_CANNOT_BUY_NO_SPACE][0] = new char [strlen(str)+1];
-	strcpy(m_ppDlgMessage[MESSAGE_CANNOT_BUY_NO_SPACE][0], str);
-
-	//-------------------------------------------------------------
-	// MESSAGE_CANNOT_BUY_NO_MONEY
-	//-------------------------------------------------------------
-	m_ppDlgMessageSize[MESSAGE_CANNOT_BUY_NO_MONEY] = 1;
-	strcpy(str, g_GameStringTable[STRING_MESSAGE_CANNOT_BUY_NO_MONEY].GetString());
-	m_ppDlgMessage[MESSAGE_CANNOT_BUY_NO_MONEY] = new char* [1];
-	m_ppDlgMessage[MESSAGE_CANNOT_BUY_NO_MONEY][0] = new char [strlen(str)+1];
-	strcpy(m_ppDlgMessage[MESSAGE_CANNOT_BUY_NO_MONEY][0], str);
-			
-	//-------------------------------------------------------------
-	// MESSAGE_CANNOT_BUY_NO_ITEM
-	//-------------------------------------------------------------
-	m_ppDlgMessageSize[MESSAGE_CANNOT_BUY_NO_ITEM] = 1;	
-	strcpy(str, g_GameStringTable[STRING_MESSAGE_CANNOT_BUY_NO_ITEM].GetString());
-	m_ppDlgMessage[MESSAGE_CANNOT_BUY_NO_ITEM] = new char* [1];
-	m_ppDlgMessage[MESSAGE_CANNOT_BUY_NO_ITEM][0] = new char [strlen(str)+1];
-	strcpy(m_ppDlgMessage[MESSAGE_CANNOT_BUY_NO_ITEM][0], str);
-
-	//-------------------------------------------------------------
-	// MESSAGE_CANNOT_BUY_NO_ITEM
-	//-------------------------------------------------------------
-	m_ppDlgMessageSize[MESSAGE_CANNOT_SELL] = 1;	
-	strcpy(str, g_GameStringTable[STRING_MESSAGE_CANNOT_SELL].GetString());
-	m_ppDlgMessage[MESSAGE_CANNOT_SELL] = new char* [1];
-	m_ppDlgMessage[MESSAGE_CANNOT_SELL][0] = new char [strlen(str)+1];
-	strcpy(m_ppDlgMessage[MESSAGE_CANNOT_SELL][0], str);
-
-	//-------------------------------------------------------------
-	// MESSAGE_SKILL_DIFFER_DOMAIN
-	//-------------------------------------------------------------
-	m_ppDlgMessageSize[MESSAGE_SKILL_DIFFER_DOMAIN] = 1;	
-	strcpy(str, g_GameStringTable[STRING_MESSAGE_SKILL_DIFFER_DOMAIN].GetString());
-	m_ppDlgMessage[MESSAGE_SKILL_DIFFER_DOMAIN] = new char* [1];
-	m_ppDlgMessage[MESSAGE_SKILL_DIFFER_DOMAIN][0] = new char [strlen(str)+1];
-	strcpy(m_ppDlgMessage[MESSAGE_SKILL_DIFFER_DOMAIN][0], str);
-
-	//-------------------------------------------------------------
-	// MESSAGE_SKILL_EXCEED_LEVEL
-	//-------------------------------------------------------------
-	m_ppDlgMessageSize[MESSAGE_SKILL_EXCEED_LEVEL] = 1;	
-	strcpy(str, g_GameStringTable[STRING_MESSAGE_SKILL_EXCEED_LEVEL].GetString());
-	m_ppDlgMessage[MESSAGE_SKILL_EXCEED_LEVEL] = new char* [1];
-	m_ppDlgMessage[MESSAGE_SKILL_EXCEED_LEVEL][0] = new char [strlen(str)+1];
-	strcpy(m_ppDlgMessage[MESSAGE_SKILL_EXCEED_LEVEL][0], str);
-
-	//-------------------------------------------------------------
-	// MESSAGE_SKILL_CANNOT_LEARN
-	//-------------------------------------------------------------
-	m_ppDlgMessageSize[MESSAGE_SKILL_CANNOT_LEARN] = 1;	
-	strcpy(str, g_GameStringTable[STRING_MESSAGE_SKILL_CANNOT_LEARN].GetString());
-	m_ppDlgMessage[MESSAGE_SKILL_CANNOT_LEARN] = new char* [1];
-	m_ppDlgMessage[MESSAGE_SKILL_CANNOT_LEARN][0] = new char [strlen(str)+1];
-	strcpy(m_ppDlgMessage[MESSAGE_SKILL_CANNOT_LEARN][0], str);
-
-  	delete [] str;
-*/
 
 	//-------------------------------------------------------------
 	// MESSAGE_PCTALK
@@ -156,7 +95,7 @@ UIDialog::Init()
 	m_ppDlgMessage[MESSAGE_PCTALK] = new char* [1];
 	for (int i=0; i<m_ppDlgMessageSize[MESSAGE_PCTALK]; i++)
 	{
-		m_ppDlgMessage[MESSAGE_PCTALK][i] = new char [2048];
+		m_ppDlgMessage[MESSAGE_PCTALK][i] = new char [TalkMessageCapacity];
 	}
 	
 
@@ -166,8 +105,8 @@ UIDialog::Init()
 	//-------------------------------------------------------------
 	m_ppDlgMessageSize[MESSAGE_FREE] = 2;	
 	m_ppDlgMessage[MESSAGE_FREE] = new char* [2];
-	m_ppDlgMessage[MESSAGE_FREE][0] = new char [256];	
-	m_ppDlgMessage[MESSAGE_FREE][1] = new char [256];	
+	m_ppDlgMessage[MESSAGE_FREE][0] = new char [FreeMessageCapacity];
+	m_ppDlgMessage[MESSAGE_FREE][1] = new char [FreeMessageCapacity];
 }
 
 //-----------------------------------------------------------------------------
@@ -660,49 +599,6 @@ UIDialog::PopupPCTalkDlg(int x, int y)
 	//---------------------------------------------------------
 	// 제목 등록
 	//---------------------------------------------------------	
-	/*
-	char* pContent = new char [lenContent+1];
-	strcpy( pContent, content );
-	char* pContentTemp = pContent;
-
-	//-------------------------------------------------------------
-	// 40글자 이상
-	//-------------------------------------------------------------
-	// 콩가루~~~ ㅡ.ㅡ; 귀차나.. 음냐..
-	int numStr = 0;
-	
-	while (lenContent > 40)
-	{
-		char* str = pContentTemp + 40;
-
-		for (int i=40; i>0; i--)
-		{
-			if (*str==' ')
-			{
-				break;
-			}
-
-			str--;
-		}
-
-		strncpy(m_ppDlgMessage[MESSAGE_PCTALK][numStr], pContentTemp, i);
-		m_ppDlgMessage[MESSAGE_PCTALK][numStr][i] = '\0';
-
-		lenContent -= i+1;
-
-		pContentTemp += i+1;		// +1은 공백이다.		
-
-		numStr++;
-	}
-
-	//-------------------------------------------------------------
-	// 40글자 이하
-	//-------------------------------------------------------------
-	strcpy(m_ppDlgMessage[MESSAGE_PCTALK][numStr], pContentTemp);
-	numStr++;	
-
-	m_pPCTalkDlg->SetMessage(m_ppDlgMessage[MESSAGE_PCTALK], numStr);//sizeof(pp_dmsg)/sizeof(char *));
-	*/
 
 
 	//---------------------------------------------------------
@@ -750,9 +646,13 @@ UIDialog::PopupPCTalkDlg(int x, int y)
 				char strID[80];
 				char strName[80];
 
+				if (pString->GetLength() < 3) {
+					++iString;
+					continue;
+				}
 				strncpy(strID, pString->GetString(), 3);
 				strID[3] = NULL;
-				strcpy(strName, pString->GetString()+3);
+				SafeFormat::Copy(strName, pString->GetString()+3);
 
 				// 이름 다시 설정
 				*pString = strName;
@@ -775,9 +675,13 @@ UIDialog::PopupPCTalkDlg(int x, int y)
 				char strID[80];
 				char strName[80];
 
+				if (pString->GetLength() < 4) {
+					++iString;
+					continue;
+				}
 				strncpy(strID, pString->GetString(), 4);
 				strID[4] = NULL;
-				strcpy(strName, pString->GetString()+4);
+				SafeFormat::Copy(strName, pString->GetString()+4);
 
 				// 이름 다시 설정
 				*pString = strName;
@@ -803,10 +707,10 @@ UIDialog::PopupPCTalkDlg(int x, int y)
 	// 메뉴 등록
 	//---------------------------------------------------------
 	DEBUG_ADD("setMENU");
-	m_pPCTalkDlg->SetMenu(pMenu, msgSize, false);// + 1, false);		// 끝내기 포함
+	m_pPCTalkDlg->SetMenu(pMenu, i, false);// + 1, false);		// 끝내기 포함
 	
 	DEBUG_ADD("spMenu");
-	strcpy(m_ppDlgMessage[MESSAGE_PCTALK][0], g_pPCTalkBox->GetContent());
+	SafeFormat::Copy(m_ppDlgMessage[MESSAGE_PCTALK][0], TalkMessageCapacity, g_pPCTalkBox->GetContent());
 
 	//const char* pFirstString = m_ppDlgMessage[MESSAGE_PCTALK][0];
 
@@ -850,80 +754,6 @@ UIDialog::ProcessHelpDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 }
 */
 
-//-----------------------------------------------------------------------------
-// PopupHelpDlg
-//-----------------------------------------------------------------------------
-/*
-void
-UIDialog::PopupHelpDlg(int x, int y)
-{
-//				C_VS_UI_DIALOG m_pC_dialog = new C_VS_UI_DIALOG(50, 20, 6, 2, func, DIALOG_OK);
-//
-//				DIALOG_MENU d_menu[] = {
-//					{"사기, 0},
-//					{"팔기", 1},
-//					{"끝내기", DIALOG_EXECID_EXIT},
-//				};
-//				m_pC_dialog->SetMenu(d_menu, 3);
-//
-//				static char * pp_dmsg[] = { // Message는 반드시 static or global로 해야 한다.
-//					"line 1",
-//					"line 2",
-//				};
-//
-//				m_pC_dialog->SetMessage(pp_dmsg, sizeof(pp_dmsg)/sizeof(char *))
-
-	//---------------------------------------------------------
-	// 기존에 있던 dialog를 지운다.
-	//---------------------------------------------------------
-	if (m_pHelpDlg!=NULL)
-	{
-		delete m_pHelpDlg;
-	}
-
-
-	//---------------------------------------------------------
-	// dialog 생성
-	//---------------------------------------------------------
-	m_pHelpDlg = new C_VS_UI_DIALOG(x, y, 4, 3, ProcessHelpDlg, SMO_NOFIT);
-
-	//---------------------------------------------------------
-	// 도움말을 Loading한다.
-	//---------------------------------------------------------
-	if (m_ppDlgMessage[MESSAGE_HELP]==NULL)
-	{	
-		MStringArray	helpMessage;
-		
-		std::ifstream file(FILE_INFO_HELP, ios::binary);
-		helpMessage.LoadFromFile( file );
-		file.close();
-
-		int lines = helpMessage.GetSize();
-
-		m_ppDlgMessage[MESSAGE_HELP] = new char* [lines];
-
-		for (int i=0; i<lines; i++)
-		{
-			m_ppDlgMessage[MESSAGE_HELP][i] = new char [helpMessage[i].GetLength()+1];
-			strcpy(m_ppDlgMessage[MESSAGE_HELP][i], helpMessage[i].GetString());
-		}
-
-		m_ppDlgMessageSize[MESSAGE_HELP] = lines;	
-	}
-
-	m_pHelpDlg->SetMessage(m_ppDlgMessage[MESSAGE_HELP], m_ppDlgMessageSize[MESSAGE_HELP]);
-
-	//---------------------------------------------------------
-	// dialog 시작..
-	//---------------------------------------------------------
-	m_pHelpDlg->Start();
-
-	//---------------------------------------------------------
-	// game으로의 입력을 차단한다.
-	//---------------------------------------------------------
-	//SetLockInputHelp();
-}
-*/
 
 //-----------------------------------------------------------------------------
 // Popup MessageDlg
@@ -1020,11 +850,10 @@ UIDialog::PopupFreeMessageDlg(const char* msg, int x, int y, WORD fButton, bool 
 		m_ppDlgMessage[msgID][0][i] = '\0';
 		//------------------------------------------
 		//yckou
-//		strcpy(m_ppDlgMessage[msgID][1], str+1);
 		if(i==0)
-			strcpy(m_ppDlgMessage[msgID][1], str);
+			SafeFormat::Copy(m_ppDlgMessage[msgID][1], FreeMessageCapacity, str);
 		else
-			strcpy(m_ppDlgMessage[msgID][1], str+1);
+			SafeFormat::Copy(m_ppDlgMessage[msgID][1], FreeMessageCapacity, str+1);
 		//end yckou
 		//------------------------------------------
 		numStr = 2;
@@ -1035,7 +864,7 @@ UIDialog::PopupFreeMessageDlg(const char* msg, int x, int y, WORD fButton, bool 
 	else
 	{
 		dlgSizeY = 0;
-		strcpy(m_ppDlgMessage[msgID][0], msg);
+		SafeFormat::Copy(m_ppDlgMessage[msgID][0], FreeMessageCapacity, msg);
 		numStr = 1;
 	}
 

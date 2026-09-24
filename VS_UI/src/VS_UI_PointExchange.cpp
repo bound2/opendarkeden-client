@@ -2,6 +2,7 @@
 // Point-based Exchange Market UI Implementation
 
 #include "Client_PCH.h"
+#include "SafeFormat.h"
 #define assert(e) ((void)(e))
 // Disabled assert for macOS
 
@@ -516,7 +517,7 @@ void C_VS_UI_POINT_EXCHANGE::DrawPageInfo()
 {
 	// Draw page information
 	char pageText[64];
-	sprintf(pageText, "Page %d/%d", m_currentPage,
+	SafeFormat::Format(pageText, "Page %d/%d", m_currentPage,
 		(m_totalItems + m_pageSize - 1) / m_pageSize);
 
 	if (gpC_base->m_p_DDSurface_back->Lock())

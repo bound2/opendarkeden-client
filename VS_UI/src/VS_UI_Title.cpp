@@ -2076,59 +2076,31 @@ void C_VS_UI_NEWCHAR::Show()
 	// show point
 	char str[10];
 	g_FL2_GetDC();
-	sprintf(str, "%d", m_p_slot->STR_PURE);
+	SafeFormat::Format(str, "%d", m_p_slot->STR_PURE);
 	g_Print(699+15, 249, str, &gpC_base->m_value_pi);
-	sprintf(str, "%d", m_p_slot->DEX_PURE);
+	SafeFormat::Format(str, "%d", m_p_slot->DEX_PURE);
 	g_Print(699+15, 249+25, str, &gpC_base->m_value_pi);
-	sprintf(str, "%d", m_p_slot->INT_PURE);
+	SafeFormat::Format(str, "%d", m_p_slot->INT_PURE);
 	g_Print(699+15, 249+25*2, str, &gpC_base->m_value_pi);
-	sprintf(str, "%d", m_p_slot->HP);
+	SafeFormat::Format(str, "%d", m_p_slot->HP);
 	g_Print(699+15, 250+25*3, str, &gpC_base->m_value_pi);
-	sprintf(str, "%d", m_p_slot->MP);
+	SafeFormat::Format(str, "%d", m_p_slot->MP);
 	g_Print(699+15, 250+25*4, str, &gpC_base->m_value_pi);
-	sprintf(str, "%d", m_p_slot->DEFENSE);
+	SafeFormat::Format(str, "%d", m_p_slot->DEFENSE);
 	g_Print(699+15, 250+25*5, str, &gpC_base->m_value_pi);
-	sprintf(str, "%d", m_p_slot->PROTECTION);
+	SafeFormat::Format(str, "%d", m_p_slot->PROTECTION);
 	g_Print(699+15, 249+25*6, str, &gpC_base->m_value_pi);
-	sprintf(str, "%d", m_p_slot->TOHIT);
+	SafeFormat::Format(str, "%d", m_p_slot->TOHIT);
 	g_Print(699+15, 250+25*7, str, &gpC_base->m_value_pi);
-	sprintf(str, "%d~%d", m_p_slot->DAM, m_p_slot->DAM2);
+	SafeFormat::Format(str, "%d~%d", m_p_slot->DAM, m_p_slot->DAM2);
 	g_Print(699+15, 250+25*8, str, &gpC_base->m_value_pi);
 	if(m_p_slot->Race == RACE_OUSTERS)
 	{
-		sprintf(str, "%d", m_p_slot->bonus_point);
+		SafeFormat::Format(str, "%d", m_p_slot->bonus_point);
 		g_Print(699+15, 250+25*9, str, &gpC_base->m_value_pi);
 	}
 	
 
-/*
-	// 문자열 출력 
-	if (gpC_base->m_p_DDSurface_back->Lock())
-	{
-		S_SURFACEINFO	surfaceinfo;
-		gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surfaceinfo);
-
-		gpC_base->SelectFont(FONT_SLAYER);
-
-		gC_font.Update(&surfaceinfo, 445, 145, WHITE);
-
-		// show point
-		char str[3];
-		sprintf(str, "%2d", m_p_slot->STR);
-		gC_font.PrintString(&surfaceinfo, str, 433, 280, WHITE);
-		sprintf(str, "%2d", m_p_slot->DEX);
-		gC_font.PrintString(&surfaceinfo, str, 433, 280+46, WHITE);
-		sprintf(str, "%2d", m_p_slot->INT);
-		gC_font.PrintString(&surfaceinfo, str, 433, 280+92, WHITE);
-		sprintf(str, "%2d", m_p_slot->DAM);
-		gC_font.PrintString(&surfaceinfo, str, 723, 422, WHITE);
-		sprintf(str, "%2d", m_p_slot->AC);
-		gC_font.PrintString(&surfaceinfo, str, 723, 422+46, WHITE);
-		sprintf(str, "%2d", m_p_slot->TOHIT);
-		gC_font.PrintString(&surfaceinfo, str, 723, 422+92, WHITE);
-
-		gpC_base->m_p_DDSurface_back->Unlock();
-	}*/
 
 	// draw Name board & name
 //	m_pC_board_spk->Blt(NAME_BOARD_X, NAME_BOARD_Y, NAME_BOARD);
@@ -2158,10 +2130,10 @@ void C_VS_UI_NEWCHAR::Show()
 	if(gbl_info_show)
 	{
 	char debug_str[100];
-	sprintf(debug_str, "hair color set = %d (%d)", m_p_slot->hair_color, GetColor(m_hair_point.x, m_hair_point.y, false));
+	SafeFormat::Format(debug_str, "hair color set = %d (%d)", m_p_slot->hair_color, GetColor(m_hair_point.x, m_hair_point.y, false));
 	g_Print(120, 540, debug_str);
 
-	sprintf(debug_str, "skin color set = %d (%d)", m_p_slot->skin_color, GetColor(m_skin_point.x, m_skin_point.y, true));
+	SafeFormat::Format(debug_str, "skin color set = %d (%d)", m_p_slot->skin_color, GetColor(m_skin_point.x, m_skin_point.y, true));
 	g_Print(120, 560, debug_str);
 	}
 #endif
@@ -3623,12 +3595,12 @@ void C_VS_UI_SERVER_SELECT::Show()
 			switch(m_server_status[i+m_scroll])
 			{
 			case STATUS_OPENED:
-				strcpy(server_status_string,(*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_OPEN].GetString());
+				SafeFormat::Copy(server_status_string,(*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_OPEN].GetString());
 				break;
 
 			case STATUS_CLOSED:
 				statusColor = RGB_RED;
-				strcpy(server_status_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_CLOSE].GetString());
+				SafeFormat::Copy(server_status_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_CLOSE].GetString());
 				break;
 			}
 		}
@@ -3637,28 +3609,28 @@ void C_VS_UI_SERVER_SELECT::Show()
 			switch(m_server_status[i+m_scroll])
 			{
 			case STATUS_VERY_GOOD:
-				strcpy(server_status_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_VERY_GOOD].GetString());
+				SafeFormat::Copy(server_status_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_VERY_GOOD].GetString());
 				break;
 				
 			case STATUS_GOOD:
-				strcpy(server_status_string,(*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_GOOD].GetString());
+				SafeFormat::Copy(server_status_string,(*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_GOOD].GetString());
 				break;
 				
 			case STATUS_NORMAL:
-				strcpy(server_status_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_NORMAL].GetString());
+				SafeFormat::Copy(server_status_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_NORMAL].GetString());
 				break;
 				
 			case STATUS_BAD:
-				strcpy(server_status_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_BAD].GetString());
+				SafeFormat::Copy(server_status_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_BAD].GetString());
 				break;
 				
 			case STATUS_VERY_BAD:
-				strcpy(server_status_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_VERY_BAD].GetString());
+				SafeFormat::Copy(server_status_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_VERY_BAD].GetString());
 				break;
 
 			case STATUS_DOWN:
 				statusColor = RGB_RED;
-				strcpy(server_status_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_CLOSE].GetString());
+				SafeFormat::Copy(server_status_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_CLOSE].GetString());
 				break;
 			}
 		}
@@ -4155,7 +4127,7 @@ void C_VS_UI_LOGIN::SendLoginToClient()
 
 	// Safety check: ensure conversion succeeded before using the pointers
 	if (S_login.sz_id != NULL && S_login.sz_password != NULL) {
-		strcpy(g_pUserOption->BackupID, S_login.sz_id);
+		SafeFormat::Copy(g_pUserOption->BackupID, S_login.sz_id);
 		gpC_base->SendMessage(UI_LOGIN, 0, 0, &S_login);
 	}
 }
@@ -4734,31 +4706,6 @@ void C_VS_UI_TITLE::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 //	}
 //	
 
-/*
-	if (gpC_base->m_p_DDSurface_back->Lock())
-	{
-		S_SURFACEINFO	surfaceinfo;
-		gpC_base->m_p_DDSurface_back->GetSurfaceInfo(&surfaceinfo);
-
-		//if (p_button->GetFocusState())
-		//{
-		//	rectangle(&surfaceinfo, p_button, BLUE);
-
-		//	if (p_button->GetPressState())
-		//		FillRect(&surfaceinfo, p_button, BLUE);
-		//}
-		//else
-		//	rectangle(&surfaceinfo, p_button, WHITE);
-
-		char buf[100];
-		sprintf(buf, "alpha = %d", p_button->m_alpha);
-		gpC_base->SelectFont(FONT_NORMAL);
-		gC_font.PrintString(&surfaceinfo, buf,
-										  10, 
-										  10, WHITE);
-
-		gpC_base->m_p_DDSurface_back->Unlock();
-	}	*/
 }
 
 //-----------------------------------------------------------------------------
@@ -4846,11 +4793,11 @@ void C_VS_UI_TITLE::Show()
 
 			char sz_temp[256];  // Increased buffer size to prevent stack overflow
 			if(g_pUserInformation->IsNetmarble)
-				sprintf(sz_temp, "%s : %1.2f", (*g_pGameStringTable)[UI_STRING_MESSAGE_NETMARBLE_CLIENT_VERSION].GetString(),(float)g_pUserInformation->GameVersion/100+3);
+				SafeFormat::Format(sz_temp, "%s : %1.2f", (*g_pGameStringTable)[UI_STRING_MESSAGE_NETMARBLE_CLIENT_VERSION].GetString(),(float)g_pUserInformation->GameVersion/100+3);
 			else
 				//add by zdj
 //				sprintf(sz_temp, "%s : %1.2f", (*g_pGameStringTable)[UI_STRING_MESSAGE_CLIENT_VERSION].GetString(),(float)g_pUserInformation->GameVersion/100+3);
-				sprintf(sz_temp,"%s","  天炼续《铁血迷情》 V2.20");
+				SafeFormat::Format(sz_temp,"%s","  天炼续《铁血迷情》 V2.20");
 			//modify by viva for Notice
 			//g_PrintColorStr(g_GameRect.right- 50 -g_GetStringWidth(sz_temp, gpC_base->m_info_pi.hfont), g_GameRect.bottom -30, sz_temp, gpC_base->m_info_pi, RGB_WHITE);
 			//end
@@ -5017,12 +4964,9 @@ void C_VS_UI_TITLE::Run(id_t id)
 #ifdef PLATFORM_WINDOWS
 			char str[256];
 
-			GetWindowsDirectory(
-				str,  // address of buffer for Windows directory
-				255        // size of directory buffer
-			);
-
-			sprintf(str, "%s\\Explorer.exe", str);
+			if (const UINT length = GetWindowsDirectoryA(str, static_cast<UINT>(sizeof(str)));
+				length == 0 || length > sizeof(str) - sizeof("\\Explorer.exe")) break;
+			SafeFormat::Append(str, "\\Explorer.exe");
 
 			// CSDLGraphics::GetDD()->RestoreDisplayMode() removed (SDL2) - GetDD() is a stub that always returns nullptr
 

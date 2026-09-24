@@ -600,7 +600,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 		if (pCurrentFocusItem->GetMaxDamage() != -1) // damage가 있는가?
 		{
 			vx = g_PrintColorStr(strX, strY, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DAMAGE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			sprintf(sz_buf, "%d~%d", pCurrentFocusItem->GetMinDamage(), pCurrentFocusItem->GetMaxDamage());				
+			SafeFormat::Format(sz_buf, "%d~%d", pCurrentFocusItem->GetMinDamage(), pCurrentFocusItem->GetMaxDamage());
 			g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
 			strY += line_gap;
 		}			
@@ -608,7 +608,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 		if (pCurrentFocusItem->GetCriticalHit() != -1)//크리트컬 히트가 있는가?
 		{
 			vx = g_PrintColorStr(strX, strY, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CRITICALHIT].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			sprintf(sz_buf, "%d", pCurrentFocusItem->GetCriticalHit());
+			SafeFormat::Format(sz_buf, "%d", pCurrentFocusItem->GetCriticalHit());
 			g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
 			strY += line_gap;
 		}		
@@ -616,7 +616,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 		if (pCurrentFocusItem->GetDefenseValue() != -1)
 		{
 			vx = g_PrintColorStr(strX, strY,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DEFENSE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			sprintf(sz_buf, "%d", pCurrentFocusItem->GetDefenseValue());
+			SafeFormat::Format(sz_buf, "%d", pCurrentFocusItem->GetDefenseValue());
 			g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);				
 			strY += line_gap;
 		}			
@@ -624,7 +624,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 		if (pCurrentFocusItem->GetProtectionValue() != -1)
 		{
 			vx = g_PrintColorStr(strX, strY, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PROTECTION].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			sprintf(sz_buf, "%d", pCurrentFocusItem->GetProtectionValue());
+			SafeFormat::Format(sz_buf, "%d", pCurrentFocusItem->GetProtectionValue());
 			g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);				
 			strY += line_gap;
 		}			
@@ -632,7 +632,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 		if (pCurrentFocusItem->GetToHit() != -1)
 		{
 			vx = g_PrintColorStr(strX, strY, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ACCURACY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			sprintf(sz_buf, "%d", pCurrentFocusItem->GetToHit());
+			SafeFormat::Format(sz_buf, "%d", pCurrentFocusItem->GetToHit());
 			g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);				
 			strY += line_gap;
 		}			
@@ -640,7 +640,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 		if (pCurrentFocusItem->GetHealPoint() != -1)
 		{
 			vx = g_PrintColorStr(strX, strY, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_HP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			sprintf(sz_buf, "+%d", pCurrentFocusItem->GetHealPoint());
+			SafeFormat::Format(sz_buf, "+%d", pCurrentFocusItem->GetHealPoint());
 			g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 			strY += line_gap;
 		}			
@@ -648,7 +648,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 		if (pCurrentFocusItem->GetManaPoint() != -1)
 		{
 			vx = g_PrintColorStr(strX, strY, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			sprintf(sz_buf, "+%d", pCurrentFocusItem->GetManaPoint());
+			SafeFormat::Format(sz_buf, "+%d", pCurrentFocusItem->GetManaPoint());
 			g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 			strY += line_gap;
 		}
@@ -657,7 +657,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 		if (pCurrentFocusItem->GetReach() != -1 && pCurrentFocusItem->GetReach() != 1)
 		{
 			vx = g_PrintColorStr(strX, strY, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_RANGE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			sprintf(sz_buf, "%d %s", pCurrentFocusItem->GetReach(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_TILE_PIECE].GetString());
+			SafeFormat::Format(sz_buf, "%d %s", pCurrentFocusItem->GetReach(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_TILE_PIECE].GetString());
 			g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 			strY += line_gap;
 		}			
@@ -665,7 +665,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 		if (pCurrentFocusItem->GetMagazineSize() != -1)
 		{
 			vx = g_PrintColorStr(strX, strY, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			sprintf(sz_buf, "%d %s", pCurrentFocusItem->GetMagazineSize(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_COUNT].GetString());
+			SafeFormat::Format(sz_buf, "%d %s", pCurrentFocusItem->GetMagazineSize(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_COUNT].GetString());
 			g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 			strY += line_gap;
 		}
@@ -690,7 +690,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 		if (pCurrentFocusItem->IsChargeItem() == true)
 		{
 			vx = g_PrintColorStr(strX, strY,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEFT_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			sprintf(sz_buf, "%d/%d", pCurrentFocusItem->GetNumber(), pCurrentFocusItem->GetMaxNumber());
+			SafeFormat::Format(sz_buf, "%d/%d", pCurrentFocusItem->GetNumber(), pCurrentFocusItem->GetMaxNumber());
 			g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 			strY += line_gap;
 		}
@@ -701,7 +701,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 
 			if(tempItem->IsMarked())
 			{
-				sprintf(sz_buf, "%s", g_pZoneTable->Get(tempItem->GetZoneID())->Name.GetString());
+				SafeFormat::Format(sz_buf, "%s", g_pZoneTable->Get(tempItem->GetZoneID())->Name.GetString());
 				g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 				strY += line_gap;
 				
@@ -721,7 +721,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 		if (pCurrentFocusItem->GetGrade()>0)
 		{
 			vx = g_PrintColorStr(strX, strY,(*g_pGameStringTable)[UI_STRING_MESSAGE_ITEM_GRADE_DESC].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			sprintf(sz_buf, " %d", pCurrentFocusItem->GetGrade());
+			SafeFormat::Format(sz_buf, " %d", pCurrentFocusItem->GetGrade());
 			g_PrintColorStr(vx, strY, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);				
 			strY += line_gap;
 		}
@@ -813,7 +813,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 		}
 		else
 		{
-			sprintf(sz_buf,"%s???????",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString());
+			SafeFormat::Format(sz_buf,"%s???????",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString());
 			vx = g_PrintColorStr(strX, strY, sz_buf, gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
 			
 			strY += line_gap;
@@ -837,30 +837,30 @@ void	C_VS_UI_ITEM_LIST::Show()
 			if(days > 0|| bContinue )
 			{
 				char tempDay[30] = {0,};
-				strcat(temp, " ");
+				SafeFormat::Append(temp, " ");
 				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_DAY), days );
-				strcat ( temp, tempDay );				
+				SafeFormat::Append ( temp, tempDay );
 			}
 			if(hours > 0|| bContinue)
 			{
 				char tempDay[30] = {0,};
-				strcat(temp, " ");
+				SafeFormat::Append(temp, " ");
 				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_HOUR), hours );
-				strcat ( temp, tempDay );				
+				SafeFormat::Append ( temp, tempDay );
 			}
 			if(minutes || bContinue)
 			{
 				char tempDay[30] = {0,};
-				strcat(temp, " ");
+				SafeFormat::Append(temp, " ");
 				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_MINUTE), minutes );
-				strcat ( temp, tempDay );				
+				SafeFormat::Append ( temp, tempDay );
 			}
 			if(seconds)
 			{
 				char tempDay[30] = {0,};
-				strcat(temp, " ");
+				SafeFormat::Append(temp, " ");
 				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_SECOND), seconds );
-				strcat ( temp, tempDay );				
+				SafeFormat::Append ( temp, tempDay );
 			}
 			g_PrintColorStr(vx,strY, temp,gpC_base->m_item_desc_pi,RGB(255,255,255));
 		}				
@@ -1064,17 +1064,17 @@ std::string		C_VS_UI_ITEM_LIST::GetItemName( int Focus )
 	if(pItem == NULL)
 		return "";
 
-	char sz_name[200]={0,};
+	std::string sz_name;
 
 	for(int i=0;i<min(2,pItem->GetItemOptionListCount());i++)
 	{
 		if(pItem->GetItemOptionName(i)!=NULL)
 		{
-			strcat(sz_name, pItem->GetItemOptionName(i));
-			strcat(sz_name, " "); // add 'space'
+			sz_name += pItem->GetItemOptionName(i);
+			sz_name += " "; // add 'space'
 		}
 	}
-	strcat(sz_name, pItem->GetName() );
+	if (const char* name = pItem->GetName()) sz_name += name;
 
 	return sz_name;
 }
@@ -3999,7 +3999,7 @@ void	C_VS_UI_OUSTERS_SKILL_INFO::Show()
 			// 2004, 10, 20, sobeit modify start - 
 			//strcpy(szTemp, (*g_pGameStringTable)[UI_STRING_MESSAGE_HAN_PASSIVE].GetString());
 			//g_PrintColorStrShadow(x+100, y+86, szTemp, gpC_base->m_chatting_pi, color, shadow_color);
-			sprintf(szTemp, "(%s)", (*g_pGameStringTable)[UI_STRING_MESSAGE_HAN_PASSIVE].GetString());
+			SafeFormat::Format(szTemp, "(%s)", (*g_pGameStringTable)[UI_STRING_MESSAGE_HAN_PASSIVE].GetString());
 			g_PrintColorStrShadow(TempX +10, y+35, szTemp, gpC_base->m_chatting_pi, color, shadow_color);
 			// 2004, 10, 20, sobeit modify end
 			
@@ -5477,7 +5477,7 @@ void	C_VS_UI_MAILBOX::AddHelpMail(DWORD id, bool open)
 
 #ifdef _LIB
 	char szData[32];
-	sprintf(szData, "%d/%d/%d",	g_pGameTime->GetYear(),
+	SafeFormat::Format(szData, "%d/%d/%d",	g_pGameTime->GetYear(),
 									g_pGameTime->GetMonth(),
 									g_pGameTime->GetDay());
 	mail.date = szData;
@@ -5501,7 +5501,7 @@ void	C_VS_UI_MAILBOX::AddMail(TAB_ID tab_id, DWORD id, SIZE windowSize, const ch
 {
 	char szTemp[512];
 	std::string dateString;
-	sprintf(szTemp, "%d", date/100);
+	SafeFormat::Format(szTemp, "%d", date/100);
 	
 	// 앞에 년도가 오면 03 이런식으로 오면 앞에 0이 없는데 출력할땐 03년 이렇게 찍어줘야 하므로 년도가 한자리수면 앞에 0을 붙여준다.
 //	if(date < 10000000)
@@ -6745,7 +6745,7 @@ void	C_VS_UI_FINDING_MINE::DrawBlock(int x, int y, BLOCK_STRUCT &block)
 		else if(block.num != 0)
 		{
 			char szTemp[2];
-			sprintf(szTemp, "%d", block.num);
+			SafeFormat::Format(szTemp, "%d", block.num);
 			g_PrintColorStr(rect.left+5, rect.top+3, szTemp, gpC_base->m_user_id_pi, numberColor[block.num-1]);
 		}
 		break;
@@ -9249,10 +9249,10 @@ bool	C_VS_UI_STATUS_CTF::MouseControl(UINT message, int _x, int _y)
 						char szTemp[256];
 
 						memset( szBuffer, 0, 256 );
-						strcat( szBuffer, (*g_pGameStringTable)[RaceString[i]].GetString() );
-						strcat( szBuffer, " ");
+						SafeFormat::Append( szBuffer, (*g_pGameStringTable)[RaceString[i]].GetString() );
+						SafeFormat::Append( szBuffer, " ");
 						SafeFormat::Format(szTemp, GetGameString(UI_STRING_MESSAGE_GET_EVENT_FLAG_STATUS), m_num_flag[i] );
-						strcat( szBuffer, szTemp );
+						SafeFormat::Append( szBuffer, szTemp );
 						g_descriptor_manager.Set(DID_INFO, x+_x, y+_y, (void *)szBuffer,0,0);
 						break;
 					}
@@ -9933,10 +9933,10 @@ bool	C_VS_UI_PET_INFO::MouseControl(UINT message, int _x, int _y)
 			// 남은 경험치
 			if( Exp.IsInRect( _x, _y ) && m_PetInfo.LEVEL < 50 )
 			{
-				sprintf( sztemp, "%d", m_PetInfo.LEVEL );
+				SafeFormat::Format( sztemp, "%d", m_PetInfo.LEVEL );
 				
-				strcpy( str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_LEVEL].GetString() );
-				strcat( str[0], sztemp );
+				SafeFormat::Copy( str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_LEVEL].GetString() );
+				SafeFormat::Append( str[0], sztemp );
 
 				int goal_exp = g_pExperienceTable->GetPetExp(m_PetInfo.LEVEL).GoalExp;
 				SafeFormat::Format(str[1], GetGameString(UI_STRING_MESSAGE_HPBAR_EXP_DESCRIPTION_NEW), g_GetNumberString(m_PetInfo.EXP_REMAIN).c_str(), g_GetNumberString((goal_exp - m_PetInfo.EXP_REMAIN)*100/max(1, (goal_exp))).c_str());
@@ -9945,9 +9945,9 @@ bool	C_VS_UI_PET_INFO::MouseControl(UINT message, int _x, int _y)
 			}
 			else if ( Level.IsInRect( _x, _y ) )
 			{
-				sprintf(sztemp, "%d", m_PetInfo.LEVEL );
-				strcpy( str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_LEVEL].GetString() );
-				strcat( str[0], sztemp );
+				SafeFormat::Format(sztemp, "%d", m_PetInfo.LEVEL );
+				SafeFormat::Copy( str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_LEVEL].GetString() );
+				SafeFormat::Append( str[0], sztemp );
 
 				g_descriptor_manager.Set(DID_INFO, x+_x, y+_y, (void *)str[0],0,0);
 			}
@@ -10110,7 +10110,7 @@ void	C_VS_UI_PET_INFO::Show()
 		char sz_buf[512];
 
 		// 레벨
-		sprintf(sz_buf, "%d", m_PetInfo.LEVEL);
+		SafeFormat::Format(sz_buf, "%d", m_PetInfo.LEVEL);
 		int level_x = x+230-g_GetStringWidth(sz_buf, gpC_base->m_char_chat_large_pi.hfont)/2, level_y = y+23;
 		g_PrintColorStr(level_x, level_y, sz_buf, gpC_base->m_char_chat_large_pi, RGB_YELLOW);
 
@@ -15206,7 +15206,7 @@ void	C_VS_UI_QUEST_MISSION::Show()
 				{
 					if(i == m_SelectPos)
 					{
-						strcpy(szMissionPopupString, szString2);
+						SafeFormat::Copy(szMissionPopupString, szString2);
 						if(m_bl_focus)
 						{
 							g_descriptor_manager.Set(DID_MULTILINE_INFO, x+4,y+38+(m_SelectPos-ScrPos)*17, (void *)szMissionPopupString,0,36);
@@ -15217,7 +15217,7 @@ void	C_VS_UI_QUEST_MISSION::Show()
 				g_PrintColorStr(x+7, y+42 + (i-ScrPos)*17, szString2, gpC_base->m_chatting_pi, RGB_WHITE);
 				if(TempInfo->bStatus != 1 && TempInfo->bStatus<3) // 수행중..이건 보여주지 말라고 해서.ㅎㅎ
 				{
-					sprintf(szString,"%s", szQuestStatus[TempInfo->bStatus]);
+					SafeFormat::Format(szString,"%s", szQuestStatus[TempInfo->bStatus]);
 					g_PrintColorStr(x+235, y+42 + (i-ScrPos)*17, szString, gpC_base->m_chatting_pi, RGB_YELLOW);
 				}
 			}

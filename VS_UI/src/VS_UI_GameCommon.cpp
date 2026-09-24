@@ -127,7 +127,6 @@ static C_VS_UI_DIALOG * gpC_dialog_ReLearnOusterSkill = NULL;
 //const int CHAT_LINE_START_Y =			g_GameRect.bottom-20;
 //const int CHAT_HISTORY_START_Y =		g_GameRect.bottom-40;
 
-static char g_szBugReportBuffer[256];
 
 const char g_sz_chat_id_divisor[CLD_TOTAL][3] = 
 {
@@ -556,7 +555,7 @@ void g_StartSellAllConfirmDialog(int _x, int _y, int price)
 	std::string sstr = sz_buf;
 	for(int i = 3; i <= 13; i += 4)
 		if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
-	sprintf(sz_buf, "%s", sstr.c_str());	
+	SafeFormat::Format(sz_buf, "%s", sstr.c_str());
 	
 	SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_ALL_PRICE), sz_buf);
 	
@@ -586,7 +585,7 @@ void g_StartRepairAllConfirmDialog(int _x, int _y, int price)
 	std::string sstr = sz_buf;
 	for(int i = 3; i <= 13; i += 4)
 		if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
-	sprintf(sz_buf, "%s", sstr.c_str());	
+	SafeFormat::Format(sz_buf, "%s", sstr.c_str());
 
 	SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_ALL_PRICE), sz_buf);
 	
@@ -2402,7 +2401,7 @@ bool C_VS_UI_TRIBE::MouseControl(UINT message, int _x, int _y)
 								
 				if(bMax)
 				{
-					strcpy(temp_str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_UP_STAT].GetString());
+					SafeFormat::Copy(temp_str[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_UP_STAT].GetString());
 //					str[2] = NULL;
 					g_descriptor_manager.Set(DID_STRINGS, x+_x, y+_y, (void *)str, 1);
 				}
@@ -4964,16 +4963,16 @@ void C_VS_UI_CHATTING::Show()
 	{
 		char sz_buf[100];
 		
-		sprintf(sz_buf, "m_pC_history_list = %d", m_pC_history_list.Size());
+		SafeFormat::Format(sz_buf, "m_pC_history_list = %d", m_pC_history_list.Size());
 		g_Print(5, TEXT_LINE(16), sz_buf);
-		sprintf(sz_buf, "m_pC_history_temp_list = %d", m_pC_history_temp_list.Size());
+		SafeFormat::Format(sz_buf, "m_pC_history_temp_list = %d", m_pC_history_temp_list.Size());
 		g_Print(5, TEXT_LINE(17), sz_buf);
 		
-		sprintf(sz_buf, "GetWhisperSize() = %d", GetWhisperSize());
+		SafeFormat::Format(sz_buf, "GetWhisperSize() = %d", GetWhisperSize());
 		g_Print(5, TEXT_LINE(20), sz_buf);
-		sprintf(sz_buf, "m_whisper_index = %d", m_whisper_index);
+		SafeFormat::Format(sz_buf, "m_whisper_index = %d", m_whisper_index);
 		g_Print(5, TEXT_LINE(21), sz_buf);
-		sprintf(sz_buf, "g_HISTORYLINE = %d", g_HISTORY_LINE);
+		SafeFormat::Format(sz_buf, "g_HISTORYLINE = %d", g_HISTORY_LINE);
 		g_Print(5, TEXT_LINE(22), sz_buf);
 		
 		
@@ -6676,8 +6675,7 @@ C_VS_UI_INVENTORY::C_VS_UI_INVENTORY()
 
 	if( m_pC_inventory_spk == NULL )
 	{
-		sprintf( g_szBugReportBuffer, "Inventory::InitError");
-		gpC_base->SendMessage(UI_SEND_BUG_REPORT, __LINE__, 0, (void*)g_szBugReportBuffer);
+		gpC_base->SendTextMessage(UI_SEND_BUG_REPORT, __LINE__, 0, "Inventory::InitError");
 	}
 	
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(m_money_button_offset_x, m_money_button_offset_y, gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_MONEY), gpC_global_resource->m_pC_assemble_box_button_spk->GetHeight(C_GLOBAL_RESOURCE::AB_BUTTON_MONEY), MONEY_ID, this, C_GLOBAL_RESOURCE::AB_BUTTON_MONEY));
@@ -8023,8 +8021,7 @@ void C_VS_UI_INVENTORY::Show()
 
 		if( p_item == NULL )
 		{			
-			sprintf(g_szBugReportBuffer,"Inventory::Show itemnum ItemNULL");
-			gpC_base->SendMessage( UI_SEND_BUG_REPORT, __LINE__,0,g_szBugReportBuffer);
+			gpC_base->SendTextMessage(UI_SEND_BUG_REPORT, __LINE__, 0, "Inventory::Show itemnum ItemNULL");
 		}
 
 		assert(p_item);
@@ -8095,7 +8092,7 @@ void C_VS_UI_INVENTORY::Show()
 				if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
 			
 			WriteLogLine(__LINE__);
-			sprintf(money_buf, "%s", sstr.c_str());
+			SafeFormat::Format(money_buf, "%s", sstr.c_str());
 
 			g_Print(x+m_money_button_offset_x+147, y+m_money_button_offset_y+4, money_buf, &gpC_base->m_money2_pi);
 		}
@@ -10087,13 +10084,13 @@ void C_VS_UI_SKILL::Show2()
 			  if(gbl_info_show)
 			  {
 				  char skill_size_buf[100];
-				  sprintf(skill_size_buf, "available skill count = %d", g_pSkillAvailable->size());
+				  SafeFormat::Format(skill_size_buf, "available skill count = %d", g_pSkillAvailable->size());
 				  g_Print(5, TEXT_LINE(3), skill_size_buf);
 				  
-				  sprintf(skill_size_buf, "skill focused slot = %d", m_focused_slot);
+				  SafeFormat::Format(skill_size_buf, "skill focused slot = %d", m_focused_slot);
 				  g_Print(5, TEXT_LINE(4), skill_size_buf);
 				  
-				  sprintf(skill_size_buf, "selected skill = %d", m_selected_skillid);
+				  SafeFormat::Format(skill_size_buf, "selected skill = %d", m_selected_skillid);
 				  g_Print(5, TEXT_LINE(5), skill_size_buf);
 				  
 				  if (gpC_base->m_p_DDSurface_back->Lock())
@@ -13786,7 +13783,7 @@ bool	C_VS_UI_INFO::CharacterInfoMouseControl(UINT message, int _x, int _y)
 				
 				if(bMax)
 				{
-					strcpy(temp_str[1], (*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_UP_STAT].GetString());
+					SafeFormat::Copy(temp_str[1], (*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_UP_STAT].GetString());
 					g_descriptor_manager.Set(DID_STRINGS, x+_x, y+_y, (void *)str, 2);
 				}
 				else
@@ -13850,18 +13847,18 @@ bool	C_VS_UI_INFO::CharacterInfoMouseControl(UINT message, int _x, int _y)
 			switch(num)
 			{
 			case 0 :
-				sprintf(temp_str[0],"%s : %s",(*g_pGameStringTable)[UI_STRING_MESSAGE_CHINGHO].GetString(),GetChinhoLevel(g_char_slot_ingame.m_AdvancementLevel));
+				SafeFormat::Format(temp_str[0],"%s : %s",(*g_pGameStringTable)[UI_STRING_MESSAGE_CHINGHO].GetString(),GetChinhoLevel(g_char_slot_ingame.m_AdvancementLevel));
 				str[2]=NULL;
 				break;
 			case 1 :
 				{
-					sprintf(temp_str[2],"%d",g_char_slot_ingame.FAME);
+					SafeFormat::Format(temp_str[2],"%d",g_char_slot_ingame.FAME);
 					std::string sstr;
 					sstr=temp_str[2];
 					for(int i = 3; i <= 13; i += 4)
 						if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
-						strcpy(temp_str[0],(*g_pGameStringTable)[UI_STRING_MESSAGE_OTHER_INFO_FAME].GetString());
-						strcpy(temp_str[2],sstr.c_str());
+						SafeFormat::Copy(temp_str[0],(*g_pGameStringTable)[UI_STRING_MESSAGE_OTHER_INFO_FAME].GetString());
+						SafeFormat::Copy(temp_str[2],sstr.c_str());
 				}									
 				break;
 			case 2 :
@@ -13900,18 +13897,18 @@ bool	C_VS_UI_INFO::CharacterInfoMouseControl(UINT message, int _x, int _y)
 			switch(num)
 			{
 			case 0 :
-				sprintf(temp_str[0],"%s%s",(*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_NAME].GetString(),g_char_slot_ingame.sz_name.c_str());
+				SafeFormat::Format(temp_str[0],"%s%s",(*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_NAME].GetString(),g_char_slot_ingame.sz_name.c_str());
 				str[2]=NULL;
 				break;
 			case 1 :
 				{
-					sprintf(temp_str[2],"%d",g_char_slot_ingame.FAME);
+					SafeFormat::Format(temp_str[2],"%d",g_char_slot_ingame.FAME);
 					std::string sstr;
 					sstr=temp_str[2];
 					for(int i = 3; i <= 13; i += 4)
 						if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
-						strcpy(temp_str[0],(*g_pGameStringTable)[UI_STRING_MESSAGE_OTHER_INFO_FAME].GetString());
-						strcpy(temp_str[2],sstr.c_str());
+						SafeFormat::Copy(temp_str[0],(*g_pGameStringTable)[UI_STRING_MESSAGE_OTHER_INFO_FAME].GetString());
+						SafeFormat::Copy(temp_str[2],sstr.c_str());
 				}									
 				break;
 			case 2 :
@@ -13954,7 +13951,7 @@ bool	C_VS_UI_INFO::CharacterInfoMouseControl(UINT message, int _x, int _y)
 					g_char_slot_ingame.sz_guild_name.size()>0)
 				{
 					SafeFormat::Format(temp_str[0],"%s",(*g_pGameStringTable)[UI_STRING_MESSAGE_OTHER_INFO_TEAM_NAME].GetString());
-					strcat(temp_str[0],g_char_slot_ingame.sz_guild_name.c_str());
+					SafeFormat::Append(temp_str[0],g_char_slot_ingame.sz_guild_name.c_str());
 				} else
 				{
 					goto grade;									// goto 는 안쓰는게 좋긴하지만 뭐-_-
@@ -14181,9 +14178,9 @@ grade :			str[2]=NULL;
 						dam1 = g_char_slot_ingame.DAM + g_char_slot_ingame.SILVER_DAM;
 						dam2 = g_char_slot_ingame.DAM2 + g_char_slot_ingame.SILVER_DAM2;
 						if (dam1 == dam2)
-							sprintf(temp_str[2], "%d", dam1);
+							SafeFormat::Format(temp_str[2], "%d", dam1);
 						else
-							sprintf(temp_str[2], "%d~%d", dam2, dam1);									
+							SafeFormat::Format(temp_str[2], "%d~%d", dam2, dam1);
 					}
 					break;
 				case 6 :
@@ -14383,9 +14380,9 @@ grade :			str[2]=NULL;
 							dam1 = g_char_slot_ingame.DAM + g_char_slot_ingame.SILVER_DAM;
 							dam2 = g_char_slot_ingame.DAM2 + g_char_slot_ingame.SILVER_DAM2;
 							if (dam1 == dam2)
-								sprintf(temp_str[2], "%d", dam1);
+								SafeFormat::Format(temp_str[2], "%d", dam1);
 							else
-								sprintf(temp_str[2], "%d~%d", dam2, dam1);									
+								SafeFormat::Format(temp_str[2], "%d~%d", dam2, dam1);
 						}
 						break;
 					case 7 :
@@ -15505,12 +15502,9 @@ void C_VS_UI_INFO::RefreshImage()
 	if(g_pProfileManager->HasProfile(g_char_slot_ingame.sz_name.c_str()))
 	{
 		const char *filename = g_pProfileManager->GetFilename(g_char_slot_ingame.sz_name.c_str());
-		char filenamei[256];
+		const std::string filenamei = std::string(filename) + "i";
 		
-		strcpy(filenamei, filename);
-		strcat(filenamei, "i");
-		
-		if(!m_p_face->LoadFromFileData(0, 1, filename, filenamei ))
+		if(!m_p_face->LoadFromFileData(0, 1, filename, filenamei.c_str() ))
 		{
 			delete m_p_face;
 			m_p_face = NULL;
@@ -16711,7 +16705,7 @@ void	C_VS_UI_INFO::_Show1()
 				}
 
 				char szTemp[512];
-				sprintf(szTemp, "%d", g_char_slot_ingame.skill_point);
+				SafeFormat::Format(szTemp, "%d", g_char_slot_ingame.skill_point);
 				g_PrintColorStrShadow(skill_x + 10, skill_y + 5, szTemp, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
 
 //				m_pC_skill_button_group->ShowDescription();
@@ -17143,9 +17137,9 @@ void	C_VS_UI_INFO::_Show2()
 			dam2 = g_char_slot_ingame.DAM2 + g_char_slot_ingame.SILVER_DAM2;
 			
 			if (dam1 == dam2)
-				sprintf(sz_temp, "%d", dam1);
+				SafeFormat::Format(sz_temp, "%d", dam1);
 			else
-				sprintf(sz_temp, "%d~%d", dam2, dam1);
+				SafeFormat::Format(sz_temp, "%d~%d", dam2, dam1);
 			
 			if(g_char_slot_ingame.SILVER_DAM > 0)
 				g_PrintColorStrOut(x+field2_x2+5, y+field2_y+field2_gap*6+4, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLUE);
@@ -17520,9 +17514,9 @@ void	C_VS_UI_INFO::_Show2()
 			dam2 = g_char_slot_ingame.DAM2 + g_char_slot_ingame.SILVER_DAM2;
 			
 			if (dam1 == dam2)
-				sprintf(sz_temp, "%d", dam1);
+				SafeFormat::Format(sz_temp, "%d", dam1);
 			else
-				sprintf(sz_temp, "%d~%d", dam2, dam1);
+				SafeFormat::Format(sz_temp, "%d~%d", dam2, dam1);
 			
 			g_PrintColorStr(x+field2_x2+5, y+field2_y+field2_gap*5+4, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			//defence
@@ -17922,9 +17916,9 @@ void	C_VS_UI_INFO::_Show2()
 			dam2 = g_char_slot_ingame.DAM2 + g_char_slot_ingame.SILVER_DAM2;
 			
 			if (dam1 == dam2)
-				sprintf(sz_temp, "%d", dam1);
+				SafeFormat::Format(sz_temp, "%d", dam1);
 			else
-				sprintf(sz_temp, "%d~%d", dam2, dam1);
+				SafeFormat::Format(sz_temp, "%d~%d", dam2, dam1);
 			
 			g_PrintColorStr(x+field2_x2+5, y+field2_y+field2_gap*line_count+4, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			line_count++;
@@ -18751,7 +18745,7 @@ void	C_VS_UI_INFO::_Show5()
 				g_PrintColorStr(x+100, y+65, domain_name[m_skill_domain], 
 					gpC_base->m_chatting_pi, RGB_WHITE);
 
-				sprintf(sz_temp, "%d%%/100%%", (goal_exp - exp_remain)*100/max(1, (goal_exp)));
+				SafeFormat::Format(sz_temp, "%d%%/100%%", (goal_exp - exp_remain)*100/max(1, (goal_exp)));
 				g_PrintColorStrOut(x+grade_text_x+95+gpC_global_resource->m_pC_info_spk->GetWidth(C_GLOBAL_RESOURCE::DOMAIN_BAR)/2-g_GetStringWidth(sz_temp, gpC_base->m_chatting_pi.hfont)/2,
 								   y+grade_text_y+24, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
 
@@ -19048,7 +19042,7 @@ void	C_VS_UI_INFO::_Show5()
 					gpC_base->m_chatting_pi, RGB_WHITE);
 
 
-				sprintf(sz_temp, "%d%%/100%%", (goal_exp - exp_remain)*100/max(1, (goal_exp)));
+				SafeFormat::Format(sz_temp, "%d%%/100%%", (goal_exp - exp_remain)*100/max(1, (goal_exp)));
 				g_PrintColorStrOut(x+grade_text_x+140+gpC_global_resource->m_pC_info_spk->GetWidth(C_GLOBAL_RESOURCE::DOMAIN_BAR)/2-g_GetStringWidth(sz_temp, gpC_base->m_chatting_pi.hfont)/2,
 								   y+grade_text_y+24, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
 
@@ -19365,7 +19359,7 @@ void	C_VS_UI_INFO::_Show5()
 							
 							char sz_temp[80];
 							
-							sprintf(sz_temp, "%d%%/100%%", (goal_exp - exp_remain)*100/max(1, (goal_exp)));
+							SafeFormat::Format(sz_temp, "%d%%/100%%", (goal_exp - exp_remain)*100/max(1, (goal_exp)));
 							g_PrintColorStrOut(x+grade_text_x+150+gpC_global_resource->m_pC_info_spk->GetWidth(C_GLOBAL_RESOURCE::DOMAIN_BAR)/2-g_GetStringWidth(sz_temp, gpC_base->m_chatting_pi.hfont)/2,
 								y+grade_text_y+24, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
 							
@@ -19659,7 +19653,7 @@ void	C_VS_UI_INFO::_Show5()
 				g_PrintColorStr(x+100, y+65, domain_name[m_ousters_Magic], 
 					gpC_base->m_chatting_pi, RGB_WHITE);
 				
-				sprintf(sz_temp, "%d%%/100%%", (goal_exp - exp_remain)*100/max(1, (goal_exp)));
+				SafeFormat::Format(sz_temp, "%d%%/100%%", (goal_exp - exp_remain)*100/max(1, (goal_exp)));
 				g_PrintColorStrOut(x+grade_text_x+150+gpC_global_resource->m_pC_info_spk->GetWidth(C_GLOBAL_RESOURCE::DOMAIN_BAR)/2-g_GetStringWidth(sz_temp, gpC_base->m_chatting_pi.hfont)/2,
 					y+grade_text_y+24, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
 
@@ -21338,7 +21332,7 @@ bool C_VS_UI_EFFECT_STATUS::MouseControl(UINT message, int _x, int _y)
 					case WAR_GUILD:
 						{
 						SafeFormat::Format(temp2, GetGameString(UI_STRING_MESSAGE_STATUS_TIME_FORMAT),hours,min);
-						sprintf(temp_string,"%s, %s : %s, %s : %s, %s : %s",
+						SafeFormat::Format(temp_string,"%s, %s : %s, %s : %s, %s : %s",
 							(*g_pGameStringTable)[UI_STRING_MESSAGE_GUILD_WAR].GetString(),
 							(*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_STATUS_ATTACK_GUILD].GetString(),
 							ifo.attack_guild_name.c_str(),
@@ -21361,7 +21355,7 @@ bool C_VS_UI_EFFECT_STATUS::MouseControl(UINT message, int _x, int _y)
 					case WAR_RACE:
 						{
 						SafeFormat::Format(temp2, GetGameString(UI_STRING_MESSAGE_STATUS_TIME_FORMAT),hours,min);
-						sprintf(temp_string,"%s, %s : %s",
+						SafeFormat::Format(temp_string,"%s, %s : %s",
 							(*g_pGameStringTable)[UI_STRING_MESSAGE_RACE_WAR].GetString(),
 							(*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_LEFT_TIME].GetString(),
 							temp2);
@@ -21381,7 +21375,7 @@ bool C_VS_UI_EFFECT_STATUS::MouseControl(UINT message, int _x, int _y)
 					case WAR_LEVEL:
 						{
 							SafeFormat::Format(temp2, GetGameString(UI_STRING_MESSAGE_STATUS_TIME_FORMAT),hours,min);
-							sprintf(temp_string,"%s, %s : %s",
+							SafeFormat::Format(temp_string,"%s, %s : %s",
 								(*g_pGameStringTable)[UI_STRING_MESSAGE_LEVEL_WAR].GetString(),
 								(*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_LEFT_TIME].GetString(),
 								temp2);
@@ -21481,7 +21475,7 @@ bool C_VS_UI_EFFECT_STATUS::MouseControl(UINT message, int _x, int _y)
 					break;
 
 				default:
-					strcpy(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_LEFT_TIME].GetString());
+					SafeFormat::Copy(temp_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_STATUS_LEFT_TIME].GetString());
 					effectstatus_string[1] = temp_string;
 					effectstatus_string[1] += " : ";
 
@@ -22422,8 +22416,8 @@ void C_VS_UI_MINIMAP::MouseControlExtra(UINT message, int _x, int _y)
 						static char party_name[20];
 						static char party_desc[50];
 						if(info->Name.GetString())
-							strcpy(party_name, info->Name.GetString());
-						else strcpy(party_name, "");
+							SafeFormat::Copy(party_name, info->Name.GetString());
+						else SafeFormat::Copy(party_name, "");
 						
 						static S_DEFAULT_HELP_STRING party_string;
 						party_string.sz_main_str = party_name;
@@ -23393,7 +23387,7 @@ void C_VS_UI_WINDOW_MANAGER::SetSMSMynum(char* str)
 	int len = strlen(str);
 	if(len>0 && len<12)
 	{
-		strcpy(m_SMS_MyNum, str);
+		SafeFormat::Copy(m_SMS_MyNum, str);
 		m_SMS_MyNum[len] = '\0';
 	}
 }
@@ -24314,16 +24308,16 @@ void C_VS_UI_TEAM_MEMBER_LIST::Show()
 				const char* TempServer = m_v_member_list[i+ScrollPos].SERVER_NAME.c_str();
 				if(strlen(TempServer))
 				{
-					sprintf(TempString, "- %s", TempServer);
+					SafeFormat::Format(TempString, "- %s", TempServer);
 					g_PrintColorStr(x+m_print_x[1]-150, y+m_print_y+m_print_gap*(i+1)+8, TempString, gpC_base->m_chatting_pi, RGB_YELLOW);
 				}
 			}
 			else
 			{
-				sprintf(TempString, "- %s", (*g_pGameStringTable)[UI_STRING_MESSAGE_NOT_LOGINED].GetString());
+				SafeFormat::Format(TempString, "- %s", (*g_pGameStringTable)[UI_STRING_MESSAGE_NOT_LOGINED].GetString());
 				g_PrintColorStr(x+m_print_x[1]-150, y+m_print_y+m_print_gap*(i+1)+8, TempString, gpC_base->m_chatting_pi, RGB_YELLOW);
 			}
-			sprintf(TempString, "%s", m_v_member_list[i+ScrollPos].MEMBER_NAME.c_str());
+			SafeFormat::Format(TempString, "%s", m_v_member_list[i+ScrollPos].MEMBER_NAME.c_str());
 			g_PrintColorStr(x+m_print_x[0], y+m_print_y+m_print_gap*(i+1)+8, TempString, gpC_base->m_chatting_pi, RGB_YELLOW);
 			//g_PrintColorStr(x+m_print_x[0], y+m_print_y+m_print_gap*(i+1)+8, m_v_member_list[i+ScrollPos].MEMBER_NAME.c_str(), gpC_base->m_chatting_pi, RGB_YELLOW);
 			// 2004, 10, 8, sobeit add end
@@ -24347,16 +24341,16 @@ void C_VS_UI_TEAM_MEMBER_LIST::Show()
 					const char* TempServer = m_v_member_list[i+ScrollPos].SERVER_NAME.c_str();
 					if(strlen(TempServer))
 					{
-						sprintf(TempString, "- %s", TempServer);
+						SafeFormat::Format(TempString, "- %s", TempServer);
 						g_PrintColorStr(x+m_print_x[1]-150, y+m_print_y+m_print_gap*(i+1)+8, TempString, gpC_base->m_chatting_pi, RGB_GREEN);
 					}
 				}
 				else
 				{
-					sprintf(TempString, "- %s", (*g_pGameStringTable)[UI_STRING_MESSAGE_NOT_LOGINED].GetString());
+					SafeFormat::Format(TempString, "- %s", (*g_pGameStringTable)[UI_STRING_MESSAGE_NOT_LOGINED].GetString());
 					g_PrintColorStr(x+m_print_x[1]-150, y+m_print_y+m_print_gap*(i+1)+8, TempString, gpC_base->m_chatting_pi, RGB_RED);
 				}
-				sprintf(TempString, "%s", m_v_member_list[i+ScrollPos].MEMBER_NAME.c_str());
+				SafeFormat::Format(TempString, "%s", m_v_member_list[i+ScrollPos].MEMBER_NAME.c_str());
 				g_PrintColorStr(x+m_print_x[0], y+m_print_y+m_print_gap*(i+1)+8, TempString, gpC_base->m_chatting_pi, RGB_WHITE);
 				
 				//g_PrintColorStr(x+m_print_x[0], y+m_print_y+m_print_gap*(i+1)+8, m_v_member_list[i+ScrollPos].MEMBER_NAME.c_str(), gpC_base->m_chatting_pi, RGB_WHITE);
@@ -24590,8 +24584,8 @@ bool	C_VS_UI_TEAM_MEMBER_LIST::MouseControl(UINT message, int _x, int _y)
 		{
 			if(GetAvailableRecall() && g_pUserInformation->GuildGrade == 1)
 			{
-				strcpy(m_SelectedID, m_v_member_list[m_focus].MEMBER_NAME.c_str());
-				if(strlen(m_SelectedID)>0)
+				m_SelectedID = m_v_member_list[m_focus].MEMBER_NAME;
+				if (!m_SelectedID.empty())
 				{
 					SafeFormat::Format(m_AskingMessage, GetGameString(UI_STRING_MESSAGE_ASKING_RECALL), m_SelectedID);
 					g_StartAskingRecall(-1,-1, m_AskingMessage);
@@ -25590,23 +25584,14 @@ void C_VS_UI_FRIEND_INFO::UpdateFriendList(FRIEND_LIST& List)
 }
 
 
-static void GetStrLine(std::vector<std::string>& v_strlist, const char* str, int strLen, bool IsBlank)
+static void GetStrLine(std::vector<std::string>& rows, const char* text, int length, bool firstRow)
 {
-	if(strLen<=0)
-		return;
-	char* strtemp = new char[strlen(str)+1];
-	strcpy(strtemp, str);
-	int len = strlen(str);
-	if(IsBlank)
-		while(g_GetStringWidth(strtemp, gpC_base->m_user_id_pi.hfont) > 360-65)
-			strtemp[--len] = '\0';
-	else
-		while(g_GetStringWidth(strtemp, gpC_base->m_user_id_pi.hfont) > 340-65)
-			strtemp[--len] = '\0';
-	std::string strpush = std::string(strtemp);
-	v_strlist.push_back(strpush);
-	GetStrLine(v_strlist, str+len, strLen-len, false);
-	delete strtemp;
+	if (!text || length <= 0) return;
+	rows = TextSystem::WrapUtf8MeasuredLines(
+		std::string_view(text, static_cast<size_t>(length)), firstRow ? 295 : 275, 275,
+		[](const std::string& row) {
+			return g_GetStringWidth(row.c_str(), gpC_base->m_user_id_pi.hfont);
+		});
 }
 
 void C_VS_UI_FRIEND_INFO::AddChattingMessageToHistory(FRIEND_LIST* pList, string Name, string strMessage)
@@ -25617,7 +25602,7 @@ void C_VS_UI_FRIEND_INFO::AddChattingMessageToHistory(FRIEND_LIST* pList, string
 		SYSTEMTIME st;
 		GetLocalTime(&st);
 		//sprintf(strtime, "%4d/%2d/%2d %2d:%2d:%2d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond );
-		sprintf(strtime, "%02d:%02d:%02d", st.wHour, st.wMinute, st.wSecond );
+		SafeFormat::Format(strtime, "%02d:%02d:%02d", st.wHour, st.wMinute, st.wSecond );
 
 		std::string str = pList->Name + " " + string(strtime) + ":" + strMessage;
 		char* str2 = (char*)str.c_str();
@@ -26040,7 +26025,7 @@ void C_VS_UI_FRIEND_CHATTING_INFO::AddLocalMessageToHistory(string strMessage)
 		SYSTEMTIME st;
 		GetLocalTime(&st);
 		//sprintf(strtime, "%4d/%2d/%2d %2d:%2d:%2d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond );
-		sprintf(strtime, "%02d:%02d:%02d", st.wHour, st.wMinute, st.wSecond );
+		SafeFormat::Format(strtime, "%02d:%02d:%02d", st.wHour, st.wMinute, st.wSecond );
 
 		//std::string str = string(g_pPlayer->GetName()) + " " + string(strtime) + " : " + strMessage;
 		std::string str = g_char_slot_ingame.sz_name + " " + string(strtime) + ":" + strMessage;
@@ -27097,38 +27082,6 @@ void C_VS_UI_TEAM_MEMBER_INFO::Show()
 	
 	const int char_width = g_GetStringWidth("a", gpC_base->m_chatting_pi.hfont);
 	
-	/*
-	while(m_member_info.INTRODUCTION.size()>next && py < y+h-print_gap*2)
-	{
-		strcpy(sz_string, m_member_info.INTRODUCTION.c_str()+next);
-		
-		char *sz_string2 = sz_string;
-		
-		while(*sz_string2 == ' ')		// 앞의 공백제거
-		{
-			sz_string2++;
-			next++;
-		}
-		
-		int cut_pos = (x+w-30 -vx)/char_width;
-
-		if(!g_PossibleStringCut(sz_string2, cut_pos))
-			cut_pos--;
-		sz_string2[cut_pos] = NULL;
-		
-		char *return_char = NULL;
-		if((return_char = strchr(sz_string2, '\n')) != NULL)	// return 처리
-		{
-			cut_pos = return_char - sz_string2+1;
-			sz_string2[cut_pos-1] = NULL;
-		}
-		
-		g_PrintColorStr(vx, py, sz_string2, gpC_base->m_chatting_pi, RGB_BLACK);
-		next += cut_pos;
-		vx = print_x;
-		gpC_base->m_p_DDSurface_back->HLine(print_x, py+line_gap, w - (print_x - x) -30, 0);
-		py += print_gap;
-	}*/
 	m_lev_intro.SetPosition(x+30, y+60+20*max(0,(3-m_scroll)));
 	m_lev_intro.SetEditorMode(20,10+m_scroll);
 
@@ -28479,22 +28432,6 @@ bool	C_VS_UI_OTHER_INFO::MouseControl(UINT message, int _x, int _y)
 						g_descriptor_manager.Set(DID_STRINGS, x+_x, y+_y, (void *)str,2);
 						
 					} else
-					/*if(_x>120&&_y>175&&_x<186&&_y<215)
-					{
-						static char temp_str[20];
-						// 음수 여부 판단해서 + 를 출력하지 않게 해준다.
-						if(m_player_info.ALIGNMENT_NUM > 0 )
-							wsprintf(temp_str, "(+%d)",m_player_info.ALIGNMENT_NUM);
-						else
-							wsprintf(temp_str, "(%d)",m_player_info.ALIGNMENT_NUM);
-						
-						const static char* str[3]={
-							(*g_pGameStringTable)[UI_STRING_MESSAGE_ALIGNMENT].GetString(),
-							NULL,
-							temp_str,
-						};
-						g_descriptor_manager.Set(DID_HELP, x+_x, y+_y, (void *)str,0,0);
-					}else*/
 					if(_x>20&&_x<102&&_y>178&&_y<238)
 					{	
 	//					DEBUG_ADD("[ OtherInfo ] MouseControl - STRDEXINT [S]");
@@ -28540,7 +28477,7 @@ bool	C_VS_UI_OTHER_INFO::MouseControl(UINT message, int _x, int _y)
 						for(int i = 3; i <= 13; i += 4)
 							if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
 							
-						sprintf(tempstring,"%s%s",(*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_FAME].GetString(),sstr.c_str());
+						SafeFormat::Format(tempstring,"%s%s",(*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_FAME].GetString(),sstr.c_str());
 							
 						g_descriptor_manager.Set(DID_STRINGS,x+_x,y+_y,(void*)str,1);
 					}
@@ -28683,22 +28620,7 @@ bool	C_VS_UI_OTHER_INFO::MouseControl(UINT message, int _x, int _y)
 							temp_str[1],
 						};
 						g_descriptor_manager.Set(DID_STRINGS, x+_x, y+_y, (void *)str_s,2);
-					} /*else				// 성향
-					if(_x>120&&_y>145&&_x<186&&_y<175)
-					{
-						static char temp_str[20];					
-						// 음수 여부 판단해서 + 를 출력하지 않게 해준다.
-						if(m_player_info.ALIGNMENT_NUM>0)
-							wsprintf(temp_str, "(+%d)",m_player_info.ALIGNMENT_NUM);
-						else
-							wsprintf(temp_str, "(%d)",m_player_info.ALIGNMENT_NUM);
-						const static char* str[3]={
-							(*g_pGameStringTable)[UI_STRING_MESSAGE_ALIGNMENT].GetString(),
-								NULL,
-								temp_str
-						};
-						g_descriptor_manager.Set(DID_HELP, x+_x, y+_y, (void *)str,0,0);
-					}*/ else			// str dex int
+					}  else			// str dex int
 					if(_x>20&&_x<102&&_y>157&&_y<217)
 					{					
 						static char temp_str[2][50];
@@ -29018,7 +28940,7 @@ void	C_VS_UI_OTHER_INFO::Show()
 
 			if(TopDomain>=0 && TopDomain<5)
 			{
-				sprintf(sz_temp,"%s %s %d",SlayerJob[TopDomain],
+				SafeFormat::Format(sz_temp,"%s %s %d",SlayerJob[TopDomain],
 					(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CLASS2].GetString(),
 					m_player_info.DOMAINLEVEL[TopDomain]);
 				g_PrintColorStr(x+field_x+x_gap_from_image+3,y+field_y+1,sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
@@ -29026,7 +28948,7 @@ void	C_VS_UI_OTHER_INFO::Show()
 			field_y+=field_gap;
 			
 			// 성향
-			sprintf(sz_temp,"%d",m_player_info.FAME);
+			SafeFormat::Format(sz_temp,"%d",m_player_info.FAME);
 			
 			std::string sstr = sz_temp;
 			for(int i = 3; i <= 13; i += 4)
@@ -29035,15 +28957,15 @@ void	C_VS_UI_OTHER_INFO::Show()
 			g_PrintColorStr(x+field_x+x_gap_from_image+3,y+field_y+1,sstr.c_str(), gpC_base->m_chatting_pi, RGB_WHITE);
 			field_y+=field_gap;
 			
-			sprintf(sz_temp,"%d/%d",m_player_info.STR_PURE,m_player_info.STR_CUR);
+			SafeFormat::Format(sz_temp,"%d/%d",m_player_info.STR_PURE,m_player_info.STR_CUR);
 			g_PrintColorStr(x+field_x+x_gap_from_image+3,y+field_y+1,sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			field_y+=field_gap;
 			
-			sprintf(sz_temp,"%d/%d",m_player_info.DEX_PURE,m_player_info.DEX_CUR);
+			SafeFormat::Format(sz_temp,"%d/%d",m_player_info.DEX_PURE,m_player_info.DEX_CUR);
 			g_PrintColorStr(x+field_x+x_gap_from_image+3,y+field_y+1,sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			field_y+=field_gap;
 			
-			sprintf(sz_temp,"%d/%d",m_player_info.INT_PURE,m_player_info.INT_CUR);
+			SafeFormat::Format(sz_temp,"%d/%d",m_player_info.INT_PURE,m_player_info.INT_CUR);
 			g_PrintColorStr(x+field_x+x_gap_from_image+3,y+field_y+1,sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			field_y+=field_gap;
 			
@@ -29246,19 +29168,19 @@ void	C_VS_UI_OTHER_INFO::Show()
 				g_PrintColorStr(x+field_x+x_gap_from_image+3,y+field_y+1,(*g_pGameStringTable)[UI_STRING_MESSAGE_NOT_JOIN_ANY_CLAN].GetString(), gpC_base->m_chatting_pi, RGB_WHITE);
 			field_y+=field_gap;
 			
-			sprintf(sz_temp,"%d",m_player_info.LEVEL);
+			SafeFormat::Format(sz_temp,"%d",m_player_info.LEVEL);
 			g_PrintColorStr(x+field_x+x_gap_from_image+3,y+field_y+1,sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			field_y+=field_gap;
 			
-			sprintf(sz_temp,"%d/%d",m_player_info.STR_PURE,m_player_info.STR_CUR);
+			SafeFormat::Format(sz_temp,"%d/%d",m_player_info.STR_PURE,m_player_info.STR_CUR);
 			g_PrintColorStr(x+field_x+x_gap_from_image+3,y+field_y+1,sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			field_y+=field_gap;
 			
-			sprintf(sz_temp,"%d/%d",m_player_info.DEX_PURE,m_player_info.DEX_CUR);
+			SafeFormat::Format(sz_temp,"%d/%d",m_player_info.DEX_PURE,m_player_info.DEX_CUR);
 			g_PrintColorStr(x+field_x+x_gap_from_image+3,y+field_y+1,sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			field_y+=field_gap;
 			
-			sprintf(sz_temp,"%d/%d",m_player_info.INT_PURE,m_player_info.INT_CUR);
+			SafeFormat::Format(sz_temp,"%d/%d",m_player_info.INT_PURE,m_player_info.INT_CUR);
 			g_PrintColorStr(x+field_x+x_gap_from_image+3,y+field_y+1,sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			field_y+=field_gap;
 			
@@ -29473,19 +29395,19 @@ void	C_VS_UI_OTHER_INFO::Show()
 			field_y+=field_gap;
 
 			
-			sprintf(sz_temp,"%d",m_player_info.LEVEL);
+			SafeFormat::Format(sz_temp,"%d",m_player_info.LEVEL);
 			g_PrintColorStr(field_rect.left+3,y+field_y+1,sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			field_y+=field_gap;
 			
-			sprintf(sz_temp,"%d/%d",m_player_info.STR_PURE,m_player_info.STR_CUR);
+			SafeFormat::Format(sz_temp,"%d/%d",m_player_info.STR_PURE,m_player_info.STR_CUR);
 			g_PrintColorStr(field_rect.left+3,y+field_y+1,sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			field_y+=field_gap;
 			
-			sprintf(sz_temp,"%d/%d",m_player_info.DEX_PURE,m_player_info.DEX_CUR);
+			SafeFormat::Format(sz_temp,"%d/%d",m_player_info.DEX_PURE,m_player_info.DEX_CUR);
 			g_PrintColorStr(field_rect.left+3,y+field_y+1,sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			field_y+=field_gap;
 			
-			sprintf(sz_temp,"%d/%d",m_player_info.INT_PURE,m_player_info.INT_CUR);
+			SafeFormat::Format(sz_temp,"%d/%d",m_player_info.INT_PURE,m_player_info.INT_CUR);
 			g_PrintColorStr(field_rect.left+3,y+field_y+1,sz_temp, gpC_base->m_chatting_pi, RGB_WHITE);
 			field_y+=field_gap;
 			
@@ -29603,12 +29525,9 @@ void	C_VS_UI_OTHER_INFO::RefreshImage()
 	if(g_pProfileManager->HasProfile(m_player_info.PLAYER_NAME.c_str()))
 	{
 		const char *filename = g_pProfileManager->GetFilename(m_player_info.PLAYER_NAME.c_str());
-		char filenamei[256];
+		const std::string filenamei = std::string(filename) + "i";
 		
-		strcpy(filenamei, filename);
-		strcat(filenamei, "i");
-		
-		if(!m_p_face->LoadFromFileData(0, 1, filename, filenamei ))
+		if(!m_p_face->LoadFromFileData(0, 1, filename, filenamei.c_str() ))
 		{
 			delete m_p_face;
 			m_p_face = NULL;
@@ -30548,7 +30467,7 @@ void	C_VS_UI_BRING_FEE::Show()
 			if(sstr.size() > i)
 				sstr.insert(sstr.size()-i, ",");
 			
-		sprintf(money_buf, "$%s", sstr.c_str());
+		SafeFormat::Format(money_buf, "$%s", sstr.c_str());
 		//g_Print(x+m_money_button_offset_x+30, y+m_money_button_offset_y+4, money_buf, &gpC_base->m_money_pi);
 
 		int len = max(0,160 - g_GetStringWidth(money_buf,gpC_base->m_money_pi.hfont));
@@ -30568,7 +30487,7 @@ void	C_VS_UI_BRING_FEE::Show()
 			if(sstr.size() > i)
 				sstr.insert(sstr.size()-i, ",");
 			
-		sprintf(money_buf, "$%s", sstr.c_str());
+		SafeFormat::Format(money_buf, "$%s", sstr.c_str());
 
 		len = max(0,160 - g_GetStringWidth(money_buf,gpC_base->m_money_pi.hfont));
 
@@ -30916,7 +30835,7 @@ void C_VS_UI_WAR_LIST::Show()
 				g_FL2_GetDC();
 				g_PrintColorStr(x+ tab_x[0] + 21 + (tab_x[1] - 21 - tab_x[0])/2 - g_GetStringWidth(itr->challengerGuildName.c_str())/2, y+tab_y[1] + gap + 6, itr->challengerGuildName.c_str(),gpC_base->m_chatting_pi,RGB_BLACK);
 				char date[100];
-				sprintf(date,"%d/%d/%d %d:00",itr->year,itr->month,itr->day,itr->hour);
+				SafeFormat::Format(date,"%d/%d/%d %d:00",itr->year,itr->month,itr->day,itr->hour);
 				g_PrintColorStr(x+ tab_x[1] + (tab_x[2] - tab_x[1])/2 - g_GetStringWidth(date)/2, y+tab_y[1] + gap + 6, date,gpC_base->m_chatting_pi,RGB_BLACK);				
 				g_FL2_ReleaseDC();
 			} else
@@ -30929,7 +30848,7 @@ void C_VS_UI_WAR_LIST::Show()
 				g_FL2_GetDC();
 				g_PrintColorStr(x+ tab_x[0] + 21 + (tab_x[1] - 21 - tab_x[0])/2 - g_GetStringWidth(challenger.c_str())/2, y+tab_y[1] + gap + 6, challenger.c_str(),gpC_base->m_chatting_pi,RGB_BLACK);
 				char date[100];
-				sprintf(date,"%d/%d/%d %d:00",itr->year,itr->month,itr->day,itr->hour);
+				SafeFormat::Format(date,"%d/%d/%d %d:00",itr->year,itr->month,itr->day,itr->hour);
 				g_PrintColorStr(x+ tab_x[1] + (tab_x[2] - tab_x[1])/2 - g_GetStringWidth(date)/2, y+tab_y[1] + gap + 6, date,gpC_base->m_chatting_pi,RGB_BLACK);
 				g_FL2_ReleaseDC();				
 			}			
@@ -31427,14 +31346,14 @@ bool	C_VS_UI_BLOOD_BIBLE_STATUS::MouseControl(UINT message, int _x, int _y)
 					NULL,
 			};
 			
-			sprintf(temp_str[0],"%s (%s)",(*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_ARMEGA+count].GetString(),(*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_ARMEGA_ENG+count].GetString());
+			SafeFormat::Format(temp_str[0],"%s (%s)",(*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_ARMEGA+count].GetString(),(*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_ARMEGA_ENG+count].GetString());
 			if(m_BloodBibleStatus[count].zone_id == -1)
 			{
-				sprintf(temp_str[1],"%s",(*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_STATUS_NONE].GetString());
+				SafeFormat::Format(temp_str[1],"%s",(*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_STATUS_NONE].GetString());
 				g_descriptor_manager.Set(DID_STRINGS,x+_x,y+_y,(void*)str,2);
 				break;
 			}
-			sprintf(temp_str[1],"%s (%d,%d)",g_pZoneTable->Get(m_BloodBibleStatus[count].zone_id)->Name.GetString(),m_BloodBibleStatus[count].x,m_BloodBibleStatus[count].y);
+			SafeFormat::Format(temp_str[1],"%s (%d,%d)",g_pZoneTable->Get(m_BloodBibleStatus[count].zone_id)->Name.GetString(),m_BloodBibleStatus[count].x,m_BloodBibleStatus[count].y);
 			//sprintf(temp_str[2],"%s",(*g_pGameStringTable)[STRING_MESSAGE_BLOOD_BIBLE_BONUS_ARMEGA+count].GetString());
 			
 			str[2] = (*g_pGameStringTable)[STRING_MESSAGE_BLOOD_BIBLE_BONUS_ARMEGA+count].GetString();
@@ -32996,23 +32915,23 @@ void	C_VS_UI_QUEST_STATUS::Show()
 				if(hour)
 				{
 					SafeFormat::Format(temp_str, GetGameString(UI_STRING_MESSAGE_HOUR), hour);
-					strcat(sz_temp, temp_str);
+					SafeFormat::Append(sz_temp, temp_str);
 					SafeFormat::Format(temp_str, " ");
-					strcat(sz_temp, temp_str);
+					SafeFormat::Append(sz_temp, temp_str);
 					bContinue = true;
 				}
 				if(minute || bContinue)
 				{
 					SafeFormat::Format(temp_str, GetGameString(UI_STRING_MESSAGE_MINUTE), minute);
-					strcat(sz_temp, temp_str);
+					SafeFormat::Append(sz_temp, temp_str);
 					SafeFormat::Format(temp_str, " ");
-					strcat(sz_temp, temp_str);
+					SafeFormat::Append(sz_temp, temp_str);
 					bContinue = true;
 				}
 				if(!hour)  
 				{
 					SafeFormat::Format(temp_str, GetGameString(UI_STRING_MESSAGE_SECOND), second);
-					strcat(sz_temp, temp_str);
+					SafeFormat::Append(sz_temp, temp_str);
 				}
 				g_PrintColorStrOut( x+83-g_GetStringWidth(sz_temp, gpC_base->m_chatting_pi.hfont)/2+tab_x,
 					y+73+tab_y, sz_temp, gpC_base->m_chatting_pi, RGB_WHITE, RGB_BLACK);
@@ -33331,13 +33250,13 @@ void	C_VS_UI_QUEST_STATUS::ShowQuestDescription(int _x, int _y)
 				if(i ==1)
 				{
 					snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_FAIL_TIME_OVER_QUEST));
-					strcat(temp_str[i], sz_temp);
+					SafeFormat::Append(temp_str[i], sz_temp);
 					continue;
 				}
 				else if(i == 2)
 				{
 					snprintf(sz_temp, sizeof(sz_temp), "%s", GetGameString(UI_STRING_MESSAGE_QUEST_DESCRIPTION_TIME_NO_REMAIN));
-					strcat(temp_str[i], sz_temp);
+					SafeFormat::Append(temp_str[i], sz_temp);
 					continue;
 				}
 			}					
@@ -33349,21 +33268,21 @@ void	C_VS_UI_QUEST_STATUS::ShowQuestDescription(int _x, int _y)
 			if(hour)
 			{
 				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_HOUR), hour);
-				strcat(temp_str[i], sz_temp);
+				SafeFormat::Append(temp_str[i], sz_temp);
 				SafeFormat::Format(sz_temp, " ");
-				strcat(temp_str[i], sz_temp);
+				SafeFormat::Append(temp_str[i], sz_temp);
 			}
 			if(minute)
 			{
 				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_MINUTE), minute);
-				strcat(temp_str[i], sz_temp);
+				SafeFormat::Append(temp_str[i], sz_temp);
 				SafeFormat::Format(sz_temp, " ");
-				strcat(temp_str[i], sz_temp);				
+				SafeFormat::Append(temp_str[i], sz_temp);
 			}
 			if(!hour && second)
 			{
 				SafeFormat::Format(sz_temp, GetGameString(UI_STRING_MESSAGE_SECOND), second);
-				strcat(temp_str[i], sz_temp);
+				SafeFormat::Append(temp_str[i], sz_temp);
 			}
 		}
 		
@@ -34647,8 +34566,8 @@ void C_VS_UI_WORLDMAP::MouseControlExtra(UINT message, int _x, int _y)
 						static char party_name[20];
 						static char party_desc[50];
 						if(info->Name.GetString())
-							strcpy(party_name, info->Name.GetString());
-						else strcpy(party_name, "");
+							SafeFormat::Copy(party_name, info->Name.GetString());
+						else SafeFormat::Copy(party_name, "");
 						
 						static S_DEFAULT_HELP_STRING party_string;
 						party_string.sz_main_str = party_name;

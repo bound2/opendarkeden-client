@@ -59,7 +59,6 @@ class AppendPatch {
 		//------------------------------------------------------------------
 		void		SetOriginalInfo(const char* orgFilename, long orgFilesize, WORD orgSpkSize);
 		void		AddAppendInfo(const char* appendFilename, long appFilesize, WORD appSpkSize);
-		bool		AddAppendInfo(const char* currentFilename);
 		void		SetFinalInfo(long finalFilesize, WORD finalSpkSize);
 		bool		SetFinalInfo(const char* currentFilename);
 

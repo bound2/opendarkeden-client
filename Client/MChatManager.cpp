@@ -550,7 +550,7 @@ MChatManager::RemoveCurseKorean(const char* strKor,
 	// 체크하면서 NULL을 찍기 때문에.. copy해서 사용한다.
 	//---------------------------------------------------------
 	char* strCheck = new char [len+1];
-	strcpy( strCheck, strKor );
+	memcpy(strCheck, strKor, static_cast<size_t>(len) + 1);
 	
 	char* strCheckPtr = strCheck;
 	

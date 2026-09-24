@@ -182,10 +182,11 @@ MItem::GetName()
 				{
 					size_t	nPrefix = strlen(pszHName) - 4;
 
-					m_pName = new char[nPrefix + strlen(pszSoulStone) + 1];
+					const size_t soulBytes = strlen(pszSoulStone) + 1;
+					m_pName = new char[nPrefix + soulBytes];
 
 					memcpy(m_pName, pszHName, nPrefix);
-					strcpy(m_pName + nPrefix, pszSoulStone);
+					memcpy(m_pName + nPrefix, pszSoulStone, soulBytes);
 
 					return m_pName;
 				}
@@ -263,23 +264,14 @@ MItem::GetEName() const
 void
 MItem::SetName(const char* pName)
 {
-	if (m_pName!=NULL)
-	{
-		delete [] m_pName;
-		m_pName = NULL;
+	char* replacement = nullptr;
+	if (pName) {
+		const size_t length = strlen(pName);
+		replacement = new char[length + 1];
+		memcpy(replacement, pName, length + 1);
 	}
-
-	if (pName==NULL)
-	{
-		return;
-	}
-
-	//---------------------------------------------
-	// 설정..
-	//---------------------------------------------
-	m_pName = new char[strlen(pName) + 1];
-
-	strcpy(m_pName, pName);
+	delete [] m_pName;
+	m_pName = replacement;
 }
 
 //----------------------------------------------------------------------

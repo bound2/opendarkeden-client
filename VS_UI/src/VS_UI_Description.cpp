@@ -348,7 +348,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			{
 
 				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_LEVEL].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				sprintf(sz_buf, "%d", p_item->GetNumber());				
+				SafeFormat::Format(sz_buf, "%d", p_item->GetNumber());
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 				py += SMALL_FONT_Y_GAP;
 
@@ -447,7 +447,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					)
 				{
 					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DURABILITY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					sprintf(sz_buf, "%d/%d", p_item->GetCurrentDurability(), p_item->GetMaxDurability());				
+					SafeFormat::Format(sz_buf, "%d/%d", p_item->GetCurrentDurability(), p_item->GetMaxDurability());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}
@@ -456,7 +456,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				if (p_item->GetSilverMax() != -1)
 				{
 					vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_SILVERING].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					sprintf(sz_buf, "%d/%d", p_item->GetSilver(), p_item->GetSilverMax());
+					SafeFormat::Format(sz_buf, "%d/%d", p_item->GetSilver(), p_item->GetSilverMax());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}			
@@ -468,7 +468,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 						stringID = UI_STRING_MESSAGE_DESC_MAGIC_DAMAGE;
 
 					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[stringID].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					sprintf(sz_buf, "%d~%d", p_item->GetMinDamage(), p_item->GetMaxDamage());				
+					SafeFormat::Format(sz_buf, "%d~%d", p_item->GetMinDamage(), p_item->GetMaxDamage());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
 					py += SMALL_FONT_Y_GAP;
 				}			
@@ -476,7 +476,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				if (p_item->GetOriginalSpeed() > 0)
 				{
 					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ATTACK_SPEED].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					sprintf(sz_buf, "%d", p_item->GetOriginalSpeed());
+					SafeFormat::Format(sz_buf, "%d", p_item->GetOriginalSpeed());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB(200, 200, 255));
 					py += SMALL_FONT_Y_GAP;
 				}
@@ -485,7 +485,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				if (p_item->GetCriticalHit() != -1)
 				{
 					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CRITICALHIT].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					sprintf(sz_buf, "%d", p_item->GetCriticalHit());
+					SafeFormat::Format(sz_buf, "%d", p_item->GetCriticalHit());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
 					py += SMALL_FONT_Y_GAP;
 				}		
@@ -493,7 +493,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				if (p_item->GetDefenseValue() != -1)
 				{
 					vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DEFENSE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					sprintf(sz_buf, "%d", p_item->GetDefenseValue());
+					SafeFormat::Format(sz_buf, "%d", p_item->GetDefenseValue());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);				
 					py += SMALL_FONT_Y_GAP;
 				}			
@@ -501,7 +501,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				if (p_item->GetProtectionValue() != -1)
 				{
 					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PROTECTION].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					sprintf(sz_buf, "%d", p_item->GetProtectionValue());
+					SafeFormat::Format(sz_buf, "%d", p_item->GetProtectionValue());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);				
 					py += SMALL_FONT_Y_GAP;
 				}			
@@ -509,7 +509,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				if (p_item->GetToHit() != -1)
 				{
 					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ACCURACY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					sprintf(sz_buf, "%d", p_item->GetToHit());
+					SafeFormat::Format(sz_buf, "%d", p_item->GetToHit());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);				
 					py += SMALL_FONT_Y_GAP;
 				}			
@@ -517,7 +517,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				if (p_item->GetHealPoint() != -1)
 				{
 					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_HP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					sprintf(sz_buf, "+%d", p_item->GetHealPoint());
+					SafeFormat::Format(sz_buf, "+%d", p_item->GetHealPoint());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}			
@@ -528,7 +528,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 						vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_EP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
 					else
 						vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					sprintf(sz_buf, "+%d", p_item->GetManaPoint());
+					SafeFormat::Format(sz_buf, "+%d", p_item->GetManaPoint());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}
@@ -537,7 +537,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				if (p_item->GetReach() != -1 && p_item->GetReach() != 1)
 				{
 					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_RANGE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					sprintf(sz_buf, "%d %s", p_item->GetReach(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_TILE_PIECE].GetString());
+					SafeFormat::Format(sz_buf, "%d %s", p_item->GetReach(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_TILE_PIECE].GetString());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}			
@@ -545,7 +545,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				if (p_item->GetMagazineSize() != -1)
 				{
 					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					sprintf(sz_buf, "%d %s", p_item->GetMagazineSize(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_COUNT].GetString());
+					SafeFormat::Format(sz_buf, "%d %s", p_item->GetMagazineSize(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_COUNT].GetString());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 					py += SMALL_FONT_Y_GAP;
 				}
@@ -570,7 +570,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				if (p_item->IsChargeItem() == true)
 				{
 					vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEFT_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					sprintf(sz_buf, "%d/%d", p_item->GetNumber(), p_item->GetMaxNumber());
+					SafeFormat::Format(sz_buf, "%d/%d", p_item->GetNumber(), p_item->GetMaxNumber());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}
@@ -579,7 +579,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				if (p_item->GetLucky() != - 9999 && itemClass != ITEM_CLASS_COUPLE_RING && itemClass != ITEM_CLASS_VAMPIRE_COUPLE_RING &&  itemClass != ITEM_CLASS_CORE_ZAP)
 				{
 					vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LUCKY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					sprintf(sz_buf, "%d", p_item->GetLucky());
+					SafeFormat::Format(sz_buf, "%d", p_item->GetLucky());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
 					py += SMALL_FONT_Y_GAP;
 				}
@@ -595,7 +595,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					{
 						SafeFormat::Format(sz_buf, GetGameString(UI_STRING_MESSAGE_OUSTERS_STONE), (*g_pGameStringTable)[g_ELEMENTAL_STRING_ID[eType]].GetString());
 						vx = g_PrintColorStr(px, py, sz_buf, gpC_base->m_item_desc_pi, stoneRGB[eType]);
-						sprintf(sz_buf, "%d", eNum);
+						SafeFormat::Format(sz_buf, "%d", eNum);
 						g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 						py += SMALL_FONT_Y_GAP;
 					}
@@ -623,7 +623,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			if (p_item->GetMaxDurability() != -1&&!p_item->IsUniqueItem()&&p_item->GetItemClass()!=ITEM_CLASS_VAMPIRE_AMULET && !p_item->IsQuestItem())
 			{
 				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DURABILITY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				sprintf(sz_buf, "???/???");				
+				SafeFormat::Format(sz_buf, "???/???");
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 				py += SMALL_FONT_Y_GAP;
 			}
@@ -631,7 +631,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			if (p_item->GetSilverMax() != -1)
 			{
 				vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_SILVERING].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				sprintf(sz_buf, "???/???");				
+				SafeFormat::Format(sz_buf, "???/???");
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 				py += SMALL_FONT_Y_GAP;
 			}
@@ -640,7 +640,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			if (p_item->GetMaxDamage() != -1)
 			{
 				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DAMAGE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				sprintf(sz_buf, "???~???");				
+				SafeFormat::Format(sz_buf, "???~???");
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
 				py += SMALL_FONT_Y_GAP;
 			}
@@ -649,7 +649,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			if (p_item->GetOriginalSpeed() > 0)
 			{
 				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ATTACK_SPEED].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				sprintf(sz_buf, "???");				
+				SafeFormat::Format(sz_buf, "???");
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB(200, 200, 255));
 				py += SMALL_FONT_Y_GAP;
 			}
@@ -658,7 +658,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			if (p_item->GetCriticalHit() != -1)
 			{
 				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CRITICALHIT].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				sprintf(sz_buf, "???");				
+				SafeFormat::Format(sz_buf, "???");
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
 				py += SMALL_FONT_Y_GAP;
 			}
@@ -667,7 +667,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			if (p_item->GetDefenseValue() != -1)
 			{
 				vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DEFENSE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				sprintf(sz_buf, "???");				
+				SafeFormat::Format(sz_buf, "???");
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);				
 				py += SMALL_FONT_Y_GAP;
 			}
@@ -676,7 +676,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			if (p_item->GetProtectionValue() != -1)
 			{
 				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PROTECTION].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				sprintf(sz_buf, "???");				
+				SafeFormat::Format(sz_buf, "???");
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);				
 				py += SMALL_FONT_Y_GAP;
 			}
@@ -685,7 +685,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			if (p_item->GetToHit() != -1)
 			{
 				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ACCURACY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				sprintf(sz_buf, "???", p_item->GetToHit());				
+				SafeFormat::Format(sz_buf, "???", p_item->GetToHit());
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);				
 				py += SMALL_FONT_Y_GAP;
 			}
@@ -694,7 +694,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			if (p_item->GetHealPoint() != -1)
 			{
 				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_HP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				sprintf(sz_buf, "+???");
+				SafeFormat::Format(sz_buf, "+???");
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 				py += SMALL_FONT_Y_GAP;
 			}
@@ -703,7 +703,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			if (p_item->GetManaPoint() != -1)
 			{
 				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				sprintf(sz_buf, "+???");				
+				SafeFormat::Format(sz_buf, "+???");
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 				py += SMALL_FONT_Y_GAP;
 			}
@@ -712,7 +712,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			if (p_item->GetReach() != -1 && p_item->GetReach() != 1)
 			{
 				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_RANGE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				sprintf(sz_buf, "??? %s",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_TILE_PIECE].GetString());				
+				SafeFormat::Format(sz_buf, "??? %s",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_TILE_PIECE].GetString());
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 				py += SMALL_FONT_Y_GAP;
 			}
@@ -721,7 +721,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			if (p_item->GetMagazineSize() != -1)
 			{
 				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				sprintf(sz_buf, "??? %s",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_COUNT].GetString());				
+				SafeFormat::Format(sz_buf, "??? %s",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_COUNT].GetString());
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 				py += SMALL_FONT_Y_GAP;
 			}
@@ -747,7 +747,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			if (p_item->IsChargeItem() == true)
 			{
 				vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEFT_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				sprintf(sz_buf, "???/???");				
+				SafeFormat::Format(sz_buf, "???/???");
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
 				py += SMALL_FONT_Y_GAP;
 			}
@@ -755,203 +755,12 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			if (p_item->GetLucky() != - 9999)
 			{
 				vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LUCKY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				sprintf(sz_buf, "???");
+				SafeFormat::Format(sz_buf, "???");
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
 				py += SMALL_FONT_Y_GAP;
 			}
 		}
 
-		/*// Durability
-		if (p_item->GetMaxDurability() != -1&&!p_item->IsUniqueItem()&&p_item->GetItemClass()!=ITEM_CLASS_VAMPIRE_AMULET)
-		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DURABILITY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			if(p_item->IsIdentified())
-				sprintf(sz_buf, "%d/%d", p_item->GetCurrentDurability(), p_item->GetMaxDurability());
-			else
-				sprintf(sz_buf, "???/???");
-			
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
-			
-			py += SMALL_FONT_Y_GAP;
-		}
-		
-		// Silvering
-		if (p_item->GetSilverMax() != -1)
-		{
-			vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_SILVERING].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			if(p_item->IsIdentified())
-				sprintf(sz_buf, "%d/%d", p_item->GetSilver(), p_item->GetSilverMax());
-			else
-				sprintf(sz_buf, "???/???");
-			
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
-			
-			py += SMALL_FONT_Y_GAP;
-		}
-		
-		// Damage
-		if (p_item->GetMaxDamage() != -1)
-		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DAMAGE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			if(p_item->IsIdentified())
-				sprintf(sz_buf, "%d~%d", p_item->GetMinDamage(), p_item->GetMaxDamage());
-			else
-				sprintf(sz_buf, "???~???");
-			
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
-			py += SMALL_FONT_Y_GAP;
-		}
-		
-		// critical hit
-		if (p_item->GetCriticalHit() != -1)
-		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CRITICALHIT].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			if(p_item->IsIdentified())
-				sprintf(sz_buf, "%d", p_item->GetCriticalHit());
-			else
-				sprintf(sz_buf, "???");
-			
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
-			py += SMALL_FONT_Y_GAP;
-		}
-		
-		
-		// Defense
-		if (p_item->GetDefenseValue() != -1)
-		{
-			vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DEFENSE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			if(p_item->IsIdentified())
-				sprintf(sz_buf, "%d", p_item->GetDefenseValue());
-			else
-				sprintf(sz_buf, "???");
-			
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);
-			
-			py += SMALL_FONT_Y_GAP;
-		}
-		
-		// Protection
-		if (p_item->GetProtectionValue() != -1)
-		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PROTECTION].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			if(p_item->IsIdentified())
-				sprintf(sz_buf, "%d", p_item->GetProtectionValue());
-			else
-				sprintf(sz_buf, "???");
-			
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);
-
-			py += SMALL_FONT_Y_GAP;
-		}
-
-		// TOHIT
-		if (p_item->GetToHit() != -1)
-		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ACCURACY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			if(p_item->IsIdentified())
-				sprintf(sz_buf, "%d", p_item->GetToHit());
-			else
-				sprintf(sz_buf, "???", p_item->GetToHit());
-
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);
-
-			py += SMALL_FONT_Y_GAP;
-		}
-
-		// Heal point
-		if (p_item->GetHealPoint() != -1)
-		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_HP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			if(p_item->IsIdentified())
-				sprintf(sz_buf, "+%d", p_item->GetHealPoint());
-			else
-				sprintf(sz_buf, "+???");
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
-
-			py += SMALL_FONT_Y_GAP;
-		}
-
-		// Mana point
-		if (p_item->GetManaPoint() != -1)
-		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			if(p_item->IsIdentified())
-				sprintf(sz_buf, "+%d", p_item->GetManaPoint());
-			else
-				sprintf(sz_buf, "+???");
-
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
-
-			py += SMALL_FONT_Y_GAP;
-		}
-
-		// Attack range
-		if (p_item->GetReach() != -1 && p_item->GetReach() != 1)
-		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_RANGE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			if(p_item->IsIdentified())
-				sprintf(sz_buf, "%d %s", p_item->GetReach(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_TILE_PIECE].GetString());
-			else
-				sprintf(sz_buf, "??? %s",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_TILE_PIECE].GetString());
-
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
-
-			py += SMALL_FONT_Y_GAP;
-		}
-
-		// Bullet
-		if (p_item->GetMagazineSize() != -1)
-		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			if(p_item->IsIdentified())
-				sprintf(sz_buf, "%d %s", p_item->GetMagazineSize(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_COUNT].GetString());
-			else
-				sprintf(sz_buf, "??? %s",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_COUNT].GetString());
-
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
-			py += SMALL_FONT_Y_GAP;
-		}
-
-		// Pocket size
-		if (p_item->GetPocketNumber() != -1)
-		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_POCKET_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			if(p_item->IsIdentified())
-				SafeFormat::Format(sz_buf, "%d %s", p_item->GetPocketNumber(), GetGameString(UI_STRING_MESSAGE_DESC_NUMBER));
-			else
-				SafeFormat::Format(sz_buf, "??? %s", GetGameString(UI_STRING_MESSAGE_DESC_NUMBER));
-
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
-
-			py += SMALL_FONT_Y_GAP;
-		}
-		
-		// Pile size
-		if (p_item->IsPileItem() == true)
-		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ITEM_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			if(p_item->IsIdentified())
-				SafeFormat::Format(sz_buf, "%d %s", p_item->GetNumber(), GetGameString(UI_STRING_MESSAGE_DESC_NUMBER));
-			else				
-				SafeFormat::Format(sz_buf, "??? %s", GetGameString(UI_STRING_MESSAGE_DESC_NUMBER));
-
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);			
-			py += SMALL_FONT_Y_GAP;
-		}
-		
-		// Charge size
-		if (p_item->IsChargeItem() == true)
-		{
-			vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEFT_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			if(p_item->IsIdentified())
-				sprintf(sz_buf, "%d/%d", p_item->GetNumber(), p_item->GetMaxNumber());
-			else
-				sprintf(sz_buf, "???/???");
-
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
-			
-			py += SMALL_FONT_Y_GAP;
-		}*/
 		if (p_item->IsIdentified() && p_item->GetItemClass() == ITEM_CLASS_VAMPIRE_PORTAL_ITEM)
 		{
 			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ARRIVAL_LOCATION].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
@@ -959,7 +768,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 
 			if(temp_item->IsMarked())
 			{
-				sprintf(sz_buf, "%s", g_pZoneTable->Get(temp_item->GetZoneID())->Name.GetString());
+				SafeFormat::Format(sz_buf, "%s", g_pZoneTable->Get(temp_item->GetZoneID())->Name.GetString());
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 				py += SMALL_FONT_Y_GAP;
 				
@@ -1091,7 +900,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		}
 		else
 		{
-			sprintf(sz_buf,"%s???????",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString());
+			SafeFormat::Format(sz_buf,"%s???????",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString());
 			vx = g_PrintColorStr(px, py, sz_buf, gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
 			
 			py += SMALL_FONT_Y_GAP;
@@ -1292,7 +1101,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			}
 			else
 			{
-				sprintf(sz_buf,"%s????????",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString());
+				SafeFormat::Format(sz_buf,"%s????????",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString());
 				vx = g_PrintColorStr(px, py, sz_buf, gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
 				py += SMALL_FONT_Y_GAP;
 			}
@@ -1325,18 +1134,18 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					sstr += g_GetStringByMoney(TempPrice);
 					vx = g_PrintColorStr(vx, py, sstr.c_str(), gpC_base->m_item_desc_pi, RGB_WHITE);
 					sstr = TempPrice/p_item->GetNumber();
-					sprintf(sz_buf, "(%sx%d)", sstr.c_str(), max(0, p_item->GetNumber()));
+					SafeFormat::Format(sz_buf, "(%sx%d)", sstr.c_str(), max(0, p_item->GetNumber()));
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, required_rgb);
 				}
 				else
 				{
-					sprintf(sz_buf, "%d", TempPrice);
+					SafeFormat::Format(sz_buf, "%d", TempPrice);
 					std::string sstr = sz_buf;
 					for(int i = 3; i <= 13; i += 4)
 						if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
-					sprintf(sz_buf, "$%s", sstr.c_str());
+					SafeFormat::Format(sz_buf, "$%s", sstr.c_str());
 					vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
-					sprintf(sz_buf, "(%dx%d)", TempPrice/p_item->GetNumber(),max(0, p_item->GetNumber()));
+					SafeFormat::Format(sz_buf, "(%dx%d)", TempPrice/p_item->GetNumber(),max(0, p_item->GetNumber()));
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, required_rgb);
 				}
 			}
@@ -1352,12 +1161,12 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				}
 				else
 				{
-					sprintf(sz_buf, "%d", TempPrice);
+					SafeFormat::Format(sz_buf, "%d", TempPrice);
 
 					sstr = sz_buf;
 					for(int i = 3; i <= 13; i += 4)
 						if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
-					sprintf(sz_buf, "$%s", sstr.c_str());
+					SafeFormat::Format(sz_buf, "$%s", sstr.c_str());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 				}
 			}
@@ -1386,19 +1195,19 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					sstr += g_GetStringByMoney(TempPrice*max(0,p_item->GetNumber()));
 					vx = g_PrintColorStr(vx, py, sstr.c_str(), gpC_base->m_item_desc_pi, RGB_WHITE);
 					sstr = g_GetStringByMoney(TempPrice);
-					sprintf(sz_buf, "(%sx%d)", sstr.c_str(), max(0, p_item->GetNumber()));
+					SafeFormat::Format(sz_buf, "(%sx%d)", sstr.c_str(), max(0, p_item->GetNumber()));
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, required_rgb);
 				}
 				else
 				{
-					sprintf(sz_buf, "%d", TempPrice*max(0,p_item->GetNumber()));
+					SafeFormat::Format(sz_buf, "%d", TempPrice*max(0,p_item->GetNumber()));
 					sstr = sz_buf;
 					for(int i = 3; i <= 13; i += 4)
 						if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
-					sprintf(sz_buf, "$%s", sstr.c_str());
+					SafeFormat::Format(sz_buf, "$%s", sstr.c_str());
 					vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 					
-					sprintf(sz_buf, "(%dx%d)", TempPrice,max(0, p_item->GetNumber()));
+					SafeFormat::Format(sz_buf, "(%dx%d)", TempPrice,max(0, p_item->GetNumber()));
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, required_rgb);
 				}
 			}
@@ -1414,11 +1223,11 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				}
 				else
 				{
-					sprintf(sz_buf, "%d", TempPrice);
+					SafeFormat::Format(sz_buf, "%d", TempPrice);
 					sstr = sz_buf;
 					for(int i = 3; i <= 13; i += 4)
 						if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
-					sprintf(sz_buf, "$%s", sstr.c_str());
+					SafeFormat::Format(sz_buf, "$%s", sstr.c_str());
 					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 				}
 			}
@@ -1460,18 +1269,18 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 						sstr += g_GetStringByMoney(TempPrice*p_item->GetNumber());
 						vx = g_PrintColorStr(vx, py, sstr.c_str(), gpC_base->m_item_desc_pi, RGB_WHITE);
 						sstr = g_GetStringByMoney(TempPrice);
-						sprintf(sz_buf, "(%sx%d)", sstr.c_str(), max(p_item->GetNumber(),0) );
+						SafeFormat::Format(sz_buf, "(%sx%d)", sstr.c_str(), max(p_item->GetNumber(),0) );
 						g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, required_rgb);
 					}
 					else
 					{
-						sprintf(sz_buf, "%d", TempPrice*p_item->GetNumber());
+						SafeFormat::Format(sz_buf, "%d", TempPrice*p_item->GetNumber());
 						sstr = sz_buf;
 						for(int i = 3; i <= 13; i += 4)
 							if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
-						sprintf(sz_buf, "$%s", sstr.c_str());
+						SafeFormat::Format(sz_buf, "$%s", sstr.c_str());
 						vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
-						sprintf(sz_buf, "(%dx%d)", TempPrice, max(p_item->GetNumber(),0) );
+						SafeFormat::Format(sz_buf, "(%dx%d)", TempPrice, max(p_item->GetNumber(),0) );
 						g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, required_rgb);
 					}
 				}
@@ -1487,11 +1296,11 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					}
 					else
 					{
-						sprintf(sz_buf, "%d", TempPrice);
+						SafeFormat::Format(sz_buf, "%d", TempPrice);
 						sstr = sz_buf;
 						for(int i = 3; i <= 13; i += 4)
 							if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
-						sprintf(sz_buf, "$%s", sstr.c_str());
+						SafeFormat::Format(sz_buf, "$%s", sstr.c_str());
 						g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 					}
 				}
@@ -1519,11 +1328,11 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			}
 			else
 			{
-				sprintf(sz_buf, "%d", TempPrice);
+				SafeFormat::Format(sz_buf, "%d", TempPrice);
 				std::string sstr = sz_buf;
 				for(int i = 3; i <= 13; i += 4)
 					if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
-				sprintf(sz_buf, "$%s", sstr.c_str());
+				SafeFormat::Format(sz_buf, "$%s", sstr.c_str());
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 			}			
 			py += SMALL_FONT_Y_GAP;
@@ -1546,11 +1355,11 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			}	
 			else
 			{
-				sprintf(sz_buf, "%d", max( 0, TempPrice));
+				SafeFormat::Format(sz_buf, "%d", max( 0, TempPrice));
 				std::string sstr = sz_buf;
 				for(int i = 3; i <= 13; i += 4)
 					if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
-				sprintf(sz_buf, "$%s", sstr.c_str());
+				SafeFormat::Format(sz_buf, "$%s", sstr.c_str());
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 			}			
 			py += SMALL_FONT_Y_GAP;
@@ -1807,14 +1616,14 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		{
 			if( g_pTimeItemManager->GetSecond( objectID ) == 0 )
 			{
-				strcpy(temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_EXPIRED_ITEM].GetString() );
+				SafeFormat::Copy(temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_EXPIRED_ITEM].GetString() );
 			} else
 			{
 				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_TIME].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB );
-				strcat(temp, " ");
+				SafeFormat::Append(temp, " ");
 				char tempSecond[10];
 				SafeFormat::Format(tempSecond, GetGameString(UI_STRING_MESSAGE_SECOND), g_pTimeItemManager->GetSecond( objectID ) );
-				strcat(temp, tempSecond );
+				SafeFormat::Append(temp, tempSecond );
 			}
 		} else
 		{
@@ -1824,25 +1633,25 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			if((tempInt = g_pTimeItemManager->GetDay( objectID ))>0  || bContinue )
 			{
 				char tempDay[30] = {0,};
-				strcat(temp, " ");
+				SafeFormat::Append(temp, " ");
 				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_DAY), tempInt );
-				strcat ( temp, tempDay );
+				SafeFormat::Append ( temp, tempDay );
 				bContinue = true;
 			}
 			if((tempInt = g_pTimeItemManager->GetHour( objectID ))>0 || bContinue)
 			{
 				char tempDay[30] = {0,};
-				strcat(temp, " ");
+				SafeFormat::Append(temp, " ");
 				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_HOUR), tempInt );
-				strcat ( temp, tempDay );
+				SafeFormat::Append ( temp, tempDay );
 				bContinue = true;
 			}
 			if((tempInt = g_pTimeItemManager->GetMinute( objectID ))>0  || bContinue)
 			{
 				char tempDay[30] = {0,};
-				strcat(temp, " ");
+				SafeFormat::Append(temp, " ");
 				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_MINUTE), tempInt );
-				strcat ( temp, tempDay );
+				SafeFormat::Append ( temp, tempDay );
 				bContinue = true;
 			}			
 		}		
@@ -1940,9 +1749,9 @@ void	_Skill_Description_Show(Rect rect, void * void_ptr, long left, long right)
 	if (g_eRaceInterface != RACE_VAMPIRE && (!(*g_pSkillInfoTable)[left].IsPassive() || g_eRaceInterface == RACE_OUSTERS))
 	{
 		// level
-		sprintf(sz_buf,"%s: ",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEVEL].GetString());
+		SafeFormat::Format(sz_buf,"%s: ",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEVEL].GetString());
 		vx = g_PrintColorStr(px, py, sz_buf, gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-		sprintf(sz_buf, "%d", (*g_pSkillInfoTable)[left].GetExpLevel());
+		SafeFormat::Format(sz_buf, "%d", (*g_pSkillInfoTable)[left].GetExpLevel());
 		g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 
 		py += SMALL_FONT_Y_GAP;
@@ -1967,9 +1776,9 @@ void	_Skill_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			}
 
 		if( left == SKILL_WILL_OF_LIFE )
-			sprintf(sz_buf, "%d",5 + (g_char_slot_ingame.level / 7));
+			SafeFormat::Format(sz_buf, "%d",5 + (g_char_slot_ingame.level / 7));
 		else
-			sprintf(sz_buf, "%d", (*g_pSkillInfoTable)[left].GetMP());
+			SafeFormat::Format(sz_buf, "%d", (*g_pSkillInfoTable)[left].GetMP());
 		g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 		py += SMALL_FONT_Y_GAP;
 	}
@@ -2199,7 +2008,7 @@ void	_SkillTree_Description_Show(Rect rect, void * void_ptr, long left, long rig
 		vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_REQUIRE_LEVEL].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
 		if((*g_pSkillInfoTable)[left].GetLearnLevel() >= 0)
 		{
-			sprintf(sz_buf, "%d", (*g_pSkillInfoTable)[left].GetLearnLevel());
+			SafeFormat::Format(sz_buf, "%d", (*g_pSkillInfoTable)[left].GetLearnLevel());
 			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 		}
 		py += SMALL_FONT_Y_GAP;
@@ -2209,9 +2018,9 @@ void	_SkillTree_Description_Show(Rect rect, void * void_ptr, long left, long rig
 	{
 		if (g_eRaceInterface != RACE_VAMPIRE && !(*g_pSkillInfoTable)[left].IsPassive() || g_eRaceInterface == RACE_OUSTERS)
 		{
-			sprintf(sz_buf,"%s: ",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEVEL].GetString());
+			SafeFormat::Format(sz_buf,"%s: ",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEVEL].GetString());
 			vx = g_PrintColorStr(px, py, sz_buf, gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-			sprintf(sz_buf, "%d", (*g_pSkillInfoTable)[left].GetExpLevel());
+			SafeFormat::Format(sz_buf, "%d", (*g_pSkillInfoTable)[left].GetExpLevel());
 			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 			py += SMALL_FONT_Y_GAP;
 		}
@@ -2253,7 +2062,7 @@ void	_SkillTree_Description_Show(Rect rect, void * void_ptr, long left, long rig
 			break;
 		}
 		
-		sprintf(sz_buf, "%d", (*g_pSkillInfoTable)[left].GetMP());
+		SafeFormat::Format(sz_buf, "%d", (*g_pSkillInfoTable)[left].GetMP());
 		g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 	}
 	else
@@ -2316,7 +2125,7 @@ void	_SkillTree_Description_Show(Rect rect, void * void_ptr, long left, long rig
 
 				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_EXP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
 				SafeFormat::Format(sz_buf, "%d", exp_percent);
-				strcat(sz_buf, "%");
+				SafeFormat::Append(sz_buf, "%");
 				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
 				py += SMALL_FONT_Y_GAP;
 
@@ -2802,41 +2611,41 @@ void _Item_Description_Calculator(void (*fp_show)(Rect, void *, long, long), int
 		{
 			if( g_pTimeItemManager->GetSecond( objectID ) == 0 )
 			{
-				strcpy(temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_EXPIRED_ITEM].GetString() );
+				SafeFormat::Copy(temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_EXPIRED_ITEM].GetString() );
 			} else
 			{
-				strcpy(temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_TIME].GetString() );
-				strcat(temp, " ");
+				SafeFormat::Copy(temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_TIME].GetString() );
+				SafeFormat::Append(temp, " ");
 				char tempSecond[10];
 				SafeFormat::Format(tempSecond, GetGameString(UI_STRING_MESSAGE_SECOND), g_pTimeItemManager->GetSecond( objectID ) );
-				strcat(temp, tempSecond );
+				SafeFormat::Append(temp, tempSecond );
 			}
 		} else
 		{
-			strcpy(temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_TIME].GetString() );
+			SafeFormat::Copy(temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_TIME].GetString() );
 
 			if((tempInt = g_pTimeItemManager->GetDay( objectID ))>0  || bContinue )
 			{
 				char tempDay[30] = {0,};
-				strcat(temp, " ");
+				SafeFormat::Append(temp, " ");
 				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_DAY), tempInt );
-				strcat(temp, tempDay );
+				SafeFormat::Append(temp, tempDay );
 				bContinue = true;
 			}
 			if((tempInt = g_pTimeItemManager->GetHour( objectID ))>0 || bContinue)
 			{
 				char tempDay[30] = {0,};
-				strcat(temp, " ");
+				SafeFormat::Append(temp, " ");
 				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_HOUR), tempInt );
-				strcat ( temp, tempDay );
+				SafeFormat::Append ( temp, tempDay );
 				bContinue = true;
 			}
 			if((tempInt = g_pTimeItemManager->GetMinute( objectID ))>0  || bContinue)
 			{
 				char tempDay[30] = {0,};
-				strcat(temp, " ");
+				SafeFormat::Append(temp, " ");
 				SafeFormat::Format(tempDay, GetGameString(UI_STRING_MESSAGE_MINUTE), tempInt );
-				strcat ( temp, tempDay );
+				SafeFormat::Append ( temp, tempDay );
 				bContinue = true;
 			}			
 		}

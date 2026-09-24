@@ -430,8 +430,12 @@ printf "check_format_arity: %d note(s)\n", $notes;
 # quest caption, a block no live event reaches, and six of these with it
 # (the hour, minute and second captions, twice); the converted call
 # sites are 315.
-my $MINIMUM_SITES   = 295;
-my $MINIMUM_CHECKED = 283;
+# 292 and 280 on2026-09-24: R17 cleanup removes the complete obsolete
+# UI_NEW_USER_REGISTRATION block. Its three counted GetGameString formats
+# were STRING_USER_REGISTER_ID_LENGTH, _PASSWORD_LENGTH and _NAME_LENGTH.
+# The scanner still counts block comments; no live call or scan scope changed.
+my $MINIMUM_SITES   = 292;
+my $MINIMUM_CHECKED = 280;
 
 if ($sites < $MINIMUM_SITES)
 {

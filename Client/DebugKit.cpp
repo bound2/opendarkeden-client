@@ -176,19 +176,4 @@ void ClearDebugInfo()
 	g_MessageStringTable.ClearMessageName();
 }
 
-void PrintMessageDetail(ofstream file, char *strMsg, int length)
-{
-	char temp[1024];
-	int i,j=0;
-	memset(temp,0,sizeof(temp));
-	j += sprintf(temp+j,"\t");
-	for(i=0; i<length; i++)
-	{
-		j += sprintf(temp+j,"%02x ",(BYTE)strMsg[i]);
-		if((i+1)%16 == 0 && i+1 != length)
-			j += sprintf(temp+j,"\n\t");
-	}
-	j += sprintf(temp+j,"\0");
-	file << temp << endl;
-}
 #endif

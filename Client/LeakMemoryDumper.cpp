@@ -6,6 +6,7 @@
 
 #include "Client_PCH.h"
 #include "LeakMemoryDumper.h"
+#include "SafeFormat.h"
 
 #ifdef ENABLE_LEAK_TRACKER
 
@@ -63,7 +64,7 @@ void AddTrack(uintptr_t addr, size_t asize, const char *fname, DWORD lnum)
 	// instead.
 	info = (ALLOC_INFO*)malloc(sizeof(ALLOC_INFO));
 	info->address = addr;
-	strncpy(info->file, fname, 63);
+	SafeFormat::Copy(info->file, fname);
 	info->line = lnum;
 	info->size = asize;
 	getAllocList().insert(getAllocList().begin(), info);
@@ -91,14 +92,14 @@ void DumpUnfreed()
 
 	for(i = getAllocList().begin(); i != getAllocList().end(); i++)
 	{
-		sprintf(buf, "%-50s:\t\tLINE %d,\t\tADDRESS 0x%p\t%zu unfreed\n",
+		snprintf(buf, sizeof(buf), "%-50s:\t\tLINE %d,\t\tADDRESS 0x%p\t%zu unfreed\n",
 			(*i)->file, (*i)->line, (void*)(*i)->address, (*i)->size);
 		OutputDebugString(buf);
 		totalSize += (*i)->size;
 	}
-	sprintf(buf, "-----------------------------------------------------------\n");
+	snprintf(buf, sizeof(buf), "-----------------------------------------------------------\n");
 	OutputDebugString(buf);
-	sprintf(buf, "Total Unfreed: %zu bytes\n", totalSize);
+	snprintf(buf, sizeof(buf), "Total Unfreed: %zu bytes\n", totalSize);
 	OutputDebugString(buf);
 }
 

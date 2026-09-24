@@ -150,7 +150,7 @@ void UI_FriendChatting_Message(GCFriendChatting* pPacket)
 void UI_RunFriendRequest(GCFriendChatting* pPacket)
 {
 	char* pName = new char[pPacket->getPlayerName().size()+1];
-	strcpy(pName, pPacket->getPlayerName().c_str());
+	memcpy(pName, pPacket->getPlayerName().c_str(), pPacket->getPlayerName().size() + 1);
 	gC_vs_ui.RunFriendRequestAsk(pName);
 }
 //void UI_CanncelFriendRequest(C_VS_UI_ASK_DIALOG* pDialog)
@@ -164,14 +164,14 @@ void UI_RunFriendRequest(GCFriendChatting* pPacket)
 void UI_RunFriendRefuse(GCFriendChatting* pPacket)
 {
 	char* pName = new char[pPacket->getPlayerName().size()+1];
-	strcpy(pName, pPacket->getPlayerName().c_str());
+	memcpy(pName, pPacket->getPlayerName().c_str(), pPacket->getPlayerName().size() + 1);
 	gC_vs_ui.RunFriendOK();
 	gC_vs_ui.RunFriendRefuseAsk(pName);
 }
 void UI_RunFriendWait(GCFriendChatting* pPacket)
 {
 	char* pName = new char[pPacket->getPlayerName().size()+1];
-	strcpy(pName, pPacket->getPlayerName().c_str());
+	memcpy(pName, pPacket->getPlayerName().c_str(), pPacket->getPlayerName().size() + 1);
 	gC_vs_ui.RunFriendWaitAsk(pName);
 }
 void UI_RunFriendOK(GCFriendChatting* pPacket)
@@ -182,13 +182,13 @@ void UI_RunFriendOK(GCFriendChatting* pPacket)
 void UI_RunFriendExist(GCFriendChatting* pPacket)
 {
 	char* pName = new char[pPacket->getPlayerName().size()+1];
-	strcpy(pName, pPacket->getPlayerName().c_str());
+	memcpy(pName, pPacket->getPlayerName().c_str(), pPacket->getPlayerName().size() + 1);
 	gC_vs_ui.RunFriendExistAsk(pName);
 }
 void UI_RunFriendBlack(GCFriendChatting* pPacket)
 {
 	char* pName = new char[pPacket->getPlayerName().size()+1];
-	strcpy(pName, pPacket->getPlayerName().c_str());
+	memcpy(pName, pPacket->getPlayerName().c_str(), pPacket->getPlayerName().size() + 1);
 	gC_vs_ui.RunFriendBlackAsk(pName);
 }
 void UI_RunFriendDelete(GCFriendChatting* pPacket)
@@ -472,7 +472,7 @@ UI_SetWorldList()
 			groupName[i] = new char[strlen(groupNameOrg) + 1];
 
 			groupID[i] = iGroup->first;			
-			strcpy(groupName[i], groupNameOrg);
+			memcpy(groupName[i], groupNameOrg, strlen(groupNameOrg) + 1);
 			groupStatus[i] = status;
 
 			iGroup ++;
@@ -544,7 +544,7 @@ UI_SetServerList()
 			serverName[i] = new char[strlen(serverNameOrg) + 1];
 
 			serverID[i] = iServer->first;			
-			strcpy(serverName[i], serverNameOrg);
+			memcpy(serverName[i], serverNameOrg, strlen(serverNameOrg) + 1);
 			serverStatus[i] = status;
 
 			iServer ++;
@@ -1827,7 +1827,7 @@ UI_RunSkillTree(int domain, int maxLevel)
 			{
 				const char* pSkillName = (*g_pSkillInfoTable)[skillID].GetHName();
 
-				sprintf(str, "%3d%s (%s)", skillID, pSkillName, (*g_pSkillInfoTable)[skillID].GetName() );
+				SafeFormat::Format(str, "%3d%s (%s)", skillID, pSkillName, (*g_pSkillInfoTable)[skillID].GetName() );
 				
 				if( g_pSystemAvailableManager->GetLimitLearnSkillLevel() >= skillLevel )
 					g_pPCTalkBox->AddString( str );
@@ -1849,7 +1849,7 @@ UI_RunSkillTree(int domain, int maxLevel)
 		//---------------------------------------------------
 		if (availableSkills==0)
 		{
-			strcpy(str, (*g_pGameStringTable)[STRING_MESSAGE_NO_SKILL_TO_LEARN].GetString());
+			SafeFormat::Copy(str, (*g_pGameStringTable)[STRING_MESSAGE_NO_SKILL_TO_LEARN].GetString());
 		}
 		else
 		{
@@ -3801,8 +3801,8 @@ void	UI_RunConnect()
 		login.sz_id = new char[ g_CpCookie.length() + 1 ];
 		login.sz_password = new char[ 10 ];
 		
-		strcpy( login.sz_id, g_CpCookie.c_str() );		
-		strcpy( login.sz_password, "DarkEden" );
+		memcpy(login.sz_id, g_CpCookie.c_str(), g_CpCookie.size() + 1);
+		memcpy(login.sz_password, "DarkEden", sizeof("DarkEden"));
 		
 		gpC_base->SendMessage(UI_LOGIN, 0, 0, (void *)&login);
 	}
@@ -3835,10 +3835,10 @@ void	UI_RunConnect()
 */
 			static LOGIN	login;
 			login.sz_id = new char[  g_pUserInformation->UserID.GetLength() + 1 ];
-			login.sz_password = new char[ 20 ];
+			login.sz_password = new char[g_pUserInformation->AutoLogInKeyValue.GetLength() + 1];
 			
-			strcpy( login.sz_id, g_pUserInformation->UserID.GetString() );		
-			strcpy( login.sz_password, g_pUserInformation->AutoLogInKeyValue.GetString() );
+			SafeFormat::Copy(login.sz_id, g_pUserInformation->UserID.GetLength() + 1, g_pUserInformation->UserID.GetString());
+			SafeFormat::Copy(login.sz_password, g_pUserInformation->AutoLogInKeyValue.GetLength() + 1, g_pUserInformation->AutoLogInKeyValue.GetString());
 			
 			gpC_base->SendMessage(UI_LOGIN, 0, 0, (void *)&login);
 		}
@@ -4035,15 +4035,15 @@ void		UI_RunQuestList(GCSelectQuestID *pPacket)
 					bContinue = true;
 					char temp[100];
 					SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_HOUR), hour );
-					strcat(tempstr, temp);
-					strcat(tempstr, " ");
+					SafeFormat::Append(tempstr, temp);
+					SafeFormat::Append(tempstr, " ");
 				}
 				if(minute > 0 || bContinue)
 				{
 					bContinue = true;
 					char temp[100];
 					SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_MINUTE), minute );
-					strcat(tempstr, temp);			
+					SafeFormat::Append(tempstr, temp);
 				}
 				char selectType = 0;
 				switch( mkq->GetType() )
@@ -4091,11 +4091,11 @@ void		UI_RunQuestList(GCSelectQuestID *pPacket)
 					switch( mkq->GetGameType() )
 					{
 					case GAME_MINE :
-						strcat(tempstr,(*g_pGameStringTable)[STRING_MESSAGE_SELECT_CRAZY_MINE].GetString() );
+						SafeFormat::Append(tempstr,(*g_pGameStringTable)[STRING_MESSAGE_SELECT_CRAZY_MINE].GetString() );
 						g_pPCTalkBox->AddString( tempstr );
 						break;
 					case GAME_ARROW :
-						strcat(tempstr,(*g_pGameStringTable)[STRING_MESSAGE_SELECT_ARROW_TILES].GetString() );
+						SafeFormat::Append(tempstr,(*g_pGameStringTable)[STRING_MESSAGE_SELECT_ARROW_TILES].GetString() );
 						g_pPCTalkBox->AddString( tempstr );
 						break;
 					}
@@ -4144,15 +4144,15 @@ void		UI_RunQuestList(GCSelectQuestID *pPacket)
 					bContinue = true;
 					char temp[100];
 					SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_HOUR), hour );
-					strcat(timestr, temp);
-					strcat(timestr, " ");
+					SafeFormat::Append(timestr, temp);
+					SafeFormat::Append(timestr, " ");
 				}
 				if(minute > 0 || bContinue)
 				{
 					bContinue = true;
 					char temp[100];
 					SafeFormat::Format(temp, GetGameString(UI_STRING_MESSAGE_MINUTE), minute );
-					strcat(timestr, temp);			
+					SafeFormat::Append(timestr, temp);
 				}		
 				switch(mkq->GetType() )
 				{
