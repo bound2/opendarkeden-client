@@ -114,20 +114,19 @@ TEST(SafeFormat, FloatingFlagsPrecisionAndTruncationMatchTheCrt)
 TEST(SafeFormat, TextCharacterAndPointerFieldsMatchTheCrt)
 {
 	int object = 7;
-	for (const char* flags : {"", "-"})
-	for (const char* width : {"", "1", "8", "32"}) {
-		const std::string prefix = std::string("%") + flags + width;
-		for (const int value : {0, 65, 255}) MatchesCrt(prefix + "c", value);
+	for (unsigned mask = 0; mask < 32; ++mask) {
+		std::string flags;
+		for (unsigned bit = 0; bit < 5; ++bit)
+			if (mask & (1U << bit)) flags += "-+ 0#"[bit];
+		for (const char* width : {"", "1", "8", "32"})
 		for (const char* precision : {"", ".0", ".1", ".6", ".32"}) {
+			const std::string prefix = "%" + flags + width + precision;
+			for (const int value : {0, 65, 255}) MatchesCrt(prefix + "c", value);
 			for (const char* value : {"", "abc", "a string longer than the smallest buffers"})
-				MatchesCrt(prefix + precision + "s", value);
-			MatchesCrt(prefix + precision + "p", static_cast<void*>(&object));
-			MatchesCrt(prefix + precision + "p", static_cast<void*>(nullptr));
+				MatchesCrt(prefix + "s", value);
+			MatchesCrt(prefix + "p", static_cast<void*>(&object));
+			MatchesCrt(prefix + "p", static_cast<void*>(nullptr));
 		}
-	}
-	for (const char* format : {"%032p", "%032.6p", "%032.32p"}) {
-		MatchesCrt(format, static_cast<void*>(&object));
-		MatchesCrt(format, static_cast<void*>(nullptr));
 	}
 }
 

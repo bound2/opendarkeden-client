@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 
 #include "SafeFormat.h"
+#include "Platform.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -29,6 +30,13 @@ namespace {
 const int		MAX_FIELD_WIDTH		= 32;
 const int		MAX_PRECISION		= 32;
 const size_t	MAX_FLAGS			= 5;
+
+// Preserve the accepted CRT flag vocabulary, including its text extensions.
+#if defined(PLATFORM_WINDOWS) || defined(PLATFORM_MACOS)
+constexpr bool CRT_ZERO_PADS_TEXT = true;
+#else
+constexpr bool CRT_ZERO_PADS_TEXT = false;
+#endif
 
 // Digit runs are clamped here too, so a "%99999999999d" in the data
 // cannot overflow the int the width is accumulated into.
@@ -200,11 +208,11 @@ size_t Emit(char* dest, size_t size, size_t out, const char* flags,
 		const char* value = arg.pString != NULL ? arg.pString : "";
 		size_t length = 0;
 		while ((precision < 0 || length < static_cast<size_t>(precision)) && value[length]) ++length;
-		return EmitField(dest, size, out, "", 0, value, length, width, left, false);
+		return EmitField(dest, size, out, "", 0, value, length, width, left, zero && CRT_ZERO_PADS_TEXT);
 	}
 	if (conversion == 'c') {
 		const char value = static_cast<char>(arg.kind == ARG_SIGNED ? arg.sValue : arg.uValue);
-		return EmitField(dest, size, out, "", 0, &value, 1, width, left, false);
+		return EmitField(dest, size, out, "", 0, &value, 1, width, left, zero && CRT_ZERO_PADS_TEXT);
 	}
 	if (conversion == 'p') {
 		// Keep the CRT's pointer spelling. Its supported decimal field width
@@ -227,7 +235,16 @@ size_t Emit(char* dest, size_t size, size_t out, const char* flags,
 		memset(digits, '0', zeros);
 		memcpy(digits + zeros, buffer + 2, digitsLength);
 		digitsLength += zeros;
-		return EmitField(dest, size, out, "0x", 2, digits, digitsLength, width, left, zero && precision < 0);
+		const char* prefix = "0x";
+		size_t prefixLength = 2;
+#if defined(__GLIBC__)
+		// GNU treats non-null %p like a signed hexadecimal field; BSD and
+		// UCRT ignore these sign flags. GNU's textual null returned above.
+		if (strchr(flags, '+')) { prefix = "+0x"; prefixLength = 3; }
+		else if (strchr(flags, ' ')) { prefix = " 0x"; prefixLength = 3; }
+#endif
+		return EmitField(dest, size, out, prefix, prefixLength, digits, digitsLength,
+			width, left, zero && precision < 0);
 	}
 
 	// A double in fixed notation needs at most 309 integer digits, a sign,
