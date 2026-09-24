@@ -3251,7 +3251,7 @@ InitGameObject()
 
 	// Player 기본값 초기화
 	g_pPlayer = new MPlayer;
-	DEBUG_ADD_FORMAT("[g_pPlayer] %x", g_pPlayer);
+	DEBUG_ADD_FORMAT("[g_pPlayer] %p", static_cast<const void*>(g_pPlayer));
 
 	g_pPlayer->SetCreatureType( CREATURETYPE_SLAYER_MALE );
 

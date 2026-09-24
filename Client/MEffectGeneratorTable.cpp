@@ -200,7 +200,7 @@ MEffectGeneratorTable::Generate(
 	BYTE temp1, BYTE temp2)
 {	
 	#ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
-		DEBUG_ADD_FORMAT("EGT-Generate. ai=%d, target=0x%X", nActionInfo, pEffectTarget);
+		DEBUG_ADD_FORMAT("EGT-Generate. ai=%d, target=%p", nActionInfo, static_cast<const void*>(pEffectTarget));
 	#endif
 
 	if (nActionInfo >= g_pActionInfoTable->GetSize())
@@ -220,7 +220,7 @@ MEffectGeneratorTable::Generate(
 	if (pEffectTarget==NULL)
 	{
 		#ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
-			DEBUG_ADD_FORMAT("EGT-Generate OK0. ai=%d, target=0x%X", nActionInfo, pEffectTarget);
+			DEBUG_ADD_FORMAT("EGT-Generate OK0. ai=%d, target=%p", nActionInfo, static_cast<const void*>(pEffectTarget));
 		#endif
 
 		return;
@@ -244,14 +244,14 @@ MEffectGeneratorTable::Generate(
 		pEffectTarget = NULL;
 
 		#ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
-			DEBUG_ADD_FORMAT("EGT-Generate OK1. ai=%d, target=0x%X", nActionInfo, pEffectTarget);
+			DEBUG_ADD_FORMAT("EGT-Generate OK1. ai=%d, target=%p", nActionInfo, static_cast<const void*>(pEffectTarget));
 		#endif
 
 		return;
 	}
 
 	#ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
-		DEBUG_ADD_FORMAT("et=0x%X, targetID=%d, targetPhase=%d", pEffectTarget, (int)pEffectTarget->GetEffectID(), pEffectTarget->GetMaxPhase());
+		DEBUG_ADD_FORMAT("et=%p, targetID=%d, targetPhase=%d", static_cast<const void*>(pEffectTarget), (int)pEffectTarget->GetEffectID(), pEffectTarget->GetMaxPhase());
 	#endif
 	
 	//------------------------------------------------------------
@@ -348,7 +348,7 @@ MEffectGeneratorTable::Generate(
 			pEffectTarget = NULL;
 
 			#ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
-				DEBUG_ADD_FORMAT("[Error] EGT-Generate id=%d, ai=%d, target=0x%X", info.EffectGeneratorID, nActionInfo, pEffectTarget);
+				DEBUG_ADD_FORMAT("[Error] EGT-Generate id=%d, ai=%d, target=%p", info.EffectGeneratorID, nActionInfo, static_cast<const void*>(pEffectTarget));
 			#endif	
 			
 			return;
@@ -381,7 +381,7 @@ MEffectGeneratorTable::Generate(
 		egInfo.temp2				= temp2;
 
 		#ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
-			DEBUG_ADD_FORMAT("et=0x%X, targetID=%d, targetPhase2=%d", pEffectTarget, (int)pEffectTarget->GetEffectID(), pEffectTarget->GetMaxPhase());
+			DEBUG_ADD_FORMAT("et=%p, targetID=%d, targetPhase2=%d", static_cast<const void*>(pEffectTarget), (int)pEffectTarget->GetEffectID(), pEffectTarget->GetMaxPhase());
 		#endif
 
 		//------------------------------------------------------------
@@ -419,7 +419,7 @@ MEffectGeneratorTable::Generate(
 			}
 
 			#ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
-				DEBUG_ADD_FORMAT("et=0x%X, targetID=%d, targetPhase3=%d", pEffectTarget, (int)pEffectTarget->GetEffectID(), pEffectTarget->GetMaxPhase());
+				DEBUG_ADD_FORMAT("et=%p, targetID=%d, targetPhase3=%d", static_cast<const void*>(pEffectTarget), (int)pEffectTarget->GetEffectID(), pEffectTarget->GetMaxPhase());
 			#endif
 
 			bGenerated = true;
@@ -450,7 +450,7 @@ MEffectGeneratorTable::Generate(
 			pEffectTarget->SetResultNULL();
 
 			#ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
-				DEBUG_ADD_FORMAT("ExecuteResult. et=0x%X, targetID=%d, targetPhase4=%d", pEffectTarget, (int)pEffectTarget->GetEffectID(), pEffectTarget->GetMaxPhase());
+				DEBUG_ADD_FORMAT("ExecuteResult. et=%p, targetID=%d, targetPhase4=%d", static_cast<const void*>(pEffectTarget), (int)pEffectTarget->GetEffectID(), pEffectTarget->GetMaxPhase());
 			#endif
 
 			// 결과 실행
@@ -498,7 +498,7 @@ MEffectGeneratorTable::Generate(
 				pEffectTarget->SetResultNULL();
 				
 #ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
-				DEBUG_ADD_FORMAT("ExecuteResult. et=0x%X, targetID=%d, targetPhase4=%d", pEffectTarget, (int)pEffectTarget->GetEffectID(), pEffectTarget->GetMaxPhase());
+				DEBUG_ADD_FORMAT("ExecuteResult. et=%p, targetID=%d, targetPhase4=%d", static_cast<const void*>(pEffectTarget), (int)pEffectTarget->GetEffectID(), pEffectTarget->GetMaxPhase());
 #endif
 				
 				// 결과 실행
@@ -513,7 +513,7 @@ MEffectGeneratorTable::Generate(
 	}
 
 	#ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
-		DEBUG_ADD_FORMAT("EGT-Generate OK. ai=%d, target=0x%X", nActionInfo, pEffectTarget);
+		DEBUG_ADD_FORMAT("EGT-Generate OK. ai=%d, target=%p", nActionInfo, static_cast<const void*>(pEffectTarget));
 	#endif
 }
 
@@ -526,7 +526,7 @@ void
 MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 {
 	#ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
-		DEBUG_ADD_FORMAT("EGT-GenerateNext. target=0x%X", pEffect->GetEffectTarget());
+		DEBUG_ADD_FORMAT("EGT-GenerateNext. target=%p", static_cast<const void*>(pEffect->GetEffectTarget()));
 	#endif
 
 	if (pEffect==NULL)
@@ -655,7 +655,7 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 		|| m_pEffectGenerator[ info.EffectGeneratorID ]==NULL)
 	{
 		#ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
-			DEBUG_ADD_FORMAT("[Error] EGT-Generate id=%d, target=0x%X", info.EffectGeneratorID, pEffectTarget);
+			DEBUG_ADD_FORMAT("[Error] EGT-Generate id=%d, target=%p", info.EffectGeneratorID, static_cast<const void*>(pEffectTarget));
 		#endif	
 
 		// 목표 완료시킨다.
