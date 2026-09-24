@@ -5465,6 +5465,12 @@ void	C_VS_UI::PowerjjangGambleResult(BYTE bItemCode)
 	if (m_pC_game)
 		m_pC_game->PowerjjangGambleResult(bItemCode);
 }
+
+void	C_VS_UI::RefreshPointExchange()
+{
+	if (m_pC_game)
+		m_pC_game->RefreshPointExchange();
+}
 // 2004, 11, 30, sobeit add end
 
 // 2005, 1, 3, sobeit add start

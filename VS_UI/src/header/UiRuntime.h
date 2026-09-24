@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <list>
+#include <string>
 
 class CSprite;
 class Packet;
@@ -25,6 +26,8 @@ struct ExchangeFilter {
 	std::uint16_t itemType = 0xffff;
 	int minPrice = 0;
 	int maxPrice = 0;
+	// A part of the seller's player name; empty matches every seller.
+	std::string sellerFilter;
 };
 
 // Borrowed callbacks, installed before UI initialization and cleared at shutdown.

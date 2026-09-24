@@ -26,7 +26,7 @@ GCRequestPowerPointResult::~GCRequestPowerPointResult ()
 }
 
 //--------------------------------------------------------------------------------
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+// Read data from the input stream (buffer) and initialise the packet.
 //--------------------------------------------------------------------------------
 void GCRequestPowerPointResult::read ( SocketInputStream & iStream )
 {
@@ -34,18 +34,20 @@ void GCRequestPowerPointResult::read ( SocketInputStream & iStream )
 
 	// Error code
 	iStream.read( m_ErrorCode );
+	if ( m_ErrorCode > kLastResultCode )
+		throw InvalidProtocolException("power point result code out of range");
 
-	// 현재 누적된 파워짱 포인트
+	// PowerZzang points accumulated so far
 	iStream.read( m_SumPowerPoint );
 
-	// 요청으로 가져온 파워짱 포인트
+	// PowerZzang points fetched by the request
 	iStream.read( m_RequestPowerPoint );
 	__END_CATCH
 }
 
 		    
 //--------------------------------------------------------------------------------
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+// Send the packet's binary image to the output stream (buffer).
 //--------------------------------------------------------------------------------
 void GCRequestPowerPointResult::write ( SocketOutputStream & oStream ) const
 {
@@ -54,10 +56,10 @@ void GCRequestPowerPointResult::write ( SocketOutputStream & oStream ) const
 	// Error code
 	oStream.write( m_ErrorCode );
 
-	// 현재 누적된 파워짱 포인트
+	// PowerZzang points accumulated so far
 	oStream.write( m_SumPowerPoint );
 
-	// 요청으로 가져온 파워짱 포인트
+	// PowerZzang points fetched by the request
 	oStream.write( m_RequestPowerPoint );
 	__END_CATCH
 }

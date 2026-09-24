@@ -14,7 +14,7 @@
 // constructor
 //--------------------------------------------------------------------------------
 GCUsePowerPointResult::GCUsePowerPointResult ()
-	: m_ErrorCode(0), m_ItemCode(0)
+	: m_ErrorCode(0), m_ItemCode(0), m_PowerPoint(0)
 {
 }
 
@@ -26,8 +26,7 @@ GCUsePowerPointResult::~GCUsePowerPointResult ()
 }
 
 //--------------------------------------------------------------------------------
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
-
+// Read data from the input stream (buffer) and initialise the packet.
 //--------------------------------------------------------------------------------
 void GCUsePowerPointResult::read ( SocketInputStream & iStream )
 {
@@ -35,9 +34,13 @@ void GCUsePowerPointResult::read ( SocketInputStream & iStream )
 
 	// Error code
 	iStream.read( m_ErrorCode );
+	if ( m_ErrorCode > kLastResultCode )
+		throw InvalidProtocolException("power point result code out of range");
 
 	// Item Code
 	iStream.read( m_ItemCode );
+	if ( m_ItemCode > kLastItemCode )
+		throw InvalidProtocolException("power point item code out of range");
 
 	// Power Point
 	iStream.read( m_PowerPoint );
@@ -47,7 +50,7 @@ void GCUsePowerPointResult::read ( SocketInputStream & iStream )
 
 		    
 //--------------------------------------------------------------------------------
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+// Send the packet's binary image to the output stream (buffer).
 //--------------------------------------------------------------------------------
 void GCUsePowerPointResult::write ( SocketOutputStream & oStream ) const
 {

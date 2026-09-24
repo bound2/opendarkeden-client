@@ -107,6 +107,7 @@ private:
 	int							m_filterItemType;
 	int							m_minPrice;
 	int							m_maxPrice;
+	std::string					m_filterSeller;	// empty = every seller
 
 	// Selected item
 	ExchangeListingItem*		m_pSelectedItem;
