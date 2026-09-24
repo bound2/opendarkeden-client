@@ -42,7 +42,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: bound2/opendarkeden-server
-          ref: cc6478598b6ef1e44cff22f5884d43c28fdedd4e
+          ref: 0d3580f85e91e8a031993ec0d8ee0326e6598e6a
           path: build/gateway
           sparse-checkout: tools/websocket
           persist-credentials: false
