@@ -10,17 +10,23 @@ try {
     const page = await browser.newPage();
     page.on('console', message => console.log(message.text()));
     await page.goto(origin, { waitUntil: 'domcontentloaded' });
-    const result = await page.evaluate(async endpoint => {
-      const { default: createProbe } = await import('./transport_tests.mjs');
-      return new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => reject(new Error('Transport probe did not exit')), 35000);
-        createProbe({ arguments: [endpoint], print: console.log, printErr: console.error,
-          onExit: code => { clearTimeout(timeout); resolve(code); },
-          onAbort: reason => { clearTimeout(timeout); reject(new Error(String(reason))); },
-        }).catch(reject);
-      });
-    }, endpoint);
-    assert.equal(result, 0, `Transport probe failed: ${endpoint}`);
-    await page.close();
+    let watchdog;
+    try {
+      const result = await Promise.race([
+        page.evaluate(async endpoint => {
+          const { default: createProbe } = await import('./transport_tests.mjs');
+          return new Promise((resolve, reject) => {
+            createProbe({ arguments: [endpoint], print: console.log, printErr: console.error,
+              onExit: resolve,
+              onAbort: reason => reject(new Error(String(reason))),
+            }).catch(reject);
+          });
+        }, endpoint),
+        // Keep the watchdog outside the page: a blocked WASM main thread
+        // cannot run its own JavaScript timeout.
+        new Promise((_, reject) => { watchdog = setTimeout(() => reject(new Error('Transport probe did not exit')), 35000); }),
+      ]);
+      assert.equal(result, 0, `Transport probe failed: ${endpoint}`);
+    } finally { clearTimeout(watchdog); await page.close(); }
   }
 } finally { await browser.close(); }

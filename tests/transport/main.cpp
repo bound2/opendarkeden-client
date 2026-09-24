@@ -1,6 +1,7 @@
 // Exercise the production Socket adapter against the binary gateway fixture.
 #define SDL_MAIN_HANDLED
 #include "Socket.h"
+#include "SocketOutputStream.h"
 #include "WebSocketTransport.h"
 
 #include <chrono>
@@ -18,6 +19,7 @@
 namespace {
 struct Probe {
 	std::unique_ptr<Socket> socket;
+	std::unique_ptr<SocketOutputStream> output;
 	std::vector<unsigned char> expected;
 	std::vector<unsigned char> received;
 	std::size_t sent = 0;
@@ -31,6 +33,11 @@ struct Probe {
 		for (std::size_t i = 0; i < expected.size(); ++i) expected[i] = static_cast<unsigned char>(i * 31);
 		socket->setNonBlocking(true);
 		socket->connect();
+		output = std::make_unique<SocketOutputStream>(socket.get(), 1024);
+		output->write(reinterpret_cast<const char*>(expected.data()), static_cast<uint>(expected.size()));
+		// The game queues packets immediately after connect. This must yield
+		// while the asynchronous handshake is pending, retaining every byte.
+		sent = output->flush();
 	}
 
 	void tick()
@@ -43,7 +50,7 @@ struct Probe {
 		}
 		try {
 			if (phase < 3 && sent < expected.size())
-				sent += socket->send(expected.data() + sent, static_cast<uint>(expected.size() - sent));
+				sent += output->flush();
 			unsigned char bytes[97];
 			for (int i = 0; i < 512; ++i) {
 				try {
@@ -58,6 +65,8 @@ struct Probe {
 				sent = 0;
 				received.clear();
 				socket->reconnect(phase == 1 ? "192.0.2.3" : "192.0.2.2", phase == 1 ? 9998 : phase == 3 ? 9997 : 9999);
+				if (phase < 3)
+					output->write(reinterpret_cast<const char*>(expected.data()), static_cast<uint>(expected.size()));
 			}
 		} catch (ConnectException& error) {
 			// The fixture either rejects the last route or sends a text frame.

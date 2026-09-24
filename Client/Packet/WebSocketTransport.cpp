@@ -173,7 +173,7 @@ unsigned int WebSocketTransport::send(const void* bytes, unsigned int length)
 	{
 		std::lock_guard<std::mutex> lock(state.mutex);
 		state.check();
-		if (!state.opened) return 0;
+		if (!state.opened) throw NonBlockingIOException("WebSocket handshake is pending");
 	}
 	// Keep messages small; packet boundaries belong to SocketOutputStream.
 	length = (std::min)(length, 64u * 1024u);
@@ -182,11 +182,13 @@ unsigned int WebSocketTransport::send(const void* bytes, unsigned int length)
 	std::size_t buffered = 0;
 	if (emscripten_websocket_get_buffered_amount(state.socket, &buffered) != EMSCRIPTEN_RESULT_SUCCESS)
 		throw ConnectException("Cannot query WebSocket output");
-	if (buffered > MaxBufferedBytes - length) return 0;
+	if (buffered > MaxBufferedBytes - length)
+		throw NonBlockingIOException("WebSocket output is full");
 	if (emscripten_websocket_send_binary(state.socket, const_cast<void*>(bytes), length) != EMSCRIPTEN_RESULT_SUCCESS)
 		throw ConnectException("WebSocket send failed");
 #else
-	if (state.socket.bufferedAmount() > MaxBufferedBytes - length) return 0;
+	if (state.socket.bufferedAmount() > MaxBufferedBytes - length)
+		throw NonBlockingIOException("WebSocket output is full");
 	if (!state.socket.sendBinary(ix::IXWebSocketSendData(static_cast<const char*>(bytes), length)).success)
 		throw ConnectException("WebSocket send failed");
 #endif
