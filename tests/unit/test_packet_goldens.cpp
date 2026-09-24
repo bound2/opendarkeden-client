@@ -89,8 +89,10 @@
 #include "Gpackets/GCMoveError.h"
 #include "Gpackets/GCAddItemToItemVerify.h"
 #include "Gpackets/GCMoveOK.h"
+#include "Gpackets/GCRequestPowerPointResult.h"
 #include "Gpackets/GCSay.h"
 #include "Gpackets/GCSystemMessage.h"
+#include "Gpackets/GCUsePowerPointResult.h"
 #include "Gpackets/GCExchangeBuy.h"
 #include "Gpackets/GCExchangeList.h"
 #include "Rpackets/RCPositionInfo.h"
@@ -1362,6 +1364,72 @@ TEST(GCGuildChat, RejectsAnOverlongSenderAndGuildName)
 	emptySender.push_back(0);
 	emptySender.push_back(0);
 	CHECK(Rejects<GCGuildChat>(emptySender));
+}
+
+//----------------------------------------------------------------------
+// The power-point results refuse a code past the last enumerator of the
+// list it names, as the server's copies do. The last enumerator itself
+// parses; one past it is refused. Each hostile body differs from the
+// good one in the byte under test only.
+//----------------------------------------------------------------------
+TEST(GCUsePowerPointResult, RejectsAResultOrItemCodePastTheLastEnumerator)
+{
+	const BYTE lastResult = GCUsePowerPointResult::kLastResultCode;
+	const BYTE lastItem = GCUsePowerPointResult::kLastItemCode;
+	CHECK_EQ((int)GCUsePowerPointResult::NOT_ENOUGH_INVENTORY_SPACE, (int)lastResult);
+	CHECK_EQ((int)GCUsePowerPointResult::BLACK_RICE_CAKE_SOUP, (int)lastItem);
+
+	GCUsePowerPointResult good;
+	good.setErrorCode(lastResult);
+	good.setItemCode(lastItem);
+	good.setPowerPoint(0xC0D1E2F3u);	// wider than a BYTE, so the setter keeps all four
+	const std::vector<unsigned char> body = WriteBody(good, 0);
+	CHECK_EQ((size_t)(szBYTE + szBYTE + szDWORD), body.size());	// code, item, points
+	CHECK(!Rejects<GCUsePowerPointResult>(body));
+
+	GCUsePowerPointResult parsed;
+	ReadBody(parsed, body, 0);
+	CHECK_EQ((int)lastResult, (int)parsed.getErrorCode());
+	CHECK_EQ((int)lastItem, (int)parsed.getItemCode());
+	CHECK_EQ(0xC0D1E2F3u, parsed.getPowerPoint());
+
+	std::vector<unsigned char> badResult = body;
+	badResult[0] = (unsigned char)(lastResult + 1);
+	CHECK(Rejects<GCUsePowerPointResult>(badResult));
+	badResult[0] = 0xFF;
+	CHECK(Rejects<GCUsePowerPointResult>(badResult));
+
+	std::vector<unsigned char> badItem = body;
+	badItem[1] = (unsigned char)(lastItem + 1);
+	CHECK(Rejects<GCUsePowerPointResult>(badItem));
+	badItem[1] = 0xFF;
+	CHECK(Rejects<GCUsePowerPointResult>(badItem));
+}
+
+TEST(GCRequestPowerPointResult, RejectsAResultCodePastTheLastEnumerator)
+{
+	const BYTE lastResult = GCRequestPowerPointResult::kLastResultCode;
+	CHECK_EQ((int)GCRequestPowerPointResult::CONNECT_ERROR, (int)lastResult);
+
+	GCRequestPowerPointResult good;
+	good.setErrorCode(lastResult);
+	good.setSumPowerPoint(1234);
+	good.setRequestPowerPoint(56);
+	const std::vector<unsigned char> body = WriteBody(good, 0);
+	CHECK_EQ((size_t)(szBYTE + szint + szint), body.size());	// code, sum, request
+	CHECK(!Rejects<GCRequestPowerPointResult>(body));
+
+	GCRequestPowerPointResult parsed;
+	ReadBody(parsed, body, 0);
+	CHECK_EQ((int)lastResult, (int)parsed.getErrorCode());
+	CHECK_EQ(1234, parsed.getSumPowerPoint());
+	CHECK_EQ(56, parsed.getRequestPowerPoint());
+
+	std::vector<unsigned char> bad = body;
+	bad[0] = (unsigned char)(lastResult + 1);
+	CHECK(Rejects<GCRequestPowerPointResult>(bad));
+	bad[0] = 0xFF;
+	CHECK(Rejects<GCRequestPowerPointResult>(bad));
 }
 
 // Type != 0 with an empty guild name: write() emits the zero length
