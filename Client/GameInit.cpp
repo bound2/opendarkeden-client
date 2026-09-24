@@ -3004,7 +3004,7 @@ static bool PartyJoinByID(TYPE_OBJECTID id, MString& name)
 
 static TYPE_OBJECTID PartyJoinByName(const char* name)
 {
-	if (!g_pZone) return OBJECTID_NULL;
+	if (!g_pZone || !g_pPlayer) return OBJECTID_NULL;
 	const auto id = g_pZone->GetCreatureID(name, 1);
 	if (auto* creature = g_pZone->GetCreature(id)) creature->SetPlayerParty();
 	return id;
@@ -3018,7 +3018,7 @@ static void PartyLeaveByID(TYPE_OBJECTID id)
 
 static void PartyLeaveByName(const char* name)
 {
-	if (g_pZone) PartyLeaveByID(g_pZone->GetCreatureID(name, 1));
+	if (g_pZone && g_pPlayer) PartyLeaveByID(g_pZone->GetCreatureID(name, 1));
 }
 
 static const MPartyHost s_PartyHost = {
