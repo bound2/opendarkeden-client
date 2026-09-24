@@ -1184,8 +1184,10 @@ rounds settled* for the host rules). Test fixtures share
   > calling it and indexes message arrays only after eligibility succeeds.
   > `TextUtf8.h` also owns the scalar-boundary prefix operation used by resource
   > line clipping and all three in-place string reducers. Their byte/storage
-  > bounds and valid UTF-8 output are tested independently; the old wrapping
-  > predicate and caller loops remain follow-up work under findings 116/135.
+  > bounds and valid UTF-8 output are tested independently. Findings 116/135
+  > are closed by the caller migrations below and retirement of the old
+  > wrapping predicate; the shared declaration and compiled implementation
+  > are gone.
   > Multiline tooltip sizing and drawing now share `basic/TextWrap` rows:
   > complete UTF-8 scalars, explicit newlines and progress at narrow columns,
   > with owned strings instead of temporary writes into borrowed text. Width
@@ -1544,8 +1546,9 @@ Complete rejected sprites leave the following packed record readable, while
 truncation leaves an empty object and failed stream. Encoded counts, decoded
 width and palette indices are validated before publication; conversion changes
 only fixed colors. `test_index_sprite_loading.cpp` owns these contracts and
-empty-sprite release state. Offline real-art validation and rejection logging
-remain separate review follow-ups.
+empty-sprite release state. Rejection diagnostics are owned by task 5.5;
+the [2026-09-23 asset audit](sprite-asset-audit-2026-09-23.md) records offline
+production-loader validation and its explicit coverage limits.
 
 The unused GL import and TGA/IMG interfaces are deleted, together with their
 abandoned UI drawing comments. VS_UI uses the existing SDL surface helper;
