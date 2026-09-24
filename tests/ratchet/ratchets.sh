@@ -725,7 +725,8 @@ check "R7 (data-file format strings passed to printf)" "$R7" "$R7_BASELINE"
 # wrong.
 # 40: removing the wsprintf shim removes its declaration and vararg forward;
 # the wide MinTrace command now uses an explicit wide literal instead of _T().
-R8_BASELINE=40
+# 34: SafeFormat emits validated arguments through literal CRT conversions.
+R8_BASELINE=34
 
 for d in Client VS_UI; do
 	if [ ! -d "$d" ]; then
