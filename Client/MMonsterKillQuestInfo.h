@@ -15,7 +15,9 @@
 #ifndef __MONSTER_KILL_QUEST_INFO_HEADER__
 #define __MONSTER_KILL_QUEST_INFO_HEADER__
 
+#ifdef _MSC_VER
 #pragma warning(disable:4786)
+#endif
 
 #include "CTypeTable.h"
 #include "MQuestInfo.h"
