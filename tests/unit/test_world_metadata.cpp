@@ -50,6 +50,7 @@ TEST(WorldMetadata, CreatureRecordsOwnActionArraysAndSpriteMappings)
 	sprites.Init(2);
 	sprites.AddCreatureType(1, 42);
 	CHECK_EQ(42, sprites.GetRandomCreatureType(1));
+	sprites.Release(); // This legacy mapper requires explicit cleanup.
 }
 
 TEST(WorldMetadata, ServerNpcRowsUpdateBothLibraryOwnedTables)
