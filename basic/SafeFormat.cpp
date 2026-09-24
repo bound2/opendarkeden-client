@@ -95,157 +95,190 @@ Accepts(char cConversion, const Arg& arg)
 
 
 //----------------------------------------------------------------------
-// Rebuild the specification from the parts this file parsed.
-//
-// The length modifier the entry supplied is discarded and replaced by
-// the one the argument's real width calls for. That is what makes a
-// "%ld" against a 32 bit argument print correctly instead of reading
-// eight bytes, and what turns a "%ls" into a narrow print of the char*
-// that was really passed rather than a wchar_t* scan of it.
-//----------------------------------------------------------------------
-void
-BuildSpec(char* pSpec, size_t nSpec, const char* pFlags, int nWidth,
-		  int nPrecision, char cConversion, const Arg& arg)
+// Emit validated values with literal CRT formats. Input flags and field sizes
+// control bounded padding; they are never assembled into a CRT format string.
+size_t AppendPadding(char* dest, size_t size, size_t out, char value, size_t count)
 {
-	char* w = pSpec;
-
-	*w++ = '%';
-
-	for (const char* f=pFlags; *f!='\0'; f++)
-	{
-		*w++ = *f;
-	}
-
-	if (nWidth >= 0)
-	{
-		if (nWidth > MAX_FIELD_WIDTH)
-		{
-			nWidth = MAX_FIELD_WIDTH;
-		}
-
-		w += snprintf(w, nSpec - (w - pSpec), "%d", nWidth);
-	}
-
-	if (nPrecision >= 0)
-	{
-		if (nPrecision > MAX_PRECISION)
-		{
-			nPrecision = MAX_PRECISION;
-		}
-
-		w += snprintf(w, nSpec - (w - pSpec), ".%d", nPrecision);
-	}
-
-	const bool bIsInteger = (cConversion=='d' || cConversion=='i'
-						  || cConversion=='u' || cConversion=='o'
-						  || cConversion=='x' || cConversion=='X');
-
-	if (bIsInteger && arg.nBytes > sizeof(int))
-	{
-		*w++ = 'l';
-		*w++ = 'l';
-	}
-
-	*w++ = cConversion;
-	*w   = '\0';
+	const size_t room = size - 1 - out;
+	if (count > room) count = room;
+	memset(dest + out, value, count);
+	return count;
 }
 
-
-//----------------------------------------------------------------------
-// Perform one conversion into what is left of the destination.
-//
-// The width a value is issued at follows the width the caller declared,
-// not the widest type available: printf("%x", -1) prints ffffffff for an
-// int and sixteen f for a long long, and this must not change what a
-// call site already printed correctly.
-//----------------------------------------------------------------------
-size_t
-Emit(char* pDest, size_t nSize, size_t nOut, const char* pSpec,
-	 char cConversion, const Arg& arg)
+size_t EmitField(char* dest, size_t size, size_t out, const char* prefix,
+				 size_t prefixLength, const char* value, size_t length,
+				 int width, bool left, bool zero)
 {
-	// The caller guarantees room for at least one byte plus a terminator.
-	const size_t	nRoom	= nSize - nOut;
-	char* const		pAt		= pDest + nOut;
+	const size_t start = out;
+	const size_t total = prefixLength + length;
+	const size_t padding = width > 0 && static_cast<size_t>(width) > total
+		? static_cast<size_t>(width) - total : 0;
+	if (!left && !zero) out += AppendPadding(dest, size, out, ' ', padding);
+	out += AppendLiteral(dest, size, out, prefix, prefixLength);
+	if (!left && zero) out += AppendPadding(dest, size, out, '0', padding);
+	out += AppendLiteral(dest, size, out, value, length);
+	if (left) out += AppendPadding(dest, size, out, ' ', padding);
+	return out - start;
+}
 
-	int n = -1;
+// Float spelling (including non-finite values) stays with the platform CRT.
+// Every conversion and flag combination below is a literal. A negative field
+// width supplies left alignment; zero width leaves space padding to EmitField.
+int EmitFloat(char* buffer, size_t capacity, double value, int width, int precision,
+			  char conversion, bool plus, bool blank, bool alternate)
+{
+	switch (conversion) {
+	case 'e':
+		if (plus) return alternate ? snprintf(buffer, capacity, "%+#0*.*e", width, precision, value)
+			: snprintf(buffer, capacity, "%+0*.*e", width, precision, value);
+		if (blank) return alternate ? snprintf(buffer, capacity, "% #0*.*e", width, precision, value)
+			: snprintf(buffer, capacity, "% 0*.*e", width, precision, value);
+		return alternate ? snprintf(buffer, capacity, "%#0*.*e", width, precision, value)
+			: snprintf(buffer, capacity, "%0*.*e", width, precision, value);
+	case 'E':
+		if (plus) return alternate ? snprintf(buffer, capacity, "%+#0*.*E", width, precision, value)
+			: snprintf(buffer, capacity, "%+0*.*E", width, precision, value);
+		if (blank) return alternate ? snprintf(buffer, capacity, "% #0*.*E", width, precision, value)
+			: snprintf(buffer, capacity, "% 0*.*E", width, precision, value);
+		return alternate ? snprintf(buffer, capacity, "%#0*.*E", width, precision, value)
+			: snprintf(buffer, capacity, "%0*.*E", width, precision, value);
+	case 'f':
+		if (plus) return alternate ? snprintf(buffer, capacity, "%+#0*.*f", width, precision, value)
+			: snprintf(buffer, capacity, "%+0*.*f", width, precision, value);
+		if (blank) return alternate ? snprintf(buffer, capacity, "% #0*.*f", width, precision, value)
+			: snprintf(buffer, capacity, "% 0*.*f", width, precision, value);
+		return alternate ? snprintf(buffer, capacity, "%#0*.*f", width, precision, value)
+			: snprintf(buffer, capacity, "%0*.*f", width, precision, value);
+	case 'F':
+		if (plus) return alternate ? snprintf(buffer, capacity, "%+#0*.*F", width, precision, value)
+			: snprintf(buffer, capacity, "%+0*.*F", width, precision, value);
+		if (blank) return alternate ? snprintf(buffer, capacity, "% #0*.*F", width, precision, value)
+			: snprintf(buffer, capacity, "% 0*.*F", width, precision, value);
+		return alternate ? snprintf(buffer, capacity, "%#0*.*F", width, precision, value)
+			: snprintf(buffer, capacity, "%0*.*F", width, precision, value);
+	case 'g':
+		if (plus) return alternate ? snprintf(buffer, capacity, "%+#0*.*g", width, precision, value)
+			: snprintf(buffer, capacity, "%+0*.*g", width, precision, value);
+		if (blank) return alternate ? snprintf(buffer, capacity, "% #0*.*g", width, precision, value)
+			: snprintf(buffer, capacity, "% 0*.*g", width, precision, value);
+		return alternate ? snprintf(buffer, capacity, "%#0*.*g", width, precision, value)
+			: snprintf(buffer, capacity, "%0*.*g", width, precision, value);
+	case 'G':
+		if (plus) return alternate ? snprintf(buffer, capacity, "%+#0*.*G", width, precision, value)
+			: snprintf(buffer, capacity, "%+0*.*G", width, precision, value);
+		if (blank) return alternate ? snprintf(buffer, capacity, "% #0*.*G", width, precision, value)
+			: snprintf(buffer, capacity, "% 0*.*G", width, precision, value);
+		return alternate ? snprintf(buffer, capacity, "%#0*.*G", width, precision, value)
+			: snprintf(buffer, capacity, "%0*.*G", width, precision, value);
+	case 'a':
+		if (plus) return alternate ? snprintf(buffer, capacity, "%+#0*.*a", width, precision, value)
+			: snprintf(buffer, capacity, "%+0*.*a", width, precision, value);
+		if (blank) return alternate ? snprintf(buffer, capacity, "% #0*.*a", width, precision, value)
+			: snprintf(buffer, capacity, "% 0*.*a", width, precision, value);
+		return alternate ? snprintf(buffer, capacity, "%#0*.*a", width, precision, value)
+			: snprintf(buffer, capacity, "%0*.*a", width, precision, value);
+	case 'A':
+		if (plus) return alternate ? snprintf(buffer, capacity, "%+#0*.*A", width, precision, value)
+			: snprintf(buffer, capacity, "%+0*.*A", width, precision, value);
+		if (blank) return alternate ? snprintf(buffer, capacity, "% #0*.*A", width, precision, value)
+			: snprintf(buffer, capacity, "% 0*.*A", width, precision, value);
+		return alternate ? snprintf(buffer, capacity, "%#0*.*A", width, precision, value)
+			: snprintf(buffer, capacity, "%0*.*A", width, precision, value);
+	default: return -1;
+	}
+}
 
-	switch (cConversion)
-	{
-		case 'd': case 'i':
-		{
-			const long long value = (arg.kind==ARG_SIGNED)
-								  ? arg.sValue
-								  : (long long)arg.uValue;
-
-			n = (arg.nBytes > sizeof(int))
-			  ? snprintf(pAt, nRoom, pSpec, value)
-			  : snprintf(pAt, nRoom, pSpec, (int)value);
-			break;
-		}
-
-		case 'u': case 'o': case 'x': case 'X':
-		{
-			const unsigned long long value = (arg.kind==ARG_UNSIGNED)
-										   ? arg.uValue
-										   : (unsigned long long)arg.sValue;
-
-			n = (arg.nBytes > sizeof(int))
-			  ? snprintf(pAt, nRoom, pSpec, value)
-			  : snprintf(pAt, nRoom, pSpec, (unsigned int)value);
-			break;
-		}
-
-		case 'c':
-		{
-			const long long value = (arg.kind==ARG_SIGNED)
-								  ? arg.sValue
-								  : (long long)arg.uValue;
-
-			n = snprintf(pAt, nRoom, pSpec, (int)value);
-			break;
-		}
-
-		case 's':
-		{
-			// A NULL here is a call site bug rather than hostile data.
-			// It prints as nothing, which is what GetGameString() does
-			// with an id it cannot resolve; the CRT's "(null)" would put
-			// a word in the user interface that means nothing to a
-			// player.
-			n = snprintf(pAt, nRoom, pSpec,
-						 arg.pString!=NULL ? arg.pString : "");
-			break;
-		}
-
-		case 'p':
-		{
-			n = snprintf(pAt, nRoom, pSpec, arg.pPointer);
-			break;
-		}
-
-		default:
-		{
-			n = snprintf(pAt, nRoom, pSpec, arg.dValue);
-			break;
-		}
+size_t Emit(char* dest, size_t size, size_t out, const char* flags,
+			int width, int precision, char conversion, const Arg& arg)
+{
+	if (width > MAX_FIELD_WIDTH) width = MAX_FIELD_WIDTH;
+	if (precision > MAX_PRECISION) precision = MAX_PRECISION;
+	const bool left = strchr(flags, '-') != NULL;
+	const bool zero = strchr(flags, '0') != NULL;
+	const bool alternate = strchr(flags, '#') != NULL;
+	if (conversion == 's') {
+		const char* value = arg.pString != NULL ? arg.pString : "";
+		size_t length = 0;
+		while ((precision < 0 || length < static_cast<size_t>(precision)) && value[length]) ++length;
+		return EmitField(dest, size, out, "", 0, value, length, width, left, false);
+	}
+	if (conversion == 'c') {
+		const char value = static_cast<char>(arg.kind == ARG_SIGNED ? arg.sValue : arg.uValue);
+		return EmitField(dest, size, out, "", 0, &value, 1, width, left, false);
+	}
+	if (conversion == 'p') {
+		// Keep the CRT's pointer spelling. Its supported decimal field width
+		// is applied here, so no non-standard flags reach printf's %p.
+		char buffer[64];
+		const int count = snprintf(buffer, sizeof(buffer), "%p", arg.pPointer);
+		if (count < 0) return 0;
+		const size_t length = static_cast<size_t>(count) < sizeof(buffer)
+			? static_cast<size_t>(count) : sizeof(buffer) - 1;
+		// The Unix CRTs render hexadecimal pointers with a 0x prefix and
+		// accept integer-style precision. MSVC's fixed-width pointer spelling
+		// ignores precision and zero padding; GNU's textual null does too.
+		const bool hex = length >= 2 && buffer[0] == '0' && buffer[1] == 'x';
+		if (!hex) return EmitField(dest, size, out, "", 0, buffer, length, width, left, false);
+		char digits[64];
+		size_t digitsLength = length - 2;
+		const size_t zeros = precision > 0 && static_cast<size_t>(precision) > digitsLength
+			? static_cast<size_t>(precision) - digitsLength : 0;
+		memset(digits, '0', zeros);
+		memcpy(digits + zeros, buffer + 2, digitsLength);
+		digitsLength += zeros;
+		return EmitField(dest, size, out, "0x", 2, digits, digitsLength, width, left, zero && precision < 0);
 	}
 
-	// A negative return is an encoding error: the contents are
-	// unspecified, so nothing is kept from it.
-	if (n < 0)
-	{
-		*pAt = '\0';
-		return 0;
+	// A double in fixed notation needs at most 309 integer digits, a sign,
+	// the decimal point and the bounded 32 fractional digits. Integers are
+	// smaller. This buffer never scales with untrusted field sizes.
+	char buffer[512];
+	int count = -1;
+	bool signedValue = false;
+	unsigned long long unsignedValue = arg.kind == ARG_UNSIGNED ? arg.uValue : 0;
+	if (conversion == 'd' || conversion == 'i') {
+		long long value = arg.kind == ARG_SIGNED ? arg.sValue : static_cast<long long>(arg.uValue);
+		if (arg.nBytes <= sizeof(int)) value = static_cast<int>(value);
+		count = snprintf(buffer, sizeof(buffer), "%.*lld", precision, value);
+		signedValue = true;
+	} else if (conversion == 'u' || conversion == 'o' || conversion == 'x' || conversion == 'X') {
+		unsignedValue = arg.kind == ARG_UNSIGNED ? arg.uValue : static_cast<unsigned long long>(arg.sValue);
+		if (arg.nBytes <= sizeof(int)) unsignedValue = static_cast<unsigned int>(unsignedValue);
+		switch (conversion) {
+		case 'u': count = snprintf(buffer, sizeof(buffer), "%.*llu", precision, unsignedValue); break;
+		case 'o': count = snprintf(buffer, sizeof(buffer), "%.*llo", precision, unsignedValue); break;
+		case 'x': count = snprintf(buffer, sizeof(buffer), "%.*llx", precision, unsignedValue); break;
+		case 'X': count = snprintf(buffer, sizeof(buffer), "%.*llX", precision, unsignedValue); break;
+		}
+	} else {
+		const int field = width < 0 ? 0 : width;
+		count = EmitFloat(buffer, sizeof(buffer), arg.dValue,
+			left ? -field : zero ? field : 0, precision, conversion,
+			strchr(flags, '+') != NULL, strchr(flags, ' ') != NULL, alternate);
+		if (count < 0) { dest[out] = '\0'; return 0; }
+		const size_t length = static_cast<size_t>(count) < sizeof(buffer)
+			? static_cast<size_t>(count) : sizeof(buffer) - 1;
+		return EmitField(dest, size, out, "", 0, buffer, length, width, left, false);
 	}
-
-	// snprintf reports the length it would have written. What was really
-	// stored is that, or the room there was.
-	if ((size_t)n >= nRoom)
-	{
-		return nRoom - 1;
+	if (count < 0) { dest[out] = '\0'; return 0; }
+	size_t length = static_cast<size_t>(count);
+	if (length >= sizeof(buffer)) length = sizeof(buffer) - 1;
+	const char* value = buffer;
+	char prefix[4] = {};
+	size_t prefixLength = 0;
+	if (signedValue) {
+		if (length && *value == '-') {
+			prefix[prefixLength++] = '-'; ++value; --length;
+		} else if (strchr(flags, '+')) prefix[prefixLength++] = '+';
+		else if (strchr(flags, ' ')) prefix[prefixLength++] = ' ';
 	}
-
-	return (size_t)n;
+	if (alternate && conversion == 'o' && (!length || *value != '0')) {
+		prefix[prefixLength++] = '0';
+	} else if (alternate && unsignedValue && (conversion == 'x' || conversion == 'X')) {
+		prefix[prefixLength++] = '0'; prefix[prefixLength++] = conversion;
+	}
+	const bool padZeros = zero && precision < 0;
+	return EmitField(dest, size, out, prefix, prefixLength, value, length, width, left, padZeros);
 }
 
 } // anonymous namespace
@@ -383,7 +416,7 @@ FormatV(char* pDest, size_t nSize, const char* pFormat,
 
 		//--------------------------------------------------------------
 		// length modifier - parsed only so that it can be stepped over.
-		// BuildSpec issues the one the argument really needs.
+		// Emit selects the integer width from the tagged argument.
 		//--------------------------------------------------------------
 		if (*q=='h' || *q=='l')
 		{
@@ -437,10 +470,7 @@ FormatV(char* pDest, size_t nSize, const char* pFormat,
 			continue;
 		}
 
-		char szSpec[32];
-		BuildSpec(szSpec, sizeof(szSpec), szFlags, nWidth, nPrecision, cConversion, *pArg);
-
-		nOut += Emit(pDest, nSize, nOut, szSpec, cConversion, *pArg);
+		nOut += Emit(pDest, nSize, nOut, szFlags, nWidth, nPrecision, cConversion, *pArg);
 		nNext++;
 		p = q;
 	}

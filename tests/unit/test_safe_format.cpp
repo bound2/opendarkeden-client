@@ -28,6 +28,7 @@
 #include <cstdio>
 #include <cstring>
 #include <string>
+#include <limits>
 
 
 namespace {
@@ -44,6 +45,99 @@ Is(const char* expected, const char* actual)
 }
 
 } // anonymous namespace
+
+namespace {
+template <typename T>
+void MatchesCrt(const std::string& format, T value)
+{
+	char expected[512];
+	const int length = std::snprintf(expected, sizeof(expected), format.c_str(), value);
+	CHECK(length >= 0 && static_cast<size_t>(length) < sizeof(expected));
+	if (length < 0 || static_cast<size_t>(length) >= sizeof(expected)) return;
+	for (const size_t capacity : {size_t(1), size_t(2), size_t(7), size_t(32), sizeof(expected)}) {
+		char actual[528];
+		std::memset(actual, 0xCD, sizeof(actual));
+		const size_t stored = static_cast<size_t>(length) < capacity
+			? static_cast<size_t>(length) : capacity - 1;
+		const int written = SafeFormat::Format(actual, capacity, format.c_str(), value);
+		if (std::memcmp(expected, actual, stored) != 0) {
+			static int reported = 0;
+			if (reported++ < 10) std::fprintf(stderr, "CRT mismatch: %s (capacity %zu): expected [%s], actual [%s]\n", format.c_str(), capacity, expected, actual);
+		}
+		CHECK_EQ(static_cast<int>(stored), written);
+		CHECK_EQ(0, std::memcmp(expected, actual, stored));
+		CHECK_EQ(0, actual[stored]);
+		bool intact = true;
+		for (size_t i = capacity; i < sizeof(actual); ++i)
+			if (static_cast<unsigned char>(actual[i]) != 0xCD) intact = false;
+		CHECK(intact);
+	}
+}
+}
+
+TEST(SafeFormat, IntegerFlagsPrecisionAndTruncationMatchTheCrt)
+{
+	for (const char* flags : {"", "-", "+", " ", "0", "#", "-+", "+#", " #", "0#", "-0"})
+	for (const char* width : {"", "1", "8", "32"})
+	for (const char* precision : {"", ".0", ".1", ".6", ".32"}) {
+		const std::string prefix = std::string("%") + flags + width + precision;
+		for (const char* conversion : {"d", "i"}) {
+			for (const int value : {0, 42, -42, (std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)()})
+				MatchesCrt(prefix + conversion, value);
+			for (const long long value : {0LL, 5000000000LL, (std::numeric_limits<long long>::min)(), (std::numeric_limits<long long>::max)()})
+				MatchesCrt(prefix + "ll" + conversion, value);
+		}
+		for (const char* conversion : {"u", "o", "x", "X"}) {
+			for (const unsigned int value : {0U, 42U, (std::numeric_limits<unsigned int>::max)()})
+				MatchesCrt(prefix + conversion, value);
+			for (const unsigned long long value : {0ULL, 5000000000ULL, (std::numeric_limits<unsigned long long>::max)()})
+				MatchesCrt(prefix + "ll" + conversion, value);
+		}
+	}
+}
+
+TEST(SafeFormat, FloatingFlagsPrecisionAndTruncationMatchTheCrt)
+{
+	for (const char* flags : {"", "-", "+", " ", "0", "#", "-+", "+#", " #", "0#", "-0"})
+	for (const char* width : {"", "1", "8", "32"})
+	for (const char* precision : {"", ".0", ".1", ".6", ".32"})
+	for (const char* conversion : {"e", "E", "f", "F", "g", "G", "a", "A"}) {
+		const std::string format = std::string("%") + flags + width + precision + conversion;
+		for (const double value : {0.0, -0.0, 1.5, -12.5, (std::numeric_limits<double>::max)(),
+			(std::numeric_limits<double>::min)(), std::numeric_limits<double>::denorm_min(),
+			std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity(),
+			std::numeric_limits<double>::quiet_NaN()})
+			MatchesCrt(format, value);
+	}
+}
+
+TEST(SafeFormat, TextCharacterAndPointerFieldsMatchTheCrt)
+{
+	int object = 7;
+	for (const char* flags : {"", "-"})
+	for (const char* width : {"", "1", "8", "32"}) {
+		const std::string prefix = std::string("%") + flags + width;
+		for (const int value : {0, 65, 255}) MatchesCrt(prefix + "c", value);
+		for (const char* precision : {"", ".0", ".1", ".6", ".32"}) {
+			for (const char* value : {"", "abc", "a string longer than the smallest buffers"})
+				MatchesCrt(prefix + precision + "s", value);
+			MatchesCrt(prefix + precision + "p", static_cast<void*>(&object));
+			MatchesCrt(prefix + precision + "p", static_cast<void*>(nullptr));
+		}
+	}
+	for (const char* format : {"%032p", "%032.6p", "%032.32p"}) {
+		MatchesCrt(format, static_cast<void*>(&object));
+		MatchesCrt(format, static_cast<void*>(nullptr));
+	}
+}
+
+TEST(SafeFormat, StringPrecisionBoundsReadsFromAnUnterminatedArray)
+{
+	const char bytes[] = {'a', 'b', 'c'};
+	char result[16];
+	SafeFormat::Format(result, "[%.3s]", bytes);
+	CHECK(Is("[abc]", result));
+}
 
 
 //----------------------------------------------------------------------
