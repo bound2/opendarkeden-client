@@ -451,7 +451,7 @@ int spritectl_blt_sprite_rle(spritectl_surface_t dest, int x, int y,
 	}
 
 	/* Process each scanline */
-	for (int sy = clip_top; sy < clip_bottom; sy++) {
+	for (int sy = int(clip_top); sy < clip_bottom; sy++) {
 		if (!sprite->scanline_rle[sy] || sprite->scanline_lens[sy] == 0) {
 			continue;  /* Empty scanline */
 		}
