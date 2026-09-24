@@ -2925,7 +2925,8 @@ ApplyPatch()
 					_chmod( logFile, _S_IREAD | _S_IWRITE );
 					remove( logFile );
 
-					snprintf(logFile, sizeof(logFile), "%s\\Log\\Log%d.txt", g_CWD, timeGetTime());
+					snprintf(logFile, sizeof(logFile), "%s\\Log\\Log%lld.txt", g_CWD,
+						static_cast<long long>(MonotonicClock::Now().time_since_epoch().count()));
 					g_pDebugMessage = new CMessageArray;
 					g_pDebugMessage->Init(MAX_DEBUGMESSAGE, 256, logFile);
 
@@ -3545,8 +3546,9 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 		//---------------------------------------------------
 		if (g_pDebugMessage!=NULL)
 		{
-			char logFile[128];
-			snprintf(logFile, sizeof(logFile), "%s\\Log\\Log%d.txt", g_CWD, timeGetTime());			
+			char logFile[_MAX_PATH + 32];
+			snprintf(logFile, sizeof(logFile), "%s\\Log\\Log%lld.txt", g_CWD,
+				static_cast<long long>(MonotonicClock::Now().time_since_epoch().count()));
 
 //			#include <fcntl.h>
 //			char clogFile[128];

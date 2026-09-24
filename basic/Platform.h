@@ -1094,6 +1094,9 @@ typedef WORD			char_t;
 extern "C" {
 #endif
 
+/* Ordered font fallback paths; static storage, terminated by NULL. */
+const char* const* platform_get_font_paths(void);
+
 /* ============================================================================
  * Time Functions
  * ============================================================================ */
