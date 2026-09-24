@@ -182,7 +182,7 @@ void GCUpdateInfoHandler::execute ( GCUpdateInfo * pPacket , Player * pPlayer )
 		delete g_pPlayer;
 	}	
 	g_pPlayer = new MPlayer;
-	DEBUG_ADD_FORMAT("[g_pPlayer] %x", g_pPlayer);
+	DEBUG_ADD_FORMAT("[g_pPlayer] %p", static_cast<const void*>(g_pPlayer));
 
 	//--------------------------------------------------
 	//

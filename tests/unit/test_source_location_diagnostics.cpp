@@ -31,6 +31,7 @@
 #include "BasicException.h"
 #include "DebugLog.h"
 
+#include <cstdio>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -421,6 +422,15 @@ TEST(SourceLocationDiagnostics, LogLinesAreByteIdenticalBetweenEntryPoints)
 	log_write(LOG_LEVEL_ERROR, "typed.cpp", 5, "%s %d %s", 42);
 	log_write_at(LogSite("typed.cpp", 6), LOG_LEVEL_ERROR, "%s", "literal %s %n %%");
 
+	// Pointer diagnostics must use %p: a rejected %x would leave the
+	// pointer unconsumed and lose the strings and status that follow it.
+	int server = 0;
+	char address[64];
+	std::snprintf(address, sizeof(address), "%p", static_cast<void*>(&server));
+	log_write_at(LogSite("typed.cpp", 7), LOG_LEVEL_ERROR,
+		"[UI] SetCurrentServerName : %p %s %s %d",
+		static_cast<const void*>(&server), "Group", "Server", 3);
+
 	// Below the level: nothing may reach the file from either path.
 	log_write(LOG_LEVEL_WARN, "C:\\src\\Some.cpp", 78, "%s", "filtered");
 	log_write_at(LogSite(), LOG_LEVEL_WARN, "%s", "filtered");
@@ -444,14 +454,16 @@ TEST(SourceLocationDiagnostics, LogLinesAreByteIdenticalBetweenEntryPoints)
 	}
 	std::filesystem::remove(log_path, error);
 
-	CHECK_EQ(5, lines.size());
+	CHECK_EQ(6, lines.size());
 
-	if (lines.size() == 5)
+	if (lines.size() == 6)
 	{
 		CHECK(lines[0] == "[ERROR] [Some.cpp:77] unit 3");
 		CHECK(lines[1] == lines[0]);
 		CHECK(lines[3] == "[ERROR] [typed.cpp:5] %s 42 %s");
 		CHECK(lines[4] == "[ERROR] [typed.cpp:6] literal %s %n %%");
+		CHECK(lines[5] == std::string("[ERROR] [typed.cpp:7] [UI] SetCurrentServerName : ")
+			+ address + " Group Server 3");
 
 		// The function name is captured but deliberately not printed.
 		const std::string expected =

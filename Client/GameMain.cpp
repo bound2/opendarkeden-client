@@ -2827,7 +2827,7 @@ LoadZoneInfo(int n)
 
 			B_RECT	rect2;
 
-			DEBUG_ADD_FORMAT("[g_pPlayer] %x", g_pPlayer);
+			DEBUG_ADD_FORMAT("[g_pPlayer] %p", static_cast<const void*>(g_pPlayer));
 			//BYTE bSlayer = (g_pPlayer==NULL || g_pPlayer->IsSlayer());
 			Race MyRace = g_pPlayer->GetRace();
 			DEBUG_ADD("bSlayer OK");
