@@ -17,13 +17,27 @@
 
 namespace NetworkTransport {
 
+std::optional<std::string> ReadEnvironment(const char* name)
+{
+#ifdef _WIN32
+	char* value = nullptr;
+	std::size_t length = 0;
+	const auto result = _dupenv_s(&value, &length, name);
+	std::unique_ptr<char, decltype(&std::free)> storage(value, &std::free);
+	if (result != 0) throw Error("Cannot read network configuration");
+#else
+	const char* value = std::getenv(name);
+#endif
+	return value ? std::optional<std::string>(value) : std::nullopt;
+}
+
 bool UsesWebSocket()
 {
 #ifdef __EMSCRIPTEN__
 	return true;
 #else
-	const char* gateway = std::getenv("DARKEDEN_WEBSOCKET_URL");
-	return gateway && *gateway;
+	const auto gateway = ReadEnvironment("DARKEDEN_WEBSOCKET_URL");
+	return gateway && !gateway->empty();
 #endif
 }
 

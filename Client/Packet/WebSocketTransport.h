@@ -2,9 +2,13 @@
 
 #include <cstddef>
 #include <memory>
+#include <optional>
 #include <string>
 
 namespace NetworkTransport {
+
+// Return owned configuration text, rather than mutable CRT environment storage.
+std::optional<std::string> ReadEnvironment(const char* name);
 
 // Empty for native TCP. Browsers always use a gateway. The advertised game
 // endpoints remain unchanged, including login/world/relogin handoff packets.

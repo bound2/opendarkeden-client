@@ -14,7 +14,6 @@
 #include "PacketFileAPI.h"
 #include "SocketAPI.h"
 #include "WebSocketTransport.h"
-#include <cstdlib>
 
 #if defined(PLATFORM_POSIX)
 #include <sys/socket.h>
@@ -210,9 +209,9 @@ void SocketImpl::connect ( const std::string & host , uint port )
 	m_Host = host;
 	m_Port = port;
 	if (m_WebMode) {
-		const char* gateway = std::getenv("DARKEDEN_WEBSOCKET_URL");
+		const auto gateway = NetworkTransport::ReadEnvironment("DARKEDEN_WEBSOCKET_URL");
 		m_WebSocket = std::make_unique<NetworkTransport::WebSocketTransport>(
-			NetworkTransport::WebSocketURL(gateway ? gateway : "", host, port));
+			NetworkTransport::WebSocketURL(gateway.value_or(""), host, port));
 		return;
 	}
 

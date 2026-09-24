@@ -2018,13 +2018,13 @@ InitSocket()
 				}
 
 				// domain으로 된 주소인 경우..
-				if (const char* host = std::getenv("DARKEDEN_LOGIN_HOST")) {
-					if (*host) ServerAddress = host;
+				if (const auto host = NetworkTransport::ReadEnvironment("DARKEDEN_LOGIN_HOST")) {
+					if (!host->empty()) ServerAddress = *host;
 				}
-				if (const char* configuredPort = std::getenv("DARKEDEN_LOGIN_PORT")) {
+				if (const auto configuredPort = NetworkTransport::ReadEnvironment("DARKEDEN_LOGIN_PORT")) {
 					char* end = nullptr;
-					const long value = std::strtol(configuredPort, &end, 10);
-					if (!*configuredPort || *end || value < 1 || value > 65535)
+					const long value = std::strtol(configuredPort->c_str(), &end, 10);
+					if (configuredPort->empty() || *end || value < 1 || value > 65535)
 						throw ConnectException("Invalid DARKEDEN_LOGIN_PORT");
 					port = static_cast<uint>(value);
 				}
