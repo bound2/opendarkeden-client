@@ -5850,28 +5850,6 @@ PacketTest()
 	}
 }
 
-//-----------------------------------------------------------------------------
-// AttackMelee
-//-----------------------------------------------------------------------------
-/*
-#include "Packet/Gpackets/GCAttackMeleeOK2.h"
-#include "Packet/Gpackets/GCAttackMeleeOK3.h"
-void
-PacketAttackMelee(int user, int target)
-{
-	Packet* pPacket;
-	
-	if (user==g_pPlayer->GetID())
-	{
-		pPacket = new GCAttackMeleeOK1;
-	}
-	GCAttackMeleeOK3 packet;
-	packet.setObjectID( user );
-	packet.setTargetObjectID( target );
-
-	packet.execute( g_pSocket );
-}
-*/
 ///以下是检测系统是否有登陆二个用户
 int GetCurrentUserNumber()
 {

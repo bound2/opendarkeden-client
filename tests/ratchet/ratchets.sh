@@ -472,7 +472,8 @@ check "R4 (library cpps referencing g_p globals)" "$R4" "$R4_BASELINE"
 # Packet::execute was deleted, and now routed through the dispatcher.
 # With the virtual gone a new direct caller is a compile error first.
 #----------------------------------------------------------------------
-R5_BASELINE=1
+# The unused PacketAttackMelee block is deleted (2026-09-24).
+R5_BASELINE=0
 
 R5=$(grep -rnE '(\.|->)execute\s*\(\s*(g_pSocket|NULL|this|0)\s*\)' \
 	Client VS_UI --include='*.cpp' 2>/dev/null \
@@ -1118,7 +1119,8 @@ fi
 # does not include Platform.h still has to use - basic/DataPath.cpp
 # includes it for that reason. R13 = 1 as of 2026-09-08: the font list.
 #----------------------------------------------------------------------
-R13_BASELINE=1
+# Font fallback policy now lives in basic/PlatformSDL.cpp.
+R13_BASELINE=0
 
 r13_cxx_members () {
 	find Client VS_UI basic tools third_party tests \( -name '*.cpp' -o -name '*.h' -o -name '*.inl' \) 2>/dev/null
@@ -1236,7 +1238,8 @@ fi
 #----------------------------------------------------------------------
 # 2 on 2026-09-17: CheckTime returned before the purported hack check.
 # Remove that unreachable body and its two calls; only log-file naming remains.
-R14_BASELINE=2
+# Log filenames use the existing 64-bit monotonic clock.
+R14_BASELINE=0
 
 if [ ! -f tests/tools/count_tick_reads.pl ]; then
 	echo "FAIL R14: tests/tools/count_tick_reads.pl is missing"

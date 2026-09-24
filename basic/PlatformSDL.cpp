@@ -67,6 +67,65 @@
 	#include <mach-o/dyld.h>
 #endif
 
+// The text backend consumes the platform-owned fallback list in order.
+const char* const* platform_get_font_paths(void)
+{
+	static const char* const paths[] = {
+		"Data/Font/NotoSansCJK-Regular.ttc",
+		"Data/Font/NotoSans-Regular.ttf",
+		"Data/Font/DejaVuSans.ttf",
+		"Data/Font/Hiragino Sans GB.ttc",
+		// None of the Data/Font paths above ship with the game data (no
+		// font is part of it - see SPRITELIB_BACKEND_README), so the
+		// system fonts below are what actually loads. Before they were
+		// listed, every AcquireFont() call on Windows walked the Data/Font
+		// paths, failed, left TextService::m_initialized false for good,
+		// and EnsureInitialized() (called at the top of DrawLine,
+		// MeasureText and the rest) turned every text call into a silent
+		// no-op: no game text was drawn anywhere, not just in this dialog.
+#if defined(_WIN32)
+		// Every Windows installation has these. Malgun Gothic covers
+		// Hangul, Chinese and Latin together (the client mixes Korean
+		// development strings with the Chinese game string tables),
+		// Microsoft YaHei specialises in Simplified Chinese, and Arial
+		// is the Latin-only last resort.
+		"C:\\Windows\\Fonts\\malgun.ttf",
+		"C:\\Windows\\Fonts\\msyh.ttc",
+		"C:\\Windows\\Fonts\\simsun.ttc",
+		"C:\\Windows\\Fonts\\arial.ttf",
+#elif defined(PLATFORM_MACOS)
+		// Every macOS since 10.8 ships Apple SD Gothic Neo (Hangul and
+		// Latin - the client's development strings are Korean), then
+		// the Chinese game tables' coverage: Arial Unicode under
+		// Supplemental (10.15 and later), Hiragino Sans GB, and
+		// PingFang where it is still a file (10.11 to 10.14; later
+		// releases keep it in a font asset catalog SDL_ttf cannot
+		// open). Helvetica is the Latin-only last resort; it and the
+		// first entry are the two a CI runner is certain to have.
+		"/System/Library/Fonts/AppleSDGothicNeo.ttc",
+		"/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+		"/System/Library/Fonts/Hiragino Sans GB.ttc",
+		"/System/Library/Fonts/PingFang.ttc",
+		"/System/Library/Fonts/Helvetica.ttc",
+#else
+		// Linux: the Noto CJK package where Debian, Ubuntu and Fedora put
+		// it, then DejaVu, which nearly every distribution installs and
+		// which covers Latin, so the tests and the title screen have a
+		// font even where CJK does not. Nothing under /usr/share/fonts is
+		// guaranteed; a machine with none of these draws no text, loudly
+		// (the "Failed to load font" line below).
+		"/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+		"/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
+		"/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+		"/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+		"/usr/share/fonts/dejavu/DejaVuSans.ttf",
+		"/usr/share/fonts/TTF/DejaVuSans.ttf",
+#endif
+		NULL
+	};
+	return paths;
+}
+
 /* Event structure definition (opaque in header) */
 struct platform_event_s {
 	SDL_mutex* mutex;
