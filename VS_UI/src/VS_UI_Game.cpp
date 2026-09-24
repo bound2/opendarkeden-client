@@ -2571,6 +2571,20 @@ bool C_VS_UI_GAME::IsRunningPointExchange() const
 }
 
 //-----------------------------------------------------------------------------
+// RefreshPointExchange
+//
+// Asks the server for the open Point Exchange's current page again, with the
+// window's own page and filter.
+//-----------------------------------------------------------------------------
+void C_VS_UI_GAME::RefreshPointExchange()
+{
+	if (NULL == m_pC_point_exchange)
+		return;
+
+	m_pC_point_exchange->RefreshList();
+}
+
+//-----------------------------------------------------------------------------
 // CloseExchangeAsk
 //
 // 이미 finish된 상태이면 아무것도 하지 않는다.

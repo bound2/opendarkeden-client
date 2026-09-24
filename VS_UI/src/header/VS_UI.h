@@ -691,6 +691,10 @@ public:
 	void	ClosePowerjjang();
 	void	PowerjjangGambleResult(BYTE bItemCode);
 	// 2004, 11,30, sobeit add end
+
+	// Asks the server for the Point Exchange's current page again, if the
+	// window is open; does nothing otherwise.
+	void	RefreshPointExchange();
 	
 	// 2005, 1, 3, sobeit add start
 	void	OpenInventoryToSwapAdvanceItem();

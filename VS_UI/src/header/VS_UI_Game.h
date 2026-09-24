@@ -569,6 +569,7 @@ public:
 	void	ClosePetStorage();
 	void	CloseExchange();
 	void	ClosePointExchange();
+	void	RefreshPointExchange();
 	void	CloseExchangeAsk();
 	void	CloseExchangeCancel();
 	void	OpenInventoryToSell();
