@@ -4,11 +4,7 @@
 #include "Client_PCH.h"
 #include "MParty.h"
 
-	#include "MZone.h"
-	#include "MCreature.h"
-	#include "ClientConfig.h"
-
-	extern MonotonicClock::TimePoint	g_FrameNow;
+#include "ClientConfig.h"
 
 #define	MAX_PARTY_MEMBER	6
 
@@ -16,6 +12,41 @@
 // Global
 //----------------------------------------------------------------------
 MParty*	g_pParty = NULL;
+
+const MPartyHost* MParty::s_Host = nullptr;
+
+const MPartyHost* MParty::SetHost(const MPartyHost* host)
+{
+	const auto* previous = s_Host;
+	s_Host = host;
+	return previous;
+}
+
+bool MParty::JoinByID(TYPE_OBJECTID id, MString& name)
+{
+	return s_Host && s_Host->JoinByID && s_Host->JoinByID(id, name);
+}
+
+TYPE_OBJECTID MParty::JoinByName(const char* name)
+{
+	return s_Host && s_Host->JoinByName ? s_Host->JoinByName(name) : OBJECTID_NULL;
+}
+
+void MParty::LeaveByID(TYPE_OBJECTID id)
+{
+	if (s_Host && s_Host->LeaveByID) s_Host->LeaveByID(id);
+}
+
+void MParty::LeaveByName(const char* name)
+{
+	if (s_Host && s_Host->LeaveByName) s_Host->LeaveByName(name);
+}
+
+MonotonicClock::TimePoint MParty::Clock()
+{
+	return s_Host && s_Host->CurrentTime ? s_Host->CurrentTime() : MonotonicClock::TimePoint();
+}
+
 
 //----------------------------------------------------------------------
 // PARTY_INFO
@@ -85,28 +116,8 @@ MParty::Release()
 void
 MParty::UnSetPlayerParty() const
 {
-	PARTY_VECTOR::const_iterator iInfo = m_pInfo.begin();
-
-	while (iInfo != m_pInfo.end())
-	{
-		PARTY_INFO* pInfo = *iInfo;
-
-		if (pInfo!=NULL)
-		{
-			// party설정을 없앤다.
-			if (g_pZone!=NULL)
-			{
-				MCreature* pCreature = g_pZone->GetCreature( g_pZone->GetCreatureID( pInfo->Name.GetString(), 1 ) );
-
-				if (pCreature!=NULL)
-				{
-					pCreature->UnSetPlayerParty();
-				}
-			}
-		}
-
-		iInfo ++;
-	}
+	for (const auto* info : m_pInfo)
+		if (info) LeaveByName(info->Name.GetString());
 }
 
 //----------------------------------------------------------------------
@@ -115,48 +126,22 @@ MParty::UnSetPlayerParty() const
 bool		
 MParty::AddMember(PARTY_INFO* pInfo)
 {
-	// 값이 제대로 설정 안된 경우
-	if (pInfo==NULL
-		|| pInfo->Name.GetString()==NULL && pInfo->ID==OBJECTID_NULL)
-	{
+	if (pInfo == nullptr
+		|| (pInfo->Name.GetString() == nullptr && pInfo->ID == OBJECTID_NULL))
 		return false;
-	}
-
-	// party 꽉 찼당..
 	if (GetSize() >= m_pInfo.capacity())
-	{
 		return false;
+
+	if (pInfo->Name.GetString() == nullptr)
+	{
+		if (!JoinByID(pInfo->ID, pInfo->Name)) return false;
+	}
+	else if (pInfo->ID == OBJECTID_NULL)
+	{
+		pInfo->ID = JoinByName(pInfo->Name.GetString());
 	}
 
-		
-		// 이름이나 ID가 값이 설정 안된 경우.. 값 넣어주기
-		if (pInfo->Name.GetString()==NULL)
-		{		
-			MCreature* pCreature = g_pZone->GetCreature( pInfo->ID );
-
-			if (pCreature==NULL)
-			{
-				return false;
-			}
-
-			pInfo->Name = pCreature->GetName();	
-			pCreature->SetPlayerParty();
-		}
-		else if (pInfo->ID==OBJECTID_NULL)
-		{			
-			pInfo->ID = g_pZone->GetCreatureID( pInfo->Name.GetString(), 1 );
-
-			MCreature* pCreature = g_pZone->GetCreature( pInfo->ID );
-
-			if (pCreature!=NULL)
-			{
-				pCreature->SetPlayerParty();
-			}			
-		}
-		
-
-	m_pInfo.push_back( pInfo );
-
+	m_pInfo.push_back(pInfo);
 	return true;
 }
 
@@ -166,31 +151,16 @@ MParty::AddMember(PARTY_INFO* pInfo)
 bool		
 MParty::RemoveMember(const char* pName)
 {
-	PARTY_VECTOR::iterator iInfo = m_pInfo.begin();
-
-	while (iInfo != m_pInfo.end())
+	for (auto member = m_pInfo.begin(); member != m_pInfo.end(); ++member)
 	{
-		PARTY_INFO* pInfo = *iInfo;
-
-		if (pInfo!=NULL
-			&& pInfo->Name==pName)
+		PARTY_INFO* info = *member;
+		if (info && info->Name == pName)
 		{
-			MCreature* pCreature = g_pZone->GetCreature( g_pZone->GetCreatureID( pName, 1 ) );
-
-			if (pCreature!=NULL)
-			{
-				pCreature->UnSetPlayerParty();
-			}
-
-			delete pInfo;
-			pInfo = NULL;
-			
-			m_pInfo.erase( iInfo );
-
+			LeaveByName(pName);
+			delete info;
+			m_pInfo.erase(member);
 			return true;
-		}	
-		
-		iInfo ++;
+		}
 	}
 	return false;
 }
@@ -201,31 +171,16 @@ MParty::RemoveMember(const char* pName)
 bool		
 MParty::RemoveMember(int creatureID)
 {
-	PARTY_VECTOR::iterator iInfo = m_pInfo.begin();
-
-	while (iInfo != m_pInfo.end())
+	for (auto member = m_pInfo.begin(); member != m_pInfo.end(); ++member)
 	{
-		PARTY_INFO* pInfo = *iInfo;
-
-		if (pInfo!=NULL 
-			&& pInfo->ID==creatureID)
+		PARTY_INFO* info = *member;
+		if (info && info->ID == creatureID)
 		{
-			MCreature* pCreature = g_pZone->GetCreature( creatureID );
-
-			if (pCreature!=NULL)
-			{
-				pCreature->UnSetPlayerParty();
-			}
-
-			delete pInfo;
-			pInfo = NULL;
-
-			m_pInfo.erase( iInfo );
-
+			LeaveByID(creatureID);
+			delete info;
+			m_pInfo.erase(member);
 			return true;
 		}
-
-		iInfo ++;
 	}
 	return false;
 }
@@ -334,7 +289,7 @@ MParty::HasMember(const char* pName) const
 void		
 MParty::SetJoinTime()
 {
-	m_JoinTime = g_FrameNow;
+	m_JoinTime = Clock();
 }
 
 //----------------------------------------------------------------------
@@ -343,5 +298,7 @@ MParty::SetJoinTime()
 bool		
 MParty::IsKickAvailableTime() const
 {
-	return g_FrameNow - m_JoinTime > MonotonicClock::Millis(g_pClientConfig->AFTER_PARTY_KICK_DELAY);
+	if (!s_Host || !s_Host->CurrentTime) return true;
+	const DWORD delay = g_pClientConfig ? g_pClientConfig->AFTER_PARTY_KICK_DELAY : DefaultKickDelayMs;
+	return Clock() - m_JoinTime > MonotonicClock::Millis(delay);
 }

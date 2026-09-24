@@ -2722,6 +2722,7 @@ void ReleaseAllObjects()
 	// All game-owned items are gone. Do not call into UI globals from any
 	// subsequent static teardown; a later initialization installs the host again.
 	MItem::SetHost(nullptr);
+	MParty::SetHost(nullptr);
 
 #ifdef DEBUG_INFO
 	ClearDebugInfo();
@@ -2990,6 +2991,44 @@ static DWORD	PriceShopTaxPercent()
 
 static const MPriceHost	s_PriceHost = { PriceRace, PriceLevel, PriceStatSum, PriceBasicStatSum, PricePotionHalf, PriceGambleHalf, PriceShopTaxPercent };
 
+// Live creature actions used by the library-owned party roster.
+static bool PartyJoinByID(TYPE_OBJECTID id, MString& name)
+{
+	if (!g_pZone) return false;
+	auto* creature = g_pZone->GetCreature(id);
+	if (!creature) return false;
+	name = creature->GetName();
+	creature->SetPlayerParty();
+	return true;
+}
+
+static TYPE_OBJECTID PartyJoinByName(const char* name)
+{
+	if (!g_pZone) return OBJECTID_NULL;
+	const auto id = g_pZone->GetCreatureID(name, 1);
+	if (auto* creature = g_pZone->GetCreature(id)) creature->SetPlayerParty();
+	return id;
+}
+
+static void PartyLeaveByID(TYPE_OBJECTID id)
+{
+	if (!g_pZone) return;
+	if (auto* creature = g_pZone->GetCreature(id)) creature->UnSetPlayerParty();
+}
+
+static void PartyLeaveByName(const char* name)
+{
+	if (g_pZone) PartyLeaveByID(g_pZone->GetCreatureID(name, 1));
+}
+
+static const MPartyHost s_PartyHost = {
+	.JoinByID = PartyJoinByID,
+	.JoinByName = PartyJoinByName,
+	.LeaveByID = PartyLeaveByID,
+	.LeaveByName = PartyLeaveByName,
+	.CurrentTime = []() { return g_FrameNow; },
+};
+
 //-----------------------------------------------------------------------------
 // The wire layer's host (docs/RESTRUCTURING.md task 5.1): three tuning
 // values out of the config, and the connection a bug report goes to.
@@ -3196,6 +3235,7 @@ InitGameObject()
 	MItem::SetHost(&s_ItemHost);
 	Wire::SetHost(&s_WireHost);
 	MPriceManager::SetHost(&s_PriceHost);
+	MParty::SetHost(&s_PartyHost);
 
 	if (g_pPCTalkBox==NULL)
 	{

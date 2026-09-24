@@ -191,7 +191,8 @@ check () {
 # 465: remove the inactive Client/DebugInfo.cpp implementation.
 # 460: move five unchanged world metadata implementations into gamemodel.
 # 456: promote two quest models plus the profile and shrine adapters.
-R1_BASELINE=456
+# 455: party membership joins gamemodel behind MPartyHost.
+R1_BASELINE=455
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -228,7 +229,7 @@ elif [ -n "$BUILD_DIR" ] && [ -f "$BUILD_DIR/build.ninja" ]; then
 	# this branch existed the ratchet SKIPPED on every non-MSVC tree,
 	# which the port assessment listed as fail-open (area A). build.ninja
 	# is rewritten on every configure, so its mtime is the configure time.
-	R1_NINJA_BASELINE=454
+	R1_NINJA_BASELINE=453
 	R1_NINJA="$BUILD_DIR/build.ninja"
 	if [ CMakeLists.txt -nt "$R1_NINJA" ] || [ tests/arch/packetwire_files.txt -nt "$R1_NINJA" ] || [ tests/arch/gamemodel_files.txt -nt "$R1_NINJA" ]; then
 		echo "FAIL R1: $BUILD_DIR was configured before CMakeLists.txt or a library membership file last changed - reconfigure that tree first"

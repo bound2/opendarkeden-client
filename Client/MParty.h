@@ -52,11 +52,24 @@ public :
 	PARTY_INFO();
 };
 
+// Borrowed callbacks installed by the executable. No host means no live
+// creatures and no kick delay. Membership records remain owned by MParty.
+struct MPartyHost {
+	bool (*JoinByID)(TYPE_OBJECTID, MString& name) = nullptr;
+	TYPE_OBJECTID (*JoinByName)(const char*) = nullptr;
+	void (*LeaveByID)(TYPE_OBJECTID) = nullptr;
+	void (*LeaveByName)(const char*) = nullptr;
+	MonotonicClock::TimePoint (*CurrentTime)() = nullptr;
+};
+
 class MParty {
 	public :
 		typedef std::vector<PARTY_INFO*>	PARTY_VECTOR;
 
 	public :
+		static const MPartyHost* SetHost(const MPartyHost* host);
+		static constexpr DWORD DefaultKickDelayMs = 60 * 60 * 1000;
+
 		MParty();
 		~MParty();
 
@@ -98,6 +111,14 @@ class MParty {
 		PARTY_INFO* GetMemberInfoByIP(const char* pIP) const;
 
 		bool		HasMember(const char* pName) const;
+
+	private:
+		static const MPartyHost* s_Host;
+		static bool JoinByID(TYPE_OBJECTID id, MString& name);
+		static TYPE_OBJECTID JoinByName(const char* name);
+		static void LeaveByID(TYPE_OBJECTID id);
+		static void LeaveByName(const char* name);
+		static MonotonicClock::TimePoint Clock();
 
 	protected :
 		int							m_Size;			// 파티원 수

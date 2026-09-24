@@ -203,3 +203,7 @@ Client/MMonsterKillQuestInfo.cpp
 Client/MMonsterKillQuestInfo.h
 Client/MQuestInfo.cpp
 Client/MQuestInfo.h
+
+# Party records and membership, with live creature actions behind MPartyHost.
+Client/MParty.cpp
+Client/MParty.h
