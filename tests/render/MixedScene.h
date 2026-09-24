@@ -26,14 +26,14 @@ struct MixedScene {
 		for (int y = 0; y < 64; ++y) for (int x = 0; x < 64; ++x) {
 			const int i = y * 64 + x;
 			pixels[i] = WORD((x * 523 + y * 149) & 0xffff);
-			indices[i] = BYTE(1 + (i % 255));
+			indices[i] = BYTE(1 + (i % 254));
 			opacity[i] = BYTE((x + y) % 33);
 		}
 		sprite.SetPixelNoColorkey(pixels.data(), 128, 64, 64);
 		indexed.SetPixel(indices.data(), 64, 64, 64);
 		alpha.SetPixel(indices.data(), 64, opacity.data(), 64, 64, 64);
-		palette.Init(256);
-		for (int i = 0; i < 256; ++i) palette[BYTE(i)] = WORD(i * 251);
+		palette.Init(255);
+		for (int i = 0; i < 255; ++i) palette[BYTE(i)] = WORD(i * 251);
 		lights.Init(64, 64);
 		for (int i = 0; i < 64; ++i) {
 			widths[i] = 12 + i % 2;

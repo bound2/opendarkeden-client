@@ -182,8 +182,8 @@ Local OpenGL measurements on 2026-09-24:
 
 | Workload | CPU ms/frame | GPU ms/frame |
 |---|---:|---:|
-| Mixed 800x600 scene, composition only | 1.008 | 3.182 |
-| Same scene with 2x xBRZ | 10.116 | 3.631 |
+| Mixed 800x600 scene, composition only | 1.033 | 3.192 |
+| Same scene with 2x xBRZ | 11.236 | 3.977 |
 | Dense palette noise, xBRZ 2x filter | 7.187 | 1.295 |
 | Dense palette noise, xBRZ 3x filter | 7.561 | 2.370 |
 | Dense palette noise, xBRZ 4x filter | 7.887 | 1.864 |
