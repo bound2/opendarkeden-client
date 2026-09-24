@@ -16,10 +16,12 @@
 #ifndef	__MCREATURETABLE_H__
 #define	__MCREATURETABLE_H__
 
+#ifdef _MSC_VER
 #pragma warning(disable:4786)
+#endif
 
 #include "MObject.h"
-#include "SpriteLib/DrawTypeDef.h"
+#include "DrawTypeDef.h"
 #include "CTypeTable.h"
 #include "MString.h"
 #include <list>

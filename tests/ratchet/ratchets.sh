@@ -189,7 +189,8 @@ check () {
 # 466: remove the empty Client_PCH.cpp; CMake now generates the PCH producer.
 # Count application sources, excluding only that generated target-specific file.
 # 465: remove the inactive Client/DebugInfo.cpp implementation.
-R1_BASELINE=465
+# 460: move five unchanged world metadata implementations into gamemodel.
+R1_BASELINE=460
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do
@@ -226,7 +227,7 @@ elif [ -n "$BUILD_DIR" ] && [ -f "$BUILD_DIR/build.ninja" ]; then
 	# this branch existed the ratchet SKIPPED on every non-MSVC tree,
 	# which the port assessment listed as fail-open (area A). build.ninja
 	# is rewritten on every configure, so its mtime is the configure time.
-	R1_NINJA_BASELINE=463
+	R1_NINJA_BASELINE=458
 	R1_NINJA="$BUILD_DIR/build.ninja"
 	if [ CMakeLists.txt -nt "$R1_NINJA" ] || [ tests/arch/packetwire_files.txt -nt "$R1_NINJA" ] || [ tests/arch/gamemodel_files.txt -nt "$R1_NINJA" ]; then
 		echo "FAIL R1: $BUILD_DIR was configured before CMakeLists.txt or a library membership file last changed - reconfigure that tree first"
@@ -401,7 +402,8 @@ check "R3 (unsafe format/copy lines in Client/Packet + Client/PacketHandler)" "$
 # NUL bytes. GNU grep had omitted that file; BSD grep already counted it.
 # This corrects the measurement, not a new library-to-executable dependency.
 # 10: remove the duplicate, inactive VS_UI/DebugInfo.cpp implementation.
-R4_BASELINE=10
+# 5: world metadata globals are now owned by the tested gamemodel objects.
+R4_BASELINE=5
 
 lib_members () {
 	# The directory trees minus the files CMake excludes from the
