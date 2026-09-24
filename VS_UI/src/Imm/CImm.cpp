@@ -9,7 +9,6 @@
 #include "CSoundPartManager.h"
 #include "MSoundTable.h"
 
-extern CSoundPartManager*		g_pSoundManager;
 
 #ifdef PLATFORM_WINDOWS
 // Keep the device pointer with its implementation so standalone UI components
