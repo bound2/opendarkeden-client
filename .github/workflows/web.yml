@@ -3,7 +3,6 @@ name: Browser build and tests
 on:
   push:
     branches: [master]
-  pull_request:
   workflow_dispatch:
 
 permissions:
