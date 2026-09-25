@@ -43,7 +43,7 @@
       "-Wunused-parameter" : 1492,
       "-Wunused-result" : 1,
       "-Wunused-value" : 10,
-      "-Wunused-variable" : 465,
+      "-Wunused-variable" : 464,
       "UNTAGGED" : 30
    },
    "linux-clang-x86_64" : {
@@ -98,7 +98,7 @@
       "-Wunused-parameter" : 1492,
       "-Wunused-private-field" : 10,
       "-Wunused-value" : 6,
-      "-Wunused-variable" : 519,
+      "-Wunused-variable" : 518,
       "-Wvisibility" : 1
    },
    "linux-x86_64" : {
@@ -146,7 +146,7 @@
       "-Wunused-parameter" : 1492,
       "-Wunused-result" : 1,
       "-Wunused-value" : 10,
-      "-Wunused-variable" : 465,
+      "-Wunused-variable" : 464,
       "UNTAGGED" : 30
    },
    "macos-arm64" : {
@@ -200,7 +200,7 @@
       "-Wunused-parameter" : 1492,
       "-Wunused-private-field" : 10,
       "-Wunused-value" : 6,
-      "-Wunused-variable" : 519,
+      "-Wunused-variable" : 518,
       "-Wvisibility" : 1,
       "LD" : 4
    },
@@ -255,7 +255,7 @@
       "-Wunused-parameter" : 1492,
       "-Wunused-private-field" : 10,
       "-Wunused-value" : 6,
-      "-Wunused-variable" : 519,
+      "-Wunused-variable" : 518,
       "-Wvisibility" : 1,
       "LD" : 4
    },
@@ -310,7 +310,7 @@
       "-Wunused-parameter" : 1492,
       "-Wunused-private-field" : 10,
       "-Wunused-value" : 6,
-      "-Wunused-variable" : 519,
+      "-Wunused-variable" : 518,
       "-Wvisibility" : 1,
       "LD" : 4
    },
@@ -365,7 +365,7 @@
       "-Wunused-parameter" : 1492,
       "-Wunused-private-field" : 10,
       "-Wunused-value" : 6,
-      "-Wunused-variable" : 519,
+      "-Wunused-variable" : 518,
       "-Wvisibility" : 1,
       "LD" : 4
    },
