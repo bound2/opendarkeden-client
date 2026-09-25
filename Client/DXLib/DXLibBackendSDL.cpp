@@ -16,6 +16,7 @@
 #include "DXLibBackend.h"
 #include "DXInputHost.h"
 #include "DXInputEvents.h"
+#include "DataPath.h"
 
 /* Implemented in Client/SpriteLib/SpriteLibBackendSDL.cpp (declared in
  * SpriteLibBackend.h, which dxlib cannot include - it builds without the
@@ -737,9 +738,12 @@ void dxlib_sound_release(void) {
 }
 
 dxlib_sound_t dxlib_sound_load_wav(const char* filename) {
-	if (!g_sound_initialized) return NULL;
+	if (!g_sound_initialized || !filename) {
+		return NULL;
+	}
 
-	Mix_Chunk* chunk = Mix_LoadWAV(filename);
+	const std::string path = Basic::NormalizeDataPath(filename);
+	Mix_Chunk* chunk = Mix_LoadWAV(path.c_str());
 	if (!chunk) {
 		fprintf(stderr, "Failed to load %s: %s\n", filename, Mix_GetError());
 		return NULL;
@@ -917,7 +921,9 @@ void dxlib_music_release(void) {
 }
 
 int dxlib_music_load(const char* filename) {
-	if (!g_music_initialized) return 1;
+	if (!g_music_initialized || !filename) {
+		return 1;
+	}
 
 	/* Free previous music */
 	if (g_current_music) {
@@ -925,7 +931,8 @@ int dxlib_music_load(const char* filename) {
 		g_current_music = NULL;
 	}
 
-	g_current_music = Mix_LoadMUS(filename);
+	const std::string path = Basic::NormalizeDataPath(filename);
+	g_current_music = Mix_LoadMUS(path.c_str());
 	if (!g_current_music) {
 		fprintf(stderr, "Failed to load music %s: %s\n", filename, Mix_GetError());
 		return 1;
