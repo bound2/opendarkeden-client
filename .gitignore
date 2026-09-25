@@ -50,7 +50,7 @@ cmake_install.cmake
 CTestTestfile.cmake
 /compile_commands.json
 .cache
-tools/web/node_modules/
+tools/web/browser-tests/target/
 
 # ==========================================
 # OS & Backup Files

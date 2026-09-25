@@ -31,36 +31,44 @@ jobs:
           docker run --rm --mount type=volume,source=darkeden-web-ci,target=/work,readonly \
             --mount type=bind,source="$PWD/build/web",target=/out \
             alpine:3.22 cp -r /work/build-wasm/bin/. /out/
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Install browser test runner
-        working-directory: tools/web
-        run: npm ci --ignore-scripts
       - name: Check out the compatible production gateway fixture
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: bound2/opendarkeden-server
-          ref: 0d3580f85e91e8a031993ec0d8ee0326e6598e6a
+          # The server commit whose tools/websocket fixture matches this client.
+          ref: 5eb8c8dfa777f9b092efd38d0c3e508b46dcc4b1
           path: build/gateway
           sparse-checkout: tools/websocket
           persist-credentials: false
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: |
+            tools/web/browser-tests
+            build/gateway/tools/websocket
+      - name: Build the browser test runner and gateway fixture
+        run: |
+          cargo build --release --locked --manifest-path tools/web/browser-tests/Cargo.toml
+          cargo build --release --locked --manifest-path build/gateway/tools/websocket/Cargo.toml --bin client-fixture
       - name: Verify WebGL pixels and binary login/world handoffs
         env:
           WEB_TEST_SOFTWARE_GL: '1'
         run: |
-          npm ci --ignore-scripts --prefix build/gateway/tools/websocket
           python3 -m http.server 18739 --bind 127.0.0.1 --directory build/web > build/web-http.log 2>&1 &
           http_pid=$!
-          node build/gateway/tools/websocket/client-fixture.mjs > build/web-gateway.log 2>&1 &
+          cargo run --release --manifest-path build/gateway/tools/websocket/Cargo.toml --bin client-fixture > build/web-gateway.log 2>&1 &
           gateway_pid=$!
           trap 'kill "$http_pid" "$gateway_pid" 2>/dev/null || true' EXIT
           for attempt in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:18739/web_sprite_tests.html >/dev/null; then break; fi
+            if curl -fsS http://127.0.0.1:18739/web_sprite_tests.html >/dev/null &&
+              (exec 3<>/dev/tcp/127.0.0.1/18740) 2>/dev/null &&
+              (exec 3<>/dev/tcp/127.0.0.1/18741) 2>/dev/null; then break; fi
             sleep 1
           done
-          node tools/web/test-renderer.mjs
-          node tools/web/test-transport.mjs
+          cargo run --release --manifest-path tools/web/browser-tests/Cargo.toml -- renderer
+          cargo run --release --manifest-path tools/web/browser-tests/Cargo.toml -- transport
       - name: Upload browser build and diagnostics
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
