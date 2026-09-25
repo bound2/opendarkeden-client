@@ -2017,7 +2017,7 @@ InitSocket()
 					port = g_FutecPort;
 				}
 
-				// domain으로 된 주소인 경우..
+				// The launcher, or a developer, may point the client at another login server.
 				if (const auto host = NetworkTransport::ReadEnvironment("DARKEDEN_LOGIN_HOST")) {
 					if (!host->empty()) ServerAddress = *host;
 				}
@@ -2029,6 +2029,8 @@ InitSocket()
 					port = static_cast<uint>(value);
 				}
 				if (ServerAddress.empty()) throw ConnectException("Login server address is empty");
+				// Resolve a domain name here. Through a gateway the name is
+				// passed on unchanged; the gateway routes the advertised endpoint.
 				if (!NetworkTransport::UsesWebSocket() && (ServerAddress[0] < '0' || ServerAddress[0] > '9'))
 				{
 					struct hostent* h;

@@ -13,9 +13,9 @@
 // declaration that changes neither layout nor behavior - preload the
 // input ring and copy the output ring out. The Socket handed to a
 // stream is never used (the constructors only assert it is non-null),
-// but its destructor closes an INVALID_SOCKET through Winsock, so
-// EnsureSocketsInitialised() must run before one is constructed or that
-// close throws Error out of a destructor.
+// and closing a never-created socket is a no-op; still call
+// EnsureSocketsInitialised() first so a test that does create one has
+// Winsock started.
 //
 // Include this from a TU compiled with the packetwire defines
 // (tests/CMakeLists.txt, PACKETWIRE_TEST_DEFINITIONS): the stream and

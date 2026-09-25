@@ -29,8 +29,10 @@ docker run --rm --mount type=volume,source=darkeden-webgl-work,target=/work,read
 ```
 
 With the same SDK activated locally, configure with `emcmake cmake -S . -B build/wasm
--DCMAKE_BUILD_TYPE=Release -DBUILD_ENGINE=OFF -DBUILD_TESTS=OFF`, then run
-`cmake --build build/wasm --target DarkEden web_sprite_tests transport_tests`.
+-DCMAKE_BUILD_TYPE=Release -DBUILD_ENGINE=OFF -DBUILD_TESTS=OFF`, then build
+`DarkEden`, `web_sprite_tests` and `transport_tests` with one `cmake --build
+build/wasm --target <name>` each: several targets in one parallel Makefile build
+race on the iconv external project's configure step in a fresh tree.
 CMake downloads the pinned SDL ports and GNU iconv 1.18.
 
 ## Assets and server configuration
@@ -111,25 +113,50 @@ The browser CI builds the complete client, runs the shared renderer pixel oracle
 in Chrome/WebGL 2, and runs the real C++ socket adapter against a pinned production
 server gateway fixture. Proprietary assets are unnecessary for these tests.
 
+The checks are one Rust program, `tools/web/browser-tests`, that drives an
+installed Chrome or Chromium in new headless mode over the DevTools protocol; it
+needs a Rust toolchain and nothing from npm. Serve `build/web` on
+`http://127.0.0.1:18739` (see above), then:
+
 ```sh
-cd tools/web
-npm ci --ignore-scripts
-node test-renderer.mjs
-node test-transport.mjs
-node test-client.mjs
+cargo run --release --manifest-path tools/web/browser-tests/Cargo.toml -- renderer
+cargo run --release --manifest-path tools/web/browser-tests/Cargo.toml -- transport
+cargo run --release --manifest-path tools/web/browser-tests/Cargo.toml -- client
 ```
 
-The default static origin is `http://127.0.0.1:18739`. Transport probes expect the
-server repository's `tools/websocket/client-fixture.mjs` on ports 18740/18741;
-install its npm dependencies and start it first. The same fixture accepts native
-`transport_tests ws://127.0.0.1:18740/game` and the adversarial endpoint on 18741.
-The probes exercise binary data, partial reads, login/world/relogin connections,
-route rejection and text-frame rejection. They do not need an account or database.
+Each command exits 0 on success, 1 on a failed check or an invalid environment
+value, and 2 on invalid arguments; `-- help` lists the arguments and environment
+variables. An uncaught page error during the transport probe fails it even when
+the probe itself reports success. The browser is found through
+`WEB_TEST_BROWSER` (an executable path or a name on `PATH`), then `CHROME`, then
+`google-chrome`, `google-chrome-stable`, `chromium` or `chromium-browser` on
+`PATH`, then the standard Chrome install location. WebGL may fall back to
+SwiftShader where no GPU is usable. Running as root or with `CI` set adds
+`--no-sandbox`, which containers and CI runners need.
 
-`test-client.mjs` additionally requires the packaged game data and installed
-Chrome. It exercises the real menu, typing, canvas sizing, fullscreen, normal exit
-and settings reload. `WEB_TEST_DPR=2` checks high-DPI output;
-`WEB_TEST_SPRITE_RENDERER=cpu` checks software composition. Screenshots and logs
-are written under `build/web-smoke`. `WEB_TEST_BROWSER` selects another installed
-Playwright Chromium channel. Live authenticated gameplay against a populated
-server is a separate integration check; these probes do not claim that coverage.
+`renderer [url]` loads `web_sprite_tests.html` and waits up to 15 minutes for the
+summary line. `WEB_TEST_SOFTWARE_GL=1` renders with SwiftShader instead of the GPU,
+as CI does. The WebGL device, shader status, failures and summary are printed; the
+full console goes to `WEB_TEST_LOG` (default `web-renderer.log`).
+
+`transport [origin] [endpoint...]` runs `transport_tests.mjs` once per endpoint in a
+fresh page, each under a 35-second watchdog kept outside the page. It expects the
+server repository's fixture on ports 18740/18741: in that repository's
+`src/server/websocketproxyserver`, start `cargo run --release --bin client-fixture` first. The
+fixture admits only the origin `http://127.0.0.1:18739`. The same fixture accepts
+native `transport_tests ws://127.0.0.1:18740/game` and the adversarial endpoint on
+18741. The probes exercise binary data, partial reads, login/world/relogin
+connections, route rejection and text-frame rejection. They do not need an account
+or database.
+
+`client [url]` additionally requires the packaged game data. It exercises the real
+menu, typing, canvas sizing, fullscreen, normal exit and settings reload, with the
+HTTP cache disabled and a persistent profile in `build/web-smoke/profile`.
+`WEB_TEST_HEIGHT` (default 900) sets the viewport height, `WEB_TEST_DPR=2` checks
+high-DPI output and `WEB_TEST_SPRITE_RENDERER=cpu` checks software composition.
+The test reads the game's file system and selects the sprite renderer by patching
+`launcher.mjs` as it is served, through DevTools request interception, so the
+shipped launcher carries no test hooks; the check fails if the launcher no longer
+contains the patched statements. Screenshots and `client.log` are written under
+`build/web-smoke`. Live authenticated gameplay against a populated server is a
+separate integration check; these probes do not claim that coverage.

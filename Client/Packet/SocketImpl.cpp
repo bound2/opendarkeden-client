@@ -133,18 +133,29 @@ void SocketImpl::close ()
 {
 	__BEGIN_TRY
 
+	// Closing is idempotent. Player closes its socket and then deletes it,
+	// and the destructor closes again; releasing the descriptor twice would
+	// close whatever socket or file had reused its number in between.
 	if (m_WebMode) {
 		m_WebSocket.reset();
 		m_WebMode = false;
 		return;
 	}
-		
+	if ( m_SocketID == INVALID_SOCKET )
+		return;
+
+	// Forget the number before the call: a close that fails with EINTR or
+	// EIO has still released the descriptor, and a retry would close
+	// whatever reused it. Linger is 0 everywhere, so WSAEWOULDBLOCK cannot
+	// leave the handle open.
+	const SOCKET socket = m_SocketID;
+	m_SocketID = INVALID_SOCKET;
 	try {
-		SocketAPI::closesocket_ex( m_SocketID );
+		SocketAPI::closesocket_ex( socket );
 	} catch ( FileNotOpenedException ) {
 		// if already closed, ignore...
 	}
-	
+
 	__END_CATCH
 }
 
@@ -209,9 +220,10 @@ void SocketImpl::connect ( const std::string & host , uint port )
 	m_Host = host;
 	m_Port = port;
 	if (m_WebMode) {
-		const auto gateway = NetworkTransport::ReadEnvironment("DARKEDEN_WEBSOCKET_URL");
+		// Release a previous connection before its replacement starts.
+		m_WebSocket.reset();
 		m_WebSocket = std::make_unique<NetworkTransport::WebSocketTransport>(
-			NetworkTransport::WebSocketURL(gateway.value_or(""), host, port));
+			NetworkTransport::WebSocketURL(NetworkTransport::WebSocketGateway(), host, port));
 		return;
 	}
 

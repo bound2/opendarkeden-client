@@ -31,13 +31,20 @@ std::optional<std::string> ReadEnvironment(const char* name)
 	return value ? std::optional<std::string>(value) : std::nullopt;
 }
 
+const std::string& WebSocketGateway()
+{
+	// The launcher (preRun) and the transport probe set the variable before
+	// the first socket exists; nothing changes it afterwards.
+	static const std::string gateway = ReadEnvironment("DARKEDEN_WEBSOCKET_URL").value_or("");
+	return gateway;
+}
+
 bool UsesWebSocket()
 {
 #ifdef __EMSCRIPTEN__
 	return true;
 #else
-	const auto gateway = ReadEnvironment("DARKEDEN_WEBSOCKET_URL");
-	return gateway && !gateway->empty();
+	return !WebSocketGateway().empty();
 #endif
 }
 
@@ -49,7 +56,7 @@ std::string WebSocketURL(const std::string& gateway, const std::string& host, un
 		host.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-") != std::string::npos)
 		throw ConnectException("Invalid WebSocket gateway or game endpoint");
 	const auto authorityStart = gateway.find("://") + 3;
-	if (authorityStart == gateway.size() || gateway[authorityStart] == '/')
+	if (authorityStart == gateway.size() || gateway[authorityStart] == '/' || gateway[authorityStart] == ':')
 		throw ConnectException("WebSocket gateway has no host");
 	return gateway + "?host=" + host + "&port=" + std::to_string(port);
 }
@@ -126,7 +133,9 @@ WebSocketTransport::WebSocketTransport(const std::string& url) : m_State(std::ma
 				if (!event->isText && current.append(event->data, event->numBytes)) return true;
 			} catch (...) { /* Exceptions must never unwind through browser callbacks. */ }
 			current.failed = true;
-			emscripten_websocket_close(current.socket, 1009, "Invalid game stream");
+			// Browsers let a page close only with 1000 or 3000-4999; 1009 throws
+			// InvalidAccessError and leaves the socket open.
+			emscripten_websocket_close(current.socket, 1000, "Invalid game stream");
 			return true;
 		});
 #else
