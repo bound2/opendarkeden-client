@@ -9,6 +9,10 @@ is the working brief for an agent in this repo.
 
 ## Build
 
+CI runs only on pushes to `master` and manual `workflow_dispatch` invocations.
+Keep pull-request triggers disabled to conserve GitHub Actions minutes (user
+instruction, 2026-09-25). Verify changes locally and use manual CI when needed.
+
 Windows + MSVC is the live path. There are two Debug trees and neither subsumes the
 other, because `/RTC1` and `/fsanitize=address` are mutually exclusive:
 
@@ -196,8 +200,8 @@ one that sees that class.
 (`SDL_VIDEODRIVER=dummy`) with the data tree beside it reaches the main menu and
 exits cleanly on `SDL_QUIT`; login and beyond are unverified off Windows (the
 port assessment's area F). **Nobody here has a Mac**: the macOS numbers come
-from GitHub's arm64 runner (`.github/workflows/macos.yml`, which also runs on
-pull requests for that reason), nothing has been watched on a Mac's display,
+from GitHub's arm64 runner (`.github/workflows/macos.yml`, invoked on master
+pushes or manually), nothing has been watched on a Mac's display,
 and a `<SDL2/...>` include spelling breaks the Homebrew build - it is
 `<SDL.h>` everywhere (`basic/Platform.h` says why).
 
