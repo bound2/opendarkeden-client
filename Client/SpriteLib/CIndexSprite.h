@@ -298,6 +298,7 @@ class CIndexSprite {
 		};
 
 		static void		SetEffect(enum FUNCTION_EFFECT func)	{ s_pMemcpyEffectFunction = s_pMemcpyEffectFunctionTable[func]; }
+		static bool		IsWipeOutEffect() { return s_pMemcpyEffectFunction == memcpyEffectWipeOut; }
 		static void		memcpyEffect(WORD* pDest, WORD* pSource, WORD pixels)
 		{
 			(*s_pMemcpyEffectFunction)(pDest, pSource, pixels);

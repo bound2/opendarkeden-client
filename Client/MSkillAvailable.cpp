@@ -705,6 +705,7 @@ MSkillSet::SetAvailableSkills()
 
 							case MAGIC_BLOODY_TUNNEL :
 							{
+								// Keep the HP check above; a marked seal is also required.
 								MVampirePortalItemFinder finder(true);
 							#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
 								if (NULL == ((MItemManager*)g_pInventory)->FindItemAll( finder , pSubInventory ))
@@ -715,9 +716,6 @@ MSkillSet::SetAvailableSkills()
 									flag = 0;
 								}
 							}
-								{
-									flag = 0;
-								}
 							break;
 
 							case MAGIC_TRANSFORM_TO_WOLF :

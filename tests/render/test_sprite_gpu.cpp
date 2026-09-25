@@ -9,11 +9,20 @@
 #include "FrameUpscaler.h"
 #include "CFilter.h"
 #include "MixedScene.h"
+#include "../support/InvisibilitySprite.h"
 #include <cstdio>
 #include <climits>
 #include <vector>
 
 extern SDL_Renderer* testSpriteRenderer;
+
+TEST(SpriteGpu, InvisibilityWipePreservesBackgroundWithoutReadbacks)
+{
+	CHECK(SpriteGpu::Attach(testSpriteRenderer, true));
+	invisibility_test::CheckFade();
+	SpriteGpu::Detach();
+}
+
 namespace {
 struct Fixture {
 	CSpriteSurface surface;

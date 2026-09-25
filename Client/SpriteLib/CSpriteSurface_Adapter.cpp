@@ -25,6 +25,7 @@
 #include "SpriteLibBackend.h"
 #include "SpriteScanline.h"
 #include <climits>
+#include <memory>
 #include "DebugLog.h"
 
 /* ============================================================================
@@ -983,8 +984,62 @@ void CSpriteSurface::BltIndexSpriteColorSet(POINT* pPoint, CIndexSprite* pSprite
 }
 
 void CSpriteSurface::BltIndexSpriteEffect(POINT* pPoint, CIndexSprite* pSprite) {
-	/* TODO: Implement effect */
-	BltIndexSprite(pPoint, pSprite);
+	if (!CIndexSprite::IsWipeOutEffect()) {
+		BltIndexSprite(pPoint, pSprite);
+		return;
+	}
+	if (!pPoint || !pSprite || !pSprite->IsInit() || !m_backend_surface
+		|| !m_backend_surface->surface || s_Value1 >= 64) return;
+	const SDL_Rect& clip = m_backend_surface->surface->clip_rect;
+	if (int64_t(pPoint->x) + pSprite->GetWidth() <= clip.x
+		|| int64_t(pPoint->y) + pSprite->GetHeight() <= clip.y
+		|| int64_t(pPoint->x) >= int64_t(clip.x) + clip.w
+		|| int64_t(pPoint->y) >= int64_t(clip.y) + clip.h) return;
+
+	// Keep the legacy center-out wipe for each indexed/fixed color run.
+	// Encode the surviving pixels as ordinary RLE so both CPU and GPU
+	// composition preserve holes and opaque black, without a GPU readback.
+	std::unique_ptr<spritectl_sprite_s, decltype(&spritectl_destroy_sprite)> wiped(
+		spritectl_create_sprite_rle(pSprite->GetWidth(), pSprite->GetHeight()), spritectl_destroy_sprite);
+	if (!wiped) return;
+	const int wipe = (std::max)(0, s_Value1);
+	std::vector<WORD> row;
+	for (int y = 0; y < pSprite->GetHeight(); ++y) {
+		row.assign(1, 0);
+		const WORD* source = pSprite->GetPixelLine(y);
+		const int segments = *source++;
+		int x = 0, written = 0;
+		auto append = [&](int count, bool indexed) {
+			const int skipped = count * wipe / 64;
+			const int left = (count - skipped) / 2;
+			for (int side = 0; side < 2; ++side) {
+				const int begin = side == 0 ? 0 : left + skipped;
+				const int end = side == 0 ? left : count;
+				if (begin == end) continue;
+				++row[0];
+				row.push_back(WORD(x + begin - written));
+				row.push_back(WORD(end - begin));
+				for (int i = begin; i < end; ++i) {
+					const WORD pixel = source[i];
+					row.push_back(indexed ? CIndexSprite::ColorSet[
+						CIndexSprite::GetUsingColorSet(BYTE(pixel >> 8))][pixel & 0xff] : pixel);
+				}
+				written = x + end;
+			}
+			source += count;
+			x += count;
+		};
+		for (int segment = 0; segment < segments; ++segment) {
+			x += *source++;
+			const int indexed = *source++;
+			append(indexed, true);
+			const int fixed = *source++;
+			append(fixed, false);
+		}
+		if (row.size() > 0xffff || spritectl_sprite_set_scanline_rle(
+			wiped.get(), y, row.data(), static_cast<uint16_t>(row.size())) != 0) return;
+	}
+	spritectl_blt_sprite(m_backend_surface, pPoint->x, pPoint->y, wiped.get(), 0, 255);
 }
 
 void CSpriteSurface::BltIndexSpriteBrightness(POINT* pPoint, CIndexSprite* pSprite, BYTE BrightBits) {
