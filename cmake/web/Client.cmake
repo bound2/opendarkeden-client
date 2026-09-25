@@ -6,9 +6,11 @@ target_link_options(DarkEden PRIVATE
     -sMODULARIZE=1 -sEXPORT_ES6=1 -sEXPORT_NAME=createDarkEden
     -sEXIT_RUNTIME=1
     -sCASE_INSENSITIVE_FS=1
-    -sEXPORTED_RUNTIME_METHODS=FS,IDBFS,callMain,ENV,ccall
+    --use-port=zlib
+    -sEXPORTED_FUNCTIONS=_main,_malloc,_free,_uncompress
+    -sEXPORTED_RUNTIME_METHODS=FS,IDBFS,callMain,ENV,ccall,HEAPU8,HEAPU32
     -lidbfs.js)
-foreach(_file index.html launcher.mjs touch-controls.mjs client-config.json)
+foreach(_file index.html launcher.mjs touch-controls.mjs asset-store.mjs client-config.json)
     configure_file("${CMAKE_SOURCE_DIR}/web/${_file}"
         "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_file}" COPYONLY)
 endforeach()

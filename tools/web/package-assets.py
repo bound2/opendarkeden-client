@@ -5,6 +5,8 @@ import json
 from pathlib import Path, PurePosixPath
 import zipfile
 
+from asset_compression import compress_assets
+
 
 def package(archive, output, font, overlays=()):
     output = output.resolve()
@@ -85,6 +87,7 @@ def package(archive, output, font, overlays=()):
     files.sort(key=lambda entry: entry['path'])
     (output / 'manifest.json').write_text(json.dumps({'version': 1, 'files': files}, indent=2) + '\n', encoding='utf-8')
     print(f'Packaged {len(files)} files, {sum(entry["size"] for entry in files):,} bytes into {output}')
+    compress_assets(output)
 
 
 if __name__ == '__main__':

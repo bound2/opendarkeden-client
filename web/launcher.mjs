@@ -1,5 +1,6 @@
 import createDarkEden from './DarkEden.mjs';
 import { installTouchControls } from './touch-controls.mjs';
+import { createAssetStore } from './asset-store.mjs';
 
 const canvas = document.querySelector('#canvas');
 const status = document.querySelector('#status');
@@ -42,7 +43,7 @@ function syncSettings(populate) {
 }
 
 async function loadAssets() {
-  const response = await fetch('./assets/manifest.json');
+  const response = await fetch('./assets/manifest.json', { cache: 'no-store' });
   if (!response.ok) throw new Error('The game data pack is unavailable.');
   const manifest = await response.json();
   if (manifest.version !== 1 || !Array.isArray(manifest.files) || manifest.files.length === 0)
@@ -51,8 +52,13 @@ async function loadAssets() {
     if (!/^Data\//.test(file.path) || file.path.split('/').some(part => !part || part === '.' || part === '..') ||
         file.path.includes('\\') || !Number.isSafeInteger(file.size) || file.size < 0 || !/^[a-f0-9]{64}$/.test(file.sha256))
       throw new Error('The game data manifest contains an invalid entry.');
+    if (file.compressed && (!/^compressed\/[a-f0-9]{64}\.dez$/.test(file.compressed.path) ||
+        !Number.isSafeInteger(file.compressed.size) || file.compressed.size < 16 ||
+        file.compressed.size >= file.size || !/^[a-f0-9]{64}$/.test(file.compressed.sha256)))
+      throw new Error('The game data manifest contains an invalid compressed entry.');
   }
-  progress.max = manifest.files.reduce((total, file) => total + file.size, 0);
+  const assets = createAssetStore(client);
+  progress.max = manifest.files.reduce((total, file) => total + (file.compressed ?? file).size, 0);
   progress.value = 0;
   progress.hidden = false;
   let cache;
@@ -61,27 +67,34 @@ async function loadAssets() {
   await Promise.all(Array.from({ length: 3 }, async () => {
     while (next < manifest.files.length) {
       const file = manifest.files[next++];
-      const url = new URL(`./assets/${file.path.split('/').map(encodeURIComponent).join('/')}?sha256=${file.sha256}`, import.meta.url);
+      const stored = file.compressed ?? file;
+      const url = new URL(`./assets/${stored.path.split('/').map(encodeURIComponent).join('/')}?sha256=${stored.sha256}`, import.meta.url);
       let data;
       try { data = await cache?.match(url); } catch { /* A failed cache read falls back to HTTP. */ }
       const cached = !!data;
       data ??= await fetch(url);
       if (!data.ok) throw new Error(`Cannot load ${file.path}.`);
       const buffer = await data.arrayBuffer();
-      if (buffer.byteLength !== file.size) throw new Error(`Incomplete game data: ${file.path}.`);
+      if (buffer.byteLength !== stored.size) {
+        try { await cache?.delete(url); } catch { /* Cache failure must not hide the error. */ }
+        throw new Error(`Incomplete game data: ${file.path}.`);
+      }
       const digest = [...new Uint8Array(await crypto.subtle.digest('SHA-256', buffer))]
         .map(byte => byte.toString(16).padStart(2, '0')).join('');
-      if (digest !== file.sha256) {
-        await cache?.delete(url);
+      if (digest !== stored.sha256) {
+        try { await cache?.delete(url); } catch { /* Cache failure must not hide the error. */ }
         throw new Error(`Damaged game data: ${file.path}. Reload to download it again.`);
       }
       if (!cached && cache) {
         try { await cache.put(url, new Response(buffer)); } catch { /* Quota failure must not prevent play. */ }
       }
       const path = `/${file.path}`;
-      client.FS.mkdirTree(path.slice(0, path.lastIndexOf('/')));
-      client.FS.createDataFile('/', file.path, new Uint8Array(buffer), true, false, true);
-      progress.value += file.size;
+      if (file.compressed) assets.add(path, new Uint8Array(buffer), file.size);
+      else {
+        client.FS.mkdirTree(path.slice(0, path.lastIndexOf('/')));
+        client.FS.createDataFile('/', file.path, new Uint8Array(buffer), true, false, true);
+      }
+      progress.value += stored.size;
       status.textContent = `Loading game data… ${Math.floor(progress.value / progress.max * 100)}%`;
     }
   }));

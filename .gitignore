@@ -73,6 +73,7 @@ desktop.ini
 *.a
 *.so
 *.dylib
+__pycache__/
 
 # Scratch files written by the file I/O unit tests. They are created in
 # the working directory, which is the build directory under CTest but the
