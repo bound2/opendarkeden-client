@@ -1,0 +1,3 @@
+A cast spell that temporarily raises the damage of your fire attack spells; the damage is determined by INT and skill level. Duration is determined by skill level and DEX.
+
+To use fire spirits in depth, you must be acknowledged by Ifrit, the Spirit King of fire. Ifrit grants the spirit caller his specialty, fierce fire attack power, along with the right to wield fire.

@@ -1,0 +1,8 @@
+%869
+A turret that fires lasers up to 10 tiles in straight diagonal lines, damaging any enemy that crosses them. Once activated, it fires its Vulcan cannon mercilessly at everything around it.
+
+
+
+
+
+

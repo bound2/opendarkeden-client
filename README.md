@@ -458,6 +458,19 @@ New-Item -ItemType Junction -Path "$dest\UserSet" -Target "$src\UserSet"
 
 Repeat for `bin\Release` if you build that configuration.
 
+The shipped data is Korean. The client carries English for the tables it
+loads (UI strings, NPC names and dialogue, skill names), but the item and
+skill descriptions, help pages, books and tutorial mails are packed in
+`Data/Ui/txt/*.rpk`, and their English is a set of loose files the client
+prefers over the packed originals. Copy them over the data once:
+
+```powershell
+Copy-Item -Recurse -Force tools\i18n\ui-text\Data\* "$src\Data\"
+```
+
+`tools/i18n/README.md` describes the translation tables and how to regenerate
+the files.
+
 ### Launch
 
 Double-click `DarkEden.exe`, or run it without arguments:

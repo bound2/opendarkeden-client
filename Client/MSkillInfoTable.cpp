@@ -71,6 +71,30 @@ MSkillInfoTable::Init()
 //	m_pTypeInfo[MAGIC_BLOODY_MARK].SetDelayTime( 3000 );
 }
 //----------------------------------------------------------------------
+// Use English Names
+//----------------------------------------------------------------------
+// SkillInfo.inf carries two names per skill: the English one the skill's
+// description file is named after (GetName) and the display name in the
+// data's own language (GetHName), which the learn-skill message, the
+// skill window and the status effect list show. The shipped data's
+// display names are Chinese, so in English the display name is the
+// English name.
+//----------------------------------------------------------------------
+void
+MSkillInfoTable::UseEnglishNames()
+{
+	const int size = GetSize();
+	for (int i = 0; i < size; i++)
+	{
+		const char* pName = m_pTypeInfo[i].GetName();
+		if (pName != NULL && pName[0] != '\0')
+		{
+			m_pTypeInfo[i].SetHName( pName );
+		}
+	}
+}
+
+//----------------------------------------------------------------------
 // Save From File  ServerSkillInfo
 //----------------------------------------------------------------------
 void			

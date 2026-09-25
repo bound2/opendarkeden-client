@@ -1,0 +1,5 @@
+A skill that lets the caster freely adjust the size of the area to attack. Select the tile at the center of the attack, then drag with the mouse to set the size of the attack area. The size of the area and the destructive power are inversely proportional, and it is most destructive when attacking a single tile.
+
+
+
+

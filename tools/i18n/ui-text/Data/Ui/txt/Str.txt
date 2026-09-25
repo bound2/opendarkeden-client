@@ -1,0 +1,1 @@
+STR : Strength (STR) reflects your character's physical power and toughness, and affects HP, Protection and Damage. It is a key stat for close-combat characters who use swords and blades.

@@ -1,0 +1,1 @@
+A spell that finds invisible Vampires through the eyes of the Holy Spirit. For a set time it reveals any Vampire in the Invisible state that enters your Vision. Others still cannot see the Vampire, but you can tell them its location by chat so they can hit it with area attacks, or use Visible to force it into view.

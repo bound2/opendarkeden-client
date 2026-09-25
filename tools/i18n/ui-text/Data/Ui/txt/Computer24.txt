@@ -1,0 +1,1 @@
+Slayers use Ampuls to heal wounds and restore concentration (or holy power). Ampuls are divided into Healing Ampuls and Mana Ampuls: Healing Ampuls heal wounds and Mana Ampuls restore mana.

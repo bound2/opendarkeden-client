@@ -1,0 +1,145 @@
+; Interface Information
+;
+; * <interface name> <list type>
+; Accessing these by number is a little awkward. -_-
+
+;================================ Image positions in the character info window
+*INFO POINT_LIST
+;================================
+124 69				; 0: position of the SkillInfo DomainBar
+;-------------------------------- Slayer
+148 127				; 1 Desc_Box
+86 120				; 2 Field_x1, Field_x2
+2 3				; 3 Name, Fame, Align Fix Position
+10 3				; 4 STR
+0 3				; 5 DEX
+5 3				; 6 INT
+0 3				; 7 HP
+0 3				; 8 MP
+0 3				; 9 TOHIT
+0 3				; 10 DAMAGE
+0 3				; 11 DEFENSE
+0 3				; 12 PROTECTION
+;-------------------------------- Vampire
+153 122				; 13 Desc_Box
+81 115				; 14 field1_x, field1_x2
+190 225				; 15 field1_x3, field1_x4
+4 3				; 16 Name, Align
+10 3				; 17 STR
+0 3				; 18 DEX
+5 3				; 19 INT
+0 3				; 20 HP
+0 3 				; 21 TOHIT
+0 3				; 22 DAMAGE
+0 3 				; 23 DEFENCE
+0 3				; 24 PROTECTION
+4 10				; 25 Fame
+3 3				; 26 Level
+0 3				; 27 Exp
+54 11				; 28 Bonus
+;-------------------------------- Ousters
+153 122				; 29 Desc_Box
+81 115				; 30 field1_x, field1_x2
+186 220				; 31 field1_x3, field1_x4
+4 3				; 32 name, align
+4 8				; 33 Guild
+4 10				; 34 Grade
+4 10				; 35 Fame
+3 3				; 36 Level
+0 3				; 37 Exp
+54 11				; 38 Bonus
+10 3				; 39 STR
+0 3				; 40 DEX
+3 3				; 41 INT
+0 3				; 42 HP
+2 3				; 43 EP
+0 3				; 44 TOHIT
+0 3				; 45 DAMAGE
+0 3				; 46 DEFENCE
+0 3				; 47 PROTECTION
+;--------------------------------
+*END
+;================================
+
+;================================
+*INFO RECT_LIST
+;================================
+1 13 29 0			; INFO POINT_LIST start position per race
+;--------------------------------
+*END
+;================================
+
+;================================
+*GAME_MENU POINT_LIST
+;-------------------------------- Slayer
+34 69				; 0 x_offset, y2_offset
+94 117				; 1 y3_offset_, y4_offset
+;-------------------------------- Vampire
+34 69				; 2
+93 117				; 3
+;-------------------------------- Ousters
+46 83				; 4
+108 131				; 5
+;--------------------------------
+*END
+;================================
+
+;================================ Button positions in Options
+*OPTION POINT_LIST
+;-------------------------------- CloseButton
+360 285				; 0
+;-------------------------------- Tab
+116 20				; 1 control
+170 20 				; 2 graphic
+224 20 				; 3 sound
+278 20				; 4 game
+;-------------------------------- Check Box Position
+125 60				; 5	
+;--------------------------------
+*END
+;================================
+
+;================================
+*OPTION RECT_LIST
+;--------------------------------
+116 170 224 278			; Tab X Position(Control,Graphic,Sound,Game)
+;--------------------------------
+*END
+;================================
+
+;================================ Button positions on the title screen
+*TITLE POINT_LIST
+;================================
+325 373				; 0 CONNECT
+325 415				; 1 OPTION
+325 457				; 2 CREDIT
+325 499				; 3 EXIT
+;--------------------------------
+*END
+;================================
+
+;================================ Button positions on the character creation screen
+*NEW_CHAR POINT_LIST
+;================================
+28 522				; 0 BACK
+687 522				; 1 NEXT
+454 463				; 2 FACE_BACK_BUTTON
+485 463				; 3 FACE_NEXT_BUTTON
+404 218				; 4 SLAYER_BUTTON
+473 218 			; 5 VAMPIRE_BUTTON
+404 241				; 6 OUSTERS_BUTTON
+404 276 			; 7 MALE_BUTTON
+465 276				; 8 FEMALE_BUTTON
+572 215				; 9 SAVE_BUTTON
+617 215				; 10 LOAD_BUTTON
+664 215 			; 11 REROLL_BUTTON
+503 178				; 12 CHECK_BUTTON
+740 250 			; 13 PLUS_BUTTON STR
+725 250				; 14 MINUS_BUTTON 
+740 275				; 15 PLUS_BUTTON DEX
+725 275				; 16 MINUS_BUTTON
+740 300				; 17 PLUS_BUTTON INT
+725 300				; 18 MINUS_BUTTON
+;================================
+*END
+;================================

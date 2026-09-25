@@ -1,0 +1,3 @@
+A cast skill that temporarily lowers the target's Defense; the reduction depends on DEX, STR and skill level. Duration depends on DEX, INT and skill level, and delay on DEX.
+
+Cascade, the spirit of waterfalls, holds great physical force like a rushing waterfall, and where there is no water it can concentrate that force in one place. Summon Cascade, give it the form you wish, and bear down on the enemy with a powerful gravity. A target caught by this skill becomes sluggish, and its Evasion is temporarily reduced.

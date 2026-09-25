@@ -1,0 +1,14 @@
+%224
+Since ancient times, red has been treated around the world as a color with magical power in rites and sorcery. The English word Red even carries a sense of the devil. In any case, deep in the human psyche red stands as a source of intense power beyond good and evil.
+
+The Red Star is an event item that can be exchanged for items or money with the NPCs below, depending on your race and location.
+
+ Field Headquarters NPC : Kaiser
+ Warrior Guild NPC : Conan
+ Soldier Guild NPC : Smith
+ Priest Guild NPC : Stoyanov
+ Vampire Village NPC : Vrykolakas
+
+Use: Stars can be exchanged when you have 20 / 40 / 60 / 80 / 100 of them, for high-grade items with a Str option or for money.
+
+* To exchange this item for money, you must first collect stars of the same kind, then go to Kaiser, Conan, Smith, Stoyanov, Vrykolakas or the like, select 'I want to exchange my stars for money' and left-click to make the exchange.

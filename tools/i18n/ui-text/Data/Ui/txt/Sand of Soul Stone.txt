@@ -1,0 +1,3 @@
+A passive skill that has a set chance to deal earth damage over an area; soul stone slots 1, 2 and 3 must all hold the earth attribute. The damage bonus depends on DEX and STR, and the success rate on spirit level.
+
+A passive skill that infuses your chakram with the power of Gnome, the earth spirit, through earth soul stones. It is similar to a critical hit, but does not knock the target back.

@@ -1,0 +1,3 @@
+Gives attack spells a set chance to deal bonus damage and knock the target back. The bonus damage and success rate depend on skill level.
+
+This spell is said to pass on the destructive wind power of the Djinn, a greater wind spirit.

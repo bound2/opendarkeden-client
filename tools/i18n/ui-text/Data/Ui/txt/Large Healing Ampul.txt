@@ -1,0 +1,2 @@
+%165
+A capsule containing a healing ampul; it restores about 100 HP.

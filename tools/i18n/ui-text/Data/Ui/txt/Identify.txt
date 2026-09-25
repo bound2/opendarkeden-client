@@ -1,0 +1,1 @@
+A spell that reveals an item's properties through the eyes of the Holy Spirit. At first it only tells basic states such as blessed, cursed or uncursed, but the more proficient you become, the more you can learn. Note that an item's state shows what was found the last time the item was put through Identify.

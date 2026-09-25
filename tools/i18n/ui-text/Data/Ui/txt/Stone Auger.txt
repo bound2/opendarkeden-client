@@ -1,0 +1,3 @@
+A long-range attack spell that makes stones burst up from the ground; damage is determined by INT and skill level. Delay and range depend on skill level.
+
+A spell that summons the Gnome, a lesser earth spirit. When summoned, the Gnome attacks the enemy with pointed, awl-like stones from the ground.

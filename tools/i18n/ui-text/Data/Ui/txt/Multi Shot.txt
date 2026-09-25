@@ -1,0 +1,1 @@
+Used with an AR, SMG or SG, this skill enables area attacks. The size of the area depends on the type of gun, and you cannot use area attacks with an SR, which cannot fire bursts. Using this skill incurs To Hit and Damage penalties, but they disappear once you reach Grand Master.

@@ -1,0 +1,2 @@
+%207
+A toolkit holding the tools needed to make and set bombs and mines and to detect and remove mines: a black square case fitted with an LCD, test leads, buttons and other equipment.

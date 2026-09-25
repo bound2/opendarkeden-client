@@ -1,0 +1,6 @@
+%1047
+Master Proud Apparel(250) is a coat usable by female Vampires of Advancement level 250 or higher. This item is obtained by enchanting an existing Advancement Coat with a Reliance Drop.
+
+< Hidden Option >
+Physical Defense +100
+Magic Defense +100

@@ -1,0 +1,17 @@
+Skill Interface
+
+In DKx Online, Slayers, Vampires and Ousters each have a large number of techniques and spells for each class.
+With many kinds of techniques and spells - attack techniques, support magic, healing magic, curse magic, elemental magic and more - you can fight in many different ways.
+
+How to Use the Skill Interface
+-----------------------------
+1. Viewing skills : Press the Quick Skill button at the bottom right of the game screen, or Control+S.
+
+2. Selecting a skill : Left-click the skill you want to use among all the skill icons you know. If you have assigned a hotkey, you can use the hotkey instead for convenience.
+
+3. Using a skill : Right-click a suitable target for the kind of skill. For attack techniques, right-click the opponent; for item-related techniques, right-click in the inventory. Spells you can only cast on yourself are applied to you with a plain right-click.
+
+4. Assigning quick skill hotkeys : The quick skill hotkeys are F9 ~ F12, and you can assign 4 skill sets in all. Open the quick skill interface, hover the mouse over the skill icon you want to assign and press F9 ~ F12 to assign it automatically.
+Vampires can also use the F5~F8 hotkeys, and Ousters can assign hotkeys from F7 ~ F12.
+
+Each skill set can hold 4 skills, which are selected in turn each time you press the hotkey.

@@ -1,0 +1,2 @@
+%198
+A file containing information on Slayers, used in the computer room. It holds data on Slayers all over the world, classifying their achievements and current areas of activity in detail.

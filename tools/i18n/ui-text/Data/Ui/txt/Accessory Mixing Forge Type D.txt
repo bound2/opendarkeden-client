@@ -1,0 +1,8 @@
+%554
+An enchant item with the special ability of turning two items of the same type and grade into one. When the two items become one, the options of the original items carry over unchanged, so the single item ends up with two options. Items that can be enchanted with an Accessory Mixing Forge are necklaces, bracelets, rings, earrings, Beads and spirit stones.
+How to use a Mixing Forge - Right-click the Mixing Forge item to open the Mixing Forge window, right-click the item you want to mix to place it in the Mixing Forge window, then click OK to mix the items.
+
+
+
+
+

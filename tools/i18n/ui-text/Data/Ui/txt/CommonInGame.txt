@@ -1,0 +1,57 @@
+Press Tab to open the Inventory window, then press Ctrl+Tab and drag items onto the gear window to equip them.
+To attack a monster, point the mouse at it and left-click.
+STR affects Damage, HP and Protection.
+DEX affects To Hit and Defense.
+INT affects MP, SP and certain spells of Clerics and Ousters.
+Every item has stat requirements.
+Click a monster's corpse after killing it and its head drops (a gem in the Teen version).
+Monster heads (gems in the Teen version) can be exchanged for money at each guild's NPC.
+Areas shown in green on the minimap are safe zones.
+Skills cannot be used in safe zones.
+To trade, hold the left Alt key in a safe zone and click the player you want to trade with.
+Attacking your own race worsens your Alignment.
+If you keep repeating the same sentence in chat, you will be unable to chat for a while.
+Items can be obtained by killing monsters on any map.
+To form a party, hold the right Alt key and click the player you want to party with.
+When the chat text is red you cannot talk; you can talk again after 10 seconds.
+Normal chat is Control+C.
+Zone chat is Control+Z.
+To whisper, press Control+W, enter the other player's ID and type your message.
+Press Control+M to turn the minimap on or off.
+Press Control+X to enter special characters.
+Press Control+E to enlarge the chat window.
+If you die with an Evil Alignment, you drop random items you are carrying.
+Attacking a player of your own race whose Alignment is better than yours worsens your Alignment.
+DKx Online staff will never ask for your personal information.
+Please send general inquiries about DKx Online through the homepage (dkxonline.com.cn).
+Please send DKx Online bug reports through the homepage (dkxonline.com.cn).
+Please send inquiries about DKx Online events through the homepage (dkxonline.com.cn).
+Please send inquiries about DKx Online guilds through the homepage (dkxonline.com.cn).
+Leaking your account information can get your account hacked, so please be very careful.
+Please refrain from bad manners that spoil the game for others (swearing, kill stealing, loot grabbing).
+If you give your password or ID number to anyone else, no compensation will be made, so please be careful.
+Vampires and monsters gain attack power and defense at night.
+HP : the stat that shows your character's life. When HP reaches 0 you die.
+To Hit (TOHIT) : the stat that shows attack accuracy; it depends on DEX and on skill and Domain levels.
+Damage (DAMAGE) : the stat that shows how hard you can hit; it depends on STR and skill level.
+Defense (DEFENSE) : the stat that shows your chance to evade against To Hit; it depends on DEX.
+Protection (PROTECTION) : the stat that shows how much Damage you shrug off; it depends on STR.
+Fame (FAME) : rises as you kill monsters or complete quests.
+When your character figure appears at the top left of the screen, items shown in yellow or red need repairing.
+Every item shows its stat requirements.
+Options do not apply on equipped items shown in red.
+If someone attacks you first, the self-defense system applies.
+While self-defense is active, you can strike back for a while without affecting your Alignment.
+Looting the corpse of a player whose Alignment is better than yours lowers your Alignment.
+You can choose between Enter chat and Normal chat in the Options.
+Interfaces such as the chat window and map can auto-hide. If hovering the mouse over the button shows 'Turn auto-hide on', auto-hide is currently off.
+Interfaces such as the chat window and map can be made translucent. If hovering the mouse over the button shows 'Display translucent.', the window is currently opaque.
+Shift-click an item in your inventory to move it to the gear window.
+When the mouse is at the edge of the chat window, the pointer turns into a hand; click and drag to resize the chat window.
+Hacking must be reported in the hacking report section of the Customer Support Center within 5 days of the incident.
+Click the green circle on the HP bar to resize the HP bar.
+Click the red circle on the HP bar to switch the HP bar between horizontal and vertical.
+If you turned from a Vampire back into a Slayer through an NPC, you must wait one week in real time and then have your blood drained to become a Vampire again.
+You can set every hotkey to suit you in the Options window.
+With Caps Lock on, hold down the left or right mouse button to automatically attack enemies within attack range around you.
+A consecutive-payment event is running now. Paying for consecutive periods brings many benefits, so please keep it in mind and take part.

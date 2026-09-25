@@ -1,0 +1,6 @@
+%1050
+Rantea Chakram(215) is a chakram usable by Ousters of Advancement grade 65 or higher. This item is obtained by enchanting an existing Advancement Chakram with an Old Drop.
+
+< Hidden Option >
+HP : +750
+Physical Damage: +20

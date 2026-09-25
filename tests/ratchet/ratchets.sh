@@ -192,7 +192,11 @@ check () {
 # 460: move five unchanged world metadata implementations into gamemodel.
 # 456: promote two quest models plus the profile and shrine adapters.
 # 455: party membership joins gamemodel behind MPartyHost.
-R1_BASELINE=455
+# 456 = 455 + 1: MNPCTableEnglish.cpp, the generated English NPC name
+# table (tools/i18n/npc_gen.pl). A recorded GROWTH, the same shape as
+# MNPCScriptTableEnglish.cpp: it writes g_pNPCTable, an executable global,
+# so it is an exe TU by construction.
+R1_BASELINE=456
 
 R1_VCXPROJ=""
 for candidate in "$BUILD_DIR/DarkEden.vcxproj" "build/vs2022/DarkEden.vcxproj"; do

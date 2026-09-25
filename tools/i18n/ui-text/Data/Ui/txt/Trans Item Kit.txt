@@ -1,0 +1,2 @@
+%547
+Switches the gender restriction of an item that is limited to one gender.

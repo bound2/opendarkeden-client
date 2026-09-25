@@ -1,0 +1,3 @@
+An attack skill that has a set chance to deal a critical blow; damage is determined by weapon damage and skill level.
+
+A skill blessed by Brekrozi, a spirit of emotion; his protection fills those in his care with courage and lifts their spirits.

@@ -1,0 +1,1 @@
+Reflects a portion of the damage you take back at the attacker. The stronger the attacker, the more damage it sends back, making enemies reluctant to attack.

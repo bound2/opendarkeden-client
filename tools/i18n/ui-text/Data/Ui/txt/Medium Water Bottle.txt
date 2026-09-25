@@ -1,0 +1,3 @@
+%172
+The ingredient for Create Holy Water, the first step of the cleric's Enchant domain. It produces holy water in proportion to its medium quantity.
+

@@ -1,0 +1,2 @@
+%983
+An enhancement item that adds an Attack Speed +5 option to equipment with no options. Unused rice cakes will be deleted from your inventory when the Chuseok event ends.

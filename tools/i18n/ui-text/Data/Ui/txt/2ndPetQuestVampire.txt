@@ -1,0 +1,4 @@
+600 500
+Carpatini
+You can now take on the Stirge quest.
+At last you have reached the required level. Congratulations. Do you know what a Stirge is? A beast that has been with us through the ages, for time out of mind. Hmm.. they have grown very rare these days, but.. now I will give you the chance to own one. You cannot imagine how hard it was for me to find it. Now show me deeds worthy of the reward.\n\n*To apply for the quest, go and see Carpatini in Limbo Castle.

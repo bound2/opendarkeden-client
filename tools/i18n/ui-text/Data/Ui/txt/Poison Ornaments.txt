@@ -1,0 +1,2 @@
+%982
+Gives your weapon the poison attribute for a certain time, so your attacks have a chance to add a lasting poison attack. (Lasts 6 days)

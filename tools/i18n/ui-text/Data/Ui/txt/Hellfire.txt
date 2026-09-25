@@ -1,0 +1,3 @@
+This skill summons Hellfire, the flames of hell that symbolize Ifrit's authority, and covers an entire area in hellfire. Once the flames touch a body they will not go out even if the victim flees them, dealing continuous damage for a set time.
+
+Summons flames on the ground over an area to burn the enemy. A target that catches fire keeps burning for the duration, taking damage all the while. The area and range increase with skill level. Mastering the skill grants a substantial bonus.

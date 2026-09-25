@@ -1,0 +1,1 @@
+Tohit : To Hit is your character's chance of landing an attack. The higher it is, the better your chance of hitting your opponent.

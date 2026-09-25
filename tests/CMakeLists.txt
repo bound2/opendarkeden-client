@@ -116,8 +116,15 @@ add_executable(ui_tests
 	ui/test_line_editor.cpp
 	ui/test_editor_focus.cpp
 	ui/test_ui_message_receiver.cpp
+	ui/test_uitext_overrides.cpp
 )
 target_link_libraries(ui_tests PRIVATE test_framework VS_UI basic)
+# The shipped English overrides of the packed UI text, checked as files.
+set_source_files_properties(
+	${CMAKE_CURRENT_SOURCE_DIR}/ui/test_uitext_overrides.cpp
+	PROPERTIES
+		COMPILE_DEFINITIONS "UITEXT_DIR=\"${CMAKE_SOURCE_DIR}/tools/i18n/ui-text/Data/Ui/txt\""
+)
 add_test(NAME ui_tests COMMAND ui_tests)
 
 #----------------------------------------------------------------------

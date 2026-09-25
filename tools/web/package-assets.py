@@ -6,7 +6,7 @@ from pathlib import Path, PurePosixPath
 import zipfile
 
 
-def package(archive, output, font):
+def package(archive, output, font, overlays=()):
     output = output.resolve()
     output.mkdir(parents=True, exist_ok=True)
     files = []
@@ -33,6 +33,16 @@ def package(archive, output, font):
                 size += len(chunk)
         files.append({'path': name, 'size': size, 'sha256': digest.hexdigest()})
 
+    def replace(source, name):
+        # An overlay file takes the place of the archive's copy, if any.
+        for entry in files:
+            if entry['path'].lower() == name.lower():
+                files.remove(entry)
+                seen.discard(entry['path'])
+                folded.discard(entry['path'].lower())
+                break
+        copy(source, name)
+
     with zipfile.ZipFile(archive) as data:
         for entry in data.infolist():
             # UserSet may contain private account settings; never distribute it.
@@ -44,6 +54,23 @@ def package(archive, output, font):
                 copy(source, entry.filename)
     if 'Data/Info/FileDef.inf' not in seen:
         raise ValueError('Archive must contain Data/Info/FileDef.inf at its root')
+    # Loose files the client prefers over the packed originals: the English
+    # UI text under tools/i18n/ui-text, for one. Each overlay is a directory
+    # with Data/ at its root, and later overlays win.
+    for overlay in overlays:
+        root = overlay.resolve()
+        if not (root / 'Data').is_dir():
+            raise ValueError(f'Overlay must contain a Data directory: {overlay}')
+        for path in sorted(root.rglob('*')):
+            if path.is_symlink():
+                raise ValueError(f'Symbolic link in overlay: {path}')
+            if not path.is_file():
+                continue
+            name = path.relative_to(root).as_posix()
+            if not name.startswith('Data/'):
+                continue
+            with path.open('rb') as source:
+                replace(source, name)
     # Native clients use system fonts; a browser deployment needs its own font.
     if font:
         with font.open('rb') as source:
@@ -65,5 +92,7 @@ if __name__ == '__main__':
     parser.add_argument('archive', type=Path)
     parser.add_argument('output', type=Path)
     parser.add_argument('--font', type=Path)
+    parser.add_argument('--overlay', type=Path, action='append', default=[],
+                        help='directory of loose files (Data/ at its root) copied over the archive; repeatable')
     args = parser.parse_args()
-    package(args.archive, args.output, args.font)
+    package(args.archive, args.output, args.font, args.overlay)

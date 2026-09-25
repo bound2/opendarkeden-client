@@ -1,0 +1,2 @@
+%985
+An enhancement item that adds a Protection +1 option to equipment with no options. Unused rice cakes will be deleted from your inventory when the Chuseok event ends.

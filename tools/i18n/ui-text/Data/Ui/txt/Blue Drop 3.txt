@@ -1,0 +1,2 @@
+%555
+A further improved version of Blue Drop 2 that can Enchant items with a very high probability. Keep in mind, however, that the item's options may be lowered or the item itself may vanish.

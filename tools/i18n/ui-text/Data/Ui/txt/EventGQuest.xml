@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QuestList>
+	<Quest id="1010">
+		<Title>Ring of Evolution</Title>
+		<Script sender="Terry">This is an emergency. I am "Terry" of EVE Headquarters. You are ordered to return to guild headquarters at once. A special mission has been handed down to you. I cannot give you the details, but please return as soon as possible. What is your situation? Can you make it?</Script>
+		<Happen replay="false">
+			<Race race="SLAYER" />
+			<Level min="150" />
+			<NOT><AdvancementClassLevel min="1" /></NOT>
+		</Happen>
+		<Complete>
+			<SayNPC name="Terry" target="302" index="1">Talk to Terry</SayNPC>
+			<Script sender="Terry" target="302" index="2">Listen carefully to what I am about to tell you. These are orders from above, and I do not know the details myself. This is a top-secret mission and must never be leaked. Do you understand?</Script>
+			<GiveQuestItem id="21" />
+			<AddEffect effectclass="462" />
+			<Script sender="Terry" targetitem="21" index="3">Take this. All you have to do is deliver it. It sounds easy, but the problem is that this document must go to the vampire Rebecca inside Limbo Castle. Of course, arrangements have been made so that you can get into the vampires' castle, so don't worry too much. Since this mission must be carried out in secret, Motorcycles and Helicopters are forbidden. Please keep that in mind.</Script>
+			<SayNPC name="Rebecca" target="255" index="4">Deliver the top-secret document to Rebecca inside Limbo Castle</SayNPC>
+			<Script sender="Rebecca" target="255" index="5">Thank you for coming all this way. Well? How does it feel for a lowly human to behold the beautiful Limbo Castle...</Script>
+			<LoseQuestItem id="21" />
+			<GiveQuestItem id="22" />
+			<Script sender="Rebecca" targetitem="22" index="6">I have received what you brought. Now take this with you. Farewell, then... Though perhaps we shall meet again. Ho ho ho ho ho ho ho ho...</Script>
+			<RemoveEffect effectclass="462" />
+			<SayNPC name="Terry" target="302" index="7">Deliver the reply to Terry in Eslania Northwest</SayNPC>
+			<Script sender="Terry" target="302" index="8">You made it back safely. What a relief. A new mission may come your way soon. Please stay somewhere close by.</Script>
+			<LoseQuestItem id="22" />
+		</Complete>
+		<FailMessage sender="Terry" target="302">Oh dear. You failed. How disappoiiinting.</FailMessage>
+		<Fail>
+			<Killed num="1" index="1">Do not die during the mission</Killed>
+			<RideMotorcycle index="2">No Motorcycles</RideMotorcycle>
+			<IllegalWarp index="3">No Helicopters</IllegalWarp>
+		</Fail>
+		<Reward>
+		</Reward>
+	</Quest>
+	<Quest id="1011">
+		<Title>Gate of the Altar</Title>
+		<Script sender="Terry">This is "Terry" of EVE Headquarters. Command was greatly impressed by your work on the last mission, and an important new mission has been handed down in a hurry. We hear that an entrance has opened in the upper central part of Adam's Holy Land, leading into the heart of the Holy Land. Please investigate it at once. Can you do it?</Script>
+		<Happen replay="false">
+			<CompleteQuest id="1010" />
+			<Race race="SLAYER" />
+			<Level min="150" />
+			<NOT><AdvancementClassLevel min="1" /></NOT>
+		</Happen>
+		<Complete>
+			<SetDynamicZone zoneid="4001" canenter="1" />
+			<EnterDynamicZone zoneid="4001" index="1">Head for the "Gate of the Altar" in the center of "Adam's Holy Land"</EnterDynamicZone>
+			<SetDynamicZone zoneid="4001" canenter="0" />
+			<ClearDynamicZone zoneid="4001" index="2">Complete the "Magic Circle" with monster blood in time and find the way inside</ClearDynamicZone>
+			<Script sender="Terry" target="302" index="3">Kzzt... The signal is bad. According to... the information we just... received... Kzzt-. At the Gate of the Altar there are magic circles... six of... Kzzt, kz-kzzt, kz-.</Script>
+			<SetDynamicZone zoneid="4002" canenter="1" />
+			<EnterDynamicZone zoneid="4002" index="4">Enter the Altar of Blood through the magic circle</EnterDynamicZone>
+			<SetDynamicZone zoneid="4002" canenter="0" />
+			<Script index="5">Fall. 'When the magic circle activated, we fell endlessly into a deep, dark abyss.'</Script>
+			<Script index="6">Hell. 'The corpses of countless humans and vampires were heaped into mountains, and the rank smell of sloshing blood stung our noses.'</Script>
+			<Script index="7">Sacrifice. 'Our comrades, their souls held captive, stare at us in reproach amid the eerie laughter of fiends.'</Script>
+			<Script index="8">Betrayal. 'Was this mission only a trap to offer us up as sacrifices? Then that letter back then... so the leaders of both sides could join hands...'</Script>
+			<Script index="9">Doubt. 'What on earth are all these sacrifices for?'</Script>
+			<ClearDynamicZone zoneid="4002" index="10">Kill monsters to obtain "Life Spirals" and use them to rescue the Slayers</ClearDynamicZone>
+			<SetDynamicZone zoneid="72" canenter="1" />
+		</Complete>
+		<FailMessage sender="Terry" target="302">Oh dear. You failed. How disappoiiinting.</FailMessage>
+		<Fail>
+			<Killed num="1" index="1">Do not die during the mission</Killed>
+			<Time limit="120" index="2">%sTime left: %d min</Time>
+		</Fail>
+		<Reward>
+		</Reward>
+	</Quest>
+	<Quest id="1012" autostart="1" ending="1">
+		<Title>Abraxas, the Flutter of a Small Bird's Wings</Title>
+		<Script>Go to "Terry". Terry is in "Eslania Northwest".</Script>
+		<Happen replay="false">
+			<CompleteQuest id="1011" />
+			<Race race="SLAYER" />
+			<Level min="150" />
+			<NOT><AdvancementClassLevel min="1" /></NOT>
+		</Happen>
+		<Complete>
+			<Script index="1">'To think the so-called leaders of EVE would plot something like this... They are no better than bloodsuckers. I cannot forgive them.'</Script>
+			<SayNPC name="Terry" target="302" index="2">Talk to Terry</SayNPC>
+			<Script sender="Terry" target="302" index="3">You completed the mission safely. Thank good...</Script>
+			<Script sender="Terry" target="302" index="4">What? That's... No... I had nothing to do with...</Script>
+			<Script sender="Terry" target="302" index="5" action="dead" warp="4003">Calm down. Look, it's...</Script>
+			<SetDynamicZone zoneid="4003" canenter="1" />
+			<EnterDynamicZone zoneid="4003" index = "6" />
+			<SetDynamicZone zoneid="4003" canenter="0" />
+			<ClearDynamicZone zoneid="4003" index="7">Guard the "Sealing of Reason" within your own mind and survive for "10 minutes"</ClearDynamicZone>
+			<Warp zoneid="12" x="239" y="167" />
+			<SayNPC name="Terry" target="302" index="8">Talk to Terry again</SayNPC>
+		</Complete>
+		<FailMessage sender="Terry" target="302">Oh dear. You failed. How disappoiiinting.</FailMessage>
+		<Fail>
+			<Killed num="1" index="1">Do not die during the mission</Killed>
+		</Fail>
+		<Reward>
+			<AdvanceClass />
+			<Random>
+				<GiveItem class="CARRYING_RECEIVER" type="0" option="STR+1" />
+				<GiveItem class="CARRYING_RECEIVER" type="0" option="DEX+1" />
+				<GiveItem class="CARRYING_RECEIVER" type="0" option="INT+1" />
+			</Random>
+		</Reward>
+	</Quest>
+	<Quest id="2010">
+		<Title>Ring of Evolution</Title>
+		<Script sender="Seth">Where on earth have you been? I sent you telepathy I don't know how many times, and you only answer now... Honestly...  What? Don't tell me you've already forgotten my voice? It's me, Seth... Seth of Limbo Castle.  When you were a greenhorn I gave you all the good rings and necklaces, and this is how you treat me?  Oh, listen to me ramble. Anyway, come see me right away. The Master has an important mission for you. You can come, right? And if you've picked up anything nice, bring it along...  </Script>
+		<Happen replay="false">
+			<Race race="VAMPIRE" />
+			<Level min="150" />
+			<NOT><AdvancementClassLevel min="1" /></NOT>
+		</Happen>
+		<Complete>
+			<SayNPC name="Seth" target="219" index="1">Talk to Seth</SayNPC>
+			<Script sender="Seth" target="219" index="2">Oh... You're here, you're here. Long time no see. How've you been, then...  More importantly, the Master has given a special order. It has to be done in secret, so swear to keep it secret. What? As long as I keep quiet it'll be fine? Why, you...  </Script>
+			<GiveQuestItem id="23" />
+			<Script sender="Seth" targetitem="23" index="3">Here, tuck this away safely. All you have to do is deliver it. Sounds easy, but guess who you have to give it to? Heh heh heh... None other than Kaiser, the leader of the Slayers.  Don't ask me why it has to go to him, 'cause I don't know either..  Well, off you go. And don't try anything bold like biting Kaiser's neck. Heh heh heh heh...  Oh, and don't do anything stupid like turning into a bat or opening a Seal during the mission.. Remember, you're on a secret mission..  </Script>
+			<SayNPC name="Kaiser" target="17" index="4">Deliver the top-secret document to Kaiser in Eslania Northwest</SayNPC>
+			<Script sender="Kaiser" target="17" index="5">Hmph... Is this it? No funny business. Stay right where you are.</Script>
+			<LoseQuestItem id="23" />
+			<GiveQuestItem id="24" />
+			<Script sender="Kaiser" targetitem="24" index="6">Hmm... Good. Take this. Watch yourself on the way back. And make sure you never run into me again, or your top half and bottom half may end up going separate ways.</Script>
+			<SayNPC name="Seth" target="219" index="7">Deliver the reply to Seth inside Limbo Castle</SayNPC>
+			<Script sender="Seth" target="219" index="8">Right... You're back, you're back. Hand that over. Nice work.  The Master may give another order soon. Stay ready.  </Script>
+			<LoseQuestItem id="24" />
+		</Complete>
+		<FailMessage sender="Seth" target="219">Tsk. You failed. Dummy.</FailMessage>
+		<Fail>
+			<Killed num="1" index="1">Do not die during the mission</Killed>
+			<IllegalWarp index="2">No Seals</IllegalWarp>
+			<RideMotorcycle index="3">No bat transformation</RideMotorcycle>
+		</Fail>
+		<Reward>
+		</Reward>
+	</Quest>
+	<Quest id="2011">
+		<Title>Gate of the Altar</Title>
+		<Script sender="Seth">It's me, Seth. You hear me? Ho ho ho ho ho. Guess what? The Master was very pleased. Everyone's praising how well you carried out that order the other day.  But listen, he's gone and handed down another new order in a hurry. You know Adam's Holy Land? An entrance has opened in its upper central part, leading into the heart of the Holy Land. You're going now, right?  </Script>
+		<Happen replay="false">
+			<CompleteQuest id="2010" />
+			<Race race="VAMPIRE" />
+			<Level min="150" />
+			<NOT><AdvancementClassLevel min="1" /></NOT>
+		</Happen>
+		<Complete>
+			<SetDynamicZone zoneid="4001" canenter="1" />
+			<EnterDynamicZone zoneid="4001" index="1">Head for the "Gate of the Altar" in the center of "Adam's Holy Land"</EnterDynamicZone>
+			<SetDynamicZone zoneid="4001" canenter="0" />
+			<ClearDynamicZone zoneid="4001" index="2">Complete the "Magic Circle" with monster blood in time and find the way inside</ClearDynamicZone>
+			<Script sender="Seth" target="219" index="3">Hey, hey. Do you know how many times I've called you...? Bzz- bzz-. According to... the information we just... received... Bzzz-. At the Gate of the Altar there are magic circles... six of... Bzz-bzz-bzzzz-.</Script>
+			<SetDynamicZone zoneid="4002" canenter="1" />
+			<EnterDynamicZone zoneid="4002" index="4">Enter the Altar of Blood through the magic circle</EnterDynamicZone>
+			<SetDynamicZone zoneid="4002" canenter="0" />
+			<Script index="5">Fall. 'When the magic circle activated, we fell endlessly into a deep, dark abyss.'</Script>
+			<Script index="6">Hell. 'The corpses of countless humans and vampires were heaped into mountains, and the rank smell of sloshing blood stung our noses.'</Script>
+			<Script index="7">Sacrifice. 'The comrades who came in with us, their souls held captive, stare at us in reproach amid the eerie laughter of fiends.'</Script>
+			<Script index="8">Betrayal. 'Was this mission only a trap to offer us up as sacrifices? Then that letter back then... so the leaders of both sides could join hands...'</Script>
+			<Script index="9">Doubt. 'What on earth are all these sacrifices for?'</Script>
+			<ClearDynamicZone zoneid="4002" index="10">Kill monsters to obtain "Life Spirals" and use them to rescue the Vampires offered as sacrifices</ClearDynamicZone>
+			<SetDynamicZone zoneid="72" canenter="1" />
+		</Complete>
+		<FailMessage sender="Seth" target="219">Tsk. You failed. Dummy.</FailMessage>
+		<Fail>
+			<Killed num="1" index="1">Do not die during the mission</Killed>
+			<Time limit="120" index="2">%sTime left: %d min</Time>
+		</Fail>
+		<Reward>
+		</Reward>
+	</Quest>
+	<Quest id="2012" autostart="1" ending="2">
+		<Title>Abraxas, the Flutter of a Small Bird's Wings</Title>
+		<Script>Go to "Seth". Seth is "Inside Limbo Castle".</Script>
+		<Happen replay="false">
+			<CompleteQuest id="2011" />
+			<Race race="VAMPIRE" />
+			<Level min="150" />
+			<NOT><AdvancementClassLevel min="1" /></NOT>
+		</Happen>
+		<Complete>
+			<Script index="1">'So the so-called Masters who lead the Vampires would sell out the blood of their own kind... I cannot forgive them.'</Script>
+			<SayNPC name="Seth" target="219" index="2">Talk to Seth</SayNPC>
+			<Script sender="Seth" target="219" index="3">Oh my, that must have been rough, huh? Look at your face, it's all...</Script>
+			<Script sender="Seth" target="219" index="4">What? That's... No, no... I had nothing to do with...</Script>
+			<Script sender="Seth" target="219" index="5" action="dead" warp="4004">I said calm down... It's just that...</Script>
+			<SetDynamicZone zoneid="4004" canenter="1" />
+			<EnterDynamicZone zoneid="4004" index="6" />
+			<SetDynamicZone zoneid="4004" canenter="0" />
+			<ClearDynamicZone zoneid="4004" index="7">Guard the "Sealing of Reason" within your own mind and survive for "10 minutes"</ClearDynamicZone>
+			<Warp zoneid="1003" x="48" y="100" />
+			<SayNPC name="Seth" target="219" index="8">Talk to Seth again</SayNPC>
+		</Complete>
+		<FailMessage sender="Seth" target="219">Tsk. You failed. Dummy.</FailMessage>
+		<Fail>
+			<Killed num="1" index="1">Do not die during the mission</Killed>
+		</Fail>
+		<Reward>
+			<AdvanceClass />
+			<Random>
+				<GiveItem class="DERMIS" type="0" option="STR+1" />
+				<GiveItem class="DERMIS" type="0" option="DEX+1" />
+				<GiveItem class="DERMIS" type="0" option="INT+1" />
+			</Random>
+		</Reward>
+	</Quest>
+
+	<Quest id="3010">
+		<Title>Ring of Evolution</Title>
+		<Script sender="Hora">I am Hora of the Ousters Village. I send you this message through the power of the spirits.  Lady Lavinia says there is an urgent matter. Please return to the village quickly.  I cannot tell you the details now. Let me say it once more: this is urgent. We truly need you. Will you come?  </Script>
+		<Happen replay="false">
+			<Race race="OUSTERS" />
+			<Level min="150" />
+			<NOT><AdvancementClassLevel min="1" /></NOT>
+		</Happen>
+		<Complete>
+			<SayNPC name="Hora" target="658" index="1">Talk to Hora</SayNPC>
+			<Script sender="Hora" target="658" index="2">You came. Thank you. May the pure heart and blessing of Elaim, the water spirit, be with you.  An important secret mission awaits you.  </Script>
+			<GiveQuestItem id="25" />
+			<Script sender="Hora" targetitem="25" index="3">Please take this. Your task is to carry it to someone. The one you must meet is the heretic vampire "Larva". Larva does not usually receive anyone, but if you go in spirit form bearing this token, Larva will agree to talk.  I will borrow Elaim's power to cast a spell on you. In a moment your body and soul will separate. Do not worry about your body; I will keep it safe.  Now, hurry to Larva.  Oh, and in spirit form you cannot use magic, attack, or do many other things. But no attack can harm you either, so do not worry.  May Elaim's blessing...  </Script>
+			<SayNPC name="Larva" target="368" index="4">Deliver the top-secret document to Larva in Limbo Castle Southeast</SayNPC>
+			<Script sender="Larva" target="368" index="5">Who is this little soul that has sought me out in such a place? Ah, so it is Lavinia's...</Script>
+			<LoseQuestItem id="25" />
+			<GiveQuestItem id="26" />
+			<Script sender="Larva" targetitem="26" index="6">Take this and go back. And one thing more...  Strange things are happening between the vampires and the humans of late. That they would join hands is unthinkable, yet they are creatures full of nothing but greed...  Mark my words, and be sure to pass them on to Lavinia.  </Script>
+			<SayNPC name="Hora" target="658" index="7">Deliver the reply to Hora in the Ousters Village</SayNPC>
+			<Script sender="Hora" target="658" index="8">So this is it. Thank you for your trouble. I was very worried about you.  What? Something like that between the humans and the vampires...? If Larva says so, it cannot be idle talk. I understand. I will tell Lady Lavinia.  I will send you another message soon.  </Script>
+			<LoseQuestItem id="26" />
+		</Complete>
+		<FailMessage sender="Hora" target="658">Oh no, you failed. What a pity.</FailMessage>
+		<Fail>
+			<Killed num="1" index="1">Do not die during the mission</Killed>
+			<IllegalWarp index="2">No Earth Spirit Horns</IllegalWarp>
+			<RideMotorcycle index="3">No Sylph</RideMotorcycle>
+		</Fail>
+		<Reward>
+		</Reward>
+	</Quest>
+	<Quest id="3011">
+		<Title>Gate of the Altar</Title>
+		<Script sender="Hora">By the blessing of the spirit Elaim, I, Hora, bring you Lady Lavinia's message. We hear that an entrance has opened in the upper central part of Adam's Holy Land, leading into the heart of the Holy Land. We need your help to thwart the greed of the vampires and the humans. Will you investigate it?</Script>
+		<Happen replay="false">
+			<CompleteQuest id="3010" />
+			<Race race="OUSTERS" />
+			<Level min="150" />
+			<NOT><AdvancementClassLevel min="1" /></NOT>
+		</Happen>
+		<Complete>
+			<SetDynamicZone zoneid="4001" canenter="1" />
+			<EnterDynamicZone zoneid="4001" index="1">Head for the "Gate of the Altar" in the center of "Adam's Holy Land"</EnterDynamicZone>
+			<SetDynamicZone zoneid="4001" canenter="0" />
+			<ClearDynamicZone zoneid="4001" index="2">Complete the "Magic Circle" with monster blood in time and find the way inside</ClearDynamicZone>
+			<Script sender="Hora" target="658" index="3">Can you hear me? Wooong... According to... the information we just... received... Woong-. At the Gate of the Altar there are magic circles... six of... Woooooong-.</Script>
+			<SetDynamicZone zoneid="4002" canenter="1" />
+			<EnterDynamicZone zoneid="4002" index="4">Enter the Altar of Blood through the magic circle</EnterDynamicZone>
+			<SetDynamicZone zoneid="4002" canenter="0" />
+			<Script index="5">Fall. 'When the magic circle activated, we fell endlessly into a deep, dark abyss.'</Script>
+			<Script index="6">Hell. 'The corpses of countless humans and vampires were heaped into mountains, and the rank smell of sloshing blood stung our noses.'</Script>
+			<Script index="7">Sacrifice. 'Our kin, their souls held captive, stare at us in reproach amid the eerie laughter of fiends.'</Script>
+			<Script index="8">Betrayal. 'Was this mission only a trap to make sacrifices of us? To think the wicked humans and vampires would join hands to plot such a thing.'</Script>
+			<Script index="9">Doubt. 'But what on earth are all these sacrifices for?'</Script>
+			<ClearDynamicZone zoneid="4002" index="10">Kill monsters to obtain "Life Spirals" and use them to rescue the Ousters offered as sacrifices</ClearDynamicZone>
+			<SetDynamicZone zoneid="72" canenter="1" />
+		</Complete>
+		<FailMessage sender="Hora" target="658">Oh no, you failed. What a pity.</FailMessage>
+		<Fail>
+			<Killed num="1" index="1">Do not die during the mission</Killed>
+			<Time limit="120" index="2">%sTime left: %d min</Time>
+		</Fail>
+		<Reward>
+		</Reward>
+	</Quest>
+	<Quest id="3012" autostart="1" ending="3">
+		<Title>Abraxas, the Flutter of a Small Bird's Wings</Title>
+		<Script>Go to "Hora".</Script>
+		<Happen replay="false">
+			<CompleteQuest id="3011" />
+			<Race race="OUSTERS" />
+			<Level min="150" />
+			<NOT><AdvancementClassLevel min="1" /></NOT>
+		</Happen>
+		<Complete>
+			<Script index="1"> Terrible creatures. To sell out their own comrades just to sate their greed... Humans and vampires really are beyond redemption... I must report this at once.  </Script>
+			<SayNPC name="Hora" target="658" index="2">Talk to Hora</SayNPC>
+			<Script sender="Hora" target="658" index="3">The blessing of Elaim was with you.</Script>
+			<Script sender="Hora" target="658" index="4">So, is there something you wish to tell me...</Script>
+			<Script sender="Hora" target="658" index="5" action="dead" warp="4005">Ah... Are you all right? Does something hu...</Script>
+			<SetDynamicZone zoneid="4005" canenter="1" />
+			<EnterDynamicZone zoneid="4005" index="6" />
+			<SetDynamicZone zoneid="4005" canenter="0" />
+			<ClearDynamicZone zoneid="4005" index="7">Guard the "Sealing of Reason" within your own mind and survive for "10 minutes"</ClearDynamicZone>
+			<Warp zoneid="1311" x="88" y="24" />
+			<SayNPC name="Hora" target="658" index="8">Talk to Hora again</SayNPC>
+		</Complete>
+		<FailMessage sender="Hora" target="658">Oh no, you failed. What a pity.</FailMessage>
+		<Fail>
+			<Killed num="1" index="1">Do not die during the mission</Killed>
+		</Fail>
+		<Reward>
+			<AdvanceClass />
+			<Random>
+				<GiveItem class="FASCIA" type="0" option="STR+1" />
+				<GiveItem class="FASCIA" type="0" option="DEX+1" />
+				<GiveItem class="FASCIA" type="0" option="INT+1" />
+			</Random>
+		</Reward>
+	</Quest>
+</QuestList>

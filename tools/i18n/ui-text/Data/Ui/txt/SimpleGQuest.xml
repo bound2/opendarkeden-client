@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QuestList>
+	<Quest id="101">
+		<Title>Open Your Eyes to the Darkness.</Title>
+		<Script sender="Vrykolakas">So, you wish to feel your newfound power? Heh... But your power is still pitifully feeble. Step outside the castle as you are and you will not last. Yet in wartime such as this I have no leisure to teach a whelp like you everything myself. Show me your potential on your own, however, and I shall teach you. The first basement level here should be within even your present means. Go and dispose of the rubbish there. When the time comes, I shall summon you.</Script>
+		<Happen replay="false">
+			<Race race="VAMPIRE" />
+			<Level max="3" />
+		</Happen>
+		<CompleteMessage sender="Vrykolakas" target="92">Hmm... Good. The scent of blood about you is quite promising. I shall pass my power on to you.</CompleteMessage>
+		<Complete>
+			<Level min="6" index="1">Reach level 6</Level>
+		</Complete>
+		<FailMessage sender="Vrykolakas" target="92">What on earth are you doing? At this rate you will make fine prey for those worms of humans...</FailMessage>
+		<Fail>
+			<Time limit="30" index="1">%sTime left: %d min</Time>
+		</Fail>
+		<Reward>
+			<GiveVampireExp amount="100" />
+			<GiveMoney amount="10000" />
+		</Reward>
+	</Quest>
+	<Quest id="102">
+		<Title>Awakening as a Vampire</Title>
+		<Script sender="Rebecca">Young vampire! Why do you still resist the temptation of blood?
+Do the trifling ethics of humans lodged in your head still trouble you? How amusing that you still care about such things when you gave up being human of your own will. Memories of the petty human world are worthless. The mighty power of our kind does not simply come into being. Our power grows ever stronger through blood, the source of life. If you wish to grow strong, you must drink blood.</Script>
+		<Happen replay="false">
+			<Race race="VAMPIRE" />
+			<Level min="3" max="5" />
+		</Happen>
+		<CompleteMessage sender="Rebecca" target="255">Have you grown used to Blood Drain now? From now on you must always keep Blood Drain in mind in battle. Now go and collect the item I left with Kakon in the village.</CompleteMessage>
+		<Complete>
+			<BloodDrain num="20" index="1">%sBlood Drains: %d / 20</BloodDrain>
+		</Complete>
+		<FailMessage sender="Rebecca" target="255">So you refuse your destiny? Well, fine... Regret will do you no good once you have turned to ash. Hmph.</FailMessage>
+		<Fail>
+			<Time limit="15" index="1">%sTime left: %d min</Time>
+		</Fail>
+		<Reward>
+			<GiveItem class="SERUM" type="0" num="9" />
+			<GiveVampireExp amount="100" />
+		</Reward>
+	</Quest>
+	<Quest id="103">
+		<Title>Persuade Larva.</Title>
+		<Script sender="Vrykolakas">The Master is most pleased to see you growing as one of our kin. Naturally, the Master trusts you will not disappoint in the future either. But every so often we find a few fools. Fools who gain the superior power of our kin, yet cannot forget the days when they were human. This happens because a fellow named Larva helps them. I do not know what the Master is thinking, keeping him around. Granted, Larva's magic power is not to be taken lightly. If he lent us his strength, our kin would grow mightier still. What do you say? Will you try to persuade Larva? I will give you a letter; go and have a word with him.</Script>
+		<Happen replay="false">
+			<Race race="VAMPIRE" />
+			<Level min="10" max="14" />
+		</Happen>
+		<Complete>
+			<SayNPC name="Vrykolakas" target="92" index="1">Receive a letter from Vrykolakas</SayNPC>
+			<GiveQuestItem id="0" />
+			<SayNPC name="Larva" target="368" index="2">Deliver the letter to Larva.</SayNPC>
+			<Message index="3">You delivered Vrykolakas' letter and tried to persuade him, but for some reason Larva only shakes his head in silence. He simply takes a letter of his own from inside his coat and asks you to give it to Vrykolakas.</Message>
+			<LoseQuestItem id="0" />
+			<GiveQuestItem id="1" />
+			<GiveVampireExp amount="200" />
+
+			<SayNPC name="Vrykolakas" target="92" index="4">Deliver the letter to Vrykolakas.</SayNPC>
+			<Script sender="Vrykolakas" target="92" index="5">Well, well. I cannot fathom what nerve it takes to make such a decision. At this rate he will draw the Master's wrath one day... Hmm, in any case, well done. See that you keep serving the Master faithfully.</Script>
+			<LoseQuestItem id="1" />
+			<GiveVampireExp amount="200" />
+		</Complete>
+		<FailMessage sender="Vrykolakas" target="92">There is no need to push yourself. It seems I overestimated you.</FailMessage>
+		<Fail>
+			<Killed num="1" index="1">Do not die while delivering the letter.</Killed>
+		</Fail>
+		<Reward>
+			<GiveItem class="VAMPIRE_WEAPON" type="1" option="STR+3" />
+			<GiveVampireExp amount="100" />
+		</Reward>
+	</Quest>
+	<Quest id="104">
+		<Title>Obedient Beasts</Title>
+		<Script sender="Kakon" target="220">Unlike humans, who are lowly creatures yet do nothing but rebel, other animals are obedient. Not that every one of them is useful, of course. Wild dogs have been breeding here in Eslania since long ago, and if you tame them well they are rather handy. I hear even the humans make use of them. Taming them is a chore at first, but they will be worth it. They say these beasts love chunks of meat, so do not forget to bring some.</Script>
+		<Happen replay="false">
+			<Race race="VAMPIRE" />
+			<Level min="20" max="20" />
+		</Happen>
+		<CompleteMessage sender="Kakon" target="220">It may not look like much use right now, but raise it steadily and it becomes quite a sight. With a bit of luck it can even boost your own abilities, though you will need to be rather lucky indeed. Then again, it might be carrying some nasty disease. Show it to Carpatini at Limbo Castle and he will take a good look at it.</CompleteMessage>
+		<Complete>
+			<TamePet num="1" index="1">Tame a Junior WolfArch to get a Wolfdog.</TamePet>
+		</Complete>
+		<FailMessage sender="Kakon" target="220">Heh heh heh, you cannot even tame one measly animal? How pathetic... How do you expect to survive out here like that?</FailMessage>
+		<Fail>
+			<Time limit="20" index="1">%sTime left: %d min</Time>
+		</Fail>
+		<Reward>
+			<GiveItem class="PET_FOOD" type="3" num="5" />
+			<GiveItem class="VAMPIRE_WEAPON" type="2" option="DAM+3" />
+		</Reward>
+	</Quest>
+
+	<Quest id="201">
+		<Title>Training to Survive</Title>
+		<Script sender="Kaiser">So you are the new recruit just assigned to us? Good grief, HQ must be desperate, sending out soldiers without so much as basic training, however urgent the situation. Send you outside the Field Headquarters as you are and you would be nothing but a meal for the vampires. Very well, I will put you through hard training at the special training grounds on base. Report to Tanya right now for a tour of the training grounds. Your specialty training will follow after that.</Script>
+		<Happen replay="false">
+			<Race race="SLAYER" />
+			<Level max="3" />
+		</Happen>
+		<CompleteMessage sender="Kaiser" target="17">You are working quite hard. Good. As of now, your specialty training begins. Fall in immediately.</CompleteMessage>
+		<Complete>
+			<Level min="5" index="1">Reach level 5 or higher</Level>
+		</Complete>
+		<FailMessage sender="Terry" target="302">Well, look at that, another sad sack is born. Keep fumbling around like that and Instructor Jacques is sure to give you a hard time. If it gets too tough, you could always buy some supplies from me. Hahaha.</FailMessage>
+		<Fail>
+			<Time limit="50" index="1">%sTime left: %d min</Time>
+		</Fail>
+		<Reward>
+			<GiveDomainExp amount="100" />
+			<GiveMoney amount="10000" />
+		</Reward>
+	</Quest>
+	<Quest id="202">
+		<Title>Training Never Ends</Title>
+		<Script sender="Jacques">Hey, recruit! So you have finally reached the point where you can learn a skill. Used well, skills can make a battle go your way with ease. What is more, using skills often lets you grow quickly. I want to see what you can do. Pick any skill you like and raise it to level XX.</Script>
+		<Happen replay="false">
+			<Race race="SLAYER" />
+			<Level min="5" max="5" />
+		</Happen>
+		<CompleteMessage sender="Jacques" target="16">Hmm, you are better than I expected. Looks like you might pull your own weight after all. Take the Supply Ticket you were issued to Nancy and she will give you your supplies.</CompleteMessage>
+		<Complete>
+			<SkillLevel min="3" index="1">Raise a skill to level 3 or higher</SkillLevel>
+		</Complete>
+		<FailMessage sender="Jacques" target="16">Hey, you... What on earth are you doing? Do you think the things we fight are scarecrows standing still? This is no amusement park. You had better get your head straight!</FailMessage>
+		<Fail>
+			<Time limit="20" index="1">%sTime left: %d min</Time>
+		</Fail>
+		<Reward>
+			<GiveQuestItem id="2" />
+			<SayNPC name="Nancy" target="303" index="1">Take the Supply Ticket to Nancy and receive your supplies</SayNPC>
+			<Message index="2">You received your supplies.</Message>
+			<GiveDomainExp amount="100" />
+			<GiveItem class="POTION" type="1" num="9" />
+			<GiveItem class="POTION" type="1" num="9" />
+			<GiveItem class="POTION" type="1" num="9" />
+			<GiveItem class="POTION" type="1" num="9" />
+			<GiveItem class="POTION" type="1" num="9" />
+			<GiveItem class="POTION" type="6" num="9" />
+			<GiveItem class="POTION" type="6" num="9" />
+			<GiveItem class="POTION" type="6" num="9" />
+			<GiveItem class="POTION" type="6" num="9" />
+			<GiveItem class="POTION" type="6" num="9" />
+		</Reward>
+	</Quest>
+	<Quest id="203">
+		<Title>Recovering the Intel</Title>
+		<Script sender="Kaiser">Our reconnaissance units have been gathering intelligence on the vampires' strongholds for some time. Recently, however, we lost contact with an agent who was investigating a vampire base northwest of the Perona Highway. He was almost certainly killed, but the data he gathered must be recovered. It is close to an enemy base, so exercise extreme caution. His last confirmed transmission came from Eslania Northwest, coordinates 67, 58. Ah! Motorcycle noise can draw the vampires' attention, so the use of motorcycles is forbidden on this mission.</Script>
+		<Happen>
+			<Race race="SLAYER" />
+			<Level min="15" max="19" />
+		</Happen>
+		<Complete>
+			<TouchWayPoint zoneid="12" x="67" y="58" type="636" dir="1" index="1">Recover the Data Disk</TouchWayPoint>
+			<Message sender="Kaiser" target="17" index="2">So he was killed after all? At least he did not become a vampire... If you have the data, withdraw at once and deliver it to Tanya.</Message>
+			<GiveQuestItem id="3" />
+			<GiveDomainExp amount="200" />
+			<SayNPC name="Tanya" target="26" index="3">Deliver the disk to Tanya</SayNPC>
+			<Message sender="Kaiser" target="17" index="2">Good, you made it back safely. Well done. Take some personal time until your next mission.</Message>
+			<LoseQuestItem id="3" />
+			<GiveDomainExp amount="200" />
+		</Complete>
+		<FailMessage sender="Kaiser" target="17">It was a mistake to trust a greenhorn like you with a mission as important as recovering intel. You will not be disciplined for failing the mission. Hmm... Looks like I am the one who will be disciplined by the top brass.</FailMessage>
+		<Fail>
+			<Killed num="1" index="1">Do not die during the mission</Killed>
+			<RideMotorcycle index="2">Motorcycles are forbidden.</RideMotorcycle>
+		</Fail>
+		<Reward>
+			<GiveItem class="RING" type="2" option="STR+2" />
+		</Reward>
+	</Quest>
+	<Quest id="204">
+		<Title>War Dog Training Orders</Title>
+		<Script sender="Smith">It has been reported that the wild dogs living in Eslania can be trained for use as war dogs. War dogs would surely be a help in carrying out operations. As of now, you are assigned to raise war dogs. Your first task, naturally, is to capture a wild dog. They should be quite fond of meat, so do not forget to bring some. That is all.</Script>
+		<Happen replay="false">
+			<Race race="SLAYER" />
+			<Level min="20" max="20" />
+		</Happen>
+		<CompleteMessage sender="Smith" target="103">So you captured a wild dog. First it needs a war dog aptitude test, so return to base. Terry will conduct the test.</CompleteMessage>
+		<Complete>
+			<TamePet num="1" index="1">Tame a dog.</TamePet>
+		</Complete>
+		<FailMessage sender="Smith" target="103">If you cannot even capture one lousy wild dog, how will you ever catch a vampire? I wonder how you became an EVE agent when you cannot carry out a mission this easy.</FailMessage>
+		<Fail>
+			<Time limit="20" index="1">%sTime left: %d min</Time>
+		</Fail>
+		<Reward>
+			<GiveItem class="PET_FOOD" type="3" num="5" />
+			<GiveItem class="HELM" type="4" option="HP+2" />
+		</Reward>
+	</Quest>
+
+	<Quest id="301">
+		<Title>Reclaim Your Power</Title>
+		<Script sender="Manescu">May the glory of holy nature be with you always. Welcome, comrade. The rampant vampires have broken your sweet slumber. Yet I sense that your power is still weak. To face the destroyers outside the village, you will need time to reawaken the power that fell asleep with you during your long slumber. Fortunately, Lady Carissas' barrier still holds as far as the first floor of the Hanial Dungeon, which connects to the village. Even so, weak creatures appear there from time to time. By fighting them you can release your power little by little. Now, there is no time to lose. You must reclaim your power as quickly as you can.</Script>
+		<Happen replay="false">
+			<Race race="OUSTERS" />
+			<Level max="3" />
+		</Happen>
+		<CompleteMessage sender="Manescu" target="655">I can feel that part of your power has been released. With this, our strength will grow a little more. Lady Lavinia in the village will be able to help you.</CompleteMessage>
+		<Complete>
+			<Level min="6" index="1">Reach level 6</Level>
+		</Complete>
+		<FailMessage sender="Lavinia" target="653">Nature is never idle. You, too, are a part of nature and must follow its laws. Please try a little harder... </FailMessage>
+		<Fail>
+			<Time limit="20" index="1">%sTime left: %d min</Time>
+		</Fail>
+		<Reward>
+			<GiveMoney amount="10000" />
+			<GiveOustersExp amount="100" />
+		</Reward>
+	</Quest>
+	<Quest id="302">
+		<Title>The Soul, Source of Power</Title>
+		<Script sender="Lavinia">Artificial teaching means nothing to us. How to develop the abilities nature has granted you is something each of us must decide by our own will. But do not forget that using these abilities requires the power of the soul. Never forget that the basics are to keep the power of your soul from running dry.</Script>
+		<Happen replay="false">
+			<Race race="OUSTERS" />
+			<Level min="3" max="5" />
+		</Happen>
+		<CompleteMessage sender="Lavinia" target="653">To release your power, you must never forget to absorb souls. I have asked Ripati to prepare something that should be of some help on your journey ahead.</CompleteMessage>
+		<Complete>
+			<BloodDrain num="20" index="1">%sAbsorb Soul: %d / 20 times</BloodDrain>
+		</Complete>
+		<FailMessage sender="Lavinia" target="653">Do not think of Absorb Soul as a chore or a cruel act. It is unavoidable if the vampires are to be purified. Still, if you do not wish it yourself, I cannot force you.</FailMessage>
+		<Fail>
+			<Time limit="30" index="1">%sTime left: %d min</Time>
+		</Fail>
+		<Reward>
+			<GiveOustersExp amount="100" />
+			<GiveItem class="PUPA" type="1" num="9" />
+		</Reward>
+	</Quest>
+	<Quest id="303">
+		<Title>The Threat of a Poisoned Land</Title>
+		<Script sender="Sioram">Our shunned people have lived until now by leaning on the kindness of nature. But humans and vampires have never stopped poisoning our mother earth, and they still do. What is more, there is no telling when the humans' industrial facility near our hidden home might be destroyed by the vampires and become a threat. I believe you could look into the situation there for us. The Sylph's unstable power could have a bad effect, so it would be best to seal away the Sylph's power for a while.</Script>
+		<Happen replay="false">
+			<Race race="OUSTERS" />
+			<Level min="10" max="14" />
+		</Happen>
+		<CompleteMessage sender="Sioram" target="656">It is a relief that there is no great threat as yet. But news that destructive vampires keep appearing there cannot help but trouble me deeply. We must watch it more closely.</CompleteMessage>
+		<Complete>
+			<TouchWayPoint zoneid="32" x="15" y="185" type="673" dir="2" index="1">Scout Drobeta NW (15,185)</TouchWayPoint>
+		</Complete>
+		<FailMessage sender="Sioram" target="656">Ah... I sense disorder in your spirit. In that state, this task will be difficult to handle. From now on, do not forget that you must learn to master yourself. And to master yourself, you must first know yourself... </FailMessage>
+		<Fail>
+			<Killed num="1" index="1">Do not die during the task.</Killed>
+			<RideMotorcycle index="2">The Sylph is forbidden</RideMotorcycle>
+		</Fail>
+		<Reward>
+			<GiveOustersExp amount="350" />
+			<GiveItem class="OUSTERS_COAT" type="1" option="STR+2" />
+		</Reward>
+	</Quest>
+	<Quest id="304">
+		<Title>Another Companion</Title>
+		<Script sender="Manescu">Unlike the outside invaders with their tainted souls, the living things that live in harmony with nature will lend us their strength. Sadly, the invaders have thinned their numbers, but the wild dogs that survive are still waiting for helpers. If you spare them the time they spend hunting for food, they will faithfully help you in that time.</Script>
+		<Happen replay="false">
+			<Race race="OUSTERS" />
+			<Level min="20" max="20" />
+		</Happen>
+		<CompleteMessage sender="Manescu" target="655">They too are living things in harmony with nature. As their helper, you must nurture their abilities and live alongside them. Whatever follows you will also receive Lady Carissas' protection.</CompleteMessage>
+		<Complete>
+			<TamePet num="1" index="1">Tame a dog.</TamePet>
+		</Complete>
+		<FailMessage sender="Manescu" target="655">Nature is not something to be ruled by force. If you seek to take everything by strength, you are no different from the vampires. For us, growing close to nature matters more than anything. You failed this time, but I hope to see you improve little by little.</FailMessage>
+		<Fail>
+			<Time limit="30" index="1">%sTime left: %d min</Time>
+		</Fail>
+		<Reward>
+			<GiveItem class="PET_FOOD" type="3" num="5" />
+			<GiveItem class="OUSTERS_CIRCLET" type="4" option="HP+2" />
+		</Reward>
+	</Quest>
+</QuestList>

@@ -1,0 +1,1 @@
+A spell that detects hidden enemies. At first it only reveals Hide, but at skill level 15 it also reveals Invisibility, and at 25 it even detects Sniping. Duration depends on INT and skill level.

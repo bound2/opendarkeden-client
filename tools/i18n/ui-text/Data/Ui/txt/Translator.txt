@@ -1,0 +1,2 @@
+%548
+A translator that converts the language of another race into your own race's language. However, the conversion consumes a great deal of energy, so it has the drawback that it cannot be used for long.

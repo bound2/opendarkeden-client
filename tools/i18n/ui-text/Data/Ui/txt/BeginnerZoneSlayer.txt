@@ -1,0 +1,5 @@
+600 500
+Kaiser Heinrich
+Your first mission.
+I commend you for completing the virtual training program. This may be a tough assignment for someone so recently sent into combat, but events are moving fast and we badly need the strength of recruits like you. I will brief you on the situation. Not long ago, lesser vampires were spotted moving about in the Temerie Holy Land, and after some investigation into their strange movements we learned that it has to do with the Blood Bible. Your mission is to stop the other two races, the Vampires and the Ousters, from gathering information on the Relic. All-out war with both races may be unavoidable, so never forget that you must join forces with your comrades. Good luck.\nWill you travel to the Temerie Holy Land?\n\n*You can also travel to the Temerie Holy Land through the NPC Salamander on Soldier Guild 1F.
+

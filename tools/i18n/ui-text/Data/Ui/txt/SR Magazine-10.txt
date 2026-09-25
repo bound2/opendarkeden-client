@@ -1,0 +1,3 @@
+%192
+A 10-round magazine used by all SR (Sniper Rifle) guns.
+

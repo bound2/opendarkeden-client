@@ -1,0 +1,1 @@
+Select a character to play. To create a new character, press the Create button; to delete an existing character, press the delete button next to its name. To enter the game, select a character and press the Next button, or double-click it.

@@ -1,0 +1,5 @@
+%1036
+The Crucis (195) is a Cross usable by Slayers of Advancement grade 45 and above. It can be obtained by enchanting an existing Advancement Cross with an Old Drop.
+
+< Hidden Option >
+HP : +300

@@ -1,0 +1,8 @@
+Arrow Tiles
+Guide your character from the START point to the GOAL point while staying clear of the monsters.
+Press the START button to begin the game.
+Press the MOVE button and your character moves in the direction of the arrow it is standing on.
+After each move you may turn the arrows clockwise or counterclockwise, once. Note that all arrows turn the same way at the same time.
+Every turn, each monster moves one tile in the direction of its arrow.
+On a blue arrow you slide straight on. On a red arrow you lose a turn.
+You fail if you run into a monster or can no longer move.

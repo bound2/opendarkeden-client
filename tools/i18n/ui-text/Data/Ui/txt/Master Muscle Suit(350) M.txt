@@ -1,0 +1,8 @@
+%1038
+Master Muscle Suit(350) is upper-body armor usable by male Slayers of Advancement level 350 or higher. This item is obtained by enchanting existing Advancement upper-body armor with a Reliance Drop.
+
+< Hidden Option >
+Physical Damage +10
+Magic Damage +10
+Physical Defense +70
+Magic Defense +70

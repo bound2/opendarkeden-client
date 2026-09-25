@@ -1,0 +1,2987 @@
+4
+[===Sender===]
+Kaiser
+Vrykolakas
+Lavinia
+DarkEden Keeper
+22
+[===KeyWord===]
+Chat
+[===MessageType===]
+    0
+	[===Event===]
+	  The first time Enter is pressed after typing
+		#SLAYERPAGE
+		[==Title==]
+		   Try special kinds of chat, such as whispers.
+		[==Sender==]
+		   0
+		[==Level Table==]
+		   -1 -1 1 5 30 30
+		[==Detail==]
+
+Let's learn about chat, the basis of every online game community.
+
+
+In DKx Online there are normal chat, whispers, party chat, zone chat and guild chat, and you can choose the text color.
+
+< file = 'HelpMessage_2' pos = 'C'>
+
+< file = 'HelpMessage_14' pos = 'L'>
+   (1) Normal chat (Ctrl+C) - Talk with the players on your screen.
+< file = 'HelpMessage_15' pos = 'L'>
+   (2) Whisper (Ctrl+W) - You can whisper to any server in the world. In whisper mode, enter the character's name and press Enter to talk with the person you are whispering to.
+< file = 'HelpMessage_16' pos = 'L'>
+   (3) Party chat (Ctrl+A) - Talk only with the players in your party.
+< file = 'HelpMessage_17' pos = 'L'>
+   (4) Zone chat or shout (Ctrl+Z) - Talk with every player in the zone your character is in. After each message you can talk (type) again after 15 seconds.
+< file = 'HelpMessage_18' pos = 'L'>
+   (5) Guild chat (Ctrl+G) - Talk only with your guild members.
+< file = 'HelpMessage_19' pos = 'L'>
+   (6) Chat On/Off - Click the bead-shaped icon to turn that chat on or off. Red means the chat is active, and black means it is off. When you turn a chat off, none of the other players' messages in it are shown.
+
+* You can also click the icons in the chat window to use that chat.
+Icons shown in red mean that chat is active.
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   Try special kinds of chat, such as whispers.
+		[==Sender==]
+		   1
+		[==Level Table==]
+		   1 5 -1 -1 -1 -1
+		[==Detail==]
+Let's learn about chat, the basis of every online game community.
+
+
+In DKx Online there are normal chat, whispers, party chat, zone chat and guild chat, and you can choose the text color.
+
+< file = 'HelpMessage_37' pos = 'L'>
+
+< file = 'HelpMessage_14' pos = 'L'>
+   (1) Normal chat (Ctrl+C) - Talk with the players on your screen.
+< file = 'HelpMessage_15' pos = 'L'>
+   (2) Whisper (Ctrl+W) - You can whisper to any server in the world. In whisper mode, enter the character's name and press Enter to talk with the person you are whispering to.
+< file = 'HelpMessage_16' pos = 'L'>
+   (3) Party chat (Ctrl+A) - Talk only with the players in your party.
+< file = 'HelpMessage_17' pos = 'L'>
+   (4) Zone chat or shout (Ctrl+Z) - Talk with every player in the zone your character is in. After each message you can talk (type) again after 15 seconds.
+< file = 'HelpMessage_18' pos = 'L'>
+   (5) Guild chat (Ctrl+G) - Talk only with your guild members.
+< file = 'HelpMessage_19' pos = 'L'>
+   (6) Chat On/Off - Click the bead-shaped icon to turn that chat on or off. Red means the chat is active, and black means it is off. When you turn a chat off, none of the other players' messages in it are shown.
+
+* You can also click the icons in the chat window to use that chat.
+Icons shown in red mean that chat is active.
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   Try special kinds of chat, such as whispers.
+		[==Sender==]
+		   2
+		[==Level Table==]
+		   1 5 -1 -1 -1 -1
+		[==Detail==]
+Let's learn about chat, the basis of every online game community.
+
+
+In DKx Online there are normal chat, whispers, party chat, zone chat and guild chat, and you can choose the text color.
+
+< file = 'HelpMessage_38' pos = 'L'>
+
+< file = 'HelpMessage_14' pos = 'L'>
+   (1) Normal chat (Ctrl+C) - Talk with the players on your screen.
+< file = 'HelpMessage_15' pos = 'L'>
+   (2) Whisper (Ctrl+W) - You can whisper to any server in the world. In whisper mode, enter the character's name and press Enter to talk with the person you are whispering to.
+< file = 'HelpMessage_16' pos = 'L'>
+   (3) Party chat (Ctrl+A) - Talk only with the players in your party.
+< file = 'HelpMessage_17' pos = 'L'>
+   (4) Zone chat or shout (Ctrl+Z) - Talk with every player in the zone your character is in. After each message you can talk (type) again after 15 seconds.
+< file = 'HelpMessage_18' pos = 'L'>
+   (5) Guild chat (Ctrl+G) - Talk only with your guild members.
+< file = 'HelpMessage_19' pos = 'L'>
+   (6) Chat On/Off - Click the bead-shaped icon to turn that chat on or off. Red means the chat is active, and black means it is off. When you turn a chat off, none of the other players' messages in it are shown.
+
+* You can also click the icons in the chat window to use that chat.
+Icons shown in red mean that chat is active.
+{End}
+[===KeyWord===]
+Interface
+[===MessageType===]
+    0
+	[===Event===]
+	  On first login
+		#SLAYERPAGE
+		[==Title==]
+		   Learn the basic controls of the game.
+		[==Sender==]
+		   0
+		[==Level Table==]
+		   -1 -1 1 5 30 30
+		[==Detail==]
+Let's learn about the DKx Online interface.
+
+# The whole interface
+< file = 'HelpMessage_28' pos = 'C'>
+(1) HP bar : Check your HP.
+(2) Minimap : Check the map of the zone you are in.
+(3) Chat window : Check the chat.
+(4) Menu window : Check every DKx Online menu.
+(5) Belt : When you wear a Belt, check your consumable items such as magazines and recovery items.
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   Learn the basic controls of the game.
+		[==Sender==]
+		   1
+		[==Level Table==]
+		   1 5 -1 -1 -1 -1
+		[==Detail==]
+Let's learn about the DKx Online interface.
+
+# The whole interface
+< file = 'HelpMessage_12' pos = 'C'>
+(1) HP bar : Check your HP.
+(2) Minimap : Check the map of the zone you are in.
+(3) Chat window : Check the chat.
+(4) Menu window : Check every DKx Online menu.
+
+* Normal attack - Left-click a monster or an enemy character.
+* Using skills - Open the skill window (Ctrl+s), click a skill to select it, then right-click to use it. You can also open the skill window (Ctrl+s) and assign skills to F5~F12 to use them as hotkeys.
+* Assigning hotkeys - Hover the mouse over a skill and press the key you want (F5~F12) to assign it. (Up to 4 skills per hotkey)
+
+  
+<#color ='80ff' a = 'y'>
+Current skill display, hotkey assignment
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_56' pos = 'LT'>
+
+* Moving - Left-click where you want to go and you move there.
+
+< file = 'HelpMessage_57' pos = 'LT'>
+
+* Hotkeys
+- Inventory window : Tab key
+- Gear window : Ctrl + Tab keys
+- Character information window : Alt + i keys
+- Rank information window : Alt + R keys
+- Skill description window : Alt + K keys
+- Skills : Alt + S keys
+
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   Learn the basic controls of the game.
+		[==Sender==]
+		   2
+		[==Level Table==]
+		   1 5 -1 -1 -1 -1
+		[==Detail==]
+Let's learn about the DKx Online interface.
+
+# The whole interface
+< file = 'HelpMessage_29' pos = 'C'>
+(1) HP bar : Check your HP.
+(2) Minimap : Check the map of the zone you are in.
+(3) Chat window : Check the chat.
+(4) Menu window : Check every DKx Online menu.
+(5) Armsband : When you wear an Armsband, check your recovery items.
+
+* Normal attack - Left-click a monster or an enemy character.
+* Using skills - Once you learn a skill (spell), open the skill window (Ctrl+s), click the skill to select it, then right-click to use it. You can also open the skill window (Ctrl+s) and assign skills to F9~F12 to use them as hotkeys.
+* Assigning hotkeys - Hover the mouse over a skill and press the key you want (F9 ~ F12) to assign it. (Up to 4 skills per hotkey)
+
+< file = 'HelpMessage_68' pos = 'L'>
+
+<#color ='80ff' a = 'y'>
+<< Assigning hotkeys
+<<#color ='ffffff' a = 'y'>
+
+
+
+
+* Interface  (Ousters image 3)
+At the top left, the thick red bar shows your HP, the green bar your EP and the thin orange bar your Experience.
+At the bottom, the largest area is the chat window; above it, on the left, is the potion window, and on the right the skill window, the in-game date and the information window.
+
+* Hotkeys
+ - Inventory window : Tab key
+ - Gear window : Ctrl + Tab keys
+ - Character information window : Alt + i keys
+ - Rank information window : Alt + R keys
+ - Skill description window : Alt + K keys
+ - Skills : Alt + S keys
+{End}
+[===KeyWord===]
+Recovery Items
+[===MessageType===]
+    1
+	[===Event===]
+	  When HP falls to 30% or below
+		#SLAYERPAGE
+		[==Title==]
+		   Recover HP and mana with items.
+		[==Sender==]
+		   0
+		[==Level Table==]
+		   -1 -1 1 5 30 30
+		[==Detail==]
+Let's learn how to refill HP and MP, the most important things when hunting.
+
+< file = 'HelpMessage_30' pos = 'L'>
+ * The item that restores HP is the Healing Ampul.
+< file = 'HelpMessage_31' pos = 'L'>
+ * The item that restores MP is the Mana Ampul.
+
+
+How to use recovery items
+(1) Right-click a recovery item in the inventory window
+(2) Once you have a Belt, put recovery items in it and use Healing/Mana Ampuls with the hotkeys (F1~F8).
+< file = 'HelpMessage_32' pos = 'L'>
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   Recover HP and mana with items.
+		[==Sender==]
+		   1
+		[==Level Table==]
+		   1 5 -1 -1 -1 -1
+		[==Detail==]
+< file = 'HelpMessage_20' pos = 'C'>
+
+Vampires refill their HP by carrying Serum in the inventory window. The Serum hotkey is 'F1', and Serums are used from the top left downward. In other words, once the leftmost column is used up, it moves on to the right.
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   Recover HP and mana with items.
+		[==Sender==]
+		   2
+		[==Level Table==]
+		   1 5 -1 -1 -1 -1
+		[==Detail==]
+Let's learn how to refill HP and EP, the most important things when hunting.
+
+< file = 'HelpMessage_33' pos = 'L'>
+* The item that restores HP is the Pupa.
+< file = 'HelpMessage_34' pos = 'L'>
+* The item that restores EP is the Mei.
+
+
+
+How to use recovery items
+(1) Right-click a recovery item in the inventory window
+(2) Once you have an Armsband, put recovery items in it and use Pupas/Meis with the hotkeys (F1~F6).
+< file = 'HelpMessage_36' pos = 'L'>
+
+
+< file = 'HelpMessage_35' pos = 'L'>
+   * Larva cannot be used as an item, but the Absorb Soul skill turns it into a Pupa.
+
+{End}
+[===KeyWord===]
+Items
+[===MessageType===]
+    0
+	[===Event===]
+	  On obtaining an item
+		#SLAYERPAGE
+		[==Title==]
+		   Learn about the kinds of items.
+		[==Sender==]
+		   0
+		[==Level Table==]
+		   -1 -1 1 5 30 30
+		[==Detail==]
+Many kinds of items can come out when you click a monster after hunting it.
+
+
+* After killing a monster and clicking its corpse, press the left Alt button to see the list of items lying on the ground on the right.
+< file = 'HelpMessage_21' pos = 'C'>
+
+
+*The basic item you always get is a monster head or Skull in the Hardcore version, or a Soul Stone in the Teen version. It is not for equipping; it is an item you sell at a shop.
+
+< file = 'HelpMessage_22' pos = 'LT'>
+  # Hardcore version: Skull
+< file = 'HelpMessage_23' pos = 'LT'>
+  # Teen version: Soul Stone
+
+
+
+
+# Items fall into 4 broad kinds.
+
+@ White - items with no options
+< file = 'HelpMessage_24' pos = 'LT'>
+
+<#color ='ffff' a = 'y'>
+@ Yellow - items with one option (Magic items)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_25' pos = 'LT'>
+
+
+<#color ='ff8080' a = 'y'>
+@ Blue - items with two options (Rare items)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_26' pos = 'LT'>
+
+
+<#color ='73a7e6' a = 'y'>
+@ Gold - items with special options (Unique items)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_27' pos = 'LT'>
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   Learn about the kinds of items.
+		[==Sender==]
+		   1
+		[==Level Table==]
+		   1 5 -1 -1 -1 -1
+		[==Detail==]
+Many kinds of items can come out when you click a monster after hunting it.
+
+
+* After killing a monster and clicking its corpse, press the left Alt button to see the list of items lying on the ground on the right.
+< file = 'HelpMessage_21' pos = 'C'>
+
+
+*The basic item you always get is a monster head or Skull in the Hardcore version, or a Soul Stone in the Teen version. It is not for equipping; it is an item you sell at a shop.
+
+< file = 'HelpMessage_22' pos = 'LT'>
+# Hardcore version: Skull
+< file = 'HelpMessage_23' pos = 'LT'>
+# Teen version: Soul Stone
+
+
+
+
+# Items fall into 4 broad kinds.
+
+@ White - items with no options
+< file = 'HelpMessage_24' pos = 'LT'>
+
+
+<#color ='ffff' a = 'y'>
+@ Yellow - items with one option (Magic items)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_25' pos = 'LT'>
+
+
+<#color ='ff8080' a = 'y'>
+@ Blue - items with two options (Rare items)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_26' pos = 'LT'>
+
+
+<#color ='73a7e6' a = 'y'>
+@ Gold - items with special options (Unique items)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_27' pos = 'LT'>
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   Learn about the kinds of items.
+		[==Sender==]
+		   2
+		[==Level Table==]
+		   1 5 -1 -1 -1 -1
+		[==Detail==]
+Many kinds of items can come out when you click a monster after hunting it.
+
+
+* After killing a monster and clicking its corpse, press the left Alt button to see the list of items lying on the ground on the right.
+< file = 'HelpMessage_21' pos = 'C'>
+
+
+*The basic item you always get is a monster head or Skull in the Hardcore version, or a Soul Stone in the Teen version. It is not for equipping; it is an item you sell at a shop.
+
+< file = 'HelpMessage_22' pos = 'LT'>
+# Hardcore version: Skull
+< file = 'HelpMessage_23' pos = 'LT'>
+# Teen version: Soul Stone
+
+# Items fall into 4 broad kinds.
+
+@ White - items with no options
+< file = 'HelpMessage_24' pos = 'LT'>
+
+
+<#color ='ffff' a = 'y'>
+@ Yellow - items with one option (Magic items)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_25' pos = 'LT'>
+
+
+<#color ='ff8080' a = 'y'>
+@ Blue - items with two options (Rare items)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_26' pos = 'LT'>
+
+<#color ='73a7e6' a = 'y'>
+@ Gold - items with special options (Unique items)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_27' pos = 'LT'>
+{End}
+[===KeyWord===]
+Shop NPC
+[===MessageType===]
+    0
+	[===Event===]
+	  On clicking a shop NPC
+		#SLAYERPAGE
+		[==Title==]
+		   Buy and sell items through merchants.
+		[==Sender==]
+		   0
+		[==Level Table==]
+		   -1 -1 1 5 30 30
+		[==Detail==]
+Follow along with the pictures
+
+1. Buying items
+
+<#color ='ff' a = 'y'>
+(1) Buying normal items
+<<#color ='ffffff' a = 'y'>
+
+
+< file = 'HelpMessage_39' pos = 'L'>
+Find the NPC and click it.
+
+< file = 'HelpMessage_40' pos = 'C'>
+Find and click the NPC's line about buying items.
+
+< file = 'HelpMessage_41' pos = 'L'>
+Check the price of the item you need.
+
+< file = 'HelpMessage_42' pos = 'C'>
+The item has been bought.
+
+
+<#color ='ff' a = 'y'>
+(2) Buying recovery items
+
+
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_43' pos = 'L'>
+Check the price of the recovery item.
+
+< file = 'HelpMessage_44' pos = 'C'>
+
+When buying recovery items, a left-click sets the quantity to 1 to start with, and you can adjust the number. Right-click the item and the quantity starts at 9.
+
+
+<#color ='80ff' a = 'y'>
+Tip. When buying consumables such as recovery items and magazines in bulk, hold down the 'Enter' key and right-click the consumable; each click buys a whole bundle at once.
+
+<<#color ='ffffff' a = 'y'>
+
+
+
+2. Selling items
+(1) Selling normal items
+
+< file = 'HelpMessage_39' pos = 'L'>
+Find the NPC and click it.
+
+< file = 'HelpMessage_45' pos = 'C'>
+Find and click the NPC's line about selling items.
+
+< file = 'HelpMessage_46' pos = 'LT'>
+Select the item to sell.
+
+< file = 'HelpMessage_47' pos = 'LT'>
+Confirm the item has been sold and check the money you received for it.
+
+(2) Selling monster heads (Soul Stones)
+
+< file = 'HelpMessage_49' pos = 'LT'>
+Click the monster heads (Soul Stones) to sell them, and the whole stack is sold.
+
+< file = 'HelpMessage_48' pos = 'LT'>
+Check the money you received for the heads.
+
+
+<#color ='4374f3' a = 'y'>
+TIP. Right-click a monster head to sell all the heads in your inventory window at once.
+<<#color ='ffffff' a = 'y'>
+
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   Buy and sell items through merchants.
+		[==Sender==]
+		   1
+		[==Level Table==]
+		   1 5 -1 -1 -1 -1
+		[==Detail==]
+Follow along with the pictures
+
+1. Buying items
+
+<#color ='ff' a = 'y'>
+(1) Buying normal items
+<<#color ='ffffff' a = 'y'>
+
+
+< file = 'HelpMessage_39' pos = 'L'>
+Find the NPC and click it.
+
+< file = 'HelpMessage_40' pos = 'C'>
+Find and click the NPC's line about buying items.
+
+< file = 'HelpMessage_41' pos = 'L'>
+Check the price of the item you need.
+
+< file = 'HelpMessage_42' pos = 'C'>
+The item has been bought.
+
+
+<#color ='ff' a = 'y'>
+(2) Buying recovery items
+
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_43' pos = 'L'>
+Check the price of the recovery item.
+
+< file = 'HelpMessage_44' pos = 'C'>
+
+When buying recovery items, a left-click sets the quantity to 1 to start with, and you can adjust the number. Right-click the item and the quantity starts at 9.
+
+
+<#color ='80ff' a = 'y'>
+Tip. When buying consumables such as recovery items and magazines in bulk, hold down the 'Enter' key and right-click the consumable; each click buys a whole bundle at once.
+
+<<#color ='ffffff' a = 'y'>
+
+
+
+2. Selling items
+(1) Selling normal items
+
+< file = 'HelpMessage_39' pos = 'L'>
+Find the NPC and click it.
+
+< file = 'HelpMessage_45' pos = 'C'>
+Find and click the NPC's line about selling items.
+
+< file = 'HelpMessage_46' pos = 'LT'>
+Select the item to sell.
+
+< file = 'HelpMessage_47' pos = 'LT'>
+Confirm the item has been sold and check the money you received for it.
+
+(2) Selling monster heads (Soul Stones)
+
+< file = 'HelpMessage_49' pos = 'LT'>
+Click the monster heads (Soul Stones) to sell them, and the whole stack is sold.
+
+< file = 'HelpMessage_48' pos = 'LT'>
+Check the money you received for the heads.
+
+
+<#color ='4374f3' a = 'y'>
+TIP. Right-click a monster head to sell all the heads in your inventory window at once.
+<<#color ='ffffff' a = 'y'>
+
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   Buy and sell items through merchants.
+		[==Sender==]
+		   2
+		[==Level Table==]
+		   1 5 -1 -1 -1 -1
+		[==Detail==]
+Follow along with the pictures
+
+1. Buying items
+
+<#color ='ff' a = 'y'>
+(1) Buying normal items
+<<#color ='ffffff' a = 'y'>
+
+
+< file = 'HelpMessage_39' pos = 'L'>
+Find the NPC and click it.
+
+< file = 'HelpMessage_40' pos = 'C'>
+Find and click the NPC's line about buying items.
+
+< file = 'HelpMessage_41' pos = 'L'>
+Check the price of the item you need.
+
+< file = 'HelpMessage_42' pos = 'C'>
+The item has been bought.
+
+
+<#color ='ff' a = 'y'>
+(2) Buying recovery items
+
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_43' pos = 'L'>
+Check the price of the recovery item.
+
+< file = 'HelpMessage_44' pos = 'C'>
+
+When buying recovery items, a left-click sets the quantity to 1 to start with, and you can adjust the number. Right-click the item and the quantity starts at 9.
+
+
+<#color ='80ff' a = 'y'>
+Tip. When buying consumables such as recovery items and magazines in bulk, hold down the 'Enter' key and right-click the consumable; each click buys a whole bundle at once.
+
+<<#color ='ffffff' a = 'y'>
+
+
+
+2. Selling items
+(1) Selling normal items
+
+< file = 'HelpMessage_39' pos = 'L'>
+Find the NPC and click it.
+
+< file = 'HelpMessage_45' pos = 'C'>
+Find and click the NPC's line about selling items.
+
+< file = 'HelpMessage_46' pos = 'LT'>
+Select the item to sell.
+
+< file = 'HelpMessage_47' pos = 'LT'>
+Confirm the item has been sold and check the money you received for it.
+
+(2) Selling monster heads (Soul Stones)
+
+< file = 'HelpMessage_49' pos = 'LT'>
+Click the monster heads (Soul Stones) to sell them, and the whole stack is sold.
+
+< file = 'HelpMessage_48' pos = 'LT'>
+Check the money you received for the heads.
+
+
+<#color ='4374f3' a = 'y'>
+TIP. Right-click a monster head to sell all the heads in your inventory window at once.
+<<#color ='ffffff' a = 'y'>
+
+{End}
+[===KeyWord===]
+Belt
+[===MessageType===]
+    1
+	[===Event===]
+	  On obtaining a Belt
+		#SLAYERPAGE
+		[==Title==]
+		   Wear a Belt to use recovery items and magazines quickly.
+		[==Sender==]
+		   0
+		[==Level Table==]
+		   -1 -1 1 10 30 30
+		[==Detail==]
+* When you wear a Belt, slots appear on the game screen, and you can drag quick items such as Healing/Mana Ampuls and magazines onto them.
+* Depending on the number of pockets on the Belt, you can assign and use the hotkeys F1~F8.
+< file = 'HelpMessage_55' pos = 'C'>
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+
+		[==Sender==]
+		   -1
+		[==Level Table==]
+		   -1 -1 -1 -1 -1 -1
+		[==Detail==]
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   Wear an Armsband to use recovery items quickly.
+		[==Sender==]
+		   2
+		[==Level Table==]
+		   1 10 -1 -1 -1 -1
+		[==Detail==]
+Now, let's learn how to use the Armsband, a must when hunting.
+
+* When you wear an Armsband, slots appear on the game screen, and you can drag recovery items such as Pupas and Meis onto them.
+
+* Depending on the number of pockets on the Armsband, you use the hotkeys F1~F6.
+
+< file = 'HelpMessage_69' pos = 'L'>
+{End}
+[===KeyWord===]
+Repair
+[===MessageType===]
+    0
+	[===Event===]
+	  When the repair icon appears at the top left
+		#SLAYERPAGE
+		[==Title==]
+		   Repair your items quickly, before they break.
+		[==Sender==]
+		   0
+		[==Level Table==]
+		   -1 -1 1 100 30 30
+		[==Detail==]
+In DKx Online almost every item has durability. If you do not repair an item whose durability has run out, it disappears.
+
+* Repairing items - Go to an NPC who handles repairs and left-click the item you want repaired; you pay a fee based on how much durability it has lost, and the item is repaired.
+
+* Orange means the item is slightly damaged, and red means it is about to break. Once an item breaks, it is gone for good.
+
+< file = 'HelpMessage_74' pos = 'L'>
+  * Repair NPCs
+  Warrior Guild NPC Smirovich
+  Soldier Guild NPC David
+  Cleric Guild NPC Griffin
+  Perona Highway NPC Robin Baxter
+  Inside Octavus NPC Simone
+           Inside Septimus Castle NPC Brenda
+
+
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   Repair your items quickly, before they break.
+		[==Sender==]
+		   1
+		[==Level Table==]
+		   1 150 -1 -1 -1 -1
+		[==Detail==]
+In DKx Online almost every item has durability. If you do not repair an item whose durability has run out, it disappears.
+
+* Repairing items - Go to an NPC who handles repairs and left-click the item you want repaired; you pay a fee based on how much durability it has lost, and the item is repaired.
+
+* Orange means the item is slightly damaged, and red means it is about to break. Once an item breaks, it disappears.
+
+
+<#color ='80ff' a = 'y'>
+The repair image appears when an item's durability drops to 1/3 of its total.
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_59' pos = 'L'>
+  * Repair NPCs
+  Limbo Castle village NPC - Kakon
+  Inside Rasen Castle NPC - Aiman
+  Perona Highway NPC - Griffith
+  Tertius Castle NPC - Hunt
+  Inside Quartus NPC - Barun
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   Repair your items quickly, before they break.
+		[==Sender==]
+		   2
+		[==Level Table==]
+		   1 150 -1 -1 -1 -1
+		[==Detail==]
+In DKx Online almost every item has durability. If you do not repair an item whose durability has run out, it disappears.
+
+* Repairing items - Go to Sioram, the NPC who handles repairs, and left-click the item you want repaired; you pay a fee based on how much durability it has lost, and the item is repaired.
+
+< file = 'HelpMessage_70' pos = 'L'>
+  * Orange means the item is slightly damaged, and red means it is about to break. Once an item breaks, it is gone for good.
+
+
+{End}
+[===KeyWord===]
+Equipping
+[===MessageType===]
+    0
+	[===Event===]
+	  On first opening the inventory
+		#SLAYERPAGE
+		[==Title==]
+		   How to equip items
+		[==Sender==]
+		   0
+		[==Level Table==]
+		   -1 -1 1 10 30 30
+		[==Detail==]
+* Open the inventory window (Tab) and the gear window (Ctrl+Tab), then drag an item from the inventory to the gear window, or Shift+left-click it to equip it automatically. Quick items such as ampuls and magazines, however, cannot be equipped in the gear window.
+Hover the mouse cursor over an item to read its description.
+* Items you cannot wear are shown in red.
+
+< file = 'HelpMessage_53' pos = 'LT'>
+<#color ='80ff' a = 'y'>
+Item description display
+<<#color ='ffffff' a = 'y'>
+
+
+
+< file = 'HelpMessage_54' pos = 'LT'>
+<#color ='80ff' a = 'y'>
+Inventory window and gear window image
+<<#color ='ffffff' a = 'y'>
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   Found an item? Then you should know how to equip it.
+		[==Sender==]
+		   1
+		[==Level Table==]
+		   1 30 -1 -1 -1 -1
+		[==Detail==]
+*Open the inventory window (Tab) and the gear window (Ctrl+Tab), then drag an item from the inventory to the gear window, or Shift+left-click it to equip it automatically.
+* Hover the mouse cursor over an item to read its description.
+* Items you cannot wear are shown in red.
+
+
+<#color ='80ff' a = 'y'>
+  Equipping items
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_58' pos = 'LT'>
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   Found an item? Then you should know how to equip it.
+		[==Sender==]
+		   2
+		[==Level Table==]
+		   1 30 -1 -1 -1 -1
+		[==Detail==]
+< file = 'HelpMessage_78' pos = 'L'>
+* Open the inventory window (Tab) and the gear window (Ctrl+Tab), then drag an item from the inventory to the gear window, or Shift+left-click it to equip it automatically.
+* Hover the mouse cursor over an item to read its description.
+* Items you cannot wear are shown in red.
+
+{End}
+[===KeyWord===]
+Storage
+[===MessageType===]
+    0
+	[===Event===]
+	  When your inventory runs out of room / when you have saved 100,000
+		#SLAYERPAGE
+		[==Title==]
+		   If your inventory is full, use Storage.
+		[==Sender==]
+		   0
+		[==Level Table==]
+		   -1 -1 1 100 30 30
+		[==Detail==]
+* You must buy Storage from the NPC who manages it before you can use it, and you can buy up to 3 Storages in all.
+
+1st purchase - 100,000
+2nd purchase - 1,000,000
+3rd purchase - 10,000,000
+
+To store things you do not use, click the NPC, choose the "I want to see my Storage." menu, then put the items from your inventory into Storage.
+To take things out, click them in Storage and move them to your inventory.
+< file = 'HelpMessage_75' pos = 'LT'>
+
+* Storage NPCs
+Warrior Guild 1F NPC Chris
+Soldier Guild 1F NPC Kevin
+Cleric Guild 1F NPC Christine
+Perona Highway NPC Robin Baxter
+Inside Octavus NPC Simone
+
+
+<#color ='80ff' a = 'y'>
+Tip. With Storage open, hold Shift and click an item to move it from Storage straight to the inventory window. (It works the other way too, from the inventory straight to Storage.)
+<<#color ='ffffff' a = 'y'>
+
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   If your inventory is full, use Storage.
+		[==Sender==]
+		   1
+		[==Level Table==]
+		   1 40 -1 -1 -1 -1
+		[==Detail==]
+* You must buy Storage from the NPC who manages it before you can use it, and you can buy up to 3 Storages in all.
+1st purchase - 100,000 geld
+2nd purchase - 1,000,000 geld
+3rd purchase - 10,000,000 geld
+
+To store things you do not use, click the NPC, choose the "I want to see my Storage." menu, then put the items from your inventory into Storage.
+To take things out, click them in Storage and move them to your inventory.
+* Vampire Beads cannot be kept in Storage.
+
+< file = 'HelpMessage_75' pos = 'LT'>
+* Storage NPCs
+Limbo Castle village NPC Carpatini
+Inside Rasen Castle NPC Aiman
+Perona Highway NPC Griffith
+Tertius Castle NPC Hunt
+Inside Quartus NPC Barun
+
+
+<#color ='80ff' a = 'y'>
+Tip. With Storage open, hold Shift and click an item to move it from Storage straight to the inventory window. (It works the other way too, from the inventory straight to Storage.)
+<<#color ='ffffff' a = 'y'>
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   If your inventory is full, use Storage.
+		[==Sender==]
+		   2
+		[==Level Table==]
+		   1 40 -1 -1 -1 -1
+		[==Detail==]
+* You must buy Storage from Amata, the NPC who manages it, before you can use it, and you can buy up to 3 Storages in all.
+1st purchase - 100,000 zad
+2nd purchase - 1,000,000 zad
+3rd purchase - 10,000,000 zad
+
+To store things you do not use, click the NPC Amata, choose the "I want to see my Storage." menu, then put the items from your inventory into Storage.
+To take things out, click them in Storage and move them to your inventory.
+
+< file = 'HelpMessage_75' pos = 'LT'>
+* Storage NPCs
+Ousters Village NPC Amata
+Hexserius Castle NPC Ignium
+Pentanus NPC Nowa
+
+
+<#color ='80ff' a = 'y'>
+Tip. With Storage open, hold Shift and click an item to move it from Storage straight to the inventory window. (It works the other way too, from the inventory straight to Storage.)
+<<#color ='ffffff' a = 'y'>
+{End}
+[===KeyWord===]
+Alignment
+[===MessageType===]
+    0
+	[===Event===]
+	  When your Alignment drops for the first time
+		#SLAYERPAGE
+		[==Title==]
+		   Your actions change your Alignment.
+		[==Sender==]
+		   0
+		[==Level Table==]
+		   -1 -1 1 150 30 30
+		[==Detail==]
+* Alignment is a stat that shows how good or evil a character is. There are five Alignments: Very Good, Good, Neutral, Evil and Very Evil. It was introduced to cut down on hostile acts such as PK between members of the same race.
+* Your Alignment drops when you strike first and kill a character of your own race whose Alignment is Good or better.
+* When a character with an evil Alignment dies, there is a chance its items fall to the ground. This only applies when the Alignment is Evil (-2501 or lower) or worse.
+* Donating money to an NPC can raise your Alignment up to -2500; to raise it any further, you must attack characters whose Alignment is Evil.
+
+*The 5 Alignment levels
+ - Each Alignment level gives your character ID a different color.
+
+<#color ='80ff' a = 'y'>
+  Very Good (blue)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_60' pos = 'LT'>
+
+
+<#color ='80ff' a = 'y'>
+  Good (sky blue)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_61' pos = 'LT'>
+
+
+<#color ='80ff' a = 'y'>
+  Neutral (gray)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_62' pos = 'LT'>
+
+
+<#color ='80ff' a = 'y'>
+  Evil (red)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_63' pos = 'LT'>
+
+
+<#color ='80ff' a = 'y'>
+  Very Evil (dark red)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_64' pos = 'LT'>
+
+PS. Our thanks to everyone who helped.
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   Your actions change your Alignment.
+		[==Sender==]
+		   1
+		[==Level Table==]
+		   1 150 -1 -1 -1 -1
+		[==Detail==]
+* Alignment is a stat that shows how good or evil a character is. There are five Alignments: Very Good, Good, Neutral, Evil and Very Evil. It was introduced to cut down on hostile acts such as PK between members of the same race.
+* Your Alignment drops when you strike first and kill a character of your own race whose Alignment is Good or better.
+* When a character with an evil Alignment dies, there is a chance its items fall to the ground. This only applies when the Alignment is Evil (-2501 or lower) or worse.
+* Donating money to an NPC can raise your Alignment up to -2500; to raise it any further, you must attack characters whose Alignment is Evil or hunt monsters of a higher level than yours.
+
+*The 5 Alignment levels
+ - Each Alignment level gives your character ID a different color.
+
+<#color ='80ff' a = 'y'>
+  Very Good (blue)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_60' pos = 'LT'>
+
+
+<#color ='80ff' a = 'y'>
+  Good (sky blue)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_61' pos = 'LT'>
+
+
+<#color ='80ff' a = 'y'>
+  Neutral (gray)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_62' pos = 'LT'>
+
+
+<#color ='80ff' a = 'y'>
+  Evil (red)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_63' pos = 'LT'>
+
+
+<#color ='80ff' a = 'y'>
+  Very Evil (dark red)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_64' pos = 'LT'>
+
+PS. Our thanks to everyone who helped.
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   Your actions change your Alignment.
+		[==Sender==]
+		   2
+		[==Level Table==]
+		   1 150 -1 -1 -1 -1
+		[==Detail==]
+* Alignment is a stat that shows how good or evil a character is. There are five Alignments: Very Good, Good, Neutral, Evil and Very Evil. It was introduced to cut down on hostile acts such as PK between members of the same race.
+* Your Alignment drops when you strike first and kill a character of your own race whose Alignment is Good or better.
+* When a character with an evil Alignment dies, there is a chance its items fall to the ground. This only applies when the Alignment is Evil (-2501 or lower) or worse.
+* Donating money to the NPC Manescu can raise your Alignment up to -2500; to raise it any further, you must attack characters whose Alignment is Evil. The ID colors for each Alignment are the same as for Vampires and Slayers.
+
+*The 5 Alignment levels
+ - Each Alignment level gives your character ID a different color.
+
+<#color ='80ff' a = 'y'>
+  Very Good (blue)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_60' pos = 'LT'>
+
+
+<#color ='80ff' a = 'y'>
+  Good (sky blue)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_61' pos = 'LT'>
+
+
+<#color ='80ff' a = 'y'>
+  Neutral (gray)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_62' pos = 'LT'>
+
+
+<#color ='80ff' a = 'y'>
+  Evil (red)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_63' pos = 'LT'>
+
+
+<#color ='80ff' a = 'y'>
+  Very Evil (dark red)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_64' pos = 'LT'>
+
+PS. Our thanks to everyone who helped.
+{End}
+[===KeyWord===]
+Party
+[===MessageType===]
+    0
+	[===Event===]
+	  On joining your first party
+		#SLAYERPAGE
+		[==Title==]
+		   Get together and hunt as a group.
+		[==Sender==]
+		   -1
+		[==Level Table==]
+		   -1 -1 1 100 30 30
+		[==Detail==]
+* The party system is a small-community support system introduced to strengthen group play.
+* A party holds up to 6 members and needs at least 2.
+< file = 'HelpMessage_76' pos = 'L'>
+* The bigger the party, the bigger the bonus.
+* Hold the right Alt key and move the cursor over the person you want to party with; a handshake icon appears, and you can create or join a party.
+* The party manager window shows each member's face, location, HP and so on.
+
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   Get together and hunt as a group.
+		[==Sender==]
+		   1
+		[==Level Table==]
+		   1 150 -1 -1 -1 -1
+		[==Detail==]
+* The party system is a small-community support system introduced to strengthen group play.
+< file = 'HelpMessage_65' pos = 'L'>
+* A party holds up to 6 members and needs at least 2.
+* The bigger the party, the bigger the bonus.
+* Hold the right Alt key and move the cursor over the person you want to party with; a handshake icon appears, and you can create or join a party.
+* The party manager window shows each member's face, location, HP and so on.
+
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   Get together and hunt as a group.
+		[==Sender==]
+		   2
+		[==Level Table==]
+		   1 150 -1 -1 -1 -1
+		[==Detail==]
+* The party system is a small-community support system introduced to strengthen group play.
+< file = 'HelpMessage_71' pos = 'L'>
+* A party holds up to 6 members and needs at least 2.
+* The bigger the party, the bigger the bonus.
+* Hold the right Alt key and move the cursor over the person you want to party with; a handshake icon appears, and you can create or join a party.
+* The party manager window shows each member's face, location, HP and so on.
+
+{End}
+[===KeyWord===]
+Death
+[===MessageType===]
+    0
+	[===Event===]
+	  On your first death
+		#SLAYERPAGE
+		[==Title==]
+		   If you fall in battle, you can come back to life at your designated location.
+		[==Sender==]
+		   0
+		[==Level Table==]
+		   -1 -1 1 30 30 30
+		[==Detail==]
+< file = 'HelpMessage_77' pos = 'L'>
+  * When your character dies, a small icon saying " You will be evacuated to your designated location " appears at the bottom left of the screen. Click it to be evacuated to the designated place with your health restored.
+
+* Respawn point NPCs
+Warrior Guild 1F NPC Johan
+Soldier Guild 1F NPC Salamander
+Cleric Guild 1F NPC Singh
+
+However, a Slayer whose stats total 40 or less who dies in the Virtual Training Ground is sent back there.
+
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   If you fall in battle, you can come back to life at your designated location.
+		[==Sender==]
+		   1
+		[==Level Table==]
+		   1 150 -1 -1 -1 -1
+		[==Detail==]
+< file = 'HelpMessage_66' pos = 'L'>
+* When your character dies, a small icon saying " Revive at your designated location " appears at the bottom left of the screen. Click it to be taken to the respawn point you set earlier with your health restored. (Status ailments are not cured.)
+
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   If you fall in battle, you can come back to life at your designated location.
+		[==Sender==]
+		   2
+		[==Level Table==]
+		   1 150 -1 -1 -1 -1
+		[==Detail==]
+< file = 'HelpMessage_72' pos = 'L'>
+   * When your character dies, a small icon saying " Revive at your designated location " appears at the bottom left of the screen. Click it to be taken to the respawn point you set earlier with your health restored. (Status ailments are not cured.)
+
+{End}
+[===KeyWord===]
+Blood Drain
+[===MessageType===]
+    0
+	[===Event===]
+	  On your first monster kill
+		#SLAYERPAGE
+		[==Title==]
+
+		[==Sender==]
+		   -1
+		[==Level Table==]
+		   -1 -1 -1 -1 -1 -1
+		[==Detail==]
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   Time to drink some blood
+		[==Sender==]
+		   1
+		[==Level Table==]
+		   1 150 -1 -1 -1 -1
+		[==Detail==]
+* Once you attack a monster and bring its HP down to 30% or less, you can drain its blood. Blood Drain is a Vampire's most basic and most important skill. Draining blood restores your own HP and earns you about 70% of the Experience the monster is worth.
+<#color ='80ff' a = 'y'>
+(100% Experience = Blood Drain 70% + Kill 30%)
+<<#color ='ffffff' a = 'y'>
+
+
+< file = 'HelpMessage_67' pos = 'L'>
+* To drain blood, open the skill window (Ctrl+s), click the Blood Drain skill with the mouse to select it, then right-click to drain.
+
+
+<#color ='80ff' a = 'y'>
+<<  The Blood Drain icon and a Vampire draining blood
+<<#color ='ffffff' a = 'y'>
+
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+
+		[==Sender==]
+		   -1
+		[==Level Table==]
+		   -1 -1 -1 -1 -1 -1
+		[==Detail==]
+{End}
+[===KeyWord===]
+Absorb Soul
+[===MessageType===]
+    0
+	[===Event===]
+	  When you lack the EP a skill needs
+		#SLAYERPAGE
+		[==Title==]
+
+		[==Sender==]
+		   -1
+		[==Level Table==]
+		   -1 -1 -1 -1 -1 -1
+		[==Detail==]
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+
+		[==Sender==]
+		   -1
+		[==Level Table==]
+		   -1 -1 -1 -1 -1 -1
+		[==Detail==]
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   Recovering EP with Absorb Soul
+		[==Sender==]
+		   2
+		[==Level Table==]
+		   1 30 -1 -1 -1 -1
+		[==Detail==]
+< file = 'HelpMessage_73' pos = 'L'>
+Absorb Soul, a technique unique to the Ousters, absorbs an opponent's EP to refill your own.
+It is a must-have technique when hunting.
+Note, however, that Absorb Soul can only be used on corpses.
+
+{End}
+[===KeyWord===]
+Blood Drained
+[===MessageType===]
+    0
+	[===Event===]
+	  When a Slayer's blood has been drained
+		#SLAYERPAGE
+		[==Title==]
+		   If your blood has been drained, get treatment quickly.
+		[==Sender==]
+		   0
+		[==Level Table==]
+		   -1 -1 1 50 30 30
+		[==Detail==]
+< file = 'HelpMessage_84' pos = 'L'>
+* When a character's HP drops below 30% in battle, it starts to bleed red blood (green blood in the Teen version). In this state, monsters can drain your blood. Once your blood has been drained, your HP bar turns blotchy red. If you do not want to turn into a Vampire, get treatment from an NPC who heals.
+< file = 'HelpMessage_81' pos = 'RT'>
+* Healing NPCs
+Field Headquarters NPC Dennis
+City Outskirts NPC Yamamoto
+Warrior Guild 1F NPC Johan
+Soldier Guild 1F NPC Salamander
+Cleric Guild 1F NPC Singh
+Perona Highway NPC Carmen Berman
+
+* If you go untreated for 12 hours and 10 minutes of real time after a monster or Vampire drains your blood, you turn into a Vampire. As a Vampire, all your Slayer stats are replaced with a Vampire's starting stats of STR 20, DEX 20, INT 20, and all the items you were wearing go into your inventory, or fall to the ground if there is no room in it.
+
+* If you forgot to get treated and became a Vampire by mistake, go to "Larva" in Limbo Castle Southeast (129,86) to become a Slayer again.
+< file = 'HelpMessage_85' pos = 'LT'>
+
+* Even if time runs out and a message says you will change in 10 seconds of game time, reconnecting gives you 2 more hours of game time. Even when those 2 hours run out, reconnecting keeps giving you another 2 hours.
+
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+
+		[==Sender==]
+		   -1
+		[==Level Table==]
+		   -1 -1 -1 -1 -1 -1
+		[==Detail==]
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+
+		[==Sender==]
+		   -1
+		[==Level Table==]
+		   -1 -1 -1 -1 -1 -1
+		[==Detail==]
+{End}
+[===KeyWord===]
+Beginner Zone
+[===MessageType===]
+    0
+	[===Event===]
+	  3 minutes after logging in
+		#SLAYERPAGE
+		[==Title==]
+		   Learn the basics of combat against weak enemies.
+		[==Sender==]
+		   0
+		[==Level Table==]
+		   -1 -1 1 10 30 30
+		[==Detail==]
+With your present strength, you cannot face the monsters anywhere in Eslania. But do not lose heart. To help you in your weakness, we have built Virtual Training Grounds 1 and 2, and filled them with weak monsters so you can train as much as you need. Once you have practiced enough, go out into the field and enjoy the fruits of your training.
+However, so that more fighters can practice there, Slayers whose base stats (Str, Dex, Int) total more than 41 are barred from the Virtual Training Ground.
+< file = 'HelpMessage_82' pos = 'L'>
+Virtual Training Ground 2 admits only Slayers whose stats total between 41 and 60. Slayers above that are judged to be true fighters and must hunt monsters out in the field.
+The warp zone to the Virtual Training Ground is inside the Field Headquarters, so make good use of it.
+The Virtual Training Ground is located in Eslania NW (Northwest).
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   Learn the basics of combat against weak enemies.
+		[==Sender==]
+		   1
+		[==Level Table==]
+		   1 20 -1 -1 -1 -1
+		[==Detail==]
+A newly created Vampire has far greater stamina and attack power than a Slayer or an Ousters.
+A new character appears Inside Limbo Castle; for your first hunting ground, we recommend heading to Bathory Dungeon B1F-B2F, which connects directly to Inside Limbo Castle.
+< file = 'HelpMessage_88' pos = 'L'>
+Most monsters in Bathory Dungeon B1F-B2F are weak, so you can hunt there without trouble until level 10 or beyond.
+Once you reach level 10 or higher, use the shops in town (Limbo Castle) to buy the items you need and learn magic.
+You can learn magic from the NPC "Vrykolakas" Inside Limbo Castle.
+Vampires split into warrior and magic types, and for both, DEX (Dex) carries a lot of weight.
+For magic-type Vampires, DEX (Dex) greatly affects skill delay,
+and for warriors it affects To Hit, evasion and so on, so it matters a great deal to both types.
+So early on it is best to raise mostly DEX, and later raise the stat that goes with the type you chose (STR (Str) for warriors, INT (Int) for mages).
+
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   Learn the basics of combat against weak enemies.
+		[==Sender==]
+		   2
+		[==Level Table==]
+		   1 20 -1 -1 -1 -1
+		[==Detail==]
+When you first log in, you appear in the Ousters Village. Rather than going outside the village to hunt, we recommend heading to 'Hanial Dungeon', the Ousters-only hunting ground inside the village.
+< file = 'HelpMessage_89' pos = 'L'>
+'Hanial Dungeon' has 4 floors; go deeper as your abilities grow. Hunt on the floor that suits your strength, and once you have leveled up and learned skills and grown stronger, try going down to the 4th floor. Be careful, though. Once Hanial Dungeon has given you confidence, head out into the wide world.
+{End}
+[===KeyWord===]
+New Skills
+[===MessageType===]
+    0
+	[===Event===]
+	  On reaching level 5
+		#SLAYERPAGE
+		[==Title==]
+		   You can now learn skills.
+		[==Sender==]
+		   0
+		[==Level Table==]
+		   -1 -1 1 5 30 30
+		[==Detail==]
+< file = 'HelpMessage_83' pos = 'L'>
+Slayers can generally learn new skills when they reach level 5. From then on, as a Slayer one step further along, you will be able to face stronger monsters than before.
+You can learn new skills without any restriction by talking to the NPC for your class. Most techniques can be learned from the NPCs at the Field Headquarters, where you first enter the game.
+
+Gun : Jean (Soldier Guild 3F), Jacques (Field Headquarters)
+Sword : Han (Warrior Guild 3F), Kaiser (Field Headquarters)
+Blade : Nuwa (Warrior Guild 3F), Kaiser (Field Headquarters)
+Heal : Rachmaninov (Cleric Guild 3F), Tanya (Field Headquarters)
+Enchant : Hannibal (Cleric Guild 3F), Tanya (Field Headquarters)
+
+Never let the skills you have learned go to waste. A soldier who does not use the skills he has learned is bound to fall behind. Always use the skills you have, raise them by doing so, and become a true soldier.
+
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   You can now learn skills.
+		[==Sender==]
+		   1
+		[==Level Table==]
+		   1 5 -1 -1 -1 -1
+		[==Detail==]
+Every time a Vampire levels up, it gets 3 stat bonus points, which you can distribute as you like.
+< file = 'HelpMessage_91' pos = 'LT'>
+
+* How the base stats relate to the secondary stats
+STR (Str) : Physical Damage and Protection
+DEX (Dex) : To Hit and evasion (Defense), the delay after casting spells, duration
+INT (Int) : Governs skill success rates and magic attack Damage.
+
+< file = 'HelpMessage_90' pos = 'LT'>
+At level 3 you can learn skills; the skill masters are in two places, Limbo Castle and Rasen Castle.
+
+*Skill masters
+Inside Limbo Castle - NPC Vrykolakas
+Inside Rasen Castle - NPC Caim
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   You can now learn skills.
+		[==Sender==]
+		   2
+		[==Level Table==]
+		   1 5 -1 -1 -1 -1
+		[==Detail==]
+Ousters receive Skill Points when they level up. Choose warrior or mage, press Ctrl + K, and warriors learn combat skills while mages learn magic. The number of Skill Points you get grows with each level up.
+Collect all the Skill Points a skill needs, then learn it.
+Skills can be raised to level 30 at most.
+
+<#color ='80ff' a = 'y'>
+(Skill Points can be redistributed up to skill level 29, but once a skill reaches level 30 its points can never be redistributed.)
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HelpMessage_80' pos = 'LT'>
+When you level up you get 3 stat bonus points to distribute among the stats you want.
+STR raises Protection, HP and Damage; DEX raises evasion, HP and To Hit; INT raises EP, magic power and HP.
+STR in particular raises HP more than DEX and INT do.
+< file = 'HelpMessage_79' pos = 'L'>
+{End}
+[===KeyWord===]
+Race Traits
+[===MessageType===]
+    0
+	[===Event===]
+	  On reaching level 30
+		#SLAYERPAGE
+		[==Title==]
+		   Get to know the traits of your race.
+		[==Sender==]
+		   0
+		[==Level Table==]
+		   -1 -1 30 80 60 60
+		[==Detail==]
+<#color ='80ff80' a = 'y'>
+1) Race traits
+<<#color ='ffffff' a = 'y'>
+
+Slayers grow the Domain level of their class by repeatedly performing actions and skills with weapons of that Domain; growth is based on skill (proficiency).
+What sets the game apart from others is its completely distinct character in its growth system, items, skills and classes. For travel, there are Motorcycles and Helicopters.
+In war, Slayers are not especially strong one on one, but when the classes band together, there is no enemy they need fear.
+One of DKx Online's systems changes stats with the time of day. Day and night do not just change your field of view or the brightness of the scenery; they change each race's stats. At night Slayers look somewhat weak against the Vampires, but by day they are relatively strong.
+
+
+<#color ='80ff80' a = 'y'>
+2) Slayer classes
+<<#color ='ffffff' a = 'y'>
+
+A Slayer can master a single Domain or learn two or more Domains at once. However, since the total of your Domain levels is capped, keep in mind that you cannot learn every Domain to 100%, and that once you hit the cap, raising one skill Domain makes another Domain decline.
+As your Domain levels grow, you can learn new skills. As a skill's level rises, its duration or Damage increases. Skills only level up if you keep using them, and a skill's level is limited by your Domain level.
+---------------------------------------------------------
+- Domain levels and skill levels are both divided into 5 grades by level
+Grade   Level         Grade
+1      1~24          Apprentice
+2      25~49         Adept
+3      50~74         Expert
+4      75~99         Master
+5      100~ 150      Grand Master
+--------------------------------------------------------
+
+<#color ='4080ff' a = 'y'>
+Tip> If your Domain level is Apprentice, you can raise your skill level up to Adept. If your Domain level is Adept, you can raise your skill level up to Expert. In other words, a skill's level can be raised to one grade above your Domain level.
+<<#color ='ffffff' a = 'y'>
+
+
+
+<#color ='80ff80' a = 'y'>
+3) Domain traits
+<<#color ='ffffff' a = 'y'>
+
+
+<#color ='4080ff' a = 'y'>
+o Warriors (Blade Domain, Sword Domain)
+<<#color ='ffffff' a = 'y'>
+
+A fighting branch that wields all kinds of swords and blades freely and specializes in close hand-to-hand combat. It splits into two lines: sword Slayers, who balance attack and defense, and blade Slayers, who boast tremendous strength and destructive power.
+A branch that fights bravely at the head of the party, protecting its comrades; training STR has a great effect on its fighting power.
+
+<#color ='4080ff' a = 'y'>
+o Soldiers (Gun Domain)
+<<#color ='ffffff' a = 'y'>
+
+A branch that specializes in all kinds of firearms, explosives and the like, the products of modern, advanced military technology.
+With covering fire from long range and mines laid on the enemy's likely approach routes, a soldier's mere presence in the party multiplies its operating range several times over. DEX has a large effect on the power and accuracy of its attacks.
+
+<#color ='4080ff' a = 'y'>
+o Clerics (Enchant Domain, Heal Domain)
+<<#color ='ffffff' a = 'y'>
+
+A special branch that uses the healing powers handed down in secret by various religions.
+They are dedicated to healing and supporting the fighters. They are known to split into the Heal line, which can fully restore party members who have been put out of action, and the Enchant line, which maximizes party members' abilities and detects and foresees the evil arts of the Vampires and others. Long hours of combat support call for training INT.
+
+
+<#color ='80ff80' a = 'y'>
+4) Stat system (table)
+<<#color ='ffffff' a = 'y'>
+
+
+<#color ='4080ff' a = 'y'>
+o Base stats
+<<#color ='ffffff' a = 'y'>
+
+- Base stats represent a character's basic yet important traits, and at the same time they set the range of the secondary stats.
+* STR (STR): A stat for the character's strength and physical toughness; it affects HP, Damage, Protection and so on.
+* DEX (DEX) : A stat for the character's quickness and agility; it affects To Hit, Defense, attack speed and so on.
+* INT (INT) : A stat for the character's intellectual ability; it affects spell duration, magic Damage and so on.
+
+
+<#color ='80ff80' a = 'y'>
+5) Secondary stats of each race
+<<#color ='ffffff' a = 'y'>
+
+
+<#color ='4080ff' a = 'y'>
+o Secondary stats
+<<#color ='ffffff' a = 'y'>
+
+Secondary stats are determined by your base stats and items, and they have an absolute effect on everything your character does in the game, such as combat and magic.
+* HP (HP) : A stat for the character's life force; when HP reaches 0, you die. HP depends on your stats and level.
+* To Hit (TOHIT) : A stat for the accuracy of your attacks; it depends on DEX.
+* Damage (DAMAGE) : A stat for the amount of harm you can deal an opponent; it depends on STR and INT.
+* Defense (DEFENSE) : A stat for your defense against To Hit; it is increased by DEX.
+* Protection (PROTECTION) : A stat for your defense against Damage; it is increased by STR.
+
+
+<#color ='80ff80' a = 'y'>
+6) Experience system
+<<#color ='ffffff' a = 'y'>
+
+
+<#color ='4080ff' a = 'y'>
+o How to earn Experience
+<<#color ='ffffff' a = 'y'>
+
+- To grow the Domain level of your class, you must repeatedly perform actions and skills with weapons of that Domain.
+- Rising Domain levels affect the success rate, Damage and so on of some techniques.
+- As your Domain levels rise, you can learn new skills. The Experience you get also varies with which skills you use at each level.
+- Slayers earn different Experience for hunting the same monster by day and by night. At night they earn about 1.5 times as much Experience.
+- For each Domain, Slayers have a suitable weapon for their level. If you wield a weapon of a higher grade than the suitable one, you earn up to 120% Domain Experience. For details on suitable weapons, search the FAQ on the homepage.
+
+< file = 'HM2_1' pos = 'L'>
+
+
+
+
+
+
+
+
+
+
+<#color ='ffff' a = 'y'>
+A level up using a skill
+<<#color ='ffffff' a = 'y'>
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   Get to know the traits of your race.
+		[==Sender==]
+		   1
+		[==Level Table==]
+		   30 80 -1 -1 -1 -1
+		[==Detail==]
+
+<#color ='ff00' a = 'y'>
+1) Race traits
+<<#color ='ffffff' a = 'y'>
+
+Vampires appear in the game as beings quite alien to humans, but they basically grow through a level system, so raising one is not hard. Vampires gain immortality by taking blood, and the more they take, the mightier they become, so they grow by gaining Experience through Blood Drain.
+
+
+<#color ='ff00' a = 'y'>
+2) The stat system
+<<#color ='ffffff' a = 'y'>
+
+
+<#color ='80ff' a = 'y'>
+o Base stats
+<<#color ='ffffff' a = 'y'>
+
+Base stats represent a character's basic yet important traits, and at the same time they set the range of the secondary stats.
+
+- STR (STR): A stat for the character's strength and physical toughness; it affects HP, Damage, Protection and so on.
+- DEX (DEX) : A stat for the character's quickness and agility; it affects To Hit, Defense, attack speed and so on.
+- INT (INT) : A stat for the character's intellectual ability; it affects spell duration, magic Damage and so on.
+
+
+
+<#color ='80ff' a = 'y'>
+o Secondary stats
+<<#color ='ffffff' a = 'y'>
+
+Secondary stats are determined by your base stats and items, and they have an absolute effect on everything your character does in the game, such as combat and magic.
+- HP (HP) : A stat for the character's life force; when HP reaches 0, you die. HP depends on your stats and level.
+- To Hit (TOHIT): A stat for the accuracy of your attacks; it depends on DEX.
+- Damage (DAMAGE): A stat for the amount of harm you can deal an opponent; it depends on STR and INT.
+- Defense (DEFENSE): A stat for your defense against To Hit; it is increased by DEX.
+- Protection (PROTECTION): A stat for your defense against Damage; it is increased by STR.
+
+
+<#color ='80ff' a = 'y'>
+o Experience system
+<<#color ='ffffff' a = 'y'>
+
+- How to earn Experience
+Vampires level up by accumulating Experience. There are two ways for a Vampire to earn Experience.
+The first is Experience from Blood Drain (BloodDrain), which earns you 70% of a monster's total Experience. The second is Experience from the last kill (LastKill), which earns you 30% of a monster's total Experience. When the Experience you accumulate this way reaches your goal Experience (GoalExp), you level up, and as you level up you can learn new Vampire magic.
+< file = 'HM2_22' pos = 'LT'>
+
+<#color ='ffff' a = 'y'>
+TIP : In battle with Slayers, Vampires can take HolyDamage (holy damage) from silver-plated weapons. Holy damage lowers your maximum HP because of the silver. There are three ways to cure it: summon a coffin with the Summon Casket skill, drain the blood of a monster or another race, or use a Serum, and the HolyDamage is lifted.
+<<#color ='ffffff' a = 'y'>
+
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   Get to know the traits of your race.
+		[==Sender==]
+		   2
+		[==Level Table==]
+		   30 80 -1 -1 -1 -1
+		[==Detail==]
+
+<#color ='80ff80' a = 'y'>
+1) Race traits
+<<#color ='ffffff' a = 'y'>
+
+
+We who hold a true faith, one with the holy spirit of nature, pray to Lord Karisas. We ask for your grace, that we may fulfill the purpose to which you rightly guide us.
+Spirits of life and nature, I long with all my heart to meet you and become one with you.
+
+I am Mihai, of the Ousters kin.
+I hope my modest knowledge may be of help to you as you take your first steps in these troubled times.
+
+You are an Ousters. The world sometimes calls us 'half-vampires', but you may ignore the picture of us that circulates through their subjective, narrow view.
+The Vampires, fallen souls that crave nothing but dark red blood; the humans, who rose by trampling the lives and homes of other living things for their own sake. We are unlike either of them.
+Our eternal life demands no blood, and unlike those to whom bright sunlight is a curse, we can face it as a blessing of nature. And unlike the Vampires and humans, who must be divided into male and female, we are whole beings of a single sex, and all of us can love one another.
+The spirits of great nature, granted only to our kin who live with nature, will always protect you. Remember, too, that a strong body that does not borrow the spirits' power can also defend you and your kin.
+
+
+<#color ='80ff80' a = 'y'>
+2) Classes
+<<#color ='ffffff' a = 'y'>
+
+
+You who seek great power have boundless potential. You can use spirit magic, summoning spirits with the energy of great nature, or use the Chakram with the power of your superb body. Or you can train in all of these together. The choice is yours.
+
+
+<#color ='4080ff' a = 'y'>
+o Combat
+<<#color ='ffffff' a = 'y'>
+
+These are techniques that use the Chakram to push your physical training to the limit. The combat line receives some support from the spirits, but it puts the emphasis on training your own strength and your skill with the Chakram.
+The combat line also splits broadly in two: warriors who focus on DEX with STR as secondary, and warriors who focus on STR with DEX as secondary.
+For the warrior line, STR and DEX are very important stats.
+STR raises Damage, HP and Protection, while DEX raises To Hit and Defense.
+So rather than leaning to one side, it is best to strike a balance when distributing them.
+
+<#color ='4080ff' a = 'y'>
+o Fire
+<<#color ='ffffff' a = 'y'>
+
+Spirit magic that summons Fire spirits, mostly for attack magic. The deeper you train in Fire spirit magic, the more powerful your spells become.
+Of all the Ousters classes, the Fire line hunts the fastest and most safely and can use area attack skills. When you use several skills at once, you can claim the highest burst Damage of any character.
+
+<#color ='4080ff' a = 'y'>
+o Water
+<<#color ='ffffff' a = 'y'>
+
+Spirit magic that summons Water spirits, for support magic such as healing and defense. The deeper you train in Water spirit magic, the more formidable your spells become.
+The Water line is very popular with every class; it can restore HP and revive the dead in party hunts and in wars, and it is strong in PvP too.
+
+
+<#color ='4080ff' a = 'y'>
+o Earth
+<<#color ='ffffff' a = 'y'>
+
+Spirit magic that summons Earth spirits, for defensive magic such as protection and ranged attacks. The deeper you train in Earth spirit magic, the more effective your spells become.
+Its direct attack skills are strong, but it can also cast useful skills on party members and others of your race, and it is the only line with a skill that can see hidden characters of other races. It is essential in wars between the races.
+
+
+<#color ='80ffff' a = 'y'>
+TIP. By the nature of the Ousters, you cannot learn every skill. Distribute your Skill Points wisely and master only the skills you really need. Learn a bit of everything out of curiosity and you may end up a jack of all trades who cannot master the skills you need in real fights.
+<<#color ='ffffff' a = 'y'>
+
+
+
+<#color ='ffff80' a = 'y'>
+* The picture shows a case where many kinds of skills were learned but the skills actually needed were not mastered.
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HM2_44' pos = 'LT'>
+
+
+<#color ='80ff80' a = 'y'>
+3) The Ousters stat system
+<<#color ='ffffff' a = 'y'>
+
+
+<#color ='4080ff' a = 'y'>
+o STR, DEX, INT
+<<#color ='ffffff' a = 'y'>
+
+Base stats represent a character's basic yet important traits, and at the same time they set the range of the secondary stats.
+< file = 'HM2_45' pos = 'LT'>
+
+<#color ='80ff80' a = 'y'>
+4) Ousters secondary stats
+<<#color ='ffffff' a = 'y'>
+
+
+<#color ='4080ff' a = 'y'>
+o HP, To Hit ... and so on
+<<#color ='ffffff' a = 'y'>
+
+Secondary stats are determined by your base stats and items, and they have an absolute effect on everything your character does in the game, such as combat and magic.
+< file = 'HM2_46' pos = 'LT'>
+
+
+<#color ='80ff80' a = 'y'>
+5) Experience system
+<<#color ='ffffff' a = 'y'>
+
+
+Ousters level up by accumulating Experience. Experience is earned at the moment of a monster kill (Kill), based on the Damage you dealt the monster and the monster's level.
+When the Experience you accumulate this way reaches your goal Experience (GoalExp), you level up, and the Skill Points you get for leveling up let you improve the skills you have or learn new magic.
+
+
+<#color ='80ffff' a = 'y'>
+TIP. Skill Points spent on a skill are never reset. Every skill is mastered at level 30, and once mastered its Skill Points cannot be redistributed, so choose carefully.
+<<#color ='ffffff' a = 'y'>
+
+
+DKx Online also has a lair system that works like quests.
+In a lair quest, many more monsters appear in a shorter time than in ordinary hunting, so make a habit of joining the quest whenever a lair opens while you are hunting.
+
+
+{End}
+[===KeyWord===]
+Race Systems
+[===MessageType===]
+    0
+	[===Event===]
+	  On reaching level 31
+		#SLAYERPAGE
+		[==Title==]
+		   Knowing the systems makes combat easier.
+		[==Sender==]
+		   0
+		[==Level Table==]
+		   -1 -1 31 80 62 62
+		[==Detail==]
+<#color ='80ff80' a = 'y'>
+1) Alignment system
+<<#color ='ffffff' a = 'y'>
+
+- Alignment is a stat that shows how good or evil a character is. It was introduced to cut down on hostile acts such as PK between members of the same race.
+- Alignment rises or falls when you attack your own race; attacking other races does not change it.
+- Attacking characters of a lower level than you makes the change much larger.
+- Also, if you keep doing bad deeds in a row, your Alignment drops at a progressive rate.
+- Alignment ranges from -10,000 to 10,000, and starts at +7,500.
+- Killing monsters can raise your Alignment up to -2500; to raise it any further, you must attack characters with an evil Alignment.
+- Donating money to an NPC can raise your Alignment up to -2500; to raise it any further, you must attack characters whose Alignment is Evil.
+- As a penalty, players with an evil Alignment are rather more likely to drop items when they die, and they also take a larger Experience penalty.
+
+
+<#color ='4080ff' a = 'y'>
+o Character ID colors by Alignment value
+<<#color ='ffffff' a = 'y'>
+
+Very Good 7501 ~ 10000
+
+< file = 'HM2_2' pos = 'L'>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Good 2501 ~ 7500
+
+< file = 'HM2_3' pos = 'L'>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Neutral 2500 ~ -2500
+
+< file = 'HM2_4' pos = 'L'>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Evil -2501 ~ -7500
+
+< file = 'HM2_5' pos = 'L'>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Very Evil -7501 ~ -10000
+
+< file = 'HM2_6' pos = 'L'>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<#color ='4080ff' a = 'y'>
+o Alignment NPCs
+<<#color ='ffffff' a = 'y'>
+
+- Soldier Guild 3F NPC - Smith
+- Warrior Guild 3F NPC - Conan
+- Cleric Guild 3F NPC - Stoyanov
+
+
+<#color ='80ff80' a = 'y'>
+2) Party system
+<<#color ='ffffff' a = 'y'>
+
+A small-community support system introduced to strengthen group play for each race; the bigger the party, the bigger the bonus. Joining and creating a party are both done with right Alt + clicking a player.
+
+<#color ='4080ff' a = 'y'>
+o How Experience is shared
+<<#color ='ffffff' a = 'y'>
+
+When you or another party member attacks an enemy, the Experience, boosted according to the number of party members within a certain distance, is automatically shared among the members in proportion to their levels; for Slayers, SlayerLevel is used as the level. Here, party size means not the total number of people who joined the party, but the total number of party members within 8 tiles of you.
+
+<#color ='4080ff' a = 'y'>
+o Bonus by party size
+<<#color ='ffffff' a = 'y'>
+
+
+<#color ='80ffff' a = 'y'>
+2 party members: 150% Experience bonus
+3 party members: 195% Experience bonus
+4 party members: 225% Experience bonus
+5 party members: 250% Experience bonus
+6 party members: 270% Experience bonus
+<<#color ='ffffff' a = 'y'>
+
+
+<#color ='4080ff' a = 'y'>
+TIP. Wield a weapon of a higher grade than your suitable weapon and you earn up to 120% Experience, and at night you earn 150% Experience on top of that. Add a party on top of both and you earn the most Experience possible.
+<<#color ='ffffff' a = 'y'>
+
+
+
+<#color ='80ff80' a = 'y'>
+3) Rank system
+<<#color ='ffffff' a = 'y'>
+
+The vampire Masters decided to grant ranks to their loyal servants to honor their deeds on the battlefield. They also proclaimed that vampires who reached high ranks would be taught special magic. This was also a way to establish a firm chain of command and raise morale for the great war to come. With it, the vampire warriors strengthened their loyalty to their Masters and at the same time gained a more organized fighting force.
+
+Rank marks by stage (each mark from left to right is 1 level higher, 5 levels per stage - e.g. the leftmost Sergeant mark is level 6)
+< file = 'HM2_7' pos = 'LT'>
+
+
+<#color ='4080ff' a = 'y'>
+o Rank Experience
+<<#color ='ffffff' a = 'y'>
+
+- You rise in Rank by accumulating Rank Experience. Slayers earn Rank Experience by hunting monsters and fighting Vampires. When it reaches the Rank Experience goal, you are promoted. Once your Rank reaches a certain level, you can learn new rank skills.
+- When you or a Slayer in your party kills an enemy, the Rank Experience grows with the size of the party and is shared automatically according to the members' levels. This bonus is only shared with members within 8 tiles of the leader.
+
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   Knowing the systems makes combat easier.
+		[==Sender==]
+		   1
+		[==Level Table==]
+		   31 80 -1 -1 -1 -1
+		[==Detail==]
+
+<#color ='80ff80' a = 'y'>
+1) Alignment system
+<<#color ='ffffff' a = 'y'>
+
+Alignment is a stat that shows how good or evil a character is. It was introduced to cut down on hostile acts such as PK between members of the same race. Alignment rises or falls when you attack your own race; attacking other races does not change it.
+Attacking characters of a lower level than you makes the change much larger.
+Also, if you keep doing bad deeds in a row, your Alignment drops at a progressive rate.
+Alignment ranges from -10,000 to 10,000, and starts at +7,500. Killing monsters can raise your Alignment up to -2500; to raise it any further, you must attack characters with an evil Alignment. Donating money to an NPC can raise your Alignment up to -2500; to raise it any further, you must attack characters whose Alignment is Evil.
+As a penalty, players with an Evil Alignment are rather more likely to drop items when they die, and they also take a larger Experience penalty.
+
+
+<#color ='ff' a = 'y'>
+# Alignment by Alignment value
+<<#color ='ffffff' a = 'y'>
+
+Alignment Very Good : 7500 ~ 10000 (dark blue)
+< file = 'HM2_24' pos = 'LT'>
+
+Alignment Good : 2500 ~ 7500 (sky blue)
+< file = 'HM2_25' pos = 'LT'>
+
+Alignment Neutral : -2500 ~ 2500 (gray)
+< file = 'HM2_26' pos = 'LT'>
+
+Alignment Evil : -2500 ~ -7500 (red)
+< file = 'HM2_27' pos = 'LT'>
+
+Alignment Very Evil : -7500 ~ -10000 (dark red)
+< file = 'HM2_28' pos = 'LT'>
+
+<#color ='80ff80' a = 'y'>
+2) Party system - The Book of Those Who Seek Friendship
+<<#color ='ffffff' a = 'y'>
+
+That one's own strength matters most for survival is nothing but foolish false wisdom. This book was written by a sage of our kin of old, who held that what truly matters is comrades who will face danger with you. If you can rise to a higher plane, you may even win a friendship in which you exchange blood with one another. Perhaps we, a kin who must live long lives, are the very race that knows the true worth of a friend.
+
+o Overview
+The party system is a small-community support system, shared by Slayers and Vampires, introduced to strengthen group play.
+The bigger the party, the bigger the bonus.
+Joining and creating a party are both done with right Alt + clicking a player.
+o How Experience is shared
+When you or a Vampire in your party drains the blood of or kills an enemy, the Experience grows with the size of the party and is shared automatically according to the members' levels.
+This bonus is only shared with members within 8 tiles of the leader. (Same as for Slayers)
+
+o Bonus by party size
+
+<#color ='80ffff' a = 'y'>
+2 party members: 150% Experience bonus
+3 party members: 195% Experience bonus
+4 party members: 225% Experience bonus
+5 party members: 250% Experience bonus
+6 party members: 270% Experience bonus
+<<#color ='ffffff' a = 'y'>
+
+
+< file = 'HM2_23' pos = 'LT'>
+
+
+<#color ='80ff80' a = 'y'>
+3) Rank system
+<<#color ='ffffff' a = 'y'>
+
+The vampire Masters decided to grant ranks to their loyal servants to honor their deeds on the battlefield. They also proclaimed that vampires who reached high ranks would be taught special magic. This was also a way to establish a firm chain of command and raise morale for the great war to come. With it, the vampire warriors strengthened their loyalty to their Masters and at the same time gained a more organized fighting force.
+o Rank Experience
+You rise in Rank by accumulating Rank Experience. Vampires earn Rank Experience by hunting monsters and fighting Slayers. When it reaches the Rank Experience goal, you are promoted. Once your Rank reaches a certain level, you can learn new Vampire magic.
+When you or a Vampire in your party kills an enemy, the Rank Experience grows with the size of the party and is shared automatically according to the members' levels. This bonus is only shared with members within 8 tiles of the leader.
+< file = 'HM2_29' pos = 'LT'>
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   Knowing the systems makes combat easier.
+		[==Sender==]
+		   2
+		[==Level Table==]
+		   31 80 -1 -1 -1 -1
+		[==Detail==]
+
+<#color ='80ff80' a = 'y'>
+1) Alignment system
+<<#color ='ffffff' a = 'y'>
+
+Alignment : A stat that shows how good or evil a character is. It was introduced to cut down on hostile acts such as PK between members of the same race.
+< file = 'HM2_47' pos = 'LT'>
+
+Alignment rises or falls when you attack your own race; attacking other races does not change it.
+Attacking characters of a lower level than you makes the change much larger.
+Also, if you keep doing bad deeds in a row, your Alignment drops at a progressive rate.
+Alignment ranges from -10,000 to 10,000, and starts at +7,500.
+
+Killing monsters can raise your Alignment up to -2500; to raise it any further, you must attack characters with an evil Alignment.
+< file = 'HM2_48' pos = 'LT'>
+
+As a penalty, players with an evil Alignment are rather more likely to drop items when they die, and they also take a larger Experience penalty.
+
+
+<#color ='80ff80' a = 'y'>
+2) Party system
+<<#color ='ffffff' a = 'y'>
+
+
+The party system is a small-community support system, shared by Slayers, Vampires and Ousters, introduced to strengthen group play.
+The bigger the party, the bigger the bonus.
+Joining and creating a party are both done with right Alt + a player (left-click).
+
+<#color ='4080ff' a = 'y'>
+o How Experience is shared
+<<#color ='ffffff' a = 'y'>
+
+When you or an Ousters in your party kills an enemy, the Experience grows with the size of the party and is shared automatically according to the members' levels.
+This bonus is only shared with members within 8 tiles of the leader. (Same as for Slayers)
+< file = 'HM2_49' pos = 'LT'>
+
+
+<#color ='80ff80' a = 'y'>
+3) Rank system
+<<#color ='ffffff' a = 'y'>
+
+
+<#color ='4080ff' a = 'y'>
+o Rank Experience
+<<#color ='ffffff' a = 'y'>
+
+You rise in Rank by accumulating Rank Experience. Ousters earn Rank Experience by hunting monsters and fighting Slayers and Vampires. When it reaches the Rank Experience goal, you are promoted. Once your Rank reaches a certain level, you can learn new Ousters skills.
+
+When you or an Ousters in your party kills an enemy, the Rank Experience grows with the size of the party and is shared automatically according to the members' levels. This bonus is only shared with members within 8 tiles of the leader.
+< file = 'HM2_50' pos = 'LT'>
+
+<#color ='4080ff' a = 'y'>
+
+o Rank stats explained
+<<#color ='ffffff' a = 'y'>
+
+At Rank levels 6, 11, 16 and 21 you can choose and learn one of the rank skills on offer; they are passive skills that work automatically with no action needed. To change a rank skill you have learned, you can reset it with the NPCs "Naishas" and "Lepri" in Adam's Holy Land. A reset can only be done once, however, and after one change you cannot change it again, so choose carefully.
+< file = 'HM2_51' pos = 'LT'>
+
+
+<#color ='ffff80' a = 'y'>
+If you have already reset a rank skill once, the following message is shown
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HM2_52' pos = 'LT'>
+
+For now only the lower ranks are supported, but the higher ranks will be supported in a future update.
+
+
+{End}
+[===KeyWord===]
+Pets
+[===MessageType===]
+    0
+	[===Event===]
+	  On reaching level 32
+		#SLAYERPAGE
+		[==Title==]
+		   Learn about pets that grow with you.
+		[==Sender==]
+		   0
+		[==Level Table==]
+		   -1 -1 32 80 64 64
+		[==Detail==]
+<#color ='80ff80' a = 'y'>
+1) The common pet system
+<<#color ='ffffff' a = 'y'>
+
+
+<#color ='4080ff' a = 'y'>
+o Getting a pet (Wolfdog / Wolverine raising manual)
+<<#color ='ffffff' a = 'y'>
+
+The Junior WolfArch is the young of the WolfArch and lives in the wild. A Junior WolfArch does not attack by default, but if a player attacks it first, it dies or runs away. To get a pet, you must tame a Junior WolfArch and turn it into a Wolfdog.
+
+<#color ='4080ff' a = 'y'>
+o Where Junior WolfArches appear
+<<#color ='ffffff' a = 'y'>
+
+Eslania (SE, NE), Limbo Castle (SE, NE), Drobeta (SE, NE), Mount Rodin (SE, NE), Perona Highway (SE, NE), Timore (SE, NE), Adam's Holy Land (center)
+o For this you need a taming item. You can buy it at an ordinary shop, and when you use it on a Junior WolfArch, there is a set chance that it follows you or runs away. If it runs away from you, you have failed to lure the Junior WolfArch; if you succeed, a pet collar is added to your inventory window, and clicking the collar summons your pet. Open the character information window and you will find a pet-shaped button. Press it to open the information window of the summoned pet.
+
+Pet interface
+
+< file = 'HM2_8' pos = 'LT'>
+
+
+
+<#color ='4080ff' a = 'y'>
+o Items for luring pets
+<<#color ='ffffff' a = 'y'>
+
+
+Item : Mini Meat (Mini Meat)
+Duration : 6 hours
+Money : 5,000 each
+
+< file = 'HM2_9' pos = 'LT'>
+
+Item : Light Meat (Light Meat)
+Duration : 22 hours
+Money : 20,000 each
+
+< file = 'HM2_10' pos = 'LT'>
+
+Item : Half Meat (Half Meat)
+Duration : 36 hours
+Money : 60,000 each
+
+< file = 'HM2_11' pos = 'LT'>
+
+Item : Large Meat (Large Meat)
+Duration : 50 hours
+Money : 350,000 each
+
+< file = 'HM2_12' pos = 'LT'>
+
+
+<#color ='ff' a = 'y'>
+The times above run in real time, and the chance of luring a pet depends on the price of the item. Once you have lured a pet, you can use these items as its food.
+<<#color ='ffffff' a = 'y'>
+
+
+
+<#color ='4080ff' a = 'y'>
+o Pet food items
+<<#color ='ffffff' a = 'y'>
+
+How long food lasts depends on the price of the item. Food items and luring items are the same thing: without a pet they serve as luring items, and once you have a pet you can use them as food.
+
+<#color ='4080ff' a = 'y'>
+o Revival item (Revival Set)
+<<#color ='ffffff' a = 'y'>
+
+An item that can bring your pet back to life. The longer the pet has been dead, the lower the chance of reviving it.
+
+<#color ='4080ff' a = 'y'>
+o Raising your pet
+<<#color ='ffffff' a = 'y'>
+
+Pets can grow up to level 50. Basically, when you log in and summon your pet, it earns Experience according to how long it stays summoned. On top of that, if you take your pet along when hunting, it loots items from the monsters you kill, and it earns some extra Experience for looting. (Monsters that carry no items give no Experience.)
+So the more you hunt with your pet, the more level Experience it earns. As its level rises, a pet transforms at certain stages and gains various abilities. Pets are never attacked by other players or monsters.
+
+Pet changes by stage
+
+< file = 'HM2_13' pos = 'LT'>
+
+
+< file = 'HM2_14' pos = 'L'>
+When your pet reaches level 10, you can give it an attribute of its own. Buy an enchant item (Red Drop) at a shop and use it to give the pet a random attribute; if the enchant fails, you can enchant again. Once an attribute has been given, however, it cannot be undone. Enchant items (Red Drop) are sold at ordinary shops.
+This attribute enchant is possible from the moment the pet reaches level 10 and must be done before it reaches level 11. If you do not enchant it, the pet earns no more Experience. (It cannot reach level 11.)
+
+
+<#color ='4080ff' a = 'y'>
+o Pet attribute values
+<<#color ='ffffff' a = 'y'>
+
+As its level rises, your pet's attribute value also increases. How much it increases depends on the attribute, and you can keep raising the attribute until level 50.
+
+
+<#color ='4080ff' a = 'y'>
+o Maximum pet attribute values
+<<#color ='ffffff' a = 'y'>
+
+
+< file = 'HM2_15' pos = 'LT'>
+
+
+
+<#color ='4080ff' a = 'y'>
+o Giving your pet a second ability (looting monster heads)
+<<#color ='ffffff' a = 'y'>
+
+Pets already have the ability to loot items from the monsters you kill. They do not pick the items up, however. From level 11 on, every level up gives you a chance to grant a second ability. This second ability lets the pet loot monster heads (Soul Stones) too. (It loots heads along with the items.)
+
+< file = 'HM2_16' pos = 'LT'>
+
+You get 1 chance per level up; press the star on the pet interface and, depending on the odds, it succeeds or fails. If it fails, you can try again at the next level. Once it succeeds, the star button is disabled.
+If you have not succeeded by level 50, you can never give your pet the second ability.
+Once you succeed in granting the second ability, your pet also earns Experience when it loots monster heads, so it grows even faster.
+
+
+<#color ='4080ff' a = 'y'>
+o Second enchant : granting a rare option
+<<#color ='ffffff' a = 'y'>
+
+When a Tier 1 pet reaches level 49, you can give it a second enchant. Unlike the first enchant (attribute) at level 10, it randomly gets one of the options found on ordinary items. This option does not grow with level. You can use the bonus from this option once the pet is mastered; it cannot be used at level 49.
+It is used the same way as the Red Drop, but with the Red Bird item instead.
+While your pet is growing, the attributes given to it apply to you just like an item's.
+Once you master your pet, it has its first ability, second ability, attribute, option and so on, and it eats its food more slowly.
+
+
+
+<#color ='80ff80' a = 'y'>
+2) The Slayer pet system
+<<#color ='ffffff' a = 'y'>
+
+The Slayer pet 'Centauro' is a mini armored vehicle equipped with a powerful A.I. Unlike the Wolfdog, these race pets cannot be raised by other races; only their own race can have them.
+Where the old Wolfdog could only loot items, these new pets also help by attacking or absorbing souls besides looting items. Their attack Damage and the amount of soul they absorb are small, but they are meant as support, and they add a new kind of fun to raising a pet.
+This third ability is gained the same way, after the second ability, looting monster heads, has been activated. You can enchant it once each time the pet levels up, using a Red Drop.
+- Slayer pets have the penalty of looting items more slowly than the old Wolfdog.
+- Slayer pets cannot be raised by players of level 40 or below.
+
+
+<#color ='4080ff' a = 'y'>
+o How to get one
+<<#color ='ffffff' a = 'y'>
+
+Race pets, which look and behave differently according to each race's nature, can only be obtained through a quest, and only by players with a Domain at level 40 or higher.
+
+
+<#color ='4080ff' a = 'y'>
+o NPC for quest applications and pet food sales
+<<#color ='ffffff' a = 'y'>
+ : Gruber (Warrior Guild 2F)
+
+The Slayer pet Centauro
+
+< file = 'HM2_17' pos = 'LT'>
+
+
+
+<#color ='4080ff' a = 'y'>
+o How to apply
+<<#color ='ffffff' a = 'y'>
+
+When the quest message is sent, a dialogue option for the quest becomes available at the NPC. Click it to receive the quest. The quest varies with your level, and you can apply for it and play it at any time. Players of level 40 or below, however, cannot apply for the quest.
+
+
+<#color ='4080ff' a = 'y'>
+o How it works
+<<#color ='ffffff' a = 'y'>
+
+
+< file = 'HM2_19' pos = 'L'>
+The quest gives you 1 hour and tells you which monsters to kill and how many. The monsters depend on the level of the player doing the quest.
+
+
+Kill all of those monsters within the time limit and the quest is complete. After completing the quest, visit the designated NPC to receive your pet.
+< file = 'HM2_20' pos = 'LT'>
+
+
+<#color ='4080ff' a = 'y'>
+o Tier 2 pet ability system
+<<#color ='ffffff' a = 'y'>
+
+As with Tier 1 pets, you can give the first attribute at level 11, and the second attribute (rare option) can be given at level 49. The second ability (looting heads) also works the same way.
+Tier 2 pets, however, get the chance to be given the ability to attack monsters from level 31.
+
+This ability can be given when the pet is level 31 or higher and has successfully been given the second ability.
+In other words, even if your pet is level 31 or higher, you cannot give it this ability unless the second ability was granted successfully.
+Likewise, even if your pet has the second ability, it does not qualify if it is below level 31.
+
+The Centauro's third ability is attacking monsters. Once a Centauro has its third ability, it attacks the monster your character is attacking.
+The items used to give Tier 2 pets their abilities are the Red Drop (first attribute) and the Red Bird (second attribute - level 49); revival works the same as for Tier 1 pets.
+For the item looting ability (level 11 or higher) and the monster attack ability (level 31 or higher), click the red star in the pet information window.
+
+
+
+
+Centauro information window
+
+< file = 'HM2_21' pos = 'L'>
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   Learn about pets that grow with you.
+		[==Sender==]
+		   1
+		[==Level Table==]
+		   32 80 -1 -1 -1 -1
+		[==Detail==]
+
+<#color ='80ff80' a = 'y'>
+1) Getting a common pet
+<<#color ='ffffff' a = 'y'>
+
+ The Junior WolfArch is the young of the WolfArch and lives in the wild. A Junior WolfArch does not attack by default, but if a player attacks it first, it dies or runs away. To get a pet, you must tame a Junior WolfArch and turn it into a Wolfdog.
+- Where Junior WolfArches appear
+Eslania (SE, NE), Limbo Castle (SE, NE), Drobeta (SE, NE), Mount Rodin (SE, NE), Perona Highway (SE, NE), Timore (SE, NE), Adam's Holy Land (center)
+- For this you need a taming item. You can buy it at an ordinary shop, and when you use it on a Junior WolfArch, there is a set chance that it follows you or runs away. If it runs away from you, you have failed to lure the Junior WolfArch; if you succeed, a leash is added to your inventory window. Click the leash to summon your pet. Open your character information window and you will find a wolf-shaped button. Press it to open the information window of the summoned pet.
+< file = 'HM2_30' pos = 'LT'>
+
+
+<#color ='4080ff' a = 'y'>
+o Items for luring pets
+<<#color ='ffffff' a = 'y'>
+
+Mini Meat Duration : 6 hours / Price : 5,000 geld
+< file = 'HM2_31' pos = 'LT'>
+
+Light Meat Duration : 22 hours / Price : 20,000 geld
+< file = 'HM2_32' pos = 'LT'>
+
+Half Meat Duration : 36 hours / Price : 60,000 geld
+< file = 'HM2_33' pos = 'LT'>
+
+Large Meat Duration : 50 hours / Price : 350,000 geld
+< file = 'HM2_34' pos = 'LT'>
+
+
+<#color ='80ffff' a = 'y'>
+The times above run in real time.
+The chance of luring a pet depends on the price of the item. Once you have lured a pet, you can use these items as its food.
+<<#color ='ffffff' a = 'y'>
+
+
+<#color ='80ff80' a = 'y'>
+o Feeding
+<<#color ='ffffff' a = 'y'>
+
+Pets die if they are not fed. Food is used up in real time, even while you are logged out or the pet is not summoned.
+Food can be bought at ordinary shops; with your pet summoned, right-click the food to feed it. Feeding replaces the food the pet already had. (It is swapped for the new food.)
+If your pet runs out of food, it dies. A dead pet cannot be summoned and can only be brought back with a revival item. If a pet has been dead for more than 1 week, however, it can never be revived.
+Look after your pet carefully so that it does not die.
+
+
+<#color ='4080ff' a = 'y'>
+o Pet food items : Mini Meat, Light Meat, Half Meat, Large Meat
+<<#color ='ffffff' a = 'y'>
+
+How long food lasts depends on the price of the item. Food items and luring items are the same thing: without a pet they serve as luring items, and once you have a pet you can use them as food.
+
+<#color ='4080ff' a = 'y'>
+o Revival item : Revival Set
+<<#color ='ffffff' a = 'y'>
+
+An item that can bring your pet back to life. The longer the pet has been dead, the lower the chance of reviving it.
+
+<#color ='4080ff' a = 'y'>
+o Raising your pet
+<<#color ='ffffff' a = 'y'>
+
+Pets can grow up to level 50. Basically, when you log in and summon your pet, it earns Experience according to how long it stays summoned. On top of that, if you take your pet along when hunting, it loots items from the monsters you kill, and it earns some extra Experience for looting. (Monsters that carry no items give no Experience.)
+So the more you hunt with your pet, the more level Experience it earns. As its level rises, a pet transforms at certain stages and gains various abilities.
+Pets are never attacked by other players or monsters.
+
+
+<#color ='80ff80' a = 'y'>
+o Pet changes by stage
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HM2_35' pos = 'LT'>
+
+
+<#color ='80ff80' a = 'y'>
+o Giving your pet an attribute
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HM2_36' pos = 'LT'>
+
+When your pet reaches level 10, you can give it an attribute of its own. Buy an enchant item (Red Drop) at a shop and use it to give the pet a random attribute; if the enchant fails, you can enchant again. Once an attribute has been given, however, it cannot be undone.
+Enchant items (Red Drop) are sold at ordinary shops.
+This attribute enchant is possible from the moment the pet reaches level 10 and must be done before it reaches level 11. If you do not enchant it, the pet earns no more Experience. (It cannot reach level 11.)
+
+<#color ='4080ff' a = 'y'>
+o Pet attribute values
+<<#color ='ffffff' a = 'y'>
+
+As its level rises, your pet's attribute value also increases. How much it increases depends on the attribute, and you can keep raising the attribute until level 50.
+
+<#color ='4080ff' a = 'y'>
+o Maximum pet attribute values
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HM2_37' pos = 'LT'>
+
+
+<#color ='4080ff' a = 'y'>
+o Giving your pet a second ability (looting monster heads)
+<<#color ='ffffff' a = 'y'>
+
+Once given the second ability, a pet can loot items from the monsters you kill (it does not pick the items up). From level 11 on, every level up gives you a chance to grant a second ability. This second ability lets the pet loot monster heads (Soul Stones) too. (It loots heads along with the items.)
+
+
+<#color ='4080ff' a = 'y'>
+o Granting the pet's second ability
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HM2_38' pos = 'LT'>
+
+You get 1 chance per level up; press the star on the pet interface and, depending on the odds, it succeeds or fails. If it fails, you can try again at the next level. Once it succeeds, the star button is disabled.
+If you have not succeeded by level 50, you can never give your pet the second ability.
+
+* Once you succeed in granting the second ability, your pet also earns Experience when it loots monster heads, so it grows even faster.
+
+
+<#color ='4080ff' a = 'y'>
+o Second enchant : granting a rare option
+<<#color ='ffffff' a = 'y'>
+
+At level 49 you can give your pet a second enchant. Unlike the first enchant (attribute) at level 10, it randomly gets one of the options found on ordinary items. This option does not grow with level. You can use the bonus from this option once the pet is mastered; it cannot be used at level 49.
+It is used the same way as the Red Drop, but with the Red Bird item instead.
+While your pet is growing, the attributes given to it apply to you just like an item's.
+Once you master your pet, it has its first ability, second ability, attribute, option and so on, and it eats its food more slowly.
+
+<#color ='4080ff' a = 'y'>
+o NPCs selling pet items
+<<#color ='ffffff' a = 'y'>
+ 
+Meat (food) seller NPCs : Carpatini Inside Limbo Castle, Griffith in Perona NE
+Revival Set seller NPCs : Carpatini Inside Limbo Castle, Griffith in Perona NE
+Red Drop seller NPC : Priya Inside Rasen Castle
+Red Bird seller NPC : Priya Inside Rasen Castle
+
+
+<#color ='80ff80' a = 'y'>
+2) Vampire pets
+<<#color ='ffffff' a = 'y'>
+
+Race pets are new pets made just for each race, with that race's character built in. Unlike the Wolfdog, these race pets cannot be raised by other races; only their own race can have them.
+Where the old Wolfdog could only loot items, these new pets also help by attacking or absorbing souls besides looting items. Their attack Damage and the amount of soul they absorb are small, but they are meant as support, and they add a new kind of fun to raising a pet.
+This third ability is gained the same way, after the second ability, looting monster heads, has been activated. You can enchant it once each time the pet levels up, using a Red Drop.
+* Vampire pets have the penalty of looting items more slowly than the old Wolfdog.
+* Vampire pets cannot be raised by players of level 40 or below.
+
+<#color ='4080ff' a = 'y'>
+
+o The Vampire pet - Stirge
+<<#color ='ffffff' a = 'y'>
+
+
+< file = 'HM2_39' pos = 'LT'>
+
+- Description
+A small flying monster that looks like a bat, though it looks less like a bat than a cross between an insect and a mammal. Despite its looks, its history is long, and it has been well known in the Vampire world since ancient times. It has a large stinger in its mouth, which it uses to drain its target's blood and sap its strength. It hates sunlight, so it often hides in dungeons and forests, and it takes a great deal of effort to get one.
+
+- Special ability
+Once its third enchant succeeds, it joins in attacking the monster or other-race character you are attacking.
+
+- How to get one
+Race pets, which look and behave differently according to each race's nature, can be obtained through a quest by players above a certain level (level 40).
+
+Level required for the Tier 2 pet quest : Vampire - level 40,
+
+* Vampire Tier 2 pet (Stirge) items
+Pack: Fresh blood taken from the Slayers' field hospitals. Well kept in its pack, this blood can bring the whole body's vigor
+back to life. A treat the cute Striges love.
+
+Stirge Bag : A product designed to carry Striges efficiently. Striges are dim-witted and often lose their owners and wander off, so the bag lets you shut them in when they are not needed.
+
+- Stirge food - Pack - Duration - Price
+
+Blood Pack Duration : 22 hours / Price : 40,000 geld
+< file = 'HM2_40' pos = 'LT'>
+
+Enriched Blood Pack Duration : 36 hours / Price : 120,000 geld
+< file = 'HM2_41' pos = 'LT'>
+
+Super Enriched Blood Pack Duration : 50 hours / Price : 550,000 geld
+< file = 'HM2_42' pos = 'LT'>
+
+*NPC for the Vampire Tier 2 pet quest and pet food sales
+ 
+Vampire - Carpatini (Inside Limbo Castle)
+
+*Tier 2 pet ability system
+As with Tier 1 pets, you can give the first attribute at level 11, and the second attribute (rare option) can be given at level 49. The second ability (looting heads) also works the same way.
+Tier 2 pets, however, get the chance to be given the ability to attack monsters from level 31.
+
+This ability can be given when the pet is level 31 or higher and has successfully been given the second ability.
+In other words, even if your pet is level 31 or higher, you cannot give it this ability unless the second ability was granted successfully.
+Likewise, even if your pet has the second ability, it does not qualify if it is below level 31.
+
+The Stirge's third ability is attacking monsters. It drains a monster's blood to damage it, but when the pet drains blood,
+it has no effect on your character's HP.
+The items used to give Tier 2 pets their abilities are the Red Drop (first attribute) and the Red Bird (second attribute - level 49); revival works the same as for Tier 1 pets.
+For the item looting ability (level 11 or higher) and the monster attack ability (level 31 or higher), click the red star in the pet information window.
+
+*Stirge information window
+< file = 'HM2_43' pos = 'LT'>
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   Learn about pets that grow with you.
+		[==Sender==]
+		   2
+		[==Level Table==]
+		   32 80 -1 -1 -1 -1
+		[==Detail==]
+
+<#color ='80ff80' a = 'y'>
+1) The common pet system
+<<#color ='ffffff' a = 'y'>
+
+The Junior WolfArch is the young of the WolfArch and lives in the wild. A Junior WolfArch does not attack by default, but if a player attacks it first, it dies or runs away. To get a pet, you must tame a Junior WolfArch and turn it into a Wolfdog.
+< file = 'HM2_53' pos = 'LT'>
+
+
+<#color ='4080ff' a = 'y'>
+o Where Junior WolfArches appear
+<<#color ='ffffff' a = 'y'>
+
+Eslania (SE, NE), Limbo Castle (SE, NE), Drobeta (SE, NE), Mount Rodin (SE, NE), Perona Highway (SE, NE), Timore (SE, NE), Adam's Holy Land (center)
+
+For this you need a taming item. You can buy it at an ordinary shop, and when you use it on a Junior WolfArch, there is a set chance that it follows you or runs away. If it runs away from you, you have failed to lure the Junior WolfArch; if you succeed, a leash is added to your inventory window. Click the leash to summon your pet. Open your character information window and you will find a dog-shaped button. Press it to open the information window of the summoned pet.
+< file = 'HM2_54' pos = 'LT'>
+
+
+<#color ='4080ff' a = 'y'>
+o Items for luring pets
+<<#color ='ffffff' a = 'y'>
+
+
+<#color ='ffff80' a = 'y'>
+Mini Meat Duration : 6 hours / Price : 5,000 zad
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HM2_55' pos = 'LT'>
+
+
+<#color ='ffff80' a = 'y'>
+Light Meat Duration : 22 hours / Price : 20,000 zad
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HM2_56' pos = 'LT'>
+
+
+<#color ='ffff80' a = 'y'>
+Half Meat Duration : 36 hours / Price : 60,000 zad
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HM2_57' pos = 'LT'>
+
+
+<#color ='ffff80' a = 'y'>
+Large Meat Duration : 50 hours / Price : 350,000 zad
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HM2_58' pos = 'LT'>
+
+
+<#color ='80ffff' a = 'y'>
+The chance of luring a pet depends on the price of the item. Once you have lured a pet, you can use these items as its food.
+<<#color ='ffffff' a = 'y'>
+
+
+
+<#color ='4080ff' a = 'y'>
+o Feeding
+<<#color ='ffffff' a = 'y'>
+
+Pets die if they are not fed. Food is used up in real time, even while you are logged out or the pet is not summoned.
+Food can be bought at ordinary shops; with your pet summoned, right-click the food to feed it. Feeding replaces the food the pet already had. (It is swapped for the new food.)
+If your pet runs out of food, it dies. A dead pet cannot be summoned and can only be brought back with a revival item. If a pet has been dead for more than 1 week, however, it can never be revived.
+Look after your pet carefully so that it does not die.
+
+<#color ='4080ff' a = 'y'>
+o Pet food items : Mini Meat, Light Meat, Half Meat, Large Meat
+<<#color ='ffffff' a = 'y'>
+
+How long food lasts depends on the price of the item. Food items and luring items are the same thing: without a pet they serve as luring items, and once you have a pet you can use them as food.
+
+<#color ='4080ff' a = 'y'>
+o Revival item : Revival Set
+<<#color ='ffffff' a = 'y'>
+
+An item that can bring your pet back to life. The longer the pet has been dead, the lower the chance of reviving it.
+
+< file = 'HM2_59' pos = 'LT'>
+
+
+<#color ='4080ff' a = 'y'>
+o Raising your pet
+<<#color ='ffffff' a = 'y'>
+
+Pets can grow up to level 50. Basically, when you log in and summon your pet, it earns Experience according to how long it stays summoned. On top of that, if you take your pet along when hunting, it loots items from the monsters you kill, and it earns some extra Experience for looting. (Monsters that carry no items give no Experience.)
+So the more you hunt with your pet, the more level Experience it earns. As its level rises, a pet transforms at certain stages and gains various abilities.
+Pets are never attacked by other players or monsters.
+
+
+<#color ='4080ff' a = 'y'>
+o Pet changes by stage
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HM2_35' pos = 'LT'>
+
+
+<#color ='4080ff' a = 'y'>
+o Giving your pet an attribute
+<<#color ='ffffff' a = 'y'>
+
+When your pet reaches level 10, you can give it an attribute of its own. Buy an enchant item (Red Drop) at a shop and use it to give the pet a random attribute; if the enchant fails, you can enchant again. Once an attribute has been given, however, it cannot be undone.
+Enchant items (Red Drop) are sold at ordinary shops.
+This attribute enchant is possible from the moment the pet reaches level 10 and must be done before it reaches level 11. If you do not enchant it, the pet earns no more Experience. (In other words, the pet cannot pass level 11.)
+< file = 'HM2_60' pos = 'LT'>
+
+As its level rises, your pet's attribute value also increases. How much it increases depends on the attribute, and you can keep raising the attribute until level 50.
+< file = 'HM2_37' pos = 'LT'>
+
+
+<#color ='80ff80' a = 'y'>
+o Giving your pet a second ability (looting monster heads (Soul Stones))
+<<#color ='ffffff' a = 'y'>
+
+Pets already have the ability to loot items from the monsters you kill (they do not pick the items up). From level 11 on, every level up gives you a chance to grant a second ability. This second ability lets the pet loot monster heads (Soul Stones) too. (It loots heads along with the items.)
+
+< file = 'HM2_61' pos = 'LT'>
+
+You get 1 chance per level up; press the star on the pet interface and, depending on the odds, it succeeds or fails. If it fails, you can try again at the next level. Once it succeeds, the star button is disabled.
+If you have not succeeded by level 50, you can never give your pet the second ability.
+
+<#color ='80ffff' a = 'y'>
+* Once you succeed in granting the second ability, your pet also earns Experience when it loots monster heads, so it grows even faster.
+<<#color ='ffffff' a = 'y'>
+
+
+
+<#color ='80ff80' a = 'y'>
+o Second enchant attribute
+<<#color ='ffffff' a = 'y'>
+
+When your pet reaches level 49, you can give it a second enchant. Unlike the first enchant (attribute) at level 10, it randomly gets one of the options found on ordinary items. This option does not grow with level. You can use the bonus from this option once the pet is mastered; it cannot be used at level 49.
+It is used the same way as the Red Drop, but with the Red Bird item instead.
+While your pet is growing, the attributes given to it apply to you just like an item's.
+Once you master your pet, it has its first ability, second ability, attribute, option and so on, and it eats its food more slowly.
+
+<#color ='80ff80' a = 'y'>
+o NPCs selling pet items
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HM2_62' pos = 'LT'>
+
+
+<#color ='80ff80' a = 'y'>
+2) Race pets
+<<#color ='ffffff' a = 'y'>
+
+Tier 2 race pets are new pets made just for each race, with that race's character built in.
+
+<#color ='4080ff' a = 'y'>
+o Ousters - Pixie (Pixie)
+<<#color ='ffffff' a = 'y'>
+
+In the game, the Pixie looks like a female fairy. Its wings are light and transparent, like an insect's. It is basically a spirit with no attribute, and when an Ousters attacks with summons, it stays at their side and helps by absorbing souls.
+
+<#color ='80ffff' a = 'y'>
+*Special ability : Once its third enchant succeeds, it absorbs souls from monsters that other players have hunted. The chance to grant the third ability comes only once the Pixie is level 30 or higher.
+<<#color ='ffffff' a = 'y'>
+
+< file = 'HM2_63' pos = 'LT'>
+
+Unlike the old Wolfdog, race pets can only be obtained by completing a quest. At level 40, a quest message is delivered to you.
+When the quest message is sent, a dialogue option for the quest becomes available at the NPC. Click it to receive the quest. The quest varies with your level, and you can apply for it and play it at any time. Players of level 40 or below, however, cannot apply for the quest. The quest gives you 1 hour and tells you which monsters to kill and how many. The monsters depend on the level of the player doing the quest. Kill all of those monsters within the time limit and the quest is complete. After completing the quest, visit the designated NPC to receive your pet. If you are already level 40 or higher, go to the NPC "Amata" in the village to receive the quest.
+For details of the quest and its rewards, see the picture below.
+ 
+< file = 'HM2_64' pos = 'LT'>
+
+< file = 'HM2_65' pos = 'LT'>
+
+< file = 'HM2_66' pos = 'LT'>
+
+< file = 'HM2_67' pos = 'LT'>
+
+< file = 'HM2_68' pos = 'LT'>
+
+< file = 'HM2_69' pos = 'LT'>
+
+< file = 'HM2_70' pos = 'LT'>
+{End}
+[===KeyWord===]
+Campaign
+[===MessageType===]
+    0
+	[===Event===]
+	  On first login
+		#SLAYERPAGE
+		[==Title==]
+		   Fraud investigation and recovery notice
+		[==Sender==]
+		   3
+		[==Level Table==]
+		   -1 -1 -1 -1 -1 -1
+		[==Detail==]
+* Period: September 15, 2004 - December 15, 2004 (3 months)
+* Types of fraud we can investigate and recover
+  - Trade fraud (lying about the amount in a trade)
+  - Impersonation fraud (deceiving with a character with a similar name)
+  - Storage character fraud
+      (posing as the item storage character of someone you know well)
+* Screenshot evidence for each type of fraud
+< file = 'HelpMessage_92' pos = 'C'>  
+
+  - Trade fraud : a screenshot of the agreed price, a screenshot of the price shown in the exchange window
+< file = 'HelpMessage_93' pos = 'C'>
+
+
+  - Impersonation fraud : a screenshot of the conversation where they lied about who they are,
+                     a screenshot of the item in the exchange window
+
+< file = 'HelpMessage_94' pos = 'C'>
+
+
+  - Storage character fraud : a screenshot of the conversation where they lied about who they are, a screenshot of the item in the exchange window
+* Recovery and seizure policy
+  - Handled under the hacking recovery policy
+  - Report during this period and get your items recovered to receive Gilles de Rais Beads
+  - Accounts that attempted fraud are permanently seized on all servers
+* How to report
+  - Report within 3 days of being defrauded
+  - Attach the relevant screenshots to your report
+  - Be sure to include your server, ID and character name (your own) in the report
+  - Report through the DKx Online homepage (dkxonline.com.cn)
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   Fraud investigation and recovery notice
+		[==Sender==]
+		   3
+		[==Level Table==]
+		   -1 -1 -1 -1 -1 -1
+		[==Detail==]
+* Period: September 15, 2004 - December 15, 2004 (3 months)
+* Types of fraud we can investigate and recover
+  - Trade fraud (lying about the amount in a trade)
+  - Impersonation fraud (deceiving with a character with a similar name)
+  - Storage character fraud
+      (posing as the item storage character of someone you know well)
+* Screenshot evidence for each type of fraud
+< file = 'HelpMessage_92' pos = 'C'>  
+
+  - Trade fraud : a screenshot of the agreed price, a screenshot of the price shown in the exchange window
+< file = 'HelpMessage_93' pos = 'C'>
+
+
+  - Impersonation fraud : a screenshot of the conversation where they lied about who they are,
+                     a screenshot of the item in the exchange window
+
+< file = 'HelpMessage_94' pos = 'C'>
+
+
+  - Storage character fraud : a screenshot of the conversation where they lied about who they are, a screenshot of the item in the exchange window
+* Recovery and seizure policy
+  - Handled under the hacking recovery policy
+  - Report during this period and get your items recovered to receive Gilles de Rais Beads
+  - Accounts that attempted fraud are permanently seized on all servers
+* How to report
+  - Report within 3 days of being defrauded
+  - Attach the relevant screenshots to your report
+  - Be sure to include your server, ID and character name (your own) in the report
+  - Report through the DKx Online homepage (dkxonline.com.cn)
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   Fraud investigation and recovery notice
+		[==Sender==]
+		   3
+		[==Level Table==]
+		   -1 -1 -1 -1 -1 -1
+		[==Detail==]
+* Period: September 15, 2004 - December 15, 2004 (3 months)
+* Types of fraud we can investigate and recover
+  - Trade fraud (lying about the amount in a trade)
+  - Impersonation fraud (deceiving with a character with a similar name)
+  - Storage character fraud
+      (posing as the item storage character of someone you know well)
+* Screenshot evidence for each type of fraud
+< file = 'HelpMessage_92' pos = 'C'>  
+
+  - Trade fraud : a screenshot of the agreed price, a screenshot of the price shown in the exchange window
+< file = 'HelpMessage_93' pos = 'C'>
+
+
+  - Impersonation fraud : a screenshot of the conversation where they lied about who they are,
+                     a screenshot of the item in the exchange window
+
+< file = 'HelpMessage_94' pos = 'C'>
+
+
+  - Storage character fraud : a screenshot of the conversation where they lied about who they are, a screenshot of the item in the exchange window
+* Recovery and seizure policy
+  - Handled under the hacking recovery policy
+  - Report during this period and get your items recovered to receive Gilles de Rais Beads
+  - Accounts that attempted fraud are permanently seized on all servers
+* How to report
+  - Report within 3 days of being defrauded
+  - Attach the relevant screenshots to your report
+  - Be sure to include your server, ID and character name (your own) in the report
+  - Report through the DKx Online homepage (dkxonline.com.cn)
+{End}
+[===KeyWord===]
+Event
+[===MessageType===]
+    0
+	[===Event===]
+	  On first login
+		#SLAYERPAGE
+		[==Title==]
+		   'Sparazzi' event notice
+		[==Sender==]
+		   3
+		[==Level Table==]
+		   -1 -1 -1 -1 -1 -1
+		[==Detail==]
+* Period: September 15, 2004 - October 15, 2004 (1 month)
+* Types of screenshots
+< file = 'HelpMessage_95' pos = 'C'>
+
+  - Premium trading : a screenshot of an ad for premium trading
+< file = 'HelpMessage_96' pos = 'C'>
+
+  - "I'll give you items" : 'Show me the items you have...'
+                            a screenshot of an ad like this
+  - Luring others into fraud : 'meant to set up a scam'
+                              a screenshot of an ad like this
+
+- Reward item
+  - 1 Bathory Pendant
+  -
+<#color ='ffff' a = 'y'>
+Rewards go only to the first person to report each case
+<<#color ='ffffff' a = 'y'>
+ 
+- Seizure policy
+  - Premium trading : handled under the seizure policy for real-money trading
+  - "I'll give you items" : chat banned for 7 days
+  - Luring others into fraud : chat banned for 7 days
+- How to report
+  - Report within 3 days of taking the screenshot
+  - Attach the relevant screenshots to your report
+  - Be sure to include your server, ID and character name (your own) in the report
+  - Report through the DKx Online homepage (dkxonline.com.cn)
+{End}
+		#VAMPIREPAGE
+		[==Title==]
+		   'Sparazzi' event notice
+		[==Sender==]
+		   3
+		[==Level Table==]
+		   -1 -1 -1 -1 -1 -1
+		[==Detail==]
+* Period: September 15, 2004 - October 15, 2004 (1 month)
+* Types of screenshots
+< file = 'HelpMessage_95' pos = 'C'>
+
+  - Premium trading : a screenshot of an ad for premium trading
+< file = 'HelpMessage_96' pos = 'C'>
+
+  - "I'll give you items" : 'Show me the items you have...'
+                            a screenshot of an ad like this
+  - Luring others into fraud : 'meant to set up a scam'
+                              a screenshot of an ad like this
+
+- Reward item
+  - 1 Bathory Pendant
+  -
+<#color ='ffff' a = 'y'>
+Rewards go only to the first person to report each case
+<<#color ='ffffff' a = 'y'>
+ 
+- Seizure policy
+  - Premium trading : handled under the seizure policy for real-money trading
+  - "I'll give you items" : chat banned for 7 days
+  - Luring others into fraud : chat banned for 7 days
+- How to report
+  - Report within 3 days of taking the screenshot
+  - Attach the relevant screenshots to your report
+  - Be sure to include your server, ID and character name (your own) in the report
+  - Report through the DKx Online homepage (dkxonline.com.cn)
+{End}
+		#OUTSTERSPAGE
+		[==Title==]
+		   'Sparazzi' event notice
+		[==Sender==]
+		   3
+		[==Level Table==]
+		   -1 -1 -1 -1 -1 -1
+		[==Detail==]
+* Period: September 15, 2004 - October 15, 2004 (1 month)
+* Types of screenshots
+< file = 'HelpMessage_95' pos = 'C'>
+
+  - Premium trading : a screenshot of an ad for premium trading
+< file = 'HelpMessage_96' pos = 'C'>
+
+  - "I'll give you items" : 'Show me the items you have...'
+                            a screenshot of an ad like this
+  - Luring others into fraud : 'meant to set up a scam'
+                              a screenshot of an ad like this
+
+- Reward item
+  - 1 Bathory Pendant
+  -
+<#color ='ffff' a = 'y'>
+Rewards go only to the first person to report each case
+<<#color ='ffffff' a = 'y'>
+ 
+- Seizure policy
+  - Premium trading : handled under the seizure policy for real-money trading
+  - "I'll give you items" : chat banned for 7 days
+  - Luring others into fraud : chat banned for 7 days
+- How to report
+  - Report within 3 days of taking the screenshot
+  - Attach the relevant screenshots to your report
+  - Be sure to include your server, ID and character name (your own) in the report
+  - Report through the DKx Online homepage (dkxonline.com.cn)
+{End}

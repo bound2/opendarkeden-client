@@ -1,0 +1,5 @@
+600 500
+Carissas
+I give you your first mission.
+You have grown strong enough to share the will of our people. We have received word that the leaders of the lesser vampires have begun moving strangely in the Temerie Holy Land, where the Relic was once kept. Rumor has it that some fragments of the Relic were damaged while it was being moved, and that they have not yet been found in the Temerie Holy Land. The Slayers and Vampires are said to have already begun searching, so we must hurry. Your task is to stop the Slayers and Vampires in their tracks. It may even come to all-out war, so you must join forces with your companions and fight together. Never forget that the holy spirit of nature is always with our people.\nWill you travel to the Temerie Holy Land?\n\n*You can also travel to the Temerie Holy Land through the NPC Ripati inside the Ousters Village.
+

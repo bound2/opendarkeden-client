@@ -1,0 +1,1 @@
+AR, SMG, SG and SR each need different bullets or magazines. If you try to load a magazine that does not match, it will always fail. Special silver-plated bullets can inflict wounds that Vampires cannot easily regenerate, but their drawback is the high price.

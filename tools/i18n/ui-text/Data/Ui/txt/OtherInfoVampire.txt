@@ -1,0 +1,23 @@
+View Other Character Interface
+
+This interface shows information about other Vampire characters of your own race in the game.
+
+Hotkey : right Control + left-click another Vampire character
+
+
+Character information shown
+---------------------------------------------
+The other Vampire information window shows the following character information.
+ 
+ The Vampire's picture
+ The Vampire's Rank mark
+ The picture of the Vampire's clan
+
+ Name      : The Vampire's name
+ Grade     : The Vampire's Rank
+ Clan      : The clan the Vampire belongs to
+ Level     : The Vampire's level
+ STR       : The Vampire's base strength and current strength
+ DEX       : The Vampire's base dexterity and current dexterity
+ INT       : The Vampire's base intelligence and current intelligence
+ Alignment : The Vampire's Alignment

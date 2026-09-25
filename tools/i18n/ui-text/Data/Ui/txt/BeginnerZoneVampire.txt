@@ -1,0 +1,5 @@
+600 500
+Vrykolakas
+Your first mission under the Blood Oath.
+The look in your eyes, thirsting for fresh human blood, tells me you have grown enough to carry out my orders. It is this: not long ago I learned that some fragments of the Relic still remain in the Temerie Holy Land. I hastily sent the leaders of the lesser vampires to investigate, but I hear the Slayers and Ousters resist more fiercely by the day and the search has run into trouble. You may consider this the first trial by which I judge you. Go to Temerie and sweep away every last one of those wretched Slayers and Ousters. Show me your loyalty through the Blood Oath. Will you travel to the Temerie Holy Land?\n\n*You can also travel to the Temerie Holy Land through the NPC Valerie inside Limbo Castle.
+

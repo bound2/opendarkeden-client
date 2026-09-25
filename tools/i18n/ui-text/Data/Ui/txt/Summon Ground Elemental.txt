@@ -1,0 +1,1 @@
+Makes a set area (5X5) around the spirit an invisibility zone. Characters within it stay invisible until they leave the area. A basic area support spell. Other races are not affected. Area and duration are determined by INT and skill level. Mastering the skill grants a substantial bonus.

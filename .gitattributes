@@ -30,6 +30,14 @@ tests/tools/*.pl text eol=lf
 # file, compared byte for byte and shared with the server repo's copies.
 tests/golden/*.hex text eol=lf
 
+# The translation tools and tables are read line by line by perl; the
+# generated English overrides of the packed UI text keep each archive
+# member's own line endings byte for byte (uitext_apply.pl), so no
+# conversion on either.
+tools/i18n/*.pl text eol=lf
+tools/i18n/*.tsv text eol=lf
+tools/i18n/ui-text/** -text
+
 # Executed by sh as a git hook after `git config core.hooksPath tools/git-hooks`;
 # a CRLF checkout would put a carriage return in every command.
 tools/git-hooks/* text eol=lf

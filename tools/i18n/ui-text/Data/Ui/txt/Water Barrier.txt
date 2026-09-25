@@ -1,0 +1,3 @@
+A barrier of water that reduces part of the damage from ranged physical attacks, area attacks and magic attacks. The damage reduction and duration depend on INT and skill level.
+
+A spell that summons the power of the spirit Undine to protect you from distant threats with an invisible barrier of water.

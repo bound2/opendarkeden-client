@@ -1,0 +1,2 @@
+%167
+Contains the smallest dose of mana ampoule. Restores about 10 MP.

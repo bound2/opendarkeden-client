@@ -1,0 +1,26 @@
+Item Exchange Interface
+
+This interface lets players exchange money or goods with each other safely. When you trade items through this interface, you can see the items or money the other player offers, which prevents the item scams that happen so often in games. If you are scammed while trading items with another player without using the Item Exchange Interface, the items will not be restored, so always use this interface when you trade items.
+ 
+How to Use the Item Exchange Interface
+--------------------------------------
+
+1. Choosing a trade partner ( ALT + left-click )
+
+Hold the ALT key and left-click the character you want to trade with, and a window appears on their screen saying a trade is being requested. If they accept, the Item Exchange Interface opens.
+
+2. Choosing items (money) to trade
+
+The Item Exchange Interface in DKx Online works a little differently from other games. In most games you drag and drop (Drag & Drop) the items you want to trade from your inventory into the trade window so the other player can see them; in DKx Online, you click the items in your own inventory that you want to trade, and only those items are shown to the other player. (Don't worry, not every item gets traded.)
+
+When the Item Exchange Interface opens, all the items in your inventory are shown. Right-click the items you want; their borders are highlighted and they appear on the other player's screen.
+
+To trade money, press the money button under the inventory and enter the amount you want; the amount then appears on the other player's screen.
+
+3. Completing or canceling the trade
+
+If the money or items you offered and those the other player offered seem fair, press the OK button. If the other player also agrees and presses OK, the trade goes through. If you do not like what the other player offered, just press CANCEL and the trade is canceled.
+
+If you press OK because you like the items offered, and the other player then changes their mind and takes back items or money, the trade is canceled automatically, so you have nothing to worry about.
+
+If items or money are put up for trade and then taken back, the OK button is disabled for 5 seconds to prevent trade scams.

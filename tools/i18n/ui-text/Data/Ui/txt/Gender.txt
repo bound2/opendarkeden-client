@@ -1,0 +1,1 @@
+Gender : Choose your character's gender. (Male or Female. Ousters cannot choose a gender.)

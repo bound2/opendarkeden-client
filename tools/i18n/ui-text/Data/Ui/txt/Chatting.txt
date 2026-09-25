@@ -1,0 +1,49 @@
+Chatting Interface
+
+This interface lets you talk with other players in the game. Through it you can talk with players on the same screen, players in the same zone and players on other servers.
+
+How to Use the Chatting Interface
+-------------------------------
+There are two chat modes, Normal Chat mode and Enter Chat mode, which you can choose in the Options.
+
+Normal Chat mode: the chat window is always on screen and you can type at any time.
+Enter Chat mode: normally you cannot chat; press Enter to open the input box and chat.
+
+Click the edge of the chat window to shrink or enlarge it. With the Translucent and Auto-Hide buttons to the right of the input box you can make the window translucent, or activate or hide the window currently shown.
+
+In Enter Chat mode the window becomes active when you press Enter to switch to input mode, and inactive when you press Enter again with nothing typed to leave input mode.
+
+In Normal Chat mode the window becomes active when you type, and inactive after 5 seconds without typing.
+
+ - Chat hotkeys
+
+  Normal chat : Control+C  Normal chat mode. Talk with and read the players on your screen.
+    Zone chat : Control+Z  Zone chat mode. Talk with every player in the zone your character is in. After sending a message you must wait 15 seconds before sending again.
+Whisper chat : Control+W  Whisper mode. You can whisper to characters on other servers as well as your own. Activate this mode, enter the name of the character to whisper to, then press Enter and write your message.
+  Party chat : Party chat mode. Talk only with the members of your party.
+  Guild chat : Control+G  Guild chat mode. Talk only with your guild members.
+
+ * On computers with a private IP behind a shared internet connection, whispers and party chat may not always get through.
+
+The small round buttons to the right of each chat mode show or hide all the conversation in that mode.
+
+ * With the buttons to the left of the chat input box you can pick a chat color, insert special characters or switch between Korean and English input.
+
+The following commands can be typed in the chat box.
+
+              Shout : Everyone in the current zone hears what you say. You can also click the ! button to the right of the chat window.
+                       ex> !message
+          Whisper : Talk so that only one person hears you. Click the ear-shaped button to the right of the chat window for a list of the people you whispered to before, which makes whispering easier.
+                       ex> /ID message
+           Ignore : Stop hearing what a specific person says.
+                       ex> @ignore ID
+      Stop ignoring : Hear a specific person again.
+                       ex> @accept ID
+      Ignore everyone : Stop hearing what anyone says.
+                       ex> @ignore
+ Stop ignoring everyone : Hear everyone again.
+                       ex> @accept
+         Language filter : Removes bad language such as swearing. When someone swears, it is shown as special characters.
+                       ex> @filter
+    Filter off : Turns the language filter off. (You can also set this in the Options.)
+                       ex> @what?

@@ -1,0 +1,3 @@
+A short-range attack spell that wraps the target in streams of water; damage is determined by INT and skill level. Range depends on skill level.
+
+A spell that summons Sicuel, a water spirit said to have the true form of a wolf with webbed hands. A warlike spirit, it never forgives anyone who carelessly intrudes on its territory.

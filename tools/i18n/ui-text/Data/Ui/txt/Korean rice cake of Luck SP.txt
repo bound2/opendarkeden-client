@@ -1,0 +1,2 @@
+%987
+An enhancement item that adds a Luck +3 option to equipment with no options. Unused rice cakes will be deleted from your inventory when the Chuseok event ends.

@@ -1,0 +1,3 @@
+A mid-range attack spell that hurls sharp saw blades; damage is determined by INT and skill level. Delay and range depend on skill level.
+
+Crowell, the Spirit King of the earth, needs a separate medium when his power is summoned. To borrow his physical force, you must therefore cast a double spell that also summons sharp minerals from deep underground to hold his power.

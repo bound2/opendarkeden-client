@@ -1,0 +1,2 @@
+%555
+An improved version of the original Blue Drop that can Enchant items with a higher probability. Keep in mind, however, that the item's options may be lowered or the item itself may vanish.

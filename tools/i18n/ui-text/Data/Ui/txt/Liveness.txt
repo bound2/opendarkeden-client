@@ -1,0 +1,4 @@
+Soldiers seasoned over many years came to receive special training to build up not only their marksmanship but also their stamina.
+Through this training they gained the toughness to fight the enemy anywhere without taking cover.
+It is a passive skill that raises your HP each time your domain level reaches certain stages, and
+it only applies while you are using a gun.

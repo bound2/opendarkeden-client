@@ -1,0 +1,3 @@
+A spell that restores the HP and EP of yourself or an ally; the amount restored is determined by INT and skill level. Delay and casting range depend on skill level.
+
+Through the protection of the Nymph, a water spirit, you can bring a healing touch to those who need its help.

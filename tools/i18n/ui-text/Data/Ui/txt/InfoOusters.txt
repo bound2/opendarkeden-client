@@ -1,0 +1,105 @@
+Information Interface
+
+The Ousters information window shows the detailed information and current state of your Ousters character. It is split into a Character tab and a Skill tab.
+
+Character tab
+
+Hotkey : Control+I
+
+Shows your character's stats and guild information, with all kinds of detailed stat information about your character. You can see everything from your character's face to the various stats and Experience, and, if you belong to a guild, the guild name and guild mark.
+
+Skill tab
+
+Hotkey : Control+K
+
+Shows the Skill Points and skill levels of the skills your character has learned.
+
+Click the 'Display translucent' button at the bottom of the window to make the window translucent and show what it covers.
+
+Grade1 tab
+
+Lets you choose and review the rank skills of each Rank, from the Yesod Rank to the Tiferet Rank.
+
+Grade2 tab
+
+This feature is not supported yet.
+
+Character information
+--------------------------------------
+The Ousters character information window shows the following.
+
+ Name        : The Ousters' name
+ Guild       : The name of the guild the Ousters belongs to
+ Level       : How far the Ousters has grown. The higher the level, the more stats the character has, the more spells it can use and the more skilled it becomes at magic.
+ Exp         : Ousters gain Experience by hunting monsters, which raises their level and grants bonus stat points to grow the character. The bar under Experience shows how much of the Experience needed for the next level has been gathered so far.
+ Alignment   : The Ousters' Alignment, showing how good or evil the character is. It falls into three broad kinds: GOOD, NEUTRAL and EVIL.
+
+ STR         : Strength is the stat for your character's physical toughness. The higher it is, the higher your HP, Damage and Protection.
+ DEX         : Dexterity is the stat for your character's quickness. The higher it is, the higher your ToHit and Defense.
+ INT         : Intelligence is the stat for your character's mental ability. The higher it is, the higher your spell success rate and the less SP your spells cost.
+
+ HP          : The stat that stands for life; when HP reaches 0 you die. HP depends on STR.
+ EP          : EP exists only for Ousters and is needed to use special techniques and elemental magic. When EP runs low, you are limited in using special techniques and magic. EP is a secondary stat that depends on INT.
+ ToHit       : This stat shows attack accuracy and depends on DEX.
+ Damage      : This stat shows how much harm you can deal and depends on STR.
+ Defense     : This stat shows your defense against To Hit and is increased by DEX and items.
+ Protection  : This stat shows your defense against Damage and is increased by items.
+
+ BonusPoint  : Leveling up gives you bonus points, and a + button appears next to Str, Dex and Int so you can raise the stat you want.
+
+ AttackSpeed : The higher the value, the faster you attack.
+
+ TIP! : To use your own picture instead of the default image in the character information window, click the image area of the window and pick a BMP or JPG file.
+
+Skill information
+--------------------------------------
+Ousters grow through the Skill Point system: as the character levels up it receives Skill Points, which it can spend to learn new spells of its choice or raise the level of spells it already knows.
+Elemental spells of the Fire, Water and Earth schools can be learned freely in whatever direction you like.
+
+The Ousters skill window shows the skills arranged as a tree; click a skill to see its detailed information and decide whether to learn it.
+
+1. Magic school tabs
+
+The Combat skill and Elemental Magic buttons at the top show the Ousters' direction of growth (physical attack or magic).
+
+Combat skill holds the skills for physical attacks, while Elemental Magic currently holds the Fire, Water and Earth spells, with more planned. Click a button to see its list of spells.
+
+3. Spell icon list
+The list of spell icons in the currently selected spell tier. Hold the mouse over a spell icon to see a tooltip with brief information about the spell. Click a spell icon to see the spell's full details.
+
+
+Lower rank skill information (Grade1)
+--------------------------------------
+Lower rank skill information (Grade1) shows your current rank level, rank Experience, the rank skills you have learned and information on the other rank skills.
+
+From the Yesod Rank to the Tiferet Rank, each time you rise one Rank you can choose one of that Rank's rank skills.
+Click a rank skill icon shown in green to learn that rank skill; at the same time, the other skills of that Rank can never be learned.
+Rank skills you have learned are shown in sky blue, rank skills you can no longer learn are shown dark, and rank skills your Rank is still too low for are shown in gray.
+
+
+Skills available at the Yesod Rank
+-Life Energy      : Increases HP
+-Elemental Energy : Increases EP
+-Wind Sense       : Increases Defense
+-Wood Skin        : Increases Protection
+-Homing Eye       : Increases To Hit
+
+Skills available at the Hod Rank
+-Swift Arm       : Increases attack speed
+-Stone Maul      : Increases combat skill Damage
+-Fire endow      : Increases Fire attack spell Damage
+-Water endow     : Increases Water attack spell Damage
+-Earth endow     : Increases Earth attack spell Damage
+
+Skills available at the Netzach Rank
+-Anti Acid skin      : Increases resistance to Acid spells
+-Anti Bloody skin    : Increases resistance to Bloody spells
+-Anti Curse skin     : Increases resistance to Curse spells
+-Anti Poison skin    : Increases resistance to Poison spells
+
+
+Skills available at the Tiferet Rank
+-Bless of Nature    : Reduces the EP cost of skills
+-Life Absorb        : Increases HP steal
+-Elemental Absorb   : Increases EP steal
+-Mystic Rule        : Increases Luck

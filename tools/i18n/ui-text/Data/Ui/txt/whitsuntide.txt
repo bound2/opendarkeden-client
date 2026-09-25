@@ -1,0 +1,5 @@
+A skill that revives at once all characters lying near death within a set range. Revived characters gain increased magic resistance for a set time.
+
+
+
+

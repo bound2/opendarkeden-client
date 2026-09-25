@@ -1,0 +1,2 @@
+%195
+A scroll for a single person, sold by the priest NPC in the cathedral. It provides in scroll form the Portal spell, which lets you travel between Zones.

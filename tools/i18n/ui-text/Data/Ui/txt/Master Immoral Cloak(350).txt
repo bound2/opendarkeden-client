@@ -1,0 +1,8 @@
+%1046
+Master Immoral Cloak(350) is a coat usable by male Vampires of Advancement level 350 or higher. This item is obtained by enchanting an existing Advancement Coat with a Reliance Drop.
+
+< Hidden Option >
+Physical Damage +20
+Magic Damage +20
+Physical Defense +140
+Magic Defense +140

@@ -1,0 +1,12 @@
+%219
+This white star, a fitting emblem of the greatest purity, is said to be exchangeable for money, which everyone needs.
+
+The White Star is an event item that can be exchanged for money with the NPCs below, depending on your race and location.
+
+ Field Headquarters NPC : Kaiser
+ Warrior Guild NPC : Conan
+ Soldier Guild NPC : Smith
+ Priest Guild NPC : Stoyanov
+ Vampire Village NPC : Vrykolakas
+
+* When you have 1 or more stars, go to Kaiser, Conan, Smith, Stoyanov, Vrykolakas or the like, select 'I want to exchange my stars for money' and left-click to exchange this item for money.

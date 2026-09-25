@@ -1,0 +1,3 @@
+An area attack spell that turns an area into a sea of fire; damage is determined by INT and skill level. Duration is determined by INT and skill level. Delay decreases with DEX, and casting range increases with skill level.
+
+A spell that summons the sun's prominence through the power of Nitras, the spirit of light. It turns an area into a place covered in fire, letting enemies caught in the flames feel the heat of a solar prominence firsthand. It is an area spell: characters within range keep taking damage until they leave it. (It cannot attack your own race.)

@@ -36,6 +36,7 @@
 #include "MGameStringTable.h"
 #include "MNPCScriptTable.h"
 #include "MNPCScriptTableEnglish.h"
+#include "MNPCTableEnglish.h"
 #include "ModifyStatusManager.h"
 #include "AcceleratorDef.h"
 #include "KeyAccelerator.h"
@@ -791,6 +792,13 @@ InitInfomation()
 	(*g_pNPCTable).LoadFromFile(NPCTable2);
 	NPCTable2.close();
 
+	// NPC.inf ships its names and role descriptions in Korean, so in
+	// English the built-in translation is applied over it.
+	if (UseEnglishText(g_pFileDef))
+	{
+		ApplyEnglishNPCTable();
+	}
+
 	//---------------------------------------------------------------------
 	//
 	//    NPC Script에 대한 정보 설정
@@ -898,6 +906,13 @@ InitInfomation()
 
 	g_pSkillInfoTable->LoadFromFileServerSkillInfo( serverSkillInfoFile );
 	serverSkillInfoFile.close();
+
+	// The display names in SkillInfo.inf are in the data's own language;
+	// the English client shows the skills under their English names.
+	if (UseEnglishText(g_pFileDef))
+	{
+		g_pSkillInfoTable->UseEnglishNames();
+	}
 
 	//---------------------------------------------------------------------
 	//

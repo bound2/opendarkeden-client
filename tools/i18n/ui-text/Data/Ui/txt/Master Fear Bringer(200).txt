@@ -1,0 +1,6 @@
+%1033
+Master Fear Bringer(200) is a sword usable by Slayers of Advancement level 200 or higher. This item is obtained by enchanting an existing Advancement Sword with a Reliance Drop.
+
+< Hidden Option >
+Physical Damage: +80
+Magic Damage: +80

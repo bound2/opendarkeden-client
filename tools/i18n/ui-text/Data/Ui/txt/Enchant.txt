@@ -1,0 +1,1 @@
+Devout priests can use their power of blessing to raise an item's abilities for a set time. The more valuable the item, the more mana it costs; the higher your proficiency, the longer the duration and the bigger the stat bonus.

@@ -1,0 +1,3 @@
+A passive skill that has a set chance to disrupt the target's attacks; soul stone slots 1, 2 and 3 must hold fire, water and earth, in that order. Duration depends on DEX and the success rate on spirit level.
+
+A skill that infuses your chakram with the power of the Leprechaun, spirit of chaos. At a set rate, every melee attack with the chakram disrupts the target's attacks. An afflicted character or monster briefly cannot attack or cast spells, and cannot summon a Motorcycle either.

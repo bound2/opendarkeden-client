@@ -1,0 +1,1 @@
+MP/EP : Magic power / spirit power (MP/EP) reflects your character's willpower and magical ability. When MP/EP reaches 0, you cannot use any magic.

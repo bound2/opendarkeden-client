@@ -1,0 +1,17 @@
+Storage Interface
+
+You can buy a Storage from the storage NPC and keep the items you want to store in it. The Storage window looks like the shop interface.
+
+The Storage interface is split into Storage 1, 2, 3, 4 and 5 so you can keep a larger number of items. To use every Storage, however, you must buy all 5.
+
+Using Storage
+--------------------
+
+1. Viewing your Storage
+First buy a Storage from the NPC in charge of storage, then talk to the NPC and choose the line about storing items; the Storage interface and the inventory interface open.
+
+2. Storing or retrieving items
+Click the item you want to store and put it in the Storage to store it.
+In the same way, pick up a stored item with the mouse to bring it back to your inventory.
+
+Shift+left-click an item in the inventory to move it to Storage, and Shift+left-click an item in Storage to move it to the inventory.

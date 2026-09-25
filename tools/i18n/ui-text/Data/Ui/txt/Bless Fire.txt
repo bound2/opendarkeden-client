@@ -1,0 +1,1 @@
+A passive skill that adds fire damage at a set chance. It only works with fire soul stones in slots 1 and 2 and an earth soul stone in slot 3. The damage bonus depends on DEX and STR, and the success rate on spirit level.

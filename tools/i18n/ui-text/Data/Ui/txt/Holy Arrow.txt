@@ -1,0 +1,1 @@
+A skill that fires holy power in the form of an arrow to damage the enemy. It can also attack at long range.

@@ -1,0 +1,3 @@
+A long-range attack spell that fires a fireball; damage is determined by INT and skill level. Delay and range depend on skill level.
+
+A spell aided by Ignis, a greater fire spirit, and an advanced form of Kasa's Arrow. Taught by Ignis, it can strike powerfully at long range.

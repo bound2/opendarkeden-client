@@ -1,0 +1,6 @@
+Combat Help
+
+In DKx Online, three different races - Slayers, Vampires and Ousters - can fight in many ways, using the various skills and magic of each class.
+Slayers cannot grow their characters without a weapon equipped. Vampires and Ousters also use weapons, but their growth is not
+restricted by them.
+Hold the mouse button on a monster to keep attacking until it dies. Click with Caps Lock on to automatically attack monsters within attack range around you.

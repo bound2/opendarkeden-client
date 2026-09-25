@@ -1,0 +1,2 @@
+%180
+A stick-shaped throwing grenade whose fuse is set off by striking it before it is thrown. A bomb made from C4, powerful enough to devastate 5 tiles around it. (For details on C4, read the bomb material description.)

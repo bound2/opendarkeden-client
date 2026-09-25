@@ -1,0 +1,4 @@
+A cast skill that temporarily raises your Defense; the Defense bonus increases with skill level.
+Duration increases with DEX and skill level, and the delay decreases with DEX.
+
+A skill that attunes your mind to Merlo, the spirit of sorrow among the spirits of the mind. Attuning your own grief and sorrow with Merlo, you give Merlo the form of a bluish shield that protects you.

@@ -1,0 +1,6 @@
+%1034
+Master Angle Cutter(100) is a blade usable by Slayers of Advancement level 100 or higher. This item is obtained by enchanting an existing Advancement blade with a Reliance Drop.
+
+< Hidden Option >
+Physical Damage: +40
+Magic Damage: +40

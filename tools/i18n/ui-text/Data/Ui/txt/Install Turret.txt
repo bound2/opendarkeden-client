@@ -1,0 +1,4 @@
+A skill that creates a mountable Vulcan cannon which, fixed in place, lays down heavy rapid fire and protects you for a set time. Its drawback is that you cannot leave the spot for a set time after creating it.
+
+
+

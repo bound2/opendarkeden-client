@@ -1,0 +1,112 @@
+Information Interface
+
+The Slayer information window shows the detailed information and current state of your Slayer character. It is split into a Character tab and a Skill tab.
+
+Character tab
+
+Hotkey : Control+I
+
+Shows your character's stats and guild information, with all kinds of detailed stat information about your character. You can see everything from your character's face to the various stats and Fame, and, if you belong to a guild, the guild name and guild mark.
+
+Skill tab
+
+Hotkey : Control+K
+
+Shows the Domain Experience and levels of the skills your character has learned.
+
+Click the 'Display translucent' button at the bottom of the window to make the window translucent and show what it covers.
+
+Grade1 tab
+
+Lets you choose and review the rank skills of each Rank, from the Private Rank to the Cainal Rank.
+
+Grade2 tab
+
+This feature is not supported yet.
+
+
+Character information
+--------------------------------------
+The Slayer information window shows the following character information.
+
+ Name        : The Slayer's name
+ Guild       : The name of the guild the Slayer belongs to
+ Fame        : The Slayer's Fame, showing how many monsters they have killed.
+ Alignment   : The Slayer's Alignment, showing how good or evil the character is. It falls into three broad kinds: GOOD, NEUTRAL and EVIL.
+
+ STR         : Strength is the stat for your character's physical toughness. The higher it is, the higher your HP, Damage and Protection.
+ DEX         : Dexterity is the stat for your character's quickness. The higher it is, the higher your ToHit and Defense.
+ INT         : Intelligence is the stat for your character's mental ability. The higher it is, the higher your MP and spell success rate.
+
+ HP          : The stat that stands for life; when HP reaches 0 you die. HP depends on STR.
+ MP          : MP exists only for Slayers and is needed to use special techniques and magic. When MP runs low, you are limited in using special techniques and magic. MP is a secondary stat that depends on INT.
+
+ ToHit       : This stat shows attack accuracy and depends on DEX and skill level.
+ Damage      : This stat shows how much harm you can deal and depends on STR and skill level.
+ Defense     : This stat shows your defense against To Hit and is increased by DEX and items.
+ Protection  : This stat shows your defense against Damage and is increased by items.
+
+ AttackSpeed : The higher the value, the faster you attack.
+
+ TIP! : To use your own picture instead of the default image in the character information window, click the image area of the window and pick a BMP or JPG file.
+
+The Slayer skill window is split into the skill Domain buttons at the top and the skill icon list at the bottom.
+
+
+Skill information
+--------------------------------------
+Slayers grow through the skill system. Choose one or more of the five Domains - Sword, Blade, Gun/Bomb, Heal and Enchant - and grow a Domain by repeating the actions that belong to it; when the Domain reaches certain levels, you earn the right to learn new techniques or spells from NPCs. Simply swinging a sword raises your Domain skill, but repeating more advanced techniques or spells makes the Domain grow faster.
+
+1. Skill (magic) Domain buttons
+The Sword, Blade, Gun/Bomb, Heal and Enchant tabs at the top are the skill (magic) Domains. Each Domain currently holds 13 ~ 17 skills; click a button to see the list. Hold the mouse over a button and you will see a tooltip showing
+your skill in that Domain.
+
+2. Skill tiers : skill (magic) Domains are divided into five tiers in all, from Apprentice, meaning you have just started in the Domain, to Grand Master, meaning you have mastered it completely. Press the left and right arrows to see the skills of the previous or next tier.
+
+Apprentice   : Level 1 ~ 24
+Adept        : Level 25 ~ 49
+Expert       : Level 50 ~ 74
+Master       : Level 75 ~ 99
+Grand Master : Level 100
+
+3. Skill icon list
+The list of skill icons in the currently selected skill tier. Hold the mouse over a skill icon to see a tooltip with brief information about the skill. Click a skill icon to see the skill's full details; the bar under a skill icon shows the skill's Experience at its current level.
+
+NOTE: The growth of lower skills is limited by the level of the Domain they belong to. Skills in a given tier can only grow up to the level of the next tier; to grow them further you must raise the level of the Domain. In other words, skills in a tier can only be grown up to the Domain's current tier + 1.
+
+ex> Suppose a Cleric of the Enchant Domain has learned Create Holy Water, an Apprentice skill, and his Domain level is 10. He can only grow Create Holy Water up to Adept (level 49 at most). To grow Create Holy Water to level 50 or higher, he must raise his Enchant Domain to level 25.
+
+
+Lower rank skill information (Grade1)
+--------------------------------------
+Lower rank skill information (Grade1) shows your current rank level, rank Experience, the rank skills you have learned and information on the other rank skills.
+
+From the Private Rank to the Cainal Rank, each time you rise one Rank you can choose one of that Rank's rank skills.
+Click a rank skill icon shown in green to learn that rank skill; at the same time, the other skills of that Rank can never be learned.
+Rank skills you have learned are shown in sky blue, rank skills you can no longer learn are shown dark, and rank skills your Rank is still too low for are shown in gray.
+
+
+Skills available at the Sergeant Rank
+-Deadly spear   : Increases Critical attack power
+-Behemoth armor : Increases Defense
+-Dragon eye     : Increases To Hit
+-Immortal heart : Increases HP
+-Reliance brain : Increases MP
+
+Skills available at the Fiscel Rank
+-Slaying knife : Increases Damage
+-Hawk Wing     : Increases attack speed
+-Holy smashing : Increases Enchant attack skill Damage
+-Soul smashing : Increases Heal attack skill Damage
+
+Skills available at the Litena Rank
+-Sapphire bless : Increases Acid resistance
+-Ruby bless     : Increases Bloody resistance
+-Diamond bless  : Increases Curse resistance
+-Emerald bless  : Increases Poison resistance
+
+Skills available at the Cainal Rank
+-Magic brain  : Reduces the MP cost of skills
+-Wight hand   : Increases HP steal
+-Seiren hand  : Increases MP steal
+-Fortune hand : Increases Luck

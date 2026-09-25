@@ -1,0 +1,1 @@
+A mastery skill that strengthens Reactive Armor; once learned, casting it on yourself also works as a shield that reduces damage. The damage reduction is affected by the levels of both this passive skill and the original skill, and as this skill's level rises, the Defense and Evasion boost of the original skill also grows.

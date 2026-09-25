@@ -1,0 +1,1 @@
+A long-range area attack that throws a chakram charged with electricity. It strikes a 5 * 5 area at the target point, with damage falling off from the center tile. It scales with STR and DEX, and range depends on skill level. Mastering the skill grants a substantial bonus.

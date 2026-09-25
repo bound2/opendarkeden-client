@@ -1,0 +1,1 @@
+A passive skill that blocks 100% of an opponent's attack at a set chance; soul stone slots 1 and 2 must hold the water attribute and slot 3 the earth attribute. The success rate depends on spirit level.

@@ -1,0 +1,1 @@
+A spell that spreads acidic liquid on the ground. It vanishes after a set time, but until then it deals acid damage to everyone who passes through the area. Item durability also wears down, but once you have crossed the area you take no further acid damage.

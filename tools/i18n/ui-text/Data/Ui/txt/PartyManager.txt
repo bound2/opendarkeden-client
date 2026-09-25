@@ -1,0 +1,41 @@
+Party Manage Interface
+
+Hotkey : Control + P
+
+This interface manages the parties players form with each other. Through it you can join or leave a party or expel other party members.
+ 
+The top of the window shows the face, name and HP bar of the character you are playing. The other party members' information is shown below yours; hover the cursor over it to see their zone name and coordinates.
+
+ * On computers with a private IP behind a shared internet connection, party member information may not always get through.
+
+How to Use the Party Manage Interface
+--------------------------------------
+
+1. Choosing a party partner (right ALT + left-click)
+
+Hold the right ALT key and left-click the character you want to party with, and an icon appears at the bottom left of their screen to show a party request is coming in. Clicking the icon brings up a message; if they accept the request, the party is formed and the management window opens.
+
+2. Leaving a party
+
+Press the X-shaped button to the right of your own character information in the management window to leave.
+
+3. Expelling other party members
+
+Click the X-shaped button to the right of another member's information in the management window to expel that member. You can only expel other members once a certain time has passed since you joined the party.
+
+4. Refusing party requests
+
+If you do not want to party with anyone, click the hand-shaped icon at the bottom of the management window to refuse party request messages.
+
+5. Telling party members apart and finding them
+
+An HP bar is shown above the heads of your party members, and when one is away from you, an arrow appears at the edge of the screen pointing their way. (It does not appear when the member is in another zone.)
+When you are in the same zone, you can find your party members' positions on the minimap.
+
+6. Chatting between party members
+
+Party members can chat with each other by selecting party chat in the chat window.
+
+7. Viewing party members' faces enlarged
+
+Hold the mouse over a face in the party window for 3 seconds to see a larger face.

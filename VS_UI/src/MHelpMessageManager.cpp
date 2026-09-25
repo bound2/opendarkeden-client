@@ -33,6 +33,10 @@ bool MHelpMessage::IsEligible(int race, int level, long long attributes) const
 namespace {
 constexpr int MaxEntries = 65536;
 constexpr std::string_view LevelTag = "[==Level 조건표==]";
+// The same marker as the English overrides of helpmessage.txt spell it
+// (tools/i18n/ui-text), which are ASCII throughout. Files are written with
+// the original marker so that any client reads them.
+constexpr std::string_view LevelTagEnglish = "[==Level Table==]";
 bool Space(char c) { return c == ' ' || c == '\t' || c == '\r'; }
 std::string_view Trim(std::string_view value)
 {
@@ -129,7 +133,7 @@ bool Parse(std::string_view text, std::vector<MString>& senders, std::vector<MHe
 					if ((fields & 2) || !lines.Next(line) || !Integer(line, message.m_iSender[race]) ||
 						message.m_iSender[race] < -1 || message.m_iSender[race] >= senderCount) return false;
 					fields |= 2;
-				} else if (line == LevelTag) {
+				} else if (line == LevelTag || line == LevelTagEnglish) {
 					if ((fields & 4) || !lines.Next(line) || !Levels(line, message, race)) return false;
 					fields |= 4;
 				} else if (line == "[==Detail==]") {

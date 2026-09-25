@@ -178,6 +178,11 @@ class SKILLINFO_NODE {
 
 		void			SetMP(int mp)				{ m_MP = mp; }
 
+		// The display name. SkillInfo.inf ships it in the data's own
+		// language; the English client replaces it with the name the
+		// skill is looked up by (see MSkillInfoTable::UseEnglishNames).
+		void			SetHName(const char* hname)	{ m_HName = hname; }
+
 		//------------------------------------------------------
 		// Add NextSkill
 		//------------------------------------------------------
@@ -622,6 +627,11 @@ class MSkillInfoTable : public CTypeTable<SKILLINFO_NODE> {
 
 		void			LoadFromFileServerSkillInfo(std::ifstream& file);
 		void			SaveFromFileServerSkillInfo(std::ofstream& file);
+
+		// Show every skill under its English name. Call after
+		// LoadFromFileServerSkillInfo(), and only when the client runs in
+		// English - see UseEnglishText().
+		void			UseEnglishNames();
 };
 
 extern MSkillInfoTable*		g_pSkillInfoTable;

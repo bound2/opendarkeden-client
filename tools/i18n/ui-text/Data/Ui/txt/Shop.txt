@@ -1,0 +1,30 @@
+Shop Interface
+
+This interface appears when you talk to an NPC who buys and sells goods. Some NPCs buy and sell everything, but most deal only in certain goods. Listen closely to what the NPCs mutter to themselves and you can learn who sells what.
+
+How to Use the Shop Interface
+--------------------------------------
+
+1. Buying items
+
+Goods on display in a shop are sorted into 3 sections by their value, abilities and performance.
+
+NORMAL : The most common items.
+SPECIAL : Here you can buy basic items with various stat-boosting options attached.
+MYSTERIOUS : Items whose nature is unknown.
+
+Select the section you want to see the items of that grade on display. Left-click the item you want to buy, and a window shows the item's price and asks whether to buy it. Choose YES and the money is paid automatically and the item goes into your inventory.
+
+2. Selling items
+
+Tell the NPC you want to sell items and the selling interface opens. Then left-click the item you want to sell, and a window shows the item's price and asks whether to sell it. Choose YES and the item is sold automatically and you are paid for it.
+To sell all your monster heads (Soul Stones in the Teen version) at once, right-click one; the total price is shown and you can sell them.
+
+3. Repairing items
+
+When talking to an NPC, choose the line asking for repairs and the repair interface opens. Then left-click the item you want repaired, and a window shows the repair price and asks whether to repair it. Choose YES and the item is repaired automatically and the cost is paid.
+Right-click to repair every item in the gear window.
+ 
+4. Silver-plating swords and blades
+
+Silver-plated swords and blades deal deadly damage to Vampires. When talking to an NPC who does silver plating, choose the line asking for silver plating and the silver-plating interface opens. Then left-click the weapon you want plated, and a window shows the plating price and asks whether to plate it. Choose YES and the weapon is silver-plated automatically and the cost is paid.

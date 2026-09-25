@@ -1,0 +1,4 @@
+600 500
+GM
+The Beginner Zone Capture the Flag war has begun.
+The Beginner Zone Capture the Flag war has begun. The beginners' war will be held for one hour in Temerie Holy Land, the zone reserved for beginners. The race that wins the Beginner Zone Capture the Flag war will receive one Gemstone for each flag it captured.\n\nWill you join the war?

@@ -1,0 +1,2 @@
+%977
+Adds a Pet ability that has a chance to cast a stun spell on monsters attacking its master. (Lasts 3 days)

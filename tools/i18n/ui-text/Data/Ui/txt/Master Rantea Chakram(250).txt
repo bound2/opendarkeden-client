@@ -1,0 +1,8 @@
+%1050
+Master Rantea Chakram(250) is a chakram usable by Ousters of Advancement level 250 or higher. This item is obtained by enchanting an existing Advancement Chakram with a Reliance Drop.
+
+< Hidden Option >
+HP: +1500
+Physical Damage: +50
+Physical Damage: +100
+Magic Damage: +100

@@ -1,0 +1,6 @@
+%1052
+Master Imperium Vestio(200) is upper-body armor usable by Ousters of Advancement level 200 or higher. This item is obtained by enchanting existing Advancement upper-body armor with a Reliance Drop.
+
+< Hidden Option >
+Physical Defense +40
+Magic Defense +40

@@ -1,0 +1,2 @@
+%235
+The most basic bomb, with the narrowest lethal radius of all current bombs. It holds more steel balls than other bombs, so it produces many fragments, and Slayers mostly use it for practice.

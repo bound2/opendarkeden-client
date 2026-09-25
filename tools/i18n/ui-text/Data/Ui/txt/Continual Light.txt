@@ -1,0 +1,3 @@
+Vampires can summon an evil fog of darkness that blinds and deafens humans. This spell summons a holy light that dispels the thick darkness summoned by a Vampire.
+
+* Characters not in the Enchant domain can learn it from the Market once they reach Advancement level 90.

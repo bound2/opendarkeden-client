@@ -1,0 +1,1 @@
+A skill that slashes once from upper right to lower left, once horizontally, and once from lower right to upper left. Also called "Triangle Break", it is a slashing technique in the shape of a triangle. The skill adds bonus damage to the weapon's base damage.

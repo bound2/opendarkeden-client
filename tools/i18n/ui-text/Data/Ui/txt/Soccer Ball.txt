@@ -1,0 +1,14 @@
+%260
+Wishing success for the 2002 Korea-Japan World Cup and for the Korean team to reach the round of 16.
+
+This item can be obtained in this event held during the World Cup, and depending on your race and location it can be exchanged with the NPCs below for items or money.
+
+ Field Headquarters NPC : Kaiser
+ Warrior Guild NPC : Conan
+ Soldier Guild NPC : Smith
+ Priest Guild NPC : Stoyanov
+ Vampire Village NPC : Vrykolakas
+
+Use: When you have 100 / 125 / 175 / 225 / 275 soccer balls of the same kind, you can exchange them for red premium items, red being the color of the Red Devils, or for money.
+
+* To exchange this item for money you must collect soccer balls of the same kind, then click 'I want to exchange my soccer balls for money' with the event NPCs Kaiser, Conan, Smith, Stoyanov or Vrykolakas.

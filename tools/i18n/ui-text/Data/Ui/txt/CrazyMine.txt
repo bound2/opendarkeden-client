@@ -1,0 +1,8 @@
+Crazy Mine
+A mix of Minesweeper and Bulls and Cows: you must open every tile that has no mine.
+If you open a tile with a mine, you fail the game.
+Left-click to select 3 tiles; the game shows how many of them hold mines and how many do not.
+If all 3 selected tiles are free of mines, or all hold mines, it shows '3O or 3X'.
+To open a tile without a mine, click the same tile twice.
+To mark a mine, right-click to plant a flag on it.
+Right-click a flag again to turn it into a question mark; right-click once more to remove the mark.

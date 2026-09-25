@@ -1,0 +1,3 @@
+Summons a huge electric sword (a sword made of energy) in the air and drops it on the chosen spot. The electric sword strikes the ground with a powerful electric attack, and once stuck in the ground it raises the damage of follow-up attacks in that area for a set time.
+
+

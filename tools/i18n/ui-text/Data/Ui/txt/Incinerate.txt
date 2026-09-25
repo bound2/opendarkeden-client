@@ -1,0 +1,3 @@
+Create a fireball and hurl it in front of the surrounding enemies, blowing up a wide area and setting it ablaze. The higher your INT, the fiercer this spell's flames will grow.
+
+* Once you reach Advancement level 50, you can learn it free of charge with a skill book from the Market.

@@ -1,0 +1,121 @@
+37 14
+&ItemDescription.spk
+Sword&Blade
+{
+	Sword
+	{
+		14
+	}
+	Blade
+	{
+		15
+	}
+}
+Gun
+{
+	SMG
+	{
+		21
+	}
+	AR
+	{
+		22
+	}
+	SG
+	{
+		20
+	}
+	SR
+	{
+		23
+	}
+}
+Cross&Mace
+{
+	Cross
+	{
+		17
+	}
+	Mace
+	{
+		35
+	}
+}
+Armor
+{
+	Helmet
+	{
+		19
+	}
+	Coat
+	{
+		11
+	}
+	Shield
+	{
+		16
+	}
+	Gloves
+	{
+		18
+	}
+	Belt
+	{
+		26
+	}
+	Trousers
+	{
+		12
+	}
+	Shoes
+	{
+		13
+	}
+}
+Accessories
+{
+	Necklace
+	{
+		10
+	}
+	Bracelet
+	{
+		9
+	}
+	Ring
+	{
+		8
+	}
+}
+Etc
+{
+	Potion
+	{
+		1
+	}
+	Water Bottle&Holy Water
+	{
+		2
+		3
+	}
+	Magazine
+	{
+		4
+	}
+	Bomb&Mine
+	{
+		24
+		25
+	}
+	Radio
+	{
+		38
+	}
+	Other Items
+	{
+		6
+		7
+		27
+	}
+}
+

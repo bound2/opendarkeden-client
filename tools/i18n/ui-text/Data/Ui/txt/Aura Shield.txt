@@ -1,0 +1,1 @@
+A spell that uses a holy aura to nullify the enemy's physical attacks. If a Vampire strikes the priest physically while the spell is in effect, part of the damage is turned back on the attacker. It can only be cast on yourself, and it is passed down only to the few priests whose holy power has been recognized.

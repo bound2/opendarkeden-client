@@ -1,0 +1,47 @@
+Clan Interface
+
+DKx Online has many clans on each world.
+By using the interface that suits each situation, you can enjoy a variety of community features in the game.
+Clan members can talk with each other using clan chat; see the Chat help for details.
+The NPCs who handle clan matters are Kakon inside Limbo Castle and Aiman inside Rasen Castle.
+
+How to Use the Clan Interface
+-----------------------------
+1. Creating a clan
+  - Visit the NPC and say you want to register a clan. If you meet the Clan Master requirements, the clan registration window opens.
+
+  - Enter a clan name and a clan introduction and register; the clan is first registered as a pending clan.
+    (Joining fees are not handled automatically in the game. If you want to charge a joining fee, state it in the introduction and collect it from each applicant in the game yourself.)
+
+  - Editing the clan introduction is not supported yet, so write it carefully.
+
+  - An official clan needs 5 founding members, including the applicant. If you want to be a founding member, select the clan you want from the pending clan list and apply to join.
+
+  - When a pending clan is approved as an official clan, the applicant becomes Clan Master and the founding members become Sub-Masters.
+
+  - The Clan Master can expel members and accept or deny applicants; Sub-Masters can only accept applicants.
+
+  - Clan Master requirements
+  Level 50 or higher, 100,000,000 geld
+
+  - Founding member requirements
+  Level 40 or higher, 50,000,000 geld
+
+2. Registering a clan mark
+  - A mark appears on pending clans automatically as clans are created and deleted.
+
+3. Viewing clan info and members
+  - Select the Clan tab on the main interface for the buttons that show clan info and the member list, where you can check information about your clan and the members who belong to it.
+  - The buttons do nothing for players who are not in a clan.
+
+4. Joining a clan
+  - A player who wants to join talks to the clan NPC and applies for membership in the clan of their choice from the clan list.
+  - The Clan Master opens the member list and selects the applicant. Pressing Accept approves the application and adds them as a member; pressing Deny rejects it, and the applicant cannot apply again for a week.
+
+5. Leaving a clan / expelling members
+  - A player who wants to leave can go to the NPC and say they want to leave; they are then removed from the clan.
+  - The Clan Master can forcibly expel a member by selecting them in the member list and pressing Expel.
+
+6. Deleting a clan
+  - Automatic deletion: a clan is deleted automatically when it drops to 4 members or fewer.
+  - Manual deletion: a clan is deleted when the Clan Master expels members until 4 or fewer remain.

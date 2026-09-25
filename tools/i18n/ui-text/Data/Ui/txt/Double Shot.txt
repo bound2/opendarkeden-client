@@ -1,0 +1,1 @@
+This skill lets you fire a 2-round burst. Burst speed varies with the type of gun: SMG is fastest, then AR, then SR/SG. Bursts incur a To Hit penalty, but it shrinks as the skill rises and disappears entirely at Grand Master.

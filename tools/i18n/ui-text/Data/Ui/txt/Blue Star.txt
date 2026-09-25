@@ -1,0 +1,14 @@
+%223
+Blue, above all, is the color of youth. Youth is the time of peak activity in both body and knowledge, and above all the time when the mind works at its sharpest.
+
+The Blue Star is an event item that can be exchanged for items or money with the NPCs below, depending on your race and location.
+
+ Field Headquarters NPC : Kaiser
+ Warrior Guild NPC : Conan
+ Soldier Guild NPC : Smith
+ Priest Guild NPC : Stoyanov
+ Vampire Village NPC : Vrykolakas
+
+Use: It can be exchanged when you have 20 / 40 / 60 / 80 / 100 stars, for high-grade items with an Int option or for money.
+
+* To exchange this item for money, you must first collect stars of the same kind, then go to Kaiser, Conan, Smith, Stoyanov, Vrykolakas or the like, select 'I want to exchange my stars for money' and left-click to make the exchange.

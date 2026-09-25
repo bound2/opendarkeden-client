@@ -1,0 +1,3 @@
+A passive skill that has a set chance to halve the target's attack speed; soul stone slots 1, 2 and 3 must all hold the water attribute. Duration depends on DEX, and the success rate on spirit level.
+
+Infuses your chakram with the power of Grupein, the ice spirit, through water soul stones.

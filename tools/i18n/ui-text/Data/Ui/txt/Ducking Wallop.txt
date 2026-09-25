@@ -1,0 +1,1 @@
+A DEX-type skill whose power depends on agility. It is an attack built on rapid movement, and the character vanishes as if teleporting when it is cast. As the skill level rises, the number of tiles over which the skill can succeed grows, and the delay shortens with skill level and DEX. Mastering the skill grants a substantial bonus.

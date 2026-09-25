@@ -1,0 +1,8 @@
+%1032
+Master Cabal(100) is a rifle usable by Slayers of Advancement level 100 or higher. This item is obtained by enchanting an existing Advancement Rifle with a Reliance Drop.
+
+< Hidden Option >
+HP : +1800
+Evasion : +200
+Physical Damage: +40
+Magic Damage: +40

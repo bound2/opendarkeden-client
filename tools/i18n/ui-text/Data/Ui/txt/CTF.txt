@@ -1,0 +1,43 @@
+How the Capture the Flag Event Works
+
+1. When the Capture the Flag event starts, 100 flags are scattered across Limbo, Eslania, Drobeta and Perona Highway. Watch for the message announcing the start of the event, then start collecting flags.
+
+   Flags spawned per area
+   * Limbo area              : 20
+   * Eslania city            : 20
+   * Drobeta industrial zone : 20
+   * Perona Highway          : 40
+
+2. A player who picks up a flag must carry it to their own race's flagpole and plant it there.
+
+   Flagpole locations by race
+   * Slayer  : Eslania Northwest, at the Field Headquarters entrance
+   * Vampire : Limbo Castle Southwest, at the Limbo Castle southwest entrance
+   * Ousters : Limbo Castle Southeast, near the Earth Spirit Horn
+
+3. Once all the flags in the field have been collected, attack the flagpoles where the other races keep their flags and steal them back before the event ends. At the same time, defend your own race's flagpole.
+
+4. When the event time runs out, the race holding the most flags wins. On victory, every flag won turns into fireworks and goes off, and as many Gemstones as there were flags are scattered around the flagpole.
+
+5. You cannot pick up more than one Gemstone. Take the Gemstone you picked up to the right NPC to exchange it for an item.
+
+   NPCs that exchange Gemstones for items, by race
+   * Slayer  : Conan, Warrior Guild 3F
+   * Vampire : Vrykolakas, Inside Limbo Castle
+   * Ousters : Lavinia, Ousters Village
+
+
+6. Restrictions while carrying a flag
+
+While you carry a flag the following restrictions apply: certain skills and abilities cannot be used.
+
+ * Vampire : Rapid Gliding, Invisibility, Hide, Bloody Zenith,
+              using a Seal, Transform To Bat, Transform To Wolf, Soul Chain
+ * Slayer : Shadow Walk, Sniping, Summon Motorcycle,
+              riding a Motorcycle, Summon Helicopter, Soul Chain
+ * Ousters : Summon Sylph, riding the Earth Spirit Horn
+
+You also cannot enter your own safe zone while carrying a flag.
+
+
+* If races collect the same number of flags, the race that planted its first flag on its flagpole earliest wins.

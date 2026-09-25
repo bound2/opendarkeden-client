@@ -1,0 +1,5 @@
+%352
+An event item prepared by DarkEden for Chuseok, the Korean harvest festival. It can add an option to an item that has none.
+Only premium users can use it. It can be used, traded, handed over and sold to shops.
+
+Green Rice Cake is an enchant rice cake that grants DEX+1 to an item with no options, and the enchant always succeeds whatever the type of item.

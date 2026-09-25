@@ -1,0 +1,1 @@
+Each skill level increases the amount of the boost and also lengthens the duration. Casting it several times does not stack. An armor-strengthening spell that, as the name says, raises Defense and Evasion. Duration and amount depend on INT and skill level. Mastering the skill grants a substantial bonus.

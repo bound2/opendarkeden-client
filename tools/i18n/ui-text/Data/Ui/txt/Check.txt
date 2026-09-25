@@ -1,0 +1,3 @@
+Check : Checks that the character name is not already taken.
+
+Characters with profane or offensive names may be sanctioned under the Terms of Service.

@@ -1,0 +1,6 @@
+A melee area skill that rapidly strikes multiple targets within a set range around you in a flurry of blows. It is a double-edged sword, however, as it drains a lot of HP while the skill lasts.
+
+
+
+
+

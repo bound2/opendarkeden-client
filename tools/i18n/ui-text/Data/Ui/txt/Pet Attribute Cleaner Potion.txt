@@ -1,0 +1,2 @@
+%975
+An item that resets a Pet's attributes. It cannot be used on Pets that have a second attribute, or on Pets under level 10 with no attribute. Note that a Pet whose attributes have been reset will no longer grow.

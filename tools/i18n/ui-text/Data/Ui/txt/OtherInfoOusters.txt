@@ -1,0 +1,23 @@
+View Other Character Interface
+
+This interface shows information about other Ousters characters of your own race in the game.
+
+Hotkey : right Control + left-click another Ousters character
+
+
+Character information shown
+---------------------------------------------
+The other Ousters information window shows the following character information.
+ 
+ The Ousters' picture
+ The Ousters' Rank mark
+ The picture of the Ousters' guild
+
+ Name      : The Ousters' name
+ Grade     : The Ousters' Rank
+ Guild     : The guild the Ousters belongs to
+ Level     : The Ousters' level
+ STR       : The Ousters' base strength and current strength
+ DEX       : The Ousters' base dexterity and current dexterity
+ INT       : The Ousters' base intelligence and current intelligence
+ Alignment : The Ousters' Alignment

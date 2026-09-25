@@ -1,0 +1,39 @@
+Inventory Interface
+
+Hotkey : TAB
+
+The inventory is the interface where your character keeps items. To make the game more fun, inventory space is limited. Since the items in DKx Online come in many sizes and shapes, you need to keep your inventory well arranged to carry more items.
+
+Slayers, Vampires and Ousters can all store more of the items they do not use day to day by using the storage interface provided by NPCs. To use it, however, you must first buy a Storage from the NPC for a set sum of money.
+
+Click the 'Display translucent' button at the bottom of the window to make the window translucent and show what it covers.
+
+How to Use the Inventory
+--------------------
+
+1. Opening the interface
+
+Press the TAB key or the Inventory button (the bag) on the main screen to open the inventory interface. Press the key or button again to close it.
+
+2. Picking up and placing items
+
+Left-click an item you want to move and it is picked up on the mouse; you can then move it to another part of the inventory, the ground, the gear window and so on. Keeping your inventory neatly arranged this way makes the game much easier.
+
+To throw an item away, left-click it in your inventory and then left-click the ground; the item leaves your inventory and drops to the ground.
+
+Shift+left-click an item to move it straight to the belt or the gear window, depending on what it is. Likewise, Shift+left-click in the belt or gear window to bring an item back to the inventory.
+When Storage is open, you can move items there just as easily.
+
+3. Items have requirements for equipping them. If you do not meet the requirements, the item is shown in red and cannot be equipped.
+
+4. Using items
+
+Right-click any usable item to use it.
+
+5. Dropping money on the ground
+
+The bottom left of the inventory interface shows how much money you have. Press the money button and enter the amount you want to drop; the money sticks to the mouse, and you can then drop it on the ground. (If you want to give money to someone, do not just drop it on the ground; use the exchange window. Hold ALT and left-click the player you want to trade with to start a trade. For details, open the exchange interface and press the HELP button to read the help text.)
+
+6. Viewing item details
+
+Click the magnifying glass button on the inventory interface and the cursor turns into a magnifying glass. Click the item you want to examine and the item information interface opens with a detailed description of it. Use the scroll bar to read the text, and when you are done, press the close button or right-click.

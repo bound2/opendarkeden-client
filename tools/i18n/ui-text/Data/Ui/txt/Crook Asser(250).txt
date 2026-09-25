@@ -1,0 +1,5 @@
+%1037
+The Crook Asser (250) is a Mace usable by Slayers of Advancement grade 100 and above. It can be obtained by enchanting an existing Advancement Mace with an Old Drop.
+
+< Hidden Option >
+INT : +100

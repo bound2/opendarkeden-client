@@ -1,0 +1,1 @@
+A skill that gives you complete mastery of the SR (Sniping-Rifle). This passive skill is always active, but only while you hold an SR, and grants a To Hit and Damage bonus whenever you use an SR (Sniping-Rifle). It cannot be used with other guns, and the bonus does not apply to them either.

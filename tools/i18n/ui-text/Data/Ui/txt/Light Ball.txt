@@ -1,0 +1,1 @@
+Fires a sphere of light at the enemy to deal damage. It can also attack at long range.

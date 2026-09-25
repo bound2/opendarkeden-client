@@ -1,0 +1,3 @@
+%214
+An item you get by clicking a monster after killing it; the higher the monster's level, the more its Skull is worth. It is one way to earn money: just sell it to a shop NPC.
+

@@ -1,0 +1,5 @@
+%559
+An event item prepared by DarkEden for Seollal, the great Korean Lunar New Year holiday. It can add an option to an item that has none.
+An item only premium users can use. It can be traded, handed over and sold to shops.
+The Blue-Green Rice Cake Soup is an enchant item that adds an All Stats+1 option to an item with no option, and it can always be enchanted regardless of item type.
+

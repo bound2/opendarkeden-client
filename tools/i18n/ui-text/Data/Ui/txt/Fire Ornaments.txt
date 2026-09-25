@@ -1,0 +1,2 @@
+%980
+For a set time your weapon gains the fire attribute, and your attacks have a chance to deal additional fire damage. (Lasts 6 days)

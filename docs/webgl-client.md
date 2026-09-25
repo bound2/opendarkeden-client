@@ -43,11 +43,15 @@ its root, and Noto Sans CJK Regular's `NotoSansCJK-Regular.ttc` with its
 
 ```sh
 python tools/web/package-assets.py path/to/assets.zip build/web/assets \
-  --font path/to/NotoSansCJK-Regular.ttc
+  --font path/to/NotoSansCJK-Regular.ttc --overlay tools/i18n/ui-text
 ```
 
 The packer rejects traversal, symlinks and duplicate case-insensitive paths.
-It excludes `UserSet` and writes a SHA-256 manifest. The launcher verifies every
+It excludes `UserSet` and writes a SHA-256 manifest. `--overlay` copies a
+directory of loose files (with `Data/` at its root) over the archive's
+contents; `tools/i18n/ui-text` is the English text of the packed item, skill,
+help, book and tutorial resources, which the client prefers over the Korean
+members of the `.rpk` archives (see `tools/i18n/README.md`). The launcher verifies every
 file and caches downloads by hash. The tested pack has 2,022 files and is about
 1.85 GB, including the font. This first version loads the complete pack before
 play, so allow several GB of browser memory and disk space. Asset streaming and
@@ -132,6 +136,33 @@ existing classic vcpkg installations need `openssl:x64-windows`. Linux needs
 `libssl-dev` in addition to the usual SDL dependencies.
 
 ## Verification
+
+The login/menu cursor renders between logic ticks, with the same 15 ms fallback
+draw interval as gameplay. The intermediate game framebuffer is marked transient:
+it is redrawn after a device reset instead of synchronously read back after every
+presentation. Persistent terrain and minimap surfaces still receive reset
+checkpoints. Sprite and glyph batches reuse unchanged render state, and WebGL
+effect shaders cache uniform locations and avoid per-draw error queries.
+
+The browser mixer uses 4,096 samples instead of the native 1,024.
+[SDL's browser audio callback](https://github.com/libsdl-org/SDL/blob/SDL2/src/audio/emscripten/SDL_emscriptenaudio.c)
+runs on the main thread, so this gives busy frames roughly
+85–93 ms of buffering at common device rates, at the cost of additional audio
+latency. It does not isolate audio from arbitrarily long main-thread stalls.
+Black translucent UI panels use the GPU gamma path on every platform.
+
+Portal and safe-zone overlays load their `.mip` metadata through the same path
+normalizer as other assets; raw Windows backslashes cannot be opened in the
+browser filesystem.
+
+On 2026-09-25, native Release unit/UI tests and the renderer oracle passed. The
+29 renderer tests passed 3,175,964 checks both in native OpenGL and Chrome WebGL 2
+(ANGLE/D3D11, RTX 5080). The repository source checks also passed.
+One comparison of the 120-frame mixed-scene benchmark against the prior renderer
+measured 32.083 → 24.758 ms/frame for GPU composition and 36.975 → 26.842 ms/frame
+with 2× xBRZ, including a GPU completion wait. This benchmark excludes gameplay's
+intermediate-framebuffer checkpoint. These are synthetic timings; populated
+combat, minimap overlays with game data, and ALT-loot audio need a live retest.
 
 The browser CI builds the complete client, runs the shared renderer pixel oracle
 in Chrome/WebGL 2, and runs the real C++ socket adapter against a pinned production

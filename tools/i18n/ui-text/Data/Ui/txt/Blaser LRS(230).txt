@@ -1,0 +1,6 @@
+%1031
+The Blaser LRS (230) is a sniper rifle usable by Slayers of Advancement grade 80 and above. It can be obtained by enchanting an existing Advancement sniper rifle with an Old Drop.
+
+< Hidden Option >
+HP : +1200
+Evasion : +200

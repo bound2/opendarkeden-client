@@ -1,0 +1,1 @@
+Select a server to connect to. Each server runs independently, but characters and items are shared, and chat between servers is supported.

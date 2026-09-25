@@ -1,0 +1,1 @@
+Damage : Damage is the amount of harm you can inflict on an enemy. The higher it is, the more you can reduce your opponent's HP.

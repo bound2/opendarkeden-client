@@ -1,0 +1,1 @@
+Select a world to connect to. You can create 3 characters in each world. However, each world is completely independent, so characters are not shared and chat between worlds is not supported.

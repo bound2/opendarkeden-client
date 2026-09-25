@@ -1,0 +1,8 @@
+%1041
+Master Shell Guard(400) is lower-body armor usable by female Slayers of Advancement level 400 or higher. This item is obtained by enchanting existing Advancement lower-body armor with a Reliance Drop.
+
+< Hidden Option >
+Physical Damage +15
+Magic Damage +15
+Physical Defense +80
+Magic Defense +80

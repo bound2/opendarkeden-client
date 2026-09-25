@@ -1,0 +1,3 @@
+To those who always walk with the fire spirits, a fire spirit reveals itself to protect the fire spirit caller. In this skill, spirit callers who use the power of fire fight alongside their spirit, which attacks the enemy together with its summoner from the rear.
+
+The spirit's power increases with INT and skill level, and the summoning time also depends on INT and skill level. It cannot be stacked, and the delay equals the summoning duration. EP cost rises slightly with skill level. Mastering the skill grants a substantial bonus.

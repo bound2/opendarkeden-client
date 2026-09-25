@@ -1,0 +1,5 @@
+%353
+An event item prepared by DarkEden for Chuseok, the Korean harvest festival. It can add an option to an item that has none.
+Only premium users can use it. It can be used, traded, handed over and sold to shops.
+
+The Blue Rice Cake is an enchant rice cake that adds INT+1 to an item with no option, and the enchant always succeeds regardless of item type.

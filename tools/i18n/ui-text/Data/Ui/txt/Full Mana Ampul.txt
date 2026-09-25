@@ -1,0 +1,3 @@
+%170
+A capsule filled with mana ampul; it restores MP completely.
+

@@ -1,0 +1,1 @@
+Create a new Slayer, Vampire or Ousters. Choose the character's name, gender, face, colors and so on, then set its stats with the Reroll button. The Save/Load buttons let you save and load stats. Vampires cannot choose a hair color or stats. Ousters cannot choose a gender or skin color, and raise their stats by hand.

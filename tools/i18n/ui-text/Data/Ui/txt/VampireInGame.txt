@@ -1,0 +1,17 @@
+HP does not regenerate in bat form.
+Vampires press the F1 key to take a Serum automatically.
+To use a transformation skill, buy the transformation item at a shop, then use the skill.
+Use a Seal (Seal) to teleport to a place you have memorized.
+The Seal (Seal) can be used from level 25.
+Experience (EXP) : rises when a Vampire drains the blood of, or kills, other creatures.
+You can drain a monster's blood when its HP is at 30% or below.
+When a Vampire is hit by a silver-plated weapon, its maximum HP drops.
+Blood Drain partly removes the maximum HP penalty at the same time.
+Vampires earn Experience from Blood Drain and from kills in a 7:3 ratio.
+To use a skill, turn on the skill window with Control+S, then right-click.
+To set spell hotkeys, press S, then assign them to F9~F12.
+Press Control+K to check your skills.
+Press Control+I to check your own information.
+Vampires regain some HP when they drain blood.
+To drain blood, bring up the Blood Drain spell in the magic window and right-click.
+At character creation, a Vampire's stats total 60.

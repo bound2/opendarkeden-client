@@ -1,0 +1,6 @@
+%1045
+Master Bone Cleave(200) is a weapon usable by Vampires of Advancement level 200 or higher. This item is obtained by enchanting an existing Advancement Weapon with a Reliance Drop.
+
+< Hidden Option >
+Physical Damage: +80
+Magic Damage: +80

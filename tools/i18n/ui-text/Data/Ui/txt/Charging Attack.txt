@@ -1,0 +1,1 @@
+An attack for STR-type Ousters that summons a giant Ousters avatar to deal a mighty blow to the enemy. Range grows with skill level, and damage with STR and skill level. Mastering the skill grants a substantial bonus.

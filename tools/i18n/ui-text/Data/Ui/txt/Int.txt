@@ -1,0 +1,1 @@
+INT : Intelligence (INT) reflects your character's mental abilities such as intellect and concentration, and affects MP and the success rate of magic. It is a key stat for cleric characters who use Heal and Enchant magic.

@@ -1,0 +1,1 @@
+HP : Health (HP) is your character's life force. When HP reaches 0, your character can no longer fight.

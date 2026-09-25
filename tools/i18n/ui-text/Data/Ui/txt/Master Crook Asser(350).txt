@@ -1,0 +1,7 @@
+%1037
+Master Crook Asser(350) is a mace usable by Slayers of Advancement level 350 or higher. This item is obtained by enchanting an existing Advancement Mace with a Reliance Drop.
+
+< Hidden Option >
+INT : +100
+Physical Damage: +140
+Magic Damage: +140

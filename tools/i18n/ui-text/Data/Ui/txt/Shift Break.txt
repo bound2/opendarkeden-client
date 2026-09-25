@@ -1,0 +1,1 @@
+The first short-range area skill of the Ousters, dealing area damage to 3 tiles in front of the character and to the left and right. Damage increases with both STR and DEX, the main stats of warrior-type Ousters. Delay shortens with DEX, and range increases with skill level. Mastering the skill grants a substantial bonus.

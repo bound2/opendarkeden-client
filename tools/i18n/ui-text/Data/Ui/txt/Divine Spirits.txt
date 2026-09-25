@@ -1,0 +1,3 @@
+A cast skill that blocks part of any magic damage with EP; the reduction through EP increases with skill level.
+
+Through the protection of the spirits who lend it their power, this spell helps you block part of the damage from wicked magic aimed at you with your spirit power.

@@ -1,0 +1,3 @@
+A cast skill that temporarily raises your Protection; the Protection bonus increases with STR. Duration increases with DEX and skill level.
+
+A skill guarded by Minerva, the Spirit King of air. Clad in the Minerial Suit, the finest of armor, her spirits never show themselves even to their summoner in ordinary times. But when the spirit caller who summoned them is in danger, they are said to reveal part of themselves for a brief moment, shielding their master with their own armor.

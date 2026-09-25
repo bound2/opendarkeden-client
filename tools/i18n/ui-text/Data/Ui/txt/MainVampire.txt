@@ -1,0 +1,105 @@
+DKx Online Basic Help (HELP)
+
+Hotkey : H
+
+Every window on screen can be moved, enlarged and shrunk to suit you.
+
+Screen interface overview
+-------------------------
+< Common to all interfaces >
+Depending on its role, each interface has an Auto-Hide button and a Translucent button.
+When an interface is docked at the edge of the screen and its Auto-Hide button is on, it slides off screen and comes back when you move the mouse over it.
+If interfaces slide in and out too slowly, turn off smooth auto-hide in the Options and they will move quickly.
+
+
+< Top of the screen >
+
+HP, EXP bars
+
+Watch your health and Experience fill up and drain. For Vampires, HP and Experience are shown, and the bars can be moved and repositioned freely. At the right end of the bar is a horizontal/vertical button, and at the left end an enlarge/shrink button.
+
+Magic status window
+
+Move the cursor to the very top center of the screen to find the magic status window. It shows the spells currently on your character, and shows nothing when no spells are active.
+
+Minimap
+
+Hotkey : Control+M
+A scaled-down view of the area your character is in, so you can see it at a glance. With the Auto-Hide and Translucent buttons you can hide it from the screen or show it translucent.
+
+
+< Bottom of the screen >
+
+Chat window
+
+See the Chat help for details.
+
+System
+
+Holds the skill window, the date and time display, the menu and the Help tab.
+See the Skill help for details on the skill window.
+
+Menu : Holds the Inventory, Gear, Information and Party window buttons.
+Help : Holds all kinds of help to make playing easier.
+
+
+In DKx Online you can perform many actions by combining keyboard and mouse input.
+
+Input overview
+--------------------
+
+        Left click : Move, attack, pick up and drop items, follow (safe zone)
+      Right click : Use a technique/spell, use an item
+ ALT   + left click : Trade items (safe zone)
+ R-ALT + left click : Form a party
+ CTRL  + left click : Follow (combat zone)
+ SHIFT + left click : Force attack
+
+         Left ALT : List the items lying on the ground
+
+              Tab : Inventory window on/off
+       CTRL + Tab : Gear window on/off
+       CTRL + S   : Quick skills on/off
+
+       CTRL + I   : Information window on/off
+       CTRL + K   : Skill window on/off
+
+       CTRL + H   : Basic help
+         F9 ~ F12 : Select and assign quick skills
+               F1 : Use Serum
+
+      SCROLL LOCK : Take a screenshot (Screenshot)
+
+              ESC : Game menu
+
+ * You can change each hotkey in the Options to suit you.
+ * In chat mode, hotkeys that type into chat, such as S, I and K, cannot be used on their own. They work together with the Control or Alt key, so when changing hotkeys it is best not to use combinations with Control or Alt in particular.
+ * For the chat hotkeys, see the Chat help.
+
+Input in detail
+----------------------------------
+
+1. Moving, attacking and following
+
+          Move : Left-click the spot you want to go to. To keep moving, drag the mouse in the direction you want to go.
+          Attack : Left-click the enemy you want to attack. Attacking works only on other races or monsters; to attack a fellow Slayer or Vampire you must use a force attack. Targets you can attack get a red outline when you hover the cursor over them.
+          Force attack : Hold SHIFT and left-click the target you want to force attack. Be careful, though: attacking your own race often worsens your Alignment and brings various penalties.
+          View names : In combat zones, hold CTRL and hover the mouse over a player to see their name. In safe zones, just hovering the mouse shows the name.
+          Follow : Hold CTRL and left-click the player you want to follow. In safe zones, shown in green on the minimap, a plain left-click is enough. Following only works on your own race.
+
+2. Dropping and picking up, equipping and removing, using and trading items
+
+       Pick up items : Left-click an item on the ground or in the inventory.
+     Drop items : Left-click the ground or the inventory with the item you are holding.
+   Equip items : Open the gear interface, click an item in the inventory, then left-click the slot you want to equip it in. Items shown in red in the gear window can be worn, but their own stats and options do not apply.
+     Remove items : Open the gear interface and left-click the item you want to remove.
+   Use items : Right-click the item you want to use in the inventory interface.
+   Trade items : In a safe zone, hold ALT and left-click.
+
+3. Selecting and using techniques/spells
+
+ See the Skill help for details.
+
+4. Using the chat window
+
+ See the Skill help for details.

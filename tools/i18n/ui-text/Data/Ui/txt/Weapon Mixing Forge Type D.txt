@@ -1,0 +1,7 @@
+%552
+An enchant item with the special ability of turning two items of the same type and grade into one. When the two items become one, the options of the original items carry over unchanged, so the single item ends up with two options. Items that can be enchanted with a Weapon Mixing Forge are blades, swords, guns, crosses, maces, knuckles, Chakrams and Wristlets.
+How to use a Mixing Forge - Right-click the Mixing Forge item to open the Mixing Forge window, right-click the item you want to mix to place it in the Mixing Forge window, then click OK to mix the items.
+
+
+
+

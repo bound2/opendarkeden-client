@@ -1,0 +1,25 @@
+Ousters skills consist of close combat techniques and Fire, Water and Earth magic.
+To learn Ousters skills, you spend the Skill Points you receive when you level up.
+Ousters learn skills and magic in the skill tree window.
+You raise a skill's level by continuing to spend Skill Points on it.
+To use a skill, bring it up in the skill window and right-click the target.
+Skills are learned with the Skill Points you collect as you level up.
+As a skill's level rises, you get Damage and To Hit bonuses.
+Skill level shows how well you have mastered a skill, and it rises as you spend Skill Points.
+The techniques you can use depend on the weapon you use.
+For physical attack and defense in close combat, you must wear a 'Chakram'.
+To use elemental magic, you must wear a 'Wristlet'.
+Press Control+H to view the help.
+Press Control+K to view the skill tree.
+Press Control+I to check your own information.
+Ousters can travel quickly using summoning stones.
+Ousters can warp to the place they want using the 'Earth Spirit Horns' found all over the map.
+To recover HP, use a recovery item, or move near an 'Earth Spirit Horn' and you recover automatically.
+Experience (EXP) : rises when Ousters kill other creatures.
+When several players attack one monster, Experience is shared according to the Damage each dealt to the creature.
+EP is spent when you use magic and skills and when you create recovery items.
+You can refill EP with Absorb Soul.
+Recovery items can be placed in the Armsband window and used from there.
+To use a skill, turn on the skill window with Control+S, then right-click.
+To set spell hotkeys, press S, then assign them to F7~F12.
+At character creation, an Ousters' stats total 45.

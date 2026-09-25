@@ -1,0 +1,1 @@
+Damage depends on INT and skill level, and the casting range also grows as the skill level rises. A melee attack skill that uses the power of fire to call up the magma flowing beneath the earth and split the ground. Unlike Prominence, which keeps burning on a set of tiles, it takes effect instantly, allowing hit-and-run attacks. Mastering the skill grants a substantial bonus.

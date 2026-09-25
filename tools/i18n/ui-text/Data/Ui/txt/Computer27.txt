@@ -1,0 +1,1 @@
+Bombs are weapons soldiers throw at Vampires to explode, and Mines are explosive weapons that, once laid, damage a wide area when someone steps on them. A Toolkit is the crafting tool used to make bombs and mines.

@@ -1,0 +1,3 @@
+A basic attack skill; damage increases with STR and skill level.
+
+The Ousters possess great physical abilities. To develop them, they must use the weapon called the chakram.

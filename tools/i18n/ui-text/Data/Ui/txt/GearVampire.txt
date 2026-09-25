@@ -1,0 +1,34 @@
+Gear Interface
+
+Hotkey : Control + TAB
+
+Some of the many items you find in the game can be worn by your character to improve their abilities. The Gear Interface is used to equip your character with items in the weapon, armor and accessory categories. Click the Translucent button at the bottom to make the gear window translucent and show what it covers.
+
+Vampires have very high base stats, so they have no particular need for weapons or armor. Instead they can raise their abilities even further by wearing evil magic accessories handed down from ancient times. Vampires have the following item slots.
+
+
+--------------------------------------
+Necklace * 1
+Coat * 1
+Bracelet * 2
+Ring * 4
+Earring * 2
+Weapon (Claw) * 2
+Amulet * 4
+--------------------------------------
+16 in total
+
+Equipping items on your character
+------------------------------
+
+1. Pick up the item to equip.
+
+Left-click an item on the ground or in your inventory to pick it up with the mouse.
+
+2. Place the item in the slot you want.
+
+The slot type must match the type of the item you want to place. For example, only weapons go in the weapon slot, and no other item can be placed there.
+
+Shift+left-click in the inventory to equip an item straight into the gear window; the item that was equipped before is then held on the mouse. Take care not to throw away the swapped item by mistake.
+
+3. Items have requirements for equipping them. If you do not meet the requirements, the item is shown in red and cannot be equipped. If your stats change while you are already wearing an item and you no longer meet its requirements, the item is shown in red in the gear window and has no effect.

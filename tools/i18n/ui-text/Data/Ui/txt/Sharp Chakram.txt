@@ -1,0 +1,1 @@
+Sharpens your chakram to raise your To Hit for a set time. The size of the To Hit bonus depends on skill level, and the duration on DEX and skill level. Mastering the skill grants a substantial bonus.

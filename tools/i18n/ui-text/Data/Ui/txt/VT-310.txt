@@ -1,0 +1,2 @@
+%215
+The first model of Visor Technology's 300 Series, a radio for communicating with Helicopter pilots. VT made it specially for military use. It has a frequency band twice as wide as an ordinary radio and a built-in CTCSS interference-prevention system. The radio has a rechargeable battery that can be charged up to 5 times.

@@ -1,0 +1,1 @@
+DEX : Dexterity (DEX) reflects your character's quickness and reflexes, and affects To Hit and Defense. It is a key stat for soldier characters who use guns.

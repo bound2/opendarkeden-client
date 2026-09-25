@@ -1,0 +1,3 @@
+Nickname Interface
+
+The nickname list. Nicknames are earned through quests, events and other special situations, and you can also make your own nickname with a Naming Pen. You can only wear one nickname at a time. Every nickname you earn is added to the list, so you can pick one and put it on whenever you like.

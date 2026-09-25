@@ -1,0 +1,104 @@
+Information Interface
+
+The Vampire information window shows the detailed information and current state of your Vampire character. It is split into a Character tab and a Skill tab.
+
+Character tab
+
+Hotkey : Control+I
+
+Shows your character's stats and guild information, with all kinds of detailed stat information about your character. You can see everything from your character's face to the various stats and Experience, and, if you belong to a clan, the clan name and clan mark.
+
+Skill tab
+
+Hotkey : Control+K
+
+Shows the Domain Experience and levels of the skills your character has learned.
+
+Click the 'Display translucent' button at the bottom of the window to make the window translucent and show what it covers.
+
+Grade1 tab
+
+Lets you choose and review the rank skills of each Rank, from the Ritter Rank to the Graf Rank.
+
+Grade2 tab
+
+This feature is not supported yet.
+
+Character information
+--------------------------------------
+The Vampire character information window shows the following.
+
+ Name        : The Vampire's name
+ Clan        : The name of the clan the Vampire belongs to
+ Level       : How far the Vampire has grown. The higher the level, the more stats the character has and the more spells it can use.
+ Exp         : Vampires gain Experience through Blood Drain, which raises their level and grants bonus stat points to grow the character. The bar under Experience shows how much of the Experience needed for the next level has been gathered so far.
+ Alignment   : The Vampire's Alignment, showing how good or evil the character is. It falls into three broad kinds: GOOD, NEUTRAL and EVIL.
+
+ STR         : Strength is the stat for your character's physical toughness. The higher it is, the higher your HP, Damage and Protection.
+ DEX         : Dexterity is the stat for your character's quickness. The higher it is, the higher your ToHit and Defense.
+ INT         : Intelligence is the stat for your character's mental ability. The higher it is, the higher your spell success rate and the less HP your spells cost.
+
+ HP          : The stat that stands for life; when HP reaches 0 you die. HP depends on STR.
+ 
+ ToHit       : This stat shows attack accuracy and depends on DEX.
+ Damage      : This stat shows how much harm you can deal and depends on STR.
+ Defense     : This stat shows your defense against To Hit and is increased by DEX and items.
+ Protection  : This stat shows your defense against Damage and is increased by items.
+
+ BonusPoint  : Leveling up gives you bonus points, and a + button appears next to Str, Dex and Int so you can raise the stat you want.
+
+ AttackSpeed : The higher the value, the faster you attack.
+
+ TIP! : To use your own picture instead of the default image in the character information window, click the image area of the window and pick a BMP or JPG file.
+
+Skill information
+--------------------------------------
+Vampires grow through the level system: at certain levels they can automatically use new spells. They learn 4 ~ 6 spells in each of the Poison, Acid, Curse, Blood, Summon and Innate schools, in a set order.
+
+The Vampire skill window is split into the magic school tabs at the top and the spell icon list at the bottom.
+
+1. Magic school tabs
+
+The Poison, Acid, Curse, Blood, Summon and Innate buttons on the left are the Vampire magic schools.
+
+Each magic school currently holds 4 ~ 6 spells, with more planned. Click a button to see its list of spells.
+
+3. Spell icon list
+The list of spell icons in the currently selected spell tier. Hold the mouse over a spell icon to see a tooltip with brief information about the spell. Click a spell icon to see the spell's full details.
+
+
+Lower rank skill information (Grade1)
+--------------------------------------
+Lower rank skill information (Grade1) shows your current rank level, rank Experience, the rank skills you have learned and information on the other rank skills.
+
+From the Ritter Rank to the Graf Rank, each time you rise one Rank you can choose one of that Rank's rank skills.
+Click a rank skill icon shown in green to learn that rank skill; at the same time, the other skills of that Rank can never be learned.
+Rank skills you have learned are shown in sky blue, rank skills you can no longer learn are shown dark, and rank skills your Rank is still too low for are shown in gray.
+
+
+Skills available at the Reichsritter Rank
+-Immortal blood : Increases HP
+-Behemoth skin  : Increases Defense
+-Safe robe      : Increases Protection
+
+Skills available at the Baronet Rank
+-Crow Wing       : Increases attack speed
+-Wisdom of blood : Reduces the HP cost of skills
+-Tiger Nail      : Increases melee skill Damage
+-Uranus bless    : Increases HP recovery speed
+
+Skills available at the Freiherr Rank
+-Disruption storm    : Increases Storm skill Damage
+-Wide storm          : Increases Storm skill area
+-Knowledge of Poison : Increases Poison success rate
+-Knowledge of Acid   : Increases Acid success rate
+-Knowledge of Curse  : Increases Curse success rate
+-Knowledge of Blood  : Increases Bloody success rate
+-Knowledge of Innate : Increases Innate success rate
+-Knowledge of Summon : Increases Summon success rate
+
+Skills available at the Graf Rank
+-Wisdom of Swamp    : Increases Acid swamp duration
+-Wisdom of silence  : Increases paralyze duration
+-Wisdom of darkness : Increases darkness duration
+-Wide darkness      : Increases darkness area

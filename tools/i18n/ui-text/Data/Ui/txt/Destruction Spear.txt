@@ -1,0 +1,3 @@
+Deals critical damage at a set chance. A target hit by this attack keeps taking 10% of the total damage for a set time.	The success rate is based on a level comparison with the target, and the duration depends on DEX and skill level. Mastering the skill grants a substantial bonus.
+
+* Once you reach Advancement level 50, you can upgrade it to be even stronger with a skill book from the Market.

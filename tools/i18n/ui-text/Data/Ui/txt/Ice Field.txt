@@ -1,0 +1,3 @@
+A spell that forms a sheet of ice on the ground, halving the movement speed of any enemy crossing it; the area is determined by skill level. Duration and delay depend on INT and skill level.
+
+A spell that summons Grupein, the ice spirit. This spirit's strength depends entirely on the spirit caller's ability, which makes it a useful spell for those just beginning to learn spirit magic. The ground where Grupein is summoned freezes over and binds the bodies of all who enter it.

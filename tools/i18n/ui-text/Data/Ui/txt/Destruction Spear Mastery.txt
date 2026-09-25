@@ -1,0 +1,1 @@
+A mastery skill that strengthens Destruction Spear; damage increases as the skill level rises. Once learned, it lets you strike a 3 * 3 area. However, attack-type passive skills do not apply on any tile except the center one.

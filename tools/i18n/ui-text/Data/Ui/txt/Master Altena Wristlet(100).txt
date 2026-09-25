@@ -1,0 +1,7 @@
+%1051
+Master Altena Wristlet(100) is a wristlet usable by Ousters of Advancement level 100 or higher. This item is obtained by enchanting an existing Advancement wristlet with a Reliance Drop.
+By default its magic damage is +50 higher than that of a first-grade Advancement wristlet, and it grows stronger still with the hidden options below.
+
+< Hidden Option >
+Physical Damage: +40
+Magic Damage: +40

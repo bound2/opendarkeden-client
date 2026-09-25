@@ -1,0 +1,3 @@
+%188
+Shells used by all SG (Shot Gun) guns; 16 rounds, single-shot.
+

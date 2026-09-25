@@ -1,0 +1,7 @@
+%1036
+Master Crucis(250) is a cross usable by Slayers of Advancement level 250 or higher. This item is obtained by enchanting an existing Advancement Cross with a Reliance Drop.
+
+< Hidden Option >
+HP : +1200
+Physical Damage: +100
+Magic Damage: +100

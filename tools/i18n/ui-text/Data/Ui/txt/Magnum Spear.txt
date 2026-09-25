@@ -1,0 +1,3 @@
+With the help of Ifrit, the Spirit King of fire, you forge powerful flames into spears and hurl them at the enemy, creating up to 6 spears to attack with.
+
+The number of spears you can create depends on skill level. Damage scales with INT and skill level. Mastering the skill grants a substantial bonus.

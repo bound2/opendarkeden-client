@@ -1,0 +1,2 @@
+%101
+A belt with 8 pockets, holding up to 8 quick items. Its front forms an X, with 2 more pockets than the Medium Belt. The more pockets a belt has, the greater its weight and defense.

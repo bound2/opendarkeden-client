@@ -1,0 +1,1 @@
+An area passive skill that has a set chance to deal earth damage over 3 tiles up, down, left and right of the caster. It only works with earth soul stones in slots 1 and 2 and a fire soul stone in slot 3. The damage bonus depends on DEX and STR, and the success rate on spirit level.

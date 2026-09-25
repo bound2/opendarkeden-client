@@ -1,0 +1,8 @@
+%1031
+Master Blaser LRS(250) is a sniper rifle usable by Slayers of Advancement level 250 or higher. This item is obtained by enchanting an existing Advancement Sniper Rifle with a Reliance Drop.
+
+< Hidden Option >
+HP : +1800
+Evasion : +200
+Physical Damage: +100
+Magic Damage: +100

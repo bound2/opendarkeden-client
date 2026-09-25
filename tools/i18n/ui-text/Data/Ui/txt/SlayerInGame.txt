@@ -1,0 +1,56 @@
+At the Field Headquarters you can learn Heal and Enchant skills from Tanya.
+At the Field Headquarters you can learn gun skills from Jacques.
+At the Field Headquarters you can learn sword and blade skills from Kaiser.
+Press Control+H to view the help.
+Press Control+K to see your Domain levels and skill levels.
+The hotkey that opens the belt's quick slots is Control+~.
+Which stats rise depends on your weapon.
+With blades & swords, STR rises more than your other stats.
+With guns, DEX rises more than your other stats.
+With crosses & maces, INT rises more than your other stats.
+Sum usually means the total of STR + DEX + INT.
+Keep using a sword as your weapon and your Sword Domain level rises.
+Keep using a blade as your weapon and your Blade Domain level rises.
+Keep using a gun as your weapon and your Gun Domain level rises.
+Keep using a cross as your weapon and your Heal Domain level rises.
+Keep using a mace as your weapon and your Enchant Domain level rises.
+To recover HP, right-click an ampul.
+A dark red stain on your HP bar means your blood has been drained.
+Monsters and Vampires can only drain your blood when your HP bar is at 30% or below.
+You raise a skill's level by using that skill again and again.
+To use a skill, bring it up in the skill window and right-click the target.
+Skills are learned as your Domain levels rise.
+As a skill's level rises, you get a small Damage and To Hit bonus.
+Skill level shows how well you have mastered a skill, and it rises as you use the skill.
+Your Domain levels rise according to the weapon you use.
+You can learn skills once a Domain reaches level 5.
+Soldiers load bullets by right-clicking a magazine.
+Soldiers using guns: each gun takes a different magazine, so buy the right one.
+Soldiers using guns: the number next to the bullet icon at the top left of the screen shows how many rounds are left.
+Put ampuls or magazines on your belt to use them easily with the hotkeys (F1~F8).
+The radio is an item for traveling to other areas.
+You can buy a radio from the NPC who sells motorcycles.
+You can only use a radio once your stats total more than 80.
+Motorcycles can be bought from the NPC in front of each guild building.
+Motorcycles have no durability, so they never need repairs.
+After you reconnect, your motorcycle disappears from where it was.
+If your Alignment is bad, you can raise it by donating money to an NPC.
+Slayers can set their respawn point only once their stat total (sum) is 40 or more.
+Use the Helicopter on the roof of a guild building to travel to another guild building.
+You can buy equipment on the 2nd and 3rd floors of the guild buildings.
+You can set a respawn point at each guild so you come back to life wherever suits you.
+On the 3rd floor of each guild building, you can donate money to raise your Alignment up to Neutral (-2500).
+Silver plating adds a sacred power called holy damage to your base Damage.
+If you want to play as a Vampire, have your blood drained and then go without treatment for 12 hours in real time.
+If you are not treated after having your blood drained, you turn into a Vampire after 12 hours, whether or not you are logged in.
+When you turn into a Vampire, your Slayer stats and items are lost.
+When you are wounded or your blood has been drained, go to 'Dennis' for treatment.
+Use the ampuls in your inventory window by right-clicking them.
+To make holy water, buy a water bottle, select the skill and use it on the water bottle.
+At character creation, your starting stats total 30.
+Slayers grow through a skill-up system, not a level-up system.
+MP : Exists only for Slayers and is needed to use special techniques and magic.
+Resistance (RESISTANCE) : The power to withstand Vampire POISON, ACID, CURSE and BLOOD magic.
+Resistance (RESISTANCE) : Increased only by items and certain skills.
+The total of your Domain levels is capped at 100.
+If your Domain levels total 100 or more, the highest-level Domain other than the one that just rose goes down.

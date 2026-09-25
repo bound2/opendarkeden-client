@@ -1,0 +1,3 @@
+A basic mid-range attack spell of the Earth domain; damage increases with INT and skill level. Range depends on skill level.
+
+A spell that borrows the fearsome strength of the dwarves, fairies of the earth, to drop rocks on the enemy.

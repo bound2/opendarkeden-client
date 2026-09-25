@@ -1,0 +1,4 @@
+600 500
+Amata
+You can now take on the Pixie quest.
+Greetings, and congratulations on reaching the required level. As you know, the Pixie is the most timid of all the spirits that help us. They are the greatest help in punishing those who stain the Holy Land with blood, but in danger they shrink to almost nothing. They want to be sure of you, the one who will be their master. If they can trust you completely, they will become very good friends. Can you show them what you are capable of?\n\n*To apply for the quest, go and see Amata in the Ousters Village.

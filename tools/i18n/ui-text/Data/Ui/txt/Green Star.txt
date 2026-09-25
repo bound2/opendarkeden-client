@@ -1,0 +1,14 @@
+%221
+Men taste the freshness of the countryside in green; women taste its boldness. Whatever anyone says, green is the color of health.
+
+The Green Star is an event item that can be exchanged for items or money with the NPCs below, depending on your race and location.
+
+ Field Headquarters NPC : Kaiser
+ Warrior Guild NPC : Conan
+ Soldier Guild NPC : Smith
+ Priest Guild NPC : Stoyanov
+ Vampire Village NPC : Vrykolakas
+
+Use: Stars can be exchanged once you have 20 / 40 / 60 / 80 / 100 of them, for high-grade items with a DEX option or for money.
+
+* To exchange this item for money, you must first collect stars of the same kind, then go to Kaiser, Conan, Smith, Stoyanov, Vrykolakas or the like, select 'I want to exchange my stars for money' and left-click to make the exchange.

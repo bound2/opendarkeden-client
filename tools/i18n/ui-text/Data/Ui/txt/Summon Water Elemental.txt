@@ -1,0 +1,3 @@
+A higher form of the Nymph's healing magic that summons the Nymph, the water spirit, to shower the summoner and many Ousters with water of life carrying the Nymph's blessing. It heals by flooding a wide area with the Nymph's water of life.
+
+The spirit follows the character and casts Nymph Recovery. When you are in a Party, it casts Nymph Recovery on every Party member. The amount restored by Nymph Recovery depends on INT and skill level, as does its duration. However, even Party members are only affected if they are on the same screen. Mastering the skill grants a substantial bonus.

@@ -1,0 +1,24 @@
+View Other Character Interface
+
+This interface shows information about other Slayer characters of your own race in the game.
+
+Hotkey : right Control + left-click another Slayer character
+
+
+Character information shown
+---------------------------------------------
+The other Slayer information window shows the following character information.
+ 
+ The Slayer's picture
+ The Slayer's Rank mark
+ The picture of the Slayer's team
+
+ Name      : The Slayer's name
+ Grade     : The Slayer's Rank
+ Team      : The team the Slayer belongs to
+ Level     : The Slayer's class and its level
+ Fame      : The Slayer's Fame
+ STR       : The Slayer's base strength and current strength
+ DEX       : The Slayer's base dexterity and current dexterity
+ INT       : The Slayer's base intelligence and current intelligence
+ Alignment : The Slayer's Alignment

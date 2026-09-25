@@ -1,0 +1,1 @@
+A spell that summons one vampire of a kind you can create. Summoning a stronger vampire, of course, costs you more blood. You also cannot summon a vampire of a higher level than yourself. A summoned vampire can only move within the area where it was first summoned, and vanishes the moment it leaves that area.

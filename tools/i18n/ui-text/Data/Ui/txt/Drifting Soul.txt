@@ -1,0 +1,3 @@
+A passive skill that slowly restores EP on its own; the amount restored increases with skill level.
+
+Through the protection of Shuriel, a middle wind spirit, you can slowly borrow spirit power from drifting spirits.

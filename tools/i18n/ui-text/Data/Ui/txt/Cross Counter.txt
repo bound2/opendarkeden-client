@@ -1,0 +1,1 @@
+Cross Counter, a counterattack, watches for the opening an enemy leaves when attacking and strikes back swiftly. In exchange, you must be ready to take some wounds yourself. While the skill lasts, you automatically counterattack whenever an enemy's attack hits you.

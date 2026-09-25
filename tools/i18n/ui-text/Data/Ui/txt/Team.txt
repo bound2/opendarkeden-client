@@ -1,0 +1,47 @@
+Team Interface
+
+DKx Online has many teams on each world.
+By using the interface that suits each situation, you can enjoy a variety of community features in the game.
+Team members can talk with each other using team chat; see the Chat help for details.
+The NPCs who handle team matters are Kakon inside Limbo Castle and Aiman inside Rasen Castle.
+
+How to Use the Team Interface
+-----------------------------
+1. Creating a team
+  - Visit the NPC and say you want to register a team. If you meet the Team Master requirements, the team registration window opens.
+
+  - Enter a team name and a team introduction and register; the team is first registered as a pending team.
+    (Joining fees are not handled automatically in the game. If you want to charge a joining fee, state it in the introduction and collect it from each applicant in the game yourself.)
+
+  - Editing the team introduction is not supported yet, so write it carefully.
+
+  - An official team needs 5 founding members, including the applicant. If you want to be a founding member, select the team you want from the pending team list and apply to join.
+
+  - When a pending team is approved as an official team, the applicant becomes Team Master and the founding members become Sub-Masters.
+
+  - The Team Master can expel members and accept or deny applicants; Sub-Masters can only accept applicants.
+
+  - Team Master requirements
+  Level 50 or higher, 100,000,000 geld
+
+  - Founding member requirements
+  Level 40 or higher, 50,000,000 geld
+
+2. Registering a team mark
+  - A mark appears on pending teams automatically as teams are created and deleted.
+
+3. Viewing team info and members
+  - Select the Team tab on the main interface for the buttons that show team info and the member list, where you can check information about your team and the members who belong to it.
+  - The buttons do nothing for players who are not in a team.
+
+4. Joining a team
+  - A player who wants to join talks to the team NPC and applies for membership in the team of their choice from the team list.
+  - The Team Master opens the member list and selects the applicant. Pressing Accept approves the application and adds them as a member; pressing Deny rejects it, and the applicant cannot apply again for a week.
+
+5. Leaving a team / expelling members
+  - A player who wants to leave can go to the NPC and say they want to leave; they are then removed from the team.
+  - The Team Master can forcibly expel a member by selecting them in the member list and pressing Expel.
+
+6. Deleting a team
+  - Automatic deletion: a team is deleted automatically when it drops to 4 members or fewer.
+  - Manual deletion: a team is deleted when the Team Master expels members until 4 or fewer remain.

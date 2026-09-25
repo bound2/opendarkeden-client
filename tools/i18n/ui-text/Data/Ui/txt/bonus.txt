@@ -1,0 +1,1 @@
+Ousters can distribute their stats freely when creating a character, using the + and - buttons next to STR/DEX/INT. You cannot create the character while bonus points remain.

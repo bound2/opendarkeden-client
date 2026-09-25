@@ -1,0 +1,47 @@
+Guild Interface
+
+DKx Online has many guilds on each world.
+By using the interface that suits each situation, you can enjoy a variety of community features in the game.
+Guild members can talk with each other using guild chat; see the Chat help for details.
+The NPC who handles guild matters is Sioram inside the Ousters Village.
+
+How to Use the Guild Interface
+-----------------------------
+1. Creating a guild
+  - Visit the NPC and say you want to register a guild. If you meet the Guild Master requirements, the guild registration window opens.
+
+  - Enter a guild name and a guild introduction and register; the guild is first registered as a pending guild.
+    (Joining fees are not handled automatically in the game. If you want to charge a joining fee, state it in the introduction and collect it from each applicant in the game yourself.)
+
+  - Editing the guild introduction is not supported yet, so write it carefully.
+
+  - An official guild needs 5 founding members, including the applicant. If you want to be a founding member, select the guild you want from the pending guild list and apply to join.
+
+  - When a pending guild is approved as an official guild, the applicant becomes Guild Master and the founding members become Sub-Masters.
+
+  - The Guild Master can expel members and accept or deny applicants; Sub-Masters can only accept applicants.
+
+  - Guild Master requirements
+  Level 50 or higher, 100,000,000 zad
+
+  - Founding member requirements
+  Level 40 or higher, 50,000,000 zad
+
+2. Registering a guild mark
+  - A mark appears on pending guilds automatically as guilds are created and deleted.
+
+3. Viewing guild info and members
+  - Select the Guild tab on the main interface for the buttons that show guild info and the member list, where you can check information about your guild and the members who belong to it.
+  - The buttons do nothing for players who are not in a guild.
+
+4. Joining a guild
+  - A player who wants to join talks to the guild NPC and applies for membership in the guild of their choice from the guild list.
+  - The Guild Master opens the member list and selects the applicant. Pressing Accept approves the application and adds them as a member; pressing Deny rejects it, and the applicant cannot apply again for a week.
+
+5. Leaving a guild / expelling members
+  - A player who wants to leave can go to the NPC and say they want to leave; they are then removed from the guild.
+  - The Guild Master can forcibly expel a member by selecting them in the member list and pressing Expel.
+
+6. Deleting a guild
+  - Automatic deletion: a guild is deleted automatically when it drops to 4 members or fewer.
+  - Manual deletion: a guild is deleted when the Guild Master expels members until 4 or fewer remain.

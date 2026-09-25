@@ -1,0 +1,1 @@
+Vampires skilled with poison can gather a weak, non-lasting poison on their sharp fingertips to attack the enemy. The victim takes additional poison damage on top of the physical damage. However, this bonus does not apply to fellow Vampires, who are naturally resistant to poison.

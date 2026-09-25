@@ -1,0 +1,6 @@
+%1032
+The Cabal (215) is an assault rifle usable by Slayers of Advancement grade 65 and above. It can be obtained by enchanting an existing Advancement assault rifle with an Old Drop.
+
+< Hidden Option >
+HP : +750
+Evasion : +200

@@ -1,0 +1,6 @@
+%1053
+Master Imperium Boots(50) is lower-body armor usable by Ousters of Advancement grade 50 or higher. This item is obtained by enchanting existing Advancement lower-body armor with a Reliance Drop.
+
+< Hidden Option >
+Physical Defense +10
+Magic Defense +10

@@ -1,0 +1,118 @@
+DKx Online Basic Help (HELP)
+
+Hotkey : H
+
+Every window on screen can be moved to suit you.
+Moved window positions and states and your hotkey settings are saved per character in the UserSet folder inside the DarkEden folder, together with your options.
+To return to the original settings, delete the settings files in that folder.
+
+Screen interface overview
+-------------------------
+< Common to all interfaces >
+Depending on its role, each interface has an Auto-Hide button and a Translucent button.
+When an interface is docked at the edge of the screen and its Auto-Hide button is on, it slides off screen and comes back when you move the mouse over it.
+If interfaces slide in and out too slowly, turn off smooth auto-hide in the Options and they will move quickly.
+
+< Top of the screen >
+
+HP, MP bars
+
+Watch your health and mana fill up and drain. For Slayers, red is HP and blue is MP, and the bars can be moved and repositioned freely. At the right end of the bar is a horizontal/vertical toggle button, and at the left end an enlarge/shrink button.
+
+Magic status window
+
+Move the cursor to the very top center of the screen to find the magic status window. It shows the spells currently on your character, and shows nothing when no spells are active.
+
+Minimap
+
+Hotkey : Control+M
+A scaled-down view of the area your character is in, so you can see it at a glance. With the Auto-Hide and Translucent buttons you can hide it from the screen or show it translucent.
+
+
+< Bottom of the screen >
+
+Quick item window (Belt)
+
+Hotkey : Control+~
+A window where you place items such as ampuls and magazines for easy use. Move the cursor to the right side of the quick item window and click the highlighted part to switch it between horizontal and vertical.
+
+Chat window
+
+See the Chat help for details.
+
+System
+
+Holds the skill window, the date and time display, the menu, Experience (Exp) and the Help tab.
+See the Skill help for details on the skill window.
+
+Menu : Holds the Inventory, Gear, Information and Party window buttons.
+Experience (Exp) : Shows your stats and the Experience in each higher Domain.
+Help : Holds all kinds of help to make playing easier.
+
+
+In DKx Online you can perform many actions by combining keyboard and mouse input.
+
+Input overview
+--------------------
+
+        Left click : Move, attack, pick up and drop items, follow (safe zone)
+      Right click : Use a technique/spell, use an item
+ ALT   + left click : Trade items (safe zone)
+ R-ALT + left click : Form a party
+ CTRL  + left click : Follow (combat zone)
+ SHIFT + left click : Force attack
+
+         Left ALT : List the items lying on the ground
+
+              Tab : Inventory window on/off
+       CTRL + Tab : Gear window on/off
+       CTRL + S   : Quick skills on/off
+       CTRL + M   : Minimap on/off
+
+       CTRL + ~   : Quick items on/off
+       CTRL + I   : Information window on/off
+       CTRL + K   : Skill window on/off
+
+       CTRL + H   : Basic help
+         F1 ~ F8  : Use quick items (Belt)
+         F9 ~ F12 : Select and assign quick skills
+
+      SCROLL LOCK : Take a screenshot (Screenshot)
+
+              ESC : Game menu
+
+ * You can change each hotkey in the Options to suit you.
+ * In chat mode, hotkeys that type into chat, such as S, I and K, cannot be used on their own. They work together with the Control or Alt key, so when changing hotkeys it is best not to use combinations with Control or Alt in particular.
+ * For the chat hotkeys, see the Chat help.
+ 
+Input in detail
+----------------------------------
+
+1. Moving, attacking and following
+
+          Move : Left-click the spot you want to go to. To keep moving, drag the mouse in the direction you want to go.
+          Attack : Left-click the enemy you want to attack. Attacking works only on other races or monsters; to attack a fellow Slayer or Vampire you must use a force attack. Targets you can attack get a red outline when you hover the cursor over them.
+          Force attack : Hold SHIFT and left-click the target you want to force attack. Be careful, though: attacking your own race often worsens your Alignment and brings various penalties.
+          View names : In combat zones, hold CTRL and hover the mouse over a player to see their name. In safe zones, just hovering the mouse shows the name.
+          Follow : Hold CTRL and left-click the player you want to follow. In safe zones, shown in green on the minimap, a plain left-click is enough. Following only works on your own race.
+   Ride a Motorcycle : Left-click your own Motorcycle to get on. The Motorcycle's key must be in your inventory.
+ Get off a Motorcycle : While riding, right-click the ground.
+
+2. Dropping and picking up, equipping and removing, using and trading items
+
+       Pick up items : Left-click an item on the ground or in the inventory.
+     Drop items : Left-click the ground or the inventory with the item you are holding.
+   Equip items : Open the gear interface, click an item in the inventory, then left-click the slot you want to equip it in. Items shown in red in the gear window can be worn, but their own stats and options do not apply.
+     Remove items : Open the gear interface and left-click the item you want to remove.
+   Use items : Right-click the item you want to use in the quick item (Belt) interface or the inventory interface.
+   Trade items : In a safe zone, hold ALT and left-click.
+     View quick items : Press the ~ key to show the quick items at the top left of the chat window. Quick items only appear when you are wearing a Belt.
+ Use quick items : Open the quick item interface and right-click the item you want to use, or press the F1 ~ F8 hotkeys to use the item in the matching slot.
+
+3. Selecting and using techniques/spells
+
+ See the Skill help for details.
+
+4. Using the chat window
+
+ See the Chat help for details.
