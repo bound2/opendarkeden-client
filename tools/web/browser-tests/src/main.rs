@@ -7,6 +7,7 @@
 mod chrome;
 mod client;
 mod renderer;
+mod touch;
 mod transport;
 
 use std::fmt;
@@ -26,6 +27,10 @@ commands:
   client [url]
       real-client smoke test; needs the packaged game data
       (default http://127.0.0.1:18739/)
+  touch [url]
+      touch controls with browser-generated multitouch; no game data needed
+  client-touch [url]
+      real-client smoke test with touch and the browser text editor
 
 environment:
   WEB_TEST_BROWSER          Chrome or Chromium executable
@@ -59,6 +64,8 @@ fn main() -> ExitCode {
         "renderer" => renderer::run(rest),
         "transport" => transport::run(rest),
         "client" => client::run(rest),
+        "touch" => touch::run(rest),
+        "client-touch" => client::run_touch(rest),
         "help" | "-h" | "--help" => {
             print!("{USAGE}");
             return ExitCode::SUCCESS;

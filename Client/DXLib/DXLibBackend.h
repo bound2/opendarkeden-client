@@ -123,6 +123,12 @@ void dxlib_input_start_text(void);
  */
 void dxlib_input_stop_text(void);
 
+// Browser controls share the physical key bindings. A tap remains visible
+// until the adapter has sampled a frame, even if both edges arrived together.
+void dxlib_input_virtual_key(int dik_key, int down);
+void dxlib_input_virtual_reset(void);
+void dxlib_input_virtual_finish_frame(void);
+
 /* ============================================================================
  * Sound Backend Interface
  * ============================================================================ */

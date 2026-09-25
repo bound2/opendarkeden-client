@@ -54,8 +54,8 @@ help, book and tutorial resources, which the client prefers over the Korean
 members of the `.rpk` archives (see `tools/i18n/README.md`). The launcher verifies every
 file and caches downloads by hash. The tested pack has 2,022 files and is about
 1.85 GB, including the font. This first version loads the complete pack before
-play, so allow several GB of browser memory and disk space. Asset streaming and
-mobile/touch controls are future work.
+play, so allow several GB of browser memory and disk space. Asset streaming is
+future work; adding touch controls does not reduce this memory requirement.
 
 Edit `build/web/client-config.json` for the deployment:
 
@@ -93,6 +93,43 @@ session-only settings. Deploy over HTTPS and serve `.wasm` as `application/wasm`
 Publish each JS/WASM bundle atomically, and revalidate launcher/module files to
 avoid mixing versions. The asset cache uses separate content hashes. No
 cross-origin isolation headers or browser plugins are required.
+
+## iPad and touch controls
+
+Open the deployed **HTTPS** address in Safari on the iPad, load the game, and tap
+**Play**. An iPad cannot use the PC's `127.0.0.1` address; use a reachable HTTPS
+deployment with its gateway configured for that origin. The local Docker default
+is deliberately bound to the PC's loopback address. The launcher's verified asset
+downloads require a secure context (plain HTTP on a LAN IP is not sufficient).
+
+Touch controls appear automatically on touch-capable devices; **Touch controls**
+also shows or hides them manually. Mouse and hardware keyboard input still work.
+
+- **Move / attack**: tap for a left click, or hold and drag to keep moving or
+  attacking. Inventory dragging uses the same gesture.
+- **Skill (right click)**: tap or drag the target to use the selected skill.
+- **Inspect**: drag the cursor over items or UI to read hover information without
+  clicking. Choose Move / attack again to interact.
+- **Loot (Alt)** toggles loot labels. Quick keys provide 1–5 and F1–F4; **More keys**
+  exposes the remaining number/function keys, letters, Tab, arrows, scrolling,
+  and Shift/Ctrl toggles. These use the game's existing key bindings (Tab opens
+  inventory by default). A second finger can press a shortcut while the first
+  finger holds a target.
+- To type, tap the game's field, then **Keyboard**. Edit with the iPad keyboard
+  and tap **Apply**, then **Enter** if needed to submit in game. **Cancel** leaves
+  the field unchanged. Password fields stay masked; character limits are checked
+  before applying. For chat, use Enter to focus the chat field first.
+
+Releasing or cancelling a touch releases its button. Changing tabs, rotating,
+changing fullscreen, or hiding controls clears held shortcuts and modifiers.
+Fullscreen includes the controls; where the Fullscreen API is unavailable, the
+button expands the game within the page and becomes **Exit fullscreen**.
+
+The controls use [Pointer Events supported by iPadOS Safari](https://webkit.org/blog/9674/new-webkit-features-in-safari-13/).
+Keyboard activation happens directly from the Keyboard button's gesture using a
+real HTML input, as described in [Apple's iPad web-content guide](https://developer.apple.com/library/archive/technotes/tn2010/tn2262/_index.html).
+Automated touch emulation is not a measurement of physical iPad performance or
+memory capacity; the full asset pack and busy gameplay still need device testing.
 
 ## Container
 
@@ -177,6 +214,8 @@ needs a Rust toolchain and nothing from npm. Serve `build/web` on
 cargo run --release --manifest-path tools/web/browser-tests/Cargo.toml -- renderer
 cargo run --release --manifest-path tools/web/browser-tests/Cargo.toml -- transport
 cargo run --release --manifest-path tools/web/browser-tests/Cargo.toml -- client
+cargo run --release --manifest-path tools/web/browser-tests/Cargo.toml -- touch
+cargo run --release --manifest-path tools/web/browser-tests/Cargo.toml -- client-touch
 ```
 
 Each command exits 0 on success, 1 on a failed check or an invalid environment
@@ -215,3 +254,13 @@ shipped launcher carries no test hooks; the check fails if the launcher no longe
 contains the patched statements. Screenshots and `client.log` are written under
 `build/web-smoke`. Live authenticated gameplay against a populated server is a
 separate integration check; these probes do not claim that coverage.
+
+`touch [url]` drives browser-generated multitouch against the shipped page and
+touch module with recorded game callbacks, without downloading assets. It checks
+tap/drag edges, multiple fingers, right click, hover, shortcuts, cancellation,
+blur, text entry and masking, portrait layout, and the fullscreen fallback.
+`client-touch [url]` uses the real WebAssembly client and packaged assets for
+touch navigation and username/password entry, followed by the same resize,
+fullscreen, shutdown and settings checks as `client`. Use `WEB_TEST_DPR=2` to
+exercise scaled canvas coordinates. Both use Chrome's touch emulation; Safari's
+software keyboard and authenticated gameplay are not covered by this harness.

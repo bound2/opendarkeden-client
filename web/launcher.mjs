@@ -1,11 +1,14 @@
 import createDarkEden from './DarkEden.mjs';
+import { installTouchControls } from './touch-controls.mjs';
 
 const canvas = document.querySelector('#canvas');
 const status = document.querySelector('#status');
 const progress = document.querySelector('#progress');
 const play = document.querySelector('#play');
 const fullscreen = document.querySelector('#fullscreen');
+const shell = document.querySelector('#game-shell');
 let client;
+let touchControls;
 function resizeCanvas() {
   if (!client || canvas.hidden) return;
   const rect = canvas.getBoundingClientRect();
@@ -21,8 +24,17 @@ canvas.addEventListener('webglcontextlost', event => {
   status.textContent = 'The graphics device was disconnected. Reload the page to reconnect.';
 });
 fullscreen.addEventListener('click', async () => {
-  try { await canvas.requestFullscreen(); canvas.focus(); }
-  catch { status.textContent = 'Fullscreen is unavailable. You can continue playing in this window.'; }
+  if (document.fullscreenElement) await document.exitFullscreen();
+  else if (shell.classList.contains('expanded')) shell.classList.remove('expanded');
+  else {
+    try { await shell.requestFullscreen(); }
+    catch { shell.classList.add('expanded'); }
+  }
+  fullscreen.textContent = document.fullscreenElement || shell.classList.contains('expanded') ? 'Exit fullscreen' : 'Fullscreen';
+  canvas.focus({ preventScroll: true });
+});
+document.addEventListener('fullscreenchange', () => {
+  fullscreen.textContent = document.fullscreenElement ? 'Exit fullscreen' : 'Fullscreen';
 });
 
 function syncSettings(populate) {
@@ -100,8 +112,9 @@ play.addEventListener('click', async () => {
           module.ENV.DARKEDEN_LOGIN_PORT = String(config.loginPort);
         }],
         print: line => console.log(line), printErr: line => console.warn(line),
-        onAbort: () => { status.textContent = 'The game stopped unexpectedly. Reload the page to try again.'; },
+        onAbort: () => { touchControls?.stop(); status.textContent = 'The game stopped unexpectedly. Reload the page to try again.'; },
         onExit: async () => {
+          touchControls?.stop();
           try {
             await syncSettings(false);
             status.textContent = 'The game has closed. Reload the page to play again.';
@@ -123,10 +136,12 @@ play.addEventListener('click', async () => {
       return;
     }
     canvas.hidden = false;
-    fullscreen.hidden = false;
+    shell.hidden = false;
+    document.body.classList.add('playing');
     play.hidden = true;
     status.textContent = '';
     canvas.focus();
+    touchControls = installTouchControls(client, canvas, shell);
     client.callMain([]);
   } catch (error) {
     console.error(error);

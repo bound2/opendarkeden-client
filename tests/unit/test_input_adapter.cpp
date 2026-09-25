@@ -9,6 +9,39 @@
 #include <cstring>
 #include <string>
 
+TEST(InputAdapter, VirtualKeyTapSurvivesTwoEventPumpsAndOneAdapterFrame)
+{
+	CSDLInput input;
+	CHECK(input.Init(nullptr, nullptr));
+	dxlib_input_virtual_key(DIK_F1, 1);
+	dxlib_input_virtual_key(DIK_F1, 0);
+	dxlib_input_update();
+	dxlib_input_update();
+	input.UpdateInput();
+	CHECK(input.KeyDown(DIK_F1));
+	input.UpdateInput();
+	CHECK(!input.KeyDown(DIK_F1));
+}
+
+TEST(InputAdapter, VirtualHeldKeysAndCancellationCannotStick)
+{
+	CSDLInput input;
+	CHECK(input.Init(nullptr, nullptr));
+	dxlib_input_virtual_key(DIK_LMENU, 1);
+	input.UpdateInput();
+	input.UpdateInput();
+	CHECK(input.KeyDown(DIK_LMENU));
+	dxlib_input_virtual_key(DIK_F2, 1);
+	dxlib_input_virtual_reset();
+	input.UpdateInput();
+	CHECK(!input.KeyDown(DIK_LMENU));
+	CHECK(!input.KeyDown(DIK_F2));
+	dxlib_input_virtual_key(-1, 1);
+	dxlib_input_virtual_key(256, 1);
+	CHECK(!dxlib_input_key_down(-1));
+	CHECK(!dxlib_input_key_down(256));
+}
+
 #ifndef DXLIB_BACKEND_SDL
 #error dxlib must publish its backend selection to consumers
 #endif

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Dark Eden</title>
 <style>
   :root { color-scheme: dark; font: 16px system-ui, sans-serif; background: #100e10; color: #eee6db; }
@@ -12,17 +12,58 @@
   button:disabled { opacity: .5; cursor: default; }
   #status { min-height: 1.5rem; padding: 0 1rem; }
   progress { width: min(30rem, 90%); accent-color: #a77b54; }
-  canvas { display: block; width: min(100%, calc((100dvh - 180px) * 1.333333)); height: auto; aspect-ratio: 4 / 3; margin: auto; background: black; outline: none; }
-  canvas:fullscreen { width: 100vw; height: 100vh; }
-  [hidden] { display: none; }
+  #game-shell { position: relative; display: flex; flex-direction: column; height: calc(100dvh - 80px); background: #100e10; }
+  canvas { display: block; width: 100%; height: 0; flex: 1; min-height: 0; background: black; outline: none; touch-action: none; -webkit-touch-callout: none; }
+  #game-shell:fullscreen, #game-shell.expanded { width: 100%; height: 100dvh; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); box-sizing: border-box; }
+  #game-shell.expanded { position: fixed; inset: 0; z-index: 10; }
+  .playing h1, .playing #play { display: none; }
+  #game-shell button { min-width: 44px; min-height: 44px; margin: 2px; padding: .4rem .65rem; touch-action: none; user-select: none; -webkit-user-select: none; }
+  button[aria-pressed="true"] { background: #795532; border-color: #ebc592; }
+  #touch-controls { padding: 2px; }
+  .control-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; }
+  #extra-keys { max-height: 25dvh; overflow-y: auto; }
+  #extra-keys button { touch-action: pan-y; }
+  #touch-help { margin: .3rem; font-size: .8rem; }
+  #text-entry { position: absolute; top: env(safe-area-inset-top, 0px); left: 0; right: 0; padding: .5rem; background: #211a17; z-index: 1; }
+  #text-value { font: 18px system-ui, sans-serif; width: min(90%, 30rem); padding: .5rem; box-sizing: border-box; }
+  #text-message { margin: .25rem; }
+  @media (max-height: 600px) { #touch-help { display: none; } #game-shell { height: calc(100dvh - 30px); } }
+  [hidden] { display: none !important; }
 </style>
 <main>
   <h1>DARK EDEN</h1>
   <p id="status" role="status">Load the game to begin.</p>
   <progress id="progress" hidden></progress>
-  <div><button id="play">Load game</button><button id="fullscreen" hidden>Fullscreen</button></div>
-  <!-- SDL's Emscripten backend uses #canvas for size and input callbacks. -->
-  <canvas id="canvas" width="800" height="600" tabindex="0" aria-label="Dark Eden game" hidden></canvas>
+  <button id="play">Load game</button>
+  <section id="game-shell" aria-label="Game and controls" hidden>
+    <!-- SDL's Emscripten backend uses #canvas for size and input callbacks. -->
+    <canvas id="canvas" width="800" height="600" tabindex="0" aria-label="Dark Eden game" hidden></canvas>
+    <div class="control-row">
+      <button id="fullscreen">Fullscreen</button>
+      <button id="touch-toggle" aria-pressed="false">Touch controls</button>
+    </div>
+    <div id="touch-controls" hidden>
+      <div class="control-row">
+        <button data-mode="left" aria-pressed="true">Move / attack</button>
+        <button data-mode="right" aria-pressed="false">Skill (right click)</button>
+        <button data-mode="hover" aria-pressed="false">Inspect</button>
+        <button data-toggle-key="56" aria-pressed="false">Loot (Alt)</button>
+        <button id="keyboard">Keyboard</button>
+        <button data-key="28">Enter</button>
+        <button data-key="1">Esc</button>
+        <button id="more-keys" aria-expanded="false">More keys</button>
+      </div>
+      <div id="quick-keys" class="control-row"></div>
+      <div id="extra-keys" hidden></div>
+      <p id="touch-help">Tap or drag to move, attack or use a skill. Inspect moves the cursor without clicking. Tap a text field, then Keyboard to type.</p>
+    </div>
+    <form id="text-entry" hidden>
+      <label for="text-value">Text for the selected game field</label><br>
+      <input id="text-value" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done">
+      <button type="submit">Apply</button><button id="text-cancel" type="button">Cancel</button>
+      <p id="text-message" role="status"></p>
+    </form>
+  </section>
 </main>
 <script type="module" src="launcher.mjs"></script>
 </html>

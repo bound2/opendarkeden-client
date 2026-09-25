@@ -23,6 +23,43 @@ struct TextInputSession
 
 } // namespace
 
+TEST(EditorFocus, BrowserReplacementUsesTheCurrentFieldAndCharacterLimit)
+{
+	TextInputSession session;
+	LineEditorVisual editor;
+	editor.SetByteLimit(3);
+	editor.Acquire();
+	auto& focus = InputFocusManager::GetInstance();
+	const auto serial = focus.GetFocusSerial();
+	CHECK(focus.ReplaceText(serial, "a\xF0\x9F\x98\x80" "b"));
+	CHECK(!focus.ReplaceText(serial, "a\xF0\x9F\x98\x80" "bc"));
+	CHECK_EQ(3, editor.Size());
+	CHECK(std::strcmp(editor.GetString(), "a\xF0\x9F\x98\x80" "b") == 0);
+	CHECK(focus.ReplaceText(serial, ""));
+	CHECK_EQ(0, editor.Size());
+	editor.SetByteLimit(100);
+	const std::string longerThanSdlEvent(80, 'x');
+	CHECK(focus.ReplaceText(serial, longerThanSdlEvent.c_str()));
+	CHECK_EQ(80, editor.Size());
+}
+
+TEST(EditorFocus, BrowserReplacementRejectsAStaleFieldEvenAfterRefocus)
+{
+	TextInputSession session;
+	LineEditorVisual first, second;
+	first.Acquire();
+	auto& focus = InputFocusManager::GetInstance();
+	const auto serial = focus.GetFocusSerial();
+	second.Acquire();
+	CHECK(!focus.ReplaceText(serial, "wrong field"));
+	first.Acquire();
+	CHECK(!focus.ReplaceText(serial, "old edit"));
+	first.Unacquire();
+	CHECK(!focus.ReplaceText(focus.GetFocusSerial(), "closed"));
+	CHECK_EQ(0, first.Size());
+	CHECK_EQ(0, second.Size());
+}
+
 TEST(EditorFocus, AcquiringAndReleasingTheFocusedFieldControlsSdlInput)
 {
 	TextInputSession session;
