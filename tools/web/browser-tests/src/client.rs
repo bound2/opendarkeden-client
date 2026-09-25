@@ -45,6 +45,14 @@ const CANVAS_SIZE: &str = r"(() => {
 })()";
 
 pub fn run(args: &[String]) -> Result<()> {
+    run_with_input(args, false)
+}
+
+pub fn run_touch(args: &[String]) -> Result<()> {
+    run_with_input(args, true)
+}
+
+fn run_with_input(args: &[String], touch: bool) -> Result<()> {
     let url = match args {
         [] => DEFAULT_URL,
         [url] => url.as_str(),
@@ -64,6 +72,9 @@ pub fn run(args: &[String]) -> Result<()> {
     })?;
     let tab = &chrome.tab;
     chrome::set_viewport(tab, 1280, height, scale)?;
+    if touch {
+        crate::touch::enable(tab)?;
+    }
     let patch_failure = patch_launcher_responses(tab, software_sprites)?;
     chrome::call::<Network::Enable>(tab, json!({}))?;
     tab.call_method(Network::ClearBrowserCache(None))?;
@@ -82,6 +93,7 @@ pub fn run(args: &[String]) -> Result<()> {
         output: &output,
         scale,
         patch_failure: &patch_failure,
+        touch,
     };
     let result = smoke.run(url, &mut transcript);
     transcript.collect();
@@ -261,6 +273,7 @@ struct Smoke<'a> {
     output: &'a Path,
     scale: f64,
     patch_failure: &'a Mutex<Option<String>>,
+    touch: bool,
 }
 
 impl Smoke<'_> {
@@ -303,7 +316,16 @@ impl Smoke<'_> {
 
         self.click_game(714.0, 380.0)?;
         let login = self.screenshot("login.png")?;
-        chrome::type_text(tab, "browserprobe", Duration::from_millis(60))?;
+        if self.touch {
+            self.touch_text("browserprobe", false)?;
+            crate::touch::tap(tab, "#more-keys")?;
+            crate::touch::tap(tab, "[data-key='15']")?;
+            thread::sleep(Duration::from_millis(200));
+            self.touch_text("touchpass", true)?;
+            crate::touch::tap(tab, "#more-keys")?;
+        } else {
+            chrome::type_text(tab, "browserprobe", Duration::from_millis(60))?;
+        }
         thread::sleep(Duration::from_millis(400));
         let typed = self.screenshot("login-text.png")?;
         ensure!(login != typed, "Typing must update the login field");
@@ -312,7 +334,7 @@ impl Smoke<'_> {
         chrome::click_element(tab, "#fullscreen")?;
         chrome::wait_for(
             tab,
-            "document.fullscreenElement === document.querySelector('canvas')",
+            "document.fullscreenElement === document.querySelector('#game-shell')",
             WAIT_TIMEOUT,
             "fullscreen",
         )?;
@@ -376,6 +398,33 @@ impl Smoke<'_> {
         }
     }
 
+    fn touch_text(&self, value: &str, password: bool) -> Result<()> {
+        let tab = self.tab;
+        crate::touch::tap(tab, "#keyboard")?;
+        ensure!(
+            chrome::eval(tab, "document.activeElement.id === 'text-value'")? == Value::Bool(true),
+            "Touch keyboard must focus the DOM input"
+        );
+        ensure!(
+            chrome::eval(
+                tab,
+                "document.querySelector('#text-value').type === 'password'"
+            )? == Value::Bool(password),
+            "Password masking must match the selected game field"
+        );
+        chrome::eval(tab, "document.querySelector('#text-value').value = ''")?;
+        chrome::type_text(tab, value, Duration::ZERO)?;
+        crate::touch::tap(tab, "#text-entry button[type=submit]")?;
+        ensure!(
+            chrome::eval(
+                tab,
+                "window.testClient.ccall('darkeden_text_value','string',[],[])"
+            )? == Value::String(value.to_owned()),
+            "Touch text must reach the actual game field once"
+        );
+        Ok(())
+    }
+
     fn check_canvas_size(&self) -> Result<()> {
         let size = chrome::eval(self.tab, CANVAS_SIZE)?;
         ensure!(
@@ -398,12 +447,13 @@ impl Smoke<'_> {
         )?)?;
         let [left, top, width, height] = rect;
         let scale = (width / 800.0).min(height / 600.0);
-        chrome::click_at(
-            self.tab,
-            left + (width - 800.0 * scale) / 2.0 + x * scale,
-            top + (height - 600.0 * scale) / 2.0 + y * scale,
-            Duration::from_millis(100),
-        )?;
+        let x = left + (width - 800.0 * scale) / 2.0 + x * scale;
+        let y = top + (height - 600.0 * scale) / 2.0 + y * scale;
+        if self.touch {
+            crate::touch::tap_at(self.tab, x, y)?;
+        } else {
+            chrome::click_at(self.tab, x, y, Duration::from_millis(100))?;
+        }
         thread::sleep(Duration::from_millis(400));
         Ok(())
     }

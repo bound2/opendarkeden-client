@@ -2,6 +2,7 @@
 #define __INPUT_FOCUS_MANAGER_H__
 
 #include <cstddef>  // for NULL
+#include <cstdint>
 
 /**
  * InputFocusManager - Global text input focus management
@@ -44,6 +45,10 @@ public:
 	// Check if any editor currently has focus
 	bool HasFocus() const { return m_focusedEditor != NULL; }
 
+	// A browser keyboard edit must not replace a field opened since it began.
+	uint32_t GetFocusSerial() const { return m_focusSerial; }
+	bool ReplaceText(uint32_t serial, const char* text);
+
 private:
 	// Private constructor for singleton
 	InputFocusManager();
@@ -55,6 +60,7 @@ private:
 
 	// Currently focused text editor
 	LineEditorVisual* m_focusedEditor;
+	uint32_t m_focusSerial = 0;
 };
 
 // Global accessor for use in DXLibBackendSDL (which cannot include VS_UI headers)

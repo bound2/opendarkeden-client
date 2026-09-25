@@ -18,7 +18,8 @@ RUN mkdir -p /work && WEB_BUILD_JOBS="$WEB_BUILD_JOBS" WEB_BUILD_TARGETS=DarkEde
 
 FROM nginx:1.27-alpine
 COPY --from=build /work/build-wasm/bin/DarkEden.mjs /work/build-wasm/bin/DarkEden.wasm \
-    /work/build-wasm/bin/index.html /work/build-wasm/bin/launcher.mjs /usr/share/nginx/html/
+    /work/build-wasm/bin/index.html /work/build-wasm/bin/launcher.mjs \
+    /work/build-wasm/bin/touch-controls.mjs /usr/share/nginx/html/
 COPY docker/nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY docker/40-client-config.sh /docker-entrypoint.d/40-client-config.sh
 RUN chmod +x /docker-entrypoint.d/40-client-config.sh && mkdir -p /usr/share/nginx/html/assets

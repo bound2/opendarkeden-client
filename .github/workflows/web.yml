@@ -68,6 +68,7 @@ jobs:
             sleep 1
           done
           cargo run --release --manifest-path tools/web/browser-tests/Cargo.toml -- renderer
+          cargo run --release --manifest-path tools/web/browser-tests/Cargo.toml -- touch
           cargo run --release --manifest-path tools/web/browser-tests/Cargo.toml -- transport
       - name: Upload browser build and diagnostics
         if: always()

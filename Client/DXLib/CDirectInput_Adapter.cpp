@@ -148,6 +148,8 @@ void CSDLInput::UpdateInput()
 		}
 	}
 
+	dxlib_input_virtual_finish_frame();
+
 	// Wheel: a delta since the last frame is all the game wants.
 	m_mouse_z = dxlib_input_get_mouse_wheel();
 

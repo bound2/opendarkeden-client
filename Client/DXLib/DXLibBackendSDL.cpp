@@ -34,6 +34,12 @@ extern "C" void spritectl_render_device_reset(void);
 #include <cstdint>
 #include <limits>
 #include <utility>
+#include <iterator>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#else
+#define EMSCRIPTEN_KEEPALIVE
+#endif
 
 /* For MP3/OGG support.
  * HAVE_SDL2_MIXER comes from Client/DXLib/CMakeLists.txt when SDL2_mixer is
@@ -194,6 +200,8 @@ static int g_stream_initialized = 0;
 
 /* Input state */
 static Uint8 g_key_state[SDL_NUM_SCANCODES];
+static bool g_virtual_keys[256] = {};
+static bool g_virtual_presses[256] = {};
 static int g_mouse_x = 0;
 static int g_mouse_y = 0;
 static std::int64_t g_mouse_wheel = 0;
@@ -368,6 +376,7 @@ int dxlib_input_init(void* window_handle) {
 void dxlib_input_release(void) {
 	g_input_initialized = 0;
 	g_mouse_wheel = 0;
+	dxlib_input_virtual_reset();
 }
 
 void DXInput::ProcessEvent(const SDL_Event& event) {
@@ -386,6 +395,7 @@ void DXInput::ProcessEvent(const SDL_Event& event) {
 			if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
 				DXInput::SetActiveApp(true);
 			} else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
+				dxlib_input_virtual_reset();
 				// Don't deactivate - keep game running in background
 				// g_bActiveApp = FALSE;
 			}
@@ -544,7 +554,34 @@ int dxlib_input_key_down(int dik_key) {
 	if (scancode == SDL_SCANCODE_UNKNOWN) return 0;
 
 	const Uint8* state = SDL_GetKeyboardState(NULL);
-	return state[scancode] ? 1 : 0;
+	return state[scancode] || g_virtual_keys[dik_key] || g_virtual_presses[dik_key] ? 1 : 0;
+}
+
+EMSCRIPTEN_KEEPALIVE void dxlib_input_virtual_key(int dik_key, int down)
+{
+	if (!g_input_initialized || dik_key < 0 || dik_key >= 256) return;
+	const SDL_Scancode scan = g_dik_to_scancode[dik_key];
+	if (scan == SDL_SCANCODE_UNKNOWN) return;
+	if (down && !g_virtual_keys[dik_key]) {
+		g_virtual_presses[dik_key] = true;
+		SDL_Event event{};
+		event.type = SDL_KEYDOWN;
+		event.key.keysym.scancode = scan;
+		event.key.keysym.sym = SDL_GetKeyFromScancode(scan);
+		DXInput::ProcessEvent(event);
+	}
+	g_virtual_keys[dik_key] = down != 0;
+}
+
+EMSCRIPTEN_KEEPALIVE void dxlib_input_virtual_reset(void)
+{
+	std::fill(std::begin(g_virtual_keys), std::end(g_virtual_keys), false);
+	dxlib_input_virtual_finish_frame();
+}
+
+void dxlib_input_virtual_finish_frame(void)
+{
+	std::fill(std::begin(g_virtual_presses), std::end(g_virtual_presses), false);
 }
 
 void dxlib_input_get_mouse_pos(int* x, int* y) {
