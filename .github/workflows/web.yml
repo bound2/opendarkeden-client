@@ -36,7 +36,7 @@ jobs:
         with:
           repository: bound2/opendarkeden-server
           # The server commit whose tools/websocket fixture matches this client.
-          ref: 5eb8c8dfa777f9b092efd38d0c3e508b46dcc4b1
+          ref: a380447d8bc87352e556e941774b3e70bdb25596
           path: build/gateway
           sparse-checkout: tools/websocket
           persist-credentials: false
