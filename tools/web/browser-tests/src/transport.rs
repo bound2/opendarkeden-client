@@ -1,6 +1,6 @@
 //! Runs the WebAssembly socket-adapter probe against gateway fixtures.
 
-use std::sync::mpsc::{self, Receiver, RecvTimeoutError};
+use std::sync::mpsc::{self, Receiver, RecvTimeoutError, TryRecvError};
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
@@ -61,31 +61,47 @@ fn run_probe(tab: &Arc<Tab>, events: &Receiver<PageEvent>, endpoint: &str) -> Re
     thread::spawn(move || {
         let _ = sender.send(chrome::eval_within(&page, &script, WATCHDOG));
     });
+    let mut page_errors = Vec::new();
     let outcome = loop {
         match outcome.try_recv() {
             Ok(outcome) => break outcome,
-            Err(_) => {
-                echo(events, SETTLE);
+            Err(TryRecvError::Empty) => {
+                echo(events, SETTLE, &mut page_errors);
+            }
+            Err(TryRecvError::Disconnected) => {
+                bail!("Transport probe runner ended without a result: {endpoint}")
             }
         }
     };
     // Let output that raced the result through before reporting it.
-    while echo(events, SETTLE) {}
-    outcome.map_err(|error| {
+    while echo(events, SETTLE, &mut page_errors) {}
+    let exit_code = outcome.map_err(|error| {
         if error.is::<NoAnswer>() {
             anyhow!("Transport probe did not exit: {endpoint}")
         } else {
             error.context(format!("Transport probe failed: {endpoint}"))
         }
-    })
+    })?;
+    // An uncaught exception in the page is a defect in the client even when
+    // the probe still reports success (a refused close code, for one).
+    if !page_errors.is_empty() {
+        bail!(
+            "Transport probe raised page errors: {endpoint}\n{}",
+            page_errors.join("\n")
+        );
+    }
+    Ok(exit_code)
 }
 
-/// Prints one page event, waiting up to `timeout` for it. Returns whether
-/// there was one.
-fn echo(events: &Receiver<PageEvent>, timeout: Duration) -> bool {
+/// Prints one page event, waiting up to `timeout` for it, and records an
+/// uncaught error. Returns whether there was an event.
+fn echo(events: &Receiver<PageEvent>, timeout: Duration, page_errors: &mut Vec<String>) -> bool {
     match events.recv_timeout(timeout) {
         Ok(PageEvent::Console(line)) => println!("{line}"),
-        Ok(PageEvent::Error(message)) => eprintln!("PAGE ERROR: {message}"),
+        Ok(PageEvent::Error(message)) => {
+            eprintln!("PAGE ERROR: {message}");
+            page_errors.push(message);
+        }
         Err(RecvTimeoutError::Timeout) => return false,
         Err(RecvTimeoutError::Disconnected) => {
             thread::sleep(timeout);

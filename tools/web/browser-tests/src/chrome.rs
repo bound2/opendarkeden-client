@@ -21,9 +21,11 @@ use serde_json::{json, Value};
 
 /// headless_chrome drops the DevTools connection once its browser-level event
 /// loop has seen no target event for this long, and browser-level events are
-/// rare. It must therefore outlast a whole check; stuck pages are caught by
-/// `CALL_TIMEOUT` instead.
-const IDLE_TIMEOUT: Duration = Duration::from_secs(60 * 60);
+/// rare. It must therefore outlast a whole check (the renderer waits up to
+/// 15 minutes); stuck pages are caught by `CALL_TIMEOUT` instead. It also
+/// bounds how long a browser that stops answering can hold the process at
+/// exit, so it is no longer than the longest check needs.
+const IDLE_TIMEOUT: Duration = Duration::from_secs(16 * 60);
 /// The longest a single protocol call may take. Calls into a page wait for its
 /// main thread, which a stuck WebAssembly module can block indefinitely.
 pub const CALL_TIMEOUT: Duration = Duration::from_secs(60);
@@ -71,6 +73,10 @@ impl Chrome {
             "--headless=new".to_owned(),
             "--hide-scrollbars".to_owned(),
             "--mute-audio".to_owned(),
+            // Let WebGL fall back to SwiftShader where there is no usable
+            // GPU (containers, VMs), as Playwright always did; a GPU is
+            // still preferred when present.
+            "--enable-unsafe-swiftshader".to_owned(),
         ];
         args.extend(launch.args);
         let options = LaunchOptions {
@@ -173,12 +179,16 @@ pub fn page_events(tab: &Tab) -> Result<Receiver<PageEvent>> {
             Event::RuntimeExceptionThrown(thrown) => {
                 PageEvent::Error(exception_message(&thrown.params.exception_details))
             }
+            // Browser-side log entries: failed resource loads, deprecation
+            // and WebGL warnings, refused WebSocket connections.
+            Event::LogEntryAdded(added) => PageEvent::Console(added.params.entry.text.clone()),
             _ => return,
         };
         // The receiver is gone once the check has finished; nothing to do.
         let _ = sender.send(forwarded);
     }))?;
     tab.enable_runtime()?;
+    tab.enable_log()?;
     Ok(receiver)
 }
 

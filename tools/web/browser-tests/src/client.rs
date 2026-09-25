@@ -30,11 +30,11 @@ const WAIT_TIMEOUT: Duration = Duration::from_secs(30);
 const SETTINGS_FILE: &str = "/UserSet/UserOption.set";
 
 /// Counts animation frames so the test can tell the game loop is running.
-const FRAME_COUNTER: &str = r"
+const FRAME_COUNTER: &str = r"(() => {
 window.browserFrames = 0;
 const request = window.requestAnimationFrame.bind(window);
 window.requestAnimationFrame = callback => request(time => { ++window.browserFrames; callback(time); });
-";
+})();";
 
 const CANVAS_SIZE: &str = r"(() => {
   const canvas = document.querySelector('canvas');

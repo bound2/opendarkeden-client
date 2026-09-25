@@ -124,11 +124,14 @@ cargo run --release --manifest-path tools/web/browser-tests/Cargo.toml -- transp
 cargo run --release --manifest-path tools/web/browser-tests/Cargo.toml -- client
 ```
 
-Each command exits 0 on success, 1 on a failed check and 2 on invalid arguments;
-`-- help` lists the arguments and environment variables. The browser is found
-through `WEB_TEST_BROWSER` (an executable path or a name on `PATH`), then
-`CHROME`, then `google-chrome`, `chromium` or `chromium-browser` on `PATH`, then the
-standard Chrome install location. Running as root or with `CI` set adds
+Each command exits 0 on success, 1 on a failed check or an invalid environment
+value, and 2 on invalid arguments; `-- help` lists the arguments and environment
+variables. An uncaught page error during the transport probe fails it even when
+the probe itself reports success. The browser is found through
+`WEB_TEST_BROWSER` (an executable path or a name on `PATH`), then `CHROME`, then
+`google-chrome`, `google-chrome-stable`, `chromium` or `chromium-browser` on
+`PATH`, then the standard Chrome install location. WebGL may fall back to
+SwiftShader where no GPU is usable. Running as root or with `CI` set adds
 `--no-sandbox`, which containers and CI runners need.
 
 `renderer [url]` loads `web_sprite_tests.html` and waits up to 15 minutes for the

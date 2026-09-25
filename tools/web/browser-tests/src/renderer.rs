@@ -36,10 +36,8 @@ pub fn run(args: &[String]) -> Result<()> {
     };
     let mut switches = Vec::new();
     if env::var_os("WEB_TEST_SOFTWARE_GL").is_some_and(|value| !value.is_empty()) {
-        switches.extend([
-            "--use-angle=swiftshader".to_owned(),
-            "--enable-unsafe-swiftshader".to_owned(),
-        ]);
+        // Force SwiftShader; the launcher already permits it as a fallback.
+        switches.push("--use-angle=swiftshader".to_owned());
     }
     let chrome = Chrome::launch(Launch {
         args: switches,
