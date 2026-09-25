@@ -142,7 +142,7 @@ full console goes to `WEB_TEST_LOG` (default `web-renderer.log`).
 `transport [origin] [endpoint...]` runs `transport_tests.mjs` once per endpoint in a
 fresh page, each under a 35-second watchdog kept outside the page. It expects the
 server repository's fixture on ports 18740/18741: in that repository's
-`tools/websocket`, start `cargo run --release --bin client-fixture` first. The
+`src/server/websocketproxyserver`, start `cargo run --release --bin client-fixture` first. The
 fixture admits only the origin `http://127.0.0.1:18739`. The same fixture accepts
 native `transport_tests ws://127.0.0.1:18740/game` and the adversarial endpoint on
 18741. The probes exercise binary data, partial reads, login/world/relogin

@@ -35,10 +35,10 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: bound2/opendarkeden-server
-          # The server commit whose tools/websocket fixture matches this client.
-          ref: a380447d8bc87352e556e941774b3e70bdb25596
+          # The server commit whose gateway fixture matches this client.
+          ref: 9cf631b5ca4bc6af90769c737286377d3e2147b5
           path: build/gateway
-          sparse-checkout: tools/websocket
+          sparse-checkout: src/server/websocketproxyserver
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
         with:
@@ -47,18 +47,18 @@ jobs:
         with:
           workspaces: |
             tools/web/browser-tests
-            build/gateway/tools/websocket
+            build/gateway/src/server/websocketproxyserver
       - name: Build the browser test runner and gateway fixture
         run: |
           cargo build --release --locked --manifest-path tools/web/browser-tests/Cargo.toml
-          cargo build --release --locked --manifest-path build/gateway/tools/websocket/Cargo.toml --bin client-fixture
+          cargo build --release --locked --manifest-path build/gateway/src/server/websocketproxyserver/Cargo.toml --bin client-fixture
       - name: Verify WebGL pixels and binary login/world handoffs
         env:
           WEB_TEST_SOFTWARE_GL: '1'
         run: |
           python3 -m http.server 18739 --bind 127.0.0.1 --directory build/web > build/web-http.log 2>&1 &
           http_pid=$!
-          cargo run --release --manifest-path build/gateway/tools/websocket/Cargo.toml --bin client-fixture > build/web-gateway.log 2>&1 &
+          cargo run --release --manifest-path build/gateway/src/server/websocketproxyserver/Cargo.toml --bin client-fixture > build/web-gateway.log 2>&1 &
           gateway_pid=$!
           trap 'kill "$http_pid" "$gateway_pid" 2>/dev/null || true' EXIT
           for attempt in $(seq 1 30); do
