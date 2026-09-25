@@ -29,6 +29,9 @@ ClientCommunicationManager*	g_pClientCommunicationManager = NULL;
 ClientCommunicationManager::ClientCommunicationManager ()
 : m_pDatagramSocket(NULL)
 {
+	// The gateway carries only the TCP stream and a browser cannot open UDP.
+	// Leave the socket NULL, as a failed bind does: peer-to-peer sends and
+	// Update() are then no-ops.
 	if (NetworkTransport::UsesWebSocket()) return;
     // Note: __BEGIN_TRY/__END_CATCH are not used here because __BEGIN_TRY
     // expands to a no-op in Release builds (NDEBUG), which would leave the

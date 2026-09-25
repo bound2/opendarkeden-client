@@ -10,8 +10,11 @@ namespace NetworkTransport {
 // Return owned configuration text, rather than mutable CRT environment storage.
 std::optional<std::string> ReadEnvironment(const char* name);
 
-// Empty for native TCP. Browsers always use a gateway. The advertised game
-// endpoints remain unchanged, including login/world/relogin handoff packets.
+// DARKEDEN_WEBSOCKET_URL, read once per process: every socket and every UDP
+// path gated on UsesWebSocket() must agree on one transport. Empty for native
+// TCP. Browsers always use a gateway. The advertised game endpoints remain
+// unchanged, including login/world/relogin handoff packets.
+const std::string& WebSocketGateway();
 bool UsesWebSocket();
 std::string WebSocketURL(const std::string& gateway, const std::string& host, unsigned int port);
 
