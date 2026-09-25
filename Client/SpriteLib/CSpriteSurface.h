@@ -99,6 +99,8 @@ class CSpriteSurface {
 		// Change brightness
 		void	ChangeBrightnessBit(RECT* pRect, BYTE DarkBits);
 		void	BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2);
+		// Opt out of reset checkpoints only for surfaces redrawn before use.
+		void	SetTransient(bool transient);
 		void	ApplyLightGrid(const CFilter& filter, const int* widths, const int* heights);
 		void	ColorBox(const RECT* rect, BYTE rgb);
 

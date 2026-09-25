@@ -45,7 +45,8 @@ reading back the framebuffer for every legacy lock around a sprite draw.
 
 At presentation, modified persistent offscreen surfaces are checkpointed to
 CPU memory for device-reset recovery. Unchanged surfaces need no checkpoint.
-The current displayed frame is redrawn after reset; the input event hook
+The intermediate game framebuffer is explicitly transient, so it also skips
+this readback. Both framebuffers are redrawn after reset; the input event hook
 invalidates the world tile cache. Cached sprite textures are recreated lazily.
 Normal device replacement synchronizes surfaces before destroying resources.
 

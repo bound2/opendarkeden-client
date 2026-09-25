@@ -15,7 +15,21 @@ namespace {
 SDL_Renderer* device = nullptr;
 GLuint program = 0, vertexArray = 0, vertexBuffer = 0;
 GLuint classifyProgram = 0, scaleProgram = 0, distanceTexture = 0;
+struct Uniforms {
+    GLint targetSize = -1, effect = -1, value = -1, gradation = -1;
+    GLint sourceSize = -1, factor = -1;
+    void Init(GLuint shader)
+    {
+        targetSize = glGetUniformLocation(shader, "targetSize");
+        effect = glGetUniformLocation(shader, "effect");
+        value = glGetUniformLocation(shader, "value");
+        gradation = glGetUniformLocation(shader, "gradation");
+        sourceSize = glGetUniformLocation(shader, "sourceSize");
+        factor = glGetUniformLocation(shader, "factor");
+    }
+} effectUniforms, classifyUniforms, scaleUniforms;
 struct Vertex { float x, y, u, v, light; };
+constexpr size_t MaxVertices = 6 * 256;
 
 constexpr const char* vertexSource = R"glsl(#version 300 es
 precision highp float;
@@ -134,8 +148,8 @@ bool Bind(SDL_Texture* texture, GLenum unit)
 void Prepare(int width, int height, Effect effect)
 {
     glUseProgram(program);
-    glUniform2f(glGetUniformLocation(program, "targetSize"), float(width), float(height));
-    glUniform1i(glGetUniformLocation(program, "effect"), static_cast<int>(effect));
+    glUniform2f(effectUniforms.targetSize, float(width), float(height));
+    glUniform1i(effectUniforms.effect, static_cast<int>(effect));
     glViewport(0, 0, width, height);
     for (GLenum cap : {GL_SCISSOR_TEST, GL_BLEND, GL_DEPTH_TEST, GL_STENCIL_TEST, GL_CULL_FACE, GL_DITHER})
         glDisable(cap);
@@ -144,11 +158,15 @@ void Prepare(int width, int height, Effect effect)
 
 bool DrawVertices(std::span<const Vertex> vertices, GLenum mode)
 {
+    if (vertices.size() > MaxVertices) return false;
     glBindVertexArray(vertexArray);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size_bytes(), vertices.data(), GL_STREAM_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size_bytes(), vertices.data());
     glDrawArrays(mode, 0, static_cast<GLsizei>(vertices.size()));
-    return glGetError() == GL_NO_ERROR;
+    // Querying WebGL errors here synchronizes with the browser GPU process
+    // for every sprite/effect. Validate resources when created; the pixel
+    // oracle checks draw results without a synchronous query per command.
+    return true;
 }
 
 bool BindDistances()
@@ -198,6 +216,9 @@ bool Attach(SDL_Renderer* renderer)
     if (!program) return false;
     classifyProgram = Link((std::string(SpriteGpuXbrz::Common) + SpriteGpuXbrz::Classify).c_str());
     scaleProgram = Link((std::string(SpriteGpuXbrz::Common) + SpriteGpuXbrz::Scale).c_str());
+    effectUniforms.Init(program);
+    if (classifyProgram) classifyUniforms.Init(classifyProgram);
+    if (scaleProgram) scaleUniforms.Init(scaleProgram);
     Uint16 samples[64];
     Uint32 converted[64];
     for (int i = 0; i < 64; ++i) {
@@ -220,11 +241,14 @@ bool Attach(SDL_Renderer* renderer)
         glUseProgram(shader);
         glUniform3fv(glGetUniformLocation(shader, "expansion"), 64, expansion);
         glUniform1i(glGetUniformLocation(shader, "distances"), 3);
+        glUniform1i(glGetUniformLocation(shader, "source"), 0);
+        glUniform1i(glGetUniformLocation(shader, "corners"), 1);
     }
     glGenVertexArrays(1, &vertexArray);
     glGenBuffers(1, &vertexBuffer);
     glBindVertexArray(vertexArray);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, MaxVertices * sizeof(Vertex), nullptr, GL_STREAM_DRAW);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
@@ -266,12 +290,11 @@ bool Xbrz(SDL_Texture* source, SDL_Texture* corners, int width, int height, int 
     const int targetWidth = width * (corners ? factor : 1), targetHeight = height * (corners ? factor : 1);
     Prepare(targetWidth, targetHeight, Effect::Copy);
     const GLuint shader = corners ? scaleProgram : classifyProgram;
+    const auto& uniforms = corners ? scaleUniforms : classifyUniforms;
     glUseProgram(shader);
-    glUniform1i(glGetUniformLocation(shader, "source"), 0);
-    glUniform1i(glGetUniformLocation(shader, "corners"), 1);
-    glUniform1i(glGetUniformLocation(shader, "factor"), factor);
-    glUniform2f(glGetUniformLocation(shader, "sourceSize"), float(width), float(height));
-    glUniform2f(glGetUniformLocation(shader, "targetSize"), float(targetWidth), float(targetHeight));
+    glUniform1i(uniforms.factor, factor);
+    glUniform2f(uniforms.sourceSize, float(width), float(height));
+    glUniform2f(uniforms.targetSize, float(targetWidth), float(targetHeight));
     const Vertex vertices[]{{0, 0, 0, 0, 0}, {float(targetWidth), 0, 1, 0, 0},
         {0, float(targetHeight), 0, 1, 0}, {float(targetWidth), float(targetHeight), 1, 1, 0}};
     return DrawVertices(vertices, GL_TRIANGLE_STRIP);
@@ -287,7 +310,7 @@ bool Draw(SDL_Texture* source, int width, int height, const SDL_Rect& placement,
     if (!Bind(source, GL_TEXTURE0) || (background && !Bind(background, GL_TEXTURE1)) ||
         (palette && !Bind(palette, GL_TEXTURE2))) return false;
     Prepare(width, height, effect);
-    glUniform1f(glGetUniformLocation(program, "value"), float(value));
+    glUniform1f(effectUniforms.value, float(value));
     if (effect == Effect::Gradation) {
         GLfloat colors[94 * 3];
         for (int i = 0; i < 94; ++i) {
@@ -295,7 +318,7 @@ bool Draw(SDL_Texture* source, int width, int height, const SDL_Rect& placement,
             colors[i * 3 + 1] = GLfloat((gradation[i] >> 5) & 63);
             colors[i * 3 + 2] = GLfloat(gradation[i] & 31);
         }
-        glUniform3fv(glGetUniformLocation(program, "gradation"), 94, colors);
+        glUniform3fv(effectUniforms.gradation, 94, colors);
     }
     glEnable(GL_SCISSOR_TEST);
     glScissor(clip.x, clip.y, clip.w, clip.h);
@@ -314,7 +337,7 @@ bool LightGrid(SDL_Texture* source, int width, int height, std::span<const Light
     if (!Bind(source, GL_TEXTURE0)) return false;
     Prepare(width, height, Effect::LightGrid);
     // Bound temporary storage even for an unusually large light grid.
-    std::array<Vertex, 6 * 256> vertices;
+    std::array<Vertex, MaxVertices> vertices;
     size_t count = 0;
     for (const auto& cell : cells) {
         const float x0 = float(cell.rect.x), y0 = float(cell.rect.y);

@@ -707,8 +707,16 @@ int dxlib_sound_init(void* window_handle) {
 		fprintf(stderr, "Mix_Init: some music decoders unavailable: %s\n", Mix_GetError());
 	}
 
-	/* Initialize SDL_mixer */
-	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) < 0) {
+	// SDL's browser audio callback shares the main thread with rendering.
+	// 1024 samples allow only 23 ms between callbacks, shorter than a busy
+	// game frame. Give WebGL four times the buffer; native audio runs on
+	// its own thread and keeps the smaller buffer.
+#ifdef __EMSCRIPTEN__
+	constexpr int audioSamples = 4096;
+#else
+	constexpr int audioSamples = 1024;
+#endif
+	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, audioSamples) < 0) {
 		fprintf(stderr, "Mix_OpenAudio failed: %s\n", Mix_GetError());
 		/* InitSound retries on every main-menu entry - undo this call's
 		 * own setup so the audio subsystem refcount cannot creep up. */

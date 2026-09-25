@@ -826,6 +826,72 @@ TEST(SpriteGpu, MapRegionTintMatchesChannelMasksAndClipsToSurface)
 		CHECK_EQ(x >= 2 && x < 5 && y >= 3 && y < 6 ? 0x07e0 : 0xffff, f.Pixel(x, y));
 }
 
+TEST(SpriteGpu, TransientCompositionSkipsReadbackButRetainsPersistentSurfaces)
+{
+	Fixture f;
+	CSpriteSurface frame, terrain;
+	CHECK(frame.Init(8, 8));
+	CHECK(terrain.Init(8, 8));
+	frame.SetTransient(true);
+	terrain.FillSurface(0x1234);
+	POINT origin{0, 0};
+	RECT full{0, 0, 8, 8};
+	frame.BltNoColorkey(&origin, &terrain, &full);
+	f.surface.BltNoColorkey(&origin, &frame, &full);
+	auto before = SpriteGpu::GetCounters();
+	CHECK(SpriteGpu::CheckpointOffscreen(f.surface.GetBackendSurface()));
+	// Only the terrain needs a CPU checkpoint, despite copying both frame
+	// buffers on the GPU. Presenting another frame needs no checkpoint.
+	CHECK_EQ(before.readbacks + 1, SpriteGpu::GetCounters().readbacks);
+	frame.FillSurface(0xabcd);
+	f.surface.BltNoColorkey(&origin, &frame, &full);
+	before = SpriteGpu::GetCounters();
+	CHECK(SpriteGpu::CheckpointOffscreen(f.surface.GetBackendSurface()));
+	CHECK_EQ(before.readbacks, SpriteGpu::GetCounters().readbacks);
+	CHECK_EQ(0xabcd, f.Pixel(0, 0));
+	SpriteGpu::Reset();
+	// The persistent map survives reset; the transient frame is redrawn.
+	frame.BltNoColorkey(&origin, &terrain, &full);
+	f.surface.BltNoColorkey(&origin, &frame, &full);
+	CHECK_EQ(0x1234, f.Pixel(7, 7));
+	frame.SetTransient(false);
+	frame.FillSurface(0x5678);
+	before = SpriteGpu::GetCounters();
+	CHECK(SpriteGpu::CheckpointOffscreen(f.surface.GetBackendSurface()));
+	CHECK_EQ(before.readbacks + 1, SpriteGpu::GetCounters().readbacks);
+}
+
+TEST(SpriteGpu, SpriteBatchTracksTargetClipAndInterleavedPixelWrites)
+{
+	Fixture f;
+	CSpriteSurface other;
+	CHECK(other.Init(8, 8));
+	other.FillSurface(0);
+	auto backend = f.surface.GetBackendSurface();
+	SDL_Rect clip{2, 1, 1, 1};
+	SDL_SetClipRect(backend->surface, &clip);
+	f.Draw();
+	f.Draw(); // Same target/clip can reuse the batch state.
+	other.FillSurface(0x001f); // Switch target.
+	clip = {3, 2, 1, 1};
+	SDL_SetClipRect(backend->surface, &clip);
+	f.Draw();
+	CHECK_EQ(0, f.Pixel(2, 1));
+	CHECK_EQ(0xffff, f.Pixel(3, 2));
+	CHECK_EQ(0x07e0, f.Pixel(3, 1));
+	CHECK_EQ(0x07e0, f.Pixel(2, 2));
+	DWORD pitch = 0;
+	auto* pixels = static_cast<BYTE*>(f.surface.Lock(nullptr, &pitch));
+	CHECK(pixels != nullptr);
+	reinterpret_cast<WORD*>(pixels + 2 * pitch)[3] = 0xf800;
+	f.surface.Unlock();
+	SDL_SetClipRect(backend->surface, nullptr);
+	f.Draw(1, 4);
+	CHECK_EQ(0xf800, f.Pixel(3, 2));
+	CHECK_EQ(0, f.Pixel(2, 4));
+	CHECK_EQ(0xffff, f.Pixel(3, 4));
+}
+
 TEST(SpriteGpu, CompleteMixedFramesMatchCpuWithoutCompositionReadbacks)
 {
 	Fixture f;

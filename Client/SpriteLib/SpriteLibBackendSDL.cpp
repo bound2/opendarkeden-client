@@ -184,6 +184,7 @@ spritectl_surface_t spritectl_create_surface(int width, int height, int format) 
 	surface->locked = 0;
 	surface->ref_count = 1;
 	surface->cpu_borrowed = 0;
+	surface->transient = 0;
 
 	return surface;
 }

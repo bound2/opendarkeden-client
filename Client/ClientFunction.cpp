@@ -282,6 +282,15 @@ DrawAlphaBox(RECT* pRect, BYTE r, BYTE g, BYTE b, BYTE alpha)
 
 		if (alpha<0) alpha = 0;
 
+		// The SDL surface API has the same GPU gamma path on every platform.
+		// Borrowing framebuffer pixels here forces a WebGL readback for each
+		// translucent UI panel and delays the browser's audio callback.
+		if (CSDLGraphics::Color(r, g, b) == 0)
+		{
+			gpC_base->m_p_DDSurface_back->GammaBox565(pRect, reverseAlpha);
+			return;
+		}
+
 #ifdef PLATFORM_WINDOWS
 		WORD color;
 		//------------------------------------------------

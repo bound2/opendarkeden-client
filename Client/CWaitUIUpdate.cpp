@@ -218,13 +218,21 @@ void
 CWaitUIUpdate::Update()
 {
 	static MonotonicClock::TimePoint lastTime = g_FrameNow;
-	bool bChanged = false;
+	static MonotonicClock::TimePoint lastDrawTime;
+	const bool drawDue = g_FrameNow - lastDrawTime >= MonotonicClock::Millis(15);
 
 	#ifdef OUTPUT_DEBUG_UPDATE_LOOP
 		DEBUG_ADD("UM");
 	#endif
 
 	UpdateMouse();
+	if (drawDue)
+	{
+		UpdateInput();
+		if (g_pUpdate != this || !g_bActiveApp) return;
+		ProcessInput();
+		if (g_pUpdate != this || !g_bActiveApp) return;
+	}
 
 	#ifdef OUTPUT_DEBUG_UPDATE_LOOP
 		DEBUG_ADD("UM2");
@@ -263,10 +271,8 @@ CWaitUIUpdate::Update()
 		//------------------------------------------
 		// Input
 		//------------------------------------------
-		// Always call UpdateInput and ProcessInput for all modes (including main menu)
-		// SDL2 backend needs to process events every frame
-		UpdateInput();
-		ProcessInput();
+		// Input and cursor drawing run at the display cadence above/below.
+		// Network and menu processing retain the original update interval.
 
 		#ifdef OUTPUT_DEBUG_UPDATE_LOOP
 			DEBUG_ADD("UP");
@@ -308,32 +314,17 @@ CWaitUIUpdate::Update()
 			return;
 		}
 
-		//------------------------------------------
-		// Draw
-		//------------------------------------------
-// 		if (g_bActiveGame
-// #ifdef OUTPUT_DEBUG
-// 			|| g_bTestMode
-// #endif
-// 			)
-// 		{
-		
-		{
-			#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-				DEBUG_ADD("D");
-			#endif
-
-			UpdateDraw();	
-
-			#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-				DEBUG_ADD("D2");
-			#endif
-		}
-
 		lastTime = g_FrameNow;
+	}
 
-		// Frame증가
-		g_FrameCount++;
+	// The software cursor must be redrawn between logic ticks, just as it
+	// is in CGameUpdate. Vsync paces accelerated rendering; 15 ms also
+	// prevents spin-presenting when the renderer ignores vsync.
+	if (drawDue && g_pUpdate == this && g_bActiveApp)
+	{
+		lastDrawTime = g_FrameNow;
+		UpdateDraw();
+		++g_FrameCount;
 	}
 
 	//------------------------------------------------------------

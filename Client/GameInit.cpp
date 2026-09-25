@@ -756,6 +756,9 @@ InitSurface()
 		g_pLast = new CSpriteSurface;
 		// SDL2: Unified offscreen surface initialization (always system memory)
 		g_pLast->InitOffsurface(g_GameRect.right, g_GameRect.bottom);
+		// This composition buffer is rebuilt before every copy to g_pBack.
+		// Reading it back for device recovery stalls the GPU every frame.
+		g_pLast->SetTransient(true);
 		g_pLast->SetTransparency( 0 );
 		g_pLast->FillSurface( CSDLGraphics::Color(30,30,30) );
 

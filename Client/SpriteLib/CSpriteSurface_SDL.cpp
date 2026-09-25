@@ -363,6 +363,11 @@ void CSpriteSurface::BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2)
 	/* TODO: Implement */
 }
 
+void CSpriteSurface::SetTransient(bool transient)
+{
+	if (m_backend_surface) m_backend_surface->transient = transient;
+}
+
 /*
  * Screen blend, per channel with maximum M:
  *

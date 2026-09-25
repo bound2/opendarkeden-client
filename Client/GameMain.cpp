@@ -2732,7 +2732,7 @@ LoadZoneInfo(int n)
 	// ZoneInfo
 	//------------------------------------------------
 //	MZoneInfo zoneInfo;
-	std::ifstream zoneInfoFile(pZoneInfo->InfoFilename.GetString(), ios::binary);
+	std::ifstream zoneInfoFile(Basic::NormalizeDataPath(pZoneInfo->InfoFilename.GetString()), ios::binary);
 
 	//------------------------------------------------
 	// File이 있는 경우만 loading한다.
