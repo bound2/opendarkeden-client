@@ -11,10 +11,10 @@
 #include "MailTemplate.h"
 #include "SXml.h"
 
-#include <cstdio>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -55,10 +55,10 @@ bool LooksLikeMailTemplate(const std::filesystem::path& path, const std::string&
 	const std::string name = path.filename().string();
 	if (name == "Briefing.txt" || name == "Computer.tre") return false;
 	const size_t end = bytes.find_first_of("\r\n");
-	const std::string first = bytes.substr(0, end);
+	std::istringstream first(bytes.substr(0, end));
 	int width = 0, height = 0;
-	char extra = 0;
-	return sscanf(first.c_str(), "%d %d %c", &width, &height, &extra) == 2;
+	std::string extra;
+	return (first >> width >> height) && !(first >> extra);
 }
 
 } // namespace
