@@ -9,6 +9,7 @@
 // include files
 
 #include "Client_PCH.h"
+#include "WebSocketTransport.h"
 #include "PacketDispatcher.h"
 #include "Lpackets/LCReconnect.h"
 #include "ClientDef.h"
@@ -98,29 +99,32 @@ void LCReconnectHandler::execute ( LCReconnect * pPacket , Player * pPlayer )
 	
 	// 2002.6.28 [UDP수정]
 	// 서버에 UDP port를 알려주기 위해서
-	CGPortCheck cgPortCheck;
-	cgPortCheck.setPCName( g_pUserInformation->CharacterID.GetString() );
+	if (!NetworkTransport::UsesWebSocket()) {
+		CGPortCheck cgPortCheck;
+		cgPortCheck.setPCName( g_pUserInformation->CharacterID.GetString() );
 
-	std::string ServerAddress;
-	uint ServerPort;
+		std::string ServerAddress;
+		uint ServerPort;
 
-	if( g_pUserInformation->bKorean )
-	{
-		ServerAddress = g_pConfigKorean->getProperty("LoginServerAddress");
-		ServerPort = g_pConfigKorean->getPropertyInt("LoginServerCheckPort");
-		//add by sonic 2006.4.10 쇱꿎角뤠槨굶뒈뒈囹
-	}
-	else
-	{
-		ServerAddress = g_pConfigForeign->getProperty( g_Dimension, "LoginServerAddress" );	
-		ServerPort = g_pConfigForeign->getPropertyInt(g_Dimension, "LoginServerCheckPort");
-	}
+		if( g_pUserInformation->bKorean )
+		{
+			ServerAddress = g_pConfigKorean->getProperty("LoginServerAddress");
+			ServerPort = g_pConfigKorean->getPropertyInt("LoginServerCheckPort");
+			//add by sonic 2006.4.10 쇱꿎角뤠槨굶뒈뒈囹
+		}
+		else
+		{
+			ServerAddress = g_pConfigForeign->getProperty( g_Dimension, "LoginServerAddress" );
+			ServerPort = g_pConfigForeign->getPropertyInt(g_Dimension, "LoginServerCheckPort");
+		}
 	
 			
-	DEBUG_ADD("[ ClientPacket] Send CGPortCheck ");
-	g_pClientCommunicationManager->sendPacket( ServerAddress,
-		ServerPort,
-		&cgPortCheck );
+		DEBUG_ADD("[ ClientPacket] Send CGPortCheck ");
+		g_pClientCommunicationManager->sendPacket( ServerAddress,
+			ServerPort,
+			&cgPortCheck );
+
+	}
 
 	DEBUG_ADD("[ MODE ] START SETMODE MODE_WAIT_UPDATEINFO");
 	SetMode( MODE_WAIT_UPDATEINFO );

@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:renderer": "node test-renderer.mjs",
+    "test:transport": "node test-transport.mjs",
+    "test:client": "node test-client.mjs"
+  },
+  "devDependencies": { "playwright": "1.63.0" }
+}

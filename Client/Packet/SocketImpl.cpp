@@ -13,6 +13,7 @@
 #include "SocketImpl.h"
 #include "PacketFileAPI.h"
 #include "SocketAPI.h"
+#include "WebSocketTransport.h"
 
 #if defined(PLATFORM_POSIX)
 #include <sys/socket.h>
@@ -77,6 +78,7 @@ SocketImpl::SocketImpl ( const std::string & host , uint port )
 SocketImpl::SocketImpl ( const SocketImpl & impl ) 
 : m_SocketID(impl.m_SocketID), m_Host(impl.m_Host), m_Port(impl.m_Port)
 {
+	if (impl.m_WebMode) throw Error("Cannot copy a WebSocket connection");
 	m_key = 1;
 }
 
@@ -108,6 +110,9 @@ SocketImpl::~SocketImpl () noexcept(false)
 void SocketImpl::create ()
 {
 	__BEGIN_TRY
+
+	m_WebMode = NetworkTransport::UsesWebSocket();
+	if (m_WebMode) return;
 		
 	// create socket
 	m_SocketID = SocketAPI::socket_ex( AF_INET , SOCK_STREAM , 0 );
@@ -126,7 +131,13 @@ void SocketImpl::create ()
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::close ()
 {
-	__BEGIN_TRY 
+	__BEGIN_TRY
+
+	if (m_WebMode) {
+		m_WebSocket.reset();
+		m_WebMode = false;
+		return;
+	}
 		
 	try {
 		SocketAPI::closesocket_ex( m_SocketID );
@@ -144,6 +155,7 @@ void SocketImpl::close ()
 void SocketImpl::bind ()
 {
 	__BEGIN_TRY
+	if (m_WebMode) throw ConnectException("WebSockets do not support peer listeners");
 
 	m_SockAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     m_SockAddr.sin_port        = htons(m_Port);
@@ -160,6 +172,7 @@ void SocketImpl::bind ()
 void SocketImpl::bind ( uint port )
 {
 	__BEGIN_TRY
+	if (m_WebMode) throw ConnectException("WebSockets do not support peer listeners");
 
 	// set server's port
 	m_Port = port;
@@ -178,6 +191,7 @@ void SocketImpl::bind ( uint port )
 void SocketImpl::listen ( uint backlog )
 {
 	__BEGIN_TRY
+	if (m_WebMode) throw ConnectException("WebSockets do not support peer listeners");
 		
 	SocketAPI::listen_ex( m_SocketID , backlog );
 
@@ -194,6 +208,12 @@ void SocketImpl::connect ( const std::string & host , uint port )
 		
 	m_Host = host;
 	m_Port = port;
+	if (m_WebMode) {
+		const auto gateway = NetworkTransport::ReadEnvironment("DARKEDEN_WEBSOCKET_URL");
+		m_WebSocket = std::make_unique<NetworkTransport::WebSocketTransport>(
+			NetworkTransport::WebSocketURL(gateway.value_or(""), host, port));
+		return;
+	}
 
 	// set sockaddr's host
 	m_SockAddr.sin_addr.s_addr = inet_addr( m_Host.c_str() );
@@ -213,7 +233,8 @@ void SocketImpl::connect ( const std::string & host , uint port )
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::connect ()
 {
-	__BEGIN_TRY 
+	__BEGIN_TRY
+	if (m_WebMode) { connect(m_Host, m_Port); return; }
 
 	// set sockaddr's host
 	m_SockAddr.sin_addr.s_addr = inet_addr( m_Host.c_str() );
@@ -234,6 +255,7 @@ void SocketImpl::connect ()
 SocketImpl * SocketImpl::accept ()
 {
 	__BEGIN_TRY
+	if (m_WebMode) throw ConnectException("WebSockets do not support peer listeners");
 
     // make client socket address structure ready
     SOCKADDR_IN ClientAddr;
@@ -262,9 +284,13 @@ SocketImpl * SocketImpl::accept ()
 //////////////////////////////////////////////////////////////////////
 // send data to peer
 //////////////////////////////////////////////////////////////////////
-uint SocketImpl::send ( const void * buf , uint len , uint flags ) 
+uint SocketImpl::send ( const void * buf , uint len , uint flags )
 {
-	__BEGIN_TRY 
+	__BEGIN_TRY
+	if (m_WebMode) {
+		if (!m_WebSocket) throw ConnectException("WebSocket has not connected");
+		return m_WebSocket->send(buf, len);
+	}
 #ifdef __USE_ENCRY__  //使用加密协议
 
 	DWORD enlen =len+5;
@@ -292,9 +318,13 @@ uint SocketImpl::send ( const void * buf , uint len , uint flags )
 //////////////////////////////////////////////////////////////////////
 // receive data from peer
 //////////////////////////////////////////////////////////////////////
-uint SocketImpl::receive ( void * buf , uint len , uint flags ) 
+uint SocketImpl::receive ( void * buf , uint len , uint flags )
 {
-	__BEGIN_TRY 
+	__BEGIN_TRY
+	if (m_WebMode) {
+		if (!m_WebSocket) throw ConnectException("WebSocket has not connected");
+		return m_WebSocket->receive(buf, len);
+	}
 
 	return SocketAPI::recv_ex( m_SocketID , buf , len , flags );
 	
@@ -306,7 +336,8 @@ uint SocketImpl::receive ( void * buf , uint len , uint flags )
 //////////////////////////////////////////////////////////////////////
 uint SocketImpl::available () const
 {
-	__BEGIN_TRY 
+	__BEGIN_TRY
+	if (m_WebMode) return m_WebSocket ? m_WebSocket->available() : 0;
 		
 	return SocketAPI::availablesocket_ex( m_SocketID );
 
@@ -318,7 +349,8 @@ uint SocketImpl::available () const
 //////////////////////////////////////////////////////////////////////
 uint SocketImpl::getLinger () const
 {
-	__BEGIN_TRY 
+	__BEGIN_TRY
+	if (m_WebMode) return 0;
 
 	struct linger ling;
 	uint len = sizeof(ling);
@@ -336,7 +368,8 @@ uint SocketImpl::getLinger () const
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::setLinger ( uint lingertime )
 {
-	__BEGIN_TRY 
+	__BEGIN_TRY
+	if (m_WebMode) return;
 
 	struct linger ling;
 	
@@ -354,7 +387,8 @@ void SocketImpl::setLinger ( uint lingertime )
 //////////////////////////////////////////////////////////////////////
 bool SocketImpl::isReuseAddr () const
 {
-	__BEGIN_TRY 
+	__BEGIN_TRY
+	if (m_WebMode) return false;
 		
 	int reuse;
 	uint len = sizeof(reuse);
@@ -372,7 +406,8 @@ bool SocketImpl::isReuseAddr () const
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::setReuseAddr ( bool on )
 {
-	__BEGIN_TRY 
+	__BEGIN_TRY
+	if (m_WebMode) return;
 
 	int opt = on == true ? 1 : 0;
 	
@@ -387,7 +422,8 @@ void SocketImpl::setReuseAddr ( bool on )
 //////////////////////////////////////////////////////////////////////
 bool SocketImpl::isNonBlocking () const
 {
-	__BEGIN_TRY 
+	__BEGIN_TRY
+	if (m_WebMode) return true;
 
 	return SocketAPI::getsocketnonblocking_ex( m_SocketID );
 	
@@ -400,7 +436,8 @@ bool SocketImpl::isNonBlocking () const
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::setNonBlocking ( bool on )
 {
-	__BEGIN_TRY 
+	__BEGIN_TRY
+	if (m_WebMode) return;
 
 	SocketAPI::setsocketnonblocking_ex( m_SocketID , on );
 	
@@ -413,7 +450,8 @@ void SocketImpl::setNonBlocking ( bool on )
 //////////////////////////////////////////////////////////////////////
 uint SocketImpl::getReceiveBufferSize () const
 {
-	__BEGIN_TRY 
+	__BEGIN_TRY
+	if (m_WebMode) return static_cast<uint>(NetworkTransport::WebSocketTransport::MaxBufferedBytes);
 
 	uint ReceiveBufferSize;
 	uint size = sizeof(ReceiveBufferSize);
@@ -431,7 +469,8 @@ uint SocketImpl::getReceiveBufferSize () const
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::setReceiveBufferSize ( uint ReceiveBufferSize )
 {
-	__BEGIN_TRY 
+	__BEGIN_TRY
+	if (m_WebMode) return;
 
 	SocketAPI::setsockopt_ex( m_SocketID , SOL_SOCKET , SO_SNDBUF , &ReceiveBufferSize, sizeof(ReceiveBufferSize) );
 	
@@ -443,7 +482,8 @@ void SocketImpl::setReceiveBufferSize ( uint ReceiveBufferSize )
 //////////////////////////////////////////////////////////////////////
 uint SocketImpl::getSendBufferSize () const
 {
-	__BEGIN_TRY 
+	__BEGIN_TRY
+	if (m_WebMode) return static_cast<uint>(NetworkTransport::WebSocketTransport::MaxBufferedBytes);
 		
 	uint SendBufferSize;
 	uint size = sizeof(SendBufferSize);
@@ -471,7 +511,8 @@ uint SocketImpl::getSendBufferSize () const
 //////////////////////////////////////////////////////////////////////
 void SocketImpl::setSendBufferSize ( uint SendBufferSize )
 {
-	__BEGIN_TRY 
+	__BEGIN_TRY
+	if (m_WebMode) return;
 		
 	SocketAPI::setsockopt_ex( m_SocketID , SOL_SOCKET , SO_SNDBUF , &SendBufferSize, sizeof(SendBufferSize) );
 	

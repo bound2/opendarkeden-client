@@ -88,6 +88,11 @@ Existing classic-mode installs need SDL_image's JPEG feature for help artwork:
 | --- | --- |
 | `sdl2`, `sdl2-image[libjpeg-turbo]`, `sdl2-ttf` | rendering, sprites, help JPEGs, text (required) |
 | `sdl2-mixer` | sound and music |
+| `openssl` | verified TLS for optional native WebSocket connections |
+
+The [browser and WebSocket guide](docs/webgl-client.md) covers the WebAssembly /
+WebGL 2 build, asset packaging, gateway configuration and browser tests. Existing
+classic vcpkg trees also need `vcpkg install openssl:x64-windows --classic`.
 | `libiconv` | shared resource and legacy text conversion in `basic/TextEncoding.cpp` |
 | `libjpeg-turbo` | JPG load/save in `UtilityFunction.cpp` |
 

@@ -70,3 +70,15 @@ initialize `sellerFilter`, resolving the missing-field warnings inherited
 from that change. Windows loses one C4244 site after using an explicit cast
 for the already-clipped RLE row bound and removing the old light-buffer pitch
 conversion. The budgets tighten these removals without increasing any category.
+
+The browser/WebSocket port adds pinned IXWebSocket v12.0.1 to native builds under
+the same warning and sanitizer policy. Complete clean CI logs establish its
+initial warning population: GCC adds 14 sites and Linux Clang adds 22, all within
+the dependency. Apple Clang adds 34, including 14 deprecation diagnostics for
+its Secure Transport backend. Compression-disabled stubs account for most unused
+parameter/field diagnostics. These are measured dependency additions; warnings
+remain enabled and no project-source warning growth is folded into the budgets.
+Windows adds 25 upstream C4244 sites and six C4267 sites. Four new project
+`getenv` deprecation sites found during the first clean build were replaced by
+an owned configuration reader using `_dupenv_s` on Windows; the C4996 budget
+therefore stays unchanged.

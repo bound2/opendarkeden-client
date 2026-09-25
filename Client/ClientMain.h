@@ -22,5 +22,8 @@
 #define __CLIENT_MAIN_H__
 
 int ClientMain(char* lpCmdLine, int nCmdShow);
+#ifdef __EMSCRIPTEN__
+bool ClientHasBrowserLoop();
+#endif
 
 #endif // __CLIENT_MAIN_H__

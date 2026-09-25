@@ -441,7 +441,12 @@ int platform_get_executable_dir(char* buffer, size_t size) {
 
 	char path[PATH_MAX] = {0};
 
-	#ifdef PLATFORM_MACOS
+	#ifdef PLATFORM_WEB
+		// The launcher mounts the browser's virtual data tree at /.
+		if (size < 2) return 1;
+		buffer[0] = '/'; buffer[1] = '\0';
+		return 0;
+	#elif defined(PLATFORM_MACOS)
 		uint32_t bufsize = sizeof(path);
 		if (_NSGetExecutablePath(path, &bufsize) != 0) {
 			return 1;

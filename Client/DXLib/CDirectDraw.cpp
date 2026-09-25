@@ -14,6 +14,25 @@
 // (no /IClient, no SPRITELIB_BACKEND_SDL) and can't safely pull in
 // SpriteLib/CSpriteSurface.h the way DarkEden.exe's own sources can.
 #include "../SpriteLib/SpriteLibBackend.h"
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+EM_JS(int, BrowserCanvasDimension, (int vertical), {
+	const rect = Module['canvas'].getBoundingClientRect();
+	const scale = Math.min(devicePixelRatio || 1, 4096 / Math.max(1, rect.width), 4096 / Math.max(1, rect.height));
+	return Math.max(1, Math.round((vertical ? rect.height : rect.width) * scale));
+});
+extern "C" EMSCRIPTEN_KEEPALIVE void darkeden_resize_canvas(int width, int height)
+{
+	CSDLGraphics::ResizeBrowserCanvas(width, height);
+}
+void CSDLGraphics::ResizeBrowserCanvas(int width, int height)
+{
+	if (!m_pSDLWindow || width <= 0 || height <= 0 || width > 4096 || height > 4096) return;
+	int oldWidth = 0, oldHeight = 0;
+	SDL_GetWindowSize(m_pSDLWindow, &oldWidth, &oldHeight);
+	if (oldWidth != width || oldHeight != height) SDL_SetWindowSize(m_pSDLWindow, width, height);
+}
+#endif
 
 //-----------------------------------------------------------------------------
 // Static member initialization for DirectDraw objects
@@ -110,14 +129,21 @@ void CSDLGraphics::Init(HWND hWnd, WORD width, WORD height, SCREENMODE mode, boo
 	// cost: the xBRZ filter's factor (FrameUpscaler::ScaleFactor) is
 	// chosen from the pixel size, so a 2x display can ask for 3x or 4x
 	// where it asked for 2x, on the CPU, every frame.
-	Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
+	Uint32 flags = SDL_WINDOW_SHOWN;
+#ifndef __EMSCRIPTEN__
+	flags |= SDL_WINDOW_ALLOW_HIGHDPI;
 	if (mode == FULLSCREEN)
 	{
 		flags |= SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_BORDERLESS;
 	}
+#endif
 	m_pSDLWindow = SDL_CreateWindow("Dark Eden",
 		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+#ifdef __EMSCRIPTEN__
+		BrowserCanvasDimension(0), BrowserCanvasDimension(1), flags);
+#else
 		width, height, flags);
+#endif
 	if (m_pSDLWindow == NULL)
 	{
 		fprintf(stderr, "CSDLGraphics::Init: SDL_CreateWindow failed: %s\n", SDL_GetError());

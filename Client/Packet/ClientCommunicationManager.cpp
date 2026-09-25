@@ -9,6 +9,7 @@
 #include "DatagramPacket.h"
 #include "PacketDispatcher.h"
 #include "WireHost.h"
+#include "WebSocketTransport.h"
 #include "PacketValidator.h"
 #include "DebugLog.h"
 // MTestDef.h is gone: its one struct sits behind __METROTECH_TEST__,
@@ -28,6 +29,7 @@ ClientCommunicationManager*	g_pClientCommunicationManager = NULL;
 ClientCommunicationManager::ClientCommunicationManager ()
 : m_pDatagramSocket(NULL)
 {
+	if (NetworkTransport::UsesWebSocket()) return;
     // Note: __BEGIN_TRY/__END_CATCH are not used here because __BEGIN_TRY
     // expands to a no-op in Release builds (NDEBUG), which would leave the
     // catch(...) below orphaned. Use explicit try/catch instead.

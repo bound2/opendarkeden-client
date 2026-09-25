@@ -66,6 +66,11 @@ int main(int argc, char* argv[])
 
 	const int result = ClientMain(&commandLine[0], 1);
 
+#ifdef __EMSCRIPTEN__
+	// The browser now owns the frame callbacks and performs shutdown when the
+	// game quits. Returning main keeps the page responsive between frames.
+	if (ClientHasBrowserLoop()) return result;
+#endif
 	SDL_Quit();
 	return result;
 }

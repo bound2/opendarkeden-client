@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dark Eden</title>
+<style>
+  :root { color-scheme: dark; font: 16px system-ui, sans-serif; background: #100e10; color: #eee6db; }
+  body { margin: 0; display: grid; min-height: 100vh; place-items: center; }
+  main { width: min(100%, 1280px); text-align: center; }
+  h1 { letter-spacing: .12em; font: 2.2rem Georgia, serif; }
+  button { margin: .4rem; padding: .65rem 1.3rem; border: 1px solid #866d53; background: #31251f; color: inherit; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  #status { min-height: 1.5rem; padding: 0 1rem; }
+  progress { width: min(30rem, 90%); accent-color: #a77b54; }
+  canvas { display: block; width: min(100%, calc((100dvh - 180px) * 1.333333)); height: auto; aspect-ratio: 4 / 3; margin: auto; background: black; outline: none; }
+  canvas:fullscreen { width: 100vw; height: 100vh; }
+  [hidden] { display: none; }
+</style>
+<main>
+  <h1>DARK EDEN</h1>
+  <p id="status" role="status">Load the game to begin.</p>
+  <progress id="progress" hidden></progress>
+  <div><button id="play">Load game</button><button id="fullscreen" hidden>Fullscreen</button></div>
+  <!-- SDL's Emscripten backend uses #canvas for size and input callbacks. -->
+  <canvas id="canvas" width="800" height="600" tabindex="0" aria-label="Dark Eden game" hidden></canvas>
+</main>
+<script type="module" src="launcher.mjs"></script>
+</html>
