@@ -14,9 +14,8 @@
 // buffer and needs a connected peer, so SocketInputStreamTestAccess
 // (befriended by the class) preloads the buffer directly. The Socket
 // handed to the stream is never used - the constructor only asserts it
-// is non-null - but its destructor closes an INVALID_SOCKET through
-// Winsock, so Winsock must be initialised or that close throws Error
-// out of a destructor.
+// is non-null - and closing a never-created socket is a no-op, so the
+// Winsock start below only matters to tests that create a real one.
 //
 // This file compiles with the same defines as the packetwire library
 // (__WIN32__/__WINDOWS__ on Windows - set in tests/CMakeLists.txt) so

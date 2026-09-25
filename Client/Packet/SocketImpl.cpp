@@ -144,12 +144,17 @@ void SocketImpl::close ()
 	if ( m_SocketID == INVALID_SOCKET )
 		return;
 
+	// Forget the number before the call: a close that fails with EINTR or
+	// EIO has still released the descriptor, and a retry would close
+	// whatever reused it. Linger is 0 everywhere, so WSAEWOULDBLOCK cannot
+	// leave the handle open.
+	const SOCKET socket = m_SocketID;
+	m_SocketID = INVALID_SOCKET;
 	try {
-		SocketAPI::closesocket_ex( m_SocketID );
+		SocketAPI::closesocket_ex( socket );
 	} catch ( FileNotOpenedException ) {
 		// if already closed, ignore...
 	}
-	m_SocketID = INVALID_SOCKET;
 
 	__END_CATCH
 }
