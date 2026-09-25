@@ -1,0 +1,14 @@
+# Keep the image build context to the sources tools/web/build-container.sh
+# needs; the build trees alone are several GB.
+.git
+.github
+.claude
+.vscode
+.idea
+build/
+build-*/
+out/
+tools/web/browser-tests/target/
+vcpkg_installed/
+*.log
+web-renderer.log

@@ -10,7 +10,8 @@ emcmake cmake -S /work/source -B /work/build-wasm \
     -DCMAKE_BUILD_TYPE=Release -DBUILD_ENGINE=OFF -DBUILD_TESTS=OFF
 # One target per invocation: with the Makefile generator, several targets in
 # one parallel build each run their own sub-make, and those raced on the
-# iconv external project's configure step in a fresh tree.
-for target in DarkEden web_sprite_tests transport_tests; do
+# iconv external project's configure step in a fresh tree. WEB_BUILD_TARGETS
+# narrows the set; the container image builds only the game.
+for target in ${WEB_BUILD_TARGETS:-DarkEden web_sprite_tests transport_tests}; do
     cmake --build /work/build-wasm --target "$target" -j "${WEB_BUILD_JOBS:-8}"
 done

@@ -1,0 +1,44 @@
+# The browser client next to the server repository's stack.
+#
+#   cd docker
+#   docker compose up -d --build
+#
+# The image (../Dockerfile) builds the WebAssembly client and serves it with
+# nginx, proxying /game to the WebSocket gateway. The asset pack is mounted
+# from DARKEDEN_ASSETS (default: the local build tree's pack). Reaching the
+# gateway needs the server stack's network: ODK_NETWORK names it (the server
+# compose project "docker" creates "docker_odk-network"), and GATEWAY_UPSTREAM
+# is the gateway's address on it (the gateway shares odk-server's namespace).
+# On a host without that stack, set GATEWAY_UPSTREAM to the gateway's
+# host:port and ODK_NETWORK to any existing network.
+
+services:
+
+  odk-web:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        WEB_BUILD_JOBS: ${WEB_BUILD_JOBS:-8}
+    image: darkeden-web:local
+    container_name: odk-web
+    environment:
+      GATEWAY_UPSTREAM: ${GATEWAY_UPSTREAM:-odk-server:8080}
+      # What the page tells the client; /game is this server's own proxy.
+      DARKEDEN_WEBSOCKET_URL: ${DARKEDEN_WEBSOCKET_URL:-/game}
+      # The advertised login endpoint; must be a route in the gateway's config.
+      DARKEDEN_LOGIN_HOST: ${DARKEDEN_LOGIN_HOST:-127.0.0.1}
+      DARKEDEN_LOGIN_PORT: ${DARKEDEN_LOGIN_PORT:-9999}
+    ports:
+      # Loopback only; a TLS-terminating reverse proxy fronts it in production.
+      - "127.0.0.1:${WEB_PORT:-18739}:80"
+    volumes:
+      - ${DARKEDEN_ASSETS:-../build/web/assets}:/usr/share/nginx/html/assets:ro
+    restart: unless-stopped
+    networks:
+      - odk-network
+
+networks:
+  odk-network:
+    external: true
+    name: ${ODK_NETWORK:-docker_odk-network}

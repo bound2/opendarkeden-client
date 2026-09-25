@@ -90,6 +90,30 @@ Publish each JS/WASM bundle atomically, and revalidate launcher/module files to
 avoid mixing versions. The asset cache uses separate content hashes. No
 cross-origin isolation headers or browser plugins are required.
 
+## Container
+
+`Dockerfile` builds the client in the pinned Emscripten image and serves it
+with nginx 1.27, which also proxies `/game` to the WebSocket gateway so the
+page and its socket share one origin (the browser then sends the page's origin,
+and the gateway's `origins` must list it). The image carries no assets: mount
+the pack produced by `package-assets.py` at `/usr/share/nginx/html/assets`.
+`client-config.json` is rendered at container start from `DARKEDEN_WEBSOCKET_URL`
+(default `/game`), `DARKEDEN_LOGIN_HOST` and `DARKEDEN_LOGIN_PORT`;
+`GATEWAY_UPSTREAM` (default `odk-server:8080`) is where nginx forwards `/game`.
+
+`docker/docker-compose.yml` runs it as `odk-web` next to the server repository's
+stack: it joins that stack's network (`ODK_NETWORK`, default `docker_odk-network`),
+mounts `DARKEDEN_ASSETS` (default `../build/web/assets`) and publishes
+`127.0.0.1:18739`. On a VPS, keep it behind a TLS-terminating reverse proxy, set
+`DARKEDEN_LOGIN_HOST`/`PORT` to the advertised login endpoint, and list this
+container's address in the gateway's `trustedProxies` so players keep their own
+IPv4 identity instead of the proxy's.
+
+```sh
+cd docker
+docker compose up -d --build
+```
+
 ## Native WebSockets
 
 Native transport remains TCP by default. To use a gateway:

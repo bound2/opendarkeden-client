@@ -16,6 +16,9 @@ tools/web/*.sh text eol=lf
 tools/ci/*.pl text eol=lf
 build_and_run_effect_viewer.sh text eol=lf
 tools/linux/Dockerfile text eol=lf
+Dockerfile text eol=lf
+docker/*.sh text eol=lf
+docker/*.template text eol=lf
 .github/workflows/*.yml text eol=lf
 
 # The audit scripts, for the same reason: all three carry a shebang, and

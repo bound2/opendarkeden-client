@@ -1,0 +1,44 @@
+# Rendered by the nginx image's entrypoint with GATEWAY_UPSTREAM substituted
+# (NGINX_ENVSUBST_FILTER keeps nginx's own $variables intact).
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+
+    # The client's WebSocket, same origin as the page. The gateway gets the
+    # page's Origin header unchanged and this proxy's address as its peer;
+    # list that address in the gateway's trustedProxies for X-Forwarded-For
+    # to carry the player's real IPv4 (docs/websocket.md in the server repo).
+    location = /game {
+        proxy_pass http://${GATEWAY_UPSTREAM};
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_read_timeout 75s;
+        proxy_send_timeout 75s;
+    }
+
+    # The asset pack is content-addressed by the ?sha256= query the launcher
+    # adds, so it can be cached for a long time.
+    location /assets/ {
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+
+    # ES modules need a JavaScript type; nginx's table has js but not mjs.
+    location ~* \.mjs$ {
+        types { }
+        default_type text/javascript;
+        add_header Cache-Control "no-cache";
+    }
+
+    # Revalidate the bundle files on every load so a deploy is picked up.
+    location ~* \.(wasm|html|json)$ {
+        add_header Cache-Control "no-cache";
+    }
+
+    gzip on;
+    gzip_types text/javascript application/json text/html application/wasm;
+    gzip_min_length 1024;
+}
