@@ -5,6 +5,7 @@
 #include "DXLib/DXLib.h"
 
 #include "UtilityFunction.h"
+#include "DataPath.h"
 
 #ifndef PLATFORM_WINDOWS
 #include <sys/statvfs.h>
@@ -353,6 +354,12 @@ LoadImageToSurface(const char* pFilename, CDirectDrawSurface& surface)
 	{
 		return false;
 	}
+
+	// Resolved for the disk (basic/DataPath.h): the identity on Windows;
+	// off Windows the separators folded and each component matched
+	// case-insensitively. InitFromBMP() and LoadJPG() below open it.
+	const std::string sResolved = Basic::NormalizeDataPath(pFilename);
+	pFilename = sResolved.c_str();
 
 	int fileLen = strlen(pFilename);
 
@@ -974,6 +981,12 @@ bool LoadImageToSurface(const char* pFilename, CSpriteSurface& surface)
 	if (pFilename == NULL) {
 		return false;
 	}
+
+	// Resolved for the disk (basic/DataPath.h): the identity on Windows;
+	// off Windows the separators folded and each component matched
+	// case-insensitively. SDL_LoadBMP() below opens it.
+	const std::string sResolved = Basic::NormalizeDataPath(pFilename);
+	pFilename = sResolved.c_str();
 
 	int fileLen = strlen(pFilename);
 

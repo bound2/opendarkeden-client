@@ -23,6 +23,7 @@
 #include "MGameStringTable.h"
 #include "SafeFormat.h"
 #include "SkinManager.h"
+#include "DataPath.h"
 
 //add by zdj
 #ifdef PLATFORM_WINDOWS
@@ -838,11 +839,13 @@ C_VS_UI_NEWCHAR::C_VS_UI_NEWCHAR()
 	m_AdvancementSlayerManIspk.LoadFromFileRunning( ISPK_ADVANCEMENT_SLAYER_MAN );
 	m_AdvancementSlayerWomanIspk.LoadFromFileRunning( ISPK_ADVANCEMENT_SLAYER_WOMAN );
 
-	ifstream file_man(CFPK_SLAYER, ios::binary);
+	// The shipped trees spell these in more than one case (Data/Image/addon.cfpk);
+	// off Windows each name is resolved against the disk before it is opened.
+	ifstream file_man(Basic::NormalizeDataPath(CFPK_SLAYER), ios::binary);
 	if (!file_man)
 		_Error(FILE_OPEN);
 	m_slayer_cfpk.LoadFromFile(file_man);
-	ifstream file_vampire(CFPK_VAMPIRE, ios::binary);
+	ifstream file_vampire(Basic::NormalizeDataPath(CFPK_VAMPIRE), ios::binary);
 	file_man.close();
 
 	if (!file_vampire)
@@ -850,38 +853,38 @@ C_VS_UI_NEWCHAR::C_VS_UI_NEWCHAR()
 	m_vampire_cfpk.LoadFromFile(file_vampire);
 	file_vampire.close();
 
-	ifstream file_ousters(CFPK_OUSTERS, ios::binary);
+	ifstream file_ousters(Basic::NormalizeDataPath(CFPK_OUSTERS), ios::binary);
 	if (!file_ousters)
 		_Error(FILE_OPEN);
 	m_ousters_cfpk.LoadFromFile(file_ousters);
 	file_ousters.close();
 	
-	ifstream file_ac_ousters( CFPK_ADVANCEMENT_OUSTERS, ios::binary );
+	ifstream file_ac_ousters( Basic::NormalizeDataPath(CFPK_ADVANCEMENT_OUSTERS), ios::binary );
 	if( !file_ac_ousters )
 		_Error( FILE_OPEN );
 	m_AdvancementOustersCfpk.LoadFromFile( file_ac_ousters );
 	file_ac_ousters.close();
 
-	ifstream file_ac_vampire( CFPK_ADVANCEMENT_VAMPIRE_MAN, ios::binary );
+	ifstream file_ac_vampire( Basic::NormalizeDataPath(CFPK_ADVANCEMENT_VAMPIRE_MAN), ios::binary );
 	if( !file_ac_vampire )
 		_Error( FILE_OPEN );
 	m_AdvancementVampireManCfpk.LoadFromFile( file_ac_vampire );
 	file_ac_vampire.close();
 
-	ifstream file_ac_vampire2( CFPK_ADVANCEMENT_VAMPIRE_WOMAN, ios::binary );
+	ifstream file_ac_vampire2( Basic::NormalizeDataPath(CFPK_ADVANCEMENT_VAMPIRE_WOMAN), ios::binary );
 	if( !file_ac_vampire2 )
 		_Error( FILE_OPEN );
 	m_AdvancementVampireWomanCfpk.LoadFromFile( file_ac_vampire2 );
 	file_ac_vampire2.close();
 
 
-	ifstream file_ac_slayerman( CFPK_ADVANCEMENT_SLAYER_MAN,ios::binary );
+	ifstream file_ac_slayerman( Basic::NormalizeDataPath(CFPK_ADVANCEMENT_SLAYER_MAN),ios::binary );
 	if( !file_ac_slayerman )
 		_Error( FILE_OPEN );
 	m_AdvancementSlayerManCfpk.LoadFromFile( file_ac_slayerman );
 	file_ac_slayerman.close();
 
-	ifstream file_ac_slayerwoman( CFPK_ADVANCEMENT_SLAYER_WOMAN,ios::binary );
+	ifstream file_ac_slayerwoman( Basic::NormalizeDataPath(CFPK_ADVANCEMENT_SLAYER_WOMAN),ios::binary );
 	if( !file_ac_slayerwoman )
 		_Error( FILE_OPEN );
 	m_AdvancementSlayerWomanCfpk.LoadFromFile( file_ac_slayerwoman );

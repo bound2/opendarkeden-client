@@ -13,6 +13,7 @@
 #include "FrameUpscaler.h"
 #include "SpriteGpu.h"
 #include "SpriteScanline.h"
+#include "DataPath.h"
 #include <climits>
 #include <limits>
 #include <stdlib.h>
@@ -962,8 +963,9 @@ int spritectl_load_pack(const char* filename, spritectl_pack_t* pack) {
 		return -1;
 	}
 
-	/* Open pack file */
-	file = fopen(filename, "rb");
+	/* Open pack file: the game's spelling of the path, resolved to the
+	   disk's (basic/DataPath.h) */
+	file = fopen(Basic::NormalizeDataPath(filename).c_str(), "rb");
 	if (!file) {
 		fprintf(stderr, "SpriteLib Backend: Failed to open pack file: %s\n", filename);
 		return -2;

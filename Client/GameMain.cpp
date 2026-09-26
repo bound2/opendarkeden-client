@@ -2197,7 +2197,9 @@ LoadZone(int n)
 		}
 
 		std::ifstream file;
-		file.open(filename, ios::binary);
+		// Zone.inf spells it Data\Map\<zone>.map: resolved for the disk as
+		// FileOpenBinary() resolves the zone load (basic/DataPath.h).
+		file.open(Basic::NormalizeDataPath(filename.GetString()).c_str(), ios::binary);
 
 		file.seekg(g_pZone->GetTileFilePosition(), ios::beg);
 		g_pTopView->LoadFromFileTileSPKSmallZone( file );
@@ -2417,7 +2419,9 @@ LoadZone(int n)
 		}
 
 		std::ifstream file;
-		file.open(filename, ios::binary);
+		// Zone.inf spells it Data\Map\<zone>.map: resolved for the disk as
+		// FileOpenBinary() resolves the zone load (basic/DataPath.h).
+		file.open(Basic::NormalizeDataPath(filename.GetString()).c_str(), ios::binary);
 
 		file.seekg(g_pZone->GetTileFilePosition(), ios::beg);
 		g_pTopView->LoadFromFileTileSPKLargeZone( file );

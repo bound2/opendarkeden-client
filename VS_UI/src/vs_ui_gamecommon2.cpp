@@ -22,6 +22,7 @@
 #include "MGameStringTable.h"
 #include "SafeFormat.h"
 #include "HelpImageCache.h"
+#include "DataPath.h"
 #include "TextService.h"
 #include "KeyAccelerator.h"
 #include "ClientConfig.h"
@@ -1157,7 +1158,7 @@ void	C_VS_UI_IMAGE_NOTICE::AddNotice(const char* name, DWORD id)
 std::string C_VS_UI_IMAGE_NOTICE::LoadInfo(DWORD ID)
 {
 	CEventGiftInfo *Event = new CEventGiftInfo;
-	std::string convertedPath = ConvertGamePath("data\\info\\eventquest.inf");
+	const std::string convertedPath = Basic::NormalizeDataPath("data\\info\\eventquest.inf");
 	ifstream info(convertedPath.c_str(), ios::binary );
 	Event->LoadFromFile ( info );
 	info.close();
@@ -17226,7 +17227,7 @@ void	C_VS_UI_POWER_JJANG::SetItemList()
 
 	// 에융..클래스 만들기 구찬타..
 	BYTE MaxItem = 0;
-	std::string convertedPath = ConvertGamePath("data\\info\\PowerjjangItem.inf");
+	const std::string convertedPath = Basic::NormalizeDataPath("data\\info\\PowerjjangItem.inf");
 	ifstream file(convertedPath.c_str(), ios::binary);
 	file.read((char*)&MaxItem, 1);
 	file.read((char*)&m_AvailablePoint, 2);

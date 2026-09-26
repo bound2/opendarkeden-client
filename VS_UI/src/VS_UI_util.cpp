@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include "VS_UI_Base.h"
 #include "VS_UI_util.h"
+#include "DataPath.h"
 #include "../../Client/SpriteLib/CSpriteOutlineManager.h"
 
 extern	BOOL g_MyFull;
@@ -658,10 +659,11 @@ void C_SPRITE_PACK::Open(const char *sz_filename)
 
 	//m_pC_spk_list->LoadFromFile(file);
 
-	// Convert path separators for cross-platform compatibility
-	// On Windows: no conversion (keeps backslashes)
-	// On Unix/macOS: converts backslashes to forward slashes
-	std::string convertedPath = ConvertGamePath(sz_filename);
+	// The UI names its packs the Windows way (data\ui\spk\..., in a letter
+	// case the disk need not share). Basic::NormalizeDataPath leaves the
+	// name alone on Windows; elsewhere it folds the separators and finds
+	// each component case-insensitively.
+	const std::string convertedPath = Basic::NormalizeDataPath(sz_filename ? sz_filename : "");
 	m_SPK.LoadFromFileRunning( convertedPath.c_str() );
 }
 

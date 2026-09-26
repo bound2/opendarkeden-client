@@ -35,6 +35,7 @@
 #include "MMonsterKillQuestInfo.h"
 #include "SystemAvailabilities.h"
 #include "SkinManager.h"
+#include "DataPath.h"
 
 #include <algorithm>
 #include <time.h>
@@ -33556,7 +33557,7 @@ void C_VS_UI_LOTTERY_CARD::LoadInfo(int &step)
 	GiftImage[52] = DARKEDEN_TICKET_2;
 
 	CEventGiftInfo *Event = new CEventGiftInfo;
-	ifstream info("data\\info\\EventQuest.inf", ios::binary );
+	ifstream info(Basic::NormalizeDataPath("data\\info\\EventQuest.inf"), ios::binary );
 	Event->LoadFromFile ( info );
 	info.close();		
 	

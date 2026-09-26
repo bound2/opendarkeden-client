@@ -68,9 +68,9 @@
 #include <emscripten.h>
 #include "UserOption.h"
 #endif
+#include "DataPath.h"			// Basic::NormalizeDataPath; Basic::FindDataRoot, the working directory off Windows
 #ifndef PLATFORM_WINDOWS
 #include "DXLib/DXLibBackend.h"	// dxlib_input_update(), the SDL event pump
-#include "DataPath.h"			// Basic::FindDataRoot, the working directory off Windows
 extern bool g_bRunning;			// cleared by the pump on SDL_QUIT (DXLibBackendSDL.cpp)
 #endif
 #include <system_error>
@@ -424,8 +424,12 @@ DARKEDEN_LANGUAGE CheckDarkEdenLanguage()
 		return DARKEDEN_KOREAN;
 
 	int num = 0;
-	const char* fileName = g_pFileDef->getProperty("FILE_LANGUAGE_INFO").c_str();
-	FILE *f = fopen(fileName, "r");
+	// Held, not borrowed: getProperty() returns a temporary, and the
+	// pointer taken from it used to dangle by the time fopen() read it.
+	// FileDef.inf names the file bare, which getProperty() leaves as
+	// spelled, so it is resolved for the disk here (basic/DataPath.h).
+	const std::string fileName = Basic::NormalizeDataPath(g_pFileDef->getProperty("FILE_LANGUAGE_INFO"));
+	FILE *f = fopen(fileName.c_str(), "r");
 	if (f == NULL) goto exit;
 
 	char szLine[512];
@@ -3236,7 +3240,11 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 		const std::string sRoot = Basic::FindDataRoot(vCandidates, FILE_INFO_FILEDEF);
 		if (sRoot.empty())
 		{
-			fprintf(stderr, "ClientMain: no data tree (%s) under any of:\n", FILE_INFO_FILEDEF);
+			// The marker as it is looked for: MFileDef.h spells it with
+			// backslashes, which FindDataRoot folds.
+			std::string sMarker = FILE_INFO_FILEDEF;
+			std::replace(sMarker.begin(), sMarker.end(), '\\', '/');
+			fprintf(stderr, "ClientMain: no data tree (%s) under any of:\n", sMarker.c_str());
 			for (size_t i = 0; i < vCandidates.size(); i++)
 				fprintf(stderr, "    %s\n", vCandidates[i].c_str());
 		}
@@ -4205,7 +4213,13 @@ int ClientMain(char* lpCmdLine, int nCmdShow)
 	// 현재 path읽기
 	if (_getcwd( CWD, _MAX_PATH )!=NULL)
 	{	
-		char UpdateDir[_MAX_PATH];
+		// Empty unless built below. The directory is the Windows updater's
+		// leftover and the backslash is Windows' separator, so off Windows
+		// this names nothing and the cleanup is a no-op, as intended - but
+		// _getcwd() can answer "/" there (the browser build's root), which
+		// the length test skips, and _rmdir() then read an uninitialized
+		// buffer.
+		char UpdateDir[_MAX_PATH] = { 0, };
 
 		int lenCWD = strlen(CWD);
 		if (lenCWD > 1)

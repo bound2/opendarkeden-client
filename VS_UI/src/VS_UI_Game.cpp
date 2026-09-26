@@ -5,6 +5,7 @@
 #include "VS_UI_Game.h"
 #include "VS_UI_filepath.h"
 #include "ProfilePath.h"
+#include "DataPath.h"
 #include "VS_UI_Message.h"
 #include "VS_UI_mouse_pointer.h"
 
@@ -4619,7 +4620,7 @@ void C_VS_UI_GAME::Start()
 	m_pC_mailbox->LoadFromFile(ProfilePath::CharacterDimensionWorld(g_char_slot_ingame.sz_name.c_str(), g_Dimension, g_pUserInformation->WorldID, ".mail").c_str());
 
 	bool IsTestServer = false;
-	ifstream IsTestServerFile(FILE_INFO_TESTSERVER, ios::binary);
+	ifstream IsTestServerFile(Basic::NormalizeDataPath(FILE_INFO_TESTSERVER), ios::binary);
 	IsTestServerFile.read((char *)&IsTestServer, 1);
 	IsTestServerFile.close();
 	g_pUserInformation->IsTestServer = IsTestServer;

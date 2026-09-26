@@ -12,6 +12,7 @@
 #include "MGameStringTable.h"
 //#define dSTRING_LEN 256 
 #include "SXml.h"
+#include "DataPath.h"
 extern RECT g_GameRect;
 
 //-----------------------------------------------------------------------------
@@ -958,7 +959,7 @@ bool	C_VS_UI_COMPUTER::LoadTree(const char* szFilename)
 {
 	assert(szFilename);
 
-	std::string spkname = _ROOT"spk\\";
+	std::string spkname = SPK_ROOT;
 
 
 //	if(!fp)_Error(FAILED_JOB);
@@ -995,7 +996,8 @@ bool	C_VS_UI_COMPUTER::LoadTree(const char* szFilename)
 
 		CSpritePack *temp;
 		temp = new CSpritePack;
-		ifstream file(spkname.c_str(), ios::binary);
+		// The name comes from the tutorial XML, in whatever case it was written.
+		ifstream file(Basic::NormalizeDataPath(spkname), ios::binary);
 		if (!file)
 			_Error(FILE_OPEN);
 		temp->LoadFromFile( file );

@@ -21,6 +21,7 @@
 #include <vector>
 #include <memory>
 #include "DebugLog.h"
+#include "DataPath.h"
 
 using std::ifstream;
 using std::ios;
@@ -29,16 +30,21 @@ using std::ofstream;
 #include "../../basic/ColorDraw.h"
 #include <cstdint>
 
+// The file names reaching the loaders below are the game's spelling of a
+// path (Data\Image\..., from FileDef.inf and VS_UI_filepath.h). Each open
+// goes through Basic::NormalizeDataPath: the identity on Windows, and
+// elsewhere the separator folding and case-insensitive component
+// resolution of basic/DataPath.h.
 namespace CTypePackDetail {
 inline bool OpenIndexedEntry(int fileID, LPCTSTR packFilename, LPCTSTR indexFilename,
 	std::ifstream& dataFile)
 {
 	if (fileID < 0 || !packFilename || !indexFilename) return false;
-	dataFile.open(packFilename, std::ios::binary | std::ios::ate);
+	dataFile.open(Basic::NormalizeDataPath(packFilename), std::ios::binary | std::ios::ate);
 	if (!dataFile) return false;
 	const auto dataSize = dataFile.tellg();
 	if (dataSize <= std::streampos(2)) return false;
-	std::ifstream indexFile(indexFilename, std::ios::binary);
+	std::ifstream indexFile(Basic::NormalizeDataPath(indexFilename), std::ios::binary);
 	std::uint16_t count = 0;
 	if (!indexFile.read(reinterpret_cast<char*>(&count), sizeof count) || fileID >= count)
 		return false;
@@ -54,11 +60,11 @@ inline bool ReadRunningIndex(const char* filename, std::ifstream& data,
 	std::vector<int>& offsets)
 {
 	if (!filename || !*filename) return false;
-	data.open(filename, std::ios::binary | std::ios::ate);
+	data.open(Basic::NormalizeDataPath(filename), std::ios::binary | std::ios::ate);
 	if (!data) return false;
 	const auto end = data.tellg();
 	std::uint16_t count = 0, dataCount = 0;
-	std::ifstream index(std::string(filename) + 'i', std::ios::binary);
+	std::ifstream index(Basic::NormalizeDataPath(std::string(filename) + 'i'), std::ios::binary);
 	if (!index.read(reinterpret_cast<char*>(&count), 2) ||
 		!data.seekg(0) || !data.read(reinterpret_cast<char*>(&dataCount), 2) ||
 		count != dataCount) return false;
@@ -236,7 +242,7 @@ template <class Type>
 bool CTypePack<Type>::LoadFromFile(LPCTSTR lpszFilename)
 {
 	if (!lpszFilename) return false;
-	std::ifstream file(lpszFilename, std::ios::binary);
+	std::ifstream file(Basic::NormalizeDataPath(lpszFilename), std::ios::binary);
 	const bool loaded = LoadFromFile(file);
 	if (!loaded) LOG_ERROR("Rejected pack file: source=%s", lpszFilename);
 	return loaded;
@@ -248,8 +254,8 @@ bool CTypePack<Type>::SaveToFile(LPCTSTR lpszFilename)
 	char szIndexFilename[512];
 	snprintf(szIndexFilename, sizeof(szIndexFilename), "%si", lpszFilename);
 
-	std::ofstream dataFile(lpszFilename, std::ios::binary);
-	std::ofstream indexFile(szIndexFilename, std::ios::binary);
+	std::ofstream dataFile(Basic::NormalizeDataPath(lpszFilename), std::ios::binary);
+	std::ofstream indexFile(Basic::NormalizeDataPath(szIndexFilename), std::ios::binary);
 
 	bool re = SaveToFile(dataFile, indexFile);
 
@@ -665,7 +671,7 @@ template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFile(LPCTSTR lpszFilename)
 {
 	if (!lpszFilename) return false;
-	std::ifstream file(lpszFilename, std::ios::binary);
+	std::ifstream file(Basic::NormalizeDataPath(lpszFilename), std::ios::binary);
 	const bool loaded = LoadFromFile(file);
 	if (!loaded) LOG_ERROR("Rejected pack file: source=%s", lpszFilename);
 	return loaded;
@@ -677,8 +683,8 @@ bool CTypePack2<TypeBase, Type1, Type2>::SaveToFile(LPCTSTR lpszFilename)
 	char szIndexFilename[512];
 	snprintf(szIndexFilename, sizeof(szIndexFilename), "%si", lpszFilename);
 
-	std::ofstream dataFile(lpszFilename, std::ios::binary);
-	std::ofstream indexFile(szIndexFilename, std::ios::binary);
+	std::ofstream dataFile(Basic::NormalizeDataPath(lpszFilename), std::ios::binary);
+	std::ofstream indexFile(Basic::NormalizeDataPath(szIndexFilename), std::ios::binary);
 
 	bool re = SaveToFile(dataFile, indexFile);
 

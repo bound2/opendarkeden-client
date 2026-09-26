@@ -28,7 +28,7 @@
 	#define CFPK_ROOT						_ROOT"cfpk/"
 	#define _DATA_DIR_ROOT					"Data/"
 	#define _DATA_DIR_IMAGE_ROOT			_DATA_DIR_ROOT"Image/"
-	#define _DATA_DIR_INFO_ROOT				"Data/info/"
+	#define _DATA_DIR_INFO_ROOT				"Data/Info/"
 	#define _PROFILE_ROOT					"UserSet/"
 #endif
 

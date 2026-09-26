@@ -4,6 +4,7 @@
 #include "Client_PCH.h"
 #include "MEventManager.h"
 #include "CJpeg.h"
+#include "DataPath.h"
 
 	#include "MPlayer.h"
 	#include "UtilityFunction.h"
@@ -293,8 +294,12 @@ bool MEventManager::AssertEventBackground(EVENTBACKGROUND_ID id)
 	if(entry->GetSurface() != NULL)
 		return true;
 
+	// The table spells the paths the Windows way; resolved for the disk
+	// (basic/DataPath.h): the identity on Windows, and elsewhere the
+	// separators folded and each component matched case-insensitively
+	// (EventBackgroundQuest2 ships as .JPS).
 	CJpeg jpg;
-	bool bOpen = jpg.Open(strFilename[id].c_str());
+	bool bOpen = jpg.Open(Basic::NormalizeDataPath(strFilename[id]).c_str());
 	if(bOpen == true && jpg.GetWidth() > 0 && jpg.GetHeight() > 0 && jpg.GetHeight() > 0)
 	{
 		CDirectDrawSurface &surface = *entry;

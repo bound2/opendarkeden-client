@@ -7,6 +7,7 @@
 #include "CAlphaSprite565.h"
 #include "CAlphaSpritePack.h"
 #include "CTypePack.h"
+#include "DataPath.h"
 #include <stdexcept>
 #include <utility>
 #include <fstream>
@@ -289,14 +290,15 @@ CAlphaSpritePack::LoadFromFileSprite(int spriteID, int fileSpriteID, const char*
 		return false;
 	}
 
-	std::ifstream spkFile(spkFilename, ios::binary);
+	// The game's spelling of the path, resolved to the disk's (basic/DataPath.h).
+	std::ifstream spkFile(Basic::NormalizeDataPath(spkFilename), ios::binary);
 
 	if (!spkFile.is_open())
 	{
 		return false;
 	}
 
-	std::ifstream indexFile(indexFilename, ios::binary);
+	std::ifstream indexFile(Basic::NormalizeDataPath(indexFilename), ios::binary);
 
 	if (!indexFile.is_open())
 	{

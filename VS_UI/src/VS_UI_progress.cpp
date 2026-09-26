@@ -8,6 +8,7 @@
 #include <time.h>
 
 #include "MGameStringTable.h"
+#include "DataPath.h"
 
 #define PROGRESS_MAX 25
 extern	BOOL g_MyFull;
@@ -103,7 +104,7 @@ C_VS_UI_PROGRESS::C_VS_UI_PROGRESS()
 			pSpk_progressPathc =SPK_PROGRESS;
 			//ifstream progress_file(SPK_PROGRESS, ios::binary);
 		}
-		ifstream progress_file(pSpk_progressPathc, ios::binary);
+		ifstream progress_file(Basic::NormalizeDataPath(pSpk_progressPathc), ios::binary);
 		m_pC_progress->LoadFromFile(progress_file);
 		progress_file.close();
 		
