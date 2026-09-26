@@ -82,6 +82,28 @@ extern int defaultTrouserColor;
 namespace {
 	POINT pointTemp;
 	RECT rect;
+
+	void DrawInvisibleVampireSprite(CSpriteSurface* surface, POINT* point,
+		CIndexSprite* sprite, MCreature* creature)
+	{
+		const int wipe = creature->GetInvisibleCount();
+		if (wipe >= 64) return;
+		WORD tint = creature->GetAttachEffectColor();
+		if (creature->GetCreatureType() == CREATURETYPE_BAT && creature->GetBatColor() != 0xffff)
+			tint = creature->GetBatColor();
+		int color1 = tint < MAX_COLORSET ? tint : creature->GetBodyColor1();
+		int color2 = tint < MAX_COLORSET ? tint : creature->GetBodyColor2();
+		if (color1 == QUEST_ITEM_COLOR || color1 == UNIQUE_ITEM_COLOR)
+			color1 = MItem::GetSpecialColorItemColorset(color1);
+		if (color2 == QUEST_ITEM_COLOR || color2 == UNIQUE_ITEM_COLOR)
+			color2 = MItem::GetSpecialColorItemColorset(color2);
+		CIndexSprite::SetUsingColorSet(color1, color2);
+		// Supply this creature's fade on every draw, including tinted bodies
+		// and weapons; other effects also use the shared value.
+		CSpriteSurface::s_Value1 = wipe;
+		CIndexSprite::SetEffect(CIndexSprite::EFFECT_WIPE_OUT);
+		surface->BltIndexSpriteEffect(point, sprite);
+	}
 };
 
 int AdvancementOustersActionConvTable[ ACTION_MAX_SLAYER ] =
@@ -1791,63 +1813,7 @@ void	MTopView::DrawVampireCharacter( POINT* pPoint, MCreature* pCreature, int ac
 			}
 			else if (pCreature->IsInvisible())
 			{
-				WORD colorSet = pCreature->GetAttachEffectColor();
-				
-				if( pCreature->GetCreatureType() == CREATURETYPE_BAT && pCreature->GetBatColor() != 0xFFFF)
-					colorSet = pCreature->GetBatColor();
-				
-				//---------------------------------------- 
-				// 캐릭터 전체 색깔이 바뀌는 경우					
-				//---------------------------------------- 
-				if (colorSet < MAX_COLORSET)
-				{
-					// IndexSprite에도 EFFECT...넣고...
-					// 스르륵~ 단계적으로 나타나게/없어지게 해야됨.. - -;
-					m_pSurface->BltIndexSpriteColorSet(&pointTemp, pSprite, colorSet);
-				}
-				else
-				{
-					int colorSet1 = pCreature->GetBodyColor1();
-					int colorSet2 = pCreature->GetBodyColor2();
-					
-					if( colorSet1 == QUEST_ITEM_COLOR || colorSet1 == UNIQUE_ITEM_COLOR )
-						colorSet1 = MItem::GetSpecialColorItemColorset( colorSet1 );
-					
-					if( colorSet2 == QUEST_ITEM_COLOR || colorSet2 == UNIQUE_ITEM_COLOR )
-						colorSet2 = MItem::GetSpecialColorItemColorset( colorSet2 );
-					
-					CIndexSprite::SetUsingColorSet( colorSet1, colorSet2 );
-					
-					int wipeValue = pCreature->GetInvisibleCount();
-					
-					if (wipeValue==0)
-					{
-						m_pSurface->BltIndexSprite(&pointTemp, pSprite);							
-					}
-					else if (wipeValue==64)
-					{
-						CSpriteSurface::SetEffect( CSpriteSurface::EFFECT_WIPE_OUT );
-						CIndexSprite::SetEffect( CIndexSprite::EFFECT_WIPE_OUT );
-						
-						m_pSurface->BltIndexSpriteEffect(&pointTemp, pSprite);
-					}
-					else
-					{
-						CSpriteSurface::s_Value1 = wipeValue;
-						
-						CSpriteSurface::SetEffect( CSpriteSurface::EFFECT_WIPE_OUT );
-						CIndexSprite::SetEffect( CIndexSprite::EFFECT_WIPE_OUT );
-						
-						m_pSurface->BltIndexSpriteEffect(&pointTemp, pSprite);
-						
-						//CSpriteSurface::s_Value1 = wipeValue/10+1;
-						
-						//CSpriteSurface::SetEffect( CSpriteSurface::EFFECT_NET );
-						//CIndexSprite::SetEffect( CIndexSprite::EFFECT_NET );
-						
-						//m_pSurface->BltIndexSpriteEffect(&pointTemp, pSprite);
-					}							
-				}
+				DrawInvisibleVampireSprite(m_pSurface, &pointTemp, pSprite, pCreature);
 			}					
 			else
 			{	
@@ -3040,56 +3006,7 @@ void	MTopView::DrawAdvancementClassVampireCharacter( POINT* pPoint, MCreature* p
 			}
 			else if (pCreature->IsInvisible())
 			{
-				WORD colorSet = pCreature->GetAttachEffectColor();
-				
-				if( pCreature->GetCreatureType() == CREATURETYPE_BAT && pCreature->GetBatColor() != 0xFFFF)
-					colorSet = pCreature->GetBatColor();
-				
-				//---------------------------------------- 
-				// 캐릭터 전체 색깔이 바뀌는 경우					
-				//---------------------------------------- 
-				if (colorSet < MAX_COLORSET)
-				{
-					// IndexSprite에도 EFFECT...넣고...
-					// 스르륵~ 단계적으로 나타나게/없어지게 해야됨.. - -;
-					m_pSurface->BltIndexSpriteColorSet(&pointTemp, pSprite, colorSet);
-				}
-				else
-				{
-					int colorSet1 = pCreature->GetBodyColor1();
-					int colorSet2 = pCreature->GetBodyColor2();
-					
-					if( colorSet1 == QUEST_ITEM_COLOR || colorSet1 == UNIQUE_ITEM_COLOR )
-						colorSet1 = MItem::GetSpecialColorItemColorset( colorSet1 );
-					
-					if( colorSet2 == QUEST_ITEM_COLOR || colorSet2 == UNIQUE_ITEM_COLOR )
-						colorSet2 = MItem::GetSpecialColorItemColorset( colorSet2 );
-					
-					CIndexSprite::SetUsingColorSet( colorSet1, colorSet2 );
-					
-					int wipeValue = pCreature->GetInvisibleCount();
-					
-					if (wipeValue==0)
-					{
-						m_pSurface->BltIndexSprite(&pointTemp, pSprite);							
-					}
-					else if (wipeValue==64)
-					{
-						CSpriteSurface::SetEffect( CSpriteSurface::EFFECT_WIPE_OUT );
-						CIndexSprite::SetEffect( CIndexSprite::EFFECT_WIPE_OUT );
-						
-						m_pSurface->BltIndexSpriteEffect(&pointTemp, pSprite);
-					}
-					else
-					{
-						CSpriteSurface::s_Value1 = wipeValue;
-						
-						CSpriteSurface::SetEffect( CSpriteSurface::EFFECT_WIPE_OUT );
-						CIndexSprite::SetEffect( CIndexSprite::EFFECT_WIPE_OUT );
-						
-						m_pSurface->BltIndexSpriteEffect(&pointTemp, pSprite);
-					}							
-				}
+				DrawInvisibleVampireSprite(m_pSurface, &pointTemp, pSprite, pCreature);
 			}					
 			else
 			{	
@@ -3353,45 +3270,7 @@ int previousClipBottom;
 				}
 				else if (pCreature->IsInvisible())
 				{
-					WORD colorSet = pCreature->GetAttachEffectColor();
-					
-					if( pCreature->GetCreatureType() == CREATURETYPE_BAT && pCreature->GetBatColor() != 0xFFFF)
-						colorSet = pCreature->GetBatColor();
-					
-					//---------------------------------------- 
-					// 캐릭터 전체 색깔이 바뀌는 경우					
-					//---------------------------------------- 
-					if (colorSet < MAX_COLORSET)
-					{
-						// IndexSprite에도 EFFECT...넣고...
-						// 스르륵~ 단계적으로 나타나게/없어지게 해야됨.. - -;
-						m_pSurface->BltIndexSpriteColorSet(&pointTemp, pSprite, colorSet);
-					}
-					else
-					{
-						int wipeValue = pCreature->GetInvisibleCount();
-						
-						if (wipeValue==0)
-						{
-							m_pSurface->BltIndexSprite(&pointTemp, pSprite);							
-						}
-						else if (wipeValue==64)
-						{
-							CSpriteSurface::SetEffect( CSpriteSurface::EFFECT_WIPE_OUT );
-							CIndexSprite::SetEffect( CIndexSprite::EFFECT_WIPE_OUT );
-							
-							m_pSurface->BltIndexSpriteEffect(&pointTemp, pSprite);
-						}
-						else
-						{
-							CSpriteSurface::s_Value1 = wipeValue;
-							
-							CSpriteSurface::SetEffect( CSpriteSurface::EFFECT_WIPE_OUT );
-							CIndexSprite::SetEffect( CIndexSprite::EFFECT_WIPE_OUT );
-							
-							m_pSurface->BltIndexSpriteEffect(&pointTemp, pSprite);
-						}							
-					}
+					DrawInvisibleVampireSprite(m_pSurface, &pointTemp, pSprite, pCreature);
 				}					
 				else
 				{	
