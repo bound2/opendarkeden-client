@@ -835,10 +835,7 @@ C_VS_UI_GAME::~C_VS_UI_GAME()
 {
 	if(m_pC_mailbox != NULL)
 	{
-		MString mailFileName;
-		mailFileName.Format(_PROFILE_ROOT "%s-%d-%d.mail", g_char_slot_ingame.sz_name.c_str(),
-			g_Dimension,g_pUserInformation->WorldID);
-		m_pC_mailbox->SaveToFile(mailFileName.GetString());
+		m_pC_mailbox->SaveToFile(ProfilePath::CharacterDimensionWorld(g_char_slot_ingame.sz_name.c_str(), g_Dimension, g_pUserInformation->WorldID, ".mail").c_str());
 	}
 	// erase() invalidates itr, so free the entries first and clear afterwards
 	for(std::vector<C_VS_UI_NicknameInfo*>::iterator itr = m_NickNameList.begin();
@@ -957,12 +954,7 @@ C_VS_UI_GAME::~C_VS_UI_GAME()
 	g_HISTORY_LINE = 4;
 	
 	// window_set file saving
-	char sz_filename[512];
-	SafeFormat::Format(sz_filename, _PROFILE_ROOT "%s-%d-%d.set", g_char_slot_ingame.sz_name.c_str(),
-		g_Dimension,g_pUserInformation->WorldID);
-
-	
-	ofstream file(sz_filename, ios::binary);
+	std::ofstream file(ProfilePath::CharacterDimensionWorld(g_char_slot_ingame.sz_name.c_str(), g_Dimension, g_pUserInformation->WorldID, ".set"), std::ios::binary);
 	
 	if(file)
 	{
@@ -4624,10 +4616,7 @@ void C_VS_UI_GAME::Start()
 	}
 	m_pC_mailbox = new C_VS_UI_MAILBOX;
 	
-	MString mailFileName;
-	mailFileName.Format(_PROFILE_ROOT "%s-%d-%d.mail", g_char_slot_ingame.sz_name.c_str(),g_Dimension,g_pUserInformation->WorldID);
-
-	m_pC_mailbox->LoadFromFile(mailFileName.GetString());
+	m_pC_mailbox->LoadFromFile(ProfilePath::CharacterDimensionWorld(g_char_slot_ingame.sz_name.c_str(), g_Dimension, g_pUserInformation->WorldID, ".mail").c_str());
 
 	bool IsTestServer = false;
 	ifstream IsTestServerFile(FILE_INFO_TESTSERVER, ios::binary);
