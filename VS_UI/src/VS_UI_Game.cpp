@@ -4,6 +4,7 @@
 #include "SafeFormat.h"
 #include "VS_UI_Game.h"
 #include "VS_UI_filepath.h"
+#include "ProfilePath.h"
 #include "VS_UI_Message.h"
 #include "VS_UI_mouse_pointer.h"
 
@@ -639,35 +640,11 @@ void C_VS_UI_GAME::ChangeToSlayerInterface()
 	
 	m_pC_tribe_interface = new C_VS_UI_SLAYER;
 
-	char sz_filename[512],sz_filename2[512],sz_filename3[512];
-	SafeFormat::Format(sz_filename, "UserSet\\%s.set", g_char_slot_ingame.sz_name.c_str());
-	SafeFormat::Format(sz_filename2,"UserSet\\%s-%d.set", g_char_slot_ingame.sz_name.c_str(),g_pUserInformation->WorldID);
-	SafeFormat::Format(sz_filename3,"UserSet\\%s-%d-%d.set", g_char_slot_ingame.sz_name.c_str(),g_Dimension,g_pUserInformation->WorldID);
-		
-	ifstream file(sz_filename3, ios::binary);
-	
-	if(file.is_open())
+	std::ifstream file;
+	if (ProfilePath::OpenCharacterSettings(file, g_char_slot_ingame.sz_name.c_str(), g_Dimension, g_pUserInformation->WorldID))
 	{
 		gpC_vs_ui_window_manager->LoadFromFile(file);
 		file.close();
-	} else
-	{
-		file.open(sz_filename2, ios::binary);
-
-		if(file.is_open())
-		{
-			gpC_vs_ui_window_manager->LoadFromFile(file);
-			file.close();
-		} else
-		{
-			file.open(sz_filename, ios::binary);
-
-			if(file.is_open())
-			{
-				gpC_vs_ui_window_manager->LoadFromFile(file);
-				file.close();
-			}
-		}
 	}
 
 	m_pC_hotkey = m_pC_tribe_interface;
@@ -707,35 +684,11 @@ void C_VS_UI_GAME::ChangeToVampireInterface()
 
 	m_pC_tribe_interface = new C_VS_UI_VAMPIRE;
 
-	char sz_filename[512];
-	char sz_filename2[512];
-	char sz_filename3[512];
-	SafeFormat::Format(sz_filename, "UserSet\\%s.set", g_char_slot_ingame.sz_name.c_str());
-	SafeFormat::Format(sz_filename2, "UserSet\\%s-%d.set", g_char_slot_ingame.sz_name.c_str(),g_pUserInformation->WorldID);
-	SafeFormat::Format(sz_filename3, "UserSet\\%s-%d-%d.set", g_char_slot_ingame.sz_name.c_str(),g_Dimension,g_pUserInformation->WorldID);
-	
-	ifstream file(sz_filename3, ios::binary);
-	
-	if(file.is_open())
+	std::ifstream file;
+	if (ProfilePath::OpenCharacterSettings(file, g_char_slot_ingame.sz_name.c_str(), g_Dimension, g_pUserInformation->WorldID))
 	{
 		gpC_vs_ui_window_manager->LoadFromFile(file);
 		file.close();
-	} else
-	{
-		file.open(sz_filename2, ios::binary);
-		if(file.is_open())
-		{
-			gpC_vs_ui_window_manager->LoadFromFile(file);
-			file.close();
-		} else
-		{
-			file.open(sz_filename, ios::binary);
-			if(file.is_open())
-			{
-				gpC_vs_ui_window_manager->LoadFromFile(file);
-				file.close();
-			}
-		}
 	}
 	
 	m_pC_hotkey = m_pC_tribe_interface;
@@ -883,7 +836,7 @@ C_VS_UI_GAME::~C_VS_UI_GAME()
 	if(m_pC_mailbox != NULL)
 	{
 		MString mailFileName;
-		mailFileName.Format("UserSet\\%s-%d-%d.mail", g_char_slot_ingame.sz_name.c_str(),
+		mailFileName.Format(_PROFILE_ROOT "%s-%d-%d.mail", g_char_slot_ingame.sz_name.c_str(),
 			g_Dimension,g_pUserInformation->WorldID);
 		m_pC_mailbox->SaveToFile(mailFileName.GetString());
 	}
@@ -1005,7 +958,7 @@ C_VS_UI_GAME::~C_VS_UI_GAME()
 	
 	// window_set file saving
 	char sz_filename[512];
-	SafeFormat::Format(sz_filename, "UserSet\\%s-%d-%d.set", g_char_slot_ingame.sz_name.c_str(),
+	SafeFormat::Format(sz_filename, _PROFILE_ROOT "%s-%d-%d.set", g_char_slot_ingame.sz_name.c_str(),
 		g_Dimension,g_pUserInformation->WorldID);
 
 	
@@ -4672,7 +4625,7 @@ void C_VS_UI_GAME::Start()
 	m_pC_mailbox = new C_VS_UI_MAILBOX;
 	
 	MString mailFileName;
-	mailFileName.Format("UserSet\\%s-%d-%d.mail", g_char_slot_ingame.sz_name.c_str(),g_Dimension,g_pUserInformation->WorldID);
+	mailFileName.Format(_PROFILE_ROOT "%s-%d-%d.mail", g_char_slot_ingame.sz_name.c_str(),g_Dimension,g_pUserInformation->WorldID);
 
 	m_pC_mailbox->LoadFromFile(mailFileName.GetString());
 
@@ -5685,35 +5638,11 @@ void C_VS_UI_GAME::ChangeToOustersInterface()
 
 	m_pC_tribe_interface = new C_VS_UI_OUSTERS;
 
-	char sz_filename[512];
-	char sz_filename2[512];
-	char sz_filename3[512];
-	SafeFormat::Format(sz_filename, "UserSet\\%s.set", g_char_slot_ingame.sz_name.c_str());
-	SafeFormat::Format(sz_filename2, "UserSet\\%s-%d.set", g_char_slot_ingame.sz_name.c_str(),g_pUserInformation->WorldID);
-	SafeFormat::Format(sz_filename3, "UserSet\\%s-%d-%d.set", g_char_slot_ingame.sz_name.c_str(),g_Dimension,g_pUserInformation->WorldID);
-	
-	ifstream file(sz_filename3, ios::binary);
-	
-	if(file.is_open())
+	std::ifstream file;
+	if (ProfilePath::OpenCharacterSettings(file, g_char_slot_ingame.sz_name.c_str(), g_Dimension, g_pUserInformation->WorldID))
 	{
 		gpC_vs_ui_window_manager->LoadFromFile(file);
 		file.close();
-	} else
-	{
-		file.open(sz_filename2, ios::binary);
-		if(file.is_open())
-		{
-			gpC_vs_ui_window_manager->LoadFromFile(file);
-			file.close();
-		} else
-		{
-			file.open(sz_filename, ios::binary);
-			if(file.is_open())
-			{
-				gpC_vs_ui_window_manager->LoadFromFile(file);
-				file.close();
-			}
-		}
 	}
 	
 	m_pC_hotkey = m_pC_tribe_interface;
