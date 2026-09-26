@@ -149,6 +149,20 @@ MItem*		g_pPacketItemShield[SHIELD_MAX] = { NULL, };
 MItem*		g_pPacketItemMotorcycle[MOTORCYCLE_MAX] = { NULL, };
 MItem*		g_pPacketItemShoulder[SHOULDER_MAX] = { NULL, };
 
+// The outlook bits are masked to their field's width, not checked against
+// these tables, so a value past a table's end counts as nothing worn.
+template <size_t N>
+static MItem* PacketItem(MItem* (&table)[N], unsigned index)
+{
+	return index < N ? table[index] : NULL;
+}
+
+template <size_t N>
+static int PacketHair(int (&table)[N], unsigned index)
+{
+	return index < N ? table[index] : table[0];
+}
+
 MItem*		g_pPacketItemOustersCoat[OUSTERS_COAT_MAX] = { NULL, };
 MItem*		g_pPacketItemOustersArm[OUSTERS_ARM_MAX] = { NULL, };
 
@@ -920,26 +934,26 @@ SetAddonToSlayer(MCreatureWear* pCreature, const PCSlayerInfo3* pInfo)
 	//----------------------------------------	
 	if (pInfo->getSex()==MALE)
 	{
-		pCreature->SetAddonHair(g_PacketHairMaleID[pInfo->getHairStyle()], pInfo->getHairColor());		
+		pCreature->SetAddonHair(PacketHair(g_PacketHairMaleID, pInfo->getHairStyle()), pInfo->getHairColor());		
 	}
 	// slayer 여
 	else
 	{
-		pCreature->SetAddonHair(g_PacketHairFemaleID[pInfo->getHairStyle()], pInfo->getHairColor());	
+		pCreature->SetAddonHair(PacketHair(g_PacketHairFemaleID, pInfo->getHairStyle()), pInfo->getHairColor());	
 	}
 
 	//----------------------------------------	
 	// 복장
 	//----------------------------------------	
-	MItem* pCoat		= g_pPacketItemJacket[pInfo->getJacketType()];
+	MItem* pCoat		= PacketItem(g_pPacketItemJacket, pInfo->getJacketType());
 //	MItem* pCoat		= g_pPacketItemJacket[JACKET_BASIC];//by viva
-	MItem* pTrouser		= g_pPacketItemPants[pInfo->getPantsType()];
-	MItem* pHelm		= g_pPacketItemHelm[pInfo->getHelmetType()];
-	MItem* pWeapon		= g_pPacketItemWeapon[pInfo->getWeaponType()];
-	MItem* pShield		= g_pPacketItemShield[pInfo->getShieldType()];
-	MItem* pMotorcycle	= g_pPacketItemMotorcycle[pInfo->getMotorcycleType()];
+	MItem* pTrouser		= PacketItem(g_pPacketItemPants, pInfo->getPantsType());
+	MItem* pHelm		= PacketItem(g_pPacketItemHelm, pInfo->getHelmetType());
+	MItem* pWeapon		= PacketItem(g_pPacketItemWeapon, pInfo->getWeaponType());
+	MItem* pShield		= PacketItem(g_pPacketItemShield, pInfo->getShieldType());
+	MItem* pMotorcycle	= PacketItem(g_pPacketItemMotorcycle, pInfo->getMotorcycleType());
 
-	MItem* pShoulder	= g_pPacketItemShoulder[pInfo->getShoulderType()];
+	MItem* pShoulder	= PacketItem(g_pPacketItemShoulder, pInfo->getShoulderType());
 
 	// 색깔정보 설정...
 	//pCoat->SetItemOptionList( getHelmetColor() );
