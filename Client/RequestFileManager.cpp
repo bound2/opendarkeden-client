@@ -5,6 +5,7 @@
 #include "RequestFileManager.h"
 #include "RequestServerPlayer.h"
 #include "ProfileManager.h"
+#include "DataPath.h"
 
 #include "Packet/Rpackets/RCRequestedFile.h"
 #include "Packet/Rpackets/RCRequestVerify.h"
@@ -96,7 +97,10 @@ SendFileInfo::StartSend()
 {
 	m_Mode = REQUEST_FILE_MODE_SEND;
 
-	m_FileStream.open( m_Filename.c_str(), std::ios::in | std::ios::binary);// |  );
+	// m_Filename stays as ProfileManager spelled it ("<dir>\<file>"),
+	// since that is the name sent to the peer; only the open resolves
+	// it for the disk (basic/DataPath.h, the identity on Windows).
+	m_FileStream.open( Basic::NormalizeDataPath(m_Filename).c_str(), std::ios::in | std::ios::binary);// |  );
 
 	if (m_FileStream.is_open())
 	{

@@ -1,9 +1,12 @@
 #include "test_framework.h"
 #include "CMessageArray.h"
+#include <chrono>
 #include <cstdio>
+#include <filesystem>
 #include <fstream>
 #include <limits>
 #include <string>
+#include <system_error>
 #ifndef _WIN32
 #include <sys/stat.h>
 #endif
@@ -161,4 +164,26 @@ TEST(MessageArray, TypedFrontEndAndPackedEntryRefuseUnprovidedArguments)
 	AddV(messages, "%s", "literal %s %n %%");
 	CHECK(std::string(messages[0]) == "%s 42 %s");
 	CHECK(std::string(messages[1]) == "literal %s %n %%");
+}
+
+// The executable names its log "<cwd>\Log\Log<n>.txt" (Client.cpp). The log
+// is opened through Basic::NormalizeDataPath, so off Windows it lands in the
+// Log directory instead of beside it under a name with backslashes in it.
+TEST(MessageArray, LogNamedWithBackslashesIsWrittenIntoItsDirectory)
+{
+	std::error_code error;
+	const std::filesystem::path root = std::filesystem::temp_directory_path(error) /
+		("message_log_" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+	std::filesystem::create_directories(root / "Log", error);
+	{
+		CMessageArray messages;
+		messages.Init(2, 16, (root.string() + "\\Log\\Log1.txt").c_str());
+		messages.Add("logged");
+	}
+	std::ifstream in(root / "Log" / "Log1.txt");
+	std::string line;
+	CHECK(bool(std::getline(in, line)));
+	CHECK(line == "logged");
+	in.close();
+	std::filesystem::remove_all(root, error);
 }

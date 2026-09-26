@@ -20,6 +20,7 @@
 // _findnext walks these two functions used to run
 // (docs/cpp17-cpp20-compatibility-assessment-2026-09-04.md, priority 6).
 #include "DirectoryListing.h"
+#include "DataPath.h"
 
 #include <string>
 #include <vector>
@@ -202,7 +203,7 @@ ProfileManager::InitProfiles()
 			//---------------------------------------------------------
 			// Read the bmp and turn it into a sprite.
 			//---------------------------------------------------------
-			char charName[256], spkFilename[256], spkiFilename[256];
+			char charName[256], spkFilename[256];
 			int lenFilename = (int)sFilename.size();
 
 			// "name.bmp"
@@ -243,20 +244,23 @@ ProfileManager::InitProfiles()
 			SPK[1].SetPixelNoColorkey(lpSurface, pitch, bigSize.x, bigSize.y);
 			delete[] lpSurface;
 
-			// filename.spk
+			// filename.spk. The directory was joined with a backslash above;
+			// off Windows it is folded to '/' here, or the pack would be a file
+			// named "UserSet\<name>.spk" beside the directory instead of in it.
 			int lenBmpFilename = strlen(bmpFilename);
 			snprintf(spkFilename, sizeof(spkFilename), "%.*sspk", lenBmpFilename-3, bmpFilename);
+			const std::string sSpkFilename = Basic::NormalizeDataPath(spkFilename);
 
-			// filename.spki
-			snprintf(spkiFilename, sizeof(spkiFilename), "%si", spkFilename);
+			// filename.spki, derived the way the readers derive it
+			const std::string sSpkiFilename = sSpkFilename + "i";
 
-			std::ofstream	spkFile(spkFilename, ios::binary);
-			std::ofstream	spkiFile(spkiFilename, ios::binary);
+			std::ofstream	spkFile(sSpkFilename, ios::binary);
+			std::ofstream	spkiFile(sSpkiFilename, ios::binary);
 			SPK.SaveToFile( spkFile, spkiFile );
 			spkFile.close();
 			spkiFile.close();
 
-			g_pProfileManager->AddProfile( charName, spkFilename );
+			g_pProfileManager->AddProfile( charName, sSpkFilename.c_str() );
 		}
 	}
 }
@@ -299,7 +303,7 @@ ProfileManager::DeleteProfiles()
 			}
 
 			snprintf(spkFilename, sizeof(spkFilename), "%s\\%s", sProfileDir.c_str(), sFilename.c_str());
-			remove(spkFilename);
+			remove(Basic::NormalizeDataPath(spkFilename).c_str());
 		}
 	}
 
@@ -318,7 +322,7 @@ ProfileManager::DeleteProfiles()
 			}
 
 			snprintf(spkFilename, sizeof(spkFilename), "%s\\%s", sProfileDir.c_str(), sFilename.c_str());
-			remove(spkFilename);
+			remove(Basic::NormalizeDataPath(spkFilename).c_str());
 		}
 	}
 }

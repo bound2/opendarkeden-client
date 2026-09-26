@@ -1,10 +1,12 @@
 #include "test_framework.h"
+#include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <string>
 #include <cstring>
 #include <new>
+#include <system_error>
 #include "UserOption.h"
 #include "KeyAccelerator.h"
 
@@ -151,4 +153,57 @@ TEST(UserOption, OldMissingAndInvalidSettingsDefaultXbrzOn)
     options.UseXbrz = FALSE;
     CHECK(!options.LoadFromFile(fixture.path.string().c_str()));
     CHECK_EQ(TRUE, options.UseXbrz);
+}
+
+// FileDef.inf names this file the Windows way, UserSet\UserOption.set, and a
+// data tree's letter case need not match the names it is given. Off Windows
+// the reader and the writer resolve the name (basic/DataPath.h), so the file
+// lands in the directory instead of beside it under a name with backslashes
+// in it, and is found again under another case; on Windows the name is used
+// as given. NormalizeDataPath caches a directory's listing the first time it
+// looks in it, so each case gets a directory nothing has resolved through.
+namespace {
+struct TemporaryRoot {
+    std::filesystem::path path;
+    explicit TemporaryRoot(const char* tag) {
+        std::error_code error;
+        path = std::filesystem::temp_directory_path(error) / (std::string("user_option_") + tag + "_" +
+            std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+        std::filesystem::create_directories(path / "UserSet", error);
+    }
+    ~TemporaryRoot() {
+        std::error_code error;
+        std::filesystem::remove_all(path, error);
+    }
+};
+}
+
+TEST(UserOption, BackslashedNameIsWrittenIntoItsDirectory)
+{
+    SettingsFixture fixture;
+    TemporaryRoot root("write");
+    const std::string name = root.path.string() + "\\UserSet\\UserOption.set";
+    UserOption options;
+    options.VolumeMusic = 5;
+    options.SaveToFile(name.c_str());
+    std::error_code error;
+    CHECK(std::filesystem::is_regular_file(root.path / "UserSet" / "UserOption.set", error));
+    UserOption loaded;
+    CHECK(loaded.LoadFromFile(name.c_str()));
+    CHECK_EQ(5, loaded.VolumeMusic);
+}
+
+TEST(UserOption, NameIsFoundUnderAnotherLetterCase)
+{
+    SettingsFixture fixture;
+    TemporaryRoot root("case");
+    UserOption options;
+    options.VolumeMusic = 6;
+    options.SaveToFile(fixture.path.string().c_str());
+    std::error_code error;
+    std::filesystem::copy_file(fixture.path, root.path / "UserSet" / "UserOption.set", error);
+    CHECK(!error);
+    UserOption loaded;
+    CHECK(loaded.LoadFromFile((root.path.string() + "\\USERSET\\useroption.SET").c_str()));
+    CHECK_EQ(6, loaded.VolumeMusic);
 }

@@ -5,6 +5,7 @@
 #include "Client_PCH.h"
 #include "UserOption.h"
 #include "KeyAccelerator.h"
+#include "DataPath.h"
 #ifdef PLATFORM_WINDOWS
 #include <DInput.h>
 #endif
@@ -98,7 +99,10 @@ void
 UserOption::SaveToFile(const char* filename)
 {
 	// std::ofstream file(filename, ios::binary);	
-	FILE* file = fopen(filename, "w");
+	if (filename == NULL) return;
+	// FileDef.inf names this file the Windows way, UserSet\UserOption.set;
+	// off Windows the name is resolved against the disk (basic/DataPath.h).
+	FILE* file = fopen(Basic::NormalizeDataPath(filename).c_str(), "w");
 	if (file == NULL) return;
 
 	DWORD flag = 0;
@@ -170,7 +174,8 @@ bool
 UserOption::LoadFromFile(const char* filename)
 {
 	UseXbrz = TRUE; // Older or missing settings files enable smoothing.
-	FILE *file = fopen(filename, "r");
+	if (filename == NULL) return false;
+	FILE *file = fopen(Basic::NormalizeDataPath(filename).c_str(), "r");
 	if (file == NULL) {
 		return false;
 	}

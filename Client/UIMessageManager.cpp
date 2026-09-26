@@ -9102,8 +9102,13 @@ UIMessageManager::Execute_UI_CLOSE_FILE_DIALOG(intptr_t left, intptr_t right, vo
 					surface.FillSurface( 0 );
 					surface.Blt(&destBigRect, &bmpSurface, &bmpRect);
 
-					const std::string saveBmpName = g_pFileDef->getProperty("DIR_PROFILE")
-						+ "\\" + g_char_slot_ingame.sz_name + ".bmp";
+					// Resolved for the platform (basic/DataPath.h): off Windows
+					// the backslash is a file name character, and the picture
+					// landed beside UserSet/ rather than in it, where
+					// ProfileManager does not look and the browser build does
+					// not persist it.
+					const std::string saveBmpName = Basic::NormalizeDataPath(g_pFileDef->getProperty("DIR_PROFILE")
+						+ "\\" + g_char_slot_ingame.sz_name + ".bmp");
 					surface.SaveToBMP(saveBmpName.c_str());
 
 					g_pProfileManager->InitProfiles();

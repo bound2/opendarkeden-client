@@ -3,9 +3,11 @@
 //----------------------------------------------------------------------
 #include "Platform.h"
 #include "CMessageArray.h"
+#include "DataPath.h"
 #include <sys/stat.h>
 #include <algorithm>
 #include <memory>
+#include <string>
 #include <vector>
 
 #ifdef OUTPUT_DEBUG
@@ -107,9 +109,14 @@ CMessageArray::Init(int max, int length, const char* filename)
 	}
 	std::unique_ptr<char[]> name;
 	if (filename) {
-		const size_t bytes = strlen(filename) + 1;
+		// The executable names its log "<cwd>\Log\Log<n>.txt" (Client.cpp).
+		// Off Windows the name is resolved here, where the file is opened, or
+		// the log would be one file beside the directory with backslashes in
+		// its name; on Windows it is kept as given (basic/DataPath.h).
+		const std::string resolved = Basic::NormalizeDataPath(filename);
+		const size_t bytes = resolved.size() + 1;
 		name = std::make_unique<char[]>(bytes);
-		memcpy(name.get(), filename, bytes);
+		memcpy(name.get(), resolved.c_str(), bytes);
 	}
 
 	Release();
