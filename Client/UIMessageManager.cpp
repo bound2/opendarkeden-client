@@ -6,6 +6,7 @@
 //-----------------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "DisplaySettings.h"
+#include "DataPath.h"
 #ifdef PLATFORM_WINDOWS
 #include <io.h>
 #include <process.h>
@@ -419,7 +420,7 @@ ExecuteLogout()
 
 						if( g_SDLAudio.IsInit() )
 						{
-							g_oggfile = fopen( (*g_pMusicTable)[ musicID ].FilenameWav ,"rb");
+							g_oggfile = fopen( Basic::NormalizeDataPath( (*g_pMusicTable)[ musicID ].FilenameWav.GetString() ).c_str(), "rb");
 							if( g_oggfile != NULL )
 							{
 								g_pOGG->streamLoad( g_oggfile, NULL );
@@ -500,7 +501,7 @@ PlayTitleMusic()
 
 				if( g_SDLAudio.IsInit() )
 				{
-					g_oggfile = fopen( (*g_pMusicTable)[ musicID ].FilenameWav, "rb") ;
+					g_oggfile = fopen( Basic::NormalizeDataPath( (*g_pMusicTable)[ musicID ].FilenameWav.GetString() ).c_str(), "rb");
 					if( g_oggfile != NULL )
 					{					
 						int volume = (g_pUserOption->VolumeMusic - 15) * 250;

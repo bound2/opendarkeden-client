@@ -20,6 +20,7 @@
 // DX3D.h removed (SDL2) - Direct3D has been replaced with SDL2
 // Unified: All platforms use TextSystem
 #include "TextSystem/TextService.h"
+#include "DataPath.h"
 #include <math.h>
 #include <list>
 #include <stdio.h>
@@ -19104,7 +19105,7 @@ MTopView::ExcuteAdvancementQuestEnding(void *pVoid)
 
 				if( g_oggfile != NULL)
 					fclose(g_oggfile );
-				g_oggfile = fopen("data\\music\\Silence_of_Battlefield.ogg","rb");
+				g_oggfile = fopen( Basic::NormalizeDataPath( "Data\\Music\\Silence_of_Battlefield.ogg" ).c_str(), "rb");
 				g_pOGG->streamLoad(g_oggfile, NULL);
 				g_pOGG->streamPlay(0);
 				int volume = (g_pUserOption->VolumeMusic - 15) * 250;
@@ -19295,7 +19296,7 @@ MTopView::ExcuteOustersFinEvent()
 
 				if( g_oggfile != NULL)
 					fclose(g_oggfile );
-				g_oggfile = fopen("data\\music\\chaos.ogg","rb");
+				g_oggfile = fopen( Basic::NormalizeDataPath( "Data\\Music\\chaos.ogg" ).c_str(), "rb");
 				g_pOGG->streamLoad(g_oggfile, NULL);
 				g_pOGG->streamPlay(0);
 				int volume = (g_pUserOption->VolumeMusic - 15) * 250;

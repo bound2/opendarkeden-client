@@ -3961,7 +3961,7 @@ PlayMusicCurrentZone()
 //		newMusicID = musicByTimeXmas[ (g_pGameTime->GetHour() / 2) % 12 ];
 //	}
 //	else
-	if( pZoneInfo->HolyLand && g_pUserOption->PlayWaveMusic)
+	if( pZoneInfo!=NULL && pZoneInfo->HolyLand && g_pUserOption->PlayWaveMusic)
 	{
 		switch ( zoneID )
 		{
@@ -4051,7 +4051,6 @@ PlayMusicCurrentZone()
 //					g_pSDLStream->Load( (*g_pMusicTable)[ musicID ].FilenameWav );
 //					g_pSDLStream->Play( FALSE );
 #else
-#ifdef PLATFORM_WINDOWS
 					if( g_oggfile != NULL )
 						fclose(g_oggfile);
 
@@ -4060,7 +4059,7 @@ PlayMusicCurrentZone()
 					if( g_SDLAudio.IsInit() )
 					{
 						g_pOGG->streamClose();
-						g_oggfile = fopen( (*g_pMusicTable)[ musicID ].FilenameWav, "rb");
+						g_oggfile = fopen( Basic::NormalizeDataPath( (*g_pMusicTable)[ musicID ].FilenameWav.GetString() ).c_str(), "rb");
 						if( g_oggfile != NULL )
 						{
 							// 2004, 11, 8, sobeit add start - 그냥 에러 체크
@@ -4075,7 +4074,6 @@ PlayMusicCurrentZone()
 							// 2004, 11, 8, sobeit add end - 그냥 에러 체크
 						}
 					}
-#endif // PLATFORM_WINDOWS
 #endif
 				}
 				else
