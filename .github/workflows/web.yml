@@ -31,6 +31,10 @@ jobs:
           docker run --rm --mount type=volume,source=darkeden-web-ci,target=/work,readonly \
             --mount type=bind,source="$PWD/build/web",target=/out \
             alpine:3.22 cp -r /work/build-wasm/bin/. /out/
+      - name: Verify compressed assets and bounded filesystem reads
+        run: |
+          python3 tests/web/test_compress_assets.py
+          node --test tests/web/test_asset_store.mjs
       - name: Check out the compatible production gateway fixture
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:

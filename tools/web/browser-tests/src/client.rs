@@ -180,6 +180,11 @@ fn patch_launcher(source: &str, software_sprites: bool) -> Result<String> {
             "preRun: [module => { module.ENV.DARKEDEN_SPRITE_RENDERER = \"software\";",
         )?;
     }
+    // Older bundles have no compressed store; keep baseline comparisons usable.
+    patched = patched.replace(
+        "const assets = createAssetStore(client);",
+        "const assets = window.testAssets = createAssetStore(client);",
+    );
     Ok(patched)
 }
 
@@ -290,6 +295,7 @@ impl Smoke<'_> {
         )?;
         let status = self.status()?;
         ensure!(status == "Ready to play.", "{status}");
+        self.report_memory("ready")?;
 
         chrome::eval(tab, "window.browserFrames = 0")?;
         chrome::click_element(tab, "#play")?;
@@ -313,6 +319,7 @@ impl Smoke<'_> {
             "The game reported a resource or runtime failure."
         );
         self.screenshot("client.png")?;
+        self.report_memory("menu")?;
 
         self.click_game(714.0, 380.0)?;
         let login = self.screenshot("login.png")?;
@@ -396,6 +403,39 @@ impl Smoke<'_> {
             Value::String(status) => Ok(status),
             other => bail!("unexpected #status text: {other}"),
         }
+    }
+
+    /// Count retained asset backing stores, separately from engine/GPU memory.
+    fn report_memory(&self, stage: &str) -> Result<()> {
+        let memory = chrome::eval(
+            self.tab,
+            r"(() => {
+          const client = window.testClient, fs = client.FS, buffers = new Set();
+          let logicalBytes = 0, files = 0;
+          const visit = path => {
+            const node = fs.lookupPath(path).node;
+            if (fs.isDir(node.mode)) {
+              for (const name of fs.readdir(path))
+                if (name !== '.' && name !== '..') visit(path + '/' + name);
+            } else {
+              ++files;
+              logicalBytes += fs.stat(path).size;
+              if (node.contents?.buffer) buffers.add(node.contents.buffer);
+            }
+          };
+          visit('/Data');
+          return { files, logicalBytes,
+            retainedAssetBytes: [...buffers].reduce((n, b) => n + b.byteLength, 0),
+            wasmHeapBytes: client.HEAPU8?.byteLength ?? null,
+            compressedStore: window.testAssets?.stats() ?? null };
+        })()",
+        )?;
+        println!("Memory at {stage}: {memory}");
+        std::fs::write(
+            self.output.join(format!("memory-{stage}.json")),
+            serde_json::to_string_pretty(&memory)?,
+        )?;
+        Ok(())
     }
 
     fn touch_text(&self, value: &str, password: bool) -> Result<()> {

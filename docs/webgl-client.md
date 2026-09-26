@@ -52,10 +52,42 @@ directory of loose files (with `Data/` at its root) over the archive's
 contents; `tools/i18n/ui-text` is the English text of the packed item, skill,
 help, book and tutorial resources, which the client prefers over the Korean
 members of the `.rpk` archives (see `tools/i18n/README.md`). The launcher verifies every
-file and caches downloads by hash. The tested pack has 2,022 files and is about
-1.85 GB, including the font. This first version loads the complete pack before
-play, so allow several GB of browser memory and disk space. Asset streaming is
-future work; adding touch controls does not reduce this memory requirement.
+download and caches it by hash.
+
+The packer also compresses files of at least 256 KiB into independently readable
+64 KiB zlib blocks. The browser retains these compressed files and decodes blocks
+as the game reads them, with one shared 4 MiB LRU cache and a 128 KiB Wasm scratch
+buffer. It does not expand the entire pack into MEMFS. Small or incompressible
+files keep their ordinary MEMFS storage. The raw files remain available for older
+clients, and the new launcher also accepts older manifests without compression.
+
+To upgrade an existing pack without extracting its ZIP again:
+
+```sh
+python tools/web/asset_compression.py build/web/assets
+```
+
+Publish the generated `compressed/` files along with `manifest.json`. The converter
+verifies the raw source hashes, writes sidecars named by their compressed hashes,
+and replaces the manifest last. Keep older sidecars while deployed clients might
+still reference them. The optional `compressed` entry supplies its path, stored
+size and SHA-256; the original entry still describes the uncompressed file.
+
+The `DEZ1` sidecar starts with four little-endian uint32 fields: magic
+`0x315a4544`, block size, original size, and block count. A uint32 length per block
+follows; its high bit marks a verbatim block and its remaining bits give the stored
+length. Block payloads follow in order. The reader validates this index before
+mounting and rejects corrupt zlib blocks or unexpected decoded lengths.
+
+On 2026-09-25, the same 3,729-file local pack retained **1,850,837,659 bytes before
+and 956,431,850 bytes after** in Chrome's asset backing stores (48.3% less).
+At the menu, the new reader additionally retained 108,932 bytes of indexes and
+4,159,809 bytes of decoded blocks. The Wasm heap was 72,548,352 bytes, including
+131,076 bytes of decompression scratch space. These are asset/heap measurements,
+not total browser or GPU memory. The full compressed pack is still downloaded
+before play. A cache miss adds synchronous block decompression to a resource read;
+busy gameplay latency, network streaming and physical iPad memory testing remain
+future work. Native asset loading is unchanged.
 
 Edit `build/web/client-config.json` for the deployment:
 
@@ -217,6 +249,14 @@ cargo run --release --manifest-path tools/web/browser-tests/Cargo.toml -- client
 cargo run --release --manifest-path tools/web/browser-tests/Cargo.toml -- touch
 cargo run --release --manifest-path tools/web/browser-tests/Cargo.toml -- client-touch
 ```
+
+After building, `python tests/web/test_compress_assets.py` checks packaging and
+`node --test tests/web/test_asset_store.mjs` checks the real Wasm zlib and filesystem
+for seeking, EOF, case folding, cache eviction, corruption and heap growth.
+Set `WEB_TEST_ASSETS` to a local packaged asset directory to additionally decode
+every compressed file and compare its original SHA-256. Browser CI runs the
+asset-free checks. The client smoke tests write `memory-ready.json` and
+`memory-menu.json` under `build/web-smoke` for before/after comparisons.
 
 Each command exits 0 on success, 1 on a failed check or an invalid environment
 value, and 2 on invalid arguments; `-- help` lists the arguments and environment
