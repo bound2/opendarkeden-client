@@ -58,6 +58,11 @@ async function loadAssets() {
       throw new Error('The game data manifest contains an invalid compressed entry.');
   }
   const assets = createAssetStore(client);
+  // The game saves these two beside its data (the last character slot and
+  // the client options), but only /UserSet reaches IndexedDB. Each is kept
+  // there, seeded from the pack on the first visit, and the data path is a
+  // link to it, so the game reads and writes the persisted copy.
+  const persisted = new Set(['Data/Info/Player.inf', 'Data/Info/ClientConfig.inf']);
   progress.max = manifest.files.reduce((total, file) => total + (file.compressed ?? file).size, 0);
   progress.value = 0;
   progress.hidden = false;
@@ -90,7 +95,12 @@ async function loadAssets() {
       }
       const path = `/${file.path}`;
       if (file.compressed) assets.add(path, new Uint8Array(buffer), file.size);
-      else {
+      else if (persisted.has(file.path)) {
+        const kept = `/UserSet${path.slice(path.lastIndexOf('/'))}`;
+        if (!client.FS.analyzePath(kept).exists) client.FS.writeFile(kept, new Uint8Array(buffer));
+        client.FS.mkdirTree(path.slice(0, path.lastIndexOf('/')));
+        client.FS.symlink(kept, path);
+      } else {
         client.FS.mkdirTree(path.slice(0, path.lastIndexOf('/')));
         client.FS.createDataFile('/', file.path, new Uint8Array(buffer), true, false, true);
       }
