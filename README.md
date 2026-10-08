@@ -614,7 +614,7 @@ Windows; none of that has been watched on a Linux display yet.
 ## Build on macOS
 
 The same tree, the same tests, Apple Clang. CI builds and tests it on
-GitHub's arm64 and Intel runners (`.github/workflows/macos.yml`, macOS 15),
+GitHub's arm64 and Intel runners (`.github/workflows/macos.yml`, macOS 26),
 and it has been built and tested on an Apple Silicon Mac (macOS 27.0, Apple
 Clang 21, CMake 4.4: every target, all 20 ctest tests passing on 2026-09-30,
 among them the three packet-read fuzz replay tests, `fuzz_replay_client_stream`,
