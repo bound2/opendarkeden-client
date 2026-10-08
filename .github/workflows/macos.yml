@@ -12,6 +12,14 @@ name: macOS build and tests
 # Silicon Mac at a desk has also built and tested the tree, with a
 # different Apple Clang from the runner's, so the warning budget is
 # recorded from this job.
+# The runners are macOS 26 with its default Xcode. Xcode 16.4 on the
+# macOS 15 images kept std::jthread and <stop_token> behind libc++'s
+# experimental switch, so a C++20 test that compiled everywhere else broke
+# this job (#371, fixed in #386); the toolchain step below checks for them
+# before the build. The executable still targets macOS 13
+# (CMAKE_OSX_DEPLOYMENT_TARGET); its SDL2 libraries are not packaged but
+# come from the user's own Homebrew, so the runner's bottles do not set
+# its minimum.
 # Run it on master pushes or invoke workflow_dispatch on a branch when
 # needed. Pull requests do not trigger CI, to conserve
 # GitHub Actions minutes.
@@ -39,9 +47,9 @@ jobs:
         arch: [arm64, x64]
         include:
           - arch: arm64
-            runner: macos-15
+            runner: macos-26
           - arch: x64
-            runner: macos-15-intel
+            runner: macos-26-intel
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -70,6 +78,10 @@ jobs:
           bash --version | head -n 1
           which -a bash grep sed find perl
           grep --version | head -n 1
+          # The C++20 library floor this job holds the code to: fail here,
+          # not twenty minutes into the build, if the image's libc++ lacks it.
+          printf '#include <stop_token>\n#include <thread>\nint main() { std::jthread t([](std::stop_token) {}); }\n' |
+            clang++ -std=c++20 -x c++ - -o /dev/null
 
       - name: Configure, build and test
         run: tools/ci/verify-linux.sh ${{ matrix.preset }}

@@ -36,8 +36,9 @@ done < <(tail -n +2 "$package/DEPENDENCIES.txt" | awk '{print $1}')
 cat > "$package/README.txt" <<EOF
 DarkEden client - experimental macOS $platform CI build
 
-Built and tested on macOS 15 using the macos Debug preset, without sanitizers.
-Use macOS 15 or later on $platform.
+Built and tested on macOS 26 using the macos Debug preset, without sanitizers.
+The executable targets macOS 13 or later on $platform; only macOS 26 has
+been tested, and the Homebrew libraries below set the practical minimum.
 This is a bare command-line executable, not a notarized .app bundle.
 Desktop rendering, audio, IME and live-server gameplay have not been verified.
 

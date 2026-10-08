@@ -71,10 +71,12 @@ for Noto CJK and DejaVu under `/usr/share/fonts`, and without one of them the cl
 # Status on macOS
 
 CI builds and tests the `macos` and `macos-asan` presets on GitHub's arm64 and Intel runners
-(`.github/workflows/macos.yml`, macOS 15). One Apple Silicon Mac (macOS 27.0, Apple Clang 21,
-CMake 4.4) built every target and passed all 20 ctest tests on 2026-09-30, among them the three
-packet-read fuzz replay tests (`fuzz_replay_client_stream`, `fuzz_replay_client_login_stream`,
-`fuzz_replay_client_datagram`) and their corpus steps. Nothing has been watched on a Mac's display
+(`.github/workflows/macos.yml`, macOS 26 and its Xcode 26.6, Apple Clang 21, whose libc++ is
+the C++20 floor: Xcode 16.4 on macOS 15 kept `std::jthread` behind an experimental switch). One
+Apple Silicon Mac (macOS 27.0, Apple Clang 21, CMake 4.4) built every target and passed all 20
+ctest tests on 2026-09-30, among them the three packet-read fuzz replay tests
+(`fuzz_replay_client_stream`, `fuzz_replay_client_login_stream`, `fuzz_replay_client_datagram`)
+and their corpus steps. Nothing has been watched on a Mac's display
 yet.
 
 - **Homebrew's `sdl2` is an alias of `sdl2-compat`**, the SDL2 API over SDL3; that is what the
