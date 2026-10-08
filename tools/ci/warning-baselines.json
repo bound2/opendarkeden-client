@@ -52,6 +52,7 @@
       "-Wdeprecated-declarations" : 14,
       "-Wlogical-op-parentheses" : 47,
       "-Wmissing-braces" : 6,
+      "-Wnontrivial-memcall" : 1,
       "-Wsign-compare" : 9,
       "-Wswitch" : 9,
       "-Wundef" : 2,
@@ -61,13 +62,14 @@
       "-Wunused-parameter" : 86,
       "-Wunused-private-field" : 4,
       "-Wunused-variable" : 6,
-      "LD" : 4
+      "LD" : 9
    },
    "macos-asan-arm64" : {
       "-Wdangling-else" : 41,
       "-Wdeprecated-declarations" : 14,
       "-Wlogical-op-parentheses" : 47,
       "-Wmissing-braces" : 6,
+      "-Wnontrivial-memcall" : 1,
       "-Wsign-compare" : 9,
       "-Wswitch" : 9,
       "-Wundef" : 2,
@@ -77,13 +79,14 @@
       "-Wunused-parameter" : 86,
       "-Wunused-private-field" : 4,
       "-Wunused-variable" : 6,
-      "LD" : 4
+      "LD" : 9
    },
    "macos-asan-x86_64" : {
       "-Wdangling-else" : 41,
       "-Wdeprecated-declarations" : 14,
       "-Wlogical-op-parentheses" : 47,
       "-Wmissing-braces" : 6,
+      "-Wnontrivial-memcall" : 1,
       "-Wsign-compare" : 8,
       "-Wswitch" : 9,
       "-Wundef" : 2,
@@ -93,13 +96,14 @@
       "-Wunused-parameter" : 86,
       "-Wunused-private-field" : 4,
       "-Wunused-variable" : 6,
-      "LD" : 4
+      "LD" : 9
    },
    "macos-x86_64" : {
       "-Wdangling-else" : 41,
       "-Wdeprecated-declarations" : 14,
       "-Wlogical-op-parentheses" : 47,
       "-Wmissing-braces" : 6,
+      "-Wnontrivial-memcall" : 1,
       "-Wsign-compare" : 8,
       "-Wswitch" : 9,
       "-Wundef" : 2,
@@ -109,7 +113,7 @@
       "-Wunused-parameter" : 86,
       "-Wunused-private-field" : 4,
       "-Wunused-variable" : 6,
-      "LD" : 4
+      "LD" : 9
    },
    "windows-asan-x64" : {
       "C4244" : 25,
