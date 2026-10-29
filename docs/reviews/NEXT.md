@@ -75,24 +75,6 @@ run the next when it did not.
 **Test:** `VS_UI` code no test reaches: a regression guard, unless the quest manager can be built in
 a `tests/unit/test_ui_server_indices.cpp` scene with a quest file.
 
-### 15. A stash list's rack count is unchecked
-
-**What:** `GCStashList::read` takes the rack count (`m_StashNum`) as any byte, though the packet
-holds at most `STASH_RACK_MAX` (3) racks and the reader refuses an item's rack past them.
-`GCStashListHandler` frees the old storage, makes one of that many racks and asks
-`GCStashList::isExist` about each, whose `Assert` throws past the third in a Debug build: the
-client disconnects. In a Release build the `Assert` is gone, `isExist` answers no, and the stash
-window is handed a storage of up to 255 racks (what it draws of them is not followed). Found by
-the handler fuzz target's run of 2026-10-29 (task 4), whose report itself was the harness's.
-
-**How:** have the reader refuse a count past `STASH_RACK_MAX`, as it refuses a rack past it.
-
-**Test:** a `GCStashList` with 4 and 255 racks is refused by `read`
-(`tests/unit/test_packet_fuzz_findings.cpp`), and the regression input
-`tests/fuzz/regressions/client_stream_handlers/GCStashList-racks-32-after-a-stash.hex` is refused
-before its handler. That input then no longer reaches the harness's `LeaveForTitle`, which it
-pins today in an ASan tree.
-
 ### 10. Kept in view, no task
 
 - The 5:5:5 sprite decoders are latent ([client traps](../architecture/client-traps.md)) and
@@ -160,7 +142,8 @@ The row is fixed: `CGSMSSend::read`'s four checks and `GCTimeLimitItemInfo::read
 `InvalidProtocolException` at the bound each `Assert` stopped at, in every build. A sweep of every
 `Assert` under `Client/Packet`, headers included, found no other wire value behind one: the rest
 check pointers or the packet's own state, and the stash, update-info and name reads check their
-values with a throw before any `Assert` sees them. Owners: `PacketFuzzFindings`'
+values with a throw before any `Assert` sees them (but not the stash's rack count, which the
+handler loops to: task 15). Owners: `PacketFuzzFindings`'
 `SMSSendCountsAndLengthsAtTheirBoundsAreRefused`, `SMSSendJustInsideItsBoundsStillReads` and
 `TimeLimitItemCountPastItsBoundIsRefused`; a Release tree showed the unfixed reads accepting the
 values. In the receive loop the refusal also sends the server a bug report, as every
@@ -312,6 +295,16 @@ open on what the frames of its call freed, though the client leaves for the titl
 deletes the game UI before it draws again, so the world now closes them (`LeaveForTitle`), and,
 since the game draws once a call, reads them after every call of the receive loop; its input is
 `regressions/client_stream_handlers/GCStashList-racks-32-after-a-stash.hex`, and the rack count
-it reached is task 15. The route through `GCOtherStoreInfo` is not seeded: it
+it reached is task 15 (done; since then no replayed input fails without `LeaveForTitle`). The route
+through `GCOtherStoreInfo` is not seeded: it
 needs a second player in the zone. Owners: `FuzzSeeds` and the
 `fuzz_replay_client_stream_handlers` ctest; what stays out of reach is under *Kept in view*.
+
+### 15. A stash list's rack count is unchecked (PR #585)
+
+`GCStashList::read` refuses a rack count past `STASH_RACK_MAX`, as it refuses an item's rack past
+it, so the handler no longer frees the stash and then throws at `isExist`'s `Assert` (Debug), or
+hands the window a storage of up to 255 racks (Release). Owner:
+`PacketFuzzFindings.StashRackCountPastTheThreeIsRefused`. The run's input is still rejected, but at
+the read, before anything is freed, so no replayed input fails without the harness's
+`LeaveForTitle` any more.

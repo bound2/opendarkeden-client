@@ -2,6 +2,9 @@
 
 ## 2026-10-29
 
+* **Update**: the [code-health review](reviews/code-health-review-2026-08-29.md) records the stash
+  list's rack count that reached an `Assert` past the packet's racks, fixed; [fuzzing](protocol/fuzzing.md)
+  says so, and the [next work plan](reviews/NEXT.md) moves its task 15 to *Done*.
 * **Update**: [fuzzing](protocol/fuzzing.md) says the game handler target takes seeds of its own
   (`tests/fuzz/seeds`, added by `golden2corpus.pl --seeds`) that reach the four windows the
   recording hosts model, records their run, and says the world closes those windows when an input
