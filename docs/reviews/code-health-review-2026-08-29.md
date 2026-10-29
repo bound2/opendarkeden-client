@@ -538,6 +538,30 @@ windows still draws (task 11 of the next work plan), and a quest
 condition byte that indexes past a four-entry table in `VS_UI`, which the
 walks of packet input safety had missed (task 12).
 
+Seeds that reach them followed the same day (task 4, PR #584): six
+streams under `tests/fuzz/seeds/client_stream_handlers`, which
+`tests/unit/test_fuzz_seeds.cpp` writes with the client's packet
+classes, open each of the four windows and then free what it draws along
+task 11's routes, whose fixes close or re-point the window first; with
+any one of those fixes taken out, its seed's replay reports the
+use-after-free under ASan. Three harness gaps came up and were fixed in
+the harness: the UI's mouse pointer, which `SetExtraInfo` reads; the
+character the player chose, whose name the PC info replies copy; and the
+windows the frames of a rejected call left open, which the client never
+draws, since it leaves for the title screen and deletes the game UI
+first (the world now also reads the windows after every call of its
+receive loop, as the game draws once a call). The last was a
+use-after-free the run reported: a `GCStashList` of 32 racks freed the
+stash and threw at `GCStashList::isExist`'s `Assert` (its input is a
+regression input; the unchecked rack count is task 15). The login target
+ran 15 minutes (194,871 inputs, coverage to 13,713 points) and the game
+target, after that fix, 15 minutes (227,287 inputs, coverage 42,384 to
+45,184): nothing else. The corpus the game run left opens the shop
+window 45 times, the storage 519, the pet storage 417 and the personal
+shop 126. A last 15-minute game run with the windows read after every
+call made 223,087 inputs (coverage 45,153 to 46,392) and found nothing.
+
+
 What the targets do not reach: what a presentation host's adapter does
 with a handler's integer or string (only the recording hosts' object
 entries are installed, so `GameMain`'s `SetWeather` or a dialog's text is

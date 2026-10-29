@@ -44,6 +44,10 @@
 //   - InitGameObject itself, the production function: the player, the
 //     inventory, the gear, the skill tree and the other objects it
 //     makes, and every host it installs;
+//   - the character the player chose (UserInformation::CharacterID),
+//     which the PC info replies copy unchecked;
+//   - the UI's mouse pointer, which PacketFunction's SetExtraInfo reads
+//     unchecked (the rest of the UI is not built);
 //   - in the game target, a zone of kZoneSize by kZoneSize sectors (a
 //     wire coordinate is a byte, so it can name a cell past it, as in
 //     any zone smaller than 256 a side), its row in the zone table, the
@@ -76,7 +80,8 @@
 // lost drop fails their regression inputs before a connection opens.
 //
 // Outcomes are client_stream_reader.h's: a Throwable is a rejected
-// input (UpdateSocketInput catches it and the client disconnects);
+// input (UpdateSocketInput catches it and the client disconnects, leaving
+// for the title screen, so the modelled windows close: LeaveForTitle);
 // anything else, a std::exception included, escapes as a crash, and so
 // does a sanitizer report. DE_FUZZ_ABORT_ON_ASSERT turns a failed
 // Assert into an abort. A crash can still be the harness's: a global
@@ -182,6 +187,7 @@
 #include "ZoneStateHost.h"
 #include "CServerInformation.h"
 #include "../basic/CMessageArray.h"
+#include "VS_UI_mouse_pointer.h"
 #include "VS_UI_title.h"
 
 #include "Gpackets/GCReconnectLogin.h"
@@ -218,6 +224,9 @@ inline const int		kNicknames = 32;
 inline const int		kCreatureTypes = 1024;
 // The size of three of the game's zones; the server's map files hold
 // zones from 17 by 25 to 256 by 256 sectors.
+// The seeds of tests/fuzz/seeds (tests/unit/test_fuzz_seeds.cpp) name
+// these three and the player's cell: they reach their windows only while
+// the values match.
 inline const TYPE_SECTORPOSITION	kZoneSize = 32;
 inline const TYPE_ZONEID	kZoneID = 61;
 inline const TYPE_OBJECTID	kPlayerID = 1000;
@@ -441,6 +450,12 @@ private:
 		Own(g_pWeather);
 		Own(g_pInventoryEffectManager);
 		Own(g_pPlayer);
+		// The character the player chose, which CLSelectPC's sender sets
+		// before the game connection opens and the PC info replies copy.
+		g_pUserInformation->CharacterID = "Fuzz";
+		// The UI's mouse pointer, which C_VS_UI::Init makes and
+		// GCUpdateInfo's SetExtraInfo reads; it holds no item here.
+		Make(gpC_mouse_pointer, new C_VS_UI_MOUSE_POINTER);
 	}
 
 	//------------------------------------------------------------------
@@ -622,6 +637,18 @@ inline void	Initialize()
 }
 
 //----------------------------------------------------------------------
+// A rejected input disconnects the client, which leaves for the title
+// screen before it draws again (UpdateSocketInput sets MODE_MAINMENU, whose
+// StartTitle deletes the game UI through EndGame): no window draws what
+// the frames of the rejected call freed. A failed Assert counts as one, as
+// in the Debug client; a Release client carries on past it.
+//----------------------------------------------------------------------
+inline void	LeaveForTitle()
+{
+	RecordingHosts::Reset();
+}
+
+//----------------------------------------------------------------------
 // One run: a fresh world with the player of `race`, a ClientPlayer in
 // `status` holding the stream, and the receive loop over it.
 //----------------------------------------------------------------------
@@ -642,6 +669,9 @@ inline void	Run(const std::uint8_t* data, std::size_t size, PlayerStatus status,
 		for (int call = 0; call < kMaxCommandCalls && left > 0; call++)
 		{
 			pPlayer->processCommand();
+			// The game draws once a call (CGameUpdate), so an open window shows
+			// what the call left it.
+			RecordingHosts::ReadOpenWindows();
 			const unsigned int now = pPlayer->Input().length();
 			if (now == left)
 				break;
@@ -650,7 +680,9 @@ inline void	Run(const std::uint8_t* data, std::size_t size, PlayerStatus status,
 	} catch (AssertionError&) {
 		if (ClientStreamFuzz::g_bAbortOnAssert)
 			std::abort();
+		LeaveForTitle();
 	} catch (Throwable&) {
+		LeaveForTitle();
 	}
 
 	pPlayer->setPlayerStatus(CPS_END_SESSION);

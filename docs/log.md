@@ -2,6 +2,13 @@
 
 ## 2026-10-29
 
+* **Update**: [fuzzing](protocol/fuzzing.md) says the game handler target takes seeds of its own
+  (`tests/fuzz/seeds`, added by `golden2corpus.pl --seeds`) that reach the four windows the
+  recording hosts model, records their run, and says the world closes those windows when an input
+  is rejected; [packet input safety](protocol/packet-input-safety.md) and `CLAUDE.md` say what the
+  seeds reach; the [next work plan](reviews/NEXT.md) moves task 4 to *Done*, keeps in view what
+  stays out of reach and adds task 15 for the stash list's rack count, and the
+  [code-health review](reviews/code-health-review-2026-08-29.md) records the run.
 * **Update**: [packet input safety](protocol/packet-input-safety.md) says the 2026-10-25 walk missed
   the quest condition byte that indexed the quest window's four-entry table past its end, and the
   [code-health review](reviews/code-health-review-2026-08-29.md) records it, fixed; the

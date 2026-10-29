@@ -51,15 +51,21 @@ them all (`ReleaseGameObjectHosts`) and puts back the model's, `ZoneState`, `Cre
 `PlayerState` and `MItem`'s, without the entries that reach the UI, a sound or a party member
 over UDP. Over them go the recording hosts of `tests/fuzz/recording_hosts.h` (task 4 of the
 [next work plan](../reviews/NEXT.md)), since the real adapters call into `VS_UI`, which the world
-never starts (`gC_vs_ui` is not initialised, so `g_pUIDialog` and `gpC_mouse_pointer` are `NULL`).
+never starts (`gC_vs_ui` is not initialised, so `g_pUIDialog` is `NULL`; the world makes the mouse
+pointer alone, which `SetExtraInfo` reads, and names the character the player chose, which the PC
+info replies copy, since the game always has both).
 A presentation entry whose real adapter reads a model object a handler hands it reads it too, and
 `PickUpItem`, whose adapter reads its item untested, aborts on `NULL`. Four windows that draw from
 the object they were given on every frame (the shop, the storage, the pet storage, the personal
 shop) are modelled as `VS_UI` keeps them: a `Run` entry opens one with no object, a `Set` entry
 hands an open one its object, a close the real UI makes forgets it (and `CloseAllDialog`, taken
-to close all four, which can only miss a finding), and `IsRunning` answers from that. At the end of every run each open window's object is walked as its `Show` walks it, so ASan
-reports one a later packet freed while the window still drew it; a free that a later packet of
-the same run hides, by closing the window or handing it another object, is not seen. The mouse's
+to close all four, which can only miss a finding), and `IsRunning` answers from that. After every call of the receive loop (the game draws once a call, about a dozen frames) and at the
+end of a run, each open window's object is walked as its `Show` walks it, so ASan reports one a
+packet freed while the window still drew it. A call an input is rejected in closes the windows
+first (`LeaveForTitle`): the client leaves for the title screen and deletes the game UI before it
+draws. A free that a later packet of the same call hides is not drawn by the game either. On a
+failed `Assert` the world follows the Debug client, which disconnects; a Release client carries on
+past it. The mouse's
 item and the quest items the UI keeps are not modelled. Every other presentation call is
 skipped, as in the unit tests, so what an adapter does with an integer or a string a handler hands
 it (`GameMain`'s `SetWeather`, a dialog's text) is not reached: the walks of
@@ -107,6 +113,11 @@ take too; its `--datagram` mode writes the 12 `RC` seeds of `client_datagram` fr
 `.datagram.` goldens, with the pad byte those leave out), and
 `tests/fuzz/regressions/<target>/*.hex`, one file per fixed crash in the goldens' hex style
 (`xxd -p crash-... | tr -d '\n'`), named after the packet and the value.
+`client_stream_handlers` also takes the six seeds of `tests/fuzz/seeds/client_stream_handlers`,
+which `tests/unit/test_fuzz_seeds.cpp` writes with the client's packet classes
+(`UPDATE_FUZZ_SEEDS=1` writes them again) and `golden2corpus.pl --seeds` adds: streams that open
+one of the four windows and then free what it draws along the routes of task 11 of the
+[next work plan](../reviews/NEXT.md), whose fixes close or re-point the window first.
 
 A crash there is a finding that came back, but only a finding that aborted (a libc `assert`, an
 escaping `std::exception`) crashes in every tree. One that corrupted memory replays green in a tree
@@ -150,11 +161,13 @@ cd /tmp/fz-login && ASAN_OPTIONS=detect_leaks=0:abort_on_error=1 \
   -timeout=10 -rss_limit_mb=2048 -max_len=32768 -close_fd_mask=3 corpus
 ```
 
-The handler targets take the same seeds, each in a scratch directory of its own (the run writes
-`fuzz_handlers_version.inf` there, the file `InitGameObject` opens first):
+The handler targets take the same seeds, and the game one its own (`--seeds`), each in a scratch
+directory of its own (the run writes `fuzz_handlers_version.inf` there, the file
+`InitGameObject` opens first):
 
 ```bash
-perl tools/fuzz/golden2corpus.pl tests/golden tests/wire-layout.txt /tmp/fz-h/corpus '^GC'
+perl tools/fuzz/golden2corpus.pl --seeds tests/fuzz/seeds/client_stream_handlers \
+  tests/golden tests/wire-layout.txt /tmp/fz-h/corpus '^GC'
 cd /tmp/fz-h && ASAN_OPTIONS=detect_leaks=0:abort_on_error=1 \
   UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1 \
   <repo>/build/presets/macos-fuzz/bin/fuzz_client_stream_handlers -max_total_time=900 \
@@ -200,7 +213,26 @@ once: the seed corpus holds no packet that reaches one, and seven of the entries
 world never makes (an item-check buffer, a request `TempInformation` records, an installed
 `GetOtherInfoName`, the player using an item), so seeds alone can reach only the four windows;
 that run tested the hosts' install, not the objects they read (the [code-health review](../reviews/code-health-review-2026-08-29.md)'s
-*Found by fuzzing* section has the run).
+*Found by fuzzing* section has the run). The game target's own seeds (task 4, PR #584) then
+reached the four windows: replayed with a counter on the window model (kept out of the commit),
+each seed opens its window, and taking out any one of task 11's fixes makes its seed's replay
+report the use-after-free under ASan. They needed two harness gaps fixed first (the mouse pointer
+`SetExtraInfo` reads, the character name the PC info replies copy), and a writer that frames each
+body by its own length: `GCUpdateInfo::write` leaves out the power-rank field its `read` takes, and
+`GCMorph1::getPacketSize` the PC-type byte. In the next 15-minute runs the login target made
+194,871 inputs (coverage 12,921 to 13,713 points) and found nothing; the game target stopped after
+about 161,500 (coverage to 42,384, where the first run's reached 37,037) on a use-after-free the
+window model reported after a rejected input: a `GCStashList` of 32 racks freed the stash and threw
+at `GCStashList::isExist`'s `Assert`, leaving the window on the freed storage. On a rejected input
+the client leaves for the title screen, whose `StartTitle` deletes the game UI before anything
+draws, so the report was the harness's: the world now closes the windows on one (`LeaveForTitle`),
+the input is a regression input, and the rack count it reached is task 15 of the next work plan.
+Run again with that fix, the game target made 227,287 inputs in 15 minutes (coverage 42,384 to
+45,184) and found nothing; replaying the corpus it left opened the shop window 45 times, the
+storage 519, the pet storage 417 and the personal shop 126. The review of the change then made
+the world read the windows after every call of the receive loop, as the game draws once a call;
+a last 15-minute run with that made 223,087 inputs (coverage 45,153 to 46,392) and found nothing.
+
 `DE_FUZZ_ABORT_ON_ASSERT=1` turns a failed `Assert` (an `AssertionError`, normally a rejected
 input) into a crash, to see which ones hostile input reaches. `-close_fd_mask=3` hides the
 crash's own message, so triage by replaying the file through the replay binary of an ASan tree:

@@ -4,8 +4,8 @@
 # packet goldens and the wire-layout inventory
 #----------------------------------------------------------------------
 #
-#   perl tools/fuzz/golden2corpus.pl <golden-dir> <wire-layout.txt> \
-#       <out-dir> <name-regex>
+#   perl tools/fuzz/golden2corpus.pl [--seeds <seed-dir>] <golden-dir> \
+#       <wire-layout.txt> <out-dir> <name-regex>
 #
 # Every seed is one input for a stream target (tests/fuzz/
 # client_stream_reader.h): the encrypt code byte, then the stream.
@@ -23,8 +23,11 @@
 #                   of min(max body size, 64) bytes (only the first
 #                   when the maximum is 0), at code 0, so every
 #                   registered parser is reached even without a golden.
+#   seed-<base>     with --seeds, one per <seed-dir>/<base>.hex: a whole
+#                   input already (tests/fuzz/seeds, which
+#                   tests/unit/test_fuzz_seeds.cpp writes), decoded.
 #
-# <out-dir> is created if missing, and the golden-* and id-* files
+# <out-dir> is created if missing, and the golden-*, id-* and seed-* files
 # already in it are deleted first, so a removed golden leaves no stale
 # seed behind. Prints the number of seeds written.
 #
@@ -63,7 +66,12 @@ if ($datagramMode) {
 	exit 0;
 }
 
-die "usage: $0 <golden-dir> <wire-layout.txt> <out-dir> <name-regex>\n"
+my $seedDir;
+if (@ARGV && $ARGV[0] eq '--seeds') {
+	shift @ARGV;
+	$seedDir = shift @ARGV;
+}
+die "usage: $0 [--seeds <seed-dir>] <golden-dir> <wire-layout.txt> <out-dir> <name-regex>\n"
 	unless @ARGV == 4;
 my ($goldenDir, $layoutFile, $outDir, $namePattern) = @ARGV;
 my $nameRegex = qr/$namePattern/;
@@ -86,7 +94,7 @@ die "no packets in $layoutFile\n" unless %idOf;
 make_path($outDir);
 -d $outDir or die "cannot create $outDir\n";
 opendir my $dir, $outDir or die "cannot list $outDir: $!\n";
-for my $stale (grep { /^(?:golden|id)-/ } readdir $dir) {
+for my $stale (grep { /^(?:golden|id|seed)-/ } readdir $dir) {
 	unlink "$outDir/$stale" or die "cannot delete $outDir/$stale: $!\n";
 }
 closedir $dir;
@@ -141,6 +149,22 @@ for my $name (sort keys %idOf) {
 		write_seed("id-$name-$len", chr(0) . frame($idOf{$name}, "\0" x $len));
 		$count++;
 	}
+}
+
+if (defined $seedDir) {
+	opendir my $seeds, $seedDir or die "cannot list $seedDir: $!\n";
+	for my $file (sort grep { /\.hex\z/ } readdir $seeds) {
+		my ($base) = $file =~ /^(.+)\.hex\z/;
+		open my $in, '<', "$seedDir/$file" or die "cannot read $seedDir/$file: $!\n";
+		my $hex = do { local $/; <$in> };
+		close $in;
+		$hex =~ s/\s+//g;
+		die "$file: not an even run of hex digits\n"
+			unless $hex =~ /\A(?:[0-9a-fA-F]{2})+\z/;
+		write_seed("seed-$base", pack('H*', $hex));
+		$count++;
+	}
+	closedir $seeds;
 }
 
 print "$count seeds\n";

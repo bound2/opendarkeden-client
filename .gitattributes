@@ -36,6 +36,10 @@ tests/golden/*.hex text eol=lf
 tools/fuzz/*.pl text eol=lf
 tests/fuzz/regressions/**/*.hex text eol=lf
 
+# The handler fuzz targets' seeds (tests/unit/test_fuzz_seeds.cpp): one hex
+# line per file, compared byte for byte.
+tests/fuzz/seeds/**/*.hex text eol=lf
+
 # The translation tools and tables are read line by line by perl; the
 # generated English overrides of the packed UI text keep each archive
 # member's own line endings byte for byte (uitext_apply.pl), so no

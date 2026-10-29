@@ -5,9 +5,9 @@
 // The presentation hosts the handler targets install in place of the
 // executable's (task 4 of docs/reviews/NEXT.md). The real adapters call
 // into VS_UI, which the world never starts (gC_vs_ui is not initialised,
-// so g_pUIDialog and gpC_mouse_pointer are NULL), so these do what the
-// real ones do to the model objects a handler hands them, which is what
-// a sanitizer can see:
+// so g_pUIDialog is NULL; handler_world.h makes only the mouse pointer),
+// so these do what the real ones do to the model objects a handler hands
+// them, which is what a sanitizer can see:
 //
 //   - an entry whose real adapter reads its object reads it here too,
 //     so ASan reports an object a handler freed before it handed it on;
@@ -24,11 +24,14 @@
 //     CloseStorage, ClosePetStorage and ClosePersnalShop their window,
 //     ShopDestroyed the shop window if it shows that shop) and
 //     CloseAllDialog, taken to close all four, which can only miss a
-//     finding. IsRunning answers from that. At the end of a run
-//     every open window's object is walked as its Show walks it, so ASan
-//     reports one a later packet freed while the window still drew it.
-//     A free that a later packet in the same run hides, by closing the
-//     window or handing it another object, is not seen.
+//     finding. IsRunning answers from that. After every call of the
+//     receive loop, as the game draws once a call, and at the end of a
+//     run, every open window's object is walked as its Show walks it, so
+//     ASan reports one a packet freed while the window still drew it; a
+//     call a rejected input ends closes them all first, since the client
+//     leaves for the title (handler_world.h's LeaveForTitle). A free that
+//     a later packet of the same call hides is not drawn by the game
+//     either.
 //
 // What the real adapters do with a handler's integers is not modelled;
 // the walks of packet input safety followed them by reading.
@@ -119,7 +122,8 @@ inline void	Reset()
 	g_PersnalShop.Close();
 }
 
-// The end of a run, before the world frees what it made.
+// After every call of the receive loop, and at the end of a run before
+// the world frees what it made.
 inline void	ReadOpenWindows()
 {
 	g_Shop.ReadIfOpen();

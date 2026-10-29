@@ -91,6 +91,12 @@ set_source_files_properties(
 	PROPERTIES
 		COMPILE_DEFINITIONS "WIRE_GOLDEN_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/golden\""
 )
+# The handler fuzz targets' seeds, which test_fuzz_seeds.cpp writes.
+set_source_files_properties(
+	${CMAKE_CURRENT_SOURCE_DIR}/unit/test_fuzz_seeds.cpp
+	PROPERTIES
+		COMPILE_DEFINITIONS "FUZZ_SEED_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/fuzz/seeds\""
+)
 
 add_test(NAME unit_tests COMMAND unit_tests)
 
