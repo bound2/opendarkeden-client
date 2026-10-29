@@ -1,6 +1,7 @@
 #include "test_framework.h"
 #include "VS_UI_Base.h"
 #include "VS_UI_GameCommon.h"
+#include "VS_UI_ExtraDialog.h"
 #include "VS_UI_GlobalResource.h"
 #include "VS_UI_Description.h"
 #include "VS_UI_mouse_pointer.h"
@@ -11,6 +12,8 @@
 #include "ProfileManager.h"
 #include "ExperienceTable.h"
 #include "MItem.h"
+#include "MMoneyManager.h"
+#include "MStorage.h"
 #include "MItemTable.h"
 #include "MItemOptionTable.h"
 #include "MTimeItemManager.h"
@@ -615,4 +618,29 @@ TEST(HPBar, AFillIsSixtyFourBitsClampedAndEmptyWithNoMaximum)
 	// The server's 32 bits, which overflowed an int product.
 	CHECK_EQ(100, BarFill(100, 0x7FFFFFFF, 0x7FFFFFFF));
 	CHECK_EQ(50, BarFill(100, 0x40000000, 0x80000000LL));
+}
+
+// A deposit dialog the stash outlived (the stash window closes it now, but
+// one that escapes that close) reads no dropped stash on a key: every key
+// computes the deposit's cap, which read g_pStorage's money manager
+// (task 13 of docs/reviews/NEXT.md). The scene types nothing into the
+// field (keys reach it through the IME), so what is pinned is the read.
+TEST(MoneyDialog, AKeyInADepositWithTheStashDroppedReadsNoStash)
+{
+	Scene scene;
+	MMoneyManager money;
+	money.SetMoney(500);
+	MMoneyManager* oldMoney = g_pMoneyManager;
+	MStorage* oldStorage = g_pStorage;
+	g_pMoneyManager = &money;
+	g_pStorage = NULL;
+	{
+		C_VS_UI_MONEY_DIALOG dialog(10, 10, 1, 0, NULL, DIALOG_OK | DIALOG_CANCEL, 10, C_VS_UI_MONEY_DIALOG::MONEY_DEPOSIT);
+		CHECK(dialog.GetType() == C_VS_UI_MONEY_DIALOG::MONEY_DEPOSIT);
+		dialog.KeyboardControl(WM_CHAR, '5', 0);
+		dialog.KeyboardControl(WM_KEYDOWN, VK_BACK, 0);
+		CHECK_EQ(0, dialog.GetValue());
+	}
+	g_pStorage = oldStorage;
+	g_pMoneyManager = oldMoney;
 }

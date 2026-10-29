@@ -466,6 +466,25 @@ void ExecF_DropMoney(C_VS_UI_DIALOG * p_this_dialog, id_t id)
 	gC_vs_ui.AcquireChatting();
 }
 
+//-----------------------------------------------------------------------------
+// CloseDepositMoneyDialog
+//
+// A deposit dialog left open read the dropped stash's money cap on a key
+// (Enter after its OK, which found no stash window and did nothing).
+//-----------------------------------------------------------------------------
+void C_VS_UI_INVENTORY::CloseDepositMoneyDialog()
+{
+	if (m_pC_dialog_drop_money != NULL
+		&& m_pC_dialog_drop_money->GetType() == C_VS_UI_MONEY_DIALOG::MONEY_DEPOSIT)
+	{
+		// One still up holds the chat's focus, which its own close gives back.
+		const bool bUp = m_pC_dialog_drop_money->Running();
+		DeleteNew(m_pC_dialog_drop_money);
+		if (bUp)
+			gC_vs_ui.AcquireChatting();
+	}
+}
+
 void Execf_BringFee(C_VS_UI_DIALOG * p_this_dialog, id_t id)
 {
 	(void)p_this_dialog;

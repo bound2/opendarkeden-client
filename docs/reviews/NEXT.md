@@ -44,21 +44,6 @@ to each.
 
 ## Tasks
 
-### 13. The stash's money dialog outlives the stash
-
-**What:** the deposit dialog the inventory opens on the stash (`m_pC_dialog_drop_money`,
-`VS_UI_GameCommon.cpp`) is the inventory's, not the stash window's, so it stays open when a handler
-closes the stash and frees `g_pStorage` (task 11's closes, `ZoneLoading::CloseWindows`). Its key
-handling reads `g_pStorage->GetMoneyManager()` for a deposit (`VS_UI_ExtraDialog.cpp`), a `NULL`
-dereference once the stash is gone, and its OK sends `UI_DROP_MONEY`, dropping the money on the
-floor instead of depositing it. Found by the review of task 11; not confirmed by a run.
-
-**How:** close the money dialog with the stash window (in `C_VS_UI_GAME::CloseStorage`, or from
-the adapters of task 11's entries), or have the dialog test `g_pStorage` and close itself.
-
-**Test:** `VS_UI` drawing is a regression guard; a test in `tests/unit/test_ui_server_indices.cpp`'s
-scene can open the dialog for a deposit, free the stash and press a key.
-
 ### 14. A quest element that opens no dialog stops the quest queue
 
 **What:** `C_VS_UI_QUEST_MANAGER::PushGQuestExcuteElement` (`VS_UI/src/vs_ui_gamecommon2.cpp`)
@@ -308,3 +293,12 @@ hands the window a storage of up to 255 racks (Release). Owner:
 `PacketFuzzFindings.StashRackCountPastTheThreeIsRefused`. The run's input is still rejected, but at
 the read, before anything is freed, so no replayed input fails without the harness's
 `LeaveForTitle` any more.
+
+### 13. The stash's money dialog outlives the stash (PR #586)
+
+`C_VS_UI_GAME::CloseStorage`, where the stash window closes during play, now closes a money dialog
+the inventory opened to ask a deposit (`C_VS_UI_INVENTORY::CloseDepositMoneyDialog`), so a key in
+it no longer reads a dropped `g_pStorage`; one that escapes the close caps the deposit at nothing
+when the stash is gone. Owner: `MoneyDialog.AKeyInADepositWithTheStashDroppedReadsNoStash` for the
+dialog; the close is a regression guard, since the dialog opens only while
+`gC_vs_ui.IsRunningStorage()`, which needs the game UI (`C_VS_UI::m_pC_game`) no test builds.
