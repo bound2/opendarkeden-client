@@ -108,6 +108,8 @@ struct Seed
 	}
 };
 
+// Every field the packet writes is set: GCAddNPC leaves its colours unset, so
+// a seed without them differed between platforms.
 void AddNPC(Seed& seed)
 {
 	GCAddNPC packet;
@@ -115,6 +117,8 @@ void AddNPC(Seed& seed)
 	packet.setNPCID(1);
 	packet.setName("Seed");
 	packet.setSpriteType(9);
+	packet.setMainColor(11);
+	packet.setSubColor(12);
 	packet.setX(kNear);
 	packet.setY(kNear);
 	packet.setDir(2);
