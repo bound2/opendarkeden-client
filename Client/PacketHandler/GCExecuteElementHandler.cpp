@@ -33,6 +33,15 @@ void GCExecuteElementHandler::execute ( GCExecuteElement * pGCExecuteElement , P
 		
 	}	
 	//------------------------------------------------------
+	// The condition names one of the element's four children
+	// (Happen, Complete, Fail, Reward), which the quest window
+	// looks up in a table of four.
+	//------------------------------------------------------
+	else if (pGCExecuteElement->getCondition() >= 4)
+	{
+		DEBUG_ADD_FORMAT_ERR("[Error] GCExecuteElement: condition %d", pGCExecuteElement->getCondition());
+	}
+	//------------------------------------------------------
 	// Otherwise
 	//------------------------------------------------------
 	else
