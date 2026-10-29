@@ -20,6 +20,7 @@
 #include "SocketOutputStream.h"
 #include "Gpackets/GCMyStoreInfo.h"
 #include "Gpackets/GCOtherStoreInfo.h"
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -45,6 +46,7 @@ bool hasPlayer = true;
 bool tracing = false;
 int windowMode = 0;
 bool windowRunning = false;
+int aliveAtClose = -1;		// the wares alive when the window last closed
 int alive = 0;
 
 struct FakeCreature
@@ -152,7 +154,8 @@ const VsUiPresentation::Host ui = []() {
 	host.SetPersnalShoptoUI = [](int mode) { windowMode = mode; calls.push_back("window mode|" + N(mode)); };
 	host.IsRunningPersnalShop = []() { return windowRunning; };
 	host.RunPersnalShop = []() { calls.push_back("window opens"); };
-	host.ClosePersnalShop = []() { calls.push_back("window closes"); };
+	// As the real one, closing destroys the window, which resets its mode.
+	host.ClosePersnalShop = []() { calls.push_back("window closes"); windowRunning = false; windowMode = 0; aliveAtClose = alive; };
 	host.SetPersnalShop = [](MStorage* pStorage) {
 		calls.push_back(pStorage == nullptr ? "window empty" : pStorage == g_pStorage2 ? "window shows the shop" : "window shows another storage");
 	};
@@ -205,6 +208,7 @@ struct World : GameModelWorld
 		tracing = false;
 		windowMode = 0;
 		windowRunning = false;
+		aliveAtClose = -1;
 		me = FakeCreature{1001, 2, 0};
 		seller = FakeCreature{1003, 2, 0};
 		vendor = FakeCreature{1005, 1, 0};
@@ -388,9 +392,24 @@ TEST(PersonalShopReplies, ANewShopReplacesTheStorageAndTheViewedShopIsRefreshed)
 	CHECK(calls == std::vector<std::string>({"shop|1007|1", "sign|1007|y|" + N(0x123456), "message|1007|y", "inventory mode|2", "window opens",
 		"inventory mode|2", "window shows the shop"}));
 	CHECK_EQ(1, alive);
-	// The player's own shop replaces it too.
+	// The player's own shop replaces it too, and the window up on the other
+	// player's shop closes before that storage goes.
+	calls.clear();
 	ReceiveMine(true, "z", {{ITEM_CLASS_SWORD, 505, 900, {}}, {ITEM_CLASS_SWORD, 506, 900, {}}});
+	CHECK(std::find(calls.begin(), calls.end(), "window closes") != calls.end());
+	CHECK_EQ(1, aliveAtClose);
 	CHECK_EQ(2, alive);
+	// Asked for the player's own shop (mode 1) while it is up on another's, the
+	// window stays and is handed the new storage.
+	ReceiveOthers(1007, true, true, "y", {{ITEM_CLASS_SWORD, 507, 900, {}}});
+	windowRunning = true;
+	windowMode = 1;
+	calls.clear();
+	ReceiveMine(true, "z", {{ITEM_CLASS_SWORD, 508, 900, {}}});
+	CHECK(std::find(calls.begin(), calls.end(), "window closes") == calls.end());
+	CHECK(!calls.empty() && calls.back() == "window shows the shop");
+	CHECK(windowRunning);
+	CHECK_EQ(1, alive);
 }
 
 TEST(PersonalShopReplies, AnotherCreaturesShopNewsOnlyMarksIt)
@@ -475,12 +494,13 @@ TEST(PersonalShopReplies, ThePlayersShopWindowOpensOnlyWhenAskedAndNotUp)
 	ReceiveMine(false, "", {}, 0);
 	windowRunning = true;
 	ReceiveMine(false, "", {}, 1);
-	CHECK(calls == std::vector<std::string>(2, "shop|1001|0"));
+	// A window that is up is not opened again, but is handed the new storage.
+	CHECK(calls == std::vector<std::string>({"shop|1001|0", "shop|1001|0", "window shows the shop"}));
 	// A player whose type is an NPC's has its shop left alone.
 	calls.clear();
 	me.creatureType = 1;
 	ReceiveMine(true, "", {}, 0);
-	CHECK(calls == std::vector<std::string>{"sign|1001|" + defaultSign + "|" + N(0x123456)});
+	CHECK(calls == std::vector<std::string>({"sign|1001|" + defaultSign + "|" + N(0x123456), "window shows the shop"}));
 }
 
 TEST(PersonalShopReplies, ClosingThePlayersShopDropsItsStorage)

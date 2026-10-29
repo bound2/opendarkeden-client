@@ -12117,6 +12117,9 @@ MPlayer::ChangeToSlayer()
 		//-----------------------------------------------------
 		if (g_pStorage!=NULL)
 		{
+			// The windows that draw it close first.
+			DialogPresentation::CloseStorage();
+			DialogPresentation::ClosePetStorage();
 			delete g_pStorage;
 			g_pStorage = NULL;
 		}
@@ -12159,6 +12162,9 @@ MPlayer::ChangeToVampire()
 		//-----------------------------------------------------
 		if (g_pStorage!=NULL)
 		{
+			// The windows that draw it close first.
+			DialogPresentation::CloseStorage();
+			DialogPresentation::ClosePetStorage();
 			delete g_pStorage;
 			g_pStorage = NULL;
 		}

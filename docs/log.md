@@ -2,6 +2,10 @@
 
 ## 2026-10-29
 
+* **Update**: the [code-health review](reviews/code-health-review-2026-08-29.md) records the routes by
+  which a handler freed an object a window still drew or a buy still wrote, fixed; the
+  [next work plan](reviews/NEXT.md) moves its task 11 to *Done* and adds task 13 for the stash's
+  money dialog.
 * **Update**: [fuzzing](protocol/fuzzing.md) says the handler targets install recording
   presentation hosts (`tests/fuzz/recording_hosts.h`) and that their first run reached none of
   them; [packet input safety](protocol/packet-input-safety.md) and `CLAUDE.md` say what the targets

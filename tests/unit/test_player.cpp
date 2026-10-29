@@ -2241,6 +2241,37 @@ TEST(Player, BecomingAVampireDropsTheSlayersThings)
 	CHECK(!me.ChangeToSlayer());
 }
 
+// The stash and pet storage windows draw g_pStorage: a change of race closes
+// both while it is still there, then drops it.
+TEST(Player, ChangingRaceClosesTheWindowsThatDrewTheStashFirst)
+{
+	Scene scene;
+	PlayerProbe& me = *scene.me;
+	scene.Tribe(CREATURETYPE_SLAYER_MALE);
+	scene.Tribe(CREATURETYPE_VAMPIRE_MALE1, CREATURETRIBE_VAMPIRE);
+	me.SetCreatureType(CREATURETYPE_SLAYER_MALE);
+	static MStorage* closedWith[2];
+	DialogPresentation::Host dialog{};
+	dialog.CloseStorage = []() { closedWith[0] = g_pStorage; };
+	dialog.ClosePetStorage = []() { closedWith[1] = g_pStorage; };
+	const DialogPresentation::Host* old = DialogPresentation::SetHost(&dialog);
+	for (bool toVampire : {true, false})
+	{
+		closedWith[0] = closedWith[1] = nullptr;
+		MStorage* stash = g_pStorage = new MStorage;
+		CHECK(toVampire ? me.ChangeToVampire() : me.ChangeToSlayer());
+		CHECK(closedWith[0] == stash);
+		CHECK(closedWith[1] == stash);
+		CHECK(g_pStorage == NULL);
+		if (g_pStorage != NULL)		// a change that failed left it
+		{
+			delete g_pStorage;
+			g_pStorage = NULL;
+		}
+	}
+	DialogPresentation::SetHost(old);
+}
+
 TEST(Player, AnOperatorsShapeIsTheUsersToo)
 {
 	Scene scene;

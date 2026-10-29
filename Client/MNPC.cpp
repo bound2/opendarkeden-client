@@ -7,6 +7,8 @@
 #include "MShopTemplateTable.h"
 #include "MShopShelf.h"
 #include "NPCShopBuilder.h"
+#include "DialogPresentationHost.h"
+#include "TempInformation.h"
 #include "PlayerStateHost.h"
 
 // The NPCs' allocator pool (task 4.244: MemoryPool.cpp's until then).
@@ -35,10 +37,32 @@ MNPC::MNPC()
 	m_pShop = NULL;
 }
 
+//----------------------------------------------------------------------
+// Forget Shop
+//----------------------------------------------------------------------
+// The shop is about to be freed: the shop window, which draws it every
+// frame, is told, and a buy waiting on it (TempInformation keeps the shop
+// for GCShopBuyOK, which writes to it) is dropped.
+//----------------------------------------------------------------------
+static void
+ForgetShop(MShop* pShop)
+{
+	DialogPresentation::ShopDestroyed(pShop);
+	if (g_pTempInformation != NULL
+		&& g_pTempInformation->GetMode() == TempInformation::MODE_SHOP_BUY
+		&& g_pTempInformation->pValue == pShop)
+	{
+		g_pTempInformation->SetMode(TempInformation::MODE_NULL);
+		// The buy locked trading, and only its reply unlocks it.
+		DialogPresentation::UnlockItemTrade();
+	}
+}
+
 MNPC::~MNPC()
 {
 	if (m_pShop!=NULL)
 	{
+		ForgetShop(m_pShop);
 		delete m_pShop;
 	}
 }
@@ -66,6 +90,7 @@ MNPC::SetShop(MShop* pShop)
 	// Delete the one there was.
 	if (m_pShop!=NULL)
 	{
+		ForgetShop(m_pShop);
 		delete m_pShop;
 	}
 

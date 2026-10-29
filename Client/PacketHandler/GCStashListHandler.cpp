@@ -33,6 +33,8 @@ void GCStashListHandler::execute ( GCStashList * pPacket , Player * pPlayer )
 		//------------------------------------------------------------
 		if (g_pStorage!=NULL)
 		{
+			// The pet storage window draws it too, and is not handed the new one.
+			DialogPresentation::ClosePetStorage();
 			delete g_pStorage;
 		}
 

@@ -6,6 +6,8 @@
 #include "MShop.h"
 #include "MShopShelf.h"
 #include "MShopTemplateTable.h"
+#include "DialogPresentationHost.h"
+#include "TempInformation.h"
 #include "MCreatureTable.h"
 #include "MCreatureSpriteTable.h"
 #include "MActionInfoTable.h"
@@ -282,6 +284,67 @@ TEST(NPC, ItsShopGoesWithIt)
 		npc.SetShop(ShopWithACoat());
 	}
 	CHECK_EQ(1, coatsDeleted);
+}
+
+// The shop window draws the shop it was given every frame, and the shop is
+// the NPC's, freed with it or when replaced: the UI is told before each, so
+// the window can close while the shop is still there.
+TEST(NPC, TheUIIsToldOfItsShopBeforeTheShopIsFreed)
+{
+	Scene scene;
+	static std::vector<const MShop*> destroyed;
+	static int coatsAtTheTime;
+	destroyed.clear();
+	DialogPresentation::Host dialog{};
+	dialog.ShopDestroyed = [](const MShop* pShop) { destroyed.push_back(pShop); coatsAtTheTime = coatsDeleted; };
+	const DialogPresentation::Host* old = DialogPresentation::SetHost(&dialog);
+	const int before = coatsDeleted;
+	{
+		MNPC npc;
+		MShop* pFirst = ShopWithACoat();
+		npc.SetShop(pFirst);
+		MShop* pSecond = ShopWithACoat();
+		npc.SetShop(pSecond);
+		CHECK(destroyed == std::vector<const MShop*>{pFirst});
+		CHECK_EQ(before, coatsAtTheTime);		// told while its coat was there
+		destroyed.clear();
+	}
+	CHECK_EQ(1u, destroyed.size());
+	CHECK_EQ(before + 1, coatsAtTheTime);
+	DialogPresentation::SetHost(old);
+}
+
+// A buy waits on the shop it was made in (TempInformation keeps the shop for
+// GCShopBuyOK, which writes to it): it is forgotten with the shop, and a
+// buy waiting on another shop is kept.
+TEST(NPC, ABuyWaitingOnItsShopIsForgottenWithTheShop)
+{
+	Scene scene;
+	TempInformation temp;
+	TempInformation* oldTemp = g_pTempInformation;
+	g_pTempInformation = &temp;
+	// The buy locked trading, and its reply would have unlocked it.
+	static int unlocked;
+	unlocked = 0;
+	DialogPresentation::Host dialog{};
+	dialog.UnlockItemTrade = []() { ++unlocked; };
+	const DialogPresentation::Host* oldDialog = DialogPresentation::SetHost(&dialog);
+	MShop* pOther = ShopWithACoat();
+	{
+		MNPC npc;
+		npc.SetShop(ShopWithACoat());
+		temp.SetMode(TempInformation::MODE_SHOP_BUY);
+		temp.pValue = pOther;
+		npc.SetShop(ShopWithACoat());
+		CHECK(temp.GetMode() == TempInformation::MODE_SHOP_BUY);
+		CHECK_EQ(0, unlocked);
+		temp.pValue = npc.GetShop();
+	}
+	CHECK(temp.GetMode() == TempInformation::MODE_NULL);
+	CHECK_EQ(1, unlocked);
+	DialogPresentation::SetHost(oldDialog);
+	delete pOther;
+	g_pTempInformation = oldTemp;
 }
 
 TEST(NPC, AFixedShelfIsBuiltFromItsTemplatesInANewShop)

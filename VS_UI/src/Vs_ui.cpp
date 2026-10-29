@@ -1983,6 +1983,16 @@ bool	C_VS_UI::IsRunningShop() const
 }
 
 //-----------------------------------------------------------------------------
+// C_VS_UI::IsShowingShop
+//
+// Whether the shop window runs and draws pShop.
+//-----------------------------------------------------------------------------
+bool	C_VS_UI::IsShowingShop(const MShop* pShop) const
+{
+	return IsRunningShop() && C_VS_UI_SHOP::Shows(pShop);
+}
+
+//-----------------------------------------------------------------------------
 // C_VS_UI::IsRunningSell
 //
 //

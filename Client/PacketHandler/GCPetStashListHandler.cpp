@@ -25,6 +25,8 @@ void GCPetStashListHandler::execute ( GCPetStashList * pPacket , Player * pPlaye
 		//------------------------------------------------------------
 		if (g_pStorage!=NULL) 
 		{
+			// The stash window draws it too, and is not handed the new one.
+			DialogPresentation::CloseStorage();
 			delete g_pStorage;
 		}
 

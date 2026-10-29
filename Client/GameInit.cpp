@@ -2886,6 +2886,9 @@ static const DialogPresentation::Host s_DialogPresentationHost = {
 	.IsRunningSell = []() { return UI_IsRunningSell() != FALSE; },
 	.IsRunningParty = UI_IsRunningParty,
 	.CloseAllDialog = []() { gC_vs_ui.CloseAllDialog(); },
+	.CloseStorage = UI_CloseStorage,
+	.ClosePetStorage = []() { gC_vs_ui.ClosePetStorage(); },
+	.ShopDestroyed = [](const MShop* pShop) { if (gC_vs_ui.IsShowingShop(pShop)) UI_CloseShop(); },
 };
 
 static const LoginPresentation::Host s_LoginPresentationHost = {

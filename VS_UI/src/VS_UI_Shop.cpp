@@ -599,6 +599,16 @@ void C_VS_UI_SHOP::Process()
 }
 
 //-----------------------------------------------------------------------------
+// Shows
+//
+// The shop is an NPC's, freed with it, so the model asks before it frees one.
+//-----------------------------------------------------------------------------
+bool C_VS_UI_SHOP::Shows(const MShop* pShop)
+{
+	return pShop != NULL && m_pShop == pShop;
+}
+
+//-----------------------------------------------------------------------------
 // SetShop
 //
 // 

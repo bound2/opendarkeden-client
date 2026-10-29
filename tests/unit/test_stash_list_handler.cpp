@@ -25,6 +25,8 @@ namespace {
 std::vector<std::string> calls;
 int alive = 0;
 bool loadable = true;
+MStorage* petsClosedWith = nullptr;	// the stash when the pet storage window closed
+int aliveAtClose = -1;				// and the items alive then
 
 struct Ware : MItem
 {
@@ -69,6 +71,7 @@ const MItemHost items = FactoryHost();
 const DialogPresentation::Host dialog = []() {
 	DialogPresentation::Host host{};
 	host.RunStorage = []() { calls.push_back("run"); };
+	host.ClosePetStorage = []() { calls.push_back("close pets"); petsClosedWith = g_pStorage; aliveAtClose = alive; };
 	host.SetStorage = [](MStorage* pStorage) { calls.push_back(pStorage == g_pStorage ? "show|stash" : "show|other"); };
 	host.PopupFreeMessageDlg = [](const char* message) { calls.push_back("popup|" + std::string(message)); };
 	return host;
@@ -97,6 +100,8 @@ struct World : GameModelWorld
 		calls.clear();
 		alive = 0;
 		loadable = true;
+		petsClosedWith = nullptr;
+		aliveAtClose = -1;
 	}
 	~World()
 	{
@@ -201,7 +206,7 @@ TEST(StashListHandler, EachStashedItemGoesToItsRackAndSlotBuiltFromThePacket)
 	const MItem* gun = World::At(1, 3);
 	CHECK(gun != nullptr && gun->GetID() == 901 && gun->GetSilver() == 0 && gun->GetNumber() == 1);
 	CHECK_EQ(123456, static_cast<long long>(g_pStorage->GetMoneyManager()->GetMoney()));
-	CHECK(calls == std::vector<std::string>({"load|901|30", "run", "show|stash"}));
+	CHECK(calls == std::vector<std::string>({"close pets", "load|901|30", "run", "show|stash"}));
 	CHECK_EQ(2, alive);
 }
 
@@ -229,7 +234,7 @@ TEST(StashListHandler, AnUnknownClassIsSkippedAndAnUnloadableGunStashedUnloaded)
 	Receive(1, {{0, 0, 940, ITEM_CLASS_HELM, 1, {}}, {0, 1, 941, ITEM_CLASS_SR, 9, {}}}, 0);
 	CHECK(World::At(0, 0) == nullptr);
 	CHECK(World::At(0, 1) != nullptr);
-	CHECK(calls == std::vector<std::string>({"load|941|9", "run", "show|stash"}));
+	CHECK(calls == std::vector<std::string>({"close pets", "load|941|9", "run", "show|stash"}));
 	CHECK_EQ(1, alive);
 }
 
@@ -251,4 +256,18 @@ TEST(StashListHandler, MissingServicesStillBuildTheStash)
 	CHECK(calls.empty());
 	CHECK(World::At(0, 0) != nullptr);
 	CHECK_EQ(7, static_cast<long long>(g_pStorage->GetMoneyManager()->GetMoney()));
+}
+
+// The pet storage window draws g_pStorage too, and only the stash window is
+// handed the new one: a stash list closes the pet storage window while the
+// storage it drew is still there, then frees it.
+TEST(StashListHandler, ThePetStorageWindowIsClosedBeforeItsStorageIsFreed)
+{
+	World world;
+	MStorage* old = g_pStorage;
+	CHECK(g_pStorage->SetItem(4, new Ware(ITEM_CLASS_SWORD)));
+	CHECK(g_pStorage->SetItem(5, new Ware(ITEM_CLASS_SWORD)));
+	Receive(1, {{0, 0, 900, ITEM_CLASS_SWORD, 4, {}}}, 0);
+	CHECK(petsClosedWith == old);
+	CHECK_EQ(2, aliveAtClose);		// its two items were still there
 }

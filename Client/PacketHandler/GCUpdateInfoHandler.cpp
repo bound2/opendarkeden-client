@@ -11,6 +11,7 @@
 #include "Gpackets/GCUpdateInfo.h"
 #include "BonusSkillHost.h"
 #include "CMessageArray.h"
+#include "DialogPresentationHost.h"
 #include "COrderedList.h"
 #include "CServerInformation.h"
 #include "ClientMode.h"
@@ -323,6 +324,10 @@ void GCUpdateInfoHandler::execute ( GCUpdateInfo * pPacket , Player * pPlayer )
 	//-----------------------------------------------------------
 	if (g_pStorage!=NULL)
 	{
+		// The windows that draw it close first; CloseWindows, below, leaves the
+		// pet storage's open.
+		DialogPresentation::CloseStorage();
+		DialogPresentation::ClosePetStorage();
 		delete g_pStorage;
 		g_pStorage = NULL;		
 	}
