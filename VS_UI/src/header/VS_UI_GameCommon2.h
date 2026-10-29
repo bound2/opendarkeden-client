@@ -1459,8 +1459,13 @@ public:
 	void	UpdateQuestItemInfo(std::vector<MItem*>& vItem);
 
 	void	PushGQuestExcuteElement(DWORD qID, BYTE bCondition, WORD wIndex);
-	void	RunGQuestExcuteElement(DWORD qID, BYTE bCondition, WORD wIndex);
+	// Whether it opened the element's NPC dialog, whose OK alone moves the
+	// queue on.
+	bool	RunGQuestExcuteElement(DWORD qID, BYTE bCondition, WORD wIndex);
 	void	RunNextGQuestExcuteElement();
+	void	RunQueuedGQuestExcuteElement();
+	// The elements waiting, the first of them showing its dialog.
+	size_t	GetExcuteElementCount() const { return m_QuestExcutElement.size(); }
 	void	RunGQuestExcuteElementAction(DWORD qID, BYTE bCondition, WORD wIndex);
 
 	void	RunQuestFail_or_Sucess(const XMLTree *pElement, int nType);

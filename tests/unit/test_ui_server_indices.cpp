@@ -2,6 +2,7 @@
 #include "VS_UI_Base.h"
 #include "VS_UI_GameCommon.h"
 #include "VS_UI_ExtraDialog.h"
+#include "VS_UI_GameCommon2.h"
 #include "VS_UI_GlobalResource.h"
 #include "VS_UI_Description.h"
 #include "VS_UI_mouse_pointer.h"
@@ -643,4 +644,19 @@ TEST(MoneyDialog, AKeyInADepositWithTheStashDroppedReadsNoStash)
 	}
 	g_pStorage = oldStorage;
 	g_pMoneyManager = oldMoney;
+}
+
+// A quest element runs at once when none waits, and only its NPC dialog's
+// OK moves the queue on. One that opens no dialog (here every one: the test
+// has no quest file) stayed at the head, and every later element queued
+// behind it and never ran (task 14 of docs/reviews/NEXT.md).
+TEST(QuestManager, AnElementThatOpensNoDialogDoesNotHoldTheQueue)
+{
+	Scene scene;
+	C_VS_UI_QUEST_MANAGER manager;
+	manager.PushGQuestExcuteElement(70001, 0, 1);
+	manager.PushGQuestExcuteElement(70002, 1, 2);
+	CHECK_EQ((size_t)0, manager.GetExcuteElementCount());
+	manager.RunNextGQuestExcuteElement();
+	CHECK_EQ((size_t)0, manager.GetExcuteElementCount());
 }

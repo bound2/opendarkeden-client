@@ -2,6 +2,10 @@
 
 ## 2026-10-29
 
+* **Update**: the [code-health review](reviews/code-health-review-2026-08-29.md) records the quest
+  queue that an element opening no dialog stopped, fixed; the [next work plan](reviews/NEXT.md)
+  moves its task 14 to *Done*, which leaves no task open, as `CLAUDE.md` and the
+  [reviews index](reviews/index.md) now say.
 * **Update**: the [code-health review](reviews/code-health-review-2026-08-29.md) records the stash's
   money dialog that outlived the stash, fixed; the [next work plan](reviews/NEXT.md) moves its
   task 13 to *Done*.
