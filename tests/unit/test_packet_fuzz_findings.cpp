@@ -911,3 +911,39 @@ TEST(PacketFuzzFindings, TimeLimitItemCountPastItsBoundIsRefused)
 	CHECK(!FramedReadIsRefused(packet, Frame(packet.getPacketID(), TimeLimitBody(MAX_TIME_LIMIT_ITEM_INFO)), why));
 	CHECK_EQ((std::size_t)MAX_TIME_LIMIT_ITEM_INFO, packet.m_TimeLimitItemInfos.size());
 }
+
+//----------------------------------------------------------------------
+// GCStashList's rack count reached its handler as any byte, though the
+// packet holds at most STASH_RACK_MAX racks: the handler freed the old
+// stash, made one of that many racks and asked isExist about each, whose
+// Assert throws past the third in a Debug build (the handler fuzz
+// target's run of 2026-10-29, task 15 of docs/reviews/NEXT.md).
+//----------------------------------------------------------------------
+namespace {
+
+// No items, then 100 in the stash.
+std::vector<unsigned char>	StashBody(unsigned char racks)
+{
+	return { racks, 0x00, 0x64, 0x00, 0x00, 0x00 };
+}
+
+} // namespace
+
+TEST(PacketFuzzFindings, StashRackCountPastTheThreeIsRefused)
+{
+	for (int racks : { STASH_RACK_MAX + 1, 32, 0xff })
+	{
+		GCStashList packet;
+		std::string why;
+		CHECK(FramedReadIsRefused(packet, Frame(packet.getPacketID(), StashBody((unsigned char)racks)), why));
+		CHECK(RefusedFor(why, "stash rack count"));
+	}
+	for (int racks : { 0, 1, STASH_RACK_MAX })
+	{
+		GCStashList packet;
+		std::string why;
+		CHECK(!FramedReadIsRefused(packet, Frame(packet.getPacketID(), StashBody((unsigned char)racks)), why));
+		CHECK_EQ(racks, (int)packet.getStashNum());
+		CHECK_EQ(100, (int)packet.getStashGold());
+	}
+}

@@ -64,6 +64,10 @@ void GCStashList::read ( SocketInputStream & iStream )
 	
 	// 보관함의 갯수를 읽어들인다.
 	iStream.read(m_StashNum);
+	// The handler makes a storage of that many racks and asks isExist about
+	// each; the packet holds at most STASH_RACK_MAX of them.
+	if (m_StashNum > STASH_RACK_MAX)
+		throw InvalidProtocolException("GCStashList: stash rack count out of range");
 
 	// 총 아이템의 숫자를 읽어들인다.
 	iStream.read(nTotal);

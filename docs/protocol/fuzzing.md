@@ -63,12 +63,12 @@ to close all four, which can only miss a finding), and `IsRunning` answers from 
 end of a run, each open window's object is walked as its `Show` walks it, so ASan reports one a
 packet freed while the window still drew it. A call an input is rejected in closes the windows
 first (`LeaveForTitle`): the client leaves for the title screen and deletes the game UI before it
-draws. A free that a later packet of the same call hides is not drawn by the game either. On a
-failed `Assert` the world follows the Debug client, which disconnects; a Release client carries on
-past it. The mouse's
-item and the quest items the UI keeps are not modelled. Every other presentation call is
-skipped, as in the unit tests, so what an adapter does with an integer or a string a handler hands
-it (`GameMain`'s `SetWeather`, a dialog's text) is not reached: the walks of
+draws. (Since task 15 refused the rack count of the input that showed it, no replayed input fails
+without it.) A free that a later packet of the same call hides is not drawn by the game either. On
+a failed `Assert` the world follows the Debug client, which disconnects; a Release client carries
+on past it. The mouse's item and the quest items the UI keeps are not modelled. Every other
+presentation call is skipped, as in the unit tests, so what an adapter does with an integer or a
+string a handler hands it (`GameMain`'s `SetWeather`, a dialog's text) is not reached: the walks of
 [packet input safety](packet-input-safety.md) followed those by reading, and the review of the
 recording hosts found one they missed (task 12 of the next work plan).
 Nor does the world hold a request the player made: a reply that checks the request mode
@@ -226,12 +226,13 @@ window model reported after a rejected input: a `GCStashList` of 32 racks freed 
 at `GCStashList::isExist`'s `Assert`, leaving the window on the freed storage. On a rejected input
 the client leaves for the title screen, whose `StartTitle` deletes the game UI before anything
 draws, so the report was the harness's: the world now closes the windows on one (`LeaveForTitle`),
-the input is a regression input, and the rack count it reached is task 15 of the next work plan.
-Run again with that fix, the game target made 227,287 inputs in 15 minutes (coverage 42,384 to
-45,184) and found nothing; replaying the corpus it left opened the shop window 45 times, the
-storage 519, the pet storage 417 and the personal shop 126. The review of the change then made
-the world read the windows after every call of the receive loop, as the game draws once a call;
-a last 15-minute run with that made 223,087 inputs (coverage 45,153 to 46,392) and found nothing.
+the input is a regression input, and the rack count it reached is now refused (task 15 of the next
+work plan, PR #585). Run again with the harness fix, the game target made 227,287 inputs in 15
+minutes (coverage 42,384 to 45,184) and found nothing; replaying the corpus it left opened the shop
+window 45 times, the storage 519, the pet storage 417 and the personal shop 126. The review of the
+change then made the world read the windows after every call of the receive loop, as the game draws
+once a call; a last 15-minute run with that made 223,087 inputs (coverage 45,153 to 46,392) and
+found nothing.
 
 `DE_FUZZ_ABORT_ON_ASSERT=1` turns a failed `Assert` (an `AssertionError`, normally a rejected
 input) into a crash, to see which ones hostile input reaches. `-close_fd_mask=3` hides the
