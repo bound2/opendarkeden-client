@@ -13319,6 +13319,9 @@ bool C_VS_UI_QUEST_MANAGER::LoadQuestXML()
 	if (!m_Quest_XML_file.Open(QUEST_EVENT_XML_FILE))
 	{
 		DEBUG_ADD("Failed to open QUEST_EVENT_XML_FILE");
+		// The main file's tree goes too: a caller releases it only after a
+		// load that succeeded, and each failed one would add another copy.
+		ReleaseQuestXML();
 		return false;
 	}
 
@@ -13974,16 +13977,15 @@ void	C_VS_UI_QUEST_MANAGER::RunQuestFail_or_Sucess(const XMLTree *pElement, int 
 
 void	C_VS_UI_QUEST_MANAGER::PushGQuestExcuteElement(DWORD qID, BYTE bCondition, WORD wIndex)
 {
-	if(0 == m_QuestExcutElement.size()) // 쌓인게 없으면 바로 실행
-	{
-		RunGQuestExcuteElement(qID, bCondition, wIndex);
-	}
+	// With none waiting, it runs at once.
+	const bool bIdle = m_QuestExcutElement.empty();
 	_GQuestExcuteElement* TempGQuestExcuteElement = new _GQuestExcuteElement;
 	TempGQuestExcuteElement->qID = qID;
 	TempGQuestExcuteElement->bCondition = bCondition;
 	TempGQuestExcuteElement->wIndex = wIndex;
 	m_QuestExcutElement.push_back(TempGQuestExcuteElement);
-
+	if (bIdle)
+		RunQueuedGQuestExcuteElement();
 }
 void	C_VS_UI_QUEST_MANAGER::RunNextGQuestExcuteElement()
 {
@@ -14000,16 +14002,22 @@ void	C_VS_UI_QUEST_MANAGER::RunNextGQuestExcuteElement()
 
 			DeleteNew(TempRun);
 		}
-		if(m_QuestExcutElement.size())
-		{
-			itr = m_QuestExcutElement.begin();
-			if(itr != m_QuestExcutElement.end())
-			{
-				TempRun = (*itr);
-				if(NULL != TempRun)
-					RunGQuestExcuteElement(TempRun->qID, TempRun->bCondition, TempRun->wIndex);
-			}
-		}
+		RunQueuedGQuestExcuteElement();
+	}
+}
+
+// Shows the first waiting element's dialog. One that opens none (its quest,
+// condition or index is not in the quest file) is dropped: only the dialog's
+// OK moves the queue on, so every element after it would wait for ever.
+void	C_VS_UI_QUEST_MANAGER::RunQueuedGQuestExcuteElement()
+{
+	while (!m_QuestExcutElement.empty())
+	{
+		_GQuestExcuteElement* pHead = m_QuestExcutElement.front();
+		if (RunGQuestExcuteElement(pHead->qID, pHead->bCondition, pHead->wIndex))
+			return;
+		m_QuestExcutElement.erase(m_QuestExcutElement.begin());
+		DeleteNew(pHead);
 	}
 }
 // npc dialog 확인 클릭 후에 클라이언트에서 따로 처리할 행동이 있는지 체크...하드코딩임.
@@ -14058,10 +14066,11 @@ void	C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElementAction(DWORD qID, BYTE bCondit
 	ReleaseQuestXML();
 }
 // GCExcuteElement 날라 왔을 때 npc dialog를 띄운다.
-void	C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElement(DWORD qID, BYTE bCondition, WORD wIndex)
+bool	C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElement(DWORD qID, BYTE bCondition, WORD wIndex)
 {
 	if(LoadQuestXML() == false)
-		return ;
+		return false;
+	bool bOpened = false;
 	
 	// 퀘스트 리스트는 id로 찾는다..복잡시럽네.-_-;;;
 	const XMLTree *pElement = m_Quest_XML_Tree.GetChildByAttr( qID , "id");
@@ -14118,11 +14127,13 @@ void	C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElement(DWORD qID, BYTE bCondition, W
 				char * pp_dmsg[] = {(char*)(pElement3->GetText().c_str()),};
 				TempDialog->SetMessage(pp_dmsg, sizeof(pp_dmsg)/sizeof(char *));//, SMO_NOFIT);
 				gC_vs_ui.SetQuestNpcDialog((void*)TempDialog);
+				bOpened = true;
 
 			}
 		}
 	}
 	ReleaseQuestXML();
+	return bOpened;
 }
 //-----------------------------------------------------------------------------
 // C_VS_UI_QUEST_LIST::C_VS_UI_QUEST_LIST

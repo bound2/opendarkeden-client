@@ -1,7 +1,7 @@
 ---
 type: Record
 title: "Next work plan"
-description: "The ranked, self-contained tasks left in the client after the 2026-10-25 merges, each written so an agent with no other context can take it: the handler fuzzers' reach and the packet-safety routes the walks did not follow (both done since), what the review of the fuzzers' hosts found, the open code-health rows, the last drawing stubs, and the owner decisions that are not an agent's to make."
+description: "The tasks ranked in the client after the 2026-10-25 merges, each written so an agent with no other context could take it, all done as of 2026-10-29 (the handler fuzzers' reach, the packet-safety routes the walks did not follow, what the review of the fuzzers' hosts found, the open code-health rows, the last drawing stubs), what is kept in view, and the owner decisions that are not an agent's to make."
 tags: [review, plan]
 ---
 
@@ -10,8 +10,8 @@ tags: [review, plan]
 Written 2026-10-26, after the merges of PRs #562-#568. The
 [restructuring plan](RESTRUCTURING.md) is complete except task 4.12, and the
 [code-health review](code-health-review-2026-08-29.md) had four rows still marked open (none
-since tasks 1 to 3), all in its *Found by fuzzing* and *Found by reading* tables. What is left
-is below, ranked by the risk it closes, with the cheap undefined-behaviour rows ahead of the long
+since tasks 1 to 3), all in its *Found by fuzzing* and *Found by reading* tables. What was left
+is below, ranked by the risk it closed (all of it done as of 2026-10-29, each under *Done*), with the cheap undefined-behaviour rows ahead of the long
 walks and the cosmetic stubs last. Each task names the code, the tests it must flip or add, and the
 rule it must keep, so it can be taken cold. One task per PR; the merge gate (a two-reviewer
 adversarial review of the whole diff, then the four platform workflows dispatched by hand) applies
@@ -44,21 +44,8 @@ to each.
 
 ## Tasks
 
-### 14. A quest element that opens no dialog stops the quest queue
-
-**What:** `C_VS_UI_QUEST_MANAGER::PushGQuestExcuteElement` (`VS_UI/src/vs_ui_gamecommon2.cpp`)
-runs an element at once when the queue is empty and queues it either way; only the NPC script
-dialog's OK (`ExecF_GQuestNpcScript`, `UI_RUN_NEXT_GQUEST_EXCUTE_ELEMENT`) removes the head and
-runs the next. An element that opens no such dialog (a quest id the quest file lacks, an index no
-child matches) stays at the head, and every later `GCExecuteElement` is queued behind it and never
-runs, while the queue grows by one allocation each. A server can cause it. Found by the review of
-task 12; not confirmed by a run.
-
-**How:** have `RunGQuestExcuteElement` report whether it opened the dialog, and drop the head and
-run the next when it did not.
-
-**Test:** `VS_UI` code no test reaches: a regression guard, unless the quest manager can be built in
-a `tests/unit/test_ui_server_indices.cpp` scene with a quest file.
+No task is open (2026-10-29): every task ranked here is under *Done*, each with its PR. What
+follows is kept in view, and the owner decisions below are not an agent's to make.
 
 ### 10. Kept in view, no task
 
@@ -87,6 +74,12 @@ Recorded so the next agent does not decide them unasked. Each stays open until t
 - Transport encryption: the wire is unencrypted, login credentials included
   ([reconciliation](code-health-reconciliation-2026-09-23.md), *Boundaries retained*). It needs a
   matching server protocol change and is a design decision, not a fix.
+- The quest queue and Escape (the review of task 14): Escape closes a quest's NPC script dialog
+  with `DIALOG_EXECID_EXIT`, which `ExecF_GQuestNpcScript` ignores, so the element stays at the
+  head of `C_VS_UI_QUEST_MANAGER`'s queue and every later one waits behind it, as one that opened no
+  dialog did. Treating Escape as the OK (`SetOkOnly(true)` on the two quest dialogs) would move the
+  queue on but run the element's action, a `dead` action among them, on Escape; whether it should
+  is the owner's call.
 
 ## Done
 
@@ -302,3 +295,11 @@ it no longer reads a dropped `g_pStorage`; one that escapes the close caps the d
 when the stash is gone. Owner: `MoneyDialog.AKeyInADepositWithTheStashDroppedReadsNoStash` for the
 dialog; the close is a regression guard, since the dialog opens only while
 `gC_vs_ui.IsRunningStorage()`, which needs the game UI (`C_VS_UI::m_pC_game`) no test builds.
+
+### 14. A quest element that opens no dialog stops the quest queue (PR #587)
+
+`RunGQuestExcuteElement` says whether it opened the element's NPC dialog, and the push and the next
+both go through `RunQueuedGQuestExcuteElement`, which drops each head that opens none, so an
+element the quest files lack no longer holds every later one; `LoadQuestXML` releases a half-read
+tree. Owner: `QuestManager.AnElementThatOpensNoDialogDoesNotHoldTheQueue`, for the push; the next's
+drop and the release are regression guards.
