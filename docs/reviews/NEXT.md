@@ -44,35 +44,6 @@ to each.
 
 ## Tasks
 
-### 11. The storage and shop windows draw objects a handler frees
-
-**What:** four `VS_UI` windows draw from the object they were given on every frame
-(`C_VS_UI_SHOP::Show`, `C_VS_UI_STORAGE::Show`, the pet storage's and the personal shop's in
-`VS_UI_PetStorage.cpp`), and nothing tells them when the model frees it. The review of the
-recording hosts (task 4) found these routes by reading, each a use-after-free a server can cause:
-- `GCShopList` for an NPC, then `GCDeleteObject` of it: `MZone::RemoveCreature` deletes the NPC,
-  `MNPC::~MNPC` deletes its shop, and the shop window keeps drawing it;
-- `GCStashList`, then `GCPetStashList`, or the other way round: both delete and replace the shared
-  `g_pStorage`, and only their own window is handed the new one;
-- `GCUpdateInfo` with the pet storage open: it deletes `g_pStorage`, and `ZoneLoading::CloseWindows`
-  closes only the shop and the storage;
-- `GCMorph1` (`MPlayer::ChangeToSlayer`, `ChangeToVampire`) deletes `g_pStorage` and closes no
-  window;
-- two `GCMyStoreInfo` (UI mode 0, the first opening the window): the second deletes `g_pStorage2`,
-  and since the window is running it is not handed the new one (`GCMyStoreInfoHandler.cpp`);
-  a `GCOtherStoreInfo` the player asked for, then a `GCMyStoreInfo`, does the same.
-
-**How:** confirm each route in the real window code, then have the model close or re-point the
-window before it frees the object it draws, through the host the handler already uses
-(`DialogPresentation`, `VsUiPresentation`, `ZoneLoading`); an NPC's shop needs its removal to reach
-the shop window. A value a library function could check is checked in the library: the handlers
-and `MPlayer` are `gamemodel`'s.
-
-**Test:** a unit test per route drives the handlers in order with the recording hosts installed
-(`tests/fuzz/recording_hosts.h`) and checks that no open window is left with the freed object;
-on the unfixed code ASan reports the read the recording host makes. Each route is a row in the
-code-health review's *Found by reading* table.
-
 ### 12. A quest condition byte indexes a four-entry table
 
 **What:** `C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElement` and its action sibling
@@ -89,6 +60,21 @@ and bound the two lookups as their siblings are.
 
 **Test:** a handler test that conditions of 4 and 255 reach no presentation call; the `VS_UI` bound is a
 regression guard. A row in the code-health review's *Found by reading* table.
+
+### 13. The stash's money dialog outlives the stash
+
+**What:** the deposit dialog the inventory opens on the stash (`m_pC_dialog_drop_money`,
+`VS_UI_GameCommon.cpp`) is the inventory's, not the stash window's, so it stays open when a handler
+closes the stash and frees `g_pStorage` (task 11's closes, `ZoneLoading::CloseWindows`). Its key
+handling reads `g_pStorage->GetMoneyManager()` for a deposit (`VS_UI_ExtraDialog.cpp`), a `NULL`
+dereference once the stash is gone, and its OK sends `UI_DROP_MONEY`, dropping the money on the
+floor instead of depositing it. Found by the review of task 11; not confirmed by a run.
+
+**How:** close the money dialog with the stash window (in `C_VS_UI_GAME::CloseStorage`, or from
+the adapters of task 11's entries), or have the dialog test `g_pStorage` and close itself.
+
+**Test:** `VS_UI` drawing is a regression guard; a test in `tests/unit/test_ui_server_indices.cpp`'s
+scene can open the dialog for a deposit, free the stash and press a key.
 
 ### 4. The handler fuzzers' seeds do not reach the recording hosts
 
@@ -300,3 +286,18 @@ up, and the [code-health review](code-health-review-2026-08-29.md) has the three
 `HPBar.AFillIsSixtyFourBitsClampedAndEmptyWithNoMaximum`, `HPBar.EveryBarIsDrawnWithNoMaximumToDivideBy`,
 `PartyManager.AMemberWithNoMaximumHPIsDrawn`, `VampireSkillCost.WillOfLifeTakesALevelPastTheWireByteAsItsLast`
 and `CIndexSpriteColorSet.ASetPastTheTableIsDrawnWithTheFirst`. With (d), task 5 is done.
+
+### 11. The storage and shop windows draw objects a handler frees (PR #582)
+
+Six routes, and two more the review of the fix found, each a use-after-free a server could cause
+(one with the player's click: the code-health review's *Found by reading* row lists them): the stash, the personal shop's
+storage, an NPC's shop or a buy waiting on it was freed while something still drew or wrote it.
+Every handler and model function that frees `g_pStorage`, and the pet storage's close, now closes
+the windows that draw it first (`DialogPresentation::CloseStorage`, `ClosePetStorage`);
+`GCMyStoreInfo` closes a window up on another player's shop (unless the player has just asked for
+their own) and hands a window that stays up the new `g_pStorage2`; and an NPC reports its shop before freeing it (`ShopDestroyed`, whose
+adapter closes the shop window if it shows that shop) and drops a buy waiting on it, unlocking
+the trade the buy locked. The
+recording hosts of the handler fuzz targets model the three entries. Owners: the close-before-free
+tests (stash list, pet stash, update info, race change, stash sale, NPC), the NPC's buy test and
+`PersonalShopReplies`.

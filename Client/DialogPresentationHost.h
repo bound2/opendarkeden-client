@@ -76,6 +76,14 @@ struct Host
 	bool (*IsRunningSell)() = nullptr;
 	bool (*IsRunningParty)() = nullptr;
 	void (*CloseAllDialog)() = nullptr;
+	// The stash and pet storage windows draw g_pStorage, the shop window an
+	// NPC's shop, every frame: what frees one (a handler, a race change, the
+	// NPC) closes the window first. CloseStorage and ClosePetStorage close
+	// those windows; ShopDestroyed closes the shop window if it shows that
+	// shop.
+	void (*CloseStorage)() = nullptr;
+	void (*ClosePetStorage)() = nullptr;
+	void (*ShopDestroyed)(const MShop* pShop) = nullptr;
 };
 
 // Borrowed until replaced. Every call reads the current host again.
@@ -114,5 +122,8 @@ bool IsRunningRepair();
 bool IsRunningSell();
 bool IsRunningParty();
 void CloseAllDialog();
+void CloseStorage();
+void ClosePetStorage();
+void ShopDestroyed(const MShop* pShop);
 
 }

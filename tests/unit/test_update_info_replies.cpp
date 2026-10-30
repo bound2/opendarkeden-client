@@ -8,6 +8,7 @@
 #include "ClientMode.h"
 #include "ClientPlayer.h"
 #include "FrameClock.h"
+#include "DialogPresentationHost.h"
 #include "GameInfoPresentationHost.h"
 #include "GameMessages.h"
 #include "MCreatureTable.h"
@@ -667,6 +668,26 @@ TEST(UpdateInfoReplies, TheStashIsDropped)
 	World world;
 	g_pStorage = new MStorage;
 	world.Receive(Update{});
+	CHECK(g_pStorage == nullptr);
+}
+
+// The stash and pet storage windows draw g_pStorage: both close while it is
+// still there, before it is dropped (the zone's CloseWindows, later, closes
+// the stash window and not the pet storage's).
+TEST(UpdateInfoReplies, TheWindowsThatDrewTheStashCloseBeforeItIsDropped)
+{
+	World world;
+	MStorage* stash = g_pStorage = new MStorage;
+	static MStorage* closedWith[2];
+	closedWith[0] = closedWith[1] = nullptr;
+	DialogPresentation::Host dialog{};
+	dialog.CloseStorage = []() { closedWith[0] = g_pStorage; };
+	dialog.ClosePetStorage = []() { closedWith[1] = g_pStorage; };
+	const DialogPresentation::Host* old = DialogPresentation::SetHost(&dialog);
+	world.Receive(Update{});
+	DialogPresentation::SetHost(old);
+	CHECK(closedWith[0] == stash);
+	CHECK(closedWith[1] == stash);
 	CHECK(g_pStorage == nullptr);
 }
 

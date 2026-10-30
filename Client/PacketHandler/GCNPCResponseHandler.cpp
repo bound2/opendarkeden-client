@@ -298,6 +298,9 @@ void GCNPCResponseHandler::execute ( GCNPCResponse * pPacket , Player * pPlayer 
 				// then.. the next time the stash is chosen.. it is made with one more.
 				if (g_pStorage!=NULL)
 				{
+					// The windows that draw it close first.
+					DialogPresentation::CloseStorage();
+					DialogPresentation::ClosePetStorage();
 					delete g_pStorage;
 					g_pStorage = NULL;
 				}

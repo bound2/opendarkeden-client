@@ -28,6 +28,8 @@ namespace {
 std::vector<std::string> calls;
 int alive = 0;
 bool plainItem = false;
+MStorage* stashClosedWith = nullptr;	// the storage when the stash window closed
+int aliveAtClose = -1;					// and the pets alive then
 
 struct Pet : MPetItem
 {
@@ -56,6 +58,7 @@ const MItemHost items = FactoryHost();
 const DialogPresentation::Host dialog = []() {
 	DialogPresentation::Host host{};
 	host.RunPetStorage = []() { calls.push_back("run"); };
+	host.CloseStorage = []() { calls.push_back("close stash"); stashClosedWith = g_pStorage; aliveAtClose = alive; };
 	host.SetPetStorage = [](MStorage* pStorage) {
 		calls.push_back(pStorage == g_pStorage ? "show|stash" : "show|other");
 	};
@@ -87,6 +90,8 @@ struct World : GameModelWorld
 		calls.clear();
 		alive = 0;
 		plainItem = false;
+		stashClosedWith = nullptr;
+		aliveAtClose = -1;
 	}
 	~World()
 	{
@@ -186,7 +191,7 @@ TEST(PetStashHandler, EachStashedPetBecomesAPetItemInItsSlotThenTheWindowOpens)
 	CHECK(g_pStorage->SetItem(5, new Pet));
 	Receive({{0, Info(1, 2, 50, 11, true, false, true), 900, 3}, {3, Info(2, 3, 100, 0, false, true, true), 901, 8}});
 	CHECK(g_pStorage->GetItem(5) == nullptr);
-	CHECK(calls == std::vector<std::string>({"run", "show|stash"}));
+	CHECK(calls == std::vector<std::string>({"close stash", "run", "show|stash"}));
 	const MPetItem* first = dynamic_cast<const MPetItem*>(g_pStorage->GetItem(0));
 	CHECK(first != nullptr);
 	if (first != nullptr)
@@ -226,7 +231,7 @@ TEST(PetStashHandler, AnEmptyStashStillReplacesTheStorageAndOpensTheWindow)
 	Receive({});
 	CHECK(g_pStorage->GetItem(5) == nullptr);
 	CHECK_EQ(0, alive);
-	CHECK(calls == std::vector<std::string>({"run", "show|stash"}));
+	CHECK(calls == std::vector<std::string>({"close stash", "run", "show|stash"}));
 }
 
 TEST(PetStashHandler, AFactoryThatMakesNoPetItemSkipsTheSlot)
@@ -251,4 +256,18 @@ TEST(PetStashHandler, MissingServicesStillBuildTheStash)
 	Receive({{1, Info(1, 2, 50, 0, true, true, true), 902, 3}});
 	CHECK(calls.empty());
 	CHECK(g_pStorage->GetItem(1) != nullptr);
+}
+
+// The stash window draws g_pStorage too, and only the pet storage window is
+// handed the new one: a pet stash closes the stash window while the storage
+// it drew is still there, then frees it.
+TEST(PetStashHandler, TheStashWindowIsClosedBeforeItsStorageIsFreed)
+{
+	World world;
+	MStorage* old = g_pStorage;
+	CHECK(g_pStorage->SetItem(0, new Pet));
+	CHECK(g_pStorage->SetItem(1, new Pet));
+	Receive({});
+	CHECK(stashClosedWith == old);
+	CHECK_EQ(2, aliveAtClose);		// its two pets were still there
 }

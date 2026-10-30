@@ -19,11 +19,12 @@
 //     (their Show walks its slots). As in VS_UI, a Run entry opens a
 //     window with no object if none is open, a Set entry hands an open
 //     window its object and is dropped while it is closed, and a close
-//     forgets it; the
-//     closes are those a handler reaches (ZoneLoading::CloseWindows
-//     closes the shop and the storage, ClosePersnalShop the personal
-//     shop) and CloseAllDialog, taken to close all four, which can only
-//     miss a finding. IsRunning answers from that. At the end of a run
+//     forgets it; the closes are those a handler reaches
+//     (ZoneLoading::CloseWindows closes the shop and the storage,
+//     CloseStorage, ClosePetStorage and ClosePersnalShop their window,
+//     ShopDestroyed the shop window if it shows that shop) and
+//     CloseAllDialog, taken to close all four, which can only miss a
+//     finding. IsRunning answers from that. At the end of a run
 //     every open window's object is walked as its Show walks it, so ASan
 //     reports one a later packet freed while the window still drew it.
 //     A free that a later packet in the same run hides, by closing the
@@ -158,6 +159,9 @@ inline void	Install()
 	dialog.RunPetStorage = []() { g_PetStorage.Run(); };
 	dialog.SetPetStorage = [](MStorage* pStorage) { g_PetStorage.Set(pStorage); };
 	dialog.CloseAllDialog = []() { Reset(); };
+	dialog.CloseStorage = []() { g_Storage.Close(); };
+	dialog.ClosePetStorage = []() { g_PetStorage.Close(); };
+	dialog.ShopDestroyed = [](const MShop* pShop) { if (g_Shop.bOpen && g_Shop.pObject == pShop) g_Shop.Close(); };
 	DialogPresentation::SetHost(&dialog);
 
 	info = {};

@@ -101,6 +101,8 @@ public:
 	~C_VS_UI_SHOP();
 
 	void	SetShop(MShop* pShop);
+	// Whether pShop is the shop the window was last given.
+	static bool	Shows(const MShop* pShop);
 
 	void	CancelPushState();
 	void	Process();

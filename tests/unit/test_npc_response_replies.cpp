@@ -98,6 +98,8 @@ const DialogPresentation::Host dialog = []() {
 	DialogPresentation::Host host{};
 	host.PopupFreeMessageDlg = [](const char* text) { calls.push_back(std::string("popup|") + (text ? text : "")); };
 	host.ShowPCTalkDlg = []() { calls.push_back("talk shown"); };
+	host.CloseStorage = []() { calls.push_back(g_pStorage != nullptr ? "stash window closed on it" : "stash window closed"); };
+	host.ClosePetStorage = []() { calls.push_back(g_pStorage != nullptr ? "pet window closed on it" : "pet window closed"); };
 	host.ClosePCTalkDlg = []() { calls.push_back("talk closed"); };
 	host.UnSetLockInputPCTalk = []() { calls.push_back("talk unlocked"); };
 	host.RunStorage = []() { calls.push_back("stash opened"); };
@@ -626,7 +628,9 @@ TEST(NPCResponseReplies, BuyingAStashCostsAndShowsTheTalkAgain)
 	world.temp.SetMode(TempInformation::MODE_STORAGE_BUY_WAIT);
 	world.temp.Value1 = 300;
 	world.Receive(NPC_RESPONSE_STASH_SELL_OK);
-	CHECK(calls == (std::vector<std::string>{"talk shown", Popup(STRING_MESSAGE_STORAGE_BUY)}));
+	// The windows that draw the stash close while it is still there.
+	CHECK(calls == (std::vector<std::string>{"talk shown", "stash window closed on it", "pet window closed on it",
+		Popup(STRING_MESSAGE_STORAGE_BUY)}));
 	CHECK(g_pStorage == nullptr && world.money.GetMoney() == 700 && world.temp.GetMode() == TempInformation::MODE_NULL);
 	for (int code : {NPC_RESPONSE_STASH_SELL_FAIL_MAX, NPC_RESPONSE_STASH_SELL_FAIL_MONEY})
 	{

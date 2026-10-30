@@ -183,4 +183,19 @@ void CloseAllDialog()
 	if (s_Host && s_Host->CloseAllDialog) s_Host->CloseAllDialog();
 }
 
+void CloseStorage()
+{
+	if (s_Host && s_Host->CloseStorage) s_Host->CloseStorage();
+}
+
+void ClosePetStorage()
+{
+	if (s_Host && s_Host->ClosePetStorage) s_Host->ClosePetStorage();
+}
+
+void ShopDestroyed(const MShop* pShop)
+{
+	if (s_Host && s_Host->ShopDestroyed) s_Host->ShopDestroyed(pShop);
+}
+
 }

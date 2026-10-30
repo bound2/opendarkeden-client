@@ -154,6 +154,7 @@ public:
 	bool	IsRunningPetStorage() const;
 	bool	IsRunningExchange() const;
 	bool	IsRunningShop() const;
+	bool	IsShowingShop(const MShop* pShop) const;
 	bool	IsRunningRepair() const;
 	bool	IsRunningSilvering() const;
 	bool	IsRunningSell() const;

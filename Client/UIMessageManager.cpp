@@ -10319,6 +10319,9 @@ UIMessageManager::Execute_UI_CLOSE_PETSTORAGE(intptr_t left, intptr_t right, voi
 	}
 
 	gC_vs_ui.ClosePetStorage();
+	// A stash window opened on the pet storage (an NPC's stash reply reuses
+	// g_pStorage) draws it too.
+	UI_CloseStorage();
 	
 	// Stop storage
 	if (g_pStorage!=NULL)

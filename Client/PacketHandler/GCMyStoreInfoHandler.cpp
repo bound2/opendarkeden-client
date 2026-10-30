@@ -83,6 +83,13 @@ void GCMyStoreInfoHandler::execute ( GCMyStoreInfo * pPacket , Player * pPlayer 
 
  		if(g_pStorage2!=NULL) 
 		{
+			// A window up on another player's shop closes; one up on the
+			// player's own is handed the new storage below.
+			// (Asking for the player's own shop, mode 1, hands it the new storage
+			// below before anything draws, and a close would reset that mode.)
+			if (VsUiPresentation::IsRunningPersnalShop() && g_pStorage2->GetCuropenid() != PlayerState::GetID()
+				&& VsUiPresentation::GetPersnalShoptoUI() != 1)
+				VsUiPresentation::ClosePersnalShop();
 			delete g_pStorage2;
 			g_pStorage2 = NULL;
 		}
@@ -90,6 +97,9 @@ void GCMyStoreInfoHandler::execute ( GCMyStoreInfo * pPacket , Player * pPlayer 
 		g_pStorage2 = new MStorage;
 		g_pStorage2->Init( 1 ); //STASH_RACK_MAX );	// hm.. 3 of them?? 
 		g_pStorage2->SetCurrent( 0 );
+		// A window that is up drew the storage just freed: it is handed this one.
+		if (VsUiPresentation::IsRunningPersnalShop())
+			VsUiPresentation::SetPersnalShop( g_pStorage2 );
 
 		if(PlayerState::GetID() != 0)
 			g_pStorage2->SetCuropenid(PlayerState::GetID());
