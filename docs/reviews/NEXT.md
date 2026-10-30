@@ -1,7 +1,7 @@
 ---
 type: Record
 title: "Next work plan"
-description: "The ranked, self-contained tasks left in the client after the 2026-10-25 merges, each written so an agent with no other context can take it: the handler fuzzers' reach, the packet-safety routes the walks did not follow (done since), the open code-health rows, the last drawing stubs, and the owner decisions that are not an agent's to make."
+description: "The ranked, self-contained tasks left in the client after the 2026-10-25 merges, each written so an agent with no other context can take it: the handler fuzzers' reach and the packet-safety routes the walks did not follow (both done since), what the review of the fuzzers' hosts found, the open code-health rows, the last drawing stubs, and the owner decisions that are not an agent's to make."
 tags: [review, plan]
 ---
 
@@ -75,39 +75,23 @@ run the next when it did not.
 **Test:** `VS_UI` code no test reaches: a regression guard, unless the quest manager can be built in
 a `tests/unit/test_ui_server_indices.cpp` scene with a quest file.
 
-### 4. The handler fuzzers' seeds do not reach the recording hosts
+### 15. A stash list's rack count is unchecked
 
-**What:** the handler targets install the recording presentation hosts of
-`tests/fuzz/recording_hosts.h` (PR #581): the entries whose real adapter reads a model object a
-handler hands it read it too, and the shop, storage, pet storage and personal shop windows are
-modelled as `VS_UI` keeps them, so ASan sees an object freed while its window is still open at
-the end of a run ([fuzzing](../protocol/fuzzing.md#the-handler-targets)). A 15-minute run of each
-target found nothing, but replaying the corpora it left called no recording entry once: the seed
-corpus is made from `tests/golden`, and none of the packets that reach one has a golden.
+**What:** `GCStashList::read` takes the rack count (`m_StashNum`) as any byte, though the packet
+holds at most `STASH_RACK_MAX` (3) racks and the reader refuses an item's rack past them.
+`GCStashListHandler` frees the old storage, makes one of that many racks and asks
+`GCStashList::isExist` about each, whose `Assert` throws past the third in a Debug build: the
+client disconnects. In a Release build the `Assert` is gone, `isExist` answers no, and the stash
+window is handed a storage of up to 255 racks (what it draws of them is not followed). Found by
+the handler fuzz target's run of 2026-10-29 (task 4), whose report itself was the harness's.
 
-**How:** write handler seeds with the client's own writers, as `tests/unit/test_packet_goldens.cpp`
-writes a golden, into a directory of their own under `tests/fuzz` (not `tests/golden`, whose files
-are the wire pins the server shares), and give `tools/fuzz/golden2corpus.pl` or the recipe a way to
-add them to the corpus. A seed is a stream of frames: one that opens a window and one that frees
-its object, the routes of task 11 (an NPC, its `GCShopList` and its `GCDeleteObject`; `GCStashList`
-then `GCPetStashList`; two `GCMyStoreInfo`; `GCMorph1` with a storage open).
-A harness gap comes first: a `GCUpdateInfo` seed reaches `PlayerState::SetExtraInfo`, whose kept
-real adapter dereferences the `NULL` `gpC_mouse_pointer` (`PacketFunction.cpp`), so it crashes
-before task 11's third route could be seen. Seven entries need state the world never makes and
-stay unreached, so seeds alone reach only the four windows: `PickUpItem` (a pickup or drop
-item-check buffer), `OkMixingForge` and `OkRemoveOption` (a `TempInformation` request),
-`RunOtherInfo` (an installed `GetOtherInfoName`), and the three item windows (the player using an
-item). Check the reach as the first run was checked: count the
-recording entries' calls while the replay binary replays the corpus a run leaves (a counter kept
-out of the commit), then run each target 15 minutes. The model reads the windows only at the end
-of a run, so a free that a later frame hides is missed; reading them after every dispatched frame
-needs a hook in the dispatch.
+**How:** have the reader refuse a count past `STASH_RACK_MAX`, as it refuses a rack past it.
 
-**Test:** the replay ctests stay green, and
-`RecordingHosts.AWindowKeepsWhatItIsHandedWhileOpenUntilTheUIClosesIt` pins the window model. A
-crash or sanitizer report a recording host meets gets a regression input and a unit test once its
-route is confirmed in the real adapter. Record the run in the fuzzing page's *Triage* paragraph and
-the code-health review's *Found by fuzzing* section.
+**Test:** a `GCStashList` with 4 and 255 racks is refused by `read`
+(`tests/unit/test_packet_fuzz_findings.cpp`), and the regression input
+`tests/fuzz/regressions/client_stream_handlers/GCStashList-racks-32-after-a-stash.hex` is refused
+before its handler. That input then no longer reaches the harness's `LeaveForTitle`, which it
+pins today in an ASan tree.
 
 ### 10. Kept in view, no task
 
@@ -115,6 +99,11 @@ the code-health review's *Found by fuzzing* section.
   tested; nothing in the shipped data uses them.
 - The [browser client](../browser/browser-client.md) builds and logs in; a task appears when the
   server's WebSocket gateway changes.
+- The handler fuzz targets' recording hosts ([fuzzing](../protocol/fuzzing.md)): seven entries
+  need state the world never makes (`PickUpItem` an item-check buffer, `OkMixingForge` and
+  `OkRemoveOption` a request `TempInformation` records, `RunOtherInfo` an installed
+  `GetOtherInfoName`, the three item windows the player using an item), and on a failed `Assert`
+  the world follows the Debug client, which disconnects, where a Release client carries on past it.
 
 ## Owner decisions (not for an agent to make)
 
@@ -309,3 +298,20 @@ four names, reading past it for a condition of 4 or more. The handler refuses su
 and the two `VS_UI` lookups are bounded to the table as their siblings are. Owner:
 `QuestElementInventoryHandlers.AConditionPastTheFourIsRefused`; the `VS_UI` bound is a regression
 guard.
+
+### 4. The handler fuzzers' seeds reach the four windows (PR #584)
+
+Six seeds of the game target (`tests/fuzz/seeds/client_stream_handlers`, written by
+`tests/unit/test_fuzz_seeds.cpp` with the client's packet classes; `golden2corpus.pl --seeds` adds
+them to the corpus) open the shop, stash, pet storage and personal shop windows and then free what
+they draw along task 11's routes, whose fixes close or re-point the window first; each makes ASan
+report a use-after-free when its route's fix is taken out. Two harness gaps came first: the world now makes the UI's mouse pointer, which
+`GCUpdateInfo`'s `SetExtraInfo` reads, and names the character the player chose, which
+the PC info replies (`SetPCSlayerInfo`, `SetPCVampireInfo`, `SetPCOustersInfo`) copy. The run found a third: a rejected input left the windows
+open on what the frames of its call freed, though the client leaves for the title screen and
+deletes the game UI before it draws again, so the world now closes them (`LeaveForTitle`), and,
+since the game draws once a call, reads them after every call of the receive loop; its input is
+`regressions/client_stream_handlers/GCStashList-racks-32-after-a-stash.hex`, and the rack count
+it reached is task 15. The route through `GCOtherStoreInfo` is not seeded: it
+needs a second player in the zone. Owners: `FuzzSeeds` and the
+`fuzz_replay_client_stream_handlers` ctest; what stays out of reach is under *Kept in view*.

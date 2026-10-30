@@ -46,7 +46,9 @@ set(FUZZ_SUPPORT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../support)
 # The replay ctest. Its inputs are the seed corpus, written into the
 # build tree by tools/fuzz/golden2corpus.pl from tests/golden and
 # tests/wire-layout.txt (the fuzz_corpus_<target> setup step, so the
-# corpus follows the goldens without being committed twice), and
+# corpus follows the goldens without being committed twice) and, for a
+# target with a tests/fuzz/seeds/<target> directory, from the seeds
+# tests/unit/test_fuzz_seeds.cpp writes there; and
 # tests/fuzz/regressions/<target>: one .hex per fixed finding, the
 # crash input as found. Run in the build tree, since a failed Assert
 # appends to assertion_failed.log in the working directory. Needs perl
@@ -108,9 +110,14 @@ function(darkeden_fuzz_target target source name_regex)
 					${name_regex}
 			)
 		else()
+			set(seeds)
+			if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/seeds/${target})
+				set(seeds --seeds ${CMAKE_CURRENT_SOURCE_DIR}/seeds/${target})
+			endif()
 			add_test(
 				NAME fuzz_corpus_${target}
 				COMMAND ${PERL_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/fuzz/golden2corpus.pl
+					${seeds}
 					${CMAKE_SOURCE_DIR}/tests/golden
 					${CMAKE_SOURCE_DIR}/tests/wire-layout.txt
 					${corpus}
