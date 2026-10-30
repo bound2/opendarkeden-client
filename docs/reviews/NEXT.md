@@ -44,23 +44,6 @@ to each.
 
 ## Tasks
 
-### 12. A quest condition byte indexes a four-entry table
-
-**What:** `C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElement` and its action sibling
-(`VS_UI/src/vs_ui_gamecommon2.cpp`) look a quest element up by
-`szConditonType[min(5, bCondition)]`, a table of four names, where the two siblings above them use
-`min(3, ...)`. `bCondition` is `GCExecuteElement`'s byte, unchecked through
-`GCExecuteElementHandler` and `C_VS_UI_GAME`; a condition of 4 or more is cut to index 4 or 5,
-which reads a pointer past the table and hands it to `XMLTree::GetChild`. It needs the quest manager `GCGQuestStatusInfo` makes
-and a quest id the quest file holds. The walk of 2026-10-25 named the quest id and missed this
-byte.
-
-**How:** refuse a condition past the table in the library (`GCExecuteElementHandler`, `gamemodel`)
-and bound the two lookups as their siblings are.
-
-**Test:** a handler test that conditions of 4 and 255 reach no presentation call; the `VS_UI` bound is a
-regression guard. A row in the code-health review's *Found by reading* table.
-
 ### 13. The stash's money dialog outlives the stash
 
 **What:** the deposit dialog the inventory opens on the stash (`m_pC_dialog_drop_money`,
@@ -75,6 +58,22 @@ the adapters of task 11's entries), or have the dialog test `g_pStorage` and clo
 
 **Test:** `VS_UI` drawing is a regression guard; a test in `tests/unit/test_ui_server_indices.cpp`'s
 scene can open the dialog for a deposit, free the stash and press a key.
+
+### 14. A quest element that opens no dialog stops the quest queue
+
+**What:** `C_VS_UI_QUEST_MANAGER::PushGQuestExcuteElement` (`VS_UI/src/vs_ui_gamecommon2.cpp`)
+runs an element at once when the queue is empty and queues it either way; only the NPC script
+dialog's OK (`ExecF_GQuestNpcScript`, `UI_RUN_NEXT_GQUEST_EXCUTE_ELEMENT`) removes the head and
+runs the next. An element that opens no such dialog (a quest id the quest file lacks, an index no
+child matches) stays at the head, and every later `GCExecuteElement` is queued behind it and never
+runs, while the queue grows by one allocation each. A server can cause it. Found by the review of
+task 12; not confirmed by a run.
+
+**How:** have `RunGQuestExcuteElement` report whether it opened the dialog, and drop the head and
+run the next when it did not.
+
+**Test:** `VS_UI` code no test reaches: a regression guard, unless the quest manager can be built in
+a `tests/unit/test_ui_server_indices.cpp` scene with a quest file.
 
 ### 4. The handler fuzzers' seeds do not reach the recording hosts
 
@@ -290,14 +289,23 @@ and `CIndexSpriteColorSet.ASetPastTheTableIsDrawnWithTheFirst`. With (d), task 5
 ### 11. The storage and shop windows draw objects a handler frees (PR #582)
 
 Six routes, and two more the review of the fix found, each a use-after-free a server could cause
-(one with the player's click: the code-health review's *Found by reading* row lists them): the stash, the personal shop's
-storage, an NPC's shop or a buy waiting on it was freed while something still drew or wrote it.
-Every handler and model function that frees `g_pStorage`, and the pet storage's close, now closes
-the windows that draw it first (`DialogPresentation::CloseStorage`, `ClosePetStorage`);
-`GCMyStoreInfo` closes a window up on another player's shop (unless the player has just asked for
-their own) and hands a window that stays up the new `g_pStorage2`; and an NPC reports its shop before freeing it (`ShopDestroyed`, whose
-adapter closes the shop window if it shows that shop) and drops a buy waiting on it, unlocking
-the trade the buy locked. The
-recording hosts of the handler fuzz targets model the three entries. Owners: the close-before-free
-tests (stash list, pet stash, update info, race change, stash sale, NPC), the NPC's buy test and
+(one with the player's click: the code-health review's *Found by reading* row lists them): the
+stash, the personal shop's storage, an NPC's shop or a buy waiting on it was freed while something
+still drew or wrote it. Every handler and model function that frees `g_pStorage`, and the pet
+storage's close, now closes the windows that draw it first (`DialogPresentation::CloseStorage`,
+`ClosePetStorage`); `GCMyStoreInfo` closes a window up on another player's shop (unless the player
+has just asked for their own) and hands a window that stays up the new `g_pStorage2`; and an NPC
+reports its shop before freeing it (`ShopDestroyed`, whose adapter closes the shop window if it
+shows that shop) and drops a buy waiting on it, unlocking the trade the buy locked. The recording
+hosts of the handler fuzz targets model the three entries. Owners: the close-before-free tests
+(stash list, pet stash, update info, race change, stash sale, NPC), the NPC's buy test and
 `PersonalShopReplies`.
+
+### 12. A quest condition byte indexes a four-entry table (PR #583)
+
+`GCExecuteElementHandler` handed the quest window `GCExecuteElement`'s condition byte unchecked,
+and the window looked the element's child up by `szConditonType[min(5, bCondition)]` in a table of
+four names, reading past it for a condition of 4 or more. The handler refuses such a condition,
+and the two `VS_UI` lookups are bounded to the table as their siblings are. Owner:
+`QuestElementInventoryHandlers.AConditionPastTheFourIsRefused`; the `VS_UI` bound is a regression
+guard.

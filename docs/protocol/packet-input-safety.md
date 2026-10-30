@@ -279,7 +279,11 @@ indexes the eight-way addon-order tables at 17 draw lines, and the direction the
 hand to `MEffectGeneratorTable::Generate`, which the homing attack's angle table takes unchecked.
 The setters now keep the facing for a direction past the eight and the generator table faces such
 an effect left, where the zone-around generator refused it and drew nothing (`tests/unit/test_creature.cpp`, `tests/unit/test_effect_generator_table.cpp`; the
-[code-health review](../reviews/code-health-review-2026-08-29.md) has the row). Not followed:
+[code-health review](../reviews/code-health-review-2026-08-29.md) has the row). Missed:
+the condition byte `GCExecuteElement` carries beside its quest id, which the quest window looked
+up in a table of four names bounded at 5; found 2026-10-29 by the review of the recording hosts,
+the handler now refuses a condition past the four (`tests/unit/test_quest_element_inventory_handlers.cpp`;
+the review has the row). Not followed:
 `VS_UI`'s own reads of the model objects it draws (inventory grids, skill trees, party slots) beyond
 those named, and the view's frame packs, which `CTypeTable` range-checks.
 

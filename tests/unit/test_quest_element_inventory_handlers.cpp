@@ -133,6 +133,18 @@ TEST(QuestElementInventoryHandlers, AQuestElementIsHandedToTheQuestWindowInAZone
 	CHECK(calls == std::vector<std::string>{"element|70001|2|513"});
 }
 
+// The condition names one of four children of the quest's element (Happen,
+// Complete, Fail, Reward): one past them reaches no window.
+TEST(QuestElementInventoryHandlers, AConditionPastTheFourIsRefused)
+{
+	World world;
+	ReceiveElement(70001, 4, 513);
+	ReceiveElement(70001, 255, 513);
+	CHECK(calls.empty());
+	ReceiveElement(70001, 3, 513);
+	CHECK(calls == std::vector<std::string>{"element|70001|3|513"});
+}
+
 TEST(QuestElementInventoryHandlers, TheQuestInventoryBecomesQuestItemsTheWindowKeeps)
 {
 	World world;

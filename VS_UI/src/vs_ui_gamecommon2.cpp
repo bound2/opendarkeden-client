@@ -14029,7 +14029,7 @@ void	C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElementAction(DWORD qID, BYTE bCondit
 													"Reward",
 												};
 
-		const XMLTree *pElement2 = pElement->GetChild( szConditonType[min(5, bCondition)]);
+		const XMLTree *pElement2 = pElement->GetChild( szConditonType[min(3, bCondition)]);
 		if(pElement2 != NULL)
 		{
 	
@@ -14074,7 +14074,7 @@ void	C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElement(DWORD qID, BYTE bCondition, W
 													"Reward",
 												};
 
-		const XMLTree *pElement2 = pElement->GetChild( szConditonType[min(5, bCondition)]);
+		const XMLTree *pElement2 = pElement->GetChild( szConditonType[min(3, bCondition)]);
 		if(pElement2 != NULL)
 		{
 	

@@ -2,6 +2,11 @@
 
 ## 2026-10-29
 
+* **Update**: [packet input safety](protocol/packet-input-safety.md) says the 2026-10-25 walk missed
+  the quest condition byte that indexed the quest window's four-entry table past its end, and the
+  [code-health review](reviews/code-health-review-2026-08-29.md) records it, fixed; the
+  [next work plan](reviews/NEXT.md) moves its task 12 to *Done* and adds task 14 for the quest
+  queue an element that opens no dialog stops.
 * **Update**: the [code-health review](reviews/code-health-review-2026-08-29.md) records the routes by
   which a handler freed an object a window still drew or a buy still wrote, fixed; the
   [next work plan](reviews/NEXT.md) moves its task 11 to *Done* and adds task 13 for the stash's
