@@ -9130,6 +9130,9 @@ bool	C_VS_UI_INVENTORY::Timer(bool reset)
 -----------------------------------------------------------------------------*/
 C_VS_UI_SKILL::C_VS_UI_SKILL()
 {
+	// Closed, as Start leaves it: the tribe window asks it for a focus slot
+	// (IsPixel2) before its Start runs.
+	m_bl_open = false;
 	switch(g_eRaceInterface)
 	{
 	case RACE_SLAYER:
@@ -11799,6 +11802,9 @@ void C_VS_UI_PARTY_MANAGER::Run(id_t id)
 C_VS_UI_INFO::C_VS_UI_INFO()
 {
 	m_pC_learn_grade_skill_confirm = NULL;
+	// The character tab: the grade checks below read it before Start sets the
+	// tab the window opens on.
+	m_info_mode = CHARACTER_INFO_MODE;
 #ifndef _LIB
 	(*g_pSkillManager)[SKILLDOMAIN_SWORD].SetDomainLevel(0);
 	(*g_pSkillManager)[SKILLDOMAIN_SWORD].SetDomainExpRemain(990);

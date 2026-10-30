@@ -146,9 +146,9 @@ extern int		g_CheckErrorTime;
 // what is sent. The keys are held through dxlib's virtual keys; the
 // presses and releases of the tick are the input's public pulse flags.
 //
-// Not reachable headless: everything that asks the UI's game windows
-// (gC_vs_ui's C_VS_UI_GAME, which only StartGame builds, from the skins
-// and sprite packs): the party window (so the right and centre buttons
+// Not reachable in this scene: everything that asks the UI's game windows
+// (gC_vs_ui's C_VS_UI_GAME, which only StartGame builds; tests/support/
+// game_ui_scene.h starts it in a scene of its own, this one does not): the party window (so the right and centre buttons
 // always end the input when the UI takes them, and a party member is
 // never picked), the request-party window, the web browser, the elevator,
 // the Christmas card, the way points and the personal shop window all

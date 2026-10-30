@@ -23,3 +23,15 @@ The ten defects under *Runtime defects* in the code-health review were found aga
 server, and none were reachable from a test binary. The ones in the short table below them were
 found by *reading*, during remediation passes, and are filed separately for exactly that reason:
 the heading is a claim about how a defect was found, not a bin for anything executable-side.
+
+**The game windows are library code a test can start** (since 2026-10-30, task 16 of the
+[next work plan](../reviews/NEXT.md)). `VS_UI`'s game windows (`gC_vs_ui`'s `C_VS_UI_GAME`,
+which `UI_StartGame` builds) read the model's tables and managers as they are built, so for a
+long time no test built them and a fix there stayed a regression guard.
+`tests/support/game_ui_scene.h` starts them headless for a slayer with what they read (its header
+lists it); `tests/unit/test_game_ui_scene.cpp` reaches a private window through an explicit
+instantiation and builds a window over a fill pattern to catch an uninitialised member. A fix in a
+game window the scene reaches without drawing is test-first like any library fix. Not yet
+covered: drawing (no test calls `gC_vs_ui.Show`, so what a window draws, the party arrow among it,
+stays a regression guard), the vampire and ousters interfaces, which need their skill domains'
+first steps in the scene, and the title UI.

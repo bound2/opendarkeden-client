@@ -1,5 +1,15 @@
 # Knowledge Bundle Update Log
 
+## 2026-10-30
+
+* **Update**: [executable-only code](testing/executable-only-code.md) says the game windows are library
+  code a test can start (`tests/support/game_ui_scene.h`); the
+  [code-health review](reviews/code-health-review-2026-08-29.md) records the two members starting them
+  found read before they were set, and that task 11's `IsShowingShop` and task 13's close are tested
+  now; [packet input safety](protocol/packet-input-safety.md) says no test draws the party arrow yet; the
+  [next work plan](reviews/NEXT.md) adds task 16 under *Done* and keeps in view what the scene
+  does not cover.
+
 ## 2026-10-29
 
 * **Update**: the [code-health review](reviews/code-health-review-2026-08-29.md) records the quest

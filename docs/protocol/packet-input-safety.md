@@ -256,7 +256,8 @@ four such sites, recorded under *Found by reading* in the
   `std::out_of_range` that no caller catches. The date is zero-padded to its six digits.
 
 `tests/unit/test_mailbox_file.cpp` and `tests/unit/test_ui_server_indices.cpp` pin each of them
-but the party arrow, which only the whole game UI draws; its description strings are static now,
+but the party arrow, which only the whole game UI draws (a test starts the game UI since, through
+`tests/support/game_ui_scene.h`, but none draws a frame); its description strings are static now,
 since the descriptor manager read them after the block that owned them had ended. The review of
 those fixes found one more: a vampire portal item's mark is its silver, which the server sends
 with the item, and its two descriptions printed the marked zone unchecked. They print
