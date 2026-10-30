@@ -2477,6 +2477,8 @@ void C_VS_UI_GAME::CloseStorage()
 		return;
 
 	DeleteNew(m_pC_storage);
+	// A deposit asked for in the inventory goes with the stash.
+	C_VS_UI_INVENTORY::CloseDepositMoneyDialog();
 	assert(m_pC_tribe_interface != NULL);
 	m_pC_tribe_interface->DoCommonActionAfterEventOccured();
 }

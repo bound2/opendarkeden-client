@@ -2,6 +2,9 @@
 
 ## 2026-10-29
 
+* **Update**: the [code-health review](reviews/code-health-review-2026-08-29.md) records the stash's
+  money dialog that outlived the stash, fixed; the [next work plan](reviews/NEXT.md) moves its
+  task 13 to *Done*.
 * **Update**: the [code-health review](reviews/code-health-review-2026-08-29.md) records the stash
   list's rack count that reached an `Assert` past the packet's racks, fixed; [fuzzing](protocol/fuzzing.md)
   says so, and the [next work plan](reviews/NEXT.md) moves its task 15 to *Done*.

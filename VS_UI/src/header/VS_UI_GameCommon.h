@@ -1098,6 +1098,9 @@ public:
 	int		GetFocusGridY() {return  m_focus_grid_y;}
 
 	static void	AutoMove( int grid_x, int grid_y );
+	// The money dialog asking a deposit into the stash closes with the stash
+	// window, which the player closes, or a handler before it frees the storage.
+	static void	CloseDepositMoneyDialog();
 	
 };
 

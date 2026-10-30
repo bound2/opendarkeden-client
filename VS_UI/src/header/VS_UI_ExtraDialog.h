@@ -293,6 +293,8 @@ public:
 	void	KeyboardControl(UINT message, UINT key, long extra);
 	void	Show();
 	int	GetValue() const;
+	// What the dialog asks for: a deposit into the stash, a drop, a sale, ...
+	TYPE_MONEY_DIALOG	GetType() const { return m_type; }
 	
 };
 

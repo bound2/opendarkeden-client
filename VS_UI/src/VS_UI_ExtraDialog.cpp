@@ -407,7 +407,10 @@ void	C_VS_UI_MONEY_DIALOG::KeyboardControl(UINT message, UINT key, long extra)
 		// 보관함에 넣기
 		case MONEY_DEPOSIT :
 			// 현재 가지고 있는 만큼만 넣을 수 있고 보관함에 돈의 limit이상은 넣을수 없다.
-			_MAX_MONEY =  min(g_pMoneyManager->GetMoney(), g_pStorage->GetMoneyManager()->GetMaxAddMoney());
+			// A dialog that outlived the stash (one the stash window's close
+			// missed) deposits nothing.
+			_MAX_MONEY = g_pStorage == NULL ? 0
+				: min(g_pMoneyManager->GetMoney(), g_pStorage->GetMoneyManager()->GetMaxAddMoney());
 			break;
 
 		case MONEY_EXCHANGE:
