@@ -151,9 +151,10 @@ extern C_VS_UI_DIALOG* g_msg_free_text;		// VS_UI_Message.cpp
 // Not run:
 // - SetMode(MODE_WAIT_UPDATEINFO): UI_StartGame builds the whole game UI
 //   (C_VS_UI_GAME), whose windows read the built skill tree
-//   (g_pSkillManager's step lists, from the game's data) and much more; it
-//   needs a seam first. Its first half (the player removed, the self-defense
-//   list released, ZoneLoading::InitSkillTree) cannot run without it.
+//   (g_pSkillManager's step lists, from the game's data) and much more;
+//   tests/support/game_ui_scene.h starts it with those, in a scene of its
+//   own, not this one. Its first half (the player removed, the self-defense
+//   list released, ZoneLoading::InitSkillTree) is not run here either.
 // - CheckInvalidProcess with the check on, on Windows: it reads the live
 //   desktop's window titles (another process's only).
 // - UpdateMouse's real cursor on Windows (GetCursorPos); off Windows the

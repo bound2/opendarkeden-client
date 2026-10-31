@@ -24,7 +24,9 @@ to each.
    new file needs no CMake edit); a fixed crash gets a unit test and, where a fuzzer found it, a
    regression input ([library fixes are test-first](../testing/library-fixes-test-first.md),
    [test framework](../testing/test-framework.md)). `VS_UI/src/**` rendering that reaches game
-   globals is `Test path: exempt` with the regression-guard wording.
+   globals is `Test path: exempt` with the regression-guard wording, unless the game UI scene
+   (`tests/support/game_ui_scene.h`) reaches it without drawing ([executable-only
+   code](../testing/executable-only-code.md)).
 3. A `fix:` commit carries `Test path: lib + test`, `moved, then fixed` or `exempt`; the hook
    that refuses one without is installed once per clone with
    `git config core.hooksPath tools/git-hooks` ([commit messages](../process/commit-messages.md)).
@@ -44,7 +46,7 @@ to each.
 
 ## Tasks
 
-No task is open (2026-10-29): every task ranked here is under *Done*, each with its PR. What
+No task is open (2026-10-30): every task ranked here is under *Done*, each with its PR. What
 follows is kept in view, and the owner decisions below are not an agent's to make.
 
 ### 10. Kept in view, no task
@@ -58,6 +60,10 @@ follows is kept in view, and the owner decisions below are not an agent's to mak
   `OkRemoveOption` a request `TempInformation` records, `RunOtherInfo` an installed
   `GetOtherInfoName`, the three item windows the player using an item), and on a failed `Assert`
   the world follows the Debug client, which disconnects, where a Release client carries on past it.
+- The game UI scene (`tests/support/game_ui_scene.h`) starts a slayer's interface and draws no
+  frame: what a window draws (the party arrow among it, drawn in `C_VS_UI::Show`) stays a
+  regression guard, as do the vampire and ousters interfaces. Task 14's next and task 12's `VS_UI`
+  bound need a quest file, not the scene.
 
 ## Owner decisions (not for an agent to make)
 
@@ -293,8 +299,8 @@ the read, before anything is freed, so no replayed input fails without the harne
 the inventory opened to ask a deposit (`C_VS_UI_INVENTORY::CloseDepositMoneyDialog`), so a key in
 it no longer reads a dropped `g_pStorage`; one that escapes the close caps the deposit at nothing
 when the stash is gone. Owner: `MoneyDialog.AKeyInADepositWithTheStashDroppedReadsNoStash` for the
-dialog; the close is a regression guard, since the dialog opens only while
-`gC_vs_ui.IsRunningStorage()`, which needs the game UI (`C_VS_UI::m_pC_game`) no test builds.
+dialog; `GameUIScene.ClosingTheStashClosesTheDepositDialog` for the close, since task 16 (until then
+a regression guard: the dialog opens only while the game UI runs).
 
 ### 14. A quest element that opens no dialog stops the quest queue (PR #587)
 
@@ -303,3 +309,13 @@ both go through `RunQueuedGQuestExcuteElement`, which drops each head that opens
 element the quest files lack no longer holds every later one; `LoadQuestXML` releases a half-read
 tree. Owner: `QuestManager.AnElementThatOpensNoDialogDoesNotHoldTheQueue`, for the push; the next's
 drop and the release are regression guards.
+
+### 16. A test seam for the whole game UI (PR #588)
+
+`tests/support/game_ui_scene.h` starts `gC_vs_ui`'s game windows (`C_VS_UI_GAME`) headless for a
+slayer, with the tables and managers they read as they are built, and puts back every global it
+sets when it ends; it draws no frame. Through it, task 13's close and task 11's `IsShowingShop`
+are tested (`GameUIScene.ClosingTheStashClosesTheDepositDialog`,
+`TheShopWindowSaysWhichShopItShows`). Starting it found two members read before they were set
+(`C_VS_UI_INFO::m_info_mode`, `C_VS_UI_SKILL::m_bl_open`), which a run with CI's UBSan options
+stops on; both are set now and pinned by tests that build each window over a fill pattern. Owners: the five `GameUIScene` tests.

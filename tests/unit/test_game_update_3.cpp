@@ -1465,8 +1465,9 @@ TEST(GameUpdate3Draw, AHiddenShakeNeitherShakesNorSteps)
 //======================================================================
 // Not observable here: what the frame hands the game window (the
 // resurrection request's four choices, the shrine minimap, the time and
-// date strings and the player's position): gC_vs_ui has no game window
-// in this binary, so each call ends at its `if (m_pC_game)`. The player
+// date strings and the player's position): gC_vs_ui has no game window in
+// this scene (tests/support/game_ui_scene.h starts one; this file does
+// not), so each call ends at its `if (m_pC_game)`. The player
 // below died in zone 1 by a quest (resurrect zone set), which skips the
 // inventory and skill reads that only feed those choices.
 namespace {
