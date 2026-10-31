@@ -6,26 +6,15 @@
 #include "WireHost.h"
 #include "DebugLog.h"
 
-// Platform-specific threading includes. Off Windows the Win32 thread
-// names this file uses (TerminateThread, GetCurrentThread,
-// SetThreadPriority, CloseHandle and the THREAD_PRIORITY_* constants)
-// come from Platform.h's shim, and SDL_Delay from the SDL header it
-// includes; this file used to carry a private pthread-flavoured copy of
-// them, applied to a thread that platform_thread_create had made as an
-// SDL_Thread*.
-#ifdef PLATFORM_WINDOWS
-	#include <windows.h>
-	#include <process.h>
-#elif defined(PLATFORM_POSIX)
-	#include <unistd.h>
+#include <chrono>
+#ifdef PLATFORM_POSIX
+#include <sys/select.h>
 #endif
 
 //--------------------------------------------------------------------------------
 // Global
 //--------------------------------------------------------------------------------
 RequestServerPlayerManager*	g_pRequestServerPlayerManager = NULL;
-
-LONG					WaitRequestThreadProc(LPVOID lpParameter);
 
 //--------------------------------------------------------------------------------
 //
@@ -35,8 +24,6 @@ LONG					WaitRequestThreadProc(LPVOID lpParameter);
 RequestServerPlayerManager::RequestServerPlayerManager()
 {
 	m_pServerSocket		= NULL;
-	m_hRequestThread	= NULL;
-	m_bThreadRunning	= false;
 	m_bUpdating			= false;
 
 	InitializeCriticalSection(&m_Lock);
@@ -55,36 +42,15 @@ RequestServerPlayerManager::~RequestServerPlayerManager()
 void
 RequestServerPlayerManager::Release()
 {
-	// Signal thread to stop gracefully
-	m_bThreadRunning = false;
+	// Assigning an empty jthread asks the running one to stop and joins it,
+	// so the socket it accepts on outlives it.
+	m_RequestThread = std::jthread();
 
-	// Wait for thread to exit (with timeout)
-	if (m_hRequestThread != NULL)
-	{
-#ifdef PLATFORM_WINDOWS
-		// Windows: Wait up to 2 seconds for thread to exit
-		DWORD waitResult = WaitForSingleObject(m_hRequestThread, 2000);
-		if (waitResult == WAIT_TIMEOUT)
-		{
-			// Thread didn't exit gracefully, force terminate
-			TerminateThread(m_hRequestThread, 0);
-		}
-		CloseHandle(m_hRequestThread);
-#else
-		// macOS/Linux: pthread_join with timeout simulation
-		// Note: We don't force terminate on POSIX as it can corrupt heap
-		// Just close the handle and let the thread exit on its own
-		CloseHandle(m_hRequestThread);
-#endif
-		m_hRequestThread = NULL;
-	}
-
+	// Cleared before the delete, whose close may throw, so it never dangles.
+	ServerSocket* pServerSocket = m_pServerSocket;
+	m_pServerSocket = NULL;
 	try {
-		if (m_pServerSocket!=NULL)
-		{
-			delete m_pServerSocket;
-			m_pServerSocket = NULL;
-		}
+		delete pServerSocket;
 	} catch (Throwable&) {
 	}
 
@@ -322,36 +288,26 @@ RequestServerPlayerManager::Update()
 void
 RequestServerPlayerManager::Init(int port)
 {
-	if (m_pServerSocket!=NULL)
-	{
-		delete m_pServerSocket;
-	}
+	// A thread an earlier Init started is stopped and joined before its
+	// socket goes, as in Release.
+	m_RequestThread = std::jthread();
+
+	// Cleared before the delete, whose close may throw, and before the new
+	// socket, whose bind may: Release must never see a freed one.
+	ServerSocket* pServerSocket = m_pServerSocket;
+	m_pServerSocket = NULL;
+	delete pServerSocket;
 
 	m_pServerSocket = new ServerSocket( port );
 
-	// Set running flag before creating thread
-	m_bThreadRunning = true;
+	// WaitRequest() waits at most 10 ms, so the thread sees a stop request
+	// within one wait; a blocking accept could only be ended by killing it.
+	m_pServerSocket->setNonBlocking();
 
-	DWORD dwChildThreadID;	// 의미 없당 -- ;
-
-#ifdef PLATFORM_WINDOWS
-	m_hRequestThread = CreateThread(NULL,
-								0,	// default stack size
-								(LPTHREAD_START_ROUTINE)WaitRequestThreadProc,
-								this,
-								NULL,
-								&dwChildThreadID);
-
-	// priority는 낮게
-	SetThreadPriority(m_hRequestThread, THREAD_PRIORITY_LOWEST);
-#else
-	// Non-Windows: Use platform_thread_create
-	m_hRequestThread = (HANDLE)platform_thread_create(
-		(platform_thread_func_t)WaitRequestThreadProc,
-		this
-	);
-	(void)dwChildThreadID; // unused on non-Windows
-#endif
+	m_RequestThread = std::jthread([this](std::stop_token stop) {
+		while (!stop.stop_requested())
+			WaitRequest();
+	});
 }
 
 //--------------------------------------------------------------------------------
@@ -361,10 +317,23 @@ void
 RequestServerPlayerManager::WaitRequest()
 {
 	// Check if socket is still valid (may be NULL during shutdown)
-	if (m_pServerSocket == NULL || !m_bThreadRunning)
+	if (m_pServerSocket == NULL)
 	{
 		return;
 	}
+
+	// Up to 10 ms for a peer to arrive. accept() is taken only for one: on an
+	// empty queue it would throw a would-block exception every poll.
+	const SOCKET listener = m_pServerSocket->getSOCKET();
+	fd_set pending;
+	FD_ZERO(&pending);
+	FD_SET(listener, &pending);
+	struct timeval wait = { 0, 10 * 1000 };
+	const int ready = select((int)listener + 1, &pending, NULL, NULL, &wait);
+	if (ready < 0)
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));	// no spin on an error
+	if (ready <= 0)
+		return;
 
 	Socket* pSocket = m_pServerSocket->accept();
 
@@ -381,39 +350,9 @@ RequestServerPlayerManager::WaitRequest()
 
 	pSocket->setNonBlocking();
 
-#ifdef PLATFORM_WINDOWS
-	SetThreadPriority(m_hRequestThread, THREAD_PRIORITY_NORMAL);
-#else
-	// Non-Windows: Thread priority not supported via platform_thread_create
-#endif
-
 	if (AddRequestServerPlayer( pRequestServerPlayer ))
 	{
 		// g_pDebugMessage에 lock걸어야 한다. - -;
 		//DEBUG_ADD_FORMAT("[Request] New Connection from %s:%d", pSocket->getHost().c_str(), pSocket->getPort());
 	}
-
-	SetThreadPriority(m_hRequestThread, THREAD_PRIORITY_LOWEST);
-}
-
-//--------------------------------------------------------------------------------
-// WaitRequest
-//--------------------------------------------------------------------------------
-LONG
-WaitRequestThreadProc(LPVOID lpParameter)
-{
-	RequestServerPlayerManager* pRequestServerPlayerManager = (RequestServerPlayerManager*)lpParameter;
-
-	while (pRequestServerPlayerManager != NULL && pRequestServerPlayerManager->IsThreadRunning())
-	{
-		pRequestServerPlayerManager->WaitRequest();
-
-		// Add delay to prevent CPU busy-wait
-		// On non-Windows platforms, sleep for 10ms to reduce CPU usage
-#ifndef PLATFORM_WINDOWS
-		SDL_Delay(10);  // 10ms delay to reduce CPU from busy-wait loop
-#endif
-	}
-
-	return 0L;
 }
