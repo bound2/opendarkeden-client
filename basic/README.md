@@ -61,8 +61,6 @@ basic/
 - `platform_sleep()` - 睡眠指定毫秒
 
 ### ✅ 线程/同步原语
-- `platform_thread_create()` - 创建线程（替代 CreateThread）
-- `platform_thread_wait()` - 等待线程
 - `platform_mutex_create/lock/unlock()` - 互斥锁（替代 CreateMutex）
 - `platform_event_create/wait/signal()` - 事件对象（替代 CreateEvent）
 
@@ -129,7 +127,6 @@ tests\Debug\test_platform.exe  # Windows
 测试覆盖：
 - ✅ 时间函数
 - ✅ 互斥锁
-- ✅ 线程
 - ✅ 事件
 - ✅ 文件操作
 - ✅ 目录类
@@ -149,8 +146,7 @@ CloseHandle(hThread);
 
 **新代码：**
 ```cpp
-platform_thread_t hThread = platform_thread_create(ThreadFunc, param);
-platform_thread_wait(hThread);
+std::jthread thread(ThreadFunc, param); // stopped and joined at scope exit
 ```
 
 ### 时间函数
@@ -204,7 +200,7 @@ platform_config_get_string("SOFTWARE\\DarkEden", "RunFileName", buffer, &size);
 创建 `DXLib/PlatformDX.h`，使用平台抽象层：
 
 ```cpp
-// CDirectInput 可使用 platform_thread_* 和 SDL2
+// CDirectInput 可使用 SDL2
 // CDirectSound 可使用 SDL_mixer
 ```
 
@@ -229,7 +225,6 @@ platform_config_get_string("SOFTWARE\\DarkEden", "RunFileName", buffer, &size);
 1. **注册表替代** - Windows 使用注册表，其他平台使用文件 `DarkEden.conf`
 2. **路径分隔符** - Windows 使用 `\`，其他平台使用 `/`
 3. **动态库扩展名** - Windows `.dll`，Linux `.so`，macOS `.dylib`
-4. **线程返回值** - 平台抽象返回 DWORD，与 Windows 保持一致
 
 ## 贡献者
 

@@ -1065,19 +1065,16 @@ typedef WORD			char_t;
 		#include <windows.h>
 	#endif
 
-	typedef HANDLE	platform_thread_t;
 	typedef HANDLE	platform_mutex_t;
 	typedef HANDLE	platform_event_t;
 	typedef HMODULE	platform_lib_t;
 
-	#define PLATFORM_INVALID_THREAD	NULL
 	#define PLATFORM_INVALID_MUTEX	NULL
 	#define PLATFORM_INVALID_EVENT	NULL
 	#define PLATFORM_INVALID_LIB		NULL
 
 #else
 	/* SDL/POSIX types */
-	typedef SDL_Thread*	platform_thread_t;
 	typedef SDL_mutex*	platform_mutex_t;
 
 	/* Forward declaration for event structure */
@@ -1085,7 +1082,6 @@ typedef WORD			char_t;
 
 	typedef void*	platform_lib_t;
 
-	#define PLATFORM_INVALID_THREAD	NULL
 	#define PLATFORM_INVALID_MUTEX	NULL
 	#define PLATFORM_INVALID_EVENT	NULL
 	#define PLATFORM_INVALID_LIB		NULL
@@ -1133,35 +1129,7 @@ uint64_t platform_get_performance_frequency(void);
  */
 void platform_sleep(DWORD ms);
 
-/* ============================================================================
- * Thread Functions
- * ============================================================================ */
-
-/**
- * Thread entry point type
- */
-typedef DWORD (*platform_thread_func_t)(void* param);
-
-/**
- * Create a new thread (like CreateThread)
- * @param func Thread function
- * @param param Parameter to pass to thread function
- * @return Thread handle or PLATFORM_INVALID_THREAD on failure
- */
-platform_thread_t platform_thread_create(platform_thread_func_t func, void* param);
-
-/**
- * Wait for thread to finish (like WaitForSingleObject on thread)
- * @param thread Thread handle
- * @return Wait result (0 = success, non-zero = failure)
- */
-int platform_thread_wait(platform_thread_t thread);
-
-/**
- * Close thread handle (like CloseHandle on thread)
- * @param thread Thread handle
- */
-void platform_thread_close(platform_thread_t thread);
+/* Threads are std::jthread (C++20, <thread>); there is no thread API here. */
 
 /* ============================================================================
  * Mutex Functions
@@ -1243,14 +1211,6 @@ void platform_event_close(platform_event_t event);
    declarations in <windows.h>. Off Windows only, here, like the rest
    of the shim. */
 #ifndef PLATFORM_WINDOWS
-	typedef DWORD (*LPTHREAD_START_ROUTINE)(void* lpParameter);
-
-	#define THREAD_PRIORITY_NORMAL          0
-	#define THREAD_PRIORITY_ABOVE_NORMAL    1
-	#define THREAD_PRIORITY_BELOW_NORMAL   -1
-	#define THREAD_PRIORITY_HIGHEST          2
-	#define THREAD_PRIORITY_LOWEST          -2
-
 	#define WAIT_OBJECT_0                   0
 	#define WAIT_TIMEOUT                    258
 
@@ -1264,39 +1224,10 @@ void platform_event_close(platform_event_t event);
 		return WAIT_TIMEOUT;
 	}
 
-	/* No-op: SDL threads are not re-prioritised after creation here. */
-	static inline BOOL SetThreadPriority(HANDLE thread, int priority) {
-		(void)thread; (void)priority;
-		return TRUE;
-	}
-
-	/* The request-service managers in Client/Packet used to carry their
-	   own copies of the next four, written over pthread_t, while the
-	   thread they applied them to came from platform_thread_create - an
-	   SDL_Thread*. pthread_cancel on an SDL_Thread* is not a thread
-	   cancel. These are honest instead: SDL has no cancel and no
-	   non-blocking exit-code query, so both report failure. The one
-	   caller left, RequestServerPlayerManager, calls TerminateThread
-	   only inside its PLATFORM_WINDOWS branch; the outbound manager
-	   that discarded the result and looped on GetExitCodeThread is
-	   deleted (docs/reviews/RESTRUCTURING.md task 5.2, eighth slice). The
-	   request service is created on Windows only (GameInit.cpp), and
-	   the manager exists off Windows because it is a packetwire
-	   member. A real cancel needs a stop flag the thread function
-	   polls. */
-	#define STILL_ACTIVE 259
-	static inline BOOL TerminateThread(HANDLE thread, DWORD exitCode) {
-		(void)thread; (void)exitCode;
-		return FALSE;
-	}
-	static inline BOOL GetExitCodeThread(HANDLE thread, LPDWORD lpExitCode) {
-		(void)thread;
-		if (lpExitCode) *lpExitCode = STILL_ACTIVE;
-		return FALSE;
-	}
-	static inline HANDLE GetCurrentThread(void) {
-		return (HANDLE)(size_t)SDL_ThreadID();
-	}
+	/* SetThreadPriority, TerminateThread, GetExitCodeThread and
+	   GetCurrentThread were shimmed here for the peer request thread; it
+	   is a std::jthread that stops on request now, and nothing off
+	   Windows names them. */
 #endif
 
 /* ============================================================================

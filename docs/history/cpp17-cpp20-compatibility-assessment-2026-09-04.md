@@ -1909,7 +1909,13 @@ reproduced the outlived thread under ASan on macOS
 (`stack-buffer-overflow` reading the freed manager from the old thread)
 and pins the prompt `Release`. macOS CI moved to Xcode 26.6 for this,
 since Xcode 16.4's libc++ kept `std::jthread` experimental; every
-platform the project builds now has the C++20 thread library.
+platform the project builds now has the C++20 thread library. With the
+thread gone from it, `basic/Platform.h` loses `platform_thread_create`,
+`platform_thread_wait` and `platform_thread_close` (and their test) and
+the off-Windows `SetThreadPriority`, `TerminateThread`,
+`GetExitCodeThread` and `GetCurrentThread` shims: nothing started a
+thread through them any more, and the client's own code (not
+`third_party/`) starts threads only through the standard library.
 
 ### Packet modernization guardrails
 
