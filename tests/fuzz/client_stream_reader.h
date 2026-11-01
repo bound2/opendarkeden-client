@@ -68,7 +68,9 @@
 // it abort instead, to see which Asserts hostile input reaches (a
 // Release build compiles them out). A failed Assert appends to
 // assertion_failed.log in the current directory, so run a fuzzer from
-// a scratch directory.
+// a scratch directory. DE_FUZZ_ANY_ID admits every registered id in
+// CPS_NORMAL, where the game server link admits the GC packets alone
+// (Initialize below; docs/protocol/server-link.md).
 //
 // Header-only and free of the test framework, so each target stays
 // one translation unit that links packetwire and nothing else.
@@ -201,6 +203,17 @@ inline void	Initialize()
 	g_pPacketFactoryManager->init();
 	g_pPacketValidator = new PacketValidator();
 	g_pPacketValidator->init();
+
+	// DE_FUZZ_ANY_ID: admit every registered id in CPS_NORMAL instead of
+	// the GC packets the game server link folds into it
+	// (GameServerLink.h), so the readers of the ids the link refuses stay
+	// fuzzed. The replay ctest fuzz_replay_client_stream_any_id sets it.
+	if (Basic::GetEnvironment("DE_FUZZ_ANY_ID").has_value())
+	{
+		g_pPacketValidator->deletePacketIDSet(CPS_NORMAL, NULL);
+		g_pPacketValidator->addPacketIDSet(CPS_NORMAL,
+			new PacketIDSet(CPS_NORMAL, PacketIDSet::PIST_ANY));
+	}
 
 	g_bAbortOnAssert = Basic::GetEnvironment("DE_FUZZ_ABORT_ON_ASSERT").has_value();
 }

@@ -9,15 +9,14 @@
 //
 //               The CG and CL directions (the packets the client only
 //               writes) are deliberately absent, with one exception
-//               below. Honest basis for that (the adversarial review
-//               corrected an earlier claim that the validator gates
-//               them): PacketValidator does NOT reliably reject their
-//               ids - CPS_NORMAL is effectively accept-anything and
-//               Player::processCommand has no validator at all - but
-//               the server never sends them, and their deleted
-//               execute() bodies were empty on the client (server-side
-//               code behind #ifndef __GAME_CLIENT__, or calls into the
-//               no-op stubs that lived in the deleted
+//               below. In CPS_NORMAL the validator refuses their ids
+//               before a body is read, since the game server link
+//               (Client/Packet/GameServerLink.h) folds the GC packets
+//               alone into that status's set; Player::processCommand
+//               has no validator at all. The server never sends them,
+//               and their deleted execute() bodies were empty on the
+//               client (server-side code behind #ifndef __GAME_CLIENT__,
+//               or calls into the no-op stubs that lived in the deleted
 //               CGHandlersStub.cpp). So the only behavior change is
 //               for a protocol-violating peer: such a packet used to
 //               be silently swallowed and now disconnects - the same

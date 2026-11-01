@@ -91,7 +91,7 @@ struct WireTables
 	: factoriesScope(&factories), validatorScope(&validator)
 	{
 		factories.init();
-		validator.init();
+		validator.init(factories);
 	}
 
 	PacketFactoryManager	factories;

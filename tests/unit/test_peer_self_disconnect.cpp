@@ -118,7 +118,7 @@ struct World
 	{
 		BindDisconnectHandler();
 		factories.init();
-		validator.init();
+		validator.init(factories);
 		g_pPacketFactoryManager = &factories;
 		g_pPacketValidator = &validator;
 		g_pRequestServerPlayerManager = &manager;

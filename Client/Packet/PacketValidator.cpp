@@ -9,6 +9,8 @@
 // include files
 #include "Client_PCH.h"
 #include "PacketValidator.h"
+#include "PacketFactoryManager.h"
+#include "GameServerLink.h"
 
 //----------------------------------------------------------------------
 // constructor
@@ -43,6 +45,18 @@ PacketValidator::~PacketValidator ()
 // initialize packet validators
 //----------------------------------------------------------------------
 void PacketValidator::init ()
+{
+	__BEGIN_TRY
+
+	if ( g_pPacketFactoryManager == NULL )
+		throw Error("the packet factories are not initialised yet");
+
+	init( *g_pPacketFactoryManager );
+
+	__END_CATCH
+}
+
+void PacketValidator::init ( const PacketFactoryManager & factories )
 {
 	__BEGIN_TRY
 
@@ -171,9 +185,17 @@ void PacketValidator::init ()
 
 
 		//----------------------------------------------------------------------
-		// CPS_NORMAL (게임에 들어가자!)
+		// CPS_NORMAL (게임에 들어가자!): the game connection admits only what
+		// a game server sends, the registered GC packets (GameServerLink.h,
+		// docs/protocol/server-link.md), folded from the factory table so a
+		// new GC packet is admitted once it is registered and nothing else is.
 		//----------------------------------------------------------------------
-		pPacketIDSet = new PacketIDSet( CPS_NORMAL , PacketIDSet::PIST_ANY );
+		pPacketIDSet = new PacketIDSet( CPS_NORMAL );
+		for ( PacketID_t packetID = 0 ; packetID < Packet::PACKET_MAX ; packetID ++ ) {
+			if ( factories.hasFactory( packetID )
+			     && GameServerLink::SentByAGameServer( factories.getPacketName( packetID ) ) )
+				pPacketIDSet->addPacketID( packetID );
+		}
 		addPacketIDSet( pPacketIDSet->getPlayerStatus(), pPacketIDSet );
 
 		//----------------------------------------------------------------------
@@ -261,16 +283,22 @@ void PacketValidator::addPacketIDSet ( PlayerStatus playerStatus , PacketIDSet *
 //----------------------------------------------------------------------
 // delete packet id set
 //----------------------------------------------------------------------
-void PacketValidator::deletePacketIDSet ( PlayerStatus playerStatus , PacketIDSet * pPacketIDSet ) 
+void PacketValidator::deletePacketIDSet ( PlayerStatus playerStatus , PacketIDSet * pPacketIDSet )
 {
 	__BEGIN_TRY
-	(void)pPacketIDSet;
 
 	if ( playerStatus >= PLAYER_STATUS_MAX )
 		throw Error("invalid player status");
 
 	if ( m_PacketIDSets[playerStatus] == NULL )
 		throw NoSuchElementException("invalid player status");
+
+	// The validator owns its sets (the destructor frees them), so the
+	// one dropped here is freed too; a caller may name it or pass NULL.
+	if ( pPacketIDSet != NULL && pPacketIDSet != m_PacketIDSets[playerStatus] )
+		throw Error("not the packet id set of that player status");
+
+	delete m_PacketIDSets[playerStatus];
 
 	m_PacketIDSets[playerStatus] = NULL;
 

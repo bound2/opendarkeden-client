@@ -12,7 +12,9 @@ generated: { by: claude-code/claude-fable-5-1, at: 2026-10-21T19:53:16Z }
 
 Two libFuzzer targets read the bytes a server sends the client, one per connection of its one
 `ClientPlayer`: `tests/fuzz/fuzz_client_stream.cpp`, the game connection, with the player in
-`CPS_NORMAL` (every registered id accepted), and `tests/fuzz/fuzz_client_login_stream.cpp`, the
+`CPS_NORMAL` (the registered GC packets, which the [server link](server-link.md) folds into that
+status's set; `DE_FUZZ_ANY_ID` in the environment admits every registered id instead, and the
+ctest `fuzz_replay_client_stream_any_id` replays every golden so), and `tests/fuzz/fuzz_client_login_stream.cpp`, the
 login connection, which reads every input once in each of the seven statuses the player holds
 there (`CPS_AFTER_SENDING_CL_LOGIN` to `CPS_AFTER_SENDING_CL_SELECT_PC`), so a frame reaches a
 parser only when that status's validator set accepts its id, as in production. Both read through
