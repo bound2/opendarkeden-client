@@ -2,6 +2,13 @@
 
 ## 2026-11-01
 
+* **Update**: the [next work plan](reviews/NEXT.md) is ranked again now that its first fifteen
+  tasks are done: tasks 17 to 23 (the packet admission set in `CPS_NORMAL`, the handler fuzzers'
+  reach, the 42 read budgets the server's inventory diff finds the two repositories disagreeing
+  on, the vampire and ousters interfaces in the game UI scene and a headless frame, a scripted
+  run against the docker server, the packet-safety walk's stop points, the modernization
+  leftovers), what is kept in view, and recommendations beside two owner decisions; `CLAUDE.md`
+  and the [reviews index](reviews/index.md) say so.
 * **Update**: [Linux and macOS](build/linux-and-macos.md) says the macOS runners and the Apple
   Silicon Mac now count the same warnings, and that the linker's count moves with the runner
   image's Homebrew (9 on 2026-10-08, 8 on 2026-11-01).
