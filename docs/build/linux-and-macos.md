@@ -91,9 +91,9 @@ yet.
   builds without warnings; what `verify-linux.sh macos` counts is the vendored code under
   `third_party/` and `build/_deps/` and the linker, so a different compiler version can count
   differently. The runner and the Apple Silicon Mac above both have Apple Clang 21, and on
-  2026-10-31 their compiler counts matched; only the linker's differed (`LD` 8 against the
-  runner's 9), because it counts the Homebrew dylibs built for a newer macOS than the 13.0
-  target, and each machine's Homebrew has its own.
+  2026-11-01 they counted the same. The linker's count (`LD`) is the Homebrew dylibs built for a
+  newer macOS than the 13.0 target, so it moves with the runner image's Homebrew as well as the
+  compiler: it was 9 on 2026-10-08 and 8 on 2026-11-01.
 - **The data links** in the README (two symbolic links and a one-time copy, the equivalent of the
   Windows junctions) were written from the code, not run against the game data.
 - **The app bundle** (`-DDARKEDEN_MACOS_BUNDLE=ON` builds `bin/DarkEden.app`): launched from

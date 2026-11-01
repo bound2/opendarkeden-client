@@ -1,5 +1,11 @@
 # Knowledge Bundle Update Log
 
+## 2026-11-01
+
+* **Update**: [Linux and macOS](build/linux-and-macos.md) says the macOS runners and the Apple
+  Silicon Mac now count the same warnings, and that the linker's count moves with the runner
+  image's Homebrew (9 on 2026-10-08, 8 on 2026-11-01).
+
 ## 2026-10-31
 
 * **Update**: [Linux and macOS](build/linux-and-macos.md) says macOS CI runs on macOS 26 and its

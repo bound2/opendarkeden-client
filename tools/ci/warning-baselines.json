@@ -62,7 +62,7 @@
       "-Wunused-parameter" : 86,
       "-Wunused-private-field" : 4,
       "-Wunused-variable" : 6,
-      "LD" : 9
+      "LD" : 8
    },
    "macos-asan-arm64" : {
       "-Wdangling-else" : 41,
@@ -79,7 +79,7 @@
       "-Wunused-parameter" : 86,
       "-Wunused-private-field" : 4,
       "-Wunused-variable" : 6,
-      "LD" : 9
+      "LD" : 8
    },
    "macos-asan-x86_64" : {
       "-Wdangling-else" : 41,
@@ -96,7 +96,7 @@
       "-Wunused-parameter" : 86,
       "-Wunused-private-field" : 4,
       "-Wunused-variable" : 6,
-      "LD" : 9
+      "LD" : 8
    },
    "macos-x86_64" : {
       "-Wdangling-else" : 41,
@@ -113,7 +113,7 @@
       "-Wunused-parameter" : 86,
       "-Wunused-private-field" : 4,
       "-Wunused-variable" : 6,
-      "LD" : 9
+      "LD" : 8
    },
    "windows-asan-x64" : {
       "C4244" : 25,
