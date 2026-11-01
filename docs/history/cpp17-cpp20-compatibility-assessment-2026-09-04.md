@@ -1894,6 +1894,29 @@ blocks) are deleted with their blocks. R17 goes from 1,016 to
 **970**. Verified by the build on Windows in both Debug trees and the
 test suites in both test trees; the client not run.
 
+**Thread status (2026-10-31):** the first priority-8 slice is the one
+owned worker the client had, the peer request thread of
+`RequestServerPlayerManager`, now a `std::jthread`. It used to block in
+`accept()`, poll a plain `bool` another thread wrote, and on `Release`
+wait two seconds on Windows and then `TerminateThread` it, or not wait
+at all elsewhere, before freeing the socket under it; a second `Init`
+left the first thread running against the next socket. The listener
+is non-blocking now, the thread waits on it in `select()` for up to
+10 ms at a time and calls `accept()` only for a waiting peer, so it
+sees its `stop_token` ask it to end within one wait, and `Init` and `Release` both stop and
+join it before the socket goes. `tests/unit/test_peer_request_thread.cpp`
+reproduced the outlived thread under ASan on macOS
+(`stack-buffer-overflow` reading the freed manager from the old thread)
+and pins the prompt `Release`. macOS CI moved to Xcode 26.6 for this,
+since Xcode 16.4's libc++ kept `std::jthread` experimental; every
+platform the project builds now has the C++20 thread library. With the
+thread gone from it, `basic/Platform.h` loses `platform_thread_create`,
+`platform_thread_wait` and `platform_thread_close` (and their test) and
+the off-Windows `SetThreadPriority`, `TerminateThread`,
+`GetExitCodeThread` and `GetCurrentThread` shims: nothing started a
+thread through them any more, and the client's own code (not
+`third_party/`) starts threads only through the standard library.
+
 ### Packet modernization guardrails
 
 Packet I/O is the highest-value area but also the easiest place to cause a silent

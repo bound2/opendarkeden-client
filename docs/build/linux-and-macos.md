@@ -71,10 +71,12 @@ for Noto CJK and DejaVu under `/usr/share/fonts`, and without one of them the cl
 # Status on macOS
 
 CI builds and tests the `macos` and `macos-asan` presets on GitHub's arm64 and Intel runners
-(`.github/workflows/macos.yml`, macOS 15). One Apple Silicon Mac (macOS 27.0, Apple Clang 21,
-CMake 4.4) built every target and passed all 20 ctest tests on 2026-09-30, among them the three
-packet-read fuzz replay tests (`fuzz_replay_client_stream`, `fuzz_replay_client_login_stream`,
-`fuzz_replay_client_datagram`) and their corpus steps. Nothing has been watched on a Mac's display
+(`.github/workflows/macos.yml`, macOS 26 and its Xcode 26.6, Apple Clang 21, whose libc++ is
+the C++20 floor: Xcode 16.4 on macOS 15 kept `std::jthread` behind an experimental switch). One
+Apple Silicon Mac (macOS 27.0, Apple Clang 21, CMake 4.4) built every target and passed all 20
+ctest tests on 2026-09-30, among them the three packet-read fuzz replay tests
+(`fuzz_replay_client_stream`, `fuzz_replay_client_login_stream`, `fuzz_replay_client_datagram`)
+and their corpus steps. Nothing has been watched on a Mac's display
 yet.
 
 - **Homebrew's `sdl2` is an alias of `sdl2-compat`**, the SDL2 API over SDL3; that is what the
@@ -88,9 +90,10 @@ yet.
 - **The warning budget is recorded from the CI runners' compilers.** The project's own code
   builds without warnings; what `verify-linux.sh macos` counts is the vendored code under
   `third_party/` and `build/_deps/` and the linker, so a different compiler version can count
-  differently. Under Apple Clang 21 the build and the tests pass, but the budget step reports the
-  linker's deployment-target warnings and a few more vendored-code diagnostics than the runner's
-  Apple Clang.
+  differently. The runner and the Apple Silicon Mac above both have Apple Clang 21, and on
+  2026-11-01 they counted the same. The linker's count (`LD`) is the Homebrew dylibs built for a
+  newer macOS than the 13.0 target, so it moves with the runner image's Homebrew as well as the
+  compiler: it was 9 on 2026-10-08 and 8 on 2026-11-01.
 - **The data links** in the README (two symbolic links and a one-time copy, the equivalent of the
   Windows junctions) were written from the code, not run against the game data.
 - **The app bundle** (`-DDARKEDEN_MACOS_BUNDLE=ON` builds `bin/DarkEden.app`): launched from

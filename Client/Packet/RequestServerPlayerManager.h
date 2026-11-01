@@ -27,6 +27,7 @@
 #endif
 #include <list>
 #include <string>
+#include <thread>
 #include <vector>
 #include "RequestServerPlayer.h"
 #include "ServerSocket.h"
@@ -69,9 +70,6 @@ class RequestServerPlayerManager {
 
 		int			GetSize() const			{ return static_cast<int>(m_listRequestServerPlayer.size()); }
 
-		// Check if thread should continue running
-		bool		IsThreadRunning() const		{ return m_bThreadRunning; }		
-
 	protected :
 		//----------------------------------------------------------------------
 		// Lock / Unlock
@@ -93,8 +91,8 @@ class RequestServerPlayerManager {
 	protected :
 		ServerSocket*			m_pServerSocket;
 
-		HANDLE					m_hRequestThread;
-		bool					m_bThreadRunning;
+		// Polls m_pServerSocket with WaitRequest() until asked to stop.
+		std::jthread			m_RequestThread;
 
 		CRITICAL_SECTION		m_Lock;
 		RequestServerPlayer_LIST		m_listRequestServerPlayer;

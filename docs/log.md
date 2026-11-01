@@ -1,5 +1,20 @@
 # Knowledge Bundle Update Log
 
+## 2026-11-01
+
+* **Update**: [Linux and macOS](build/linux-and-macos.md) says the macOS runners and the Apple
+  Silicon Mac now count the same warnings, and that the linker's count moves with the runner
+  image's Homebrew (9 on 2026-10-08, 8 on 2026-11-01).
+
+## 2026-10-31
+
+* **Update**: [Linux and macOS](build/linux-and-macos.md) says macOS CI runs on macOS 26 and its
+  Xcode 26.6, whose libc++ is the C++20 floor (`std::jthread`); the
+  [C++20 assessment](history/cpp17-cpp20-compatibility-assessment-2026-09-04.md) records its
+  priority-8 slice, the peer request thread as a `std::jthread`, and the thread shims that went
+  with it; the [code-health review](reviews/code-health-review-2026-08-29.md) records the removal
+  of `platform_thread_create` under its finding.
+
 ## 2026-10-30
 
 * **Update**: [executable-only code](testing/executable-only-code.md) says the game windows are library

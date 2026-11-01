@@ -163,52 +163,19 @@ void platform_sleep(DWORD ms) {
 }
 
 /* ============================================================================
- * Thread/Mutex/Event/Dynamic-Library Functions
+ * Mutex/Event/Dynamic-Library Functions
  * ============================================================================ */
-/* platform_thread_t/platform_mutex_t/platform_event_t/platform_lib_t are
+/* platform_mutex_t/platform_event_t/platform_lib_t are
    real Win32 HANDLE/HMODULE on PLATFORM_WINDOWS (see Platform.h) - the
    loading thread, MWorkThread.cpp (retired, task 4.263), relied on that
-   (e.g. casting platform_thread_create()'s result straight to HANDLE,
-   and creating its event members with the real CreateEvent() while
+   (e.g. creating its event members with the real CreateEvent() while
    closing them via platform_event_close()). The SDL
-   versions below return SDL_Thread pointers, SDL_mutex pointers, and
+   versions below return SDL_mutex pointers and
    platform_event_s pointers, which are not interchangeable with those -
    so on Windows this needs a genuine
-   native implementation instead of sharing the SDL one. */
-namespace {
-struct ThreadWrapperData {
-	platform_thread_func_t func;
-	void* param;
-	ThreadWrapperData(platform_thread_func_t callback, void* argument) : func(callback), param(argument) {}
-};
-}
-
+   native implementation instead of sharing the SDL one. Threads are
+   std::jthread, so there is no thread function here. */
 #ifdef PLATFORM_WINDOWS
-
-static DWORD WINAPI ThreadWrapper(void* data) {
-	std::unique_ptr<ThreadWrapperData> wrapper(static_cast<ThreadWrapperData*>(data));
-	return wrapper->func(wrapper->param);
-}
-
-platform_thread_t platform_thread_create(platform_thread_func_t func, void* param) {
-	if (!func) return nullptr;
-	auto wrapper = std::make_unique<ThreadWrapperData>(func, param);
-	const auto thread = CreateThread(NULL, 0, ThreadWrapper, wrapper.get(), 0, NULL);
-	// The started thread owns the data; a failed creation leaves it here.
-	if (thread) wrapper.release();
-	return thread;
-}
-
-int platform_thread_wait(platform_thread_t thread) {
-	if (thread == NULL) return 1;
-	return (WaitForSingleObject(thread, INFINITE) == WAIT_OBJECT_0) ? 0 : 1;
-}
-
-void platform_thread_close(platform_thread_t thread) {
-	if (thread != NULL) {
-		CloseHandle(thread);
-	}
-}
 
 void platform_event_close(platform_event_t event) {
 	if (event != NULL) {
@@ -225,33 +192,6 @@ void platform_event_close(platform_event_t event) {
    this abstraction layer, as MWorkThread.cpp did). */
 
 #else /* !PLATFORM_WINDOWS */
-
-static int SDLCALL ThreadWrapper(void* data) {
-	std::unique_ptr<ThreadWrapperData> wrapper(static_cast<ThreadWrapperData*>(data));
-	wrapper->func(wrapper->param);
-	return 0;
-}
-
-platform_thread_t platform_thread_create(platform_thread_func_t func, void* param) {
-	if (!func) return nullptr;
-	auto wrapper = std::make_unique<ThreadWrapperData>(func, param);
-	const auto thread = SDL_CreateThread(ThreadWrapper, "thread", wrapper.get());
-	if (thread) wrapper.release();
-	return thread;
-}
-
-int platform_thread_wait(platform_thread_t thread) {
-	if (thread == NULL) return 1;
-	int status = 0;
-	SDL_WaitThread(thread, &status);
-	return 0;
-}
-
-void platform_thread_close(platform_thread_t thread) {
-	(void)thread;
-	/* SDL threads are automatically cleaned up by SDL_WaitThread */
-	/* No explicit close needed */
-}
 
 platform_mutex_t platform_mutex_create(int initial_locked) {
 	SDL_mutex* mutex = SDL_CreateMutex();
