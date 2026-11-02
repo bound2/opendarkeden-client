@@ -78,7 +78,7 @@ job has not produced these totals either. The same Mac ran the `macos` preset's 
 that day ([Linux and macOS](../build/linux-and-macos.md#status-on-macos)), of which
 `verify-linux.sh` and `verify-windows.ps1` then required 16 by name
 (`fuzz_replay_client_datagram` the latest then; the list is 23 names on 2026-10-23, the two
-handler replays the latest). A
+handler replays the latest, and 24 on 2026-11-01, `fuzz_replay_client_stream_any_id` the latest). A
 platform-conditional test can make the check totals differ by one between platforms; that is not a
 failure. Keep a new measurement with the change that produced it; this concept records the last
 one, not a live count. `tools/ci/verify-linux.sh` prints the suite's own totals line, the line a

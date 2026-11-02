@@ -538,9 +538,9 @@ PacketFactoryManager::PacketFactoryManager ()
 	m_Factories = new PacketFactory*[ m_Size ];
 	
 	// 팩토리에 대한 포인터들을 NULL 로 초기화한다.
-	for (int i = 0 ; i < m_Size ; i ++)
+	for (int i = 0 ; i < m_Size ; i ++) 
 		m_Factories[i] = NULL;
-
+			
 	m_Names.assign(m_Size, std::string());
 
 	__END_CATCH

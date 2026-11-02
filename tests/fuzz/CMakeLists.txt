@@ -178,4 +178,6 @@ if(PERL_EXECUTABLE)
 	set_tests_properties(fuzz_replay_client_stream_any_id PROPERTIES
 		FIXTURES_REQUIRED fuzz_client_stream_any_id_corpus
 		ENVIRONMENT "DE_FUZZ_ANY_ID=1")
+else()
+	message(STATUS "perl not found: the fuzz_replay_client_stream_any_id test is not registered")
 endif()

@@ -7,8 +7,9 @@
   (every registered GC packet), each factory registered with its name through
   `DE_PACKET_FACTORY`, and `DE_FUZZ_ANY_ID` widens the fuzz targets' set; [fuzzing](protocol/fuzzing.md)
   says what the game targets read now and names the `fuzz_replay_client_stream_any_id` replay,
-  the [testing overview](testing/overview.md) lists it, and `CLAUDE.md` and the
-  [protocol index](protocol/index.md) link the rule.
+  the [testing overview](testing/overview.md) lists it, `CLAUDE.md` and the
+  [protocol index](protocol/index.md) link the rule, and the [next work plan](reviews/NEXT.md)
+  moves task 17 to *Done* (`CLAUDE.md` and the [reviews index](reviews/index.md) say so).
 * **Update**: the [next work plan](reviews/NEXT.md) is ranked again now that its first fifteen
   tasks are done: tasks 17 to 23 (the packet admission set in `CPS_NORMAL`, the handler fuzzers'
   reach, the 42 read budgets the server's inventory diff finds the two repositories disagreeing

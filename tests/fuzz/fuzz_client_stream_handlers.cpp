@@ -10,8 +10,10 @@
 // before dispatch.
 //
 // The player is in CPS_NORMAL, as fuzz_client_stream.cpp's is: every
-// registered id is accepted, so every handler the registry binds is
-// reachable. Each input runs three times, the player a slayer, a
+// registered GC packet is admitted (docs/protocol/server-link.md), so
+// every handler the registry binds for a game server's packet is
+// reachable, and DE_FUZZ_ANY_ID in the environment admits every
+// registered id. Each input runs three times, the player a slayer, a
 // vampire and an ousters, each in a world of its own, since many
 // handlers take a branch per race.
 //

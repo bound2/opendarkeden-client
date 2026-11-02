@@ -10,13 +10,18 @@
 // CG packets the client only writes, the login server's LC replies, a
 // peer's CR and RC packets, the updater's UC and CU) and every id with
 // no factory, which the PIST_ANY set this replaced admitted as far as
-// createPacket. The server's GameClientLink.h and game_client_link_tests
-// are the mirror for what a client sends.
+// the size gate (getPacketMaxSize throws for it). The server's
+// GameClientLink.h and game_client_link_tests are the mirror for what
+// a client sends.
 //
 // The goldens and the handler fuzz seeds are checked against the same
 // set, so nothing the game targets replay is refused at the gate, and
 // the production loop is driven once with a client-to-server packet to
 // show the refusal comes before the body is read.
+//
+// The names the fold reads are checked too: every registered factory
+// carries a name with a link in every build, and a validator
+// initialised before the table is an error.
 //
 // Compiled with WIRE_GOLDEN_DIR and FUZZ_SEED_DIR (tests/CMakeLists.txt).
 //
@@ -42,6 +47,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -198,7 +204,7 @@ TEST(GameServerLink, InGameTheValidatorAdmitsEveryRegisteredGCPacketAndNothingEl
 	}
 	CHECK_EQ(0, mismatches);
 
-	// 246 GC factories and 41 others on 2026-11-01; the bounds let a
+	// 246 GC factories and 41 others when this was written; the bounds let a
 	// registration or two come or go without pinning the table.
 	CHECK(admitted >= 200);
 	CHECK(refusedRegistered >= 20);
@@ -213,7 +219,9 @@ TEST(GameServerLink, TheLinksAClientWritesOrReadsElsewhereAreRefusedInGame)
 	CHECK(AdmittedInGame(tables, Packet::PACKET_GC_UPDATE_INFO));
 	CHECK(AdmittedInGame(tables, Packet::PACKET_GC_SET_POSITION));
 	CHECK(AdmittedInGame(tables, Packet::PACKET_GC_MY_STORE_INFO));
-	// Registered with no handler: admitted here, refused by name at the dispatch.
+	// Bound to a handler that does nothing on purpose
+	// (PacketHandlerRegistry.cpp): admitted here and swallowed there, as
+	// before.
 	CHECK(AdmittedInGame(tables, Packet::PACKET_GC_EXCHANGE_LIST));
 
 	// What this client only writes, the login server's replies, a peer's
@@ -238,6 +246,61 @@ TEST(GameServerLink, TheLinksAClientWritesOrReadsElsewhereAreRefusedInGame)
 	}
 	CHECK(unregistered != Packet::PACKET_MAX);
 	CHECK(!AdmittedInGame(tables, unregistered));
+}
+
+//----------------------------------------------------------------------
+// The names the fold reads
+//----------------------------------------------------------------------
+
+TEST(GameServerLink, EveryRegisteredFactoryCarriesItsNameInEveryBuild)
+{
+	Tables tables;
+
+	// The links PacketFactoryManager::init registers.
+	static const char* const links[] = { "GC", "LC", "CR", "RC", "CG", "UC", "CU" };
+
+	std::set<std::string> names;
+	int registered = 0;
+	int unlinked = 0;
+	for (PacketID_t id = 0; id < Packet::PACKET_MAX; id++)
+	{
+		if (!tables.factories.hasFactory(id))
+			continue;
+		registered++;
+		const std::string name = tables.factories.getPacketName(id);
+		bool linked = false;
+		for (const char* link : links)
+			if (name.size() > 2 && name.compare(0, 2, link) == 0)
+				linked = true;
+		if (!linked)
+		{
+			std::printf("  id %u is registered as \"%s\"\n", (unsigned)id, name.c_str());
+			unlinked++;
+		}
+		// No two ids are registered under one name.
+		CHECK(names.insert(name).second);
+	}
+	CHECK(registered >= 200);
+	CHECK_EQ(0, unlinked);
+}
+
+TEST(GameServerLink, InitBeforeTheFactoriesIsAnError)
+{
+	// GameInit.cpp builds the factory table first; a validator folded
+	// from no table would admit nothing in game.
+	PacketFactoryManager* const previous = g_pPacketFactoryManager;
+	g_pPacketFactoryManager = NULL;
+
+	PacketValidator validator;
+	bool refused = false;
+	try {
+		validator.init();
+	} catch (Error&) {
+		refused = true;
+	}
+
+	g_pPacketFactoryManager = previous;
+	CHECK(refused);
 }
 
 //----------------------------------------------------------------------

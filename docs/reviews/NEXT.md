@@ -54,37 +54,6 @@ platform workflows dispatched by hand) applies to each.
 Ranked 2026-11-01. The order is the rank, and the numbers continue the first ranking's, so a
 *Done* entry keeps its name.
 
-### 17. Admit only what a server sends in the game state
-
-**What:** `PacketValidator::init` (`Client/Packet/PacketValidator.cpp`) gives `CPS_NORMAL`, the
-status of a session in the game, a `PIST_ANY` set, so in game the client reads every factory
-`PacketFactoryManager` registers: 287 on 2026-11-01, counted with
-`grep -v -E '^\s*//' Client/Packet/PacketFactoryManager.cpp | grep -c -E 'new [A-Z]{2}[A-Za-z0-9]*Factory\('`
-(with `-o` in place of `-c`, and the two letters sorted and counted, it gives the links), of
-which GC 246, LC 17, CR 4 and RC 7 are what a game server, a login server or a peer client
-sends, CG 11 what this client only writes, and UC 1 and CU 1 the updater's, read by handlers
-that do nothing and sent by no server. Every other status names its ids or admits none; only
-the game's status admits everything. The server narrows its side of the same link (its
-`src/Core/GameClientLink.h`, pinned by its `game_client_link_tests`). Task 3's follow-up is one
-consequence: the client parses `CGSMSSend`, a client-to-server packet.
-
-**How:** a named set for `CPS_NORMAL` derived from the factory table by link, the GC ids at
-least; whether any LC, CR or RC id can arrive on the game connection is what the derivation
-must answer by reading the handlers, not assume. Pin it with a test in `tests/unit/` that walks
-the factory table and checks each id's admission against its link, and that every golden and
-every seed the game handler target replays is still admitted. The game stream target reads in
-`CPS_NORMAL` through the validator (`tests/fuzz/client_stream_reader.h`) and the game handler
-target runs `ClientPlayer::processCommand` itself (`tests/fuzz/handler_world.h`), so both would
-shrink to the admitted set: give them an any-id switch, as the server's `DE_FUZZ_ANY_ID` does,
-so the readers of the refused ids stay fuzzed, and say so in [fuzzing](../protocol/fuzzing.md).
-A refused id takes the path a refused id takes in the login statuses today. Then `CGSMSSend`
-(task 3's follow-up): its `write` can emit 113 bytes against the 108 its `getPacketMaxSize`
-states, because the size counts the caller's number as `MAX_RECEVIER_NUM` bytes, not
-`MAX_NUMBER_LENGTH`; take the server's 114, the budget its copy moved to on 2026-09-13 (its fix
-log), so the inventory line `110 CGSMSSend 108` moves to 114, re-recorded by `test_wire_layout`
-under `UPDATE_GOLDENS=1`, and the cross-repo diff (task 23) clears on it. Rule kept: no byte on
-the wire moves, so no golden changes ([wire layout](../protocol/wire-layout.md)).
-
 ### 18. The handler fuzzers' reach
 
 **What:** the game handler target's recording hosts (`tests/fuzz/recording_hosts.h`) stand in
@@ -102,12 +71,12 @@ libFuzzer for fifteen minutes with the new seeds as [fuzzing](../protocol/fuzzin
 and record the run there. Rule kept: a fixed crash gets a regression input *and* a unit test,
 and a harness gap is fixed in the harness, never by weakening the check.
 
-### 23. The 42 read budgets the two inventories disagree on
+### 23. The 41 read budgets the two inventories still disagree on
 
 **What:** the server repository's `tests/tools/wire_inventory_diff.sh`, the ground truth for
 whether the two copies of the protocol agree on ids and maximum body sizes, fails against this
 repository on 2026-11-01 with 42 `max-size mismatches (same id and name)`: `CGSMSSend` (114
-there, 108 here; task 17) and 41 GC packets the server budgets larger than this client reads
+there, 108 here until task 17) and 41 GC packets the server budgets larger than this client reads
 (`GCAddMonster` 1072 against 306, `GCSkillInfo` 34706 against 4338, `GCUpdateInfo` 59146
 against 58380 among them; `GCStashList` is the other way, 7506 against 21006). A GC packet the
 server can write past this client's budget is refused at the receive loop's size gate
@@ -458,3 +427,20 @@ are tested (`GameUIScene.ClosingTheStashClosesTheDepositDialog`,
 `TheShopWindowSaysWhichShopItShows`). Starting it found two members read before they were set
 (`C_VS_UI_INFO::m_info_mode`, `C_VS_UI_SKILL::m_bl_open`), which a run with CI's UBSan options
 stops on; both are set now and pinned by tests that build each window over a fill pattern. Owners: the five `GameUIScene` tests.
+
+### 17. Admit only what a server sends in the game state (PR #591)
+
+`CPS_NORMAL`'s set is folded from the factory table by `GameServerLink::SentByAGameServer`
+(`Client/Packet/GameServerLink.h`): the 246 registered GC packets are admitted in game, and the
+41 other factories (CG 11, LC 17, CR 4, RC 7, UC 1, CU 1; 287 in all, counted with
+`grep -c 'DE_PACKET_FACTORY(' Client/Packet/PacketFactoryManager.cpp`) and every unregistered id
+are refused before their body is read, on the path a refused id took in the login statuses. The
+derivation read the handlers and the server: the gameserver constructs no LC, CR, RC, UC or CU
+packet, so the prefix needs no correction, and the UC and CU handlers, which do nothing, stay
+registered. Each factory is registered with its name through `DE_PACKET_FACTORY`, since no name
+reaches the validator outside `__DEBUG_OUTPUT__`; the game fuzz targets read the admitted set
+and `DE_FUZZ_ANY_ID` widens it, which `fuzz_replay_client_stream_any_id` replays on both verify
+scripts' lists; `CGSMSSend`'s budget is the server's 114. Owners: the eight tests of
+`tests/unit/test_game_server_link.cpp` (`GameServerLink`, `ClientPlayerReceiveLoop`),
+`SMSSend.TheLargestPacketTheWriterAcceptsFitsTheStatedMaximum` and the rule's concept,
+[server link](../protocol/server-link.md).
