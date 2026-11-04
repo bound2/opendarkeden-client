@@ -4,9 +4,12 @@
 //
 // The handler fuzz targets' own seeds (tests/fuzz/seeds/<target>/*.hex,
 // docs/protocol/fuzzing.md): streams of frames a server could send that
-// open a window and then free the object it draws, the routes the
-// recording presentation hosts model (tests/fuzz/recording_hosts.h). The
-// seed corpus made from tests/golden holds no packet that reaches one.
+// reach a recording presentation entry (tests/fuzz/recording_hosts.h),
+// opening a window and then freeing the object it draws, or handing an
+// entry the object the world made for the player's request. The seed
+// corpus made from tests/golden holds no packet that reaches one. That
+// each seed reaches its entry is the fuzz_seeds_reach_client_stream_handlers
+// ctest's; here the bytes are pinned.
 //
 // Each seed is the encrypt code byte 0 and the frames, each body framed
 // by its length (see Seed): one the packet class has no setters for is
@@ -21,6 +24,7 @@
 //----------------------------------------------------------------------
 #include "test_framework.h"
 #include "packet_stream_access.h"
+#include "../fuzz/handler_world_ids.h"
 #include "CrtCompat.h"
 #include "ItemClassDef.h"
 #include "MShop.h"
@@ -31,10 +35,14 @@
 #include "SocketInputStream.h"
 #include "SocketOutputStream.h"
 #include "StoreInfo.h"
+#include "Gpackets/GCAddItemToItemVerify.h"
 #include "Gpackets/GCAddNPC.h"
 #include "Gpackets/GCDeleteObject.h"
+#include "Gpackets/GCDeleteandPickUpOK.h"
 #include "Gpackets/GCMorph1.h"
 #include "Gpackets/GCMyStoreInfo.h"
+#include "Gpackets/GCOtherModifyInfo.h"
+#include "Gpackets/GCOtherStoreInfo.h"
 #include "Gpackets/GCPetStashList.h"
 #include "Gpackets/GCShopList.h"
 #include "Gpackets/GCStashList.h"
@@ -52,6 +60,11 @@ namespace {
 // zone 32 cells a side, the player in its middle.
 const ObjectID_t kNPC = 5000;
 const Coord_t kNear = 17;
+// What the world holds for the player's request (handler_world.h's
+// MakeRequests), by the ids it shares: the peer the other-info window
+// names and the item the item-check buffer holds.
+using HandlerFuzz::kPeerID;
+using HandlerFuzz::kBufferedItemID;
 
 // A body as a server writes its fields.
 struct Body
@@ -300,6 +313,46 @@ std::string ToHex(const std::vector<unsigned char>& bytes)
 	return hex;
 }
 
+// The reply to the pick-up pending in every run: the sword to the mouse.
+void DeleteAndPickUpOK(Seed& seed)
+{
+	GCDeleteandPickUpOK packet;
+	packet.setObjectID(kBufferedItemID);
+	seed.Then(packet);
+}
+
+// The reply to the request a run records: a forge done in a slayer's run,
+// an option removed in the others'.
+void AddItemToItemVerify(Seed& seed, BYTE code)
+{
+	GCAddItemToItemVerify packet;
+	packet.setCode(code);
+	packet.setParameter(0);
+	packet.setParameter2(0);
+	seed.Then(packet);
+}
+
+// The peer's status changed: the other-info window is open on it.
+void OtherModifyInfo(Seed& seed)
+{
+	GCOtherModifyInfo packet;
+	packet.setObjectID(kPeerID);
+	seed.Then(packet);
+}
+
+// The peer's personal shop, opened at the player's request, with nothing on
+// its shelf.
+void OtherStoreInfo(Seed& seed)
+{
+	GCOtherStoreInfo packet;
+	packet.setObjectID(kPeerID);
+	packet.setRequested(1);
+	packet.setStoreInfo(new StoreInfo);
+	packet.getStoreInfo()->setOpen(1);
+	packet.getStoreInfo()->setSign("Seed");
+	seed.Then(packet);
+}
+
 // Compare with tests/fuzz/seeds/client_stream_handlers/<name>.hex, or
 // write it under UPDATE_FUZZ_SEEDS=1.
 void ExpectSeed(const std::string& name, const Seed& seed)
@@ -371,4 +424,35 @@ TEST(FuzzSeeds, ThePlayersShopTwice)
 	MyStoreInfo(seed, 1, false);
 	MyStoreInfo(seed, 0, true);
 	ExpectSeed("my-store-twice", seed);
+}
+
+// The replies that hand an item to a presentation entry: the pick-up pending
+// in every run, the forge a slayer's run records and the option removal the
+// other runs record.
+TEST(FuzzSeeds, ThePickUpTheForgeAndTheOptionRemoval)
+{
+	Seed pickUp;
+	DeleteAndPickUpOK(pickUp);
+	ExpectSeed("pick-up-ok", pickUp);
+
+	Seed forge;
+	AddItemToItemVerify(forge, ADD_ITEM_TO_ITEM_VERIFY_MIXING_OK);
+	ExpectSeed("mixing-ok", forge);
+
+	Seed removal;
+	AddItemToItemVerify(removal, ADD_ITEM_TO_ITEM_VERIFY_DETACHING_OK);
+	ExpectSeed("detaching-ok", removal);
+}
+
+// The peer the world stands in the zone: its status change reaches the
+// other-info window, its shop the personal shop window.
+TEST(FuzzSeeds, ThePeersInfoAndShop)
+{
+	Seed info;
+	OtherModifyInfo(info);
+	ExpectSeed("other-modify-info", info);
+
+	Seed shop;
+	OtherStoreInfo(shop);
+	ExpectSeed("other-store-info", shop);
 }

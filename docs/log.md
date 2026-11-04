@@ -1,5 +1,17 @@
 # Knowledge Bundle Update Log
 
+## 2026-11-04
+
+* **Update**: [fuzzing](protocol/fuzzing.md) says what the handler world holds for the player's
+  request (a peer, and one request a run: a forge, a pick-up off the ground, an option removal),
+  which four of the seven unreached presentation entries needed, that the three item windows'
+  entries are reached only by the UI's use of an item (the one reply that opens one bypasses the
+  hosts), that `fuzz_seeds_reach_client_stream_handlers` owns what the seeds reach and the mouse
+  pointer is modelled, and what the 15-minute runs with the five new seeds made; the
+  [testing overview](testing/overview.md) lists the ctest; the
+  [next work plan](reviews/NEXT.md) moves task 18 to *Done*, and `CLAUDE.md` and the
+  [reviews index](reviews/index.md) say so.
+
 ## 2026-11-01
 
 * **Creation**: [server link](protocol/server-link.md), the rule that the game connection admits

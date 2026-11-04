@@ -152,6 +152,23 @@ darkeden_fuzz_target(client_datagram fuzz_client_datagram.cpp ^RC DATAGRAM)
 darkeden_fuzz_target(client_stream_handlers fuzz_client_stream_handlers.cpp ^GC HANDLERS)
 darkeden_fuzz_target(client_login_stream_handlers fuzz_client_login_stream_handlers.cpp ^LC HANDLERS)
 
+#----------------------------------------------------------------------
+# What the game target's own seeds reach. The replay over the seed
+# directory alone, with DE_FUZZ_REACH naming the recording entries
+# (tests/fuzz/recording_hosts.h) the seeds are written to reach: the
+# process fails at its end if one was never called, so a seed, the world
+# or a handler that stops short of its entry fails here, not in a count
+# kept out of the tree. The list is the one docs/protocol/fuzzing.md
+# gives for the seeds.
+#----------------------------------------------------------------------
+add_test(
+	NAME fuzz_seeds_reach_client_stream_handlers
+	COMMAND fuzz_replay_client_stream_handlers ${CMAKE_CURRENT_SOURCE_DIR}/seeds/client_stream_handlers
+	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
+set_tests_properties(fuzz_seeds_reach_client_stream_handlers PROPERTIES
+	ENVIRONMENT "DE_FUZZ_REACH=RunShop,SetShop,RunStorage,SetStorage,RunPetStorage,SetPetStorage,RunPersnalShop,SetPersnalShop,PickUpItem,OkMixingForge,OkRemoveOption,RunOtherInfo")
+
 # The game connection with every registered id admitted (DE_FUZZ_ANY_ID,
 # client_stream_reader.h) over the seeds of every golden and every layout
 # line, so the readers of the ids the game server link refuses

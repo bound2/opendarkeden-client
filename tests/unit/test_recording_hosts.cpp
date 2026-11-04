@@ -7,13 +7,16 @@
 // model object in opens with none, takes the one a Set entry hands it
 // only while open, and forgets it when a close the real UI makes closes
 // it; IsRunning answers from that. The end of a run reads the objects of
-// the windows still open, and only those.
+// the windows still open, and only those. The mouse pointer keeps the
+// item PickUpItem hands it until DropItem, read with the windows, and
+// every entry counts its calls.
 //
 //----------------------------------------------------------------------
 
 #include "test_framework.h"
 
 #include "../fuzz/recording_hosts.h"
+#include "ItemClassDef.h"
 
 namespace {
 
@@ -95,4 +98,29 @@ TEST(RecordingHosts, AWindowKeepsWhatItIsHandedWhileOpenUntilTheUIClosesIt)
 	CHECK(!VsUiPresentation::IsRunningPersnalShop());
 	CHECK(!RecordingHosts::g_PetStorage.bOpen);
 	CHECK(!ReadsAtTheEnd());
+}
+
+TEST(RecordingHosts, TheMouseKeepsWhatPickUpItemHandsItUntilDropItemAndCountsTheCall)
+{
+	Hosts hosts;
+	RecordingHosts::Install();
+	CHECK(!ReadsAtTheEnd());
+
+	// A key, the one item class a test makes without the factory host.
+	MKey key;
+	const unsigned before = RecordingHosts::g_Reached[RecordingHosts::ENTRY_PICK_UP_ITEM];
+	DialogPresentation::PickUpItem(&key);
+	CHECK_EQ(RecordingHosts::g_Reached[RecordingHosts::ENTRY_PICK_UP_ITEM], before + 1);
+	CHECK(RecordingHosts::g_pMouseItem == &key);
+	CHECK(ReadsAtTheEnd());		// the mouse, drawn every frame
+
+	DialogPresentation::DropItem();
+	CHECK(RecordingHosts::g_pMouseItem == NULL);
+	CHECK(!ReadsAtTheEnd());
+
+	// A rejected input leaves for the title: the mouse is empty again.
+	DialogPresentation::PickUpItem(&key);
+	RecordingHosts::Reset();
+	CHECK(RecordingHosts::g_pMouseItem == NULL);
+	CHECK_EQ(RecordingHosts::g_Reached[RecordingHosts::ENTRY_PICK_UP_ITEM], before + 2);
 }

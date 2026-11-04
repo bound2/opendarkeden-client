@@ -1,7 +1,7 @@
 ---
 type: Record
 title: "Next work plan"
-description: "The tasks ranked in the client on 2026-11-01 after the first fifteen were done: the packet admission set, the handler fuzzers' reach, the read budgets the two inventories disagree on, the other two races in the game UI scene, a scripted run against the server, the walk's stop points and the modernization leftovers, each written so an agent with no other context could take it, what is kept in view, and the owner decisions that are not an agent's to make."
+description: "The tasks ranked in the client on 2026-11-01 after the first fifteen were done: the packet admission set, the handler fuzzers' reach, the read budgets the two inventories disagree on, the other two races in the game UI scene, a scripted run against the server, the walk's stop points and the modernization leftovers, each written so an agent with no other context could take it, what is kept in view, and the owner decisions that are not an agent's to make; the packet admission set (task 17) and the handler fuzzers' reach (task 18) are done."
 tags: [review, plan]
 ---
 
@@ -53,23 +53,6 @@ platform workflows dispatched by hand) applies to each.
 
 Ranked 2026-11-01. The order is the rank, and the numbers continue the first ranking's, so a
 *Done* entry keeps its name.
-
-### 18. The handler fuzzers' reach
-
-**What:** the game handler target's recording hosts (`tests/fuzz/recording_hosts.h`) stand in
-for the presentation entries, and seven need state the world (`tests/fuzz/handler_world.h`)
-never makes: `PickUpItem` an item-check buffer, `OkMixingForge` and `OkRemoveOption` a request
-that `TempInformation` records, `RunOtherInfo` an installed `GetOtherInfoName`, and the three
-item windows the player using an item; the route through `GCOtherStoreInfo` needs a second
-player in the zone. Nothing fuzzes those entries' handlers past the point where the state is
-missing.
-
-**How:** make the state in the world (a second player, an item in use, a recorded request, an
-installed name callback), write a seed per entry through `tests/unit/test_fuzz_seeds.cpp`
-(`golden2corpus.pl --seeds` adds them), replay the corpus, then run each handler target under
-libFuzzer for fifteen minutes with the new seeds as [fuzzing](../protocol/fuzzing.md) describes,
-and record the run there. Rule kept: a fixed crash gets a regression input *and* a unit test,
-and a harness gap is fixed in the harness, never by weakening the check.
 
 ### 23. The 41 read budgets the two inventories still disagree on
 
@@ -444,3 +427,24 @@ scripts' lists; `CGSMSSend`'s budget is the server's 114. Owners: the eight test
 `tests/unit/test_game_server_link.cpp` (`GameServerLink`, `ClientPlayerReceiveLoop`),
 `SMSSend.TheLargestPacketTheWriterAcceptsFitsTheStatedMaximum` and the rule's concept,
 [server link](../protocol/server-link.md).
+
+### 18. The handler fuzzers' reach (PR #593)
+
+The world holds the request the player has just sent, one a run as the UI admits one at a time
+(`tests/fuzz/handler_world.h`'s `MakeRequests`, as `UIMessageManager.cpp` leaves the item-check
+buffer and `TempInformation`): a slayer's player forging, a vampire's picking a sword up off the
+ground to the mouse, an ousters' taking an option off an inventory item with the remover on the
+mouse; and in every run a second player of the player's race beside it, named as the other-info
+window names its subject (`tests/fuzz/recording_hosts.h` installs `GetOtherInfoName`). Five seeds
+(`tests/unit/test_fuzz_seeds.cpp`) reach `PickUpItem`, `OkMixingForge`, `OkRemoveOption`,
+`RunOtherInfo` and the personal shop window through `GCOtherStoreInfo`; the three item windows'
+entries are reached only by the UI's own use of an item, and the one reply that opens one,
+`GCUseOK`, goes through the executable's adapter straight into `VS_UI`, outside any host, so no
+seed reaches them; [fuzzing](../protocol/fuzzing.md) says so, with the 15-minute runs. The
+recording hosts count every entry's calls, and their mouse pointer keeps the item `PickUpItem`
+hands it until `DropItem`, read with the windows. Owners:
+`fuzz_seeds_reach_client_stream_handlers` (the seed directory replayed with `DE_FUZZ_REACH`
+naming the entries the seeds reach, on both verify scripts' required lists), `FuzzSeeds` and
+`GameServerLink.EveryFrameOfAHandlerSeedIsAdmittedInGame` in `unit_tests`, `RecordingHosts` in
+`unit_tests` for the mouse and the counts, and the ids `tests/fuzz/handler_world_ids.h` shares
+between the world and the seeds.
