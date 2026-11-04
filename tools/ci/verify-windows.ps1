@@ -66,7 +66,7 @@ try {
 		'decore_tests', 'decore_vendored', 'ratchets', 'arch_includes',
 		'source_encoding', 'knowledge_bundle', 'warning_policy', 'warning_budget_parser', 'format_arity', 'packet_indices', 'wire_inventory_fresh', 'fuzz_replay_client_stream',
 		'fuzz_replay_client_stream_any_id', 'fuzz_replay_client_login_stream', 'fuzz_replay_client_datagram', 'fuzz_replay_client_stream_handlers',
-		'fuzz_replay_client_login_stream_handlers')
+		'fuzz_replay_client_login_stream_handlers', 'fuzz_seeds_reach_client_stream_handlers')
 	$warningFailures = @()
 	foreach ($preset in $BuildPresets) {
 		Write-Host "Building all targets: $preset (log: $logDir/$preset-build.log)"

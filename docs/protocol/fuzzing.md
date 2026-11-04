@@ -51,12 +51,15 @@ game strings (an empty table left the operator name prefix empty, which made eve
 operator's and hid the replies' player branch) and a nickname table with a row of text per index
 (the game will not start without its nickname file), `InitGameObject` itself, and for the game target a 32 by 32 zone with the player in its middle (the size of three
 of the game's zones; the server's map files hold zones from 17 by 25 to 256 by 256, and a wire
-coordinate is a byte) and, since task 18, what a player who had just acted holds: a second
-player of the player's race beside it, named as the other-info window names its subject, a sword
-in the inventory the item-check buffer holds for a pick-up to the mouse, and the request
-`TempInformation` records, a forge of two more items in a slayer's run and an option removal
-from the sword in a vampire's and an ousters', so a reply that hands those objects to a
-presentation entry reaches it. `InitGameObject` installs the executable's host adapters; the run removes
+coordinate is a byte) and, since task 18, a second player of the player's race beside it, named
+as the other-info window names its subject, and the request the player has just sent, one a run
+as the UI admits one at a time, left as `UIMessageManager.cpp` leaves the item-check buffer and
+`TempInformation`: a slayer's player is forging (the mixing item in the inventory and the
+buffer, the two forge items' cells recorded), a vampire's picking a sword up off the ground
+beside it to the mouse (the sword the zone's and the buffer's), an ousters' taking an option
+off an inventory item with the remover on the mouse (the remover in the buffer, the target's
+cell recorded), so a reply that hands those objects to a presentation entry reaches it.
+`InitGameObject` installs the executable's host adapters; the run removes
 them all (`ReleaseGameObjectHosts`) and puts back the model's, `ZoneState`, `CreatureState`,
 `PlayerState` and `MItem`'s, without the entries that reach the UI, a sound or a party member
 over UDP. Over them go the recording hosts of `tests/fuzz/recording_hosts.h` (task 4 of the
@@ -81,9 +84,12 @@ presentation call is skipped, as in the unit tests, so what an adapter does with
 string a handler hands it (`GameMain`'s `SetWeather`, a dialog's text) is not reached: the walks of
 [packet input safety](packet-input-safety.md) followed those by reading, and the review of the
 recording hosts found one they missed (task 12 of the next work plan).
-Nor does the world hold a request the player made: a reply that checks the request mode
-`TempInformation` records (a storage move, a trade) finds none and does nothing, as it would if a
-server sent it unasked. `GCReconnectLogin` and `LCReconnect` are read and not dispatched: they
+A reply that checks for a request the run's player did not send (a storage move, a trade)
+finds none in `TempInformation` and does nothing, as it would if a server sent it unasked; the
+one request each run holds is its race's (above). The mouse pointer is the recording hosts'
+(`PickUpItem` hands it an item, `DropItem` takes it back), read with the windows after every call
+and never freed, as the UI never frees it: what it holds when a run ends is a leak the runs do not
+count. `GCReconnectLogin` and `LCReconnect` are read and not dispatched: they
 reconnect the socket to the address the packet names. The player's socket aborts the run if
 anything disconnects it, which only those two do, so the regression input of each fails if the
 drop is lost.
@@ -229,9 +235,10 @@ left check pointers; the login target failed none in 25 minutes. The datagram ta
 `DE_FUZZ_ABORT_ON_ASSERT=1` (the `RC` readers hold no `Assert`; `Datagram::read` holds two).
 The handler targets ran 15 minutes each with the recording hosts on 2026-10-29 (248,844 and
 211,632 inputs) and found nothing, but replaying the corpora they left called no recording entry
-once: the seed corpus holds no packet that reaches one, and seven of the entries need state this
-world never makes (an item-check buffer, a request `TempInformation` records, an installed
-`GetOtherInfoName`, the player using an item), so seeds alone can reach only the four windows;
+once: the seed corpus holds no packet that reaches one, and seven of the entries needed state
+the world did not make then (an item-check buffer, a request `TempInformation` records, an
+installed `GetOtherInfoName`, the player using an item), so seeds alone could reach only the
+four windows;
 that run tested the hosts' install, not the objects they read (the [code-health review](../reviews/code-health-review-2026-08-29.md)'s
 *Found by fuzzing* section has the run). The game target's own seeds (task 4, PR #584) then
 reached the four windows: replayed with a counter on the window model (kept out of the commit),
@@ -253,14 +260,23 @@ window 45 times, the storage 519, the pet storage 417 and the personal shop 126.
 change then made the world read the windows after every call of the receive loop, as the game draws
 once a call; a last 15-minute run with that made 223,087 inputs (coverage 45,153 to 46,392) and
 found nothing. Task 18 then made the state four of the seven unreached entries need (the
-item-check buffer, the recorded request, the installed name and the peer it names) and found the
-other three, the item windows, out of any reply's reach: `MEffectItem::UseInventory` and
-`MCodeSheetItem::UseInventory` run only from the UI's own use of an item (`UIMessageManager.cpp`),
-never from a handler. Each of the five seeds reaches its entry in the replay (the pick-up in
-every run, the forge in a slayer's, the option removal in the other two, the peer's info and its
-shop in every run; counted with a line on each entry, kept out of the commit), and the 15-minute
-runs with them on 2026-11-04 made 66,289 inputs on the game target (coverage 37,670 to 42,606)
-and 55,419 on the login target (coverage 13,437 to 14,401), finding nothing.
+item-check buffer, the recorded request, the installed name and the peer it names), one request
+a run as the UI admits one, and found the other three, the item windows, reached only by the
+UI's own use of an item: `MCodeSheetItem::UseInventory` opens the quest inventory,
+`MEffectItem::UseInventory` the bulletin board and `MEventTreeItem::UseInventory` the Xmas card
+window or the bulletin board, and `UseInventory` runs from `UIMessageManager.cpp` alone. The one
+reply that opens one of them, `GCUseOK`, does so through the executable's `UseItemOK` adapter
+(`PacketFunction.cpp`) straight into `VS_UI`, outside any host, which the world leaves out, so no
+seed reaches those three entries. The seeds' reach is owned by
+`fuzz_seeds_reach_client_stream_handlers`, the replay of the seed directory with `DE_FUZZ_REACH`
+naming the entries (`recording_hosts.h` counts every entry's calls): over the eleven seeds the
+pick-up reaches `PickUpItem` once (a vampire's run), the forge `OkMixingForge` once (a slayer's),
+the option removal `OkRemoveOption` once (an ousters'), the peer's info `RunOtherInfo` and its
+shop `RunPersnalShop` in every run, and the four windows' seeds their windows as before. The
+15-minute runs with the five seeds on 2026-11-04 made 48,779 inputs on the game target
+(coverage 37,969 to 43,106) and 38,306 on the login target (coverage 13,452 to 14,339), finding
+nothing (a first pair of runs, before the review moved the pick-up's sword onto the ground
+and made one request a run, had made 66,289 and 55,419 and found nothing).
 
 `DE_FUZZ_ABORT_ON_ASSERT=1` turns a failed `Assert` (an `AssertionError`, normally a rejected
 input) into a crash, to see which ones hostile input reaches. `-close_fd_mask=3` hides the

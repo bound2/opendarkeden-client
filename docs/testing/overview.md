@@ -24,6 +24,7 @@ everything else is verified by builds and the automated checks, never by a runti
 | `fuzz_replay_client_stream`, `fuzz_replay_client_login_stream`, `fuzz_replay_client_datagram` | the seed corpus and every fixed crash through the packet readers ([fuzzing](../protocol/fuzzing.md)) |
 | `fuzz_replay_client_stream_any_id` | every golden through the game connection's reader with every registered id admitted (`DE_FUZZ_ANY_ID`), where the game connection itself admits only what a game server sends ([server link](../protocol/server-link.md)) |
 | `fuzz_replay_client_stream_handlers`, `fuzz_replay_client_login_stream_handlers` | the same seeds and every fixed crash through the client's receive loop into the packet handlers, in a world `tests/fuzz/handler_world.h` builds ([fuzzing](../protocol/fuzzing.md#the-handler-targets)) |
+| `fuzz_seeds_reach_client_stream_handlers` | the game handler target's own seeds replayed with `DE_FUZZ_REACH` naming the recording entries each must reach ([fuzzing](../protocol/fuzzing.md#the-handler-targets)) |
 | `ratchets` (bash) | the shrink-only counts ([ratchets](ratchets.md)) |
 | `arch_includes`, `decore_vendored`, `source_encoding`, `format_arity`, `packet_indices`, `wire_inventory_fresh`, `warning_budget_parser`, `knowledge_bundle` (perl) | the include graph, the vendored copy, UTF-8 sources, [format strings](../protocol/format-strings.md), [packet indices](../protocol/packet-input-safety.md), the [wire inventory](../protocol/wire-layout.md), the warning budget's parser, the [knowledge bundle](../knowledge-bundle.md) |
 | `warning_policy` (cmake) | the warning options every target compiles with ([reading build output](../build/reading-build-output.md)) |
@@ -78,7 +79,8 @@ job has not produced these totals either. The same Mac ran the `macos` preset's 
 that day ([Linux and macOS](../build/linux-and-macos.md#status-on-macos)), of which
 `verify-linux.sh` and `verify-windows.ps1` then required 16 by name
 (`fuzz_replay_client_datagram` the latest then; the list is 23 names on 2026-10-23, the two
-handler replays the latest, and 24 on 2026-11-01, `fuzz_replay_client_stream_any_id` the latest). A
+handler replays the latest, 24 on 2026-11-01, `fuzz_replay_client_stream_any_id` the latest, and 25 on
+2026-11-04, `fuzz_seeds_reach_client_stream_handlers` the latest). A
 platform-conditional test can make the check totals differ by one between platforms; that is not a
 failure. Keep a new measurement with the change that produced it; this concept records the last
 one, not a live count. `tools/ci/verify-linux.sh` prints the suite's own totals line, the line a
