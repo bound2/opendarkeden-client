@@ -109,7 +109,7 @@
 107	CGSkillToSelf	4
 108	CGSkillToTile	6
 109	CGSMSAddressList	0
-110	CGSMSSend	108
+110	CGSMSSend	114
 111	CGStashDeposit	4
 112	CGStashList	4
 113	CGStashRequestBuy	0

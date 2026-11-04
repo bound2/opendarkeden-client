@@ -151,3 +151,33 @@ darkeden_fuzz_target(client_datagram fuzz_client_datagram.cpp ^RC DATAGRAM)
 # dispatched to the handlers, in the world handler_world.h builds.
 darkeden_fuzz_target(client_stream_handlers fuzz_client_stream_handlers.cpp ^GC HANDLERS)
 darkeden_fuzz_target(client_login_stream_handlers fuzz_client_login_stream_handlers.cpp ^LC HANDLERS)
+
+# The game connection with every registered id admitted (DE_FUZZ_ANY_ID,
+# client_stream_reader.h) over the seeds of every golden and every layout
+# line, so the readers of the ids the game server link refuses
+# (docs/protocol/server-link.md) are still replayed.
+if(PERL_EXECUTABLE)
+	set(any_id_corpus ${CMAKE_CURRENT_BINARY_DIR}/corpus/client_stream_any_id)
+	add_test(
+		NAME fuzz_corpus_client_stream_any_id
+		COMMAND ${PERL_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/fuzz/golden2corpus.pl
+			${CMAKE_SOURCE_DIR}/tests/golden
+			${CMAKE_SOURCE_DIR}/tests/wire-layout.txt
+			${any_id_corpus}
+			.
+	)
+	set_tests_properties(fuzz_corpus_client_stream_any_id PROPERTIES
+		FIXTURES_SETUP fuzz_client_stream_any_id_corpus)
+	add_test(
+		NAME fuzz_replay_client_stream_any_id
+		COMMAND fuzz_replay_client_stream
+			${any_id_corpus}
+			${CMAKE_CURRENT_SOURCE_DIR}/regressions/client_stream
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+	)
+	set_tests_properties(fuzz_replay_client_stream_any_id PROPERTIES
+		FIXTURES_REQUIRED fuzz_client_stream_any_id_corpus
+		ENVIRONMENT "DE_FUZZ_ANY_ID=1")
+else()
+	message(STATUS "perl not found: the fuzz_replay_client_stream_any_id test is not registered")
+endif()

@@ -96,7 +96,7 @@ struct TablesScope
 	: m_pFactories(g_pPacketFactoryManager), m_pValidator(g_pPacketValidator)
 	{
 		factories.init();
-		validator.init();
+		validator.init(factories);
 		g_pPacketFactoryManager = &factories;
 		g_pPacketValidator = &validator;
 	}

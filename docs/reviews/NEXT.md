@@ -1,21 +1,26 @@
 ---
 type: Record
 title: "Next work plan"
-description: "The tasks ranked in the client after the 2026-10-25 merges, each written so an agent with no other context could take it, all done as of 2026-10-29 (the handler fuzzers' reach, the packet-safety routes the walks did not follow, what the review of the fuzzers' hosts found, the open code-health rows, the last drawing stubs), what is kept in view, and the owner decisions that are not an agent's to make."
+description: "The tasks ranked in the client on 2026-11-01 after the first fifteen were done: the packet admission set, the handler fuzzers' reach, the read budgets the two inventories disagree on, the other two races in the game UI scene, a scripted run against the server, the walk's stop points and the modernization leftovers, each written so an agent with no other context could take it, what is kept in view, and the owner decisions that are not an agent's to make."
 tags: [review, plan]
 ---
 
 # Next work plan
 
-Written 2026-10-26, after the merges of PRs #562-#568. The
+Written 2026-10-26, after the merges of PRs #562-#568, and ranked again on 2026-11-01 after
+its fifteen tasks were done (each under *Done* with its PR, the last in PR #588). The
 [restructuring plan](RESTRUCTURING.md) is complete except task 4.12, and the
-[code-health review](code-health-review-2026-08-29.md) had four rows still marked open (none
-since tasks 1 to 3), all in its *Found by fuzzing* and *Found by reading* tables. What was left
-is below, ranked by the risk it closed (all of it done as of 2026-10-29, each under *Done*), with the cheap undefined-behaviour rows ahead of the long
-walks and the cosmetic stubs last. Each task names the code, the tests it must flip or add, and the
-rule it must keep, so it can be taken cold. One task per PR; the merge gate (a two-reviewer
-adversarial review of the whole diff, then the four platform workflows dispatched by hand) applies
-to each.
+[code-health review](code-health-review-2026-08-29.md) has no row marked open. The second
+ranking draws on what the first left in view, on where the packet-safety walks stopped
+([packet input safety](../protocol/packet-input-safety.md)), on what the handler fuzzers cannot
+reach ([fuzzing](../protocol/fuzzing.md)) and on a reading of the validator and the factory
+table. It is ranked by the risk it closes: the admission set, the fuzzers' reach and the read
+budgets the two inventories disagree on first, then the UI seam and the run against the server,
+which give owners to what is still a regression guard, and the walk's stop points and the
+modernization leftovers last. Each task names the
+code, the tests it must flip or add, and the rule it must keep, so it can be taken cold. One
+task per PR; the merge gate (a two-reviewer adversarial review of the whole diff, then the four
+platform workflows dispatched by hand) applies to each.
 
 ## How to take a task
 
@@ -46,24 +51,123 @@ to each.
 
 ## Tasks
 
-No task is open (2026-10-30): every task ranked here is under *Done*, each with its PR. What
-follows is kept in view, and the owner decisions below are not an agent's to make.
+Ranked 2026-11-01. The order is the rank, and the numbers continue the first ranking's, so a
+*Done* entry keeps its name.
 
-### 10. Kept in view, no task
+### 18. The handler fuzzers' reach
+
+**What:** the game handler target's recording hosts (`tests/fuzz/recording_hosts.h`) stand in
+for the presentation entries, and seven need state the world (`tests/fuzz/handler_world.h`)
+never makes: `PickUpItem` an item-check buffer, `OkMixingForge` and `OkRemoveOption` a request
+that `TempInformation` records, `RunOtherInfo` an installed `GetOtherInfoName`, and the three
+item windows the player using an item; the route through `GCOtherStoreInfo` needs a second
+player in the zone. Nothing fuzzes those entries' handlers past the point where the state is
+missing.
+
+**How:** make the state in the world (a second player, an item in use, a recorded request, an
+installed name callback), write a seed per entry through `tests/unit/test_fuzz_seeds.cpp`
+(`golden2corpus.pl --seeds` adds them), replay the corpus, then run each handler target under
+libFuzzer for fifteen minutes with the new seeds as [fuzzing](../protocol/fuzzing.md) describes,
+and record the run there. Rule kept: a fixed crash gets a regression input *and* a unit test,
+and a harness gap is fixed in the harness, never by weakening the check.
+
+### 23. The 41 read budgets the two inventories still disagree on
+
+**What:** the server repository's `tests/tools/wire_inventory_diff.sh`, the ground truth for
+whether the two copies of the protocol agree on ids and maximum body sizes, fails against this
+repository on 2026-11-01 with 42 `max-size mismatches (same id and name)`: `CGSMSSend` (114
+there, 108 here until task 17) and 41 GC packets the server budgets larger than this client reads
+(`GCAddMonster` 1072 against 306, `GCSkillInfo` 34706 against 4338, `GCUpdateInfo` 59146
+against 58380 among them; `GCStashList` is the other way, 7506 against 21006). A GC packet the
+server can write past this client's budget is refused at the receive loop's size gate
+(`ClientPlayer::processCommand`, "too large packet SIZE") and disconnects the player in play; a
+budget larger than the server ever writes is only a looser read gate.
+
+**How:** for each GC line, read the server's `write()` and `getPacketSize()` against this
+client's `getPacketMaxSize()`: where the server can write more, raise this client's budget to
+the server's (the inventory line moves, re-recorded by `test_wire_layout` under
+`UPDATE_GOLDENS=1` after `tests/tools/gen_wire_inventory.pl` regenerates the registry; no byte
+on the wire does), and where it cannot, say why the two differ in
+[wire layout](../protocol/wire-layout.md) and have the server lower its own or list the line in
+the diff's exceptions. The owner is the diff run clean against the server's master, named with
+its date in [wire layout](../protocol/wire-layout.md). Rule kept: a golden is never
+re-recorded to make a test pass, and a layout change is a protocol change the server ships
+identically ([wire layout](../protocol/wire-layout.md)).
+
+### 19. The vampire and ousters interfaces in the game UI scene, then one headless frame
+
+**What:** `tests/support/game_ui_scene.h` starts `C_VS_UI_GAME` for a slayer only and draws no
+frame, so the vampire and ousters interfaces are untested, and what a window draws stays a
+regression guard: the party arrow (`C_VS_UI::Show`), the slayer, ousters and info windows' bars
+(`HPBar.EveryBarIsDrawnWithNoMaximumToDivideBy` draws the HP bar alone, and Apple Silicon does
+not trap on the division it guards, where x86 does), task 12's `VS_UI` bound and task 14's next, which need a quest
+file. Starting the slayer alone found two members read before they were set (task 16).
+
+**How:** start the other two races in the scene (expect the same class of finding, reproduced
+by reading the fill pattern, [uninitialised members](../testing/uninitialised-members.md)), add
+a quest-file fixture for the quest window, then draw one frame on SDL's dummy video driver so
+draw-time contracts (the party arrow, the bars, the descriptor renderers) can be asserted and
+the `exempt` fixes get owners. Rule kept: `VS_UI` rendering that reaches game globals is
+`Test path: exempt` only until the scene reaches it
+([executable-only code](../testing/executable-only-code.md)).
+
+### 20. A scripted headless run against the docker server
+
+**What:** off Windows the client is verified to the main menu: login, character select, a zone
+and chat against the docker server are not verified
+([Linux and macOS](../build/linux-and-macos.md)), and the
+[browser client](../browser/browser-client.md) builds and logs in. Beyond the goldens and the
+server repository's wire-inventory diff (red today, task 23), nothing proves the two
+repositories still agree end to end.
+
+**How:** a script under `tools/` that starts the server repository's compose stack
+(`docker/docker-compose.yml` there), runs the native client under `SDL_VIDEODRIVER=dummy`, and
+checks the mode transitions (`GameMain.cpp`'s `SetMode`): login, the character list, zone
+entry, a chat line, logout. Script the login the least invasive way there is (the launcher
+arguments if they suffice, else a test-only entry behind a build option), never a change to the
+game's own flow. It is run by hand and recorded in [Linux and macOS](../build/linux-and-macos.md);
+it is never a merge gate (the user's instruction of 2026-09-17: live verification is optional).
+
+### 21. The packet-safety walk's stop points
+
+**What:** two stop points [packet input safety](../protocol/packet-input-safety.md) names and
+one task 7 left: a pixel's gradation byte indexes within a `ColorSet` row (0 to 255 into 30
+entries) unchecked in the CPU decoders and the SDL wipe, which only the sprite packs choose;
+`memcpyPalEffectGradation` indexes `ColorSet[s_Value1]` without the range check
+`memcpyEffectGradation` makes, which matters once it is registered (task 7 under *Done*; the
+[native GPU renderer](../rendering/native-gpu-renderer.md) says it is unregistered); and the
+`VS_UI` reads of the model the 2026-10-25 walk listed as not followed that task 5 (d) did not
+reach, the party slots among them (5 (d) found the inventory grids and the skill trees holding;
+the safety page's closing sentence still lists them and is narrowed with this task).
+
+**How:** one reading task per stop point, each ending in a row of the
+[code-health review](code-health-review-2026-08-29.md) (found open, or followed and clean) and
+a test where a fix is made; the sprite-data route ranks lowest, since a server does not choose
+it. Rule kept: a search that finds nothing is a fact about the search
+([measure the value](../process/measure-the-value.md)).
+
+### 22. Modernization leftovers, behind the above
+
+**What:** the [C++20 assessment](../history/cpp17-cpp20-compatibility-assessment-2026-09-04.md)
+has priority 9 (ownership RAII) not started, and the seven packets that never freed their reads
+(task 8) were that class; spans and typed scalars (priorities 3 and 4) have four slices and
+`std::filesystem` (6) one, each leaving most call sites as they were.
+
+**How:** behaviour-preserving slices, small and reviewable, each with the round-trip or golden
+coverage the assessment asks for; take one only when nothing above is open. Rule kept: a move
+does not change bytes in the same commit ([move, then fix](../process/move-then-fix.md)).
+
+### Kept in view, no task
 
 - The 5:5:5 sprite decoders are latent ([client traps](../architecture/client-traps.md)) and
   tested; nothing in the shipped data uses them.
 - The [browser client](../browser/browser-client.md) builds and logs in; a task appears when the
   server's WebSocket gateway changes.
-- The handler fuzz targets' recording hosts ([fuzzing](../protocol/fuzzing.md)): seven entries
-  need state the world never makes (`PickUpItem` an item-check buffer, `OkMixingForge` and
-  `OkRemoveOption` a request `TempInformation` records, `RunOtherInfo` an installed
-  `GetOtherInfoName`, the three item windows the player using an item), and on a failed `Assert`
-  the world follows the Debug client, which disconnects, where a Release client carries on past it.
-- The game UI scene (`tests/support/game_ui_scene.h`) starts a slayer's interface and draws no
-  frame: what a window draws (the party arrow among it, drawn in `C_VS_UI::Show`) stays a
-  regression guard, as do the vampire and ousters interfaces. Task 14's next and task 12's `VS_UI`
-  bound need a quest file, not the scene.
+- On a failed `Assert` the handler fuzzers' world follows the Debug client, which disconnects,
+  where a Release client carries on past it ([fuzzing](../protocol/fuzzing.md)).
+- The server repository's `tests/tools/wire_inventory_diff.sh` and `decore_client_diff.sh`
+  compare the two copies of the protocol and of the shared rules; run them after any
+  protocol-touching PR in either repository. The inventory diff is red today (task 23).
 
 ## Owner decisions (not for an agent to make)
 
@@ -76,10 +180,14 @@ Recorded so the next agent does not decide them unasked. Each stays open until t
   from CP949 to UTF-8 on load while the filter pairs bytes and looks words up in two- to
   eight-byte windows, so the shipped lists match no text (pinned by
   `KoreanWordsFromTheBinaryListAreConvertedAndMatchNothing`). Which encoding chat is filtered in
-  is the owner's call.
+  is the owner's call. Recommendation (2026-11-01): filter in UTF-8, converting each list once
+  on load and matching the converted words' byte sequences, and re-pin the test.
 - Transport encryption: the wire is unencrypted, login credentials included
   ([reconciliation](code-health-reconciliation-2026-09-23.md), *Boundaries retained*). It needs a
-  matching server protocol change and is a design decision, not a fix.
+  matching server protocol change and is a design decision, not a fix. Recommendation
+  (2026-11-01), taken with the server: make the TLS WebSocket gateway the only public endpoint,
+  which native clients can already use ([browser client](../browser/browser-client.md)), so no
+  wire change is needed.
 - The quest queue and Escape (the review of task 14): Escape closes a quest's NPC script dialog
   with `DIALOG_EXECID_EXIT`, which `ExecF_GQuestNpcScript` ignores, so the element stays at the
   head of `C_VS_UI_QUEST_MANAGER`'s queue and every later one waits behind it, as one that opened no
@@ -319,3 +427,20 @@ are tested (`GameUIScene.ClosingTheStashClosesTheDepositDialog`,
 `TheShopWindowSaysWhichShopItShows`). Starting it found two members read before they were set
 (`C_VS_UI_INFO::m_info_mode`, `C_VS_UI_SKILL::m_bl_open`), which a run with CI's UBSan options
 stops on; both are set now and pinned by tests that build each window over a fill pattern. Owners: the five `GameUIScene` tests.
+
+### 17. Admit only what a server sends in the game state (PR #591)
+
+`CPS_NORMAL`'s set is folded from the factory table by `GameServerLink::SentByAGameServer`
+(`Client/Packet/GameServerLink.h`): the 246 registered GC packets are admitted in game, and the
+41 other factories (CG 11, LC 17, CR 4, RC 7, UC 1, CU 1; 287 in all, counted with
+`grep -c 'DE_PACKET_FACTORY(' Client/Packet/PacketFactoryManager.cpp`) and every unregistered id
+are refused before their body is read, on the path a refused id took in the login statuses. The
+derivation read the handlers and the server: the gameserver constructs no LC, CR, RC, UC or CU
+packet, so the prefix needs no correction, and the UC and CU handlers, which do nothing, stay
+registered. Each factory is registered with its name through `DE_PACKET_FACTORY`, since no name
+reaches the validator outside `__DEBUG_OUTPUT__`; the game fuzz targets read the admitted set
+and `DE_FUZZ_ANY_ID` widens it, which `fuzz_replay_client_stream_any_id` replays on both verify
+scripts' lists; `CGSMSSend`'s budget is the server's 114. Owners: the eight tests of
+`tests/unit/test_game_server_link.cpp` (`GameServerLink`, `ClientPlayerReceiveLoop`),
+`SMSSend.TheLargestPacketTheWriterAcceptsFitsTheStatedMaximum` and the rule's concept,
+[server link](../protocol/server-link.md).

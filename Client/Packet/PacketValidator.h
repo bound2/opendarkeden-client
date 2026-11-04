@@ -14,6 +14,8 @@
 #include "PlayerStatus.h"
 #include <vector>
 
+class PacketFactoryManager;
+
 //----------------------------------------------------------------------
 //
 // class PacketValidator;
@@ -22,6 +24,10 @@
 // XXXPlayer::processCommand() 에서 패킷 아이디가 들어왔을 경우
 // 이 아이디를 플레이어의 상태에 따라서 검증해본다. 이때 맞으면
 // 계속 처리하면 되지만 틀리면 접속을 종료해야 한다.
+//
+// The set for CPS_NORMAL, the game connection, is folded from the
+// factory table by the game server link (GameServerLink.h,
+// docs/protocol/server-link.md), so init needs the factories first.
 //
 //----------------------------------------------------------------------
 
@@ -35,8 +41,12 @@ public :
 	// destructor
 	~PacketValidator ();
 
-	// init
+	// init from the factory table g_pPacketFactoryManager holds;
+	// Error when it is not there yet (a startup-order bug)
 	void init ();
+
+	// init from the given factory table
+	void init ( const PacketFactoryManager & factories );
 
 	// add packet id set
 	void addPacketIDSet ( PlayerStatus playerStatus , PacketIDSet * pPacketID );

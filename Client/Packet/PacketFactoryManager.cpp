@@ -541,6 +541,8 @@ PacketFactoryManager::PacketFactoryManager ()
 	for (int i = 0 ; i < m_Size ; i ++) 
 		m_Factories[i] = NULL;
 			
+	m_Names.assign(m_Size, std::string());
+
 	__END_CATCH
 }
 
@@ -584,150 +586,150 @@ void PacketFactoryManager::init ()
 {
 	__BEGIN_TRY
 		
-	addFactory(new GCAddBatFactory());
-	addFactory(new GCAddBurrowingCreatureFactory());
-	addFactory(new GCAddEffectFactory());
-	addFactory(new GCAddEffectToTileFactory());
-	addFactory(new GCAddGearToInventoryFactory());
-	addFactory(new GCAddGearToZoneFactory());
-	addFactory(new GCAddInstalledMineToZoneFactory());
-	addFactory(new GCAddMonsterFactory());
-	addFactory(new GCAddMonsterCorpseFactory());
-	addFactory(new GCAddMonsterFromBurrowingFactory());
-	addFactory(new GCAddMonsterFromTransformationFactory());
-	addFactory(new GCAddNewItemToZoneFactory());
-	addFactory(new GCAddNPCFactory());
-	addFactory(new GCAddSlayerFactory());
-	addFactory(new GCAddSlayerCorpseFactory());
-	addFactory(new GCAddVampireFactory());
-	addFactory(new GCAddVampireCorpseFactory());
-	addFactory(new GCAddVampireFromBurrowingFactory());
-	addFactory(new GCAddVampireFromTransformationFactory());
-	addFactory(new GCAddWolfFactory());
-    addFactory(new GCAttackFactory());
-    addFactory(new GCAttackArmsOK1Factory());
-    addFactory(new GCAttackArmsOK2Factory());
-    addFactory(new GCAttackArmsOK3Factory());
-    addFactory(new GCAttackArmsOK4Factory());
-    addFactory(new GCAttackArmsOK5Factory());
-    addFactory(new GCAttackMeleeOK1Factory());
-    addFactory(new GCAttackMeleeOK2Factory());
-    addFactory(new GCAttackMeleeOK3Factory());
-	addFactory(new GCBloodDrainOK1Factory());
-	addFactory(new GCBloodDrainOK2Factory());
-	addFactory(new GCBloodDrainOK3Factory());
-    addFactory(new GCCastingSkillFactory());
-    addFactory(new GCCannotAddFactory());
-    addFactory(new GCCannotUseFactory());
-    addFactory(new GCChangeShapeFactory());
-    addFactory(new GCChangeDarkLightFactory());
-    addFactory(new GCChangeWeatherFactory());
-    addFactory(new GCCreateItemFactory());
-    addFactory(new GCCreatureDiedFactory());
-    addFactory(new GCCrossCounterOK1Factory());
-    addFactory(new GCCrossCounterOK2Factory());
-    addFactory(new GCCrossCounterOK3Factory());
-	addFactory(new GCDeleteandPickUpOKFactory());
-	addFactory(new GCDeleteInventoryItemFactory());
-	addFactory(new GCDeleteObjectFactory());
-	addFactory(new GCRemoveCorpseHeadFactory());
-	addFactory(new GCRemoveInjuriousCreatureFactory());
-	addFactory(new GCDeleteEffectFromTileFactory());
-	addFactory(new GCDisconnectFactory());
-	addFactory(new GCDropItemToZoneFactory());
-	addFactory(new GCFastMoveFactory());
-	addFactory(new GCFakeMoveFactory());
-	addFactory(new GCGetDamageFactory());
-	addFactory(new GCGetOffMotorCycleFactory());
-	addFactory(new GCGetOffMotorCycleOKFactory());
-	addFactory(new GCGetOffMotorCycleFailedFactory());
-	addFactory(new GCGlobalChatFactory());
-	addFactory(new GCHPRecoveryStartToSelfFactory());
-	addFactory(new GCHPRecoveryStartToOthersFactory());
-	addFactory(new GCHPRecoveryEndToSelfFactory());
-	addFactory(new GCHPRecoveryEndToOthersFactory());
- 	addFactory(new GCLightningFactory());
-	addFactory(new GCLearnSkillFailedFactory());
-	addFactory(new GCLearnSkillOKFactory());
-	addFactory(new GCLearnSkillReadyFactory());
-	addFactory(new GCKnockBackFactory());
-	addFactory(new GCKnocksTargetBackOK1Factory());
-	addFactory(new GCKnocksTargetBackOK2Factory());
-	addFactory(new GCKnocksTargetBackOK4Factory());
-	addFactory(new GCKnocksTargetBackOK5Factory());
-	addFactory(new GCMakeItemOKFactory());
-	addFactory(new GCMakeItemFailFactory());
-	addFactory(new GCMineExplosionOK1Factory());
-	addFactory(new GCMineExplosionOK2Factory());
-	addFactory(new GCModifyInformationFactory());
-	addFactory(new GCMorph1Factory());
-	addFactory(new GCMorphSlayer2Factory());
-	addFactory(new GCMorphVampire2Factory());
-	addFactory(new GCMoveFactory());
-	addFactory(new GCMoveErrorFactory());
-	addFactory(new GCMoveOKFactory());
-	addFactory(new GCMPRecoveryStartFactory());
-	addFactory(new GCMPRecoveryEndFactory());
-	addFactory(new GCNPCAskFactory());
-	addFactory(new GCNPCSayFactory());
-	addFactory(new GCRealWearingInfoFactory());
-	addFactory(new GCReconnectFactory());
-	addFactory(new GCReconnectLoginFactory());
-	addFactory(new GCRemoveEffectFactory());
-	addFactory(new GCRemoveFromGearFactory());
-	addFactory(new GCRideMotorCycleFactory());
-	addFactory(new GCRideMotorCycleOKFactory());
-	addFactory(new GCRideMotorCycleFailedFactory());
-	addFactory(new GCReloadOKFactory());
-	addFactory(new GCUnburrowOKFactory());
-	addFactory(new GCUnburrowFailFactory());
-	addFactory(new GCUntransformOKFactory());
-	addFactory(new GCUntransformFailFactory());
-	addFactory(new GCUseBonusPointFailFactory());
-	addFactory(new GCUseBonusPointOKFactory());
-	addFactory(new GCSayFactory());
-	addFactory(new GCSearchMotorcycleOKFactory());
-	addFactory(new GCSearchMotorcycleFailFactory());
-	addFactory(new GCSetPositionFactory());
+	addFactory( DE_PACKET_FACTORY(GCAddBat) );
+	addFactory( DE_PACKET_FACTORY(GCAddBurrowingCreature) );
+	addFactory( DE_PACKET_FACTORY(GCAddEffect) );
+	addFactory( DE_PACKET_FACTORY(GCAddEffectToTile) );
+	addFactory( DE_PACKET_FACTORY(GCAddGearToInventory) );
+	addFactory( DE_PACKET_FACTORY(GCAddGearToZone) );
+	addFactory( DE_PACKET_FACTORY(GCAddInstalledMineToZone) );
+	addFactory( DE_PACKET_FACTORY(GCAddMonster) );
+	addFactory( DE_PACKET_FACTORY(GCAddMonsterCorpse) );
+	addFactory( DE_PACKET_FACTORY(GCAddMonsterFromBurrowing) );
+	addFactory( DE_PACKET_FACTORY(GCAddMonsterFromTransformation) );
+	addFactory( DE_PACKET_FACTORY(GCAddNewItemToZone) );
+	addFactory( DE_PACKET_FACTORY(GCAddNPC) );
+	addFactory( DE_PACKET_FACTORY(GCAddSlayer) );
+	addFactory( DE_PACKET_FACTORY(GCAddSlayerCorpse) );
+	addFactory( DE_PACKET_FACTORY(GCAddVampire) );
+	addFactory( DE_PACKET_FACTORY(GCAddVampireCorpse) );
+	addFactory( DE_PACKET_FACTORY(GCAddVampireFromBurrowing) );
+	addFactory( DE_PACKET_FACTORY(GCAddVampireFromTransformation) );
+	addFactory( DE_PACKET_FACTORY(GCAddWolf) );
+    addFactory( DE_PACKET_FACTORY(GCAttack) );
+    addFactory( DE_PACKET_FACTORY(GCAttackArmsOK1) );
+    addFactory( DE_PACKET_FACTORY(GCAttackArmsOK2) );
+    addFactory( DE_PACKET_FACTORY(GCAttackArmsOK3) );
+    addFactory( DE_PACKET_FACTORY(GCAttackArmsOK4) );
+    addFactory( DE_PACKET_FACTORY(GCAttackArmsOK5) );
+    addFactory( DE_PACKET_FACTORY(GCAttackMeleeOK1) );
+    addFactory( DE_PACKET_FACTORY(GCAttackMeleeOK2) );
+    addFactory( DE_PACKET_FACTORY(GCAttackMeleeOK3) );
+	addFactory( DE_PACKET_FACTORY(GCBloodDrainOK1) );
+	addFactory( DE_PACKET_FACTORY(GCBloodDrainOK2) );
+	addFactory( DE_PACKET_FACTORY(GCBloodDrainOK3) );
+    addFactory( DE_PACKET_FACTORY(GCCastingSkill) );
+    addFactory( DE_PACKET_FACTORY(GCCannotAdd) );
+    addFactory( DE_PACKET_FACTORY(GCCannotUse) );
+    addFactory( DE_PACKET_FACTORY(GCChangeShape) );
+    addFactory( DE_PACKET_FACTORY(GCChangeDarkLight) );
+    addFactory( DE_PACKET_FACTORY(GCChangeWeather) );
+    addFactory( DE_PACKET_FACTORY(GCCreateItem) );
+    addFactory( DE_PACKET_FACTORY(GCCreatureDied) );
+    addFactory( DE_PACKET_FACTORY(GCCrossCounterOK1) );
+    addFactory( DE_PACKET_FACTORY(GCCrossCounterOK2) );
+    addFactory( DE_PACKET_FACTORY(GCCrossCounterOK3) );
+	addFactory( DE_PACKET_FACTORY(GCDeleteandPickUpOK) );
+	addFactory( DE_PACKET_FACTORY(GCDeleteInventoryItem) );
+	addFactory( DE_PACKET_FACTORY(GCDeleteObject) );
+	addFactory( DE_PACKET_FACTORY(GCRemoveCorpseHead) );
+	addFactory( DE_PACKET_FACTORY(GCRemoveInjuriousCreature) );
+	addFactory( DE_PACKET_FACTORY(GCDeleteEffectFromTile) );
+	addFactory( DE_PACKET_FACTORY(GCDisconnect) );
+	addFactory( DE_PACKET_FACTORY(GCDropItemToZone) );
+	addFactory( DE_PACKET_FACTORY(GCFastMove) );
+	addFactory( DE_PACKET_FACTORY(GCFakeMove) );
+	addFactory( DE_PACKET_FACTORY(GCGetDamage) );
+	addFactory( DE_PACKET_FACTORY(GCGetOffMotorCycle) );
+	addFactory( DE_PACKET_FACTORY(GCGetOffMotorCycleOK) );
+	addFactory( DE_PACKET_FACTORY(GCGetOffMotorCycleFailed) );
+	addFactory( DE_PACKET_FACTORY(GCGlobalChat) );
+	addFactory( DE_PACKET_FACTORY(GCHPRecoveryStartToSelf) );
+	addFactory( DE_PACKET_FACTORY(GCHPRecoveryStartToOthers) );
+	addFactory( DE_PACKET_FACTORY(GCHPRecoveryEndToSelf) );
+	addFactory( DE_PACKET_FACTORY(GCHPRecoveryEndToOthers) );
+ 	addFactory( DE_PACKET_FACTORY(GCLightning) );
+	addFactory( DE_PACKET_FACTORY(GCLearnSkillFailed) );
+	addFactory( DE_PACKET_FACTORY(GCLearnSkillOK) );
+	addFactory( DE_PACKET_FACTORY(GCLearnSkillReady) );
+	addFactory( DE_PACKET_FACTORY(GCKnockBack) );
+	addFactory( DE_PACKET_FACTORY(GCKnocksTargetBackOK1) );
+	addFactory( DE_PACKET_FACTORY(GCKnocksTargetBackOK2) );
+	addFactory( DE_PACKET_FACTORY(GCKnocksTargetBackOK4) );
+	addFactory( DE_PACKET_FACTORY(GCKnocksTargetBackOK5) );
+	addFactory( DE_PACKET_FACTORY(GCMakeItemOK) );
+	addFactory( DE_PACKET_FACTORY(GCMakeItemFail) );
+	addFactory( DE_PACKET_FACTORY(GCMineExplosionOK1) );
+	addFactory( DE_PACKET_FACTORY(GCMineExplosionOK2) );
+	addFactory( DE_PACKET_FACTORY(GCModifyInformation) );
+	addFactory( DE_PACKET_FACTORY(GCMorph1) );
+	addFactory( DE_PACKET_FACTORY(GCMorphSlayer2) );
+	addFactory( DE_PACKET_FACTORY(GCMorphVampire2) );
+	addFactory( DE_PACKET_FACTORY(GCMove) );
+	addFactory( DE_PACKET_FACTORY(GCMoveError) );
+	addFactory( DE_PACKET_FACTORY(GCMoveOK) );
+	addFactory( DE_PACKET_FACTORY(GCMPRecoveryStart) );
+	addFactory( DE_PACKET_FACTORY(GCMPRecoveryEnd) );
+	addFactory( DE_PACKET_FACTORY(GCNPCAsk) );
+	addFactory( DE_PACKET_FACTORY(GCNPCSay) );
+	addFactory( DE_PACKET_FACTORY(GCRealWearingInfo) );
+	addFactory( DE_PACKET_FACTORY(GCReconnect) );
+	addFactory( DE_PACKET_FACTORY(GCReconnectLogin) );
+	addFactory( DE_PACKET_FACTORY(GCRemoveEffect) );
+	addFactory( DE_PACKET_FACTORY(GCRemoveFromGear) );
+	addFactory( DE_PACKET_FACTORY(GCRideMotorCycle) );
+	addFactory( DE_PACKET_FACTORY(GCRideMotorCycleOK) );
+	addFactory( DE_PACKET_FACTORY(GCRideMotorCycleFailed) );
+	addFactory( DE_PACKET_FACTORY(GCReloadOK) );
+	addFactory( DE_PACKET_FACTORY(GCUnburrowOK) );
+	addFactory( DE_PACKET_FACTORY(GCUnburrowFail) );
+	addFactory( DE_PACKET_FACTORY(GCUntransformOK) );
+	addFactory( DE_PACKET_FACTORY(GCUntransformFail) );
+	addFactory( DE_PACKET_FACTORY(GCUseBonusPointFail) );
+	addFactory( DE_PACKET_FACTORY(GCUseBonusPointOK) );
+	addFactory( DE_PACKET_FACTORY(GCSay) );
+	addFactory( DE_PACKET_FACTORY(GCSearchMotorcycleOK) );
+	addFactory( DE_PACKET_FACTORY(GCSearchMotorcycleFail) );
+	addFactory( DE_PACKET_FACTORY(GCSetPosition) );
 	// shop interface
-	addFactory(new GCShopVersionFactory());
-	addFactory(new GCShopListFactory());
-	addFactory(new GCShopListMysteriousFactory());
-	addFactory(new GCShopBuyOKFactory());
-	addFactory(new GCShopBuyFailFactory());
-	addFactory(new GCShopSoldFactory());
-	addFactory(new GCShopSellFailFactory());
-	addFactory(new GCShopSellOKFactory());
-	addFactory(new GCShopBoughtFactory());
-	addFactory(new GCShopMarketConditionFactory());
+	addFactory( DE_PACKET_FACTORY(GCShopVersion) );
+	addFactory( DE_PACKET_FACTORY(GCShopList) );
+	addFactory( DE_PACKET_FACTORY(GCShopListMysterious) );
+	addFactory( DE_PACKET_FACTORY(GCShopBuyOK) );
+	addFactory( DE_PACKET_FACTORY(GCShopBuyFail) );
+	addFactory( DE_PACKET_FACTORY(GCShopSold) );
+	addFactory( DE_PACKET_FACTORY(GCShopSellFail) );
+	addFactory( DE_PACKET_FACTORY(GCShopSellOK) );
+	addFactory( DE_PACKET_FACTORY(GCShopBought) );
+	addFactory( DE_PACKET_FACTORY(GCShopMarketCondition) );
 
-	addFactory(new GCSkillFailed1Factory());
-	addFactory(new GCSkillFailed2Factory());
-	addFactory(new GCSkillToInventoryOK1Factory());
-	addFactory(new GCSkillToInventoryOK2Factory());
-	addFactory(new GCSkillToObjectOK1Factory());
-	addFactory(new GCSkillToObjectOK2Factory());
-	addFactory(new GCSkillToObjectOK3Factory());
-	addFactory(new GCSkillToObjectOK4Factory());
-	addFactory(new GCSkillToObjectOK5Factory());
-	addFactory(new GCSkillToObjectOK6Factory());
-	addFactory(new GCSkillToSelfOK1Factory());
-	addFactory(new GCSkillToSelfOK2Factory());
-	addFactory(new GCSkillToSelfOK3Factory());
-	addFactory(new GCSkillToTileOK1Factory());
-	addFactory(new GCSkillToTileOK2Factory());
-	addFactory(new GCSkillToTileOK3Factory());
-	addFactory(new GCSkillToTileOK4Factory());
-	addFactory(new GCSkillToTileOK5Factory());
-	addFactory(new GCSkillToTileOK6Factory());
-	addFactory(new GCSystemMessageFactory());
-	addFactory(new GCTakeOffFactory());
-	addFactory(new GCTeachSkillInfoFactory());
-	addFactory(new GCThrowItemOK1Factory());
-	addFactory(new GCThrowItemOK2Factory());
-	addFactory(new GCThrowItemOK3Factory());
-	addFactory(new GCUpdateInfoFactory());
-	addFactory(new GCUseOKFactory());
+	addFactory( DE_PACKET_FACTORY(GCSkillFailed1) );
+	addFactory( DE_PACKET_FACTORY(GCSkillFailed2) );
+	addFactory( DE_PACKET_FACTORY(GCSkillToInventoryOK1) );
+	addFactory( DE_PACKET_FACTORY(GCSkillToInventoryOK2) );
+	addFactory( DE_PACKET_FACTORY(GCSkillToObjectOK1) );
+	addFactory( DE_PACKET_FACTORY(GCSkillToObjectOK2) );
+	addFactory( DE_PACKET_FACTORY(GCSkillToObjectOK3) );
+	addFactory( DE_PACKET_FACTORY(GCSkillToObjectOK4) );
+	addFactory( DE_PACKET_FACTORY(GCSkillToObjectOK5) );
+	addFactory( DE_PACKET_FACTORY(GCSkillToObjectOK6) );
+	addFactory( DE_PACKET_FACTORY(GCSkillToSelfOK1) );
+	addFactory( DE_PACKET_FACTORY(GCSkillToSelfOK2) );
+	addFactory( DE_PACKET_FACTORY(GCSkillToSelfOK3) );
+	addFactory( DE_PACKET_FACTORY(GCSkillToTileOK1) );
+	addFactory( DE_PACKET_FACTORY(GCSkillToTileOK2) );
+	addFactory( DE_PACKET_FACTORY(GCSkillToTileOK3) );
+	addFactory( DE_PACKET_FACTORY(GCSkillToTileOK4) );
+	addFactory( DE_PACKET_FACTORY(GCSkillToTileOK5) );
+	addFactory( DE_PACKET_FACTORY(GCSkillToTileOK6) );
+	addFactory( DE_PACKET_FACTORY(GCSystemMessage) );
+	addFactory( DE_PACKET_FACTORY(GCTakeOff) );
+	addFactory( DE_PACKET_FACTORY(GCTeachSkillInfo) );
+	addFactory( DE_PACKET_FACTORY(GCThrowItemOK1) );
+	addFactory( DE_PACKET_FACTORY(GCThrowItemOK2) );
+	addFactory( DE_PACKET_FACTORY(GCThrowItemOK3) );
+	addFactory( DE_PACKET_FACTORY(GCUpdateInfo) );
+	addFactory( DE_PACKET_FACTORY(GCUseOK) );
 
 	// Add by elcastle 2000-11-29
 //	addFactory(new GCPhoneConnectedFactory());
@@ -735,204 +737,204 @@ void PacketFactoryManager::init ()
 //	addFactory(new GCPhoneDisconnectedFactory());
 //	addFactory(new GCPhoneConnectionFailedFactory());
 //	addFactory(new GCPhoneSayFactory());
-	addFactory(new GCWhisperFactory());
-	addFactory(new GCWhisperFailedFactory());
+	addFactory( DE_PACKET_FACTORY(GCWhisper) );
+	addFactory( DE_PACKET_FACTORY(GCWhisperFailed) );
 
 	// Add by elcastle 2000-12-2
-	addFactory(new GCSkillInfoFactory());
+	addFactory( DE_PACKET_FACTORY(GCSkillInfo) );
 
 	// Add by elcastle 2000-12-9
-	addFactory(new GCStatusCurrentHPFactory());
+	addFactory( DE_PACKET_FACTORY(GCStatusCurrentHP) );
 
-    addFactory(new GCStashListFactory());
-    addFactory(new GCStashSellFactory());
+    addFactory( DE_PACKET_FACTORY(GCStashList) );
+    addFactory( DE_PACKET_FACTORY(GCStashSell) );
 
-	addFactory(new GCTradePrepareFactory());
-	addFactory(new GCTradeAddItemFactory());
-	addFactory(new GCTradeRemoveItemFactory());
-	addFactory(new GCTradeMoneyFactory());
-	addFactory(new GCTradeFinishFactory());
-	addFactory(new GCTradeErrorFactory());
-	addFactory(new GCTradeVerifyFactory());
-	addFactory(new GCVisibleOKFactory());
-	addFactory(new GCVisibleFailFactory());
+	addFactory( DE_PACKET_FACTORY(GCTradePrepare) );
+	addFactory( DE_PACKET_FACTORY(GCTradeAddItem) );
+	addFactory( DE_PACKET_FACTORY(GCTradeRemoveItem) );
+	addFactory( DE_PACKET_FACTORY(GCTradeMoney) );
+	addFactory( DE_PACKET_FACTORY(GCTradeFinish) );
+	addFactory( DE_PACKET_FACTORY(GCTradeError) );
+	addFactory( DE_PACKET_FACTORY(GCTradeVerify) );
+	addFactory( DE_PACKET_FACTORY(GCVisibleOK) );
+	addFactory( DE_PACKET_FACTORY(GCVisibleFail) );
 
-	addFactory(new GCNPCResponseFactory());
+	addFactory( DE_PACKET_FACTORY(GCNPCResponse) );
 
-	addFactory(new GCNPCSayDynamicFactory());
-	addFactory(new GCNPCAskDynamicFactory());
+	addFactory( DE_PACKET_FACTORY(GCNPCSayDynamic) );
+	addFactory( DE_PACKET_FACTORY(GCNPCAskDynamic) );
 
-	addFactory(new GCAddHelicopterFactory());
-	addFactory(new GCAddVampirePortalFactory());
-	addFactory(new GCAddInjuriousCreatureFactory());
-	addFactory(new GCEnterVampirePortalFactory());
+	addFactory( DE_PACKET_FACTORY(GCAddHelicopter) );
+	addFactory( DE_PACKET_FACTORY(GCAddVampirePortal) );
+	addFactory( DE_PACKET_FACTORY(GCAddInjuriousCreature) );
+	addFactory( DE_PACKET_FACTORY(GCEnterVampirePortal) );
 
-	addFactory(new GCPartyInviteFactory());
-	addFactory(new GCPartyLeaveFactory());
-	addFactory(new GCPartyJoinedFactory());
-	addFactory(new GCPartyErrorFactory());
+	addFactory( DE_PACKET_FACTORY(GCPartyInvite) );
+	addFactory( DE_PACKET_FACTORY(GCPartyLeave) );
+	addFactory( DE_PACKET_FACTORY(GCPartyJoined) );
+	addFactory( DE_PACKET_FACTORY(GCPartyError) );
 
-	addFactory(new GCRequestedIPFactory());
-	addFactory(new GCRequestFailedFactory());
+	addFactory( DE_PACKET_FACTORY(GCRequestedIP) );
+	addFactory( DE_PACKET_FACTORY(GCRequestFailed) );
 
-	addFactory(new GCOtherModifyInfoFactory());
-	addFactory(new GCThrowBombOK1Factory());
-	addFactory(new GCThrowBombOK2Factory());
-	addFactory(new GCThrowBombOK3Factory());
+	addFactory( DE_PACKET_FACTORY(GCOtherModifyInfo) );
+	addFactory( DE_PACKET_FACTORY(GCThrowBombOK1) );
+	addFactory( DE_PACKET_FACTORY(GCThrowBombOK2) );
+	addFactory( DE_PACKET_FACTORY(GCThrowBombOK3) );
 	
-	addFactory(new LCCreatePCErrorFactory());
-	addFactory(new LCCreatePCOKFactory());
-	addFactory(new LCDeletePCErrorFactory());
-	addFactory(new LCDeletePCOKFactory());
-	addFactory(new LCLoginErrorFactory());
-	addFactory(new LCLoginOKFactory());
-	addFactory(new LCPCListFactory());
-	addFactory(new LCQueryResultPlayerIDFactory());
-	addFactory(new LCQueryResultCharacterNameFactory());
-	addFactory(new LCReconnectFactory());
-	addFactory(new LCRegisterPlayerErrorFactory());
-	addFactory(new LCRegisterPlayerOKFactory());
-	addFactory(new LCSelectPCErrorFactory());
-	addFactory(new LCVersionCheckOKFactory());
-	addFactory(new LCVersionCheckErrorFactory());
-	addFactory(new LCServerListFactory());
-	addFactory(new LCWorldListFactory());
+	addFactory( DE_PACKET_FACTORY(LCCreatePCError) );
+	addFactory( DE_PACKET_FACTORY(LCCreatePCOK) );
+	addFactory( DE_PACKET_FACTORY(LCDeletePCError) );
+	addFactory( DE_PACKET_FACTORY(LCDeletePCOK) );
+	addFactory( DE_PACKET_FACTORY(LCLoginError) );
+	addFactory( DE_PACKET_FACTORY(LCLoginOK) );
+	addFactory( DE_PACKET_FACTORY(LCPCList) );
+	addFactory( DE_PACKET_FACTORY(LCQueryResultPlayerID) );
+	addFactory( DE_PACKET_FACTORY(LCQueryResultCharacterName) );
+	addFactory( DE_PACKET_FACTORY(LCReconnect) );
+	addFactory( DE_PACKET_FACTORY(LCRegisterPlayerError) );
+	addFactory( DE_PACKET_FACTORY(LCRegisterPlayerOK) );
+	addFactory( DE_PACKET_FACTORY(LCSelectPCError) );
+	addFactory( DE_PACKET_FACTORY(LCVersionCheckOK) );
+	addFactory( DE_PACKET_FACTORY(LCVersionCheckError) );
+	addFactory( DE_PACKET_FACTORY(LCServerList) );
+	addFactory( DE_PACKET_FACTORY(LCWorldList) );
 
-		addFactory(new CRConnectFactory());
-		addFactory(new RCConnectVerifyFactory());
-		addFactory(new CRRequestFactory());
-		addFactory(new RCPositionInfoFactory());
-		addFactory(new CRDisconnectFactory());
-		addFactory(new RCSayFactory());		
-		addFactory(new RCStatusHPFactory());		
-		addFactory(new CRWhisperFactory());
-		addFactory(new RCRequestVerifyFactory());
-		addFactory(new RCRequestedFileFactory());
-		addFactory(new RCCharacterInfoFactory());
+		addFactory( DE_PACKET_FACTORY(CRConnect) );
+		addFactory( DE_PACKET_FACTORY(RCConnectVerify) );
+		addFactory( DE_PACKET_FACTORY(CRRequest) );
+		addFactory( DE_PACKET_FACTORY(RCPositionInfo) );
+		addFactory( DE_PACKET_FACTORY(CRDisconnect) );
+		addFactory( DE_PACKET_FACTORY(RCSay) );		
+		addFactory( DE_PACKET_FACTORY(RCStatusHP) );		
+		addFactory( DE_PACKET_FACTORY(CRWhisper) );
+		addFactory( DE_PACKET_FACTORY(RCRequestVerify) );
+		addFactory( DE_PACKET_FACTORY(RCRequestedFile) );
+		addFactory( DE_PACKET_FACTORY(RCCharacterInfo) );
 
 //	addFactory( new GCShowGuildRegistFactory() );
-	addFactory( new GCWaitGuildListFactory() );
-	addFactory( new GCShowGuildInfoFactory() );
-	addFactory( new GCShowGuildJoinFactory() );
-	addFactory( new GCShowMessageBoxFactory() );
+	addFactory( DE_PACKET_FACTORY(GCWaitGuildList) );
+	addFactory( DE_PACKET_FACTORY(GCShowGuildInfo) );
+	addFactory( DE_PACKET_FACTORY(GCShowGuildJoin) );
+	addFactory( DE_PACKET_FACTORY(GCShowMessageBox) );
 //	addFactory( new GCModifyMoneyFactory() );
-	addFactory( new GCShowWaitGuildInfoFactory() );
-	addFactory( new GCActiveGuildListFactory() );
+	addFactory( DE_PACKET_FACTORY(GCShowWaitGuildInfo) );
+	addFactory( DE_PACKET_FACTORY(GCActiveGuildList) );
 
-	addFactory( new GCShowGuildMemberInfoFactory() );
-	addFactory( new GCGuildChatFactory() );
-	addFactory( new GCGuildMemberListFactory() );
-	addFactory( new GCModifyGuildMemberInfoFactory() );
+	addFactory( DE_PACKET_FACTORY(GCShowGuildMemberInfo) );
+	addFactory( DE_PACKET_FACTORY(GCGuildChat) );
+	addFactory( DE_PACKET_FACTORY(GCGuildMemberList) );
+	addFactory( DE_PACKET_FACTORY(GCModifyGuildMemberInfo) );
 
-	addFactory( new GCAddItemToItemVerifyFactory() );
+	addFactory( DE_PACKET_FACTORY(GCAddItemToItemVerify) );
 
 	// 2002.9.2
-	addFactory( new GCNoticeEventFactory() );
+	addFactory( DE_PACKET_FACTORY(GCNoticeEvent) );
 
-	addFactory( new GCSelectRankBonusOKFactory() );
-	addFactory( new GCSelectRankBonusFailedFactory() );
-	addFactory( new GCRankBonusInfoFactory() );
+	addFactory( DE_PACKET_FACTORY(GCSelectRankBonusOK) );
+	addFactory( DE_PACKET_FACTORY(GCSelectRankBonusFailed) );
+	addFactory( DE_PACKET_FACTORY(GCRankBonusInfo) );
 
-	addFactory( new GCNPCInfoFactory() );
-	addFactory( new GCNPCAskVariableFactory() );
-	addFactory( new GCWarScheduleListFactory() );
-	addFactory( new GCWarListFactory() );
+	addFactory( DE_PACKET_FACTORY(GCNPCInfo) );
+	addFactory( DE_PACKET_FACTORY(GCNPCAskVariable) );
+	addFactory( DE_PACKET_FACTORY(GCWarScheduleList) );
+	addFactory( DE_PACKET_FACTORY(GCWarList) );
 
-	addFactory( new GCHolyLandBonusInfoFactory() );
-	addFactory( new GCBloodBibleStatusFactory() );
-	addFactory( new GCKickMessageFactory() );
-	addFactory( new GCTimeLimitItemInfoFactory() );
-	addFactory( new GCSelectQuestIDFactory() );
-	addFactory( new GCQuestStatusFactory() );
-	addFactory( new GCMonsterKillQuestInfoFactory() );
-	addFactory( new GCNotifyWinFactory() );
-	addFactory( new GCGoodsListFactory() );
-	addFactory( new GCTakeOutOKFactory() );
-	addFactory( new GCTakeOutFailFactory() );
-	addFactory( new GCAddOustersFactory() );
-	addFactory( new GCAddOustersCorpseFactory() );
-	addFactory( new GCDownSkillOKFactory() );
-	addFactory( new GCDownSkillFailedFactory() );
+	addFactory( DE_PACKET_FACTORY(GCHolyLandBonusInfo) );
+	addFactory( DE_PACKET_FACTORY(GCBloodBibleStatus) );
+	addFactory( DE_PACKET_FACTORY(GCKickMessage) );
+	addFactory( DE_PACKET_FACTORY(GCTimeLimitItemInfo) );
+	addFactory( DE_PACKET_FACTORY(GCSelectQuestID) );
+	addFactory( DE_PACKET_FACTORY(GCQuestStatus) );
+	addFactory( DE_PACKET_FACTORY(GCMonsterKillQuestInfo) );
+	addFactory( DE_PACKET_FACTORY(GCNotifyWin) );
+	addFactory( DE_PACKET_FACTORY(GCGoodsList) );
+	addFactory( DE_PACKET_FACTORY(GCTakeOutOK) );
+	addFactory( DE_PACKET_FACTORY(GCTakeOutFail) );
+	addFactory( DE_PACKET_FACTORY(GCAddOusters) );
+	addFactory( DE_PACKET_FACTORY(GCAddOustersCorpse) );
+	addFactory( DE_PACKET_FACTORY(GCDownSkillOK) );
+	addFactory( DE_PACKET_FACTORY(GCDownSkillFailed) );
 
-	addFactory( new GCMiniGameScoresFactory() );
-	addFactory( new GCFlagWarStatusFactory() );
-	addFactory( new GCOtherGuildNameFactory() );
-	addFactory( new GCSweeperBonusInfoFactory() );
-	addFactory( new GCRegenZoneStatusFactory() );
-	addFactory( new GCPetInfoFactory() );
-	addFactory( new GCPetUseSkillFactory() );
+	addFactory( DE_PACKET_FACTORY(GCMiniGameScores) );
+	addFactory( DE_PACKET_FACTORY(GCFlagWarStatus) );
+	addFactory( DE_PACKET_FACTORY(GCOtherGuildName) );
+	addFactory( DE_PACKET_FACTORY(GCSweeperBonusInfo) );
+	addFactory( DE_PACKET_FACTORY(GCRegenZoneStatus) );
+	addFactory( DE_PACKET_FACTORY(GCPetInfo) );
+	addFactory( DE_PACKET_FACTORY(GCPetUseSkill) );
 
-	addFactory( new GCPartyPositionFactory() );
-	addFactory( new GCPartySayFactory() );
+	addFactory( DE_PACKET_FACTORY(GCPartyPosition) );
+	addFactory( DE_PACKET_FACTORY(GCPartySay) );
 
 //	addFactory( new GGServerChatFactory() );
 
-	addFactory( new GCPetStashListFactory() );
-	addFactory( new GCPetStashVerifyFactory() ); 
+	addFactory( DE_PACKET_FACTORY(GCPetStashList) );
+	addFactory( DE_PACKET_FACTORY(GCPetStashVerify) ); 
 
-	addFactory( new CGSMSSendFactory() );
+	addFactory( DE_PACKET_FACTORY(CGSMSSend) );
 
-	addFactory( new GCSMSAddressListFactory() );
-	addFactory( new GCAddressListVerifyFactory() );
+	addFactory( DE_PACKET_FACTORY(GCSMSAddressList) );
+	addFactory( DE_PACKET_FACTORY(GCAddressListVerify) );
 
-	addFactory( new GCNicknameListFactory() );
-	addFactory(	new GCAddNicknameFactory() );
+	addFactory( DE_PACKET_FACTORY(GCNicknameList) );
+	addFactory( DE_PACKET_FACTORY(GCAddNickname) );
 
-	addFactory(	new GCNicknameVerifyFactory() );
-	addFactory(	new GCModifyNicknameFactory() );
+	addFactory( DE_PACKET_FACTORY(GCNicknameVerify) );
+	addFactory( DE_PACKET_FACTORY(GCModifyNickname) );
 
-	addFactory( new GCGQuestStatusInfoFactory() );
-	addFactory( new GCGQuestStatusModifyFactory() );
+	addFactory( DE_PACKET_FACTORY(GCGQuestStatusInfo) );
+	addFactory( DE_PACKET_FACTORY(GCGQuestStatusModify) );
 
-	addFactory( new GCExecuteElementFactory() );
-	addFactory( new GCGQuestInventoryFactory() );
+	addFactory( DE_PACKET_FACTORY(GCExecuteElement) );
+	addFactory( DE_PACKET_FACTORY(GCGQuestInventory) );
 
-	addFactory( new CURequestLoginModeFactory() );
-	addFactory( new UCRequestLoginModeFactory() );
+	addFactory( DE_PACKET_FACTORY(CURequestLoginMode) );
+	addFactory( DE_PACKET_FACTORY(UCRequestLoginMode) );
 
-	addFactory( new GCAuthKeyFactory() );
+	addFactory( DE_PACKET_FACTORY(GCAuthKey) );
 
-	addFactory( new GCGuildResponseFactory() );
-	addFactory( new GCUnionOfferListFactory() );
-	addFactory( new GCShowUnionInfoFactory() ) ;
+	addFactory( DE_PACKET_FACTORY(GCGuildResponse) );
+	addFactory( DE_PACKET_FACTORY(GCUnionOfferList) );
+	addFactory( DE_PACKET_FACTORY(GCShowUnionInfo) );
 
-	addFactory( new GCBloodBibleListFactory() ) ;
-	addFactory( new GCBloodBibleSignInfoFactory() ) ;
+	addFactory( DE_PACKET_FACTORY(GCBloodBibleList) );
+	addFactory( DE_PACKET_FACTORY(GCBloodBibleSignInfo) );
 
 
 	// 석민씨 작업
-	addFactory( new CGDisplayItemFactory() );
-	addFactory( new CGUndisplayItemFactory() );
-	addFactory( new CGStoreSignFactory() );
-	addFactory( new CGStoreOpenFactory() );
-	addFactory( new CGStoreCloseFactory() );
-	addFactory( new CGRequestStoreInfoFactory() );
-	addFactory( new CGBuyStoreItemFactory() );
-	addFactory( new GCMyStoreInfoFactory() );
-	addFactory( new GCOtherStoreInfoFactory() );
-	addFactory( new GCRemoveStoreItemFactory() );
-	addFactory( new GCAddStoreItemFactory() );
+	addFactory( DE_PACKET_FACTORY(CGDisplayItem) );
+	addFactory( DE_PACKET_FACTORY(CGUndisplayItem) );
+	addFactory( DE_PACKET_FACTORY(CGStoreSign) );
+	addFactory( DE_PACKET_FACTORY(CGStoreOpen) );
+	addFactory( DE_PACKET_FACTORY(CGStoreClose) );
+	addFactory( DE_PACKET_FACTORY(CGRequestStoreInfo) );
+	addFactory( DE_PACKET_FACTORY(CGBuyStoreItem) );
+	addFactory( DE_PACKET_FACTORY(GCMyStoreInfo) );
+	addFactory( DE_PACKET_FACTORY(GCOtherStoreInfo) );
+	addFactory( DE_PACKET_FACTORY(GCRemoveStoreItem) );
+	addFactory( DE_PACKET_FACTORY(GCAddStoreItem) );
 	// 끝
 		
-	addFactory( new GCRequestPowerPointResultFactory() );
-	addFactory( new GCUsePowerPointResultFactory() );
+	addFactory( DE_PACKET_FACTORY(GCRequestPowerPointResult) );
+	addFactory( DE_PACKET_FACTORY(GCUsePowerPointResult) );
 
-	addFactory( new GCSubInventoryInfoFactory() );
+	addFactory( DE_PACKET_FACTORY(GCSubInventoryInfo) );
 		
 	//add by viva
-	addFactory( new CGConnectSetKeyFactory() );
-	addFactory( new GCFriendChattingFactory() );
-	addFactory( new GCUseSkillCardOKFactory() );
+	addFactory( DE_PACKET_FACTORY(CGConnectSetKey) );
+	addFactory( DE_PACKET_FACTORY(GCFriendChatting) );
+	addFactory( DE_PACKET_FACTORY(GCUseSkillCardOK) );
 	//end
 
 	// Exchange System Packets
-	addFactory( new CGExchangeListFactory() );
-	addFactory( new CGExchangeBuyFactory() );
-	addFactory( new GCExchangeBuyFactory() );
+	addFactory( DE_PACKET_FACTORY(CGExchangeList) );
+	addFactory( DE_PACKET_FACTORY(CGExchangeBuy) );
+	addFactory( DE_PACKET_FACTORY(GCExchangeBuy) );
 	// Was never registered: the server's listing reply was unroutable even
 	// though the client had (a stub of) the class. Found during the 1.4
 	// exchange-layout reconciliation.
-	addFactory( new GCExchangeListFactory() );
+	addFactory( DE_PACKET_FACTORY(GCExchangeList) );
 
 #if defined(__OUTPUT_INIT__) && __OUTPUT_INIT__
 	cout << toString() << endl;
@@ -946,28 +948,42 @@ void PacketFactoryManager::init ()
 // 팩토리 객체를 특정 인덱스에 추가한다.
 //
 //////////////////////////////////////////////////////////////////////
-void PacketFactoryManager::addFactory (PacketFactory * pFactory) 
+void PacketFactoryManager::addFactory (PacketFactory * pFactory, const char * packetName)
 {
 	__BEGIN_TRY
-		
+
 	if (pFactory == nullptr)
 		throw InvalidProtocolException("null packet factory");
+	if (packetName == nullptr)
+		throw InvalidProtocolException("null packet name");
 	const PacketID_t packetID = pFactory->getPacketID();
 	if (packetID >= m_Size)
 		throw InvalidProtocolException("packet factory id out of range");
 	if (m_Factories[packetID] != NULL) {
 		StringStream msg;
-	#ifdef __DEBUG_OUTPUT__
-		msg << "duplicate packet factories, " << pFactory->getPacketName() ;
-	#else	
-		msg << "duplicate packet factories ";
-	#endif
+		msg << "duplicate packet factories, " << packetName;
 		throw Error(msg.toString());
 	}
-	
+
 	// 패킷팩토리를 등록한다.
 	m_Factories[packetID] = pFactory;
-			
+	m_Names[packetID] = packetName;
+
+	__END_CATCH
+}
+
+void PacketFactoryManager::addFactory (PacketFactory * pFactory)
+{
+	__BEGIN_TRY
+
+	if (pFactory == nullptr)
+		throw InvalidProtocolException("null packet factory");
+#ifdef __DEBUG_OUTPUT__
+	addFactory(pFactory, pFactory->getPacketName().c_str());
+#else
+	addFactory(pFactory, "");
+#endif
+
 	__END_CATCH
 }
 
@@ -1020,11 +1036,21 @@ PacketSize_t PacketFactoryManager::getPacketMaxSize (PacketID_t packetID)
 
 //////////////////////////////////////////////////////////////////////
 //
+// whether a factory is registered for the id
+//
+//////////////////////////////////////////////////////////////////////
+bool PacketFactoryManager::hasFactory (PacketID_t packetID) const noexcept
+{
+	return packetID < m_Size && m_Factories[packetID] != NULL;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+//
 // 패킷아이디로 특정 패킷의 이름을 리턴한다.
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __DEBUG_OUTPUT__
-string PacketFactoryManager::getPacketName (PacketID_t packetID) 
+string PacketFactoryManager::getPacketName (PacketID_t packetID) const
 {
 	__BEGIN_TRY
 
@@ -1036,8 +1062,8 @@ string PacketFactoryManager::getPacketName (PacketID_t packetID)
 		throw InvalidProtocolException(msg.toString());
 	}
 
-	return m_Factories[packetID]->getPacketName();
-			
+	return m_Names[packetID];
+
 	__END_CATCH
 }
 
@@ -1045,6 +1071,7 @@ string PacketFactoryManager::getPacketName (PacketID_t packetID)
 //////////////////////////////////////////////////////////////////////
 // get debug string
 //////////////////////////////////////////////////////////////////////
+#ifdef __DEBUG_OUTPUT__
 string PacketFactoryManager::toString () const
 {
 	__BEGIN_TRY

@@ -10,6 +10,7 @@
 
 * [Format strings](format-strings.md) - A format string loaded from a data file goes through SafeFormat::Format, which checks the entry's conversions against the arguments the call site passes; R7 counts the lookup spelled at the format argument, R8 every printf-family call whose format is not a literal, and format_arity audits the sites it finds and pins how many.
 * [Packet input safety](packet-input-safety.md) - Unvalidated network input is the top open risk, instrumented two ways: ratchet R3 holds server-supplied lengths into copies at zero, and the packet_indices ctest reads every packet-indexed subscript by value and fails closed on a container it does not know.
+* [Server link](server-link.md) - The game connection admits only the packets a game server sends: in CPS_NORMAL the validator's set is folded from the factory table, every registered GC packet and nothing else, and the game fuzz targets read that set unless DE_FUZZ_ANY_ID widens it to every registered id.
 * [Wire layout](wire-layout.md) - Every factory's id, name and max body size is pinned in tests/wire-layout.txt and every packet's bytes in tests/golden/*.hex; a layout change is a protocol change shipped identically in the server, re-recorded deliberately, never to make a test pass.
 
 # Reports

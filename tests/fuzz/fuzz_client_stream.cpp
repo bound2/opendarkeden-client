@@ -8,9 +8,12 @@
 // input ring and what counts as a finding).
 //
 // The player is in CPS_NORMAL, the status of a session in the game:
-// its validator set is PIST_ANY, so no id is refused there and every
-// registered parser is reachable. The game connection's other statuses
-// (CPS_AFTER_SENDING_CG_CONNECT, CPS_WAITING_FOR_GC_SET_POSITION,
+// its validator set is the GC packets the game server link admits
+// (Client/Packet/GameServerLink.h), so the parsers of every registered
+// GC packet are reachable and the rest are refused at the gate; with
+// DE_FUZZ_ANY_ID in the environment every registered parser is (the
+// ctest fuzz_replay_client_stream_any_id). The game connection's other
+// statuses (CPS_AFTER_SENDING_CG_CONNECT, CPS_WAITING_FOR_GC_SET_POSITION,
 // CPS_WAITING_FOR_GC_RECONNECT_LOGIN) accept fewer ids, never more.
 // The encrypt code is the one GCUpdateInfoHandler sets after the zone
 // loads, any byte.

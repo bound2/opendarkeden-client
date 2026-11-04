@@ -2,6 +2,21 @@
 
 ## 2026-11-01
 
+* **Creation**: [server link](protocol/server-link.md), the rule that the game connection admits
+  only what a game server sends: `CPS_NORMAL`'s validator set is folded from the factory table
+  (every registered GC packet), each factory registered with its name through
+  `DE_PACKET_FACTORY`, and `DE_FUZZ_ANY_ID` widens the fuzz targets' set; [fuzzing](protocol/fuzzing.md)
+  says what the game targets read now and names the `fuzz_replay_client_stream_any_id` replay,
+  the [testing overview](testing/overview.md) lists it, `CLAUDE.md` and the
+  [protocol index](protocol/index.md) link the rule, and the [next work plan](reviews/NEXT.md)
+  moves task 17 to *Done* (`CLAUDE.md` and the [reviews index](reviews/index.md) say so).
+* **Update**: the [next work plan](reviews/NEXT.md) is ranked again now that its first fifteen
+  tasks are done: tasks 17 to 23 (the packet admission set in `CPS_NORMAL`, the handler fuzzers'
+  reach, the 42 read budgets the server's inventory diff finds the two repositories disagreeing
+  on, the vampire and ousters interfaces in the game UI scene and a headless frame, a scripted
+  run against the docker server, the packet-safety walk's stop points, the modernization
+  leftovers), what is kept in view, and recommendations beside two owner decisions; `CLAUDE.md`
+  and the [reviews index](reviews/index.md) say so.
 * **Update**: [Linux and macOS](build/linux-and-macos.md) says the macOS runners and the Apple
   Silicon Mac now count the same warnings, and that the linker's count moves with the runner
   image's Homebrew (9 on 2026-10-08, 8 on 2026-11-01).

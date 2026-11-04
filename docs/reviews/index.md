@@ -8,4 +8,4 @@
 # Records
 
 * [Client restructuring plan](RESTRUCTURING.md) - The extraction plan that split the executable into testable libraries, complete as of 2026-09-09, with every task's owner, the ratchet table and what the review rounds settled.
-* [Next work plan](NEXT.md) - The tasks ranked after the 2026-10-25 merges, each written so an agent with no other context could take it, all done as of 2026-10-29, plus what is kept in view and the owner decisions no agent may make.
+* [Next work plan](NEXT.md) - The tasks ranked on 2026-11-01 after the first fifteen were done (the handler fuzzers' reach, the read budgets the two inventories disagree on, the other two races in the game UI scene, a scripted run against the server, the walk's stop points, the modernization leftovers), each written so an agent with no other context could take it, plus what is kept in view and the owner decisions no agent may make; the packet admission set (task 17) is done.

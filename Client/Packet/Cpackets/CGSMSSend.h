@@ -68,7 +68,7 @@ public:
 	Packet* createPacket() { return new CGSMSSend(); }
 	string getPacketName() const { return "CGSMSSend"; }
 	PacketID_t getPacketID() const noexcept { return Packet::PACKET_CG_SMS_SEND; }
-	PacketSize_t getPacketMaxSize() const { return szBYTE + (szBYTE + MAX_NUMBER_LENGTH)*MAX_RECEVIER_NUM + szBYTE + MAX_RECEVIER_NUM + szBYTE + MAX_MESSAGE_LENGTH; }
+	PacketSize_t getPacketMaxSize() const { return szBYTE + (szBYTE + MAX_NUMBER_LENGTH)*MAX_RECEVIER_NUM + szBYTE + MAX_NUMBER_LENGTH + szBYTE + MAX_MESSAGE_LENGTH; }
 };
 
 

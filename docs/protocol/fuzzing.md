@@ -12,10 +12,13 @@ generated: { by: claude-code/claude-fable-5-1, at: 2026-10-21T19:53:16Z }
 
 Two libFuzzer targets read the bytes a server sends the client, one per connection of its one
 `ClientPlayer`: `tests/fuzz/fuzz_client_stream.cpp`, the game connection, with the player in
-`CPS_NORMAL` (every registered id accepted), and `tests/fuzz/fuzz_client_login_stream.cpp`, the
-login connection, which reads every input once in each of the seven statuses the player holds
-there (`CPS_AFTER_SENDING_CL_LOGIN` to `CPS_AFTER_SENDING_CL_SELECT_PC`), so a frame reaches a
-parser only when that status's validator set accepts its id, as in production. Both read through
+`CPS_NORMAL` (the registered GC packets, which the [server link](server-link.md) folds into that
+status's set; `DE_FUZZ_ANY_ID` in the environment admits every registered id instead, and the
+ctest `fuzz_replay_client_stream_any_id` replays every golden so), and
+`tests/fuzz/fuzz_client_login_stream.cpp`, the login connection, which reads every input once in
+each of the seven statuses the player holds there (`CPS_AFTER_SENDING_CL_LOGIN` to
+`CPS_AFTER_SENDING_CL_SELECT_PC`), so a frame reaches a parser only when that status's validator
+set accepts its id, as in production. Both read through
 `tests/fuzz/client_stream_reader.h`: `[encrypt code byte][stream]`, read frame by frame through
 the same gates as `ClientPlayer::processCommand` (its header lists them with their line numbers;
 keep the two in step), once from the start of the input ring and once with the ring's wrap point
@@ -36,8 +39,10 @@ take the read-only targets' input, `[encrypt code byte][stream]`, so the same se
 and run `ClientPlayer::processCommand` itself on a player whose socket never connected: the
 production gates, `PacketDispatcher::dispatch` into the handler `Client/PacketHandlerRegistry.cpp`
 binds, and the player status a handler sets carrying over to the next frame. The game target runs
-every input three times in `CPS_NORMAL`, the player a slayer, a vampire and an ousters, since many
-handlers branch on the race; the login target runs it from each of the seven login statuses.
+every input three times in `CPS_NORMAL` (the game connection's set, the registered GC packets, or
+every registered id under `DE_FUZZ_ANY_ID`, as for the read-only target), the player a slayer, a
+vampire and an ousters, since many handlers branch on the race; the login target runs it from each
+of the seven login statuses.
 
 The world they dispatch into is `tests/fuzz/handler_world.h` (its header is the full
 description): empty data tables sized where code assumes a row exists (an id past a table reads
@@ -113,6 +118,10 @@ take too; its `--datagram` mode writes the 12 `RC` seeds of `client_datagram` fr
 `.datagram.` goldens, with the pad byte those leave out), and
 `tests/fuzz/regressions/<target>/*.hex`, one file per fixed crash in the goldens' hex style
 (`xxd -p crash-... | tr -d '\n'`), named after the packet and the value.
+`fuzz_replay_client_stream_any_id` replays the `client_stream` binary once more, over a corpus of
+its own (`fuzz_corpus_client_stream_any_id`: every golden and every layout line, no prefix), with
+`DE_FUZZ_ANY_ID=1` in its environment, so the readers of the ids the game connection refuses are
+replayed in every tree too.
 `client_stream_handlers` also takes the six seeds of `tests/fuzz/seeds/client_stream_handlers`,
 which `tests/unit/test_fuzz_seeds.cpp` writes with the client's packet classes
 (`UPDATE_FUZZ_SEEDS=1` writes them again) and `golden2corpus.pl --seeds` adds: streams that open
@@ -150,6 +159,10 @@ cd /tmp/fz && ASAN_OPTIONS=detect_leaks=0:abort_on_error=1 \
   <repo>/build/presets/macos-fuzz/bin/fuzz_client_stream -max_total_time=600 \
   -timeout=10 -rss_limit_mb=2048 -max_len=32768 -close_fd_mask=3 corpus
 ```
+
+With `DE_FUZZ_ANY_ID=1` in the environment the game target admits every registered id, as the
+connection did before the [server link](server-link.md); its corpus is then every golden (the same
+command with `.` for the prefix), and that run is how the readers of the refused ids are fuzzed.
 
 The login target is the same run with its own seeds and binary, in its own scratch directory:
 
