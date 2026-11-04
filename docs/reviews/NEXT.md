@@ -430,15 +430,21 @@ scripts' lists; `CGSMSSend`'s budget is the server's 114. Owners: the eight test
 
 ### 18. The handler fuzzers' reach (PR #593)
 
-The world holds what a player who had just acted holds (`tests/fuzz/handler_world.h`'s
-`MakeRequests`): a second player of the player's race beside it, named as the other-info window
-names its subject (`tests/fuzz/recording_hosts.h` installs `GetOtherInfoName`), a sword in the
-inventory the item-check buffer holds for a pick-up to the mouse, and the request
-`TempInformation` records, a forge of two more items in a slayer's run and an option removal
-from the sword in a vampire's and an ousters'. Five seeds (`tests/unit/test_fuzz_seeds.cpp`)
-reach `PickUpItem`, `OkMixingForge`, `OkRemoveOption`, `RunOtherInfo` and the personal shop
-window through `GCOtherStoreInfo`, which an instrumented replay counted; the three item windows
-are out of any reply's reach, since an item is used only from the UI (`UIMessageManager.cpp`),
-and [fuzzing](../protocol/fuzzing.md) says so, with the 15-minute runs that followed. Owners:
-`FuzzSeeds` and `GameServerLink.EveryFrameOfAHandlerSeedIsAdmittedInGame` in `unit_tests`, and
-the handler replay ctests over the seeds.
+The world holds the request the player has just sent, one a run as the UI admits one at a time
+(`tests/fuzz/handler_world.h`'s `MakeRequests`, as `UIMessageManager.cpp` leaves the item-check
+buffer and `TempInformation`): a slayer's player forging, a vampire's picking a sword up off the
+ground to the mouse, an ousters' taking an option off an inventory item with the remover on the
+mouse; and in every run a second player of the player's race beside it, named as the other-info
+window names its subject (`tests/fuzz/recording_hosts.h` installs `GetOtherInfoName`). Five seeds
+(`tests/unit/test_fuzz_seeds.cpp`) reach `PickUpItem`, `OkMixingForge`, `OkRemoveOption`,
+`RunOtherInfo` and the personal shop window through `GCOtherStoreInfo`; the three item windows'
+entries are reached only by the UI's own use of an item, and the one reply that opens one,
+`GCUseOK`, goes through the executable's adapter straight into `VS_UI`, outside any host, so no
+seed reaches them; [fuzzing](../protocol/fuzzing.md) says so, with the 15-minute runs. The
+recording hosts count every entry's calls, and their mouse pointer keeps the item `PickUpItem`
+hands it until `DropItem`, read with the windows. Owners:
+`fuzz_seeds_reach_client_stream_handlers` (the seed directory replayed with `DE_FUZZ_REACH`
+naming the entries the seeds reach, on both verify scripts' required lists), `FuzzSeeds` and
+`GameServerLink.EveryFrameOfAHandlerSeedIsAdmittedInGame` in `unit_tests`, `RecordingHosts` in
+`unit_tests` for the mouse and the counts, and the ids `tests/fuzz/handler_world_ids.h` shares
+between the world and the seeds.

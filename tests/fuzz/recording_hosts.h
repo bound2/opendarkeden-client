@@ -32,10 +32,26 @@
 //     leaves for the title (handler_world.h's LeaveForTitle). A free that
 //     a later packet of the same call hides is not drawn by the game
 //     either.
+//   - the mouse pointer holds the item PickUpItem hands it, as
+//     C_VS_UI_MOUSE_POINTER keeps the one it is handed until DropItem
+//     forgets it, and it is read with the windows, so ASan reports an
+//     item a packet freed while the mouse still drew it. A handler
+//     reaches the item on the mouse only through GetMouseItem, which
+//     stays empty here, so nothing here moves it on; the UI never frees
+//     it either, so what the mouse holds when a run ends, or when a
+//     later pick-up replaces it, is lost, a leak the runs do not count
+//     (docs/protocol/fuzzing.md).
 //
 //   - the other-info window names its subject: GetOtherInfoName answers
 //     kOtherInfoName, the peer handler_world.h stands in the zone, so
 //     GCOtherModifyInfo for it reaches RunOtherInfo.
+//
+//   - every entry counts the calls it gets (g_Reached, by Entry). When
+//     DE_FUZZ_REACH holds a comma-separated list of entry names, the
+//     process prints every count as it ends and fails, status 1, if an
+//     entry named was never reached or a name is no entry's: the owner
+//     of what the seeds reach, the fuzz_seeds_reach_client_stream_handlers
+//     ctest, which replays the seed directory with it.
 //
 // What the real adapters do with a handler's integers is not modelled;
 // the walks of packet input safety followed them by reading.
@@ -58,6 +74,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <string>
 
 namespace RecordingHosts {
 
@@ -66,6 +83,85 @@ inline const char* const	kOtherInfoName = "Peer";
 
 // What a read leaves, so the compiler keeps the read.
 inline volatile unsigned long	g_Sink = 0;
+
+// The entries that take a handler's object or open a window, as
+// DE_FUZZ_REACH names them.
+enum Entry
+{
+	ENTRY_PICK_UP_ITEM,
+	ENTRY_OK_MIXING_FORGE,
+	ENTRY_OK_REMOVE_OPTION,
+	ENTRY_RUN_SHOP,
+	ENTRY_SET_SHOP,
+	ENTRY_RUN_STORAGE,
+	ENTRY_SET_STORAGE,
+	ENTRY_RUN_PET_STORAGE,
+	ENTRY_SET_PET_STORAGE,
+	ENTRY_RUN_OTHER_INFO,
+	ENTRY_RUN_QUEST_INVENTORY,
+	ENTRY_RUN_XMAS_CARD_WINDOW,
+	ENTRY_RUN_BULLETIN_BOARD_WINDOW,
+	ENTRY_RUN_PERSNAL_SHOP,
+	ENTRY_SET_PERSNAL_SHOP,
+	ENTRY_MAX
+};
+
+inline const char* const	kEntryNames[ENTRY_MAX] = {
+	"PickUpItem", "OkMixingForge", "OkRemoveOption",
+	"RunShop", "SetShop", "RunStorage", "SetStorage", "RunPetStorage", "SetPetStorage",
+	"RunOtherInfo", "RunQuestInventory", "RunXmasCardWindow", "RunBulletinBoardWindow",
+	"RunPersnalShop", "SetPersnalShop",
+};
+
+// How many times each entry was called since the process started.
+inline unsigned	g_Reached[ENTRY_MAX] = {};
+
+inline void	Reach(Entry entry)
+{
+	++g_Reached[entry];
+}
+
+// Prints every entry's count and ends the process with status 1 if an
+// entry DE_FUZZ_REACH names was never reached, or a name is no entry's;
+// nothing when DE_FUZZ_REACH is not set. Registered to run at exit.
+inline void	CheckReachAtExit()
+{
+	const char* names = std::getenv("DE_FUZZ_REACH");
+	if (names == NULL)
+		return;
+	for (int i = 0; i < ENTRY_MAX; i++)
+		std::fprintf(stderr, "recording_hosts: %s reached %u times\n", kEntryNames[i], g_Reached[i]);
+
+	bool bReached = true;
+	const std::string list(names);
+	std::size_t start = 0;
+	while (start <= list.size())
+	{
+		std::size_t end = list.find(',', start);
+		if (end == std::string::npos)
+			end = list.size();
+		const std::string name = list.substr(start, end - start);
+		start = end + 1;
+		if (name.empty())
+			continue;
+		int found = -1;
+		for (int i = 0; i < ENTRY_MAX; i++)
+			if (name == kEntryNames[i])
+				found = i;
+		if (found < 0)
+		{
+			std::fprintf(stderr, "recording_hosts: DE_FUZZ_REACH names no entry %s\n", name.c_str());
+			bReached = false;
+		}
+		else if (g_Reached[found] == 0)
+		{
+			std::fprintf(stderr, "recording_hosts: %s was not reached\n", name.c_str());
+			bReached = false;
+		}
+	}
+	if (!bReached)
+		std::_Exit(1);
+}
 
 inline void	Read(const MItem* pItem)
 {
@@ -121,12 +217,17 @@ inline Window<MStorage>	g_Storage;
 inline Window<MStorage>	g_PetStorage;
 inline Window<MStorage>	g_PersnalShop;
 
+// The item on the mouse pointer, the last one PickUpItem was handed,
+// until DropItem.
+inline MItem*	g_pMouseItem = NULL;
+
 inline void	Reset()
 {
 	g_Shop.Close();
 	g_Storage.Close();
 	g_PetStorage.Close();
 	g_PersnalShop.Close();
+	g_pMouseItem = NULL;
 }
 
 // After every call of the receive loop, and at the end of a run before
@@ -137,12 +238,16 @@ inline void	ReadOpenWindows()
 	g_Storage.ReadIfOpen();
 	g_PetStorage.ReadIfOpen();
 	g_PersnalShop.ReadIfOpen();
+	Read(g_pMouseItem);
 }
 
 // Installed over the empty hosts, after the model's; every other entry
 // stays empty, and a missing entry is skipped as before.
 inline void	Install()
 {
+	static const bool bChecksAtExit = (std::atexit(CheckReachAtExit), true);
+	(void)bChecksAtExit;
+
 	Reset();
 
 	static DialogPresentation::Host		dialog;
@@ -152,23 +257,26 @@ inline void	Install()
 
 	dialog = {};
 	dialog.PickUpItem = [](MItem* pItem) {
+		Reach(ENTRY_PICK_UP_ITEM);
 		if (pItem == NULL)
 		{
 			std::fprintf(stderr, "recording_hosts: PickUpItem(NULL), which UI_PickUpItem reads\n");
 			std::abort();
 		}
 		Read(pItem);
+		g_pMouseItem = pItem;
 	};
-	dialog.OkMixingForge = [](std::uint32_t, MItem* pItem, MItem* pItem2) { Read(pItem); Read(pItem2); };
-	dialog.OkRemoveOption = [](std::uint32_t, MItem* pItem) { Read(pItem); };
-	dialog.RunShop = []() { g_Shop.Run(); };
-	dialog.SetShop = [](MShop* pShop) { g_Shop.Set(pShop); };
+	dialog.DropItem = []() { g_pMouseItem = NULL; };
+	dialog.OkMixingForge = [](std::uint32_t, MItem* pItem, MItem* pItem2) { Reach(ENTRY_OK_MIXING_FORGE); Read(pItem); Read(pItem2); };
+	dialog.OkRemoveOption = [](std::uint32_t, MItem* pItem) { Reach(ENTRY_OK_REMOVE_OPTION); Read(pItem); };
+	dialog.RunShop = []() { Reach(ENTRY_RUN_SHOP); g_Shop.Run(); };
+	dialog.SetShop = [](MShop* pShop) { Reach(ENTRY_SET_SHOP); g_Shop.Set(pShop); };
 	dialog.IsRunningShop = []() { return g_Shop.bOpen; };
-	dialog.RunStorage = []() { g_Storage.Run(); };
-	dialog.SetStorage = [](MStorage* pStorage) { g_Storage.Set(pStorage); };
+	dialog.RunStorage = []() { Reach(ENTRY_RUN_STORAGE); g_Storage.Run(); };
+	dialog.SetStorage = [](MStorage* pStorage) { Reach(ENTRY_SET_STORAGE); g_Storage.Set(pStorage); };
 	dialog.IsRunningStorage = []() { return g_Storage.bOpen; };
-	dialog.RunPetStorage = []() { g_PetStorage.Run(); };
-	dialog.SetPetStorage = [](MStorage* pStorage) { g_PetStorage.Set(pStorage); };
+	dialog.RunPetStorage = []() { Reach(ENTRY_RUN_PET_STORAGE); g_PetStorage.Run(); };
+	dialog.SetPetStorage = [](MStorage* pStorage) { Reach(ENTRY_SET_PET_STORAGE); g_PetStorage.Set(pStorage); };
 	dialog.CloseAllDialog = []() { Reset(); };
 	dialog.CloseStorage = []() { g_Storage.Close(); };
 	dialog.ClosePetStorage = []() { g_PetStorage.Close(); };
@@ -177,15 +285,15 @@ inline void	Install()
 
 	info = {};
 	info.GetOtherInfoName = []() -> const char* { return kOtherInfoName; };
-	info.RunOtherInfo = [](MCreature* pCreature) { Read(pCreature); };
+	info.RunOtherInfo = [](MCreature* pCreature) { Reach(ENTRY_RUN_OTHER_INFO); Read(pCreature); };
 	GameInfoPresentation::SetHost(&info);
 
 	ui = {};
-	ui.RunQuestInventory = [](const MItem* pItem) { Read(pItem); };
-	ui.RunXmasCardWindow = [](const MItem* pItem) { Read(pItem); };
-	ui.RunBulletinBoardWindow = [](const MItem* pItem) { Read(pItem); };
-	ui.RunPersnalShop = []() { g_PersnalShop.Run(); };
-	ui.SetPersnalShop = [](MStorage* pStorage) { g_PersnalShop.Set(pStorage); };
+	ui.RunQuestInventory = [](const MItem* pItem) { Reach(ENTRY_RUN_QUEST_INVENTORY); Read(pItem); };
+	ui.RunXmasCardWindow = [](const MItem* pItem) { Reach(ENTRY_RUN_XMAS_CARD_WINDOW); Read(pItem); };
+	ui.RunBulletinBoardWindow = [](const MItem* pItem) { Reach(ENTRY_RUN_BULLETIN_BOARD_WINDOW); Read(pItem); };
+	ui.RunPersnalShop = []() { Reach(ENTRY_RUN_PERSNAL_SHOP); g_PersnalShop.Run(); };
+	ui.SetPersnalShop = [](MStorage* pStorage) { Reach(ENTRY_SET_PERSNAL_SHOP); g_PersnalShop.Set(pStorage); };
 	ui.ClosePersnalShop = []() { g_PersnalShop.Close(); };
 	ui.IsRunningPersnalShop = []() { return g_PersnalShop.bOpen; };
 	VsUiPresentation::SetHost(&ui);

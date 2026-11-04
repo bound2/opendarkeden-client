@@ -4,9 +4,12 @@
 //
 // The handler fuzz targets' own seeds (tests/fuzz/seeds/<target>/*.hex,
 // docs/protocol/fuzzing.md): streams of frames a server could send that
-// open a window and then free the object it draws, the routes the
-// recording presentation hosts model (tests/fuzz/recording_hosts.h). The
-// seed corpus made from tests/golden holds no packet that reaches one.
+// reach a recording presentation entry (tests/fuzz/recording_hosts.h),
+// opening a window and then freeing the object it draws, or handing an
+// entry the object the world made for the player's request. The seed
+// corpus made from tests/golden holds no packet that reaches one. That
+// each seed reaches its entry is the fuzz_seeds_reach_client_stream_handlers
+// ctest's; here the bytes are pinned.
 //
 // Each seed is the encrypt code byte 0 and the frames, each body framed
 // by its length (see Seed): one the packet class has no setters for is
@@ -21,6 +24,7 @@
 //----------------------------------------------------------------------
 #include "test_framework.h"
 #include "packet_stream_access.h"
+#include "../fuzz/handler_world_ids.h"
 #include "CrtCompat.h"
 #include "ItemClassDef.h"
 #include "MShop.h"
@@ -56,11 +60,11 @@ namespace {
 // zone 32 cells a side, the player in its middle.
 const ObjectID_t kNPC = 5000;
 const Coord_t kNear = 17;
-// What the world holds for a player who had just acted (handler_world.h's
-// MakeRequests): the peer the other-info window names, and the sword the
-// item-check buffer and an option removal name.
-const ObjectID_t kPeer = 1001;
-const ObjectID_t kSword = 2000;
+// What the world holds for the player's request (handler_world.h's
+// MakeRequests), by the ids it shares: the peer the other-info window
+// names and the item the item-check buffer holds.
+using HandlerFuzz::kPeerID;
+using HandlerFuzz::kBufferedItemID;
 
 // A body as a server writes its fields.
 struct Body
@@ -313,7 +317,7 @@ std::string ToHex(const std::vector<unsigned char>& bytes)
 void DeleteAndPickUpOK(Seed& seed)
 {
 	GCDeleteandPickUpOK packet;
-	packet.setObjectID(kSword);
+	packet.setObjectID(kBufferedItemID);
 	seed.Then(packet);
 }
 
@@ -332,7 +336,7 @@ void AddItemToItemVerify(Seed& seed, BYTE code)
 void OtherModifyInfo(Seed& seed)
 {
 	GCOtherModifyInfo packet;
-	packet.setObjectID(kPeer);
+	packet.setObjectID(kPeerID);
 	seed.Then(packet);
 }
 
@@ -341,7 +345,7 @@ void OtherModifyInfo(Seed& seed)
 void OtherStoreInfo(Seed& seed)
 {
 	GCOtherStoreInfo packet;
-	packet.setObjectID(kPeer);
+	packet.setObjectID(kPeerID);
 	packet.setRequested(1);
 	packet.setStoreInfo(new StoreInfo);
 	packet.getStoreInfo()->setOpen(1);
