@@ -70,10 +70,12 @@
 #include "MShop.h"
 #include "MShopShelf.h"
 #include "MStorage.h"
+#include "CrtCompat.h"
 
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <optional>
 #include <string>
 
 namespace RecordingHosts {
@@ -126,14 +128,14 @@ inline void	Reach(Entry entry)
 // nothing when DE_FUZZ_REACH is not set. Registered to run at exit.
 inline void	CheckReachAtExit()
 {
-	const char* names = std::getenv("DE_FUZZ_REACH");
-	if (names == NULL)
+	const std::optional<std::string> names = Basic::GetEnvironment("DE_FUZZ_REACH");
+	if (!names)
 		return;
 	for (int i = 0; i < ENTRY_MAX; i++)
 		std::fprintf(stderr, "recording_hosts: %s reached %u times\n", kEntryNames[i], g_Reached[i]);
 
 	bool bReached = true;
-	const std::string list(names);
+	const std::string& list = *names;
 	std::size_t start = 0;
 	while (start <= list.size())
 	{
