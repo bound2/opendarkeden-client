@@ -18,7 +18,7 @@ void GCAddInjuriousCreature::read (SocketInputStream & iStream)
 	if (szName == 0)
 		throw InvalidProtocolException("szName == 0");
 
-	if (szName > 10)
+	if (szName > 20)
 		throw InvalidProtocolException("too large name length");
 
 	iStream.read(m_Name , szName);
@@ -36,7 +36,7 @@ void GCAddInjuriousCreature::write (SocketOutputStream & oStream) const
 	if (szName == 0)
 		throw InvalidProtocolException("szName == 0");
 
-	if (szName > 10)
+	if (szName > 20)
 		throw InvalidProtocolException("too large name length");
 
 	oStream.write(szName);

@@ -125,7 +125,7 @@ public:
 			szObjectID +     // item OID
 			szBYTE +         // item class
 			szItemType +     // item type
-			szBYTE + 255 +   // item option type
+			szBYTE + MAX_ITEM_OPTION_NUM +   // item option type
 			szDurability +   // item durablility
 			szItemNum +      // number of item
 			szSilver +       // silver coating amount

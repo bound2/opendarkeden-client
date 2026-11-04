@@ -92,6 +92,7 @@ public:
 			+ szGuildID						// 길드 아이디
 			+ szRank						// 계급
 			+ szBYTE						// 권한
+			+ szAlignment					// alignment, as read takes it
 			+ szuint
 			+ szLevel;
 	}

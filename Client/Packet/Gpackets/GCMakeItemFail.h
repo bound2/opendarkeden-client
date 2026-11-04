@@ -100,7 +100,7 @@ public :
 
 	// get Packet Max Size
 	// PacketSize_t getPacketMaxSize() const throw() { return szSkillType + szCEffectID + szDuration + szBYTE + szBYTE * m_ListNum * 2 ; }
-	PacketSize_t getPacketMaxSize() const { return 255 + ModifyInfo::getPacketMaxSize(); }
+	PacketSize_t getPacketMaxSize() const { return GCChangeInventoryItemNum::getMaxSize() + ModifyInfo::getPacketMaxSize(); }
 };
 
 

@@ -2,6 +2,11 @@
 
 ## 2026-11-04
 
+* **Update**: [wire layout](protocol/wire-layout.md) records the inventory diff run clean against
+  the server on 2026-11-04 and the 41 budgets that moved to what the server writes, with what
+  stays in view; [packet input safety](protocol/packet-input-safety.md) names `GCNPCAskDynamic`'s
+  16,425-byte frame maximum; the [next work plan](reviews/NEXT.md) moves task 23 to *Done*, and
+  `CLAUDE.md` and the [reviews index](reviews/index.md) say so.
 * **Update**: [fuzzing](protocol/fuzzing.md) says what the handler world holds for a player who
   had just acted (a peer, a pending pick-up, a recorded request), which four of the seven
   unreached presentation entries needed, that the three item windows are out of any reply's

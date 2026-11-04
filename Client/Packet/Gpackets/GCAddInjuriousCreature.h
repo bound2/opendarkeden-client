@@ -83,7 +83,7 @@ public:
 
 	// get packet's max body size
 	// message 의 최대 크기에 대한 설정이 필요하다.
-	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE + 10; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szBYTE + 20; }	// the longest name the server writes
 
 };
 

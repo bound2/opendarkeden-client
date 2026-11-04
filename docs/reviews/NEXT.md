@@ -1,7 +1,7 @@
 ---
 type: Record
 title: "Next work plan"
-description: "The tasks ranked in the client on 2026-11-01 after the first fifteen were done: the packet admission set, the handler fuzzers' reach, the read budgets the two inventories disagree on, the other two races in the game UI scene, a scripted run against the server, the walk's stop points and the modernization leftovers, each written so an agent with no other context could take it, what is kept in view, and the owner decisions that are not an agent's to make; the packet admission set (task 17) and the handler fuzzers' reach (task 18) are done."
+description: "The tasks ranked in the client on 2026-11-01 after the first fifteen were done: the packet admission set, the handler fuzzers' reach, the read budgets the two inventories disagree on, the other two races in the game UI scene, a scripted run against the server, the walk's stop points and the modernization leftovers, each written so an agent with no other context could take it, what is kept in view, and the owner decisions that are not an agent's to make; the packet admission set (task 17), the handler fuzzers' reach (task 18) and the read budgets (task 23) are done."
 tags: [review, plan]
 ---
 
@@ -54,29 +54,6 @@ platform workflows dispatched by hand) applies to each.
 Ranked 2026-11-01. The order is the rank, and the numbers continue the first ranking's, so a
 *Done* entry keeps its name.
 
-### 23. The 41 read budgets the two inventories still disagree on
-
-**What:** the server repository's `tests/tools/wire_inventory_diff.sh`, the ground truth for
-whether the two copies of the protocol agree on ids and maximum body sizes, fails against this
-repository on 2026-11-01 with 42 `max-size mismatches (same id and name)`: `CGSMSSend` (114
-there, 108 here until task 17) and 41 GC packets the server budgets larger than this client reads
-(`GCAddMonster` 1072 against 306, `GCSkillInfo` 34706 against 4338, `GCUpdateInfo` 59146
-against 58380 among them; `GCStashList` is the other way, 7506 against 21006). A GC packet the
-server can write past this client's budget is refused at the receive loop's size gate
-(`ClientPlayer::processCommand`, "too large packet SIZE") and disconnects the player in play; a
-budget larger than the server ever writes is only a looser read gate.
-
-**How:** for each GC line, read the server's `write()` and `getPacketSize()` against this
-client's `getPacketMaxSize()`: where the server can write more, raise this client's budget to
-the server's (the inventory line moves, re-recorded by `test_wire_layout` under
-`UPDATE_GOLDENS=1` after `tests/tools/gen_wire_inventory.pl` regenerates the registry; no byte
-on the wire does), and where it cannot, say why the two differ in
-[wire layout](../protocol/wire-layout.md) and have the server lower its own or list the line in
-the diff's exceptions. The owner is the diff run clean against the server's master, named with
-its date in [wire layout](../protocol/wire-layout.md). Rule kept: a golden is never
-re-recorded to make a test pass, and a layout change is a protocol change the server ships
-identically ([wire layout](../protocol/wire-layout.md)).
-
 ### 19. The vampire and ousters interfaces in the game UI scene, then one headless frame
 
 **What:** `tests/support/game_ui_scene.h` starts `C_VS_UI_GAME` for a slayer only and draws no
@@ -100,7 +77,7 @@ the `exempt` fixes get owners. Rule kept: `VS_UI` rendering that reaches game gl
 and chat against the docker server are not verified
 ([Linux and macOS](../build/linux-and-macos.md)), and the
 [browser client](../browser/browser-client.md) builds and logs in. Beyond the goldens and the
-server repository's wire-inventory diff (red today, task 23), nothing proves the two
+server repository's wire-inventory diff (clean since 2026-11-04, task 23), nothing proves the two
 repositories still agree end to end.
 
 **How:** a script under `tools/` that starts the server repository's compose stack
@@ -150,7 +127,7 @@ does not change bytes in the same commit ([move, then fix](../process/move-then-
   where a Release client carries on past it ([fuzzing](../protocol/fuzzing.md)).
 - The server repository's `tests/tools/wire_inventory_diff.sh` and `decore_client_diff.sh`
   compare the two copies of the protocol and of the shared rules; run them after any
-  protocol-touching PR in either repository. The inventory diff is red today (task 23).
+  protocol-touching PR in either repository. The inventory diff ran clean on 2026-11-04 (task 23).
 
 ## Owner decisions (not for an agent to make)
 
@@ -442,3 +419,19 @@ are out of any reply's reach, since an item is used only from the UI (`UIMessage
 and [fuzzing](../protocol/fuzzing.md) says so, with the 15-minute runs that followed. Owners:
 `FuzzSeeds` and `GameServerLink.EveryFrameOfAHandlerSeedIsAdmittedInGame` in `unit_tests`, and
 the handler replay ctests over the seeds.
+
+### 23. The 41 read budgets the two inventories still disagree on (PR #__C23__)
+
+Each of the 41 `GC` budgets the server's `tests/tools/wire_inventory_diff.sh` listed on
+2026-11-01 now equals what the server's `write()` can emit: 33 rose, where this client's receive
+gate refused a legal packet (`GCShopBuyFail` every time; the shared `EffectInfo`, the effected
+creature lists, `GCSkillInfo`'s eight records, the guild, union, war and schedule lists when
+full), and 8 fell to the server's exact maximum (the item option list, capped at
+`MAX_ITEM_OPTION_NUM` 30; the nickname list's byte count; two bytes never read). No byte on the
+wire moved; the inventory was re-recorded and the diff ran clean against the server's `master`
+at `58913ab`, then again with `GearInfo`'s term raised from 13 to 22 slots in both repos (the
+server's PR #401, which also bounds `GCNPCAskDynamic`'s body), which moves `GCMorph1` and
+`GCUpdateInfo` in both inventories. [Wire layout](../protocol/wire-layout.md) records the run
+and what stays in view (this client's uncapped string and count bytes). Owner: the diff run
+clean, named with its date in [wire layout](../protocol/wire-layout.md), and
+`WireLayout.InventoryMatchesCommittedFile` in `unit_tests` for the budgets as recorded.

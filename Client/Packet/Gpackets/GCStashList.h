@@ -32,7 +32,7 @@ typedef struct _STASHITEM
 		return szObjectID + 
 				szBYTE + 
 				szItemType + 
-				szBYTE + 255 +
+				szBYTE + MAX_ITEM_OPTION_NUM +
 				szDurability +
 				szItemNum +
 				szSilver +

@@ -62,7 +62,7 @@ public :
 	void read(SocketInputStream & iStream);
 	void write(SocketOutputStream & oStream) const;
 	PacketID_t getPacketID() const noexcept { return PACKET_GC_SHOP_BUY_FAIL; }
-	PacketSize_t getPacketSize() const noexcept { return szObjectID;}
+	PacketSize_t getPacketSize() const noexcept { return szObjectID + szBYTE + szuint; }
 
 	#ifdef __DEBUG_OUTPUT__
 		std::string getPacketName() const { return "GCShopBuyFail"; }
@@ -98,7 +98,7 @@ public:
 	#endif
 
 	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_SHOP_BUY_FAIL; }
-	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID; }
+	PacketSize_t getPacketMaxSize() const noexcept { return szObjectID + szBYTE + szuint; }
 };
 
 //////////////////////////////////////////////////////////////////////////////

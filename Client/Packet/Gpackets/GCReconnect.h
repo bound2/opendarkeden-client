@@ -41,7 +41,6 @@ public :
 	PacketSize_t getPacketSize () const 
 	{ 
 		return static_cast<PacketSize_t>(szBYTE + m_Name.size() 		// 캐릭터 이름
-			+ szPCType 						// 슬레이어 or 뱀파이어?
 			+ szBYTE + m_ServerIP.size() 	// 새로 접속할 게임 서버 IP
 			+ szDWORD); 						// 인증 키
 	}
@@ -118,7 +117,6 @@ public :
 	PacketSize_t getPacketMaxSize () const
 	{
 		return szBYTE + 20 		 		// 캐릭터 이름
-			+ szPCType 					// 슬레이어 or 뱀파이어?
 			+ szBYTE + 15			 	// 새로 접속할 게임 서버 IP
 			+ szDWORD; 					// 인증 키
 	}

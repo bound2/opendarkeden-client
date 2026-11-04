@@ -90,8 +90,9 @@ public:
 
 		size += szObjectID;          // npc object id
 		size += szScriptID;          // script id size
-		size += szWORD + 1024;       // subject length & actual std::string
-		size += szWORD * 10 + 10240; // contents length & actual std::strings
+		size += szWORD + 1024;         // subject length & actual std::string
+		size += szBYTE;                // contents count
+		size += (szWORD + 1024) * 15;  // contents length & actual std::strings, the server's most
 
 		return size;
 	}

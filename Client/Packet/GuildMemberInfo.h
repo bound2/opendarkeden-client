@@ -46,7 +46,7 @@ public :
 	PacketSize_t getSize ();
 
 	static uint getMaxSize() noexcept {
-		return ( szBYTE + 20 + szGuildMemberRank + szbool) * 220 + szBYTE + szServerID;
+		return szBYTE + 20 + szGuildMemberRank + szbool + szServerID;	// one member, as read takes it
 	}
 
 	// get packet's debug string

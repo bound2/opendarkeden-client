@@ -21,7 +21,7 @@
 // class GCNicknameList;
 //////////////////////////////////////////////////////////////////////////////
 
-#define MAX_NICKNAME_NUM	500
+#define MAX_NICKNAME_NUM	255	// the count is a byte
 
 class GCNicknameList : public Packet 
 {

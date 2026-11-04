@@ -101,7 +101,7 @@ public:
 		unit += szObjectID;     // item object id
 		unit += szBYTE;         // item class
 		unit += szItemType;     // item type
-		unit += szBYTE + 255;   // item option type
+		unit += szBYTE + MAX_ITEM_OPTION_NUM;   // item option type
 		unit += szDurability;   // item durability
 		unit += szSilver;       // silver coating amount
 		unit += szGrade;        // grade

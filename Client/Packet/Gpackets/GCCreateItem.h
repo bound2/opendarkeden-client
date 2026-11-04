@@ -118,7 +118,7 @@ public:
 		return szObjectID +  // 아이템 오브젝트 ID
 			szBYTE +         // 아이템 클래스
 			szItemType +     // 아이템 타입
-			szBYTE + 255 +   // 아이템 옵션
+			szBYTE + MAX_ITEM_OPTION_NUM +   // 아이템 옵션
 			szDurability +   // 아이템 내구도
 			szSilver +       // 아이템 은 도금량
 			szGrade +        // 아이템 등급

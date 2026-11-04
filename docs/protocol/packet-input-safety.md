@@ -61,7 +61,7 @@ string ends in a `std::string`, an `MString`, a `StringCell` or a heap block siz
 length, or in a fixed array through a call bounded by that array: `snprintf(dst, sizeof(dst))`,
 `SafeFormat`'s array overloads, or `CopyBounded` with a constant count and an explicit terminator.
 The 128-byte stack buffers this page used to name are of that kind now. The longest string,
-`GCNPCAskDynamic`'s subject and answers (`WORD` lengths, bounded only by the frame's 11,294-byte
+`GCNPCAskDynamic`'s subject and answers (`WORD` lengths, bounded only by the frame's 16,425-byte
 maximum), is cut to the talk box's 2048-byte row. Not followed: the descriptor renderers other than
 the blood bible's, and the view, which keeps pointers to the names it draws (both followed since, below). No ratchet pins the result: a spelling count would have
 seen none of the routes walked here, so a new string sink is found by the same walk.

@@ -124,7 +124,8 @@ public :
 	// const static GCSkillInfoPacketMaxSize 를 정의, 리턴하라.
 	PacketSize_t getPacketMaxSize () const 
 	{ 
-		return SlayerSkillInfo::getMaxSize();
+		// The type, the count and a record per skill domain, the widest a slayer's.
+		return szBYTE + szBYTE + SlayerSkillInfo::getMaxSize() * SKILL_DOMAIN_MAX;
 	}
 
 };
