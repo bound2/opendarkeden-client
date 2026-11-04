@@ -77,7 +77,8 @@ the `exempt` fixes get owners. Rule kept: `VS_UI` rendering that reaches game gl
 and chat against the docker server are not verified
 ([Linux and macOS](../build/linux-and-macos.md)), and the
 [browser client](../browser/browser-client.md) builds and logs in. Beyond the goldens and the
-server repository's wire-inventory diff (clean since 2026-11-04, task 23), nothing proves the two
+server repository's wire-inventory diff (clean since 2026-11-04 against its PR #401 branch, task
+23), nothing proves the two
 repositories still agree end to end.
 
 **How:** a script under `tools/` that starts the server repository's compose stack
@@ -127,7 +128,8 @@ does not change bytes in the same commit ([move, then fix](../process/move-then-
   where a Release client carries on past it ([fuzzing](../protocol/fuzzing.md)).
 - The server repository's `tests/tools/wire_inventory_diff.sh` and `decore_client_diff.sh`
   compare the two copies of the protocol and of the shared rules; run them after any
-  protocol-touching PR in either repository. The inventory diff ran clean on 2026-11-04 (task 23).
+  protocol-touching PR in either repository. The inventory diff ran clean on 2026-11-04 against the
+  server's PR #401 branch (task 23).
 
 ## Owner decisions (not for an agent to make)
 
@@ -434,10 +436,12 @@ gate refused a legal packet (`GCShopBuyFail` every time; the shared `EffectInfo`
 creature lists, `GCSkillInfo`'s eight records, the guild, union, war and schedule lists when
 full), and 8 fell to the server's exact maximum (the item option list, capped at
 `MAX_ITEM_OPTION_NUM` 30; the nickname list's byte count; two bytes never read). No byte on the
-wire moved; the inventory was re-recorded and the diff ran clean against the server's `master`
-at `58913ab`, then again with `GearInfo`'s term raised from 13 to 22 slots in both repos (the
-server's PR #401, which also bounds `GCNPCAskDynamic`'s body), which moves `GCMorph1` and
-`GCUpdateInfo` in both inventories. [Wire layout](../protocol/wire-layout.md) records the run
-and what stays in view (this client's uncapped string and count bytes). Owner: the diff run
-clean, named with its date in [wire layout](../protocol/wire-layout.md), and
-`WireLayout.InventoryMatchesCommittedFile` in `unit_tests` for the budgets as recorded.
+wire moved; the inventory was re-recorded and the diff ran clean against the server's PR #401
+branch (its `master` at `58913ab` with `GearInfo`'s term raised from 13 to 22 slots in both
+repos, which moves `GCMorph1` and `GCUpdateInfo` in both inventories; the PR also bounds
+`GCNPCAskDynamic`'s body). [Wire layout](../protocol/wire-layout.md) records the run and what
+stays in view (this client's uncapped string and count bytes). Owners: the diff run clean, named
+with its date in [wire layout](../protocol/wire-layout.md), `PacketBudgets` in `unit_tests` (nine
+packets written at the server's caps through this client's writers, which keep to
+`MAX_ITEM_OPTION_NUM`, equal their budgets) and `WireLayout.InventoryMatchesCommittedFile` for
+the budgets as recorded.

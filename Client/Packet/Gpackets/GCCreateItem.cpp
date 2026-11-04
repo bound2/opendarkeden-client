@@ -68,6 +68,11 @@ void GCCreateItem::write ( SocketOutputStream & oStream ) const
 	oStream.write( m_ItemClass );
 	oStream.write( m_ItemType );
 	
+	// The server's writers emit at most MAX_ITEM_OPTION_NUM options, the
+	// budget's term; this one keeps to it too.
+	if (m_OptionType.size() > MAX_ITEM_OPTION_NUM)
+		throw InvalidProtocolException("too many item options");
+
 	BYTE optionSize = static_cast<BYTE>(m_OptionType.size());
 	oStream.write( optionSize );
 

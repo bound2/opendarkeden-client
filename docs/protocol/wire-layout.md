@@ -29,16 +29,18 @@ from its own packet classes; a diff between the two is a protocol bug in one rep
 are constructed and checked but kept out of the rendered file, because the server deleted its
 copies.
 
-**The diff ran clean on 2026-11-04** against the server's `master` at `58913ab`: task 23 of the
+**The diff ran clean on 2026-11-04** against the server's PR #401 branch (its `master` at
+`58913ab` with `GearInfo`'s term raised to 22 slots, below): task 23 of the
 [next work plan](../reviews/NEXT.md) moved the 41 `GC` budgets the two inventories disagreed on,
 each to what the server's `write()` can emit, which the server's `kMaxSize` states exactly for 40
 of them (`GCNPCAskDynamic`'s 16,425 is a budget its `write()` does not enforce: the subject and
 the answers are unbounded there, a finding for the server, bounded in its PR #401). Thirty-three rose, where this
 client's receive gate (`ClientPlayer::processCommand`, "too large packet SIZE") refused a legal
-packet: `GCShopBuyFail`, whose 9-byte body never fit its 4-byte budget; a full guild member
+packet at its fullest (the gate sums the maxima, so a shorter one passed): `GCShopBuyFail`, whose
+9-byte body never fit its 4-byte budget; a full guild member
 list, union offer list, war list or war schedule; a creature with more than 63 effects, since
 `EffectInfo::getMaxSize()` returned the count's range, not the bytes; the effected-creature
-lists of eleven skill, bomb and mine replies, budgeted one id instead of 255; `GCSkillInfo`,
+lists of ten skill, bomb and mine replies, budgeted one id instead of 255; `GCSkillInfo`,
 budgeted one record of eight; `GCAddInjuriousCreature`, whose read also refused a name past 10
 characters where the server writes 20. Eight fell to the server's exact maximum: an item's
 option list, which the server's writers cap at `MAX_ITEM_OPTION_NUM` (30, now a client constant
@@ -46,14 +48,17 @@ too), in `GCCreateItem`, `GCShopBought`, `GCShopBuyOK`, `GCShopList` and `GCStas
 `GCNicknameList`'s 500 entries through a byte count; a byte `GCPetStashList` and `GCReconnect`
 budgeted and never read. No byte on the wire moved; `tests/wire-layout.txt` was re-recorded.
 The review of the server's side found a term both repos had wrong: `GearInfo` budgeted 13
-gear slots where a creature wears up to 22 (`WEAR_MAX`) and the server writes one record per
-worn item, so a `GCMorph1` for a player wearing more than 13 items (26,209 budgeted, 29,368
-possible) was refused at this gate, and `GCUpdateInfo`'s gear term overflowed into the slack its
+gear slots where a creature wears up to 22 (`VAMPIRE_WEAR_MAX` and `OUSTERS_WEAR_MAX`; the
+slayer's `WEAR_MAX` is 21) and the server writes one record per worn item, so a `GCMorph1` for a
+player wearing more than 13 items (26,209 budgeted, 29,368 possible) could be refused at this gate, and `GCUpdateInfo`'s gear term overflowed into the slack its
 never-filled motorcycle slot list leaves. The term counts 22 slots in both repos now (the
 server's PR #401), so `GCMorph1`'s line is 29,368 and `GCUpdateInfo`'s 62,305 in both
-inventories. Kept in view: this client reads several string and count bytes uncapped (a pet's
-nickname, a nickname record, a shop sign, a monster's name, a stash item's sub-item count), so
-these budgets hold against a conforming server ([packet input safety](packet-input-safety.md)).
+inventories. `PacketBudgets` in `unit_tests` writes nine of the packets at the server's caps
+through this client's own writers, which keep to `MAX_ITEM_OPTION_NUM` as the server's do, and
+checks the bytes equal the budget. Kept in view: this client reads several string and count bytes
+uncapped (a pet's nickname, a nickname record, a monster's name, a stash item's sub-item count, a
+shop list's item count), so these budgets hold against a conforming server
+([packet input safety](packet-input-safety.md)).
 
 # The goldens
 

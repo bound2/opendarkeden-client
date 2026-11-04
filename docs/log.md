@@ -3,7 +3,7 @@
 ## 2026-11-04
 
 * **Update**: [wire layout](protocol/wire-layout.md) records the inventory diff run clean against
-  the server on 2026-11-04 and the 41 budgets that moved to what the server writes, with what
+  the server's PR #401 branch on 2026-11-04 and the 41 budgets that moved to what the server writes, with what
   stays in view; [packet input safety](protocol/packet-input-safety.md) names `GCNPCAskDynamic`'s
   16,425-byte frame maximum; the [next work plan](reviews/NEXT.md) moves task 23 to *Done*, and
   `CLAUDE.md` and the [reviews index](reviews/index.md) say so.
