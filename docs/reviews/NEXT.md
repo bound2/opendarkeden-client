@@ -420,7 +420,7 @@ and [fuzzing](../protocol/fuzzing.md) says so, with the 15-minute runs that foll
 `FuzzSeeds` and `GameServerLink.EveryFrameOfAHandlerSeedIsAdmittedInGame` in `unit_tests`, and
 the handler replay ctests over the seeds.
 
-### 23. The 41 read budgets the two inventories still disagree on (PR #__C23__)
+### 23. The 41 read budgets the two inventories still disagree on (PR #594)
 
 Each of the 41 `GC` budgets the server's `tests/tools/wire_inventory_diff.sh` listed on
 2026-11-01 now equals what the server's `write()` can emit: 33 rose, where this client's receive
