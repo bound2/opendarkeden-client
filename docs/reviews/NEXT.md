@@ -428,7 +428,7 @@ scripts' lists; `CGSMSSend`'s budget is the server's 114. Owners: the eight test
 `SMSSend.TheLargestPacketTheWriterAcceptsFitsTheStatedMaximum` and the rule's concept,
 [server link](../protocol/server-link.md).
 
-### 18. The handler fuzzers' reach (PR #__C18__)
+### 18. The handler fuzzers' reach (PR #593)
 
 The world holds what a player who had just acted holds (`tests/fuzz/handler_world.h`'s
 `MakeRequests`): a second player of the player's race beside it, named as the other-info window
