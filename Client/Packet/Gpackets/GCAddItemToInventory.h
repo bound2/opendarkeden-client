@@ -28,6 +28,9 @@ public:
     void write(SocketOutputStream & oStream) const;
 	PacketSize_t getPacketSize() const { return static_cast<PacketSize_t>(szObjectID + szCoord + szCoord + szBYTE + szItemType + szBYTE + m_OptionType.size() + szDurability + szItemNum); }
 
+	// The most the body holds: the item with MAX_ITEM_OPTION_NUM options.
+	static PacketSize_t getMaxSize() { return szObjectID + szCoord + szCoord + szBYTE + szItemType + szBYTE + szOptionType * MAX_ITEM_OPTION_NUM + szDurability + szItemNum; }
+
 #ifdef __DEBUG_OUTPUT__	
 	std::string getPacketName() const { return "GCAddItemToInventory"; }
 	std::string toString() const;

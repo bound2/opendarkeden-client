@@ -45,6 +45,9 @@ public :
 
 	PacketSize_t getPacketSize () const { return szBYTE + szObjectID * m_ChangedItemListNum + szItemNum*m_ChangedItemListNum;} 
 
+	// The most the body holds: the count byte and 255 changed items.
+	static PacketSize_t getMaxSize() { return szBYTE + (szObjectID + szItemNum) * 255; }
+
 	#ifdef __DEBUG_OUTPUT__
 		// get packet's debug std::string
 		std::string toString () const;

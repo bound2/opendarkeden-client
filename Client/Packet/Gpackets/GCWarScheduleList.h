@@ -64,7 +64,7 @@ public :
 	PacketSize_t getPacketMaxSize() const {
 		return (
 			szBYTE + 
-			( szBYTE+szWORD+szBYTE+szBYTE+szBYTE+szGuildID*6+(szBYTE*16)*6 ) * MAX_WAR_NUM
+			( szBYTE+szWORD+szBYTE+szBYTE+szBYTE+szGuildID*6+(szBYTE+16)*6 ) * MAX_WAR_NUM
 		);
 	}
 };

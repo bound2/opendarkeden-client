@@ -94,13 +94,14 @@ void	RoundTrip ( const RecordT & src, RecordT & dst )
 }
 
 //----------------------------------------------------------------------
-// 256 options is one more than a count byte can say: write() refuses it
-// rather than sending a count of 0 followed by 256 option bytes.
+// One option more than MAX_ITEM_OPTION_NUM, the most the server's writers
+// emit and the budget's term: write() refuses it, as the server's does,
+// so a packet this client writes fits its own budget.
 //----------------------------------------------------------------------
 template <class RecordT>
 void	CheckTooManyOptionsRefused ( RecordT & packet )
 {
-	for (int i = 0; i < 256; i++)
+	for (int i = 0; i < (int)MAX_ITEM_OPTION_NUM + 1; i++)
 		packet.addOptionType((OptionType_t)(i & 0xff));
 
 	OptionOutFixture	out;

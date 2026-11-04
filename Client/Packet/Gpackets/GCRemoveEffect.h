@@ -55,7 +55,7 @@ public :
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
 	PacketSize_t getPacketSize () const noexcept { return szObjectID + szBYTE + szEffectID * m_ListNum; }
-	static PacketSize_t getPacketMaxSize() noexcept { return 255;}
+	static PacketSize_t getPacketMaxSize() noexcept { return szObjectID + szBYTE + szEffectID * 255; }
 
 	// get / set ListNumber
 	BYTE getListNum() const noexcept { return m_ListNum; }
@@ -118,7 +118,7 @@ public :
 	PacketID_t getPacketID () const noexcept { return Packet::PACKET_GC_REMOVE_EFFECT; }
 
 	// get Packet Max Size
-	PacketSize_t getPacketMaxSize () const noexcept { return 255;}
+	PacketSize_t getPacketMaxSize () const noexcept { return szObjectID + szBYTE + szEffectID * 255; }
 
 };
 

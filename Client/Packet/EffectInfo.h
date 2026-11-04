@@ -45,7 +45,8 @@ public :
 	// get packet's body size
 	// 최적화시, 미리 계산된 정수를 사용한다.
 	PacketSize_t getSize () const noexcept { return szBYTE + szWORD * m_ListNum * 2; }
-	static PacketSize_t getMaxSize() noexcept { return 255;}
+	// What read takes at most: the count byte and 255 pairs of WORDs.
+	static PacketSize_t getMaxSize() noexcept { return szBYTE + szWORD * 255 * 2; }
 
 	// get packet's debug std::string
 	std::string toString () const;

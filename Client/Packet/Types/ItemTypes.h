@@ -28,6 +28,10 @@ const uint szItemType = sizeof(ItemType_t);
 typedef BYTE OptionType_t;
 const uint szOptionType = sizeof( OptionType_t );
 
+// The most options an item carries on the wire: the server's writers refuse
+// more (its MAX_ITEM_OPTION_NUM), so a budget counts this many.
+const uint MAX_ITEM_OPTION_NUM = 30;
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Item의 DB 용 아이디

@@ -87,7 +87,7 @@ void GCShopBuyOK::write ( SocketOutputStream & oStream ) const
 	oStream.write(m_ItemType);
 	
 	// The option count is a BYTE, and read() takes it ahead of the options.
-	if (m_OptionType.size() > 255)
+	if (m_OptionType.size() > MAX_ITEM_OPTION_NUM)
 		throw InvalidProtocolException("too many item options");
 
 	oStream.write(static_cast<BYTE>(m_OptionType.size()));

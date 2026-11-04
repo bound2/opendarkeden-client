@@ -67,7 +67,7 @@ public :
 	Packet* createPacket() { return new GCPetStashList(); }
 	string getPacketName() const { return "GCPetStashList"; }
 	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_PET_STASH_LIST; }
-	PacketSize_t getPacketMaxSize() const { return szBYTE + PetStashItemInfo::getPacketMaxSize() * MAX_PET_STASH; }
+	PacketSize_t getPacketMaxSize() const { return PetStashItemInfo::getPacketMaxSize() * MAX_PET_STASH; }
 };
 
 

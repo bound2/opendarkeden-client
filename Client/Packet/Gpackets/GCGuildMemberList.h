@@ -115,7 +115,7 @@ public :
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
 	// const static GCSystemMessagePacketMaxSize 를 정의, 리턴하라.
-	PacketSize_t getPacketMaxSize() const { return  szBYTE + GuildMemberInfo::getMaxSize(); }
+	PacketSize_t getPacketMaxSize() const { return szBYTE + szBYTE + GuildMemberInfo::getMaxSize() * 220; }	// the type, the count, the server's most
 
 };
 

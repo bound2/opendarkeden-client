@@ -1,7 +1,7 @@
 ---
 type: Record
 title: "Next work plan"
-description: "The tasks ranked in the client on 2026-11-01 after the first fifteen were done: the packet admission set, the handler fuzzers' reach, the read budgets the two inventories disagree on, the other two races in the game UI scene, a scripted run against the server, the walk's stop points and the modernization leftovers, each written so an agent with no other context could take it, what is kept in view, and the owner decisions that are not an agent's to make."
+description: "The tasks ranked in the client on 2026-11-01 after the first fifteen were done: the packet admission set, the handler fuzzers' reach, the read budgets the two inventories disagree on, the other two races in the game UI scene, a scripted run against the server, the walk's stop points and the modernization leftovers, each written so an agent with no other context could take it, what is kept in view, and the owner decisions that are not an agent's to make; the packet admission set (task 17), the handler fuzzers' reach (task 18) and the read budgets (task 23) are done."
 tags: [review, plan]
 ---
 
@@ -54,46 +54,6 @@ platform workflows dispatched by hand) applies to each.
 Ranked 2026-11-01. The order is the rank, and the numbers continue the first ranking's, so a
 *Done* entry keeps its name.
 
-### 18. The handler fuzzers' reach
-
-**What:** the game handler target's recording hosts (`tests/fuzz/recording_hosts.h`) stand in
-for the presentation entries, and seven need state the world (`tests/fuzz/handler_world.h`)
-never makes: `PickUpItem` an item-check buffer, `OkMixingForge` and `OkRemoveOption` a request
-that `TempInformation` records, `RunOtherInfo` an installed `GetOtherInfoName`, and the three
-item windows the player using an item; the route through `GCOtherStoreInfo` needs a second
-player in the zone. Nothing fuzzes those entries' handlers past the point where the state is
-missing.
-
-**How:** make the state in the world (a second player, an item in use, a recorded request, an
-installed name callback), write a seed per entry through `tests/unit/test_fuzz_seeds.cpp`
-(`golden2corpus.pl --seeds` adds them), replay the corpus, then run each handler target under
-libFuzzer for fifteen minutes with the new seeds as [fuzzing](../protocol/fuzzing.md) describes,
-and record the run there. Rule kept: a fixed crash gets a regression input *and* a unit test,
-and a harness gap is fixed in the harness, never by weakening the check.
-
-### 23. The 41 read budgets the two inventories still disagree on
-
-**What:** the server repository's `tests/tools/wire_inventory_diff.sh`, the ground truth for
-whether the two copies of the protocol agree on ids and maximum body sizes, fails against this
-repository on 2026-11-01 with 42 `max-size mismatches (same id and name)`: `CGSMSSend` (114
-there, 108 here until task 17) and 41 GC packets the server budgets larger than this client reads
-(`GCAddMonster` 1072 against 306, `GCSkillInfo` 34706 against 4338, `GCUpdateInfo` 59146
-against 58380 among them; `GCStashList` is the other way, 7506 against 21006). A GC packet the
-server can write past this client's budget is refused at the receive loop's size gate
-(`ClientPlayer::processCommand`, "too large packet SIZE") and disconnects the player in play; a
-budget larger than the server ever writes is only a looser read gate.
-
-**How:** for each GC line, read the server's `write()` and `getPacketSize()` against this
-client's `getPacketMaxSize()`: where the server can write more, raise this client's budget to
-the server's (the inventory line moves, re-recorded by `test_wire_layout` under
-`UPDATE_GOLDENS=1` after `tests/tools/gen_wire_inventory.pl` regenerates the registry; no byte
-on the wire does), and where it cannot, say why the two differ in
-[wire layout](../protocol/wire-layout.md) and have the server lower its own or list the line in
-the diff's exceptions. The owner is the diff run clean against the server's master, named with
-its date in [wire layout](../protocol/wire-layout.md). Rule kept: a golden is never
-re-recorded to make a test pass, and a layout change is a protocol change the server ships
-identically ([wire layout](../protocol/wire-layout.md)).
-
 ### 19. The vampire and ousters interfaces in the game UI scene, then one headless frame
 
 **What:** `tests/support/game_ui_scene.h` starts `C_VS_UI_GAME` for a slayer only and draws no
@@ -117,7 +77,8 @@ the `exempt` fixes get owners. Rule kept: `VS_UI` rendering that reaches game gl
 and chat against the docker server are not verified
 ([Linux and macOS](../build/linux-and-macos.md)), and the
 [browser client](../browser/browser-client.md) builds and logs in. Beyond the goldens and the
-server repository's wire-inventory diff (red today, task 23), nothing proves the two
+server repository's wire-inventory diff (clean since 2026-11-04 against its PR #401 branch, task
+23), nothing proves the two
 repositories still agree end to end.
 
 **How:** a script under `tools/` that starts the server repository's compose stack
@@ -167,7 +128,8 @@ does not change bytes in the same commit ([move, then fix](../process/move-then-
   where a Release client carries on past it ([fuzzing](../protocol/fuzzing.md)).
 - The server repository's `tests/tools/wire_inventory_diff.sh` and `decore_client_diff.sh`
   compare the two copies of the protocol and of the shared rules; run them after any
-  protocol-touching PR in either repository. The inventory diff is red today (task 23).
+  protocol-touching PR in either repository. The inventory diff ran clean on 2026-11-04 against the
+  server's PR #401 branch (task 23).
 
 ## Owner decisions (not for an agent to make)
 
@@ -444,3 +406,42 @@ scripts' lists; `CGSMSSend`'s budget is the server's 114. Owners: the eight test
 `tests/unit/test_game_server_link.cpp` (`GameServerLink`, `ClientPlayerReceiveLoop`),
 `SMSSend.TheLargestPacketTheWriterAcceptsFitsTheStatedMaximum` and the rule's concept,
 [server link](../protocol/server-link.md).
+
+### 18. The handler fuzzers' reach (PR #593)
+
+The world holds the request the player has just sent, one a run as the UI admits one at a time
+(`tests/fuzz/handler_world.h`'s `MakeRequests`, as `UIMessageManager.cpp` leaves the item-check
+buffer and `TempInformation`): a slayer's player forging, a vampire's picking a sword up off the
+ground to the mouse, an ousters' taking an option off an inventory item with the remover on the
+mouse; and in every run a second player of the player's race beside it, named as the other-info
+window names its subject (`tests/fuzz/recording_hosts.h` installs `GetOtherInfoName`). Five seeds
+(`tests/unit/test_fuzz_seeds.cpp`) reach `PickUpItem`, `OkMixingForge`, `OkRemoveOption`,
+`RunOtherInfo` and the personal shop window through `GCOtherStoreInfo`; the three item windows'
+entries are reached only by the UI's own use of an item, and the one reply that opens one,
+`GCUseOK`, goes through the executable's adapter straight into `VS_UI`, outside any host, so no
+seed reaches them; [fuzzing](../protocol/fuzzing.md) says so, with the 15-minute runs. The
+recording hosts count every entry's calls, and their mouse pointer keeps the item `PickUpItem`
+hands it until `DropItem`, read with the windows. Owners:
+`fuzz_seeds_reach_client_stream_handlers` (the seed directory replayed with `DE_FUZZ_REACH`
+naming the entries the seeds reach, on both verify scripts' required lists), `FuzzSeeds` and
+`GameServerLink.EveryFrameOfAHandlerSeedIsAdmittedInGame` in `unit_tests`, `RecordingHosts` in
+`unit_tests` for the mouse and the counts, and the ids `tests/fuzz/handler_world_ids.h` shares
+between the world and the seeds.
+
+### 23. The 41 read budgets the two inventories still disagree on (PR #594)
+
+Each of the 41 `GC` budgets the server's `tests/tools/wire_inventory_diff.sh` listed on
+2026-11-01 now equals what the server's `write()` can emit: 33 rose, where this client's receive
+gate refused a legal packet (`GCShopBuyFail` every time; the shared `EffectInfo`, the effected
+creature lists, `GCSkillInfo`'s eight records, the guild, union, war and schedule lists when
+full), and 8 fell to the server's exact maximum (the item option list, capped at
+`MAX_ITEM_OPTION_NUM` 30; the nickname list's byte count; two bytes never read). No byte on the
+wire moved; the inventory was re-recorded and the diff ran clean against the server's PR #401
+branch (its `master` at `58913ab` with `GearInfo`'s term raised from 13 to 22 slots in both
+repos, which moves `GCMorph1` and `GCUpdateInfo` in both inventories; the PR also bounds
+`GCNPCAskDynamic`'s body). [Wire layout](../protocol/wire-layout.md) records the run and what
+stays in view (this client's uncapped string and count bytes). Owners: the diff run clean, named
+with its date in [wire layout](../protocol/wire-layout.md), `PacketBudgets` in `unit_tests` (nine
+packets written at the server's caps through this client's writers, which keep to
+`MAX_ITEM_OPTION_NUM`, equal their budgets) and `WireLayout.InventoryMatchesCommittedFile` for
+the budgets as recorded.

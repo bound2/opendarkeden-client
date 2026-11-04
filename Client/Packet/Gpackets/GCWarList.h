@@ -56,7 +56,7 @@ public :
 	Packet* createPacket() { return new GCWarList(); }
 	std::string getPacketName() const { return "GCWarList"; }
 	PacketID_t getPacketID() const noexcept { return Packet::PACKET_GC_WAR_LIST; }
-	PacketSize_t getPacketMaxSize() const { return (RaceWarInfo::getMaxSize() + GuildWarInfo::getMaxSize()) * 12; }
+	PacketSize_t getPacketMaxSize() const { return szBYTE + (szWarType + GuildWarInfo::getMaxSize()) * 24; }	// the count, then the widest war 24 times, the server's most
 };
 
 class GCWarListHandler {

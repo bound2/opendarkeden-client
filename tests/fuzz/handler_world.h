@@ -54,7 +54,20 @@
 //     player standing in its middle under the ID kPlayerID, and the
 //     inventory and the gear cleared the way GCUpdateInfo's
 //     SetInventoryInfo and SetGearInfo clear them; the player is a
-//     slayer, a vampire or an ousters. The login target has no zone.
+//     slayer, a vampire or an ousters. The login target has no zone;
+//   - the request the player has just sent (MakeRequests), one a run as
+//     the UI admits one at a time, so a reply that hands an object to a
+//     presentation entry reaches it (recording_hosts.h): a slayer's
+//     player is forging, a vampire's picking a sword up off the ground
+//     to the mouse, an ousters' taking an option off an item with the
+//     remover on the mouse, each as UIMessageManager.cpp leaves the
+//     item-check buffer and TempInformation; and in every run a second
+//     player of the player's race stands nearby, named as the
+//     other-info window names its subject. The three item windows'
+//     entries are reached only by the UI's own use of an item; the one
+//     reply that opens one, GCUseOK's, goes through the executable's
+//     UseItemOK adapter straight into VS_UI, outside any host, and is
+//     left out.
 //
 // The hosts. InitGameObject installs the executable's adapters; most
 // of them draw, play sounds or open dialogs through a UI and a view
@@ -106,6 +119,7 @@
 #define HANDLER_WORLD_H
 
 #include "client_stream_reader.h"
+#include "handler_world_ids.h"
 #include "PacketDispatcherTestAccess.h"
 
 #include "Client_PCH.h"
@@ -236,6 +250,14 @@ inline const int		kMaxCommandCalls = 16;
 // The player's race in a run.
 enum Race { RACE_RUN_SLAYER, RACE_RUN_VAMPIRE, RACE_RUN_OUSTERS, RACE_RUN_MAX };
 
+// The creature type of each race's player and of the peer beside it.
+inline const TYPE_CREATURETYPE	kRaceTypes[RACE_RUN_MAX] = {
+	CREATURETYPE_SLAYER_MALE, CREATURETYPE_VAMPIRE_MALE1, CREATURETYPE_OUSTERS,
+};
+
+// The ids and cells of what MakeRequests makes are handler_world_ids.h's,
+// shared with the seeds that name them.
+
 // The file InitGameObject opens before anything else: its four bytes are
 // read and not used. Written in the working directory, a scratch one.
 inline const char		kVersionFile[] = "fuzz_handlers_version.inf";
@@ -286,7 +308,10 @@ public:
 		MakeGameObjects();
 		InstallHosts();
 		if (bInZone)
+		{
 			EnterZone(race);
+			MakeRequests(race);
+		}
 		// Taken last, so they go first, while what their items read is
 		// still there.
 		Own(g_pStorage);
@@ -327,6 +352,13 @@ private:
 	{
 		global = value;
 		Own(global);
+	}
+
+	// Frees an object no global and no container holds when the run ends.
+	template <class T>
+	void	OwnObject(T* object)
+	{
+		m_Undo.push_back([object]() { delete object; });
 	}
 
 	// Puts the global back to the value it holds now when the run ends.
@@ -504,9 +536,6 @@ private:
 	//------------------------------------------------------------------
 	void	EnterZone(Race race)
 	{
-		static const TYPE_CREATURETYPE kRaceTypes[RACE_RUN_MAX] = {
-			CREATURETYPE_SLAYER_MALE, CREATURETYPE_VAMPIRE_MALE1, CREATURETYPE_OUSTERS,
-		};
 		g_pPlayer->SetCreatureType(kRaceTypes[race]);
 		g_pPlayer->SetID(kPlayerID);
 		g_pPlayer->SetPosition(kZoneSize / 2, kZoneSize / 2);
@@ -525,6 +554,119 @@ private:
 		ZoneState::SetPlayer();
 		SetInventoryInfo(NULL);
 		SetGearInfo(NULL, NULL);
+	}
+
+	//------------------------------------------------------------------
+	// What a player who had just acted holds (see the file header): the
+	// peer the other-info window names, the sword a pick-up to the mouse
+	// holds in the item-check buffer, and the request TempInformation
+	// records, which differs with the race. The zone owns the peer and the
+	// inventory its items, so the run's teardown frees them.
+	//------------------------------------------------------------------
+	// The peer beside the player, and the request the player has just sent,
+	// as UIMessageManager.cpp leaves it: it admits one at a time (each site
+	// needs an empty item-check buffer and TempInformation at MODE_NULL), so
+	// a run holds one, by race. A slayer's player sent CGMixItem for a forge:
+	// the mixing item, in the inventory, is in the buffer as
+	// USE_FROM_INVENTORY and TempInformation's pValue, and the two forge
+	// items' cells are Value1 to Value4 under MODE_ITEM_MIXING. A vampire's
+	// sent CGAddZoneToMouse for a sword on the ground beside it: the sword
+	// is in the buffer as PICKUP_TO_MOUSE and stays the zone's until the
+	// reply's PickupItem takes it out. An ousters' sent CGMixItem to take an
+	// option off an inventory item with the remover on the mouse: the
+	// remover, in no container, is in the buffer as ITEM_TO_ITEM, the
+	// target's cell is Value1 and Value2 under MODE_ITEM_TO_ITEM and the
+	// option's index Value3. The zone owns the peer and the ground sword,
+	// the inventory its items, and the run the remover, as the UI's mouse
+	// pointer would hold it. The ids and cells are handler_world_ids.h's.
+	void	MakeRequests(Race race)
+	{
+		if (MCreature* pPeer = ZoneState::NewCreatureWear())
+		{
+			CreatureState::SetCreatureType(pPeer, kRaceTypes[race]);
+			CreatureState::SetID(pPeer, kPeerID);
+			CreatureState::SetGroundCreature(pPeer);
+			CreatureState::SetPosition(pPeer, kZoneSize / 2 + 1, kZoneSize / 2 + 1);
+			CreatureState::SetServerPosition(pPeer, kZoneSize / 2 + 1, kZoneSize / 2 + 1);
+			CreatureState::SetDirection(pPeer, 0);
+			CreatureState::SetCurrentDirection(pPeer, 0);
+			CreatureState::SetAction(pPeer, ACTION_STAND);
+			CreatureState::SetName(pPeer, RecordingHosts::kOtherInfoName);
+			if (!ZoneState::AddCreature(pPeer))
+				ZoneState::DeleteCreature(pPeer);
+		}
+
+		switch (race)
+		{
+		case RACE_RUN_SLAYER:
+			if (MItem* pMixing = AddInventoryItem(kBufferedItemID, kInventoryCell[0], kInventoryCell[1]))
+			{
+				AddInventoryItem(kForgeItemIDs[0], kForgeCells[0][0], kForgeCells[0][1]);
+				AddInventoryItem(kForgeItemIDs[1], kForgeCells[1][0], kForgeCells[1][1]);
+				g_pPlayer->SetItemCheckBuffer(pMixing, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
+				g_pTempInformation->SetMode(TempInformation::MODE_ITEM_MIXING);
+				g_pTempInformation->Value1 = kForgeCells[0][0];
+				g_pTempInformation->Value2 = kForgeCells[0][1];
+				g_pTempInformation->Value3 = kForgeCells[1][0];
+				g_pTempInformation->Value4 = kForgeCells[1][1];
+				g_pTempInformation->pValue = pMixing;
+			}
+			break;
+		case RACE_RUN_VAMPIRE:
+			if (MItem* pSword = NewSword(kBufferedItemID))
+			{
+				pSword->SetPosition(kZoneSize / 2 - 1, kZoneSize / 2);
+				if (!ZoneState::AddItem(pSword, false))
+				{
+					std::fprintf(stderr, "handler_world: the zone refused item %u\n", (unsigned)kBufferedItemID);
+					delete pSword;
+					break;
+				}
+				g_pPlayer->SetItemCheckBuffer(pSword, MPlayer::ITEM_CHECK_BUFFER_PICKUP_TO_MOUSE);
+			}
+			break;
+		case RACE_RUN_OUSTERS:
+			if (AddInventoryItem(kTargetItemID, kInventoryCell[0], kInventoryCell[1]) != NULL)
+				if (MItem* pRemover = NewSword(kBufferedItemID))
+				{
+					OwnObject(pRemover);
+					g_pPlayer->SetItemCheckBuffer(pRemover, MPlayer::ITEM_CHECK_BUFFER_ITEM_TO_ITEM);
+					g_pTempInformation->SetMode(TempInformation::MODE_ITEM_TO_ITEM);
+					g_pTempInformation->Value1 = kInventoryCell[0];
+					g_pTempInformation->Value2 = kInventoryCell[1];
+					g_pTempInformation->Value3 = 0;
+				}
+			break;
+		default:
+			break;
+		}
+	}
+
+	// A sword of type 0 under `id`, in no container, or NULL.
+	static MItem*	NewSword(TYPE_OBJECTID id)
+	{
+		MItem* pItem = MItem::NewItem(ITEM_CLASS_SWORD);
+		if (pItem == NULL)
+			return NULL;
+		pItem->SetID(id);
+		pItem->SetItemType(0);
+		return pItem;
+	}
+
+	// A sword of type 0 under `id` in the inventory's cell, or NULL when the
+	// inventory refuses it.
+	static MItem*	AddInventoryItem(TYPE_OBJECTID id, BYTE x, BYTE y)
+	{
+		MItem* pItem = NewSword(id);
+		if (pItem == NULL)
+			return NULL;
+		if (!g_pInventory->AddItem(pItem, x, y))
+		{
+			std::fprintf(stderr, "handler_world: the inventory refused item %u at (%u, %u)\n", (unsigned)id, (unsigned)x, (unsigned)y);
+			delete pItem;
+			return NULL;
+		}
+		return pItem;
 	}
 };
 

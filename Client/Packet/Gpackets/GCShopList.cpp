@@ -130,6 +130,11 @@ void GCShopList::write (SocketOutputStream & oStream) const
 			oStream.write(item.itemClass);
 			oStream.write(item.itemType);
 
+			// The server's writers emit at most MAX_ITEM_OPTION_NUM options, the
+			// budget's term; this one keeps to it too.
+			if (item.optionType.size() > MAX_ITEM_OPTION_NUM)
+				throw InvalidProtocolException("too many item options");
+
 			BYTE optionSize = static_cast<BYTE>(item.optionType.size());
 			oStream.write(optionSize);
 

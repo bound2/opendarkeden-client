@@ -47,8 +47,11 @@ public :
 	// 최적화시, 미리 계산된 정수를 사용한다.
 	PacketSize_t getSize ();
 
+	// The most slots a creature wears, the server's VAMPIRE_WEAR_MAX and
+	// OUSTERS_WEAR_MAX (the slayer's WEAR_MAX is 21), one record each: the
+	// server writes one per worn item.
 	static uint getMaxSize () { 
-		return szBYTE + ( GearSlotInfo::getMaxSize() * 13 );
+		return szBYTE + ( GearSlotInfo::getMaxSize() * 22 );
 	}
 
 	// get packet's debug std::string

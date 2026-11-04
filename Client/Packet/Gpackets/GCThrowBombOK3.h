@@ -157,7 +157,7 @@ public :
 
 	// get Pakcet Max Size
 	PacketSize_t getPacketMaxSize () const { return szObjectID + szCoord*2 + szDir + szItemType 
-	   + szBYTE + szWORD + szObjectID + 255; }
+	   + szBYTE + szWORD + szObjectID * 255 + 255; }
 };
 
 
