@@ -33,6 +33,10 @@
 //     a later packet of the same call hides is not drawn by the game
 //     either.
 //
+//   - the other-info window names its subject: GetOtherInfoName answers
+//     kOtherInfoName, the peer handler_world.h stands in the zone, so
+//     GCOtherModifyInfo for it reaches RunOtherInfo.
+//
 // What the real adapters do with a handler's integers is not modelled;
 // the walks of packet input safety followed them by reading.
 //
@@ -56,6 +60,9 @@
 #include <cstdlib>
 
 namespace RecordingHosts {
+
+// The name of the creature the other-info window is open on.
+inline const char* const	kOtherInfoName = "Peer";
 
 // What a read leaves, so the compiler keeps the read.
 inline volatile unsigned long	g_Sink = 0;
@@ -169,6 +176,7 @@ inline void	Install()
 	DialogPresentation::SetHost(&dialog);
 
 	info = {};
+	info.GetOtherInfoName = []() -> const char* { return kOtherInfoName; };
 	info.RunOtherInfo = [](MCreature* pCreature) { Read(pCreature); };
 	GameInfoPresentation::SetHost(&info);
 

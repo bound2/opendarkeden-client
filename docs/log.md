@@ -1,5 +1,14 @@
 # Knowledge Bundle Update Log
 
+## 2026-11-04
+
+* **Update**: [fuzzing](protocol/fuzzing.md) says what the handler world holds for a player who
+  had just acted (a peer, a pending pick-up, a recorded request), which four of the seven
+  unreached presentation entries needed, that the three item windows are out of any reply's
+  reach, and what the 15-minute runs with the five new seeds made; the
+  [next work plan](reviews/NEXT.md) moves task 18 to *Done*, and `CLAUDE.md` and the
+  [reviews index](reviews/index.md) say so.
+
 ## 2026-11-01
 
 * **Creation**: [server link](protocol/server-link.md), the rule that the game connection admits

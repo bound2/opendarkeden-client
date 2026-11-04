@@ -54,7 +54,17 @@
 //     player standing in its middle under the ID kPlayerID, and the
 //     inventory and the gear cleared the way GCUpdateInfo's
 //     SetInventoryInfo and SetGearInfo clear them; the player is a
-//     slayer, a vampire or an ousters. The login target has no zone.
+//     slayer, a vampire or an ousters. The login target has no zone;
+//   - what a player who had just acted holds (MakeRequests), so a reply
+//     that hands an object to a presentation entry reaches it
+//     (recording_hosts.h): a second player of the player's race standing
+//     nearby, named as the other-info window names its subject; a sword
+//     in the inventory the player is picking up to the mouse, which the
+//     item-check buffer holds; and the request TempInformation records,
+//     a forge of two more inventory items in a slayer's run and an
+//     option removal from the sword in a vampire's and an ousters', so
+//     one input meets each. The three item windows are not reached this
+//     way: an item is used from the UI, never by a reply.
 //
 // The hosts. InitGameObject installs the executable's adapters; most
 // of them draw, play sounds or open dialogs through a UI and a view
@@ -236,6 +246,20 @@ inline const int		kMaxCommandCalls = 16;
 // The player's race in a run.
 enum Race { RACE_RUN_SLAYER, RACE_RUN_VAMPIRE, RACE_RUN_OUSTERS, RACE_RUN_MAX };
 
+// The creature type of each race's player and of the peer beside it.
+inline const TYPE_CREATURETYPE kRaceTypes[RACE_RUN_MAX] = {
+	CREATURETYPE_SLAYER_MALE, CREATURETYPE_VAMPIRE_MALE1, CREATURETYPE_OUSTERS,
+};
+
+// The peer and the items MakeRequests makes, which the seeds name
+// (tests/unit/test_fuzz_seeds.cpp): the sword at kSwordCell is the pick-up's
+// and the option removal's, the two at kForgeCells the forge's.
+inline const TYPE_OBJECTID	kPeerID = 1001;
+inline const TYPE_OBJECTID	kSwordID = 2000;
+inline const TYPE_OBJECTID	kForgeItemIDs[2] = { 2001, 2002 };
+inline const BYTE		kSwordCell[2] = { 0, 0 };
+inline const BYTE		kForgeCells[2][2] = { { 3, 0 }, { 6, 0 } };
+
 // The file InitGameObject opens before anything else: its four bytes are
 // read and not used. Written in the working directory, a scratch one.
 inline const char		kVersionFile[] = "fuzz_handlers_version.inf";
@@ -286,7 +310,10 @@ public:
 		MakeGameObjects();
 		InstallHosts();
 		if (bInZone)
+		{
 			EnterZone(race);
+			MakeRequests(race);
+		}
 		// Taken last, so they go first, while what their items read is
 		// still there.
 		Own(g_pStorage);
@@ -504,9 +531,6 @@ private:
 	//------------------------------------------------------------------
 	void	EnterZone(Race race)
 	{
-		static const TYPE_CREATURETYPE kRaceTypes[RACE_RUN_MAX] = {
-			CREATURETYPE_SLAYER_MALE, CREATURETYPE_VAMPIRE_MALE1, CREATURETYPE_OUSTERS,
-		};
 		g_pPlayer->SetCreatureType(kRaceTypes[race]);
 		g_pPlayer->SetID(kPlayerID);
 		g_pPlayer->SetPosition(kZoneSize / 2, kZoneSize / 2);
@@ -525,6 +549,70 @@ private:
 		ZoneState::SetPlayer();
 		SetInventoryInfo(NULL);
 		SetGearInfo(NULL, NULL);
+	}
+
+	//------------------------------------------------------------------
+	// What a player who had just acted holds (see the file header): the
+	// peer the other-info window names, the sword a pick-up to the mouse
+	// holds in the item-check buffer, and the request TempInformation
+	// records, which differs with the race. The zone owns the peer and the
+	// inventory its items, so the run's teardown frees them.
+	//------------------------------------------------------------------
+	void	MakeRequests(Race race)
+	{
+		if (MCreature* pPeer = ZoneState::NewCreatureWear())
+		{
+			CreatureState::SetCreatureType(pPeer, kRaceTypes[race]);
+			CreatureState::SetID(pPeer, kPeerID);
+			CreatureState::SetGroundCreature(pPeer);
+			CreatureState::SetPosition(pPeer, kZoneSize / 2 + 1, kZoneSize / 2 + 1);
+			CreatureState::SetServerPosition(pPeer, kZoneSize / 2 + 1, kZoneSize / 2 + 1);
+			CreatureState::SetDirection(pPeer, 0);
+			CreatureState::SetCurrentDirection(pPeer, 0);
+			CreatureState::SetAction(pPeer, ACTION_STAND);
+			CreatureState::SetName(pPeer, RecordingHosts::kOtherInfoName);
+			if (!ZoneState::AddCreature(pPeer))
+				ZoneState::DeleteCreature(pPeer);
+		}
+
+		MItem* pSword = AddInventoryItem(kSwordID, kSwordCell[0], kSwordCell[1]);
+		AddInventoryItem(kForgeItemIDs[0], kForgeCells[0][0], kForgeCells[0][1]);
+		AddInventoryItem(kForgeItemIDs[1], kForgeCells[1][0], kForgeCells[1][1]);
+		if (pSword != NULL)
+			g_pPlayer->SetItemCheckBuffer(pSword, MPlayer::ITEM_CHECK_BUFFER_PICKUP_TO_MOUSE);
+
+		if (race == RACE_RUN_SLAYER)
+		{
+			g_pTempInformation->SetMode(TempInformation::MODE_ITEM_MIXING);
+			g_pTempInformation->Value1 = kForgeCells[0][0];
+			g_pTempInformation->Value2 = kForgeCells[0][1];
+			g_pTempInformation->Value3 = kForgeCells[1][0];
+			g_pTempInformation->Value4 = kForgeCells[1][1];
+		}
+		else
+		{
+			g_pTempInformation->SetMode(TempInformation::MODE_ITEM_TO_ITEM);
+			g_pTempInformation->Value1 = kSwordCell[0];
+			g_pTempInformation->Value2 = kSwordCell[1];
+		}
+	}
+
+	// A sword of type 0 under `id` in the inventory's cell, or NULL when the
+	// inventory refuses it.
+	static MItem*	AddInventoryItem(TYPE_OBJECTID id, BYTE x, BYTE y)
+	{
+		MItem* pItem = MItem::NewItem(ITEM_CLASS_SWORD);
+		if (pItem == NULL)
+			return NULL;
+		pItem->SetID(id);
+		pItem->SetItemType(0);
+		if (!g_pInventory->AddItem(pItem, x, y))
+		{
+			std::fprintf(stderr, "handler_world: the inventory refused item %u at (%u, %u)\n", (unsigned)id, (unsigned)x, (unsigned)y);
+			delete pItem;
+			return NULL;
+		}
+		return pItem;
 	}
 };
 

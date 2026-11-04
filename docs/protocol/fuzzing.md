@@ -51,7 +51,12 @@ game strings (an empty table left the operator name prefix empty, which made eve
 operator's and hid the replies' player branch) and a nickname table with a row of text per index
 (the game will not start without its nickname file), `InitGameObject` itself, and for the game target a 32 by 32 zone with the player in its middle (the size of three
 of the game's zones; the server's map files hold zones from 17 by 25 to 256 by 256, and a wire
-coordinate is a byte). `InitGameObject` installs the executable's host adapters; the run removes
+coordinate is a byte) and, since task 18, what a player who had just acted holds: a second
+player of the player's race beside it, named as the other-info window names its subject, a sword
+in the inventory the item-check buffer holds for a pick-up to the mouse, and the request
+`TempInformation` records, a forge of two more items in a slayer's run and an option removal
+from the sword in a vampire's and an ousters', so a reply that hands those objects to a
+presentation entry reaches it. `InitGameObject` installs the executable's host adapters; the run removes
 them all (`ReleaseGameObjectHosts`) and puts back the model's, `ZoneState`, `CreatureState`,
 `PlayerState` and `MItem`'s, without the entries that reach the UI, a sound or a party member
 over UDP. Over them go the recording hosts of `tests/fuzz/recording_hosts.h` (task 4 of the
@@ -122,11 +127,13 @@ take too; its `--datagram` mode writes the 12 `RC` seeds of `client_datagram` fr
 its own (`fuzz_corpus_client_stream_any_id`: every golden and every layout line, no prefix), with
 `DE_FUZZ_ANY_ID=1` in its environment, so the readers of the ids the game connection refuses are
 replayed in every tree too.
-`client_stream_handlers` also takes the six seeds of `tests/fuzz/seeds/client_stream_handlers`,
+`client_stream_handlers` also takes the eleven seeds of `tests/fuzz/seeds/client_stream_handlers`,
 which `tests/unit/test_fuzz_seeds.cpp` writes with the client's packet classes
-(`UPDATE_FUZZ_SEEDS=1` writes them again) and `golden2corpus.pl --seeds` adds: streams that open
-one of the four windows and then free what it draws along the routes of task 11 of the
-[next work plan](../reviews/NEXT.md), whose fixes close or re-point the window first.
+(`UPDATE_FUZZ_SEEDS=1` writes them again) and `golden2corpus.pl --seeds` adds: six streams that
+open one of the four windows and then free what it draws along the routes of task 11 of the
+[next work plan](../reviews/NEXT.md), whose fixes close or re-point the window first, and five
+replies that hand an object to a presentation entry the world's pending state makes reachable
+(task 18): a pick-up to the mouse, a forge, an option removal, the peer's status and its shop.
 
 A crash there is a finding that came back, but only a finding that aborted (a libc `assert`, an
 escaping `std::exception`) crashes in every tree. One that corrupted memory replays green in a tree
@@ -245,7 +252,15 @@ minutes (coverage 42,384 to 45,184) and found nothing; replaying the corpus it l
 window 45 times, the storage 519, the pet storage 417 and the personal shop 126. The review of the
 change then made the world read the windows after every call of the receive loop, as the game draws
 once a call; a last 15-minute run with that made 223,087 inputs (coverage 45,153 to 46,392) and
-found nothing.
+found nothing. Task 18 then made the state four of the seven unreached entries need (the
+item-check buffer, the recorded request, the installed name and the peer it names) and found the
+other three, the item windows, out of any reply's reach: `MEffectItem::UseInventory` and
+`MCodeSheetItem::UseInventory` run only from the UI's own use of an item (`UIMessageManager.cpp`),
+never from a handler. Each of the five seeds reaches its entry in the replay (the pick-up in
+every run, the forge in a slayer's, the option removal in the other two, the peer's info and its
+shop in every run; counted with a line on each entry, kept out of the commit), and the 15-minute
+runs with them on 2026-11-04 made 66,289 inputs on the game target (coverage 37,670 to 42,606)
+and 55,419 on the login target (coverage 13,437 to 14,401), finding nothing.
 
 `DE_FUZZ_ABORT_ON_ASSERT=1` turns a failed `Assert` (an `AssertionError`, normally a rejected
 input) into a crash, to see which ones hostile input reaches. `-close_fd_mask=3` hides the
